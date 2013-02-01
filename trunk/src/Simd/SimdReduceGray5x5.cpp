@@ -412,7 +412,7 @@ namespace Simd
 			MainRowY5x5<align>(LoadUnpacked(odd + offset), LoadUnpacked(even + offset), buffer, offset);
 		}
 
-		template <bool align, bool compensation> __forceinline __m128i MainRowX5x5(ushort * dst)
+		template <bool align, bool compensation> SIMD_INLINE __m128i MainRowX5x5(ushort * dst)
 		{
 			__m128i t0 = _mm_loadu_si128((__m128i*)(dst - 2));
 			__m128i t1 = _mm_loadu_si128((__m128i*)(dst - 1));
@@ -423,7 +423,7 @@ namespace Simd
 			return DivideBy256<compensation>(t2);
 		}
 
-		template <bool align, bool compensation> __forceinline void MainRowX5x5(Buffer & buffer, size_t offset, uchar *dst)
+		template <bool align, bool compensation> SIMD_INLINE void MainRowX5x5(Buffer & buffer, size_t offset, uchar *dst)
 		{
 			__m128i t0 = MainRowX5x5<align, compensation>(buffer.dst + offset);
 			__m128i t1 = MainRowX5x5<align, compensation>(buffer.dst + offset + HA);
