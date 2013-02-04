@@ -21,44 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Test/TestPerformance.h"
+#ifndef __TestYuvToHue_h__
+#define __TestYuvToHue_h__
 
-#include "Test/TestReduceGray.h"
-#include "Test/TestCrc32.h"
-#include "Test/TestBgraToGray.h"
-#include "Test/TestBgrToGray.h"
-#include "Test/TestYuvToHue.h"
-
-#define EXECUTE_TEST(test)\
-{\
-	std::cout << #test << " is started :" << std::endl; \
-	bool result = test(); \
-	std::cout << #test << " is finished "  << (result ? " successfully." : " with ERRORS!!!") << std::endl << std::endl; \
-}
-
-int main(int argc, char* argv[])
+namespace Test
 {
-	std::cout.precision(1);
-	std::cout.setf(std::ios::fixed);
+	bool Yuv444ToHueTest();
 
-	EXECUTE_TEST(Test::ReduceGray2x2Test);
-	EXECUTE_TEST(Test::ReduceGray3x3Test);
-	EXECUTE_TEST(Test::ReduceGray4x4Test);
-	EXECUTE_TEST(Test::ReduceGray5x5Test);
-
-	EXECUTE_TEST(Test::Crc32Test);
-
-	EXECUTE_TEST(Test::BgraToGrayTest);
-
-	EXECUTE_TEST(Test::BgrToGrayTest);
-
-	EXECUTE_TEST(Test::Yuv444ToHueTest);
-	EXECUTE_TEST(Test::Yuv420ToHueTest);
-
-#ifdef TEST_PERFORMANCE_TEST_ENABLE
-	std::cout << "Function execution times:" << std::endl;
-	std::cout << Test::PerformanceMeasurerStorage::s_storage.Statistic() << std::endl;
-#endif//TEST_PERFORMANCE_TEST_ENABLE
-
-	return 0;
+	bool Yuv420ToHueTest();
 }
+
+#endif//__TestYuvToHue_h__

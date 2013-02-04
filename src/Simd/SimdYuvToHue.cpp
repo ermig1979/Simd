@@ -68,7 +68,7 @@ namespace Simd
 
 			for(size_t row = 0; row < height; row += 2)
 			{
-				for(size_t col1 = 0, col2 = 0; col1 < width; col2 += 2, col1++)
+				for(size_t col1 = 0, col2 = 0; col2 < width; col2 += 2, col1++)
 				{
 					int u_ = u[col1];
 					int v_ = v[col1];
