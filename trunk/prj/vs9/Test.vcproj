@@ -238,6 +238,14 @@
 				RelativePath="..\..\src\Test\TestReduceGray.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\Test\TestYuvToHue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestYuvToHue.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\Test\TestMain.cpp"
