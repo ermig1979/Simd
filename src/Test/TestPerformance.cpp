@@ -29,7 +29,7 @@
 #if defined(_WIN64) || defined(_WIN32)
 #define NOMINMAX
 #include <windows.h>
-#elif defined(linux)
+#elif defined(linux) || defined (__linux) || defined (__linux__)
 #include <sys/time.h>
 #else
 #error Platform is not supported!
@@ -53,7 +53,7 @@ namespace Test
 		QueryPerformanceCounter(&counter);
 		return double(counter.QuadPart)/g_frequency;
 	}
-#elif defined(linux)
+#elif defined(linux) || defined (__linux) || defined (__linux__)
 	double GetTime()
 	{
 		timeval t1;

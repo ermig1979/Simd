@@ -239,6 +239,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestYuvToBgra.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestYuvToBgra.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestYuvToHue.cpp"
 				>
 			</File>
