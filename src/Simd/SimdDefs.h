@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <math.h>
 
-#if defined(_MSC_VER) 
+#if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
 #if _MSC_VER >= 1600
 #include <stdint.h>
@@ -50,6 +50,10 @@
 #define SIMD_SSE42_ENABLE
 #endif
 
+#if !defined(SIMD_AVX_DEPRECATE) && _MSC_FULL_VER >= 160040219 
+#define SIMD_AVX_ENABLE
+#endif
+
 #elif defined(__GNUC__)
 
 #include <stdint.h>
@@ -62,6 +66,10 @@
 
 #if !defined(SIMD_SSE42_DEPRECATE) && defined(__SSE4_2__)
 #define SIMD_SSE42_ENABLE
+#endif
+
+#if !defined(SIMD_AVX_DEPRECATE) && defined(__AVX__)
+#define SIMD_AVX_ENABLE
 #endif
 
 #else
@@ -77,5 +85,9 @@
 #ifdef SIMD_SSE42_ENABLE
 #include <nmmintrin.h>
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+#include <immintrin.h>
+#endif// SIMD_AVX_ENABLE
 
 #endif//__SimdDefs_h__

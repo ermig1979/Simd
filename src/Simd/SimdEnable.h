@@ -65,5 +65,24 @@ namespace Simd
     (type)(base)
 
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+	namespace Avx
+	{
+		bool SupportedByCPU();
+		bool SupportedByOS();
+
+		const bool Enable = SupportedByCPU() && SupportedByOS();
+	}
+
+#define SIMD_AVX_INIT_FUNCTION_PTR(type, avx, base) \
+	(Simd::Avx::Enable ? (type)(avx) : (type)(base))
+
+#else// SIMD_AVX_ENABLE
+
+#define SIMD_AVX_INIT_FUNCTION_PTR(type, avx, base) \
+	(type)(base)
+
+#endif// SIMD_AVX_ENABLE
 }
 #endif//__SimdEnable_h__

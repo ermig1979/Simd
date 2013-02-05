@@ -28,6 +28,8 @@
 
 //#define SIMD_SSE42_DEPRECATE
 
+//#define SIMD_AVX_DEPRECATE
+
 //#define SIMD_ALLOCATE_ON_STACK
 
 #endif//__SimdConfig_h__
