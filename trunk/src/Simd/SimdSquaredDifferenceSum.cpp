@@ -35,6 +35,8 @@ namespace Simd
     {
         int SquaredDifferenceSum32(const uchar *a, const uchar *b, size_t size)
         {
+			assert(size < 0x10000);
+
             int sum = 0;
             for(size_t i = 0; i < size; ++i)
             {
@@ -45,6 +47,8 @@ namespace Simd
         
         int SquaredDifferenceSum32(const uchar *a, const uchar *b, const uchar *mask, size_t size)
         {
+			assert(size < 0x10000);
+
             int sum = 0;
             for(size_t i = 0; i < size; ++i)
             {
@@ -75,7 +79,7 @@ namespace Simd
 
         int SquaredDifferenceSum32A(const uchar *a, const uchar *b, size_t size)
         {
-            assert(Aligned(a) && Aligned(b) && Aligned(size));
+            assert(Aligned(a) && Aligned(b) && Aligned(size) && size < 0x10000);
 
             __m128i sum = _mm_setzero_si128();
             for(size_t i = 0; i < size; i += A)
@@ -89,7 +93,7 @@ namespace Simd
         
         int SquaredDifferenceSum32A(const uchar *a, const uchar *b, const uchar *mask, size_t size)
         {
-            assert(Aligned(a) && Aligned(b) && Aligned(size));
+            assert(Aligned(a) && Aligned(b) && Aligned(size) && size < 0x10000);
 
             __m128i sum = _mm_setzero_si128();
             for(size_t i = 0; i < size; i += A)

@@ -28,6 +28,7 @@
 #include "Test/TestBgraToGray.h"
 #include "Test/TestBgrToGray.h"
 #include "Test/TestYuvToHue.h"
+#include "Test/TestYuvToBgra.h"
 
 #define EXECUTE_TEST(test)\
 {\
@@ -54,6 +55,9 @@ int main(int argc, char* argv[])
 
 	EXECUTE_TEST(Test::Yuv444ToHueTest);
 	EXECUTE_TEST(Test::Yuv420ToHueTest);
+
+	EXECUTE_TEST(Test::Yuv444ToBgraTest);
+	EXECUTE_TEST(Test::Yuv420ToBgraTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
