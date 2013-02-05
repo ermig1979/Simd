@@ -61,6 +61,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
+    <BuildLog>
+      <Path>$(SolutionDir)\..\..\..\obj\$(ProjectName)\$(Configuration)\Build.log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -75,6 +78,9 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
+    <BuildLog>
+      <Path>$(SolutionDir)\..\..\..\obj\$(ProjectName)\$(Configuration)\Build.log</Path>
+    </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h" />
