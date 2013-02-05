@@ -31,50 +31,60 @@
 #endif
 
 #include "Simd/SimdEnable.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
+	const uint EDX_SSE2_BIT = 1 << 26;
+	const uint ECX_SSE42_BIT = 1 << 20;
+	const uint ECX_OSXSAVE_BIT = 1 << 27;
+	const uint ECX_AVX_BIT = 1 << 28;
+
+	enum Register
+	{
+		Eax = 0, 
+		Ebx = 1,
+		Ecx = 2, 
+		Edx = 3,
+	};
+
+	inline bool CheckCpuidBits(uint level, Register index, uint bits)
+	{
+		unsigned int registers[4];
+#if defined(_WIN64) || defined(_WIN32)
+		__cpuid((int*)registers, level);
+#elif defined __GNUC__
+		__get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx);
+#else
+#error Do not know how to detect CPU info!
+#endif
+		return (registers[index] & bits) == bits;
+	}
+
+
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
         bool SupportedByCPU()
         {
-#if defined WIN32
-            //read CPU info and verify SSE2 support:
-            int cpuInfo[4];
-            __cpuid(cpuInfo, 1);
-            return (cpuInfo[3] & 0x04000000) != 0;
-#elif defined __GNUC__
-            unsigned int eax = 0;
-            unsigned int ebx = 0;
-            unsigned int edx = 0;
-            unsigned int ecx = 0;
-            __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-            return edx & bit_SSE2;
-#else
-    #error Do not know how to detect CPU info
-#endif
+			return CheckCpuidBits(1, Edx, EDX_SSE2_BIT);
         }
 
-#if defined(_WIN64) || defined(_WIN32)
         bool SupportedByOS()
         {
-            // executing SSE2 instruction:
+#if defined(_WIN64) || defined(_WIN32)
             __try 
             {
-                return _mm_setzero_pd().m128d_f64[0] == 0.0;
+                return _mm_setzero_pd().m128d_f64[0] == 0.0; // try to execute of SSE2 instruction;
             }
             __except(EXCEPTION_EXECUTE_HANDLER) 
             {
                 return false;
             }
-        }
 #else
-        bool SupportedByOS()
-        {
-            return true;
-        }
+			return true;
 #endif
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -83,43 +93,51 @@ namespace Simd
     {
         bool SupportedByCPU()
         {
-#if defined WIN32
-            //read CPU info and verify SSE42 support:
-            int cpuInfo[4];
-            __cpuid(cpuInfo, 1);
-            return (cpuInfo[2] & 0x00100000) != 0;
-#elif defined __GNUC__
-            unsigned int eax = 0;
-            unsigned int ebx = 0;
-            unsigned int edx = 0;
-            unsigned int ecx = 0;
-            __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-            return ecx & bit_SSE4_2;
-#else
-    #error Do not know how to detect CPU info
-#endif
+			return CheckCpuidBits(1, Ecx, 1 << 20);
         }
 
+        bool SupportedByOS()
+        {
 #if defined(_WIN64) || defined(_WIN32)
-        bool SupportedByOS()
-        {
-            // executing SSE42 instruction:
-            __try 
-            {
-                _mm_crc32_u8(0, 0);
-                return true;
-            }
-            __except(EXCEPTION_EXECUTE_HANDLER) 
-            {
-                return true;
-            }
-        }
+			__try 
+			{
+				_mm_crc32_u8(0, 0); // try to execute of SSE42 instruction;
+				return true;
+			}
+			__except(EXCEPTION_EXECUTE_HANDLER) 
+			{
+				return false;
+			}
 #else
-        bool SupportedByOS()
-        {
-            return true;
-        }
+			return true;
 #endif
+        }
     }
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+	namespace Avx
+	{
+		bool SupportedByCPU()
+		{
+			return CheckCpuidBits(1, Ecx, ECX_OSXSAVE_BIT | ECX_AVX_BIT);
+		}
+
+		bool SupportedByOS()
+		{
+#if defined(_WIN64) || defined(_WIN32)
+			__try 
+			{
+				return _mm256_setzero_pd().m256d_f64[0] == 0.0; // try to execute of AVX instruction;
+			}
+			__except(EXCEPTION_EXECUTE_HANDLER) 
+			{
+				return false;
+			}
+#else
+			return true;
+#endif
+		}		
+	}
+#endif// SIMD_AVX_ENABLE
 }
