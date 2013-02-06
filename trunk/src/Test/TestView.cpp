@@ -104,10 +104,10 @@ namespace Test
     {
         if(data != NULL && right >= left && bottom >= top)
         {
-			left = Simd::Base::Max(left, (ptrdiff_t)0);
-            top = Simd::Base::Max(top, (ptrdiff_t)0);
-            right = Simd::Base::Min(right, (ptrdiff_t)width);
-            bottom = Simd::Base::Min(bottom, (ptrdiff_t)height);
+			left = Simd::Base::Max((int)left, 0);
+            top = Simd::Base::Max((int)top, 0);
+            right = Simd::Base::Min((int)right, (int)width);
+            bottom = Simd::Base::Min((int)bottom, (int)height);
             return View(right - left, bottom - top, stride, format, data + top*stride + left*SizeOf(format));
         }
         else
