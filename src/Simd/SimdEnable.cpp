@@ -75,7 +75,8 @@ namespace Simd
 #if defined(_WIN64) || defined(_WIN32)
             __try 
             {
-                return _mm_setzero_pd().m128d_f64[0] == 0.0; // try to execute of SSE2 instruction;
+				__m128d value = _mm_set1_pd(1.0);// try to execute of SSE2 instructions;
+				return true;
             }
             __except(EXCEPTION_EXECUTE_HANDLER) 
             {
@@ -93,7 +94,7 @@ namespace Simd
     {
         bool SupportedByCPU()
         {
-			return CheckCpuidBits(1, Ecx, 1 << 20);
+			return CheckCpuidBits(1, Ecx, ECX_SSE42_BIT);
         }
 
         bool SupportedByOS()
@@ -101,7 +102,7 @@ namespace Simd
 #if defined(_WIN64) || defined(_WIN32)
 			__try 
 			{
-				_mm_crc32_u8(0, 0); // try to execute of SSE42 instruction;
+				uint32_t value = _mm_crc32_u8(0, 1); // try to execute of SSE42 instructions;
 				return true;
 			}
 			__except(EXCEPTION_EXECUTE_HANDLER) 
@@ -128,7 +129,8 @@ namespace Simd
 #if defined(_WIN64) || defined(_WIN32)
 			__try 
 			{
-				return _mm256_setzero_pd().m256d_f64[0] == 0.0; // try to execute of AVX instruction;
+				__m256d value = _mm256_set1_pd(1.0);// try to execute of AVX instructions;
+				return true;
 			}
 			__except(EXCEPTION_EXECUTE_HANDLER) 
 			{
