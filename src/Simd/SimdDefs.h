@@ -30,7 +30,6 @@
 
 #include <stdlib.h>
 #include <assert.h>
-#include <math.h>
 
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
