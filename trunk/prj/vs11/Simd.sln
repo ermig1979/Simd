@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test.vcxproj", "{423128F2-9D4E-408D-9123-49CE57A32B0A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simd", "Simd.vcxproj", "{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{423128F2-9D4E-408D-9123-49CE57A32B0A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{423128F2-9D4E-408D-9123-49CE57A32B0A}.Debug|Win32.Build.0 = Debug|Win32
+		{423128F2-9D4E-408D-9123-49CE57A32B0A}.Release|Win32.ActiveCfg = Release|Win32
+		{423128F2-9D4E-408D-9123-49CE57A32B0A}.Release|Win32.Build.0 = Release|Win32
+		{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}.Debug|Win32.ActiveCfg = Debug|Win32
+		{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}.Debug|Win32.Build.0 = Debug|Win32
+		{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}.Release|Win32.ActiveCfg = Release|Win32
+		{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
