@@ -35,39 +35,58 @@
 
 namespace Simd
 {
-	const uint EDX_SSE2_BIT = 1 << 26;
-	const uint ECX_SSE42_BIT = 1 << 20;
-	const uint ECX_OSXSAVE_BIT = 1 << 27;
-	const uint ECX_AVX_BIT = 1 << 28;
-
-	enum Register
+	namespace Cpuid
 	{
-		Eax = 0, 
-		Ebx = 1,
-		Ecx = 2, 
-		Edx = 3,
-	};
+		enum Level : uint
+		{
+			Ordinary = 1,
+			Extended = 7,
+		};	
+	
+		enum Register : uint
+		{
+			Eax = 0, 
+			Ebx = 1,
+			Ecx = 2, 
+			Edx = 3,
+		};
 
-	inline bool CheckCpuidBits(uint level, Register index, uint bits)
-	{
-		unsigned int registers[4];
-#if defined(_WIN64) || defined(_WIN32)
-		__cpuid((int*)registers, level);
-#elif defined __GNUC__
-		__get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx);
-#else
-#error Do not know how to detect CPU info!
-#endif
-		return (registers[index] & bits) == bits;
+		enum Bit
+		{
+		//	Ordinary:
+		//Edx:
+			SSE2 = 1 << 26,
+
+		//Ecx:
+			SSE42 = 1 << 20,
+			OSXSAVE = 1 << 27,
+			AVX = 1 << 28,
+
+		//	Extended:
+		//Ebx:
+			AVX2 = 1 << 5,
+		};
+
+		inline bool CheckBit(Level level, Register index, Bit bit)
+		{
+			unsigned int registers[4] = {0, 0, 0, 0};
+	#if defined(_WIN64) || defined(_WIN32)
+			__cpuid((int*)registers, level);
+	#elif defined __GNUC__
+			__get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx));
+	#else
+	#error Do not know how to detect CPU info!
+	#endif
+			return (registers[index] & bit) == bit;
+		}
 	}
-
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
         bool SupportedByCPU()
         {
-			return CheckCpuidBits(1, Edx, EDX_SSE2_BIT);
+			return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE2);
         }
 
         bool SupportedByOS()
@@ -94,7 +113,7 @@ namespace Simd
     {
         bool SupportedByCPU()
         {
-			return CheckCpuidBits(1, Ecx, ECX_SSE42_BIT);
+			return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
         }
 
         bool SupportedByOS()
@@ -121,7 +140,9 @@ namespace Simd
 	{
 		bool SupportedByCPU()
 		{
-			return CheckCpuidBits(1, Ecx, ECX_OSXSAVE_BIT | ECX_AVX_BIT);
+			return 
+				Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) && 
+				Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
 		}
 
 		bool SupportedByOS()
@@ -142,4 +163,33 @@ namespace Simd
 		}		
 	}
 #endif// SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+	namespace Avx2
+	{
+		bool SupportedByCPU()
+		{
+			return 
+				Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+				Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2);
+		}
+
+		bool SupportedByOS()
+		{
+#if defined(_WIN64) || defined(_WIN32)
+			__try 
+			{
+				__m256i value = _mm256_abs_epi8(_mm256_set1_epi8(1));// try to execute of AVX2 instructions;
+				return true;
+			}
+			__except(EXCEPTION_EXECUTE_HANDLER) 
+			{
+				return false;
+			}
+#else
+			return true;
+#endif
+		}		
+	}
+#endif// SIMD_AVX2_ENABLE
 }

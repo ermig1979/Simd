@@ -53,6 +53,10 @@
 #define SIMD_AVX_ENABLE
 #endif
 
+#if !defined(SIMD_AVX2_DEPRECATE) && _MSC_VER >= 1700 
+#define SIMD_AVX2_ENABLE
+#endif
+
 #elif defined(__GNUC__)
 
 #include <stdint.h>
@@ -71,6 +75,10 @@
 #define SIMD_AVX_ENABLE
 #endif
 
+#if !defined(SIMD_AVX2_DEPRECATE) && defined(__AVX2__)
+#define SIMD_AVX2_ENABLE
+#endif
+
 #else
 
 #error This platform is unsupported!
@@ -79,14 +87,14 @@
 
 #ifdef SIMD_SSE2_ENABLE
 #include <emmintrin.h>
-#endif// SIMD_SSE2_ENABLE
+#endif
 
 #ifdef SIMD_SSE42_ENABLE
 #include <nmmintrin.h>
-#endif// SIMD_SSE42_ENABLE
+#endif
 
-#ifdef SIMD_AVX_ENABLE
+#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #include <immintrin.h>
-#endif// SIMD_AVX_ENABLE
+#endif
 
 #endif//__SimdDefs_h__
