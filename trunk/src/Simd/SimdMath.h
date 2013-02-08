@@ -26,6 +26,8 @@
 
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -58,6 +60,14 @@ namespace Simd
             a = b;
             b = t;
         }
+
+		SIMD_INLINE void SortU8(int & a, int & b)
+		{
+			int d = a - b;
+			int m = ~(d >> 8);
+			b += d & m;
+			a -= d & m;
+		}
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -78,14 +88,11 @@ namespace Simd
 			return _mm_min_epi16(a, _mm_min_epi16(b, c));
 		}
 
-		SIMD_INLINE __m128i LoadBeforeFirst8(__m128i first)
+		SIMD_INLINE void SortU8(__m128i & a, __m128i & b)
 		{
-			return _mm_or_si128(_mm_slli_si128(first, 1), _mm_and_si128(first, K8_FIRST_FF));
-		}
-
-		SIMD_INLINE __m128i LoadAfterLast8(__m128i last)
-		{
-			return _mm_or_si128(_mm_srli_si128(last, 1), _mm_and_si128(last, K8_LAST_FF));
+			__m128i t = a;
+			a = _mm_min_epu8(t, b);
+			b = _mm_max_epu8(t, b);
 		}
 	}
 #endif// SIMD_SSE2_ENABLE

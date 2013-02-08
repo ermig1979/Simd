@@ -110,7 +110,7 @@ namespace Simd
         {
             const __m128i t = Load<align>((__m128i*)p);
             return BinomialSum16(
-                _mm_and_si128(LoadBeforeFirst8(t), K16_00FF),
+                _mm_and_si128(LoadBeforeFirst<1>(t), K16_00FF),
                 _mm_and_si128(t, K16_00FF),
                 _mm_and_si128(_mm_srli_si128(t, 1), K16_00FF));
         }
@@ -173,6 +173,15 @@ namespace Simd
 			else
 				ReduceGray3x3<align, false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 		}
+
+		void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+		{
+			if(Aligned(src) && Aligned(srcStride))
+				ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+			else
+				ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+		}
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -181,12 +190,7 @@ namespace Simd
     {
 #ifdef SIMD_SSE2_ENABLE
         if(Sse2::Enable && srcWidth >= Sse2::A)
-        {
-            if(Aligned(src) && Aligned(srcStride))
-                Sse2::ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-            else
-                Sse2::ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-        }
+			Sse2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
         else
 #endif//SIMD_SSE2_ENABLE
             Base::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);

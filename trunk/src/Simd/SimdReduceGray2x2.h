@@ -50,9 +50,12 @@ namespace Simd
         void ReduceGray2x2A(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        void ReduceGray2x2U(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
+
+		void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+}
 #endif// SIMD_SSE2_ENABLE
 
     typedef void (*ReduceGray2x2Ptr)(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 

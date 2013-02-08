@@ -39,6 +39,9 @@
     <ClInclude Include="..\..\src\Test\TestYuvToHue.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestFilter.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -69,5 +72,8 @@
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestMain.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

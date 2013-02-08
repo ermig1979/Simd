@@ -28,22 +28,25 @@
 
 namespace Test 
 {
-	struct Func
+	namespace
 	{
-		typedef void (*FuncPtr)(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha);
-
-		FuncPtr func;
-		std::string description;
-
-		Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
-
-		void Call(const View & y, const View & u, const View & v, View & bgra) const
+		struct Func
 		{
-			TEST_PERFORMANCE_TEST(description);
-			func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, 0xFF);
-		}
-	};
+			typedef void (*FuncPtr)(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+				size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha);
+
+			FuncPtr func;
+			std::string description;
+
+			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & y, const View & u, const View & v, View & bgra) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, 0xFF);
+			}
+		};	
+	}
 
 #define FUNC(function) Func(function, #function)
 

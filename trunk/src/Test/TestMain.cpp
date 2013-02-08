@@ -29,19 +29,22 @@
 #include "Test/TestBgrToGray.h"
 #include "Test/TestYuvToHue.h"
 #include "Test/TestYuvToBgra.h"
+#include "Test/TestFilter.h"
 
 #define EXECUTE_TEST(test)\
 {\
 	std::cout << #test << " is started :" << std::endl; \
 	bool result = test(); \
-	std::cout << #test << " is finished "  << (result ? " successfully." : " with ERRORS!!!") << std::endl << std::endl; \
+	std::cout << #test << " is finished "  << (result ? " successfully." : " with errors!") << std::endl << std::endl; \
+	if(!result) \
+	{ \
+		std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \
+		return 1; \
+	} \
 }
 
 int main(int argc, char* argv[])
 {
-	std::cout.precision(1);
-	std::cout.setf(std::ios::fixed);
-
 	EXECUTE_TEST(Test::ReduceGray2x2Test);
 	EXECUTE_TEST(Test::ReduceGray3x3Test);
 	EXECUTE_TEST(Test::ReduceGray4x4Test);
@@ -58,6 +61,8 @@ int main(int argc, char* argv[])
 
 	EXECUTE_TEST(Test::Yuv444ToBgraTest);
 	EXECUTE_TEST(Test::Yuv420ToBgraTest);
+
+	EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

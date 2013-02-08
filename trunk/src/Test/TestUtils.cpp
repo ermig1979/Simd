@@ -63,8 +63,10 @@ namespace Test
         }
         else
         {
-            Simd::ResizeBilinear(pSrc->data, pSrc->width, pSrc->height, pSrc->stride, pDst->data, pDst->width, pDst->height, pDst->stride, 
-                (int)View::SizeOf(pSrc->format));
+            Simd::ResizeBilinear(
+				pSrc->data, pSrc->width, pSrc->height, pSrc->stride, 
+				pDst->data, pDst->width, pDst->height, pDst->stride, 
+                View::SizeOf(pSrc->format));
         }
     }
 

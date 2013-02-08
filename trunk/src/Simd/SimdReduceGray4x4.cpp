@@ -157,7 +157,7 @@ namespace Simd
 			const __m128i t1 = _mm_loadu_si128((__m128i*)src);
 			const __m128i t3 = _mm_loadu_si128((__m128i*)(src + 2));
 			return BinomialSum16(
-				_mm_and_si128(LoadBeforeFirst8(t1), K16_00FF),
+				_mm_and_si128(LoadBeforeFirst<1>(t1), K16_00FF),
 				_mm_and_si128(t1, K16_00FF),
 				_mm_and_si128(_mm_srli_si128(t1, 1), K16_00FF),
 				_mm_and_si128(t3, K16_00FF));
@@ -180,7 +180,7 @@ namespace Simd
 		{
 			const __m128i t0 = _mm_loadu_si128((__m128i*)(src - 1));
 			const __m128i t1 = _mm_loadu_si128((__m128i*)src);
-			const __m128i t2 = LoadAfterLast8(t1);
+			const __m128i t2 = LoadAfterLast<1>(t1);
 			return BinomialSum16(
 				_mm_and_si128(t0, K16_00FF),
 				_mm_and_si128(t1, K16_00FF),
@@ -191,8 +191,8 @@ namespace Simd
 		template <> SIMD_INLINE __m128i ReduceColTail<false>(const uchar *src)
 		{
 			const __m128i t0 = _mm_loadu_si128((__m128i*)(src - 1));
-			const __m128i t1 = LoadAfterLast8(t0);
-			const __m128i t2 = LoadAfterLast8(t1);
+			const __m128i t1 = LoadAfterLast<1>(t0);
+			const __m128i t2 = LoadAfterLast<1>(t1);
 			return BinomialSum16(
 				_mm_and_si128(t0, K16_00FF),
 				_mm_and_si128(t1, K16_00FF),
@@ -215,7 +215,7 @@ namespace Simd
 			size_t alignedDstWidth = Simd::AlignLo(dstWidth, A);
 			size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
 
-			Buffer buffer(Simd::AlignHi(dstWidth));
+			Buffer buffer(Simd::AlignHi(dstWidth, A));
 
 			__m128i tmp = ReduceColNose(src);
 			Store<true>((__m128i*)buffer.src0, tmp);

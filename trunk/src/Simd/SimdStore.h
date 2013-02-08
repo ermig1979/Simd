@@ -21,36 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __Simd_h__
-#define __Simd_h__
+#ifndef __SimdStore_h__
+#define __SimdStore_h__
 
-#include "Simd/SimdConfig.h"
 #include "Simd/SimdDefs.h"
-#include "Simd/SimdTypes.h"
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdLoad.h"
-#include "Simd/SimdStore.h"
-#include "Simd/SimdExtract.h"
-#include "Simd/SimdConst.h"
-#include "Simd/SimdMath.h"
 
-#include "Simd/SimdBgrToGray.h"
-#include "Simd/SimdBgrToBgra.h"
-#include "Simd/SimdBgraToGray.h"
-#include "Simd/SimdBgraToBgr.h"
-#include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdYuvToBgra.h"
-#include "Simd/SimdYuvToHue.h"
-#include "Simd/SimdSquaredDifferenceSum.h"
-#include "Simd/SimdReduceGray2x2.h"
-#include "Simd/SimdReduceGray3x3.h"
-#include "Simd/SimdReduceGray4x4.h"
-#include "Simd/SimdReduceGray5x5.h"
-#include "Simd/SimdInterleaveBgra.h"
-#include "Simd/SimdResizeBilinear.h"
-#include "Simd/SimdCrc32.h"
-#include "Simd/SimdMedianFilterSquare3x3.h"
+namespace Simd
+{
+#ifdef SIMD_SSE2_ENABLE
+	namespace Sse2
+	{
+		template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
 
-#endif//__Simd_h__
+		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
+		{
+			return _mm_storeu_si128(p, a); 
+		}
+
+		template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
+		{
+			return _mm_store_si128(p, a); 
+		}
+	}
+#endif//SIMD_SSE2_ENABLE
+}
+#endif//__SimdStore_h__

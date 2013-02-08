@@ -28,20 +28,23 @@
 
 namespace Test
 {
-    struct Func
-    {
-        typedef void(*FuncPtr)(const uchar *bgr, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
-        FuncPtr func;
-        std::string description;
+	namespace
+	{
+		struct Func
+		{
+			typedef void(*FuncPtr)(const uchar *bgr, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+			FuncPtr func;
+			std::string description;
 
-        Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-        void Call(const View & src, View & dst) const
-        {
-            TEST_PERFORMANCE_TEST(description);
-            func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
-        }
-    };
+			void Call(const View & src, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
+			}
+		};	
+	}
 
 #define FUNC(func) Func(func, #func)
 
@@ -49,7 +52,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " for size (" << width << "," << height << ")." << std::endl;
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
 
         View s(width, height, View::Bgr24, NULL);
         FillRandom(s);

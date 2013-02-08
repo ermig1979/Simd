@@ -285,6 +285,26 @@ namespace Simd
 				bgra += 2*bgraStride;
 			}
 		}
+
+		void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha)
+		{
+			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				Yuv420ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+			else
+				Yuv420ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+		}
+
+		void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha)
+		{
+			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				Yuv444ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+			else
+				Yuv444ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+		}
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -295,13 +315,7 @@ namespace Simd
 	{
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::DA)
-		{
-			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
-				Sse2::Yuv420ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-			else
-				Sse2::Yuv420ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-		}
+			Sse2::Yuv420ToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		else
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv420ToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
@@ -312,13 +326,7 @@ namespace Simd
 	{
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
-		{
-			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
-				Sse2::Yuv444ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-			else
-				Sse2::Yuv444ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-		}
+			Sse2::Yuv444ToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		else
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv444ToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);

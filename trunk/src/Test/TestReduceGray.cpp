@@ -28,42 +28,48 @@
 
 namespace Test
 {
-	struct Func1
+	namespace
 	{
-		typedef void (*FuncPtr)(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-		FuncPtr func;
-		std::string description;
-
-		Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
-
-		void Call(const View & src, View & dst) const
+		struct Func1
 		{
-			TEST_PERFORMANCE_TEST(description);
-			func(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
-		}
-	};
+			typedef void (*FuncPtr)(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+				uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+			FuncPtr func;
+			std::string description;
+
+			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & src, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
+			}
+		};
+	}
 
 #define FUNC1(function) Func1(function, #function)
 
-	struct Func2
+	namespace
 	{
-		typedef void (*FuncPtr)(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool correction);
-
-		FuncPtr func;
-		std::string description;
-		bool correction;
-
-		Func2(const FuncPtr & f, const std::string & d, bool c) : func(f), description(d + (c ? "<1>" : "<0>")), correction(c) {}
-
-		void Call(const View & src, View & dst) const
+		struct Func2
 		{
-			TEST_PERFORMANCE_TEST(description);
-			func(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, correction);
-		}
-	};
+			typedef void (*FuncPtr)(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+				uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool correction);
+
+			FuncPtr func;
+			std::string description;
+			bool correction;
+
+			Func2(const FuncPtr & f, const std::string & d, bool c) : func(f), description(d + (c ? "<1>" : "<0>")), correction(c) {}
+
+			void Call(const View & src, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, correction);
+			}
+		};
+	}
 
 #define FUNC2(function, correction) Func2(function, #function, correction)
 
