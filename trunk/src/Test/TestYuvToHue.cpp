@@ -69,9 +69,9 @@ namespace Test
 		View hue1(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
 		View hue2(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
 
-		f1.Call(y, u, v, hue1);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(y, u, v, hue1));
 
-		f2.Call(y, u, v, hue2);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, hue2));
 
 		result = result && Compare(hue1, hue2, 0, true, 10, 256);
 

@@ -89,9 +89,9 @@ namespace Test
 		View d1(reducedWidth, reducedHeight, View::Gray8, NULL);
 		View d2(reducedWidth, reducedHeight, View::Gray8, NULL);
 
-		f1.Call(s, d1);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
-		f2.Call(s, d2);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
 		result = result && Compare(d1, d2, 0, true, 10);
 

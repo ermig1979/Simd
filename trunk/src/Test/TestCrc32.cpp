@@ -61,9 +61,11 @@ namespace Test
 
         std::cout << "Test " << f1.description << " & " << f2.description << " for size = " << data.size() << "." << std::endl;
 
-        unsigned int crc1 = f1.Call(&data[0], data.size());
+        unsigned int crc1;
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc1 = f1.Call(&data[0], data.size()));
 
-        unsigned int crc2 = f2.Call(&data[0], data.size());
+		unsigned int crc2;
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc2 = f2.Call(&data[0], data.size()));
 
         if(crc1 != crc2)
         {
@@ -77,11 +79,7 @@ namespace Test
     {
         bool result = true;
 
-#ifdef _DEBUG
-        std::vector<unsigned char> data(123);
-#else
-        std::vector<unsigned char> data(123456789);
-#endif
+		std::vector<unsigned char> data(W*H - 1);
         SetRandom(&data[0], data.size());
 
         result = result && Crc32Test(data, FUNC(Simd::Base::Crc32), FUNC(Simd::Sse42::Crc32));

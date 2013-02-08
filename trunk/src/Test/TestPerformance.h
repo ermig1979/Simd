@@ -119,4 +119,19 @@ namespace Test
 #define TEST_PERFORMANCE_TEST_SET_SIZE(size)
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
+#ifdef _DEBUG
+#define TEST_EXECUTE_AT_LEAST_MIN_TIME(test) \
+	test;
+#else
+#define TEST_EXECUTE_AT_LEAST_MIN_TIME(test) \
+{ \
+	double startTime = Test::GetTime(); \
+	do \
+	{ \
+		test; \
+	} \
+	while(Test::GetTime() - startTime < Test::MINIMAL_TEST_EXECUTION_TIME); \
+}
+#endif
+
 #endif//__TestPerformance_h__
