@@ -113,7 +113,7 @@ namespace Simd
             _mm_storel_epi64((__m128i*)dst, _mm_packus_epi16(d, K_ZERO));
         }
 
-        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        void ReduceGray2x2U(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
@@ -143,6 +143,15 @@ namespace Simd
                 dst += dstStride;
             }
         }
+
+		void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+		{
+			if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
+				ReduceGray2x2A(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+			else
+				ReduceGray2x2U(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+		}
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -153,12 +162,7 @@ namespace Simd
     {
 #ifdef SIMD_SSE2_ENABLE
         if(Sse2::Enable && srcWidth >= Sse2::A)
-        {
-            if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
-                Sse2::ReduceGray2x2A(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else
-                Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        }
+            Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         else
 #endif//SIMD_SSE2_ENABLE
             Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);

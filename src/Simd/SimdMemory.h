@@ -64,72 +64,65 @@ namespace Simd
 #endif
     }
 
-    SIMD_INLINE size_t AlignHi(size_t size, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE size_t AlignHi(size_t size, size_t align)
     {
         return (size + align - 1) & ~(align - 1);
     }
 
-    SIMD_INLINE void* AlignHi(const void *p, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE void* AlignHi(const void *p, size_t align)
     {
         return (void*)((((size_t)p) + align - 1) & ~(align - 1));
     }
 
-    SIMD_INLINE size_t AlignLo(size_t size, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE size_t AlignLo(size_t size, size_t align)
     {
         return size & ~(align - 1);
     }
 
-    SIMD_INLINE void* AlignLo(const void *p, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE void* AlignLo(const void *p, size_t align)
     {
         return (void*)(((size_t)p) & ~(align - 1));
     }
 
-    SIMD_INLINE bool Aligned(size_t size, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE bool Aligned(size_t size, size_t align)
     {
         return size%align == 0;
     }
 
-    SIMD_INLINE bool Aligned(const void *p, size_t align = DEFAULT_MEMORY_ALIGN)
+    SIMD_INLINE bool Aligned(const void *p, size_t align)
     {
         return ((size_t)p)%align == 0;
     }
-    
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        template <bool align> SIMD_INLINE __m128i Load(const __m128i * p);
 
-        template <> SIMD_INLINE __m128i Load<false>(const __m128i * p)
-        {
-            return _mm_loadu_si128(p); 
-        }
-
-        template <> SIMD_INLINE __m128i Load<true>(const __m128i * p)
-        {
-            return _mm_load_si128(p); 
-        }
-
-		template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
-
-		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
+	{
+		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m128i))
 		{
-			return _mm_storeu_si128(p, a); 
+			return Simd::Aligned(size, align);
 		}
 
-		template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
+		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m128i))
 		{
-			return _mm_store_si128(p, a); 
+			return Simd::Aligned(p, align);
 		}
-    }
-#endif//SIMD_SSE2_ENABLE
+	}
+#endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_SSE42_ENABLE    
+	namespace Sse42
+	{
+		using namespace Sse2;
+	}
+#endif// SIMD_SSE42_ENABLE
 }
 
 #if defined(_WIN64) || defined(_WIN32) 
     #define SIMD_ALLOCA(type, size) \
-        (type*) Simd::AlignHi(_alloca(Simd::AlignHi((size)*sizeof(type)) + Simd::DEFAULT_MEMORY_ALIGN))
+        (type*) Simd::AlignHi(_alloca(Simd::AlignHi((size)*sizeof(type), Simd::DEFAULT_MEMORY_ALIGN) + Simd::DEFAULT_MEMORY_ALIGN))
 #elif defined __unix__
     #define SIMD_ALLOCA(type, size) \
-        (type*) Simd::AlignHi(alloca(Simd::AlignHi((size)*sizeof(type)) + Simd::DEFAULT_MEMORY_ALIGN))
+        (type*) Simd::AlignHi(alloca(Simd::AlignHi((size)*sizeof(type), Simd::DEFAULT_MEMORY_ALIGN) + Simd::DEFAULT_MEMORY_ALIGN))
 #else
     #error Do not know how to allocate memory on stack
 #endif

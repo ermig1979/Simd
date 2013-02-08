@@ -21,49 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConst_h__
-#define __SimdConst_h__
+#ifndef __SimdMedianFilterSquare3x3_h__
+#define __SimdMedianFilterSquare3x3_h__
 
-#include "Simd/SimdInit.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-    }
+	namespace Base
+	{
+		void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
 
 #ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-        const size_t A = sizeof(__m128i);
-        const size_t DA = 2*A;
-        const size_t QA = 4*A;
-		const size_t OA = 8*A;
-        const size_t HA = A/2;
-
-        const __m128i K_ZERO = SIMD_MM_SET1_EPI8(0);
-		const __m128i K_INV_ZERO = SIMD_MM_SET1_EPI8(0xFF);
-
-		const __m128i K16_0001 = SIMD_MM_SET1_EPI16(0x0001);
-		const __m128i K16_0002 = SIMD_MM_SET1_EPI16(0x0002);
-		const __m128i K16_0003 = SIMD_MM_SET1_EPI16(0x0003);
-		const __m128i K16_0004 = SIMD_MM_SET1_EPI16(0x0004);
-		const __m128i K16_0005 = SIMD_MM_SET1_EPI16(0x0005);
-        const __m128i K16_0006 = SIMD_MM_SET1_EPI16(0x0006);
-		const __m128i K16_0008 = SIMD_MM_SET1_EPI16(0x0008);
-		const __m128i K16_0020 = SIMD_MM_SET1_EPI16(0x0020);
-		const __m128i K16_0080 = SIMD_MM_SET1_EPI16(0x0080);
-        const __m128i K16_00FF = SIMD_MM_SET1_EPI16(0x00FF);
-        
-		const __m128i K32_000000FF = SIMD_MM_SET1_EPI32(0x000000FF);
-    }
+	namespace Sse2
+	{
+		void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE42_ENABLE    
-    namespace Sse42
-    {
-        using namespace Sse2;
-    }
-#endif// SIMD_SSE42_ENABLE
+	void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+		size_t channelCount, uchar * dst, size_t dstStride);
 }
-#endif//__SimdConst_h__
+#endif//__SimdMedianFilterSquare3x3_h__

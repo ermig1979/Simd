@@ -82,12 +82,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Release|Win32"
+			Name="Debug|x64"
 			OutputDirectory="$(SolutionDir)\..\..\bin\vs9\$(PlatformName)\$(ConfigurationName)\"
 			IntermediateDirectory="$(SolutionDir)\..\..\obj\vs9\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="2"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -103,15 +102,16 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
-				EnableIntrinsicFunctions="true"
+				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\src"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
+				PreprocessorDefinitions="_WIN64;_DEBUG;_LIB"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -145,11 +145,12 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
+			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)\..\..\bin\vs9\$(PlatformName)\$(ConfigurationName)\"
 			IntermediateDirectory="$(SolutionDir)\..\..\obj\vs9\$(PlatformName)\$(ConfigurationName)\$(ProjectName)"
 			ConfigurationType="4"
 			CharacterSet="2"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -165,16 +166,15 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TargetEnvironment="3"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="0"
+				Optimization="2"
+				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\src"
-				PreprocessorDefinitions="_WIN64;_DEBUG;_LIB"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -275,170 +275,194 @@
 	<References>
 	</References>
 	<Files>
-		<File
-			RelativePath="..\..\src\Simd\Simd.h"
+		<Filter
+			Name="Sys"
 			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgraToBgr.cpp"
+			<File
+				RelativePath="..\..\src\Simd\Simd.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdConfig.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdConst.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdDefs.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdEnable.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdEnable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdExtract.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdInit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdLoad.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdMath.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdMemory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdStore.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdTypes.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="Alg"
 			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgraToBgr.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgraToGray.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgraToGray.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgrToBgra.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgrToBgra.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgrToGray.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdBgrToGray.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdConfig.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdConst.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdCrc32.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdCrc32.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdDefs.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdEnable.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdEnable.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdExtract.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdInit.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdInterleaveBgra.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdInterleaveBgra.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdMath.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdMemory.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray2x2.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray2x2.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray3x3.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray3x3.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray4x4.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray4x4.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray5x5.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdReduceGray5x5.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdResizeBilinear.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdResizeBilinear.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdSquaredDifferenceSum.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdSquaredDifferenceSum.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdTypes.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToBgr.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToBgr.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToBgra.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToBgra.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToHue.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\Simd\SimdYuvToHue.h"
-			>
-		</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgraToBgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgraToBgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgraToGray.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgraToGray.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgrToBgra.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgrToBgra.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgrToGray.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBgrToGray.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdCrc32.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdCrc32.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdInterleaveBgra.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdInterleaveBgra.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdMedianFilterSquare3x3.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray2x2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray2x2.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray3x3.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray3x3.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray4x4.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray4x4.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray5x5.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdReduceGray5x5.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdResizeBilinear.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdResizeBilinear.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdSquaredDifferenceSum.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdSquaredDifferenceSum.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToBgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToBgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToBgra.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToBgra.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToHue.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdYuvToHue.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

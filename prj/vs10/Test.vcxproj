@@ -184,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestFilter.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestUtils.h" />
     <ClInclude Include="..\..\src\Test\TestView.h" />
@@ -195,6 +196,7 @@
     <ClInclude Include="..\..\src\Test\TestYuvToHue.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
     <ClCompile Include="..\..\src\Test\TestView.cpp" />

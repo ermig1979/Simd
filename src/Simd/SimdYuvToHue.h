@@ -40,6 +40,11 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
+		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * hue, size_t hueStride);
+
+		void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * hue, size_t hueStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 

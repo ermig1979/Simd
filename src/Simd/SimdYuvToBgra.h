@@ -52,6 +52,11 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+		void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha = 0xFF);
+
+		void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha = 0xFF);
     }
 #endif// SIMD_SSE2_ENABLE
 

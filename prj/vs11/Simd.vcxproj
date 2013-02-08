@@ -32,7 +32,9 @@
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdInterleaveBgra.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare3x3.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray2x2.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray3x3.h" />
@@ -40,6 +42,7 @@
     <ClInclude Include="..\..\src\Simd\SimdReduceGray5x5.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizeBilinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgra.h" />
@@ -53,6 +56,7 @@
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray4x4.cpp" />

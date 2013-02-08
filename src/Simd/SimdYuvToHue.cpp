@@ -227,6 +227,24 @@ namespace Simd
 				hue += hueStride;
 			}
 		}
+
+		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * hue, size_t hueStride)
+		{
+			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
+				Yuv420ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+			else
+				Yuv420ToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+		}
+
+		void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+			size_t width, size_t height, uchar * hue, size_t hueStride)
+		{
+			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
+				Yuv444ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+			else
+				Yuv444ToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -235,13 +253,7 @@ namespace Simd
 	{
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::DA)
-		{
-			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-				Sse2::Yuv420ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-			else
-				Sse2::Yuv420ToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-		}
-		else
+			Sse2::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 	}
@@ -250,14 +262,8 @@ namespace Simd
 		size_t width, size_t height, uchar * hue, size_t hueStride)
 	{
 #ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::DA)
-		{
-			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
-				Sse2::Yuv444ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-			else
-				Sse2::Yuv444ToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-		}
-		else
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 	}

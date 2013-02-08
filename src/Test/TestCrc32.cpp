@@ -28,21 +28,24 @@
 
 namespace Test
 {
-    struct Func
-    {
-        typedef unsigned __int32 (*FunkPtr)(const void *src, size_t size);
+	namespace
+	{
+		struct Func
+		{
+			typedef unsigned __int32 (*FunkPtr)(const void *src, size_t size);
 
-        FunkPtr func;
-        std::string description;
+			FunkPtr func;
+			std::string description;
 
-        Func(const FunkPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FunkPtr & f, const std::string & d) : func(f), description(d) {}
 
-        unsigned __int32 Call(const void *src, size_t size) const
-        {
-            TEST_PERFORMANCE_TEST(description);
-            return func(src, size);
-        }
-    };
+			unsigned __int32 Call(const void *src, size_t size) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				return func(src, size);
+			}
+		};	
+	}
 
 #define FUNC(func) Func(func, #func)
 

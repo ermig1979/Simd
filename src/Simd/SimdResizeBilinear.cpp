@@ -43,7 +43,7 @@ namespace Simd
 		int alpha;
 	};
 
-	template <int CHANNEL_COUNT>
+	template <size_t CHANNEL_COUNT>
 	void EstimateAlphaIndex(size_t srcSize, size_t dstSize, IndexAlpha * indexAlpha)
 	{
 		float scale = (float)srcSize/dstSize;
@@ -51,7 +51,7 @@ namespace Simd
 		for(size_t i = 0; i < dstSize; ++i)
 		{
 			float alpha = (float)((i + 0.5)*scale - 0.5);
-			size_t index = (int)::floor(alpha);
+			size_t index = (size_t)::floor(alpha);
 			alpha -= index;
 
 			if(index < 0)
@@ -66,7 +66,7 @@ namespace Simd
 				alpha = 1;
 			}
 
-			for(int c = 0; c < CHANNEL_COUNT; c++)
+			for(size_t c = 0; c < CHANNEL_COUNT; c++)
 			{
 				indexAlpha[i*CHANNEL_COUNT + c].index = CHANNEL_COUNT*index + c;
 				indexAlpha[i*CHANNEL_COUNT + c].alpha = (int)(alpha * FRACTION_RANGE + 0.5);
@@ -76,7 +76,7 @@ namespace Simd
 
 	namespace Base
 	{
-		template <int CHANNEL_COUNT>
+		template <size_t CHANNEL_COUNT>
 		void ResizeBilinear(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
@@ -149,7 +149,7 @@ namespace Simd
 
 		void ResizeBilinear(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int channelCount)
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 		{
 			assert(channelCount == 1 || channelCount == 3 || channelCount == 4);
 
@@ -298,7 +298,7 @@ namespace Simd
 { 
 	void ResizeBilinear(
 		const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int channelCount)
+		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 	{
 #ifdef SIMD_SSE2_ENABLE
         if(Sse2::Enable && channelCount == 1 && srcWidth >= Sse2::A)
