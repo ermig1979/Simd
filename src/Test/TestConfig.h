@@ -48,8 +48,10 @@ namespace Test
 	const int H = 96;
 #else
 	const int W = 1920;
-	const int H = 10800;
-#endif	
+	const int H = 1080;
+#endif
+
+	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
 }
 
 #endif//__TestConfig_h__

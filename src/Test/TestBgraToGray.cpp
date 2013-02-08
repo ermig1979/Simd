@@ -60,9 +60,9 @@ namespace Test
         View d1(width, height, View::Gray8, NULL);
         View d2(width, height, View::Gray8, NULL);
 
-        f1.Call(s, d1);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
-        f2.Call(s, d2);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
         result = result && Compare(d1, d2, 0, true, 10);
 
@@ -73,8 +73,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && BgraToGrayTest(W + 1, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::Sse2::BgraToGray));
-        result = result && BgraToGrayTest(W + 7, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::Sse2::BgraToGray));
+        result = result && BgraToGrayTest(W + 1, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::BgraToGray));
+        result = result && BgraToGrayTest(W + 7, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::BgraToGray));
         result = result && BgraToGrayTest(W, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::Sse2::BgraToGray));
         result = result && BgraToGrayTest(W, H, FUNC(Simd::BgraToGray), FUNC(Simd::BgraToGray));
 

@@ -69,9 +69,9 @@ namespace Test
 		View bgra1(width, height, View::Bgra32, NULL, (width%16 == 0 ? 16 : 1));
 		View bgra2(width, height, View::Bgra32, NULL, (width%16 == 0 ? 16 : 1));
 
-		f1.Call(y, u, v, bgra1);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(y, u, v, bgra1));
 
-		f2.Call(y, u, v, bgra2);
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, bgra2));
 
 		result = result && Compare(bgra1, bgra2, 0, true, 10);
 
