@@ -73,6 +73,33 @@ namespace Simd
 			a[1] = Load<align>((__m128i*)p);
 			a[2] = LoadAfterLast<step>(a[1]);
 		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadNose5(const uchar * p, __m128i a[5])
+		{
+			a[2] = Load<align>((__m128i*)p);
+			a[1] = LoadBeforeFirst<step>(a[2]);
+			a[0] = LoadBeforeFirst<step>(a[1]);
+			a[3] = _mm_loadu_si128((__m128i*)(p + step));
+			a[4] = _mm_loadu_si128((__m128i*)(p + 2*step));
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadBody5(const uchar * p, __m128i a[5])
+		{
+			a[0] = _mm_loadu_si128((__m128i*)(p - 2*step));
+			a[1] = _mm_loadu_si128((__m128i*)(p - step));
+			a[2] = Load<align>((__m128i*)p);
+			a[3] = _mm_loadu_si128((__m128i*)(p + step));
+			a[4] = _mm_loadu_si128((__m128i*)(p + 2*step));
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadTail5(const uchar * p, __m128i a[5])
+		{
+			a[0] = _mm_loadu_si128((__m128i*)(p - 2*step));
+			a[1] = _mm_loadu_si128((__m128i*)(p - step));
+			a[2] = Load<align>((__m128i*)p);
+			a[3] = LoadAfterLast<step>(a[2]);
+			a[4] = LoadAfterLast<step>(a[3]);
+		}
 	}
 #endif//SIMD_SSE2_ENABLE
 }

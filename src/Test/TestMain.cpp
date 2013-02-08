@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::Yuv420ToBgraTest);
 
 	EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
+	EXECUTE_TEST(Test::MedianFilterSquare5x5Test);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

@@ -95,4 +95,20 @@ namespace Test
 
 		return result;
 	}
+
+	bool MedianFilterSquare5x5Test()
+	{
+		bool result = true;
+
+		result = result && FilterTest(ARGS(View::Gray8, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+		result = result && FilterTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+
+		result = result && FilterTest(ARGS(View::Bgr24, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+		result = result && FilterTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+
+		result = result && FilterTest(ARGS(View::Bgra32, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+		result = result && FilterTest(ARGS(View::Bgra32, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+
+		return result;
+	}
 }

@@ -52,5 +52,6 @@
 #include "Simd/SimdResizeBilinear.h"
 #include "Simd/SimdCrc32.h"
 #include "Simd/SimdMedianFilterSquare3x3.h"
+#include "Simd/SimdMedianFilterSquare5x5.h"
 
 #endif//__Simd_h__

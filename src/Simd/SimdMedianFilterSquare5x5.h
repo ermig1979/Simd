@@ -1,5 +1,5 @@
 /*
-* Simd Library Tests.
+* Simd Library.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,14 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __TestFilter_h__
-#define __TestFilter_h__
+#ifndef __SimdMedianFilterSquare5x5_h__
+#define __SimdMedianFilterSquare5x5_h__
 
-namespace Test
+#include "Simd/SimdTypes.h"
+
+namespace Simd
 {
-	bool MedianFilterSquare3x3Test();
+	namespace Base
+	{
+		void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
 
-	bool MedianFilterSquare5x5Test();
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
+	{
+		void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
+#endif// SIMD_SSE2_ENABLE
+
+	void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
+		size_t channelCount, uchar * dst, size_t dstStride);
 }
-
-#endif//__TestFilter_h__
+#endif//__SimdMedianFilterSquare5x5_h__

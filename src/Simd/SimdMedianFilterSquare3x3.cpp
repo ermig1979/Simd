@@ -159,9 +159,9 @@ namespace Simd
 				}
 
 				size_t col = size - A;
-				LoadTailSquare3x3<false, step>(y, col, a);
+				LoadTailSquare3x3<align, step>(y, col, a);
 				Sort9(a);
-				Store<false>((__m128i*)(dst + col), a[4]);
+				Store<align>((__m128i*)(dst + col), a[4]);
 			}
 		}
 
