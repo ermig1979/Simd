@@ -127,24 +127,7 @@ namespace Simd
     #error Do not know how to allocate memory on stack
 #endif
 
-#ifdef SIMD_ALLOCATE_ON_STACK
-
-#define SIMD_ALLOCATE(type, size) \
-	SIMD_ALLOCA(type, size)
-
-#define SIMD_FREE(name) 
-
-#else//SIMD_ALLOCATE_ON_STACK
-
-#define SIMD_ALLOCATE(type, size) \
-	(type*)Simd::Allocate(sizeof(type)*(size))
-
-#define SIMD_FREE(name) \
-	Simd::Free(name)
-
-#endif//SIMD_ALLOCATE_ON_STACK
-
 #define SIMD_ARRAY(type, name, size) \
-	type * name = SIMD_ALLOCATE(type, size)
+	type * name = SIMD_ALLOCA(type, size)
 
 #endif//__SimdMemory_h__

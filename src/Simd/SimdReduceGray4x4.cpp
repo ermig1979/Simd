@@ -37,20 +37,20 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = (int*)Allocate(sizeof(int)*2*width);
-					src0 = p;
+					_p = Allocate(sizeof(int)*2*width);
+					src0 = (int*)_p;
 					src1 = src0 + width;
 				}
 
 				~Buffer()
 				{
-					Free(p);
+					Free(_p);
 				}
 
 				int * src0;
 				int * src1;
 			private:
-				int *p;
+				void *_p;
 			};	
 		}
 
@@ -121,8 +121,8 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = (ushort*)Allocate(sizeof(ushort)*4*width);
-					src0 = p;
+					_p = Allocate(sizeof(ushort)*4*width);
+					src0 = (ushort*)_p;
 					src1 = src0 + width;
 					src2 = src1 + width;
 					src3 = src2 + width;
@@ -130,7 +130,7 @@ namespace Simd
 
 				~Buffer()
 				{
-					Free(p);
+					Free(_p);
 				}
 
 				ushort * src0;
@@ -138,7 +138,7 @@ namespace Simd
 				ushort * src2;
 				ushort * src3;
 			private:
-				ushort *p;
+				void * _p;
 			};	
 		}
 

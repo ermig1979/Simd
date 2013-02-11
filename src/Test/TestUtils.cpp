@@ -61,8 +61,6 @@ namespace Test
         }
     }
 
-    //-------------------------------------------------------------------------
-
     void FillRandom(View & view)
     {
         assert(view.data);
@@ -77,8 +75,6 @@ namespace Test
             }
         }
     }
-
-    //-------------------------------------------------------------------------
 
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle)
     {
