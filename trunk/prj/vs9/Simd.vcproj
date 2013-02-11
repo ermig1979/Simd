@@ -330,6 +330,14 @@
 				RelativePath="..\..\src\Simd\SimdTypes.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdView.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdView.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Alg"

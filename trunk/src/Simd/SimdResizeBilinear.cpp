@@ -307,5 +307,14 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 	}
+
+	void ResizeBilinear(const View & src, View & dst)
+	{
+		assert(src.format == dst.format);
+		assert(src.format == View::Gray8 || src.format == View::Bgr24 || src.format == View::Bgra32);
+
+		ResizeBilinear(src.data, src.stride, src.width, src.height, 
+			dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
+	}
 }
 

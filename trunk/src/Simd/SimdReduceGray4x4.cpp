@@ -37,14 +37,14 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = SIMD_ALLOCATE(int, 2*width);
+					p = (int*)Allocate(sizeof(int)*2*width);
 					src0 = p;
 					src1 = src0 + width;
 				}
 
 				~Buffer()
 				{
-					SIMD_FREE(p);
+					Free(p);
 				}
 
 				int * src0;
@@ -121,7 +121,7 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = SIMD_ALLOCATE(ushort, 4*width);
+					p = (ushort*)Allocate(sizeof(ushort)*4*width);
 					src0 = p;
 					src1 = src0 + width;
 					src2 = src1 + width;
@@ -130,7 +130,7 @@ namespace Simd
 
 				~Buffer()
 				{
-					SIMD_FREE(p);
+					Free(p);
 				}
 
 				ushort * src0;
@@ -264,6 +264,15 @@ namespace Simd
 				Base::Swap(buffer.src1, buffer.src3);
 			}
 		}
+
+		void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+		{
+			if(Aligned(srcWidth, 2))
+				ReduceGray4x4<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+			else
+				ReduceGray4x4<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -272,14 +281,16 @@ namespace Simd
 	{
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && srcWidth >= Sse2::A)
-		{
-			if(Aligned(srcWidth, 2))
-				Sse2::ReduceGray4x4<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				Sse2::ReduceGray4x4<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
+			Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 		else
 #endif//SIMD_SSE2_ENABLE
 			Base::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+	}
+
+	void ReduceGray4x4(const View & src, View & dst)
+	{
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
+
+		ReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
 	}
 }

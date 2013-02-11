@@ -41,15 +41,6 @@ namespace Test
         }
     }
 
-    void BgraToGray(const View *pSrc, View *pDst)
-    {
-        assert(pSrc && pDst && pSrc->data && pDst->data);
-        assert(pSrc->format == View::Bgra32 && pDst->format == View::Gray8);
-        assert(pSrc->width == pDst->width && pSrc->height == pDst->height);
-
-        Simd::BgraToGray(pSrc->data, pSrc->width, pSrc->height, pSrc->stride, pDst->data, pDst->stride);
-    }
-
     void ResizeBilinear(const View *pSrc, View *pDst)
     {
         assert(pSrc && pDst && pSrc->data && pDst->data);
@@ -95,12 +86,12 @@ namespace Test
         assert(a.format == View::Gray8 || a.format == View::Bgr24 || a.format == View::Bgra32);
 
         int errorCount = 0;
-        size_t colors = View::SizeOf(a.format);
+        size_t colors = Simd::View::SizeOf(a.format);
         size_t width = colors*a.width;
         for(size_t row = 0; row < a.height; ++row)
         {
-            unsigned char* pA = a.data + row*a.stride;
-            unsigned char* pB = b.data + row*b.stride;
+            uchar* pA = a.data + row*a.stride;
+            uchar* pB = b.data + row*b.stride;
             for(size_t offset = 0; offset < width; ++offset)
             {
                 if(pA[offset] != pB[offset])

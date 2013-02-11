@@ -24,7 +24,7 @@
 #ifndef __SimdBgrToGray_h__
 #define __SimdBgrToGray_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
@@ -54,5 +54,7 @@ namespace Simd
 #endif// SIMD_SSE2_ENABLE
 
     void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
+
+	void BgrToGray(const View & bgr, View & gray);
 }
 #endif//__SimdBgrToGray_h__

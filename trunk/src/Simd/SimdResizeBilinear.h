@@ -24,7 +24,7 @@
 #ifndef __SimdResizeBilinear_h__
 #define __SimdResizeBilinear_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
@@ -47,5 +47,7 @@ namespace Simd
 	void ResizeBilinear(
 		const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+	void ResizeBilinear(const View & src, View & dst);
 }
 #endif//__SimdResizeBilinear_h__

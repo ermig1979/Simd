@@ -24,7 +24,7 @@
 #ifndef __SimdBgraToGray_h__
 #define __SimdBgraToGray_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
@@ -47,5 +47,7 @@ namespace Simd
     extern FlatBgraToGrayPtr FlatBgraToGrayA;
 
     void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+
+	void BgraToGray(const View & bgra, View & gray);
 }
 #endif//__SimdBgraToGray_h__

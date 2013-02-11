@@ -342,7 +342,7 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = SIMD_ALLOCATE(ushort, 5*width + A);
+					p = (ushort*)Allocate(sizeof(ushort)*(5*width + A));
 					in0 = p;
 					in1 = in0 + width;
 					out0 = in1 + width;
@@ -352,7 +352,7 @@ namespace Simd
 
 				~Buffer()
 				{
-					SIMD_FREE(p);
+					Free(p);
 				}
 
 				ushort * in0;
@@ -493,5 +493,12 @@ namespace Simd
 		else
 #endif//SIMD_SSE2_ENABLE
 			Base::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+	}
+
+	void ReduceGray5x5(const View & src, View & dst, bool compensation)
+	{
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
+
+		ReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
 	}
 }

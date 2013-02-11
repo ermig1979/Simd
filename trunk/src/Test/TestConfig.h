@@ -42,6 +42,7 @@
 namespace Test
 {
 	typedef Simd::uchar uchar;
+	typedef Simd::View View;
 
 #ifdef _DEBUG
 	const int W = 128;

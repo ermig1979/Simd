@@ -24,7 +24,7 @@
 #ifndef __SimdYuvToBgr_h__
 #define __SimdYuvToBgr_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 #include "Simd/SimdMath.h"
 
 namespace Simd
@@ -40,11 +40,6 @@ namespace Simd
         const int U_TO_GREEN_WEIGHT = -int(0.391*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int V_TO_GREEN_WEIGHT = -int(0.813*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int V_TO_RED_WEIGHT = int(1.596*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
-
-        SIMD_INLINE int RestrictRange(int value, int min = 0, int max = 255)
-        {
-            return Max(min, Min(max, value));
-        }
 
         SIMD_INLINE int YuvToBlue(int y, int u)
         {
@@ -82,7 +77,7 @@ namespace Simd
 				bgr = bgr + bgrStride*(height - 2);
 				bgrStride = -bgrStride;
 			}
-			return Yuv420ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+			Yuv420ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 		}
 
 		void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
@@ -150,5 +145,16 @@ namespace Simd
 		}	
 	}
 #endif// SIMD_SSE2_ENABLE
+
+
+	void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
+
+	void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
+
+	void Yuv444ToBgr(const View & y, const View & u, const View & v, View & bgr);
+
+	void Yuv420ToBgr(const View & y, const View & u, const View & v, View & bgr);
 }
 #endif//__SimdYuvToBgr_h__

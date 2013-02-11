@@ -21,8 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Test/TestConfig.h"
-#include "Test/TestView.h"
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 
@@ -40,7 +38,7 @@ namespace Test
 
 			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & y, const View & u, const View & v, View & hue) const
+			void Call(const Simd::View & y, const View & u, const View & v, View & hue) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);

@@ -149,4 +149,12 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE       
             Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     }
+
+	void BgraToGray(const View & bgra, View & gray)
+	{
+		assert(bgra.width == gray.width && bgra.height == gray.height);
+		assert(bgra.format == View::Bgra32 && gray.format == View::Gray8);
+
+		BgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
+	}
 }

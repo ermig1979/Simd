@@ -24,7 +24,7 @@
 #ifndef __TestUtils_h__
 #define __TestUtils_h__
 
-#include "Test/TestView.h"
+#include "Test/TestConfig.h"
 
 namespace Test
 {
@@ -33,20 +33,12 @@ namespace Test
 		return (::rand()*range)/RAND_MAX;
 	}
 
-	//-------------------------------------------------------------------------
-
-    void Copy(const View * pSrc, View * pDst);
-
-    void BgraToGray(const View *pSrc, View * pDst);
+	void Copy(const View * pSrc, View * pDst);
 
     void ResizeBilinear(const View *pSrc, View *pDst);
 
-    //-------------------------------------------------------------------------
-
     void FillRandom(View & view);
     
-    //-------------------------------------------------------------------------
-
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0);
 }

@@ -55,6 +55,9 @@
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdView.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare5x5.h">
       <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdView.h">
+      <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

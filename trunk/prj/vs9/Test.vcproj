@@ -346,14 +346,6 @@
 				RelativePath="..\..\src\Test\TestUtils.h"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\Test\TestView.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\Test\TestView.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Test"
