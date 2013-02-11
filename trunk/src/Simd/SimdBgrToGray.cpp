@@ -56,36 +56,56 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+		namespace
+		{
+			struct Buffer
+			{
+				Buffer(size_t width)
+				{
+					_p = Allocate(sizeof(uchar)*4*width);
+					bgra = (uchar*)_p;
+				}
+
+				~Buffer()
+				{
+					Free(_p);
+				}
+
+				uchar * bgra;
+			private:
+				void *_p;
+			};	
+		}
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
         {
             assert(width >= A);
 
-            uchar *bgra = (uchar *)Allocate(width*4);
+            Buffer buffer(width);
+
             if(Aligned(gray) && Aligned(width))
             {
                 for(size_t row = 1; row < height; ++row)
                 {
-                    Base::BgrToBgra(bgr, width, bgra, false, false);
-                    Sse2::BgraToGrayA(bgra, width, gray);
+                    Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
+                    Sse2::BgraToGrayA(buffer.bgra, width, gray);
                     bgr += bgrStride;
                     gray += grayStride;
                 }
-                Base::BgrToBgra(bgr, width, bgra, false, true);
-                Sse2::BgraToGrayA(bgra, width, gray);
+                Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
+                Sse2::BgraToGrayA(buffer.bgra, width, gray);
             }
             else
             {
                 for(size_t row = 1; row < height; ++row)
                 {
-                    Base::BgrToBgra(bgr, width, bgra, false, false);
-                    Sse2::BgraToGrayU(bgra, width, gray);
+                    Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
+                    Sse2::BgraToGrayU(buffer.bgra, width, gray);
                     bgr += bgrStride;
                     gray += grayStride;
                 }
-                Base::BgrToBgra(bgr, width, bgra, false, true);
-                Sse2::BgraToGrayU(bgra, width, gray);
+                Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
+                Sse2::BgraToGrayU(buffer.bgra, width, gray);
             }
-            Free(bgra);
         }
     }
 #endif//SIMD_SSE2_ENABLE

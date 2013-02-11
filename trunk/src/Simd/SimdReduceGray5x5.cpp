@@ -31,6 +31,32 @@ namespace Simd
 {
 	namespace Base
 	{
+		namespace
+		{
+			struct Buffer
+			{
+				Buffer(size_t width)
+				{
+					_p = Allocate(sizeof(ushort)*3*width);
+					isc0 = (ushort*)_p;
+					isc1 = isc0 + width;
+					iscp = isc1 + width;
+				}
+
+				~Buffer()
+				{
+					Free(_p);
+				}
+
+				ushort * isc0;
+				ushort * isc1;
+				ushort * iscp;
+			private:
+				void *_p;
+			};	
+		}
+
+
 		/**************************************************************************************************
 		*  The Burt & Adelson Reduce operation. This function use 2-D version of algorithm;
 		*
@@ -108,11 +134,9 @@ namespace Simd
 		{
 			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
 
-			unsigned short isr0, isr1, isrp;
+			Buffer buffer(dstWidth + 1);
 
-			SIMD_ARRAY(ushort, isc0, dstWidth + 1);
-			SIMD_ARRAY(ushort, isc1, dstWidth + 1);
-			SIMD_ARRAY(ushort, iscp, dstWidth + 1);
+			unsigned short isr0, isr1, isrp;
 
 			const short zeroPixel = 0;
 
@@ -140,8 +164,8 @@ namespace Simd
 
 					if (evenX)
 					{
-						isc0[dstx] = isr1 + 6*isr0 + isrp + icurrent;
-						isc1[dstx] = 5*isc0[dstx];
+						buffer.isc0[dstx] = isr1 + 6*isr0 + isrp + icurrent;
+						buffer.isc1[dstx] = 5*buffer.isc0[dstx];
 						isr1 = isr0 + isrp;
 						isr0 = icurrent;
 					}
@@ -158,14 +182,14 @@ namespace Simd
 				{
 					// previous srcx was even
 					++dstx;
-					isc0[dstx] = isr1 + 11*isr0;
-					isc1[dstx] = 5*isc0[dstx];
+					buffer.isc0[dstx] = isr1 + 11*isr0;
+					buffer.isc1[dstx] = 5*buffer.isc0[dstx];
 				}
 				else 
 				{
 					// previous srcx was odd
-					isc0[dstx] = isr1 + 6*isr0 + isrp + (isrp >> 2);
-					isc1[dstx] = 5*isc0[dstx];
+					buffer.isc0[dstx] = isr1 + 6*isr0 + isrp + (isrp >> 2);
+					buffer.isc1[dstx] = 5*buffer.isc0[dstx];
 				}
 			}
 			sy += srcStride;
@@ -188,9 +212,9 @@ namespace Simd
 						++sx;
 						dx = dy;
 
-						register unsigned short * p_isc0 = isc0;
-						register unsigned short * p_isc1 = isc1;
-						register unsigned short * p_iscp = iscp;
+						register unsigned short * p_isc0 = buffer.isc0;
+						register unsigned short * p_isc1 = buffer.isc1;
+						register unsigned short * p_iscp = buffer.iscp;
 
 						// Main entries in row
 						for (evenX = false, srcx = 1, dstx = 0; srcx < (srcWidth - 1); srcx+=2, ++sx)
@@ -214,7 +238,7 @@ namespace Simd
 							*dx = DivideBy256<compensation>(ip);
 							++dx;
 						}		
-						dstx += p_isc0 - isc0;
+						dstx += p_isc0 - buffer.isc0;
 
 						//doing the last operation due to even number of operations in previous cycle
 						if (!(srcWidth&1))
@@ -233,20 +257,20 @@ namespace Simd
 							++dstx;
 
 							unsigned short ip;
-							ip = isc1[dstx] + 6*isc0[dstx] + iscp[dstx];
-							isc1[dstx] = isc0[dstx] + iscp[dstx];
-							isc0[dstx] = isr1 + 11*isr0;
-							ip = ip + isc0[dstx];
+							ip = buffer.isc1[dstx] + 6*buffer.isc0[dstx] + buffer.iscp[dstx];
+							buffer.isc1[dstx] = buffer.isc0[dstx] + buffer.iscp[dstx];
+							buffer.isc0[dstx] = isr1 + 11*isr0;
+							ip = ip + buffer.isc0[dstx];
 							*dx = DivideBy256<compensation>(ip);
 						}
 						else
 						{
 							// Previous srcx was odd
 							unsigned short ip;
-							ip = isc1[dstx] + 6*isc0[dstx] + iscp[dstx];
-							isc1[dstx] = isc0[dstx] + iscp[dstx];
-							isc0[dstx] = isr1 + 6*isr0 + isrp + (isrp >> 2);
-							ip = ip + isc0[dstx];
+							ip = buffer.isc1[dstx] + 6*buffer.isc0[dstx] + buffer.iscp[dstx];
+							buffer.isc1[dstx] = buffer.isc0[dstx] + buffer.iscp[dstx];
+							buffer.isc0[dstx] = isr1 + 6*isr0 + isrp + (isrp >> 2);
+							ip = ip + buffer.isc0[dstx];
 							*dx = DivideBy256<compensation>(ip);
 						}
 
@@ -261,7 +285,7 @@ namespace Simd
 						++sx;
 
 						// Main entries in odd-numbered row
-						register unsigned short * p_iscp = iscp;
+						register unsigned short * p_iscp = buffer.iscp;
 
 						for (evenX = false, srcx = 1, dstx = 0; srcx < (srcWidth - 1); srcx += 2, ++sx)
 						{
@@ -276,7 +300,7 @@ namespace Simd
 							isr1 = isr0 + isrp;
 							isr0 = icurrent;							
 						}
-						dstx += p_iscp - iscp;
+						dstx += p_iscp - buffer.iscp;
 
 						//doing the last operation due to even number of operations in previous cycle
 						if (!(srcWidth&1))
@@ -293,11 +317,11 @@ namespace Simd
 						{
 							// previous srcx was even
 							++dstx;
-							iscp[dstx] = (isr1 + 11*isr0) * 4;
+							buffer.iscp[dstx] = (isr1 + 11*isr0) * 4;
 						}
 						else 
 						{
-							iscp[dstx] = (isr1 + 6*isr0 + isrp + (isrp >> 2)) * 4;
+							buffer.iscp[dstx] = (isr1 + 6*isr0 + isrp + (isrp >> 2)) * 4;
 						}
 					}
 					evenY = !evenY;
@@ -309,18 +333,14 @@ namespace Simd
 				if (!evenY) 
 				{
 					for (dstx = 1, dx = dy; dstx < (dstWidth + 1); ++dstx, ++dx) 
-						*dx = DivideBy256<compensation>(isc1[dstx] + 11*isc0[dstx]);
+						*dx = DivideBy256<compensation>(buffer.isc1[dstx] + 11*buffer.isc0[dstx]);
 				}
 				else
 				{
 					for (dstx = 1, dx = dy; dstx < (dstWidth + 1); ++dstx, ++dx) 
-						*dx = DivideBy256<compensation>(isc1[dstx] + 6*isc0[dstx] + iscp[dstx] + (iscp[dstx] >> 2));
+						*dx = DivideBy256<compensation>(buffer.isc1[dstx] + 6*buffer.isc0[dstx] + buffer.iscp[dstx] + (buffer.iscp[dstx] >> 2));
 				}
 			}
-
-			SIMD_FREE(isc0);
-			SIMD_FREE(isc1);
-			SIMD_FREE(iscp);
 		}
 
 		void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
@@ -342,8 +362,8 @@ namespace Simd
 			{
 				Buffer(size_t width)
 				{
-					p = (ushort*)Allocate(sizeof(ushort)*(5*width + A));
-					in0 = p;
+					_p = Allocate(sizeof(ushort)*(5*width + A));
+					in0 = (ushort*)_p;
 					in1 = in0 + width;
 					out0 = in1 + width;
 					out1 = out0 + width;
@@ -352,7 +372,7 @@ namespace Simd
 
 				~Buffer()
 				{
-					Free(p);
+					Free(_p);
 				}
 
 				ushort * in0;
@@ -361,7 +381,7 @@ namespace Simd
 				ushort * out1;
 				ushort * dst;
 			private:
-				ushort *p;
+				void *_p;
 			};	
 		}
 

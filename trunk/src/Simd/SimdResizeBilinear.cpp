@@ -76,6 +76,32 @@ namespace Simd
 
 	namespace Base
 	{
+		namespace 
+		{
+			struct Buffer
+			{
+				Buffer(size_t width, size_t height)
+				{
+					_p = Allocate(sizeof(IndexAlpha)*(width + height) + sizeof(int)*2*width);
+					iax = (IndexAlpha*)_p;
+					iay = iax + width;
+					pbx[0] = (int*)(iay + height);
+					pbx[1] = pbx[0] + width;
+				}
+
+				~Buffer()
+				{
+					Free(_p);
+				}
+
+				IndexAlpha * iax;
+				IndexAlpha * iay;
+				int * pbx[2];
+			private:
+				void *_p;
+			};
+		}
+
 		template <size_t CHANNEL_COUNT>
 		void ResizeBilinear(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -83,30 +109,25 @@ namespace Simd
 		{
 			size_t dstRowSize = CHANNEL_COUNT*dstWidth;
 
-			SIMD_ARRAY(IndexAlpha, iax, dstRowSize);
-			SIMD_ARRAY(IndexAlpha, iay, dstHeight);
+			Buffer buffer(dstRowSize, dstHeight);
 
-			int *pbx[2];
-			pbx[0] = SIMD_ALLOCATE(int, dstRowSize);
-			pbx[1] = SIMD_ALLOCATE(int, dstRowSize);
+			EstimateAlphaIndex<1>(srcHeight, dstHeight, buffer.iay);
 
-			EstimateAlphaIndex<1>(srcHeight, dstHeight, iay);
-
-			EstimateAlphaIndex<CHANNEL_COUNT>(srcWidth, dstWidth, iax);
+			EstimateAlphaIndex<CHANNEL_COUNT>(srcWidth, dstWidth, buffer.iax);
 
 			ptrdiff_t previous = -2;
 
 			for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
 			{
-				int fy = iay[yDst].alpha;                            
-				size_t sy = iay[yDst].index;
+				int fy = buffer.iay[yDst].alpha;                            
+				size_t sy = buffer.iay[yDst].index;
 				int k = 0;
 
 				if(sy == previous)
 					k = 2;
 				else if(sy == previous + 1)
 				{
-					Swap(pbx[0], pbx[1]);
+					Swap(buffer.pbx[0], buffer.pbx[1]);
 					k = 1;
 				}
 
@@ -114,12 +135,12 @@ namespace Simd
 
 				for(; k < 2; k++)
 				{
-					int* pb = pbx[k];
+					int* pb = buffer.pbx[k];
 					const uchar* ps = src + (sy + k)*srcStride;                                                
 					for(size_t x = 0; x < dstRowSize; x++)
 					{
-						size_t sx = iax[x].index;
-						int fx = iax[x].alpha;
+						size_t sx = buffer.iax[x].index;
+						int fx = buffer.iax[x].alpha;
 						int t = ps[sx];
 						pb[x] = (t << FRACTION_SHIFT) + (ps[sx + CHANNEL_COUNT] - t)*fx; 
 					}
@@ -127,24 +148,19 @@ namespace Simd
 
 				if(fy == 0)
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
-						dst[xDst] = ((pbx[0][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						dst[xDst] = ((buffer.pbx[0][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
 				else if(fy == FRACTION_RANGE)
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
-						dst[xDst] = ((pbx[1][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						dst[xDst] = ((buffer.pbx[1][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
 				else
 				{
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
 					{
-						int t = pbx[0][xDst];
-						dst[xDst] = ((t << FRACTION_SHIFT) + (pbx[1][xDst] - t)*fy + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						int t = buffer.pbx[0][xDst];
+						dst[xDst] = ((t << FRACTION_SHIFT) + (buffer.pbx[1][xDst] - t)*fy + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
 					}
 				}
 			}
-
-			SIMD_FREE(iax);
-			SIMD_FREE(iay);
-			SIMD_FREE(pbx[0]);
-			SIMD_FREE(pbx[1]);
 		}
 
 		void ResizeBilinear(
@@ -171,6 +187,34 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
+		namespace 
+		{
+			struct Buffer
+			{
+				Buffer(size_t width, size_t height)
+				{
+					_p = Allocate(sizeof(IndexAlpha)*height + sizeof(size_t)*width + sizeof(short)*4*width);
+					iay = (IndexAlpha*)_p;
+					ix = (size_t*)(iay + height);
+					ax = (short*)(ix + width);
+					pbx[0] = ax + 2*width;
+					pbx[1] = pbx[0] + width;
+				}
+
+				~Buffer()
+				{
+					Free(_p);
+				}
+
+				IndexAlpha * iay;
+				size_t * ix;
+				short * ax;
+				short * pbx[2];
+			private:
+				void *_p;
+			};
+		}
+
 		const __m128i K16_FRACTION_ROUND_TERM = SIMD_MM_SET1_EPI16(FRACTION_ROUND_TERM);
 
 		void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, size_t * indexes, short *alphas)
@@ -223,19 +267,14 @@ namespace Simd
 		{
 			assert(dstWidth >= A);
 			
-			SIMD_ARRAY(IndexAlpha, iay, dstHeight);
-			EstimateAlphaIndex<1>(srcHeight, dstHeight, iay);
-
 			size_t bufferWidth = AlignHi(dstWidth, HA);
 			size_t alignedWidth = bufferWidth - HA;
 
-			SIMD_ARRAY(size_t, ix, bufferWidth);
-			SIMD_ARRAY(short, ax, 2*bufferWidth);
-			EstimateAlphaIndexX(srcWidth, dstWidth, ix, ax);
+			Buffer buffer(bufferWidth, dstHeight);
 
-			short *pbx[2];
-			pbx[0] = SIMD_ALLOCATE(short, bufferWidth);
-			pbx[1] = SIMD_ALLOCATE(short, bufferWidth);
+			EstimateAlphaIndex<1>(srcHeight, dstHeight, buffer.iay);
+
+			EstimateAlphaIndexX(srcWidth, dstWidth, buffer.ix, buffer.ax);
 
 			ptrdiff_t previous = -2;
 
@@ -243,17 +282,17 @@ namespace Simd
 
 			for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
 			{
-				a[0] = _mm_set1_epi16(short(FRACTION_RANGE - iay[yDst].alpha));
-				a[1] = _mm_set1_epi16(short(iay[yDst].alpha));
+				a[0] = _mm_set1_epi16(short(FRACTION_RANGE - buffer.iay[yDst].alpha));
+				a[1] = _mm_set1_epi16(short(buffer.iay[yDst].alpha));
 
-				size_t sy = iay[yDst].index;
+				size_t sy = buffer.iay[yDst].index;
 				int k = 0;
 
 				if(sy == previous)
 					k = 2;
 				else if(sy == previous + 1)
 				{
-					Base::Swap(pbx[0], pbx[1]);
+					Base::Swap(buffer.pbx[0], buffer.pbx[1]);
 					k = 1;
 				}
 
@@ -261,34 +300,28 @@ namespace Simd
 
 				for(; k < 2; k++)
 				{
-					short* pb = pbx[k];
+					short* pb = buffer.pbx[k];
 					const uchar* ps = src + (sy + k)*srcStride;                                                
 					for(size_t x = 0; x < dstWidth; x++)
-						pb[x] = *(short*)(ps + ix[x]);
+						pb[x] = *(short*)(ps + buffer.ix[x]);
 
 					for(size_t i = 0; i < bufferWidth; i += HA)
 					{
-						InterpolateX(pb + i, ax + 2*i, pb + i);
+						InterpolateX(pb + i, buffer.ax + 2*i, pb + i);
 					}
 				}
 
 				for(size_t i = 0; i < alignedWidth; i += HA)
 				{
-					s[0] = _mm_load_si128((__m128i*)(pbx[0] + i));
-					s[1] = _mm_load_si128((__m128i*)(pbx[1] + i));
+					s[0] = _mm_load_si128((__m128i*)(buffer.pbx[0] + i));
+					s[1] = _mm_load_si128((__m128i*)(buffer.pbx[1] + i));
 					InterpolateY(s, a, dst + i);
 				}
 
-				s[0] = _mm_loadu_si128((__m128i*)(pbx[0] + dstWidth - HA));
-				s[1] = _mm_loadu_si128((__m128i*)(pbx[1] + dstWidth - HA));
+				s[0] = _mm_loadu_si128((__m128i*)(buffer.pbx[0] + dstWidth - HA));
+				s[1] = _mm_loadu_si128((__m128i*)(buffer.pbx[1] + dstWidth - HA));
 				InterpolateY(s, a, dst + dstWidth - HA);
 			}
-
-			SIMD_FREE(ix);
-			SIMD_FREE(ax);
-			SIMD_FREE(iay);
-			SIMD_FREE(pbx[0]);
-			SIMD_FREE(pbx[1]);
 		}
 	}
 #endif//SIMD_SSE2_ENABLE
