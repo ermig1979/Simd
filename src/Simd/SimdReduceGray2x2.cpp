@@ -167,4 +167,11 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
             Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     }
+
+	void ReduceGray2x2(const View & src, View & dst)
+	{
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
+
+		ReduceGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
+	}
 }

@@ -26,9 +26,6 @@
     <ClCompile Include="..\..\src\Test\TestUtils.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Test\TestView.cpp">
-      <Filter>Sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Test\TestFilter.cpp">
       <Filter>Test</Filter>
     </ClCompile>
@@ -59,9 +56,6 @@
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestUtils.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestView.h">
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestFilter.h">

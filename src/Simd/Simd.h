@@ -35,6 +35,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdView.h"
 
 #include "Simd/SimdBgrToGray.h"
 #include "Simd/SimdBgrToBgra.h"

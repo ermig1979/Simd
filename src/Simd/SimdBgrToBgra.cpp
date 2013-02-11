@@ -72,4 +72,12 @@ namespace Simd
             BgrToBgra(bgr, width, bgra, true, true);
         }
     }
+
+	void BgrToBgra(const View & bgr, View & bgra)
+	{
+		assert(bgra.width == bgr.width && bgra.height == bgr.height);
+		assert(bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
+
+		BgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride);
+	}
 }

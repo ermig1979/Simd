@@ -1,5 +1,5 @@
 /*
-* Simd Library Tests.
+* Simd Library.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,9 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Test/TestView.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdView.h"
 
-namespace Test
+namespace Simd
 {
     size_t View::SizeOf(Format format)
     {
@@ -32,7 +33,6 @@ namespace Test
         case None:
             return 0;
         case Gray8:
-        case Bayer8:
             return 1;
         case Bgr24:
             return 3;
@@ -64,12 +64,12 @@ namespace Test
         format = f;
         if(d)
         {
-            data = (unsigned char*)d;
+            data = (uchar*)d;
             _owner = false;
         }
         else
         {
-            data = (unsigned char*)Simd::Allocate(height*stride);
+            data = (uchar*)Allocate(height*stride);
             _owner = true;
         }
     }
@@ -79,15 +79,15 @@ namespace Test
         width = w;
         height = h;
         format = f;
-        stride = Simd::AlignHi(width*SizeOf(format), align);
+        stride = AlignHi(width*SizeOf(format), align);
         if(d)
         {
-            data = (unsigned char*)Simd::AlignHi(d, align);
+            data = (uchar*)AlignHi(d, align);
             _owner = false;
         }
         else
         {
-            data = (unsigned char*)Simd::Allocate(height*stride, align);
+            data = (uchar*)Allocate(height*stride, align);
             _owner = true;
         }
     }
@@ -96,7 +96,7 @@ namespace Test
     {
         if(_owner && data)
         {
-            Simd::Free(data);
+            Free(data);
         }
     }
 
@@ -104,10 +104,10 @@ namespace Test
     {
         if(data != NULL && right >= left && bottom >= top)
         {
-			left = Simd::Base::Max((int)left, 0);
-            top = Simd::Base::Max((int)top, 0);
-            right = Simd::Base::Min((int)right, (int)width);
-            bottom = Simd::Base::Min((int)bottom, (int)height);
+			left = Base::RestrictRange((int)left, 0, (int)width);
+			top = Base::RestrictRange((int)top, 0, (int)height);
+			right = Base::RestrictRange((int)right, 0, (int)width);
+			bottom = Base::RestrictRange((int)bottom, 0, (int)height);
             return View(right - left, bottom - top, stride, format, data + top*stride + left*SizeOf(format));
         }
         else

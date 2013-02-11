@@ -45,6 +45,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
+    <ClInclude Include="..\..\src\Simd\SimdView.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToHue.h" />
@@ -65,6 +66,7 @@
     <ClCompile Include="..\..\src\Simd\SimdReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdView.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToHue.cpp" />

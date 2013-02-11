@@ -24,7 +24,7 @@
 #ifndef __SimdMedianFilterSquare3x3_h__
 #define __SimdMedianFilterSquare3x3_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
@@ -44,5 +44,7 @@ namespace Simd
 
 	void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
 		size_t channelCount, uchar * dst, size_t dstStride);
+
+	void MedianFilterSquare3x3(const View & src, View & dst);
 }
 #endif//__SimdMedianFilterSquare3x3_h__

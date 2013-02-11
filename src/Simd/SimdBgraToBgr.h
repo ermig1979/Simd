@@ -24,13 +24,14 @@
 #ifndef __SimdBgraToBgr_h__
 #define __SimdBgraToBgr_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
 	namespace Base
 	{
 		void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow = true);
+
 		void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride);
 	}
 
@@ -38,5 +39,7 @@ namespace Simd
 	{
 		Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
 	}
+
+	void BgraToBgr(const View & bgra, View & bgr);
 }
 #endif//__SimdBgraToBgr_h__

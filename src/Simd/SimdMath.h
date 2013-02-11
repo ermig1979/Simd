@@ -33,6 +33,13 @@ namespace Simd
 {
     namespace Base
     {
+		template <class T> SIMD_INLINE void Swap(T & a, T & b)
+		{
+			T t = a;
+			a = b;
+			b = t;
+		}
+
         SIMD_INLINE int Min(int a, int b)
         {
             return a < b ? a : b;
@@ -43,6 +50,11 @@ namespace Simd
             return a > b ? a : b;
         }
 
+		SIMD_INLINE int RestrictRange(int value, int min = 0, int max = 255)
+		{
+			return Max(min, Min(max, value));
+		}
+
         SIMD_INLINE int Square(int a)
         {
             return a*a;
@@ -51,14 +63,6 @@ namespace Simd
         SIMD_INLINE int SquaredDifference(int a, int b)
         {
             return Square(a - b);
-        }
-
-        template <class T>
-        SIMD_INLINE void Swap(T &a, T &b)
-        {
-            T t = a;
-            a = b;
-            b = t;
         }
 
 		SIMD_INLINE void SortU8(int & a, int & b)

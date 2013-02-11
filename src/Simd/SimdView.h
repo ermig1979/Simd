@@ -1,5 +1,5 @@
 /*
-* Simd Library Tests.
+* Simd Library.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,12 +21,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __TestView_h__
-#define __TestView_h__
+#ifndef __SimdView_h__
+#define __SimdView_h__
 
-#include "Test/TestConfig.h"
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
 
-namespace Test
+namespace Simd
 {
     struct View
     {
@@ -34,7 +35,6 @@ namespace Test
         {
             None = 0,
             Gray8,
-            Bayer8,
             Bgr24,
             Bgra32,
             Int32,
@@ -46,11 +46,11 @@ namespace Test
         size_t height;
         ptrdiff_t stride;
         Format format;
-        unsigned char* data;
+        uchar * data;
 
         View(); 
         View(size_t w, size_t h, ptrdiff_t s, Format f, void* d); 
-        View(size_t w, size_t h, Format f, void* d, size_t align = Simd::DEFAULT_MEMORY_ALIGN);
+        View(size_t w, size_t h, Format f, void* d, size_t align = DEFAULT_MEMORY_ALIGN);
 
         ~View(); 
 
@@ -61,4 +61,4 @@ namespace Test
     };
 }
 
-#endif//__TestView_h__
+#endif//__SimdView_h__

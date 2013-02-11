@@ -24,7 +24,7 @@
 #ifndef __SimdReduceGray5x5_h__
 #define __SimdReduceGray5x5_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
@@ -37,10 +37,14 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
+		void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true);
 	}
 #endif// SIMD_SSE2_ENABLE
 
 	void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true);
+
+	void ReduceGray5x5(const View & src, View & dst, bool compensation = true);
 }
 #endif//__SimdReduceGray5x5_h__
