@@ -121,7 +121,7 @@ namespace Test
 
 #ifdef _DEBUG
 #define TEST_EXECUTE_AT_LEAST_MIN_TIME(test) \
-	test;
+	test; 
 #else
 #define TEST_EXECUTE_AT_LEAST_MIN_TIME(test) \
 { \

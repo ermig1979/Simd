@@ -65,6 +65,16 @@ namespace Simd
             return Square(a - b);
         }
 
+		SIMD_INLINE int Average(int a, int b)
+		{
+			return (a + b + 1) >> 1;
+		}
+
+		SIMD_INLINE int Average(int a, int b, int c, int d)
+		{
+			return (a + b + c + d + 2) >> 2;
+		}
+
 		SIMD_INLINE void SortU8(int & a, int & b)
 		{
 			int d = a - b;
@@ -97,6 +107,41 @@ namespace Simd
 			__m128i t = a;
 			a = _mm_min_epu8(t, b);
 			b = _mm_max_epu8(t, b);
+		}
+
+		SIMD_INLINE __m128i ShiftLeft(__m128i a, size_t shift)
+		{
+			__m128i t = a;
+			if(shift & 8)
+				t = _mm_slli_si128(t, 8);
+			if(shift & 4)
+				t = _mm_slli_si128(t, 4);
+			if(shift & 2)
+				t = _mm_slli_si128(t, 2);
+			if(shift & 1)
+				t = _mm_slli_si128(t, 1);
+			return t;
+		}
+
+		SIMD_INLINE __m128i ShiftRight(__m128i a, size_t shift)
+		{
+			__m128i t = a;
+			if(shift & 8)
+				t = _mm_srli_si128(t, 8);
+			if(shift & 4)
+				t = _mm_srli_si128(t, 4);
+			if(shift & 2)
+				t = _mm_srli_si128(t, 2);
+			if(shift & 1)
+				t = _mm_srli_si128(t, 1);
+			return t;
+		}
+
+		SIMD_INLINE __m128i HorizontalSum32(__m128i a)
+		{
+			return _mm_add_epi64(
+				_mm_and_si128(a, K64_00000000FFFFFFFF), 
+				_mm_and_si128(_mm_srli_si128(a, 4), K64_00000000FFFFFFFF));
 		}
 	}
 #endif// SIMD_SSE2_ENABLE

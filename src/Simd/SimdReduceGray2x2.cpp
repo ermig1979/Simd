@@ -79,83 +79,57 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        void ReduceGray2x2A(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride));
-            assert(Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride));
-            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
+		template <bool align> void ReduceGray2x2(
+			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+		{
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+			if(align)
+			{
+				assert(Aligned(src) && Aligned(srcStride));
+				assert(Aligned(dst) && Aligned(dstStride));
+			}
 
-            for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
-            {
-                const __m128i *s0 = (__m128i*)src;
-                const __m128i *s1 = (__m128i*)(srcRow == srcHeight - 1 ? src : src + srcStride);
-                const __m128i *end = (__m128i*)(src + srcWidth);
-                __m128i *d = (__m128i*)dst;
-                for(; s0 < end; s0 += 2, s1 += 2, d += 1)
-                {
-                    _mm_store_si128(d, Average8(s0[0], s0[1], s1[0], s1[1]));
-                }
-                src += 2*srcStride;
-                dst += dstStride;
-            }
-        }
-
-        SIMD_INLINE void AverageU(const uchar * src0, const uchar * src1, uchar * dst)
-        {
-            const __m128i s0 = _mm_loadu_si128((__m128i*)src0);
-            const __m128i s1 = _mm_loadu_si128((__m128i*)src1);
-            const __m128i d = Average16(
-                _mm_and_si128(s0, K16_00FF), 
-                _mm_and_si128(_mm_srli_si128(s0, 1), K16_00FF),                
-                _mm_and_si128(s1, K16_00FF), 
-                _mm_and_si128(_mm_srli_si128(s1, 1), K16_00FF));
-            _mm_storel_epi64((__m128i*)dst, _mm_packus_epi16(d, K_ZERO));
-        }
-
-        void ReduceGray2x2U(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
-
-            size_t alignedWidth = AlignLo(srcWidth, A);
-            size_t evenWidth = AlignLo(srcWidth, 2);
-            for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
-            {
-                const uchar *src0 = src;
-                const uchar *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                size_t srcOffset = 0, dstOffset = 0;
-                for(; srcOffset < alignedWidth; srcOffset += A, dstOffset += HA)
-                {
-                    AverageU(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
-                }
-                if(alignedWidth != srcWidth)
-                {
-                    dstOffset = dstWidth - HA - (evenWidth != srcWidth ? 1 : 0);
-                    srcOffset = evenWidth - A;
-                    AverageU(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
-                    if(evenWidth != srcWidth)
-                    {
-                        dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
-                    }
-                }
-                src += 2*srcStride;
-                dst += dstStride;
-            }
-        }
+			size_t alignedWidth = AlignLo(srcWidth, DA);
+			size_t evenWidth = AlignLo(srcWidth, 2);
+			for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
+			{
+				const uchar *src0 = src;
+				const uchar *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
+				size_t srcOffset = 0, dstOffset = 0;
+				for(; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
+				{
+					Store<align>((__m128i*)(dst + dstOffset), Average8(
+						Load<align>((__m128i*)(src0 + srcOffset)), Load<align>((__m128i*)(src0 + srcOffset + A)), 
+						Load<align>((__m128i*)(src1 + srcOffset)), Load<align>((__m128i*)(src1 + srcOffset + A))));
+				}
+				if(alignedWidth != srcWidth)
+				{
+					dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
+					srcOffset = evenWidth - DA;
+					Store<align>((__m128i*)(dst + dstOffset), Average8(
+						Load<align>((__m128i*)(src0 + srcOffset)), Load<align>((__m128i*)(src0 + srcOffset + A)), 
+						Load<align>((__m128i*)(src1 + srcOffset)), Load<align>((__m128i*)(src1 + srcOffset + A))));
+					if(evenWidth != srcWidth)
+					{
+						dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
+					}
+				}
+				src += 2*srcStride;
+				dst += dstStride;
+			}
+		}
 
 		void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
 			if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
-				ReduceGray2x2A(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+				ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 			else
-				ReduceGray2x2U(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+				ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-    ReduceGray2x2Ptr ReduceGray2x2A = SIMD_SSE2_INIT_FUNCTION_PTR(ReduceGray2x2Ptr, Sse2::ReduceGray2x2A, Base::ReduceGray2x2);
 
     void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)

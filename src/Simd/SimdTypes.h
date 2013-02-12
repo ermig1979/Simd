@@ -26,8 +26,6 @@
 
 #include "Simd/SimdDefs.h"
 
-namespace Simd
-{
 #ifdef SIMD_OWN_STDINT
 #if (_MSC_VER < 1300)
 	typedef signed char       int8_t;
@@ -47,7 +45,9 @@ namespace Simd
 	typedef signed __int64    int64_t;
 	typedef unsigned __int64  uint64_t;
 #endif//SIMD_OWN_STDINT
-
+	
+namespace Simd
+{
 	typedef unsigned char uchar;
 	typedef unsigned short ushort;
 	typedef unsigned int uint;

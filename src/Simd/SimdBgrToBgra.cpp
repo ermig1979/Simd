@@ -30,20 +30,21 @@ namespace Simd
 {
     namespace Base
     {
-        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha, bool lastRow)
+        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha, bool lastRow, uchar alpha)
         {
             if(fillAlpha)
             {
+				const int32_t alphaMask = alpha << 24;
                 for(size_t i = (lastRow ? 1 : 0); i < size; ++i, bgr += 3, bgra += 4)
                 {
-                    *(int32_t*)bgra = (*(int32_t*)bgr) | 0xFF000000;
+                    *(int32_t*)bgra = (*(int32_t*)bgr) | alphaMask;
                 }
                 if(lastRow)
                 {
                     bgra[0] = bgr[0];
                     bgra[1] = bgr[1];
                     bgra[2] = bgr[2];
-                    bgra[3] = 0xFF;
+                    bgra[3] = alpha;
                 }
             }
             else
@@ -61,23 +62,28 @@ namespace Simd
             }
         }
 
-        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride)
+        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha)
         {
             for(size_t row = 1; row < height; ++row)
             {
-                BgrToBgra(bgr, width, bgra, true, false);
+                BgrToBgra(bgr, width, bgra, true, false, alpha);
                 bgr += bgrStride;
                 bgra += bgraStride;
             }
-            BgrToBgra(bgr, width, bgra, true, true);
+            BgrToBgra(bgr, width, bgra, true, true, alpha);
         }
     }
 
-	void BgrToBgra(const View & bgr, View & bgra)
+	void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha)
+	{
+		Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+	}
+
+	void BgrToBgra(const View & bgr, View & bgra, uchar alpha)
 	{
 		assert(bgra.width == bgr.width && bgra.height == bgr.height);
 		assert(bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
 
-		BgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride);
+		BgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride, alpha);
 	}
 }

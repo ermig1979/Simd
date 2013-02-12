@@ -1,5 +1,5 @@
 /*
-* Simd Library.
+* Simd Library Tests.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,31 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdReduceGray2x2_h__
-#define __SimdReduceGray2x2_h__
+#ifndef __TestDifferenceSum_h__
+#define __TestDifferenceSum_h__
 
-#include "Simd/SimdMath.h"
-#include "Simd/SimdView.h"
-
-namespace Simd
+namespace Test
 {
-    namespace Base
-    {
-        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
+	bool SquareDifferenceSumTest();
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-		void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+	bool MaskedSquareDifferenceSumTest();
 }
-#endif// SIMD_SSE2_ENABLE
 
-    void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-	void ReduceGray2x2(const View & src, View & dst);
-}
-#endif//__SimdReduceGray2x2_h__
+#endif//__TestDifferenceSum_h__

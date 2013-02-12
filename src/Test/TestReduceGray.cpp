@@ -100,12 +100,6 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && ReduceGrayTest(W, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::Sse2::ReduceGray2x2A));
-		result = result && ReduceGrayTest(W, H + 1, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::Sse2::ReduceGray2x2A));
-
-		result = result && ReduceGrayTest(W + 3, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::Sse2::ReduceGray2x2));
-		result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::Sse2::ReduceGray2x2));
-
 		result = result && ReduceGrayTest(W + 3, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::ReduceGray2x2));
 		result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::ReduceGray2x2));
 		result = result && ReduceGrayTest(W, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(Simd::ReduceGray2x2));

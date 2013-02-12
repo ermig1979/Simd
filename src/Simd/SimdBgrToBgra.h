@@ -30,15 +30,13 @@ namespace Simd
 {
     namespace Base
     {
-        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha = true, bool lastRow = true);
-        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride);
+        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha = true, bool lastRow = true, uchar alpha = 0xFF);
+
+        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
     }
 
-    SIMD_INLINE void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride)
-    {
-        Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride);
-    }
+    void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
 
-	void BgrToBgra(const View & bgr, View & bgra);
+	void BgrToBgra(const View & bgr, View & bgra, uchar alpha = 0xFF);
 }
 #endif//__SimdBgrToBgra_h__

@@ -80,7 +80,7 @@ namespace Test
 		std::vector<unsigned char> data(W*H - 1);
         SetRandom(&data[0], data.size());
 
-        result = result && Crc32Test(data, FUNC(Simd::Base::Crc32), FUNC(Simd::Sse42::Crc32));
+        result = result && Crc32Test(data, FUNC(Simd::Base::Crc32), FUNC(Simd::Crc32));
 
         return result;
     }

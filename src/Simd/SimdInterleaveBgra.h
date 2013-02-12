@@ -53,17 +53,15 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-    typedef void (*FlatInterleaveBgraFromIntBgrPtr)(
-        uchar *bgra, size_t size, 
-        const int *blue, int bluePrecision, bool blueSigned, 
-        const int *green, int greenPrecision, bool greenSigned,
-        const int *red, int redPrecision, bool redSigned,
-        uchar alpha);
-    extern FlatInterleaveBgraFromIntBgrPtr FlatInterleaveBgraFromIntBgrA;
+	void InterleaveBgra(
+		uchar *bgra, size_t size, 
+		const int *blue, int bluePrecision, bool blueSigned, 
+		const int *green, int greenPrecision, bool greenSigned,
+		const int *red, int redPrecision, bool redSigned,
+		uchar alpha = 0xFF);
 
-    typedef void (*FlatInterleaveBgraFromIntGrayPtr)(uchar *bgra, size_t size, 
-        const int *gray, int grayPrecision, bool graySigned, 
-        uchar alpha);
-    extern FlatInterleaveBgraFromIntGrayPtr FlatInterleaveBgraFromIntGrayA;
+	void InterleaveBgra(uchar *bgra, size_t size, 
+		const int *gray, int grayPrecision, bool graySigned, 
+		uchar alpha = 0xFF);
 }
 #endif//__SimdInterleaveBgra_h__

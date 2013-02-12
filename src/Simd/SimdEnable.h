@@ -36,15 +36,6 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-    
-#define SIMD_SSE2_INIT_FUNCTION_PTR(type, sse2, base) \
-    (Simd::Sse2::Enable ? (type)(sse2) : (type)(base))
-
-#else// SIMD_SSE2_ENABLE
-
-#define SIMD_SSE2_INIT_FUNCTION_PTR(type, sse2, base) \
-    (type)(base)
-
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE42_ENABLE
@@ -55,15 +46,6 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-
-#define SIMD_SSE42_INIT_FUNCTION_PTR(type, sse42, base) \
-    (Simd::Sse42::Enable ? (type)(sse42) : (type)(base))
-
-#else// SIMD_SSE42_ENABLE
-
-#define SIMD_SSE42_INIT_FUNCTION_PTR(type, sse2, base) \
-    (type)(base)
-
 #endif// SIMD_SSE42_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
@@ -74,15 +56,6 @@ namespace Simd
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
-
-#define SIMD_AVX_INIT_FUNCTION_PTR(type, avx, base) \
-	(Simd::Avx::Enable ? (type)(avx) : (type)(base))
-
-#else// SIMD_AVX_ENABLE
-
-#define SIMD_AVX_INIT_FUNCTION_PTR(type, avx, base) \
-	(type)(base)
-
 #endif// SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
@@ -93,15 +66,6 @@ namespace Simd
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
-
-#define SIMD_AVX2_INIT_FUNCTION_PTR(type, avx2, base) \
-	(Simd::Avx2::Enable ? (type)(avx2) : (type)(base))
-
-#else// SIMD_AVX2_ENABLE
-
-#define SIMD_AVX2_INIT_FUNCTION_PTR(type, avx2, base) \
-	(type)(base)
-
 #endif// SIMD_AVX2_ENABLE
 }
 #endif//__SimdEnable_h__
