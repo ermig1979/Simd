@@ -42,7 +42,6 @@ namespace Simd
                 RED_TO_GRAY_WEIGHT*red + BGR_TO_GRAY_ROUND_TERM) >> BGR_TO_GRAY_AVERAGING_SHIFT;
         }
 
-        void BgrToGray(const uchar *bgr, size_t size, uchar *gray);
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
     }
 

@@ -30,21 +30,15 @@ namespace Simd
 {
     namespace Base
     {
-        void BgraToGray(const uchar *bgra, size_t size, uchar *gray);
         void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
     }
     
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        void BgraToGrayA(const uchar *bgra, size_t size, uchar *gray);
-        void BgraToGrayU(const uchar *bgra, size_t size, uchar *gray);
         void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
     }
 #endif// SIMD_SSE2_ENABLE
-
-    typedef void (*FlatBgraToGrayPtr)(const uchar *bgra, size_t size, uchar *gray);
-    extern FlatBgraToGrayPtr FlatBgraToGrayA;
 
     void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
 

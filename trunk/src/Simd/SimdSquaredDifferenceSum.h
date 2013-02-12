@@ -24,29 +24,38 @@
 #ifndef __SimdSquaredDifferenceSum_h__
 #define __SimdSquaredDifferenceSum_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
     namespace Base
     {
-        int SquaredDifferenceSum32(const uchar *a, const uchar *b, size_t size);
-        int SquaredDifferenceSum32(const uchar *a, const uchar *b, const uchar *mask, size_t size);
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			size_t width, size_t height, uint64_t * sum);
+
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        int SquaredDifferenceSum32A(const uchar *a, const uchar *b, size_t size);
-        int SquaredDifferenceSum32A(const uchar *a, const uchar *b, const uchar *mask, size_t size);
-    }
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			size_t width, size_t height, uint64_t * sum);
+
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+}
 #endif// SIMD_SSE2_ENABLE
 
-    typedef int (*FlatSquaredDifferenceSum32Ptr)(const uchar *a, const uchar *b, size_t size);
-    extern FlatSquaredDifferenceSum32Ptr FlatSquaredDifferenceSum32A;
-    
-    typedef int (*FlatMaskedSquaredDifferenceSum32Ptr)(const uchar *a, const uchar *b, 
-        const uchar *mask, size_t size);
-    extern FlatMaskedSquaredDifferenceSum32Ptr FlatMaskedSquaredDifferenceSum32A;
+	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		size_t width, size_t height, uint64_t * sum);
+
+	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+
+	void SquaredDifferenceSum(const View & a, const View & b, uint64_t & sum);
+
+	void SquaredDifferenceSum(const View & a, const View & b, const View & mask, uint64_t & sum);
 }
 #endif//__SimdSquaredDifferenceSum_h__

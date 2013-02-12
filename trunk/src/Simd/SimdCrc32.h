@@ -40,7 +40,6 @@ namespace Simd
     }
 #endif// SIMD_SSE42_ENABLE
 
-    typedef uint (*Crc32Ptr)(const void * src, size_t size);
-    extern Crc32Ptr Crc32;
+	uint Crc32(const void * src, size_t size);
 }
 #endif//__SimdCrc32_h__

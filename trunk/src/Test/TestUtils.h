@@ -34,6 +34,8 @@ namespace Test
 	}
 
     void FillRandom(View & view);
+
+	void FillRandomMask(View & view);
     
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0);

@@ -40,6 +40,21 @@ namespace Test
         }
     }
 
+	void FillRandomMask(View & view)
+	{
+		assert(view.data);
+
+		size_t width = view.width*View::SizeOf(view.format);
+		for(size_t row = 0; row < view.height; ++row)
+		{
+			ptrdiff_t offset = row*view.stride;
+			for(size_t col = 0; col < width; ++col, ++offset)
+			{
+				view.data[offset] = Random(2) ? 0xFF : 0;
+			}
+		}
+	}
+
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle)
     {
         assert(a.data && b.data && a.height == b.height && a.width == b.width && a.format == b.format);

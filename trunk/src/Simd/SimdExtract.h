@@ -51,12 +51,19 @@ namespace Simd
 			return ExtractInt32<0>(a) + ExtractInt32<1>(a) + ExtractInt32<2>(a) + ExtractInt32<3>(a);
 		}
 
-#ifdef _M_X64
 		template <int index> SIMD_INLINE int64_t ExtractInt64(__m128i a)
 		{
-			return _mm_cvtsi128_si64(_mm_srli_si128(a, 8 * index))
+#ifdef _M_X64
+			return _mm_cvtsi128_si64(_mm_srli_si128(a, 8 * index));
+#else
+			return (int64_t)ExtractInt32<2*index + 1>(a)*0x100000000 + (uint32_t)ExtractInt32<2*index>(a);
+#endif
 		}
-#endif//_M_X64
+
+		SIMD_INLINE uint64_t ExtractInt64Sum(__m128i a)
+		{
+			return ExtractInt64<0>(a) + ExtractInt64<1>(a);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 }

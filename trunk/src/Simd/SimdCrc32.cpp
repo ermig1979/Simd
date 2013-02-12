@@ -113,5 +113,13 @@ namespace Simd
     }
 #endif// SIMD_SSE42_ENABLE
 
-    Crc32Ptr Crc32 = SIMD_SSE42_INIT_FUNCTION_PTR(Crc32Ptr, Sse42::Crc32, Base::Crc32);
+	uint Crc32(const void * src, size_t size)
+	{
+#ifdef SIMD_SSE42_ENABLE 
+		if(Sse42::Enable)
+			return Sse42::Crc32(src, size);
+		else
+#endif//SIMD_SSE42_ENABLE
+			return Base::Crc32(src, size);
+	}
 }

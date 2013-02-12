@@ -86,12 +86,6 @@ namespace Simd
 #define SIMD_MM_SETR_EPI32(a0, a1, a2, a3) \
     _mm_setr_epi32((int)(a0), (int)(a1), (int)(a2), (int)(a3))
 
-#define SIMD_MM_SET1_EPI64(a) \
-    _mm_set1_epi64((__m64)(a))
-
-#define SIMD_MM_SETR_EPI64(a0, a1) \
-    _mm_setr_epi64((__m64)(a0), (__m64)(a1))
-
 #define SIMD_MM_SET1_PS(a) \
 	_mm_set_ps1((float)(a))
 
@@ -99,13 +93,13 @@ namespace Simd
 	Simd::Sse2::_mm_set2_ps((float)(a0), (float)(a1))
 
 #define SIMD_MM_SETR_PS(a0, a1, a2, a3) \
-	_mm_setr_epi32((float)(a0), (float)(a1), (float)(a2), (float)(a3))
+	_mm_setr_ps((float)(a0), (float)(a1), (float)(a2), (float)(a3))
 
 #define SIMD_MM_SET1_PD(a) \
-	_mm_set1_epi64((double)(a))
+	_mm_set1_pd((double)(a))
 
 #define SIMD_MM_SETR_PD(a0, a1) \
-	_mm_setr_epi64((double)(a0), (double)(a1))
+	_mm_setr_pd((double)(a0), (double)(a1))
 
 #else //defined(_M_X64) || defined(__GNUC__)
 
@@ -117,12 +111,6 @@ namespace Simd
 #define SIMD_AS_4CHARS(a) \
     Simd::GetChar(int32_t(a), 0), Simd::GetChar(int32_t(a), 1), \
     Simd::GetChar(int32_t(a), 2), Simd::GetChar(int32_t(a), 3)
-
-#define SIMD_AS_8CHARS(a) \
-    Simd::GetChar(int64_t(a), 0), Simd::GetChar(int64_t(a), 1), \
-    Simd::GetChar(int64_t(a), 2), Simd::GetChar(int64_t(a), 3), \
-    Simd::GetChar(int64_t(a), 4), Simd::GetChar(int64_t(a), 5), \
-    Simd::GetChar(int64_t(a), 6), Simd::GetChar(int64_t(a), 7)
 
 #define SIMD_MM_SET1_EPI8(a) \
     {SIMD_AS_CHAR(a), SIMD_AS_CHAR(a), SIMD_AS_CHAR(a), SIMD_AS_CHAR(a), \
@@ -162,12 +150,6 @@ namespace Simd
 
 #define SIMD_MM_SETR_EPI32(a0, a1, a2, a3) \
     {SIMD_AS_4CHARS(a0), SIMD_AS_4CHARS(a1), SIMD_AS_4CHARS(a2), SIMD_AS_4CHARS(a3)}
-
-#define SIMD_MM_SET1_EPI64(a) \
-    {SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a)}
-
-#define SIMD_MM_SETR_EPI64(a0, a1) \
-    {SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1)}
 
 #define SIMD_MM_SET1_PS(a) \
 	{float(a), float(a), float(a), float(a)}

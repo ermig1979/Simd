@@ -33,23 +33,17 @@ namespace Simd
 {
     namespace Base
     {
-        void BgrToGray(const uchar *bgr, size_t size, uchar *gray)
-        {
-            const uchar *end = gray + size;
-            for(; gray < end; gray += 1, bgr += 3)
-            {
-                *gray = BgrToGray(bgr[0], bgr[1], bgr[2]);
-            }
-        }
-
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
         {
-            for(size_t row = 0; row < height; ++row)
-            {
-                BgrToGray(bgr, width, gray);
-                bgr += bgrStride;
-                gray += grayStride;
-            }
+			for(size_t row = 0; row < height; ++row)
+			{
+				const uchar * pBgr = bgr + row*bgrStride;
+				uchar * pGray = gray + row*grayStride;
+				for(const uchar *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgr += 3)
+				{
+					*pGray = BgrToGray(pBgr[0], pBgr[1], pBgr[2]);
+				}
+			}
         }
     }
 
@@ -82,30 +76,15 @@ namespace Simd
 
             Buffer buffer(width);
 
-            if(Aligned(gray) && Aligned(width))
-            {
-                for(size_t row = 1; row < height; ++row)
-                {
-                    Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
-                    Sse2::BgraToGrayA(buffer.bgra, width, gray);
-                    bgr += bgrStride;
-                    gray += grayStride;
-                }
-                Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
-                Sse2::BgraToGrayA(buffer.bgra, width, gray);
-            }
-            else
-            {
-                for(size_t row = 1; row < height; ++row)
-                {
-                    Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
-                    Sse2::BgraToGrayU(buffer.bgra, width, gray);
-                    bgr += bgrStride;
-                    gray += grayStride;
-                }
-                Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
-                Sse2::BgraToGrayU(buffer.bgra, width, gray);
-            }
+			for(size_t row = 1; row < height; ++row)
+			{
+				Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
+				Sse2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
+				bgr += bgrStride;
+				gray += grayStride;
+			}
+			Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
+			Sse2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
         }
     }
 #endif//SIMD_SSE2_ENABLE

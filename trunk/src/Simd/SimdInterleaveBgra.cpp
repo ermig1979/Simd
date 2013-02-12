@@ -37,8 +37,10 @@ namespace Simd
             const int *red, int redPrecision, bool redSigned,
             uchar alpha)
         {
-            assert(bluePrecision > 0 && greenPrecision > 0 && redPrecision > 0 && bluePrecision < 32 && greenPrecision < 32 && redPrecision < 32);
-            assert((bluePrecision >= 8 && greenPrecision >= 8 && redPrecision >= 8) || (bluePrecision <= 8 && greenPrecision <= 8 && redPrecision <= 8)); 
+            assert(bluePrecision > 0 && greenPrecision > 0 && redPrecision > 0 && 
+				bluePrecision < 32 && greenPrecision < 32 && redPrecision < 32);
+            assert((bluePrecision >= 8 && greenPrecision >= 8 && redPrecision >= 8) || 
+				(bluePrecision <= 8 && greenPrecision <= 8 && redPrecision <= 8)); 
  
             int blueAdjust = blueSigned ? 1 << (bluePrecision - 1) : 0;
             int greenAdjust = greenSigned ? 1 << (greenPrecision - 1) : 0;
@@ -111,9 +113,21 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-    FlatInterleaveBgraFromIntBgrPtr FlatInterleaveBgraFromIntBgrA = Base::InterleaveBgra;
-        //SIMD_INIT_FUNCTION_PTR(FlatInterleaveBgraFromIntBgrPtr, Sse2::InterleaveBgraA, Base::InterleaveBgra);
+	void InterleaveBgra(
+		uchar *bgra, size_t size, 
+		const int *blue, int bluePrecision, bool blueSigned, 
+		const int *green, int greenPrecision, bool greenSigned,
+		const int *red, int redPrecision, bool redSigned,
+		uchar alpha)
+	{
+		Base::InterleaveBgra(bgra, size, blue, bluePrecision, blueSigned, 
+			green, greenPrecision, greenSigned, red, redPrecision, redSigned, alpha);
+	}
 
-    FlatInterleaveBgraFromIntGrayPtr FlatInterleaveBgraFromIntGrayA = Base::InterleaveBgra;
-        //SIMD_INIT_FUNCTION_PTR(FlatInterleaveBgraFromIntGrayPtr, Sse2::InterleaveBgraA, Base::InterleaveBgra);
+	void InterleaveBgra(uchar *bgra, size_t size, 
+		const int *gray, int grayPrecision, bool graySigned, 
+		uchar alpha)
+	{
+		Base::InterleaveBgra(bgra, size, gray, grayPrecision, graySigned, alpha);
+	}
 }
