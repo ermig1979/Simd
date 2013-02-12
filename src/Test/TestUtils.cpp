@@ -25,42 +25,6 @@
 
 namespace Test
 {
-    void Copy(const View *pSrc, View *pDst)
-    {
-        assert(pSrc && pDst && pSrc->data && pDst->data);
-        assert(pSrc->format == pDst->format && pSrc->width == pDst->width && pSrc->height == pDst->height);
-
-        size_t size = pSrc->width*View::SizeOf(pSrc->format);
-        unsigned char *src = pSrc->data;
-        unsigned char *dst = pDst->data;
-        for(size_t row = 0; row < pSrc->height; ++row)
-        {
-            memcpy(dst, src, size);
-            src += pSrc->stride;
-            dst += pDst->stride;
-        }
-    }
-
-    void ResizeBilinear(const View *pSrc, View *pDst)
-    {
-        assert(pSrc && pDst && pSrc->data && pDst->data);
-        assert(pSrc->format == pDst->format && 
-            (pSrc->format == View::Gray8 || pSrc->format == View::Bgr24 || pSrc->format == View::Bgra32));
-        assert(pSrc->width && pDst->width && pSrc->height && pDst->height);
-
-        if(pSrc->width == pDst->width && pSrc->height == pDst->height)
-        {
-            Copy(pSrc, pDst);
-        }
-        else
-        {
-            Simd::ResizeBilinear(
-				pSrc->data, pSrc->width, pSrc->height, pSrc->stride, 
-				pDst->data, pDst->width, pDst->height, pDst->stride, 
-                View::SizeOf(pSrc->format));
-        }
-    }
-
     void FillRandom(View & view)
     {
         assert(view.data);

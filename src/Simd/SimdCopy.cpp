@@ -21,39 +21,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __Simd_h__
-#define __Simd_h__
+#include <memory.h>
 
-#include "Simd/SimdConfig.h"
-#include "Simd/SimdDefs.h"
-#include "Simd/SimdTypes.h"
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdLoad.h"
-#include "Simd/SimdStore.h"
-#include "Simd/SimdExtract.h"
-#include "Simd/SimdConst.h"
-#include "Simd/SimdMath.h"
-#include "Simd/SimdView.h"
-
-#include "Simd/SimdBgrToGray.h"
-#include "Simd/SimdBgrToBgra.h"
-#include "Simd/SimdBgraToGray.h"
-#include "Simd/SimdBgraToBgr.h"
-#include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdYuvToBgra.h"
-#include "Simd/SimdYuvToHue.h"
-#include "Simd/SimdSquaredDifferenceSum.h"
-#include "Simd/SimdReduceGray2x2.h"
-#include "Simd/SimdReduceGray3x3.h"
-#include "Simd/SimdReduceGray4x4.h"
-#include "Simd/SimdReduceGray5x5.h"
-#include "Simd/SimdInterleaveBgra.h"
-#include "Simd/SimdResizeBilinear.h"
-#include "Simd/SimdCrc32.h"
 #include "Simd/SimdCopy.h"
-#include "Simd/SimdMedianFilterSquare3x3.h"
-#include "Simd/SimdMedianFilterSquare5x5.h"
 
-#endif//__Simd_h__
+namespace Simd
+{
+	void Copy(const View & src, View & dst)
+	{
+		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
+
+		size_t rowSize = src.width*View::SizeOf(src.format);
+		uchar * srcData = src.data;
+		uchar * dstData = dst.data;
+		for(size_t row = 0; row < src.height; ++row)
+		{
+			memcpy(dstData, srcData, rowSize);
+			srcData += src.stride;
+			dstData += dst.stride;
+		}
+	}
+}

@@ -58,6 +58,9 @@
     <ClCompile Include="..\..\src\Simd\SimdView.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdCopy.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -149,6 +152,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdView.h">
       <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
+      <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

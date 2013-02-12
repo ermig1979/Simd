@@ -28,6 +28,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdResizeBilinear.h"
 
 namespace Simd
@@ -346,8 +347,15 @@ namespace Simd
 		assert(src.format == dst.format);
 		assert(src.format == View::Gray8 || src.format == View::Bgr24 || src.format == View::Bgra32);
 
-		ResizeBilinear(src.data, src.stride, src.width, src.height, 
-			dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
+		if(src.width == dst.width && src.height == dst.height)
+		{
+			Copy(src, dst);
+		}
+		else
+		{
+			ResizeBilinear(src.data, src.stride, src.width, src.height, 
+				dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
+		}
 	}
 }
 
