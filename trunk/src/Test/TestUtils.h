@@ -33,10 +33,6 @@ namespace Test
 		return (::rand()*range)/RAND_MAX;
 	}
 
-	void Copy(const View * pSrc, View * pDst);
-
-    void ResizeBilinear(const View *pSrc, View *pDst);
-
     void FillRandom(View & view);
     
     bool Compare(const View & a, const View & b, 

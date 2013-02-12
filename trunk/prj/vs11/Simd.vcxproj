@@ -26,6 +26,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCrc32.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
@@ -55,6 +56,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdCopy.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />

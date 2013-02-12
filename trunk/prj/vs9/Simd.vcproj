@@ -375,6 +375,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdCopy.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdCopy.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdCrc32.cpp"
 				>
 			</File>
