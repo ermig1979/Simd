@@ -46,6 +46,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
+    <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgra.h" />
@@ -154,6 +155,9 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent>
+      <Command>$(ProjectDir)\..\cmd\GetVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -172,6 +176,9 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent>
+      <Command>$(ProjectDir)\..\cmd\GetVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -194,6 +201,9 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent>
+      <Command>$(ProjectDir)\..\cmd\GetVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -216,6 +226,9 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent>
+      <Command>$(ProjectDir)\..\cmd\GetVersion.cmd</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

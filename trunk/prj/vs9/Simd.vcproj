@@ -28,6 +28,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(ProjectDir)\..\cmd\GetVersion.cmd"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -90,6 +91,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(ProjectDir)\..\cmd\GetVersion.cmd"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -154,6 +156,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(ProjectDir)\..\cmd\GetVersion.cmd"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -217,6 +220,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(ProjectDir)\..\cmd\GetVersion.cmd"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -328,6 +332,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\Simd\SimdTypes.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdVersion.h"
 				>
 			</File>
 			<File
