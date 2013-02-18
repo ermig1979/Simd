@@ -39,6 +39,8 @@ namespace Test
     
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0);
+
+	std::string ColorDescription(View::Format format);
 }
 
 #endif//__TestUtils_h__

@@ -102,4 +102,11 @@ namespace Test
         }
         return errorCount == 0;
     }
+
+	std::string ColorDescription(View::Format format)
+	{
+		std::stringstream ss;
+		ss << "<" << View::SizeOf(format) << ">";
+		return ss.str();
+	}
 }

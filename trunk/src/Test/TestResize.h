@@ -21,40 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __TestConfig_h__
-#define __TestConfig_h__
-
-#ifndef _DEBUG
-#define TEST_PERFORMANCE_TEST_ENABLE
-#endif
-
-#include <stdlib.h>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <sstream>
-
-#include "Simd/Simd.h"
+#ifndef __TestResize_h__
+#define __TestResize_h__
 
 namespace Test
 {
-	typedef Simd::uchar uchar;
-	typedef Simd::View View;
-
-#ifdef _DEBUG
-	const int W = 128;
-	const int H = 96;
-#else
-	const int W = 1920;
-	const int H = 1080;
-#endif
-
-	const double K = 0.1;
-
-	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+	bool ResizeBilinearTest();
 }
 
-#endif//__TestConfig_h__
+#endif//__TestResize_h__

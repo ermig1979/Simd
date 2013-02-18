@@ -195,11 +195,11 @@ namespace Simd
 				Buffer(size_t width, size_t height)
 				{
 					_p = Allocate(sizeof(IndexAlpha)*height + sizeof(size_t)*width + sizeof(short)*4*width);
-					iay = (IndexAlpha*)_p;
-					ix = (size_t*)(iay + height);
+					ix = (size_t*)_p;
 					ax = (short*)(ix + width);
 					pbx[0] = ax + 2*width;
 					pbx[1] = pbx[0] + width;
+					iay = (IndexAlpha*)(pbx[1] + width);
 				}
 
 				~Buffer()
@@ -207,10 +207,10 @@ namespace Simd
 					Free(_p);
 				}
 
-				IndexAlpha * iay;
 				size_t * ix;
 				short * ax;
 				short * pbx[2];
+				IndexAlpha * iay;
 			private:
 				void *_p;
 			};
