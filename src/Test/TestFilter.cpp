@@ -26,13 +26,6 @@
 
 namespace Test
 {
-	std::string ColorDescription(View::Format format)
-	{
-		std::stringstream ss;
-		ss << "<" << View::SizeOf(format) << ">";
-		return ss.str();
-	}	
-
 	namespace
 	{
 		struct Func
