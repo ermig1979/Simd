@@ -375,6 +375,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestDeinterleave.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestDeinterleave.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestDifferenceSum.cpp"
 				>
 			</File>

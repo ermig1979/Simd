@@ -34,6 +34,8 @@ namespace Simd
             return 0;
         case Gray8:
             return 1;
+		case Uv16:
+			return 2;
         case Bgr24:
             return 3;
         case Bgra32:

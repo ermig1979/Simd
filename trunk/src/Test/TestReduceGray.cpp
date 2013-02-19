@@ -84,8 +84,8 @@ namespace Test
 		View s(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
 		FillRandom(s);
 
-		View d1(reducedWidth, reducedHeight, View::Gray8, NULL);
-		View d2(reducedWidth, reducedHeight, View::Gray8, NULL);
+		View d1(reducedWidth, reducedHeight, View::Gray8, NULL, (reducedWidth%16 == 0 ? 16 : 1));
+		View d2(reducedWidth, reducedHeight, View::Gray8, NULL, (reducedWidth%16 == 0 ? 16 : 1));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 

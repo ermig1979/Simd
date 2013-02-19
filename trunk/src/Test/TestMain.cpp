@@ -32,6 +32,7 @@
 #include "Test/TestFilter.h"
 #include "Test/TestDifferenceSum.h"
 #include "Test/TestResize.h"
+#include "Test/TestDeinterleave.h"
 
 #define EXECUTE_TEST(test)\
 {\
@@ -71,6 +72,8 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::MaskedSquareDifferenceSumTest);
 
 	EXECUTE_TEST(Test::ResizeBilinearTest);
+
+	EXECUTE_TEST(Test::DeinterleaveUvTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

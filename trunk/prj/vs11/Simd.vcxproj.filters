@@ -61,6 +61,9 @@
     <ClCompile Include="..\..\src\Simd\SimdCopy.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -158,6 +161,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdVersion.h">
       <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h">
+      <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

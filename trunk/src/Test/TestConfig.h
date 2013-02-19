@@ -52,8 +52,6 @@ namespace Test
 	const int H = 1080;
 #endif
 
-	const double K = 0.1;
-
 	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
 }
 

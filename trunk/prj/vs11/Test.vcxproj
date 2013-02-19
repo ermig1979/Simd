@@ -175,6 +175,7 @@
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestMain.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="..\..\src\Test\TestBgrToGray.h" />
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
     <ClInclude Include="..\..\src\Test\TestCrc32.h" />
+    <ClInclude Include="..\..\src\Test\TestDeinterleave.h" />
     <ClInclude Include="..\..\src\Test\TestDifferenceSum.h" />
     <ClInclude Include="..\..\src\Test\TestFilter.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
