@@ -45,6 +45,9 @@
     <ClInclude Include="..\..\src\Test\TestResize.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestDeinterleave.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -79,6 +82,9 @@
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestResize.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp">
       <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>

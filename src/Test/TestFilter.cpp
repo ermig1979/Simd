@@ -59,8 +59,8 @@ namespace Test
 		View s(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
 		FillRandom(s);
 
-		View d1(width, height, format, NULL);
-		View d2(width, height, format, NULL);
+		View d1(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
+		View d2(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
@@ -78,6 +78,9 @@ namespace Test
 		result = result && FilterTest(ARGS(View::Gray8, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
 		result = result && FilterTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
 
+		result = result && FilterTest(ARGS(View::Uv16, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
+		result = result && FilterTest(ARGS(View::Uv16, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
+
 		result = result && FilterTest(ARGS(View::Bgr24, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
 		result = result && FilterTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
 
@@ -93,6 +96,9 @@ namespace Test
 
 		result = result && FilterTest(ARGS(View::Gray8, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
 		result = result && FilterTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+
+		result = result && FilterTest(ARGS(View::Uv16, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+		result = result && FilterTest(ARGS(View::Uv16, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
 
 		result = result && FilterTest(ARGS(View::Bgr24, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
 		result = result && FilterTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));

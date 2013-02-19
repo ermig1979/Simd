@@ -58,7 +58,7 @@ namespace Test
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle)
     {
         assert(a.data && b.data && a.height == b.height && a.width == b.width && a.format == b.format);
-        assert(a.format == View::Gray8 || a.format == View::Bgr24 || a.format == View::Bgra32);
+        assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
 
         int errorCount = 0;
         size_t colors = Simd::View::SizeOf(a.format);

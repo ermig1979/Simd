@@ -168,12 +168,15 @@ namespace Simd
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 		{
-			assert(channelCount == 1 || channelCount == 3 || channelCount == 4);
+			assert(channelCount >= 1 && channelCount <= 4);
 
 			switch(channelCount)
 			{
 			case 1:
 				ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+				break;
+			case 2:
+				ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 				break;
 			case 3:
 				ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
@@ -345,7 +348,7 @@ namespace Simd
 	void ResizeBilinear(const View & src, View & dst)
 	{
 		assert(src.format == dst.format);
-		assert(src.format == View::Gray8 || src.format == View::Bgr24 || src.format == View::Bgra32);
+		assert(src.format == View::Gray8 || src.format == View::Uv16 || src.format == View::Bgr24 || src.format == View::Bgra32);
 
 		if(src.width == dst.width && src.height == dst.height)
 		{

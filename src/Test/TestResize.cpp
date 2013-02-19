@@ -42,7 +42,7 @@ namespace Test
 			void Call(const View & src, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, 
+				func(src.data, src.width, src.height, src.stride, 
 					dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
 			}
 		};
@@ -60,11 +60,11 @@ namespace Test
 		std::cout << "Test " << f1.description << " & " << f2.description
 			<< " [" << int(width*k) << ", " << int(height*k) << "] -> [" << width << ", " << height << "]." << std::endl;
 
-		View s(int(width*k), int(height*k), format, NULL, (width%16 == 0 ? 16 : 1));
+		View s(int(width*k), int(height*k), format, NULL, (int(k*width)%16 == 0 ? 16 : 1));
 		FillRandom(s);
 
-		View d1(width, height, format, NULL);
-		View d2(width, height, format, NULL);
+		View d1(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
+		View d2(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
@@ -81,6 +81,9 @@ namespace Test
 
 		result = result && ResizeTest(ARGS(View::Gray8, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
 		result = result && ResizeTest(ARGS(View::Gray8, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+
+		result = result && ResizeTest(ARGS(View::Uv16, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+		result = result && ResizeTest(ARGS(View::Uv16, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
 
 		result = result && ResizeTest(ARGS(View::Bgr24, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
 		result = result && ResizeTest(ARGS(View::Bgr24, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));

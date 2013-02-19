@@ -35,6 +35,7 @@ namespace Simd
         {
             None = 0,
             Gray8,
+			Uv16,
             Bgr24,
             Bgra32,
             Int32,

@@ -399,6 +399,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdDeinterleaveUv.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdDeinterleaveUv.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdInterleaveBgra.cpp"
 				>
 			</File>

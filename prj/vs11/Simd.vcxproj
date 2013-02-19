@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
     <ClInclude Include="..\..\src\Simd\SimdCrc32.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
@@ -59,6 +60,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdCopy.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
