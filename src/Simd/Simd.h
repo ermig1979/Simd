@@ -57,5 +57,6 @@
 #include "Simd/SimdMedianFilterSquare3x3.h"
 #include "Simd/SimdMedianFilterSquare5x5.h"
 #include "Simd/SimdDeinterleaveUv.h"
+#include "Simd/SimdGaussianBlur3x3.h"
 
 #endif//__Simd_h__

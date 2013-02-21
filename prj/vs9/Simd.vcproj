@@ -407,6 +407,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdGaussianBlur3x3.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdGaussianBlur3x3.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdInterleaveBgra.cpp"
 				>
 			</File>

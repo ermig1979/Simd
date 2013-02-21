@@ -32,6 +32,7 @@
     <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur3x3.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdInterleaveBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
@@ -62,6 +63,7 @@
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp" />
