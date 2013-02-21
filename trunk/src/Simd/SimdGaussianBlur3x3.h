@@ -1,5 +1,5 @@
 /*
-* Simd Library Tests.
+* Simd Library.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,16 +21,30 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __TestFilter_h__
-#define __TestFilter_h__
+#ifndef __SimdGaussianBlur3x3_h__
+#define __SimdGaussianBlur3x3_h__
 
-namespace Test
+#include "Simd/SimdView.h"
+
+namespace Simd
 {
-	bool MedianFilterSquare3x3Test();
+	namespace Base
+	{
+		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
 
-	bool MedianFilterSquare5x5Test();
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
+	{
+		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uchar * dst, size_t dstStride);
+	}
+#endif// SIMD_SSE2_ENABLE
 
-	bool GaussianBlur3x3Test();
+	void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+		size_t channelCount, uchar * dst, size_t dstStride);
+
+	void GaussianBlur3x3(const View & src, View & dst);
 }
-
-#endif//__TestFilter_h__
+#endif//__SimdGaussianBlur3x3_h__

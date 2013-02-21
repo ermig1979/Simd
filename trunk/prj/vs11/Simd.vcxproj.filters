@@ -64,6 +64,9 @@
     <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -163,6 +166,9 @@
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur3x3.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

@@ -108,4 +108,23 @@ namespace Test
 
 		return result;
 	}
+
+	bool GaussianBlur3x3Test()
+	{
+		bool result = true;
+
+		result = result && FilterTest(ARGS(View::Gray8, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+		result = result && FilterTest(ARGS(View::Gray8, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+
+		result = result && FilterTest(ARGS(View::Uv16, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+		result = result && FilterTest(ARGS(View::Uv16, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+
+		result = result && FilterTest(ARGS(View::Bgr24, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+		result = result && FilterTest(ARGS(View::Bgr24, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+
+		result = result && FilterTest(ARGS(View::Bgra32, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+		result = result && FilterTest(ARGS(View::Bgra32, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+
+		return result;
+	}
 }
