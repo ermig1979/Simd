@@ -140,4 +140,24 @@ namespace Test
 
 		return result;
 	}
+
+	bool AbsDifferenceSumTest()
+	{
+		bool result = true;
+
+		result = result && DifferenceTest(W, H, FUNC1(Simd::Base::AbsDifferenceSum), FUNC1(Simd::AbsDifferenceSum));
+		result = result && DifferenceTest(W + 1, H - 1, FUNC1(Simd::Base::AbsDifferenceSum), FUNC1(Simd::AbsDifferenceSum));
+
+		return result;
+	}
+
+	bool MaskedAbsDifferenceSumTest()
+	{
+		bool result = true;
+
+		result = result && MaskedDifferenceTest(W, H, FUNC2(Simd::Base::AbsDifferenceSum), FUNC2(Simd::AbsDifferenceSum));
+		result = result && MaskedDifferenceTest(W + 1, H - 1, FUNC2(Simd::Base::AbsDifferenceSum), FUNC2(Simd::AbsDifferenceSum));
+
+		return result;
+	}
 }
