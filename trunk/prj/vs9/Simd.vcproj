@@ -351,6 +351,14 @@
 			Name="Alg"
 			>
 			<File
+				RelativePath="..\..\src\Simd\SimdAbsDifferenceSum.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdAbsDifferenceSum.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdBgraToBgr.cpp"
 				>
 			</File>

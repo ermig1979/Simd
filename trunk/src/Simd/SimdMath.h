@@ -65,6 +65,11 @@ namespace Simd
             return Square(a - b);
         }
 
+		SIMD_INLINE int AbsDifference(int a, int b)
+		{
+			return a > b ? a - b : b - a;
+		}
+
 		SIMD_INLINE int Average(int a, int b)
 		{
 			return (a + b + 1) >> 1;
@@ -82,7 +87,14 @@ namespace Simd
 			b += d & m;
 			a -= d & m;
 		}
-    }
+
+		SIMD_INLINE int AbsDifferenceU8(int a, int b)
+		{
+			int d = a - b;
+			int m = d >> 8;
+			return (d & ~m)|(-d & m);
+		}
+	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2

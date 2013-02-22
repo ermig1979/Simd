@@ -29,6 +29,10 @@ namespace Test
 	bool SquareDifferenceSumTest();
 
 	bool MaskedSquareDifferenceSumTest();
+
+	bool AbsDifferenceSumTest();
+
+	bool MaskedAbsDifferenceSumTest();
 }
 
 #endif//__TestDifferenceSum_h__
