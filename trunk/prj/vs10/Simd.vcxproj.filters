@@ -70,6 +70,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAverage.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -175,6 +178,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAverage.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

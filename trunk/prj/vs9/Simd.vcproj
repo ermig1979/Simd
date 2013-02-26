@@ -359,6 +359,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdAverage.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdAverage.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdBgraToBgr.cpp"
 				>
 			</File>
