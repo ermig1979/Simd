@@ -351,6 +351,14 @@
 			Name="Test"
 			>
 			<File
+				RelativePath="..\..\src\Test\TestAverage.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestAverage.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestBgraToGray.cpp"
 				>
 			</File>
