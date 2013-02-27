@@ -296,7 +296,7 @@ namespace Simd
 					k = 2;
 				else if(sy == previous + 1)
 				{
-					Base::Swap(buffer.pbx[0], buffer.pbx[1]);
+					Swap(buffer.pbx[0], buffer.pbx[1]);
 					k = 1;
 				}
 

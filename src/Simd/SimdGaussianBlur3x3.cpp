@@ -178,8 +178,8 @@ namespace Simd
 					Store<align>((__m128i*)(dst + col), BlurRow<true>(buffer, col));
 				Store<align>((__m128i*)(dst + size - A), BlurRow<align>(buffer, size - A));
 
-				Base::Swap(buffer.src0, buffer.src2);
-				Base::Swap(buffer.src0, buffer.src1);
+				Swap(buffer.src0, buffer.src2);
+				Swap(buffer.src0, buffer.src1);
 			}
 		}
 

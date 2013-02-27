@@ -106,10 +106,10 @@ namespace Simd
     {
         if(data != NULL && right >= left && bottom >= top)
         {
-			left = Base::RestrictRange((int)left, 0, (int)width);
-			top = Base::RestrictRange((int)top, 0, (int)height);
-			right = Base::RestrictRange((int)right, 0, (int)width);
-			bottom = Base::RestrictRange((int)bottom, 0, (int)height);
+			left = RestrictRange(left, 0, (ptrdiff_t)width);
+			top = RestrictRange(top, 0, (ptrdiff_t)height);
+			right = RestrictRange(right, 0, (ptrdiff_t)width);
+			bottom = RestrictRange(bottom, 0, (ptrdiff_t)height);
             return View(right - left, bottom - top, stride, format, data + top*stride + left*SizeOf(format));
         }
         else

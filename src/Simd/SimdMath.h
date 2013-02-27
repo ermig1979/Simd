@@ -31,15 +31,35 @@
 
 namespace Simd
 {
+	template <class T> SIMD_INLINE void Swap(T & a, T & b)
+	{
+		T t = a;
+		a = b;
+		b = t;
+	}
+
+	template <class T> SIMD_INLINE T Min(T a, T b)
+	{
+		return a < b ? a : b;
+	}
+
+	template <class T> SIMD_INLINE T Max(T a, T b)
+	{
+		return a > b ? a : b;
+	}
+
+	template <class T> SIMD_INLINE T RestrictRange(T value, T min, T max)
+	{
+		return Max(min, Min(max, value));
+	}
+
+	template <class T> SIMD_INLINE T Square(T a) 
+	{
+		return a*a;
+	}
+
     namespace Base
     {
-		template <class T> SIMD_INLINE void Swap(T & a, T & b)
-		{
-			T t = a;
-			a = b;
-			b = t;
-		}
-
         SIMD_INLINE int Min(int a, int b)
         {
             return a < b ? a : b;
