@@ -478,8 +478,8 @@ namespace Simd
 				if(alignedWidth != srcWidth)
 					MainRowY5x5<false>(odd, even, buffer, srcWidth - A);
 
-				Base::Swap(buffer.in0, buffer.out0);
-				Base::Swap(buffer.in1, buffer.out1);
+				Swap(buffer.in0, buffer.out0);
+				Swap(buffer.in1, buffer.out1);
 
 				buffer.dst[-2] = buffer.dst[0];
 				buffer.dst[-1] = buffer.dst[0];

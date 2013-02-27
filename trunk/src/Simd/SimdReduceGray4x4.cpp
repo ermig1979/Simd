@@ -260,8 +260,8 @@ namespace Simd
 				if(alignedDstWidth != dstWidth)
 					_mm_storel_epi64((__m128i*)(dst + dstWidth - HA), ReduceRow<false>(buffer, dstWidth - HA));
 
-				Base::Swap(buffer.src0, buffer.src2);
-				Base::Swap(buffer.src1, buffer.src3);
+				Swap(buffer.src0, buffer.src2);
+				Swap(buffer.src1, buffer.src3);
 			}
 		}
 
