@@ -106,10 +106,10 @@ namespace Simd
     {
         if(data != NULL && right >= left && bottom >= top)
         {
-			left = RestrictRange(left, 0, (ptrdiff_t)width);
-			top = RestrictRange(top, 0, (ptrdiff_t)height);
-			right = RestrictRange(right, 0, (ptrdiff_t)width);
-			bottom = RestrictRange(bottom, 0, (ptrdiff_t)height);
+			left = RestrictRange(left, (ptrdiff_t)0, (ptrdiff_t)width);
+			top = RestrictRange(top, (ptrdiff_t)0, (ptrdiff_t)height);
+			right = RestrictRange(right, (ptrdiff_t)0, (ptrdiff_t)width);
+			bottom = RestrictRange(bottom, (ptrdiff_t)0, (ptrdiff_t)height);
             return View(right - left, bottom - top, stride, format, data + top*stride + left*SizeOf(format));
         }
         else
