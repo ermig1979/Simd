@@ -73,7 +73,7 @@ namespace Simd
 	#if defined(_WIN64) || defined(_WIN32)
 			__cpuid((int*)registers, level);
 	#elif defined __GNUC__
-			__get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx));
+			__get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx);
 	#else
 	#error Do not know how to detect CPU info!
 	#endif
