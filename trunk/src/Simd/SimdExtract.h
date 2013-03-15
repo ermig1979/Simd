@@ -53,7 +53,7 @@ namespace Simd
 
 		template <int index> SIMD_INLINE int64_t ExtractInt64(__m128i a)
 		{
-#ifdef _M_X64
+#if defined(_M_X64) && (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER >= 1600))
 			return _mm_cvtsi128_si64(_mm_srli_si128(a, 8 * index));
 #else
 			return (int64_t)ExtractInt32<2*index + 1>(a)*0x100000000 + (uint32_t)ExtractInt32<2*index>(a);
