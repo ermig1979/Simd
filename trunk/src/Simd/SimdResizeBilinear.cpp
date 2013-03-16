@@ -356,7 +356,7 @@ namespace Simd
 		}
 		else
 		{
-			ResizeBilinear(src.data, src.stride, src.width, src.height, 
+			ResizeBilinear(src.data, src.width, src.height, src.stride, 
 				dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
 		}
 	}
