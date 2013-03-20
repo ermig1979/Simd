@@ -44,26 +44,6 @@ namespace Simd
 
     //-------------------------------------------------------------------------
 
-    SIMD_INLINE void* Allocate(size_t size, size_t align = DEFAULT_MEMORY_ALIGN) 
-    {
-#ifdef SIMD_USE_POSIX_MEMALIGN
-        void* memptr = NULL;
-        posix_memalign(&memptr, align, size);
-        return memptr;
-#else
-        return _aligned_malloc(size, align);
-#endif
-    }
-
-    SIMD_INLINE void Free(void *p) 
-    {
-#ifdef SIMD_USE_POSIX_MEMALIGN
-        free(p);
-#else
-        _aligned_free(p);
-#endif
-    }
-
     SIMD_INLINE size_t AlignHi(size_t size, size_t align)
     {
         return (size + align - 1) & ~(align - 1);
@@ -93,6 +73,26 @@ namespace Simd
     {
         return ((size_t)p)%align == 0;
     }
+
+	SIMD_INLINE void* Allocate(size_t size, size_t align = DEFAULT_MEMORY_ALIGN) 
+	{
+#ifdef SIMD_USE_POSIX_MEMALIGN
+		void* memptr = NULL;
+		posix_memalign(&memptr, AlignHi(align, sizeof(void*)), size);
+		return memptr;
+#else
+		return _aligned_malloc(size, align);
+#endif
+	}
+
+	SIMD_INLINE void Free(void *p) 
+	{
+#ifdef SIMD_USE_POSIX_MEMALIGN
+		free(p);
+#else
+		_aligned_free(p);
+#endif
+	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
