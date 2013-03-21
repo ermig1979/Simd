@@ -44,5 +44,22 @@ namespace Simd
 		}
 	}
 #endif//SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+	namespace Avx2
+	{
+		template <bool align> SIMD_INLINE void Store(__m256i * p, __m256i a);
+
+		template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
+		{
+			return _mm256_storeu_si256(p, a); 
+		}
+
+		template <> SIMD_INLINE void Store<true>(__m256i * p, __m256i a)
+		{
+			return _mm256_store_si256(p, a); 
+		}
+	}
+#endif//SIMD_SAVX2_ENABLE
 }
 #endif//__SimdStore_h__

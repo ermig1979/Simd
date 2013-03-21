@@ -67,5 +67,23 @@ namespace Simd
         using namespace Sse2;
     }
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
+	{
+		const size_t A = sizeof(__m256i);
+		const size_t DA = 2*A;
+		const size_t QA = 4*A;
+		const size_t OA = 8*A;
+		const size_t HA = A/2;
+
+		const __m256i K_ZERO = SIMD_MM256_SET1_EPI8(0);
+		const __m256i K_INV_ZERO = SIMD_MM256_SET1_EPI8(0xFF);
+
+		const __m256i K16_0001 = SIMD_MM256_SET1_EPI16(0x0001);
+
+		const __m256i K32_000000FF = SIMD_MM256_SET1_EPI32(0x000000FF);
+	}
+#endif// SIMD_AVX2_ENABLE
 }
 #endif//__SimdConst_h__

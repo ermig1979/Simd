@@ -102,5 +102,22 @@ namespace Simd
 		}
 	}
 #endif//SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+	namespace Avx2
+	{
+		template <bool align> SIMD_INLINE __m256i Load(const __m256i * p);
+
+		template <> SIMD_INLINE __m256i Load<false>(const __m256i * p)
+		{
+			return _mm256_loadu_si256(p); 
+		}
+
+		template <> SIMD_INLINE __m256i Load<true>(const __m256i * p)
+		{
+			return _mm256_load_si256(p); 
+		}
+	}
+#endif//SIMD_AVX2_ENABLE
 }
 #endif//__SimdLoad_h__
