@@ -36,10 +36,12 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE42_ENABLE)
+#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
+	const size_t DEFAULT_MEMORY_ALIGN = sizeof(__m256i);
+#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE42_ENABLE)
     const size_t DEFAULT_MEMORY_ALIGN = sizeof(__m128i);
 #else
-    const size_t DEFAULT_MEMORY_ALIGN = 1;
+    const size_t DEFAULT_MEMORY_ALIGN = sizeof(void*);
 #endif
 
     //-------------------------------------------------------------------------
@@ -115,6 +117,21 @@ namespace Simd
 		using namespace Sse2;
 	}
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
+	{
+		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m256i))
+		{
+			return Simd::Aligned(size, align);
+		}
+
+		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m256i))
+		{
+			return Simd::Aligned(p, align);
+		}
+	}
+#endif// SIMD_AVX2_ENABLE
 }
 
 #if defined(_WIN64) || defined(_WIN32) 
