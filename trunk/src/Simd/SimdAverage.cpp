@@ -91,14 +91,62 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
+	{
+		template <bool align> void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		{
+			assert(width*channelCount >= A);
+			if(align)
+				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t size = channelCount*width;
+			size_t alignedSize = Simd::AlignLo(size, A);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t offset = 0; offset < alignedSize; offset += A)
+				{
+					const __m256i a_ = Load<align>((__m256i*)(a + offset));
+					const __m256i b_ = Load<align>((__m256i*)(b + offset));
+					Store<align>((__m256i*)(dst + offset), _mm256_avg_epu8(a_, b_));
+				}
+				if(alignedSize != size)
+				{
+					const __m256i a_ = Load<false>((__m256i*)(a + size - A));
+					const __m256i b_ = Load<false>((__m256i*)(b + size - A));
+					Store<false>((__m256i*)(dst + size - A), _mm256_avg_epu8(a_, b_));
+				}
+				a += aStride;
+				b += bStride;
+				dst += dstStride;
+			}
+		}
+
+		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		{
+			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+				Average<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			else
+				Average<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+		}
+	}
+#endif// SIMD_AVX2_ENABLE
+
 	void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+		if(Avx2::Enable && width*channelCount >= Avx2::A)
+			Avx2::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+		else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width*channelCount >= Sse2::A)
 			Sse2::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 		else
-#endif//SIMD_SSE2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 			Base::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 	}
 

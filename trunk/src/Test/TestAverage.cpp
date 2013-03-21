@@ -91,6 +91,40 @@ namespace Test
 		result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Base::Average, Simd::Average));
 		result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Base::Average, Simd::Average));
 
+#ifdef SIMD_SSE2_ENABLE
+		if(Simd::Sse2::Enable)
+		{
+			result = result && AverageTest(ARGS1(View::Gray8, W, H, Simd::Sse2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Gray8, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Uv16, W, H, Simd::Sse2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Uv16, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Bgr24, W, H, Simd::Sse2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Bgr24, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Sse2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
+		}
+#endif//SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+		if(Simd::Avx2::Enable)
+		{
+			result = result && AverageTest(ARGS1(View::Gray8, W, H, Simd::Avx2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Gray8, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Uv16, W, H, Simd::Avx2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Uv16, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Bgr24, W, H, Simd::Avx2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Bgr24, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
+
+			result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Avx2::Average, Simd::Average));
+			result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
+		}
+#endif//SIMD_AVX2_ENABLE
+
 		return result;
 	}
 }
