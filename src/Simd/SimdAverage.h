@@ -42,6 +42,14 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
+	{
+		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+	}
+#endif// SIMD_AVX2_ENABLE
+
 	void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
 
