@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -31,7 +31,7 @@ namespace Simd
     namespace Base
     {
         // Precalculated CRC32c lookup table for polynomial 0x1EDC6F41 (castagnoli-crc)
-        uint Crc32cTable[256] = 
+        uint32_t Crc32cTable[256] =
         {
             0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L, 0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
             0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL, 0x4D43CFD0L, 0xBF284CD3L, 0xAC78BF27L, 0x5E133C24L,
@@ -67,17 +67,17 @@ namespace Simd
             0x79B737BAL, 0x8BDCB4B9L, 0x988C474DL, 0x6AE7C44EL, 0xBE2DA0A5L, 0x4C4623A6L, 0x5F16D052L, 0xAD7D5351L
         };
 
-        uint Crc32(const void *src, size_t size)
+        uint32_t Crc32(const void *src, size_t size)
         {
             uchar *p = (uchar*)src;
-            uint crc = 0;
+            uint32_t crc = 0;
             while (size--)
                 crc = (crc >> 8) ^ Crc32cTable[(crc ^ *p++) & 0xFF];
             return crc;
         }
     }
 
-#ifdef SIMD_SSE42_ENABLE    
+#ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
         SIMD_INLINE void Crc32(size_t & crc, const size_t * p, const size_t * end)
@@ -98,7 +98,7 @@ namespace Simd
                 crc = _mm_crc32_u8((uint)crc, *p++);
         }
 
-        uint Crc32(const void *src, size_t size)
+        uint32_t Crc32(const void *src, size_t size)
         {
             uchar * nose = (uchar*)src;
             size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
@@ -108,14 +108,14 @@ namespace Simd
             Crc32(crc, nose, (uchar*)body);
             Crc32(crc, body, tail);
             Crc32(crc, (uchar*)tail, nose + size);
-            return (uint)crc;
+            return (uint32_t)crc;
         }
     }
 #endif// SIMD_SSE42_ENABLE
 
-	uint Crc32(const void * src, size_t size)
+	uint32_t Crc32(const void * src, size_t size)
 	{
-#ifdef SIMD_SSE42_ENABLE 
+#ifdef SIMD_SSE42_ENABLE
 		if(Sse42::Enable)
 			return Sse42::Crc32(src, size);
 		else
