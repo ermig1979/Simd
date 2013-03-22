@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -30,7 +30,7 @@ namespace Test
 	{
 		struct Func1
 		{
-			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride,
 				size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
@@ -47,7 +47,7 @@ namespace Test
 
 		struct Func2
 		{
-			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride,
 				const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
@@ -66,7 +66,7 @@ namespace Test
 #define FUNC1(function) Func1(function, #function)
 #define FUNC2(function) Func2(function, #function)
 
-	bool DifferenceTest(int width, int height, Func1 & f1, Func1 & f2)
+	bool DifferenceTest(int width, int height, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -92,7 +92,7 @@ namespace Test
 		return result;
 	}
 
-	bool MaskedDifferenceTest(int width, int height, Func2 & f1, Func2 & f2)
+	bool MaskedDifferenceTest(int width, int height, const Func2 & f1, const Func2 & f2)
 	{
 		bool result = true;
 
