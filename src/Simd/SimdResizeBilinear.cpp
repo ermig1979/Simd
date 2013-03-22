@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -55,7 +55,7 @@ namespace Simd
 			size_t index = (size_t)::floor(alpha);
 			alpha -= index;
 
-			if(index < 0)
+			if((ptrdiff_t)index < 0)
 			{
 				index = 0;
 				alpha = 0;
@@ -73,11 +73,11 @@ namespace Simd
 				indexAlpha[i*CHANNEL_COUNT + c].alpha = (int)(alpha * FRACTION_RANGE + 0.5);
 			}
 		}
-	}    
+	}
 
 	namespace Base
 	{
-		namespace 
+		namespace
 		{
 			struct Buffer
 			{
@@ -120,8 +120,8 @@ namespace Simd
 
 			for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
 			{
-				int fy = buffer.iay[yDst].alpha;                            
-				size_t sy = buffer.iay[yDst].index;
+				int fy = buffer.iay[yDst].alpha;
+				ptrdiff_t sy = buffer.iay[yDst].index;
 				int k = 0;
 
 				if(sy == previous)
@@ -137,13 +137,13 @@ namespace Simd
 				for(; k < 2; k++)
 				{
 					int* pb = buffer.pbx[k];
-					const uchar* ps = src + (sy + k)*srcStride;                                                
+					const uchar* ps = src + (sy + k)*srcStride;
 					for(size_t x = 0; x < dstRowSize; x++)
 					{
 						size_t sx = buffer.iax[x].index;
 						int fx = buffer.iax[x].alpha;
 						int t = ps[sx];
-						pb[x] = (t << FRACTION_SHIFT) + (ps[sx + CHANNEL_COUNT] - t)*fx; 
+						pb[x] = (t << FRACTION_SHIFT) + (ps[sx + CHANNEL_COUNT] - t)*fx;
 					}
 				}
 
@@ -191,7 +191,7 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
-		namespace 
+		namespace
 		{
 			struct Buffer
 			{
@@ -231,7 +231,7 @@ namespace Simd
 				size_t index = (int)::floor(alpha);
 				alpha -= index;
 
-				if(index < 0)
+				if((ptrdiff_t)index < 0)
 				{
 					index = 0;
 					alpha = 0;
@@ -245,7 +245,7 @@ namespace Simd
 
 				indexes[i] = index;
 				alphas[1] = (short)(alpha * FRACTION_RANGE + 0.5);
-				alphas[0] = (short)(FRACTION_RANGE - alphas[1]); 
+				alphas[0] = (short)(FRACTION_RANGE - alphas[1]);
 				alphas += 2;
 			}
 		}
@@ -270,7 +270,7 @@ namespace Simd
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
 			assert(dstWidth >= A);
-			
+
 			size_t bufferWidth = AlignHi(dstWidth, HA);
 			size_t alignedWidth = bufferWidth - HA;
 
@@ -289,7 +289,7 @@ namespace Simd
 				a[0] = _mm_set1_epi16(short(FRACTION_RANGE - buffer.iay[yDst].alpha));
 				a[1] = _mm_set1_epi16(short(buffer.iay[yDst].alpha));
 
-				size_t sy = buffer.iay[yDst].index;
+				ptrdiff_t sy = buffer.iay[yDst].index;
 				int k = 0;
 
 				if(sy == previous)
@@ -305,7 +305,7 @@ namespace Simd
 				for(; k < 2; k++)
 				{
 					short* pb = buffer.pbx[k];
-					const uchar* ps = src + (sy + k)*srcStride;                                                
+					const uchar* ps = src + (sy + k)*srcStride;
 					for(size_t x = 0; x < dstWidth; x++)
 						pb[x] = *(short*)(ps + buffer.ix[x]);
 
@@ -332,7 +332,7 @@ namespace Simd
 }
 
 namespace Simd
-{ 
+{
 	void ResizeBilinear(
 		const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
@@ -356,7 +356,7 @@ namespace Simd
 		}
 		else
 		{
-			ResizeBilinear(src.data, src.width, src.height, src.stride, 
+			ResizeBilinear(src.data, src.width, src.height, src.stride,
 				dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
 		}
 	}
