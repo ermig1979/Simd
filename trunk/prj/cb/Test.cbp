@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Test" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Test\;Sys\;" />
+		<Build>
+			<Target title="Debug Win32">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/Test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/Test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="..\..\bin\cb\Win32\Debug\libSimd.a" />
+				</Linker>
+			</Target>
+			<Target title="Debug x64">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Debug/Test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Debug/Test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-D_WIN64" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="..\..\bin\cb\x64\Debug\libSimd.a" />
+				</Linker>
+			</Target>
+			<Target title="Release Win32">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/Test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/Test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="..\..\bin\cb\Win32\Release\libSimd.a" />
+				</Linker>
+			</Target>
+			<Target title="Release x64">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Release/Test" prefix_auto="1" extension_auto="1" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Release/Test" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-D_WIN64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_CONSOLE" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<Linker>
+					<Add library="..\..\bin\cb\x64\Release\libSimd.a" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-march=core2" />
+		</Compiler>
+		<Unit filename="../../src/Test/TestAverage.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestAverage.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBgrToGray.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBgrToGray.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBgraToGray.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBgraToGray.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestConfig.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestCrc32.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestCrc32.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestDeinterleave.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestDeinterleave.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestDifferenceSum.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestDifferenceSum.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestFilter.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestFilter.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestMain.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestPerformance.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestPerformance.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestReduceGray.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestReduceGray.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestResize.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestResize.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestUtils.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestUtils.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestYuvToBgra.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestYuvToBgra.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestYuvToHue.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestYuvToHue.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

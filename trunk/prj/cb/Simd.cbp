@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Simd" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Sys\;Alg\;" />
+		<Build>
+			<Target title="Debug Win32">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/Simd" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/Simd" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<ExtraCommands>
+					<Add before="$(ProjectDir)/../cmd/GetVersion.cmd" />
+				</ExtraCommands>
+			</Target>
+			<Target title="Debug x64">
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Debug/Simd" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Debug/Simd" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-D_WIN64" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<ExtraCommands>
+					<Add before="$(ProjectDir)/../cmd/GetVersion.cmd" />
+				</ExtraCommands>
+			</Target>
+			<Target title="Release Win32">
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/Simd" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/Simd" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<ExtraCommands>
+					<Add before="$(ProjectDir)/../cmd/GetVersion.cmd" />
+				</ExtraCommands>
+			</Target>
+			<Target title="Release x64">
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Release/Simd" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Release/Simd" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-D_WIN64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+				<ExtraCommands>
+					<Add before="$(ProjectDir)/../cmd/GetVersion.cmd" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-march=core2" />
+		</Compiler>
+		<Unit filename="../../src/Simd/Simd.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAverage.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAverage.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgrToBgra.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgrToGray.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgrToGray.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgraToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgraToBgr.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgraToGray.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBgraToGray.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdConfig.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdConst.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdCopy.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdCopy.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdCrc32.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdCrc32.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDefs.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDeinterleaveUv.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDeinterleaveUv.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdEnable.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdEnable.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdExtract.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdInit.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdInterleaveBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdInterleaveBgra.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdLoad.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMath.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMemory.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray2x2.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray3x3.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray3x3.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray4x4.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray4x4.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray5x5.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray5x5.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdResizeBilinear.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdResizeBilinear.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdStore.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdTypes.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdVersion.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdView.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdView.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToBgr.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToBgra.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToHue.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToHue.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
