@@ -327,6 +327,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdSet.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdStore.h"
 				>
 			</File>

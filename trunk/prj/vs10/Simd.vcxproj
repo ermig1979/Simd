@@ -189,6 +189,7 @@
     <ClInclude Include="..\..\src\Simd\SimdReduceGray4x4.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray5x5.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizeBilinear.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />

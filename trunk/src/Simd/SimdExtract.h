@@ -60,7 +60,7 @@ namespace Simd
 #endif
 		}
 
-		SIMD_INLINE uint64_t ExtractInt64Sum(__m128i a)
+		SIMD_INLINE int64_t ExtractInt64Sum(__m128i a)
 		{
 			return ExtractInt64<0>(a) + ExtractInt64<1>(a);
 		}
