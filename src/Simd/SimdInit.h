@@ -82,29 +82,6 @@ namespace Simd
 
 #ifdef SIMD_SSE2_ENABLE
 
-    namespace Sse2
-    {
-        SIMD_INLINE __m128i _mm_set2_epi8(char a0, char a1)
-        {
-            return _mm_unpacklo_epi8(_mm_set1_epi8(a0), _mm_set1_epi8(a1));
-        }
-
-        SIMD_INLINE __m128i _mm_set2_epi16(short a0, short a1)
-        {
-            return _mm_unpacklo_epi16(_mm_set1_epi16(a0), _mm_set1_epi16(a1));
-        }
-
-        SIMD_INLINE __m128i _mm_set2_epi32(int a0, int a1)
-        {
-            return _mm_unpacklo_epi32(_mm_set1_epi32(a0), _mm_set1_epi32(a1));
-        }
-
-		SIMD_INLINE __m128 _mm_set2_ps(float a0, float a1)
-		{
-			return _mm_unpacklo_ps(_mm_set_ps1(a0), _mm_set_ps1(a1));
-		}
-	}
-
 #if defined(_MSC_VER)
 
 #define SIMD_MM_SET1_EPI8(a) \
@@ -164,29 +141,6 @@ namespace Simd
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
-
-	namespace Avx2
-	{
-		SIMD_INLINE __m256i _mm256_set2_epi8(char a0, char a1)
-		{
-			return _mm256_unpacklo_epi8(_mm256_set1_epi8(a0), _mm256_set1_epi8(a1));
-		}
-
-		SIMD_INLINE __m256i _mm256_set2_epi16(short a0, short a1)
-		{
-			return _mm256_unpacklo_epi16(_mm256_set1_epi16(a0), _mm256_set1_epi16(a1));
-		}
-
-		SIMD_INLINE __m256i _mm256_set2_epi32(int a0, int a1)
-		{
-			return _mm256_unpacklo_epi32(_mm256_set1_epi32(a0), _mm256_set1_epi32(a1));
-		}
-
-		SIMD_INLINE __m256 _mm256_set2_ps(float a0, float a1)
-		{
-			return _mm256_unpacklo_ps(_mm256_set1_ps(a0), _mm256_set1_ps(a1));
-		}
-	}
 
 #if defined(_MSC_VER)
 
