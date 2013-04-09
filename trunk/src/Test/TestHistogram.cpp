@@ -57,7 +57,7 @@ namespace Test
 		std::cout << "Test " << f1.description << " & " << f2.description
 			<< " [" << width << ", " << height << "] (" << step << ", " << indent << ")." << std::endl;
 
-		View s(int(width), int(height), View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(s);
 
 		Histogram h1 = {0}, h2 = {0};

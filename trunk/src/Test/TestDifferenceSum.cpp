@@ -72,10 +72,10 @@ namespace Test
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		View a(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(a);
 
-		View b(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(b);
 
 		uint64_t s1, s2;
@@ -98,13 +98,13 @@ namespace Test
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		View a(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(a);
 
-		View b(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(b);
 
-		View m(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View m(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandomMask(m);
 
 		uint64_t s1, s2;

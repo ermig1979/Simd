@@ -81,11 +81,11 @@ namespace Test
 		const int reducedWidth = (width + 1)/2;
 		const int reducedHeight = (height + 1)/2;
 
-		View s(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(s);
 
-		View d1(reducedWidth, reducedHeight, View::Gray8, NULL, (reducedWidth%16 == 0 ? 16 : 1));
-		View d2(reducedWidth, reducedHeight, View::Gray8, NULL, (reducedWidth%16 == 0 ? 16 : 1));
+		View d1(reducedWidth, reducedHeight, View::Gray8, NULL, TEST_ALIGN(reducedWidth));
+		View d2(reducedWidth, reducedHeight, View::Gray8, NULL, TEST_ALIGN(reducedWidth));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
