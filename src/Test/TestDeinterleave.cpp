@@ -55,13 +55,13 @@ namespace Test
 		std::cout << "Test " << f1.description << " & " << f2.description
 			<< " [" << width << ", " << height << "]." << std::endl;
 
-		View uv(width, height, View::Uv16, NULL, (width%16 == 0 ? 16 : 1));
+		View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
 		FillRandom(uv);
 
-		View u1(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
-		View v1(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
-		View u2(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
-		View v2(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View u1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View v1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(uv, u1, v1));
 

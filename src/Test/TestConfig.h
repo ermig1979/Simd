@@ -57,4 +57,7 @@ namespace Test
 	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
 }
 
+#define TEST_ALIGN(size) \
+	(((size_t)(size))%Simd::DEFAULT_MEMORY_ALIGN == 0 ? Simd::DEFAULT_MEMORY_ALIGN : 1)
+
 #endif//__TestConfig_h__

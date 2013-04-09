@@ -57,15 +57,15 @@ namespace Test
 		const int uvWidth = is420 ? width/2 : width;
 		const int uvHeight = is420 ? height/2 : height;
 
-		View y(width, height, View::Gray8, NULL, (width%16 == 0 ? 16 : 1));
+		View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(y);
-		View u(uvWidth, uvHeight, View::Gray8, NULL, (uvWidth%16 == 0 ? 16 : 1));
+		View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
 		FillRandom(u);
-		View v(uvWidth, uvHeight, View::Gray8, NULL, (uvWidth%16 == 0 ? 16 : 1));
+		View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
 		FillRandom(v);
 
-		View bgra1(width, height, View::Bgra32, NULL, (width%16 == 0 ? 16 : 1));
-		View bgra2(width, height, View::Bgra32, NULL, (width%16 == 0 ? 16 : 1));
+		View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+		View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(y, u, v, bgra1));
 

@@ -56,11 +56,11 @@ namespace Test
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		View s(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
+		View s(width, height, format, NULL, TEST_ALIGN(width));
 		FillRandom(s);
 
-		View d1(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
-		View d2(width, height, format, NULL, (width%16 == 0 ? 16 : 1));
+		View d1(width, height, format, NULL, TEST_ALIGN(width));
+		View d2(width, height, format, NULL, TEST_ALIGN(width));
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
