@@ -147,6 +147,12 @@
 		<Unit filename="../../src/Test/TestFilter.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestHistogram.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestHistogram.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestMain.cpp">
 			<Option virtualFolder="Sys/" />
 		</Unit>

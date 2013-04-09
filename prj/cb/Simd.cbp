@@ -116,6 +116,12 @@
 		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAverage.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

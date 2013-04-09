@@ -1,5 +1,5 @@
 /*
-* Simd Library.
+* Simd Library Tests.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,22 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdCopy.h"
+#ifndef __TestHistogram_h__
+#define __TestHistogram_h__
 
-namespace Simd
+namespace Test
 {
-	void Copy(const View & src, View & dst)
-	{
-		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
-
-		size_t rowSize = src.width*View::SizeOf(src.format);
-		uchar * srcData = src.data;
-		uchar * dstData = dst.data;
-		for(size_t row = 0; row < src.height; ++row)
-		{
-			memcpy(dstData, srcData, rowSize);
-			srcData += src.stride;
-			dstData += dst.stride;
-		}
-	}
+	bool AbsSecondDerivativeHistogramTest();
 }
+
+#endif//__TestHistogram_h__

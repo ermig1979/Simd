@@ -407,6 +407,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestHistogram.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestHistogram.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestReduceGray.cpp"
 				>
 			</File>

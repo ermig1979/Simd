@@ -51,6 +51,9 @@
     <ClInclude Include="..\..\src\Test\TestAverage.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestHistogram.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -91,6 +94,9 @@
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestAverage.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestHistogram.cpp">
       <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>
