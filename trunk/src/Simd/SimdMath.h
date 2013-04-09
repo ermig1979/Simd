@@ -114,6 +114,20 @@ namespace Simd
 			int m = d >> 8;
 			return (d & ~m)|(-d & m);
 		}
+
+		SIMD_INLINE int MaxU8(int a, int b)
+		{
+			int d = a - b;
+			int m = ~(d >> 8);
+			return b + (d & m);
+		}
+
+		SIMD_INLINE int MinU8(int a, int b)
+		{
+			int d = a - b;
+			int m = ~(d >> 8);
+			return a - (d & m);
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -174,6 +188,11 @@ namespace Simd
 			return _mm_add_epi64(
 				_mm_and_si128(a, K64_00000000FFFFFFFF), 
 				_mm_and_si128(_mm_srli_si128(a, 4), K64_00000000FFFFFFFF));
+		}
+
+		SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
+		{
+			return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
 		}
 	}
 #endif// SIMD_SSE2_ENABLE

@@ -73,6 +73,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAverage.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -185,6 +188,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h">
+      <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

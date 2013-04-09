@@ -40,6 +40,7 @@
 #include "Simd/SimdView.h"
 
 #include "Simd/SimdAbsDifferenceSum.h"
+#include "Simd/SimdAbsSecondDerivativeHistogram.h"
 #include "Simd/SimdAverage.h"
 #include "Simd/SimdBgraToBgr.h"
 #include "Simd/SimdBgraToGray.h"

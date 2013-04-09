@@ -103,6 +103,35 @@ namespace Test
         return errorCount == 0;
     }
 
+	bool Compare(const Histogram a, const Histogram b, int differenceMax, bool printError, int errorCountMax)
+	{
+		int errorCount = 0;
+		for(size_t i = 0; i < Simd::HISTOGRAM_SIZE; ++i)
+		{
+			if(a[i] != b[i])
+			{
+				if(differenceMax > 0)
+				{
+					int difference = Simd::Base::Max(a[i], b[i]) - Simd::Base::Min(a[i], b[i]);
+					if(difference <= differenceMax)
+						continue;
+				}
+				errorCount++;
+				if(printError)
+				{
+					std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
+				}
+				if(errorCount > errorCountMax)
+				{
+					if(printError)
+						std::cout << "Stop comparison." << std::endl;
+					return false;
+				}
+			}
+		}
+		return errorCount == 0;
+	}
+
 	std::string ColorDescription(View::Format format)
 	{
 		std::stringstream ss;

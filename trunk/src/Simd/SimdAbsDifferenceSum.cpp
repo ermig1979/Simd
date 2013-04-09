@@ -151,6 +151,8 @@ namespace Simd
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 			const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum)
 		{
+			assert(width >= A);
+
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
 				AbsDifferenceSum<true>(a, aStride, b, bStride, mask, maskStride, width, height, sum);
 			else

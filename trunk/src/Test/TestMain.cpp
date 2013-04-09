@@ -34,6 +34,7 @@
 #include "Test/TestResize.h"
 #include "Test/TestDeinterleave.h"
 #include "Test/TestAverage.h"
+#include "Test/TestHistogram.h"
 
 #define EXECUTE_TEST(test)\
 {\
@@ -80,6 +81,8 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::DeinterleaveUvTest);
 
 	EXECUTE_TEST(Test::AverageTest);
+
+	EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

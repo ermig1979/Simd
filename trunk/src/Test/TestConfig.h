@@ -42,7 +42,9 @@
 namespace Test
 {
 	typedef Simd::uchar uchar;
+	typedef Simd::uint uint;
 	typedef Simd::View View;
+	typedef uint Histogram[Simd::HISTOGRAM_SIZE];
 
 #ifdef _DEBUG
 	const int W = 128;

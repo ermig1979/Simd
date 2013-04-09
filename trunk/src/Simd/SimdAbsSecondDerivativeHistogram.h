@@ -21,22 +21,30 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdCopy.h"
+#ifndef __SimdAbsSecondDerivativeHistogram_h__
+#define __SimdAbsSecondDerivativeHistogram_h__
+
+#include "Simd/SimdView.h"
 
 namespace Simd
 {
-	void Copy(const View & src, View & dst)
+	namespace Base
 	{
-		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
-
-		size_t rowSize = src.width*View::SizeOf(src.format);
-		uchar * srcData = src.data;
-		uchar * dstData = dst.data;
-		for(size_t row = 0; row < src.height; ++row)
-		{
-			memcpy(dstData, srcData, rowSize);
-			srcData += src.stride;
-			dstData += dst.stride;
-		}
+		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+			size_t step, size_t indent, uint * histogram);
 	}
+
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
+	{
+		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+			size_t step, size_t indent, uint * histogram);
+	}
+#endif// SIMD_SSE2_ENABLE
+
+	void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+		size_t step, size_t indent, uint * histogram);
+
+	void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);
 }
+#endif//__SimdAbsSecondDerivativeHistogram_h__

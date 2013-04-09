@@ -28,6 +28,8 @@
 
 namespace Simd
 {
+	const size_t HISTOGRAM_SIZE = UCHAR_MAX + 1;
+
     namespace Base
     {
     }
