@@ -32,6 +32,8 @@ xcopy %TRUNK_DIR%\doc\* %TMP_DIR%\doc\* /y /i /s
 erase %TMP_DIR%\prj\*.user /q /s /f
 erase %TMP_DIR%\prj\*.suo /q /s /f
 erase %TMP_DIR%\prj\*.ncb /q /s /f
+erase %TMP_DIR%\prj\*.depend /q /s /f
+erase %TMP_DIR%\prj\*.layout /q /s /f
 
 %RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%VERSION%.zip %TMP_DIR%
 
