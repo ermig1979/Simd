@@ -34,7 +34,7 @@ namespace Simd
 			size_t width, size_t height, uint64_t * sum);
 
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -44,7 +44,7 @@ namespace Simd
 			size_t width, size_t height, uint64_t * sum);
 
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -52,10 +52,10 @@ namespace Simd
 		size_t width, size_t height, uint64_t * sum);
 
 	void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-		const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+		const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 
 	void AbsDifferenceSum(const View & a, const View & b, uint64_t & sum);
 
-	void AbsDifferenceSum(const View & a, const View & b, const View & mask, uint64_t & sum);
+	void AbsDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum);
 }
 #endif//__SimdAbsDifferenceSum_h__

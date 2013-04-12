@@ -43,6 +43,11 @@ namespace Simd
 			return _mm_load_si128(p); 
 		}
 
+		template <bool align> SIMD_INLINE __m128i LoadMaskI8(const __m128i * p, __m128i index)
+		{
+			return _mm_cmpeq_epi8(Load<align>(p), index);
+		}
+
 		template <size_t count> SIMD_INLINE __m128i LoadBeforeFirst(__m128i first)
 		{
 			return _mm_or_si128(_mm_slli_si128(first, count), _mm_and_si128(first, _mm_srli_si128(K_INV_ZERO, A - count)));

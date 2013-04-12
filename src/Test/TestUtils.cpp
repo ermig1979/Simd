@@ -40,7 +40,7 @@ namespace Test
         }
     }
 
-	void FillRandomMask(View & view)
+	void FillRandomMask(View & view, uchar index)
 	{
 		assert(view.data);
 
@@ -50,7 +50,7 @@ namespace Test
 			ptrdiff_t offset = row*view.stride;
 			for(size_t col = 0; col < width; ++col, ++offset)
 			{
-				view.data[offset] = Random(2) ? 0xFF : 0;
+				view.data[offset] = Random(2) ? index : 0;
 			}
 		}
 	}

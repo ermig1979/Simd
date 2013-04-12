@@ -48,17 +48,17 @@ namespace Test
 		struct Func2
 		{
 			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride,
-				const uchar *mask, size_t maskStride, size_t width, size_t height, uint64_t * sum);
+				const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
 			std::string description;
 
 			Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & a, const View & b, const View & mask, uint64_t & sum) const
+			void Call(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum) const
 			{
 				TEST_PERFORMANCE_TEST(description + "<m>");
-				func(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, a.width, a.height, &sum);
+				func(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
 			}
 		};
 	}
@@ -105,13 +105,14 @@ namespace Test
 		FillRandom(b);
 
 		View m(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandomMask(m);
+		uchar index = Random(256);
+		FillRandomMask(m, index);
 
 		uint64_t s1, s2;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, m, s1));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, m, index, s1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, m, s2));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, m, index, s2));
 
 		if(s1 != s2)
 		{
