@@ -411,6 +411,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdBinarization.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBinarization.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdCopy.cpp"
 				>
 			</File>

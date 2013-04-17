@@ -375,6 +375,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestBinarization.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestBinarization.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestCrc32.cpp"
 				>
 			</File>

@@ -152,6 +152,12 @@
 		<Unit filename="../../src/Simd/SimdBgraToGray.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBinarization.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBinarization.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdConfig.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>

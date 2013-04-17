@@ -54,6 +54,9 @@
     <ClInclude Include="..\..\src\Test\TestHistogram.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestBinarization.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -97,6 +100,9 @@
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBinarization.cpp">
       <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>

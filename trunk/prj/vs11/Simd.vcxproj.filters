@@ -76,6 +76,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -190,6 +193,9 @@
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBinarization.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
