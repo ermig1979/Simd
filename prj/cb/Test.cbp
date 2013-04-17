@@ -120,6 +120,12 @@
 		<Unit filename="../../src/Test/TestBgraToGray.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestBinarization.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBinarization.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestConfig.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>

@@ -184,6 +184,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestAverage.h" />
+    <ClInclude Include="..\..\src\Test\TestBinarization.h" />
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
     <ClInclude Include="..\..\src\Test\TestDeinterleave.h" />
     <ClInclude Include="..\..\src\Test\TestDifferenceSum.h" />
@@ -201,6 +202,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestAverage.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />

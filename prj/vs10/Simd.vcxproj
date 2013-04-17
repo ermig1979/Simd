@@ -169,6 +169,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBgraToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
@@ -208,6 +209,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdCopy.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp" />

@@ -23,18 +23,19 @@
 */
 #include "Test/TestPerformance.h"
 
-#include "Test/TestReduceGray.h"
-#include "Test/TestCrc32.h"
+#include "Test/TestAverage.h"
 #include "Test/TestBgraToGray.h"
 #include "Test/TestBgrToGray.h"
-#include "Test/TestYuvToHue.h"
-#include "Test/TestYuvToBgra.h"
-#include "Test/TestFilter.h"
-#include "Test/TestDifferenceSum.h"
-#include "Test/TestResize.h"
+#include "Test/TestBinarization.h"
+#include "Test/TestCrc32.h"
 #include "Test/TestDeinterleave.h"
-#include "Test/TestAverage.h"
+#include "Test/TestDifferenceSum.h"
+#include "Test/TestFilter.h"
 #include "Test/TestHistogram.h"
+#include "Test/TestReduceGray.h"
+#include "Test/TestResize.h"
+#include "Test/TestYuvToBgra.h"
+#include "Test/TestYuvToHue.h"
 
 #define EXECUTE_TEST(test)\
 {\
@@ -83,6 +84,10 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::AverageTest);
 
 	EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
+
+	EXECUTE_TEST(Test::GreaterThenBinarizationTest);
+	EXECUTE_TEST(Test::LesserThenBinarizationTest);
+	EXECUTE_TEST(Test::EqualToBinarizationTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
