@@ -71,6 +71,7 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
 	EXECUTE_TEST(Test::MedianFilterSquare5x5Test);
 	EXECUTE_TEST(Test::GaussianBlur3x3Test);
+	EXECUTE_TEST(Test::AbsGradientSaturatedSumTest);
 
 	EXECUTE_TEST(Test::SquareDifferenceSumTest);
 	EXECUTE_TEST(Test::MaskedSquareDifferenceSumTest);

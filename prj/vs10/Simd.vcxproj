@@ -163,6 +163,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h" />
     <ClInclude Include="..\..\src\Simd\SimdAverage.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h" />
@@ -203,6 +204,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAverage.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp" />
