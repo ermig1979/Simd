@@ -363,6 +363,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdAbsGradientSaturatedSum.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdAbsGradientSaturatedSum.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp"
 				>
 			</File>

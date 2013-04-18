@@ -116,6 +116,12 @@
 		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
