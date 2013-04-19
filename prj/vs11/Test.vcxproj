@@ -185,6 +185,7 @@
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestResize.cpp" />
+    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestReduceGray.h" />
     <ClInclude Include="..\..\src\Test\TestResize.h" />
+    <ClInclude Include="..\..\src\Test\TestShift.h" />
     <ClInclude Include="..\..\src\Test\TestUtils.h" />
     <ClInclude Include="..\..\src\Test\TestYuvToBgra.h" />
     <ClInclude Include="..\..\src\Test\TestYuvToHue.h" />

@@ -192,6 +192,7 @@
     <ClInclude Include="..\..\src\Test\TestHistogram.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestResize.h" />
+    <ClInclude Include="..\..\src\Test\TestShift.h" />
     <ClInclude Include="..\..\src\Test\TestUtils.h" />
     <ClInclude Include="..\..\src\Test\TestBgraToGray.h" />
     <ClInclude Include="..\..\src\Test\TestBgrToGray.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestResize.cpp" />
+    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />

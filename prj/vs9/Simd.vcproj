@@ -523,6 +523,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdShiftBilinear.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdShiftBilinear.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdSquaredDifferenceSum.cpp"
 				>
 			</File>

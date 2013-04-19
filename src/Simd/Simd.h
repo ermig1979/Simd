@@ -60,6 +60,7 @@
 #include "Simd/SimdReduceGray4x4.h"
 #include "Simd/SimdReduceGray5x5.h"
 #include "Simd/SimdResizeBilinear.h"
+#include "Simd/SimdShiftBilinear.h"
 #include "Simd/SimdSquaredDifferenceSum.h"
 #include "Simd/SimdYuvToBgra.h"
 #include "Simd/SimdYuvToBgr.h"

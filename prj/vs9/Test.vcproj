@@ -439,6 +439,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestShift.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestShift.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestYuvToBgra.cpp"
 				>
 			</File>

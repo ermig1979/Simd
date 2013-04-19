@@ -21,9 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include <limits>
-#include <iomanip>
-
 #include "Test/TestPerformance.h"
 
 #if defined(_MSC_VER)

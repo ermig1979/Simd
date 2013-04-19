@@ -36,6 +36,8 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+#include <limits>
+#include <iomanip>
 
 #include "Simd/Simd.h"
 
