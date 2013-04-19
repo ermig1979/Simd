@@ -193,6 +193,7 @@
     <ClInclude Include="..\..\src\Simd\SimdReduceGray5x5.h" />
     <ClInclude Include="..\..\src\Simd\SimdResizeBilinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShiftBilinear.h" />
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
@@ -225,6 +226,7 @@
     <ClCompile Include="..\..\src\Simd\SimdReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdView.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgr.cpp" />

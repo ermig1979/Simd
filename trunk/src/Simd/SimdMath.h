@@ -48,6 +48,11 @@ namespace Simd
 		return a > b ? a : b;
 	}
 
+	template <class T> SIMD_INLINE T Abs(T a)
+	{
+		return a < 0 ? -a : a;
+	}
+
 	template <class T> SIMD_INLINE T RestrictRange(T value, T min, T max)
 	{
 		return Max(min, Min(max, value));

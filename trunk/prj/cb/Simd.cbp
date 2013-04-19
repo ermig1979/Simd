@@ -269,6 +269,12 @@
 		<Unit filename="../../src/Simd/SimdSet.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdShiftBilinear.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdShiftBilinear.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

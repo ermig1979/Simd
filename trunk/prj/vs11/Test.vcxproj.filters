@@ -47,6 +47,9 @@
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestShift.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestCrc32.h">
@@ -95,6 +98,9 @@
       <Filter>Test</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestBinarization.h">
+      <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestShift.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>
