@@ -130,8 +130,7 @@ namespace Simd
 
 			if(fDx)
 			{
-				const unsigned char* ps[2][2];
-				size_t ss[2][2];
+				const uchar * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
 				size_t srcOffset = (iDy > 0 ? 0 : - iDy)*srcStride + xOffset;
 				size_t bkgOffset = (iDy > 0 ? 0 : - iDy)*bkgStride + xOffset;
@@ -139,27 +138,17 @@ namespace Simd
 
 				if(iDx < 0)
 				{
-					ps[0][0] = (bkg ? bkg + bkgOffset : 0); 
+					ps[0][0] = bkg + bkgOffset; 
 					ps[0][1] = src + (iDy < 0 ? 0 : iDy)*srcStride; 
-					ps[1][0] = (bkg ? bkg + bkgOffset : 0); 
+					ps[1][0] = bkg + bkgOffset; 
 					ps[1][1] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride; 
-
-					ss[0][0] = (bkg ? bkgStride : 0); 
-					ss[0][1] = srcStride; 
-					ss[1][0] = (bkg ? bkgStride : 0); 
-					ss[1][1] = srcStride; 
 				}
 				else
 				{
 					ps[0][0] = src + (iDy < 0 ? 0 : iDy)*srcStride + (width - 1)*channelCount; 
-					ps[0][1] = (bkg ? bkg + bkgOffset : 0); 
+					ps[0][1] = bkg + bkgOffset; 
 					ps[1][0] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride + (width - 1)*channelCount; 
-					ps[1][1] = (bkg ? bkg + bkgOffset : 0); 
-
-					ss[0][0] = srcStride; 
-					ss[0][1] = (bkg ? bkgStride : 0); 
-					ss[1][0] = srcStride; 
-					ss[1][1] = (bkg ? bkgStride : 0); 
+					ps[1][1] = bkg + bkgOffset; 
 				}
 
 				for(size_t row = 0; row < mainHeight; ++row)
@@ -167,31 +156,31 @@ namespace Simd
 					for(size_t channel = 0; channel < channelCount; channel++)
 					{
 						int s[2][2];
-						s[0][0] = (ps[0][0] ? ps[0][0][channel] : 0); 
-						s[0][1] = (ps[0][1] ? ps[0][1][channel] : 0); 
-						s[1][0] = (ps[1][0] ? ps[1][0][channel] : 0); 
-						s[1][1] = (ps[1][1] ? ps[1][1][channel] : 0); 
+						s[0][0] = ps[0][0][channel]; 
+						s[0][1] = ps[0][1][channel]; 
+						s[1][0] = ps[1][0][channel]; 
+						s[1][1] = ps[1][1][channel]; 
 						dst[dstOffset + channel] = Interpolate(s, k);
 					}
-					ps[0][0] += (ps[0][0] ? ss[0][0] : 0); 
-					ps[0][1] += (ps[0][1] ? ss[0][1] : 0); 
-					ps[1][0] += (ps[1][0] ? ss[1][0] : 0); 
-					ps[1][1] += (ps[1][1] ? ss[1][1] : 0); 
+					ps[0][0] += srcStride; 
+					ps[0][1] += bkgStride; 
+					ps[1][0] += srcStride; 
+					ps[1][1] += bkgStride; 
 					dstOffset += dstStride;
 				}
 			}
 
 			if(fDy)
 			{
-				const unsigned char* ps[2][2];
+				const uchar * ps[2][2];
 				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 
 				if(iDy < 0)
 				{
-					ps[0][0] = (bkg ? bkg + bkgOffset : 0);
-					ps[0][1] = (bkg ? bkg + bkgOffset : 0); 
+					ps[0][0] = bkg + bkgOffset;
+					ps[0][1] = bkg + bkgOffset; 
 					ps[1][0] = src + (iDx < 0 ? 0 : iDx)*channelCount; 
 					ps[1][1] = src + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount; 
 				}
@@ -199,8 +188,8 @@ namespace Simd
 				{
 					ps[0][0] = src + (height - 1)*srcStride + (iDx < 0 ? 0 : iDx)*channelCount;
 					ps[0][1] = src + (height - 1)*srcStride + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount; 
-					ps[1][0] = (bkg ? bkg + bkgOffset : 0); 
-					ps[1][1] = (bkg ? bkg + bkgOffset : 0);
+					ps[1][0] = bkg + bkgOffset; 
+					ps[1][1] = bkg + bkgOffset;
 				}
 
 				for(size_t col = 0; col < mainWidth; ++col)
@@ -208,40 +197,40 @@ namespace Simd
 					for(size_t channel = 0; channel < channelCount; channel++)
 					{
 						int s[2][2];
-						s[0][0] = (ps[0][0] ? ps[0][0][channel] : 0); 
-						s[0][1] = (ps[0][1] ? ps[0][1][channel] : 0); 
-						s[1][0] = (ps[1][0] ? ps[1][0][channel] : 0); 
-						s[1][1] = (ps[1][1] ? ps[1][1][channel] : 0); 
+						s[0][0] = ps[0][0][channel]; 
+						s[0][1] = ps[0][1][channel]; 
+						s[1][0] = ps[1][0][channel]; 
+						s[1][1] = ps[1][1][channel]; 
 						dst[dstOffset + channel] = Interpolate(s, k);
 					}
-					ps[0][0] += (ps[0][0] ? channelCount : 0); 
-					ps[0][1] += (ps[0][1] ? channelCount : 0); 
-					ps[1][0] += (ps[1][0] ? channelCount : 0); 
-					ps[1][1] += (ps[1][1] ? channelCount : 0); 
+					ps[0][0] += channelCount; 
+					ps[0][1] += channelCount; 
+					ps[1][0] += channelCount; 
+					ps[1][1] += channelCount; 
 					dstOffset += channelCount;
 				}
 			}
 
 			if(fDx && fDy)
 			{
-				const unsigned char* ps[2][2];
+				const uchar * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
 				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + xOffset;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + xOffset;
 				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + xOffset;
 
-				ps[0][0] = (iDx >= 0 && iDy >= 0) ? (src + (height - 1)*srcStride + (width - 1)*channelCount): (bkg ? bkg + bkgOffset : 0); 
-				ps[0][1] = (iDx < 0 && iDy >= 0) ? (src + (height - 1)*srcStride): (bkg ? bkg + bkgOffset : 0); 
-				ps[1][0] = (iDx >= 0 && iDy < 0) ? (src + (width - 1)*channelCount): (bkg ? bkg + bkgOffset : 0); 
-				ps[1][1] = (iDx < 0 && iDy < 0) ? (src): (bkg ? bkg + bkgOffset : 0); 
+				ps[0][0] = (iDx >= 0 && iDy >= 0) ? (src + (height - 1)*srcStride + (width - 1)*channelCount): bkg + bkgOffset; 
+				ps[0][1] = (iDx < 0 && iDy >= 0) ? (src + (height - 1)*srcStride): bkg + bkgOffset; 
+				ps[1][0] = (iDx >= 0 && iDy < 0) ? (src + (width - 1)*channelCount): bkg + bkgOffset; 
+				ps[1][1] = (iDx < 0 && iDy < 0) ? (src): bkg + bkgOffset; 
 
 				for(size_t channel = 0; channel < channelCount; channel++)
 				{
 					int s[2][2];
-					s[0][0] = (ps[0][0] ? ps[0][0][channel] : 0); 
-					s[0][1] = (ps[0][1] ? ps[0][1][channel] : 0); 
-					s[1][0] = (ps[1][0] ? ps[1][0][channel] : 0); 
-					s[1][1] = (ps[1][1] ? ps[1][1][channel] : 0); 
+					s[0][0] = ps[0][0][channel]; 
+					s[0][1] = ps[0][1][channel]; 
+					s[1][0] = ps[1][0][channel]; 
+					s[1][1] = ps[1][1][channel]; 
 					dst[dstOffset + channel] = Interpolate(s, k);
 				}
 			}
@@ -315,10 +304,11 @@ namespace Simd
 			}
 		}
 
-		void ShiftBilinear(
-			const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+		void CommonShiftAction(
+			const uchar * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
 			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
+			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * & dst, size_t dstStride,
+			int & fDx, int & fDy)
 		{
 			assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
 			assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
@@ -333,8 +323,8 @@ namespace Simd
 
 			ptrdiff_t iDx = (ptrdiff_t)floor(shiftX + FRACTION_ROUND_TERM);
 			ptrdiff_t iDy = (ptrdiff_t)floor(shiftY + FRACTION_ROUND_TERM);
-			int fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
-			int fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
+			fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
+			fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
 
 			int left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
 			int top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
@@ -350,6 +340,16 @@ namespace Simd
 
 			width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
 			height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
+		}
+
+		void ShiftBilinear(
+			const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
+			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
+		{
+			int fDx, fDy;
+			CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 
+				cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
 			ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
 		}
@@ -503,36 +503,11 @@ namespace Simd
 			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
 			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
 		{
-			assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
-			assert(shiftX + A < cropRight - cropLeft && shiftY < cropBottom - cropTop);
+			assert(shiftX + A < cropRight - cropLeft);
 
-			Base::CopyBackground(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
-
-			dst += dstStride*cropTop + cropLeft*channelCount;
-			src += srcStride*cropTop + cropLeft*channelCount;
-			bkg += bkgStride*cropTop + cropLeft*channelCount;
-			width = cropRight - cropLeft;
-			height = cropBottom - cropTop;
-
-			ptrdiff_t iDx = (ptrdiff_t)floor(shiftX + Base::FRACTION_ROUND_TERM);
-			ptrdiff_t iDy = (ptrdiff_t)floor(shiftY + Base::FRACTION_ROUND_TERM);
-			int fDx = (int)floor((shiftX + Base::FRACTION_ROUND_TERM - iDx)*Base::FRACTION_RANGE);
-			int fDy = (int)floor((shiftY + Base::FRACTION_ROUND_TERM - iDy)*Base::FRACTION_RANGE);
-
-			int left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
-			int top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
-			int right = (iDx < 0 ? width : width - iDx);
-			int bottom = (iDy < 0 ? height : height - iDy);
-
-			Base::CopyBackground(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
-
-			Base::MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
-
-			src += Max(0, iDy)*srcStride + Max(0, iDx)*channelCount;
-			dst += Max(0,-iDy)*dstStride + Max(0,-iDx)*channelCount;
-
-			width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
-			height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
+			int fDx, fDy;
+			Base::CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 
+				cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
 			ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
 		}
