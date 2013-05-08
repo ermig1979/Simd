@@ -35,6 +35,7 @@
 #include "Test/TestReduceGray.h"
 #include "Test/TestResize.h"
 #include "Test/TestShift.h"
+#include "Test/TestStatistic.h"
 #include "Test/TestYuvToBgra.h"
 #include "Test/TestYuvToHue.h"
 
@@ -92,6 +93,8 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::EqualToBinarizationTest);
 
 	EXECUTE_TEST(Test::ShiftBilinearTest);
+
+	EXECUTE_TEST(Test::GetStatisticTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

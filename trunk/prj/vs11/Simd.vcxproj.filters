@@ -85,6 +85,9 @@
     <ClCompile Include="..\..\src\Simd\SimdShiftBilinear.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdStatistic.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -208,6 +211,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftBilinear.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStatistic.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
