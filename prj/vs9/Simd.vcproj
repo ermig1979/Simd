@@ -539,6 +539,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdStatistic.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdStatistic.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdYuvToBgr.cpp"
 				>
 			</File>
