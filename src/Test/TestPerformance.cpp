@@ -55,7 +55,7 @@ namespace Test
 	{
 		timeval t1;
 		gettimeofday(&t1, NULL);
-		return t1.tv_sec * 1000.0 + t1.tv_usec / 1000.0;
+		return t1.tv_sec + t1.tv_usec / 1000000.0;
 	}
 #else
 #error Platform is not supported!
