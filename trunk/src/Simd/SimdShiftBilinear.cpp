@@ -326,17 +326,17 @@ namespace Simd
 			fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
 			fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
 
-			int left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
-			int top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
-			int right = (iDx < 0 ? width : width - iDx);
-			int bottom = (iDy < 0 ? height : height - iDy);
+			ptrdiff_t left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
+			ptrdiff_t top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
+			ptrdiff_t right = (iDx < 0 ? width : width - iDx);
+			ptrdiff_t bottom = (iDy < 0 ? height : height - iDy);
 
 			CopyBackground(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
 
 			MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
 
-			src += Max(0, iDy)*srcStride + Max(0, iDx)*channelCount;
-			dst += Max(0,-iDy)*dstStride + Max(0,-iDx)*channelCount;
+			src += Simd::Max((ptrdiff_t)0, iDy)*srcStride + Simd::Max((ptrdiff_t)0, iDx)*channelCount;
+			dst += Simd::Max((ptrdiff_t)0,-iDy)*dstStride + Simd::Max((ptrdiff_t)0,-iDx)*channelCount;
 
 			width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
 			height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
