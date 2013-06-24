@@ -88,6 +88,9 @@
     <ClCompile Include="..\..\src\Simd\SimdStatistic.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdStretchGray2x2.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -214,6 +217,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStatistic.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStretchGray2x2.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

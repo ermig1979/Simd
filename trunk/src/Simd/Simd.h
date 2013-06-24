@@ -63,6 +63,7 @@
 #include "Simd/SimdShiftBilinear.h"
 #include "Simd/SimdSquaredDifferenceSum.h"
 #include "Simd/SimdStatistic.h"
+#include "Simd/SimdStretchGray2x2.h"
 #include "Simd/SimdYuvToBgra.h"
 #include "Simd/SimdYuvToBgr.h"
 #include "Simd/SimdYuvToHue.h"

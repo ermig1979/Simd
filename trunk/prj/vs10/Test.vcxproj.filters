@@ -63,6 +63,9 @@
     <ClInclude Include="..\..\src\Test\TestStatistic.h">
       <Filter>Test</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestStretchGray.h">
+      <Filter>Test</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp">
@@ -115,6 +118,9 @@
       <Filter>Test</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\TestStatistic.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestStretchGray.cpp">
       <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>
