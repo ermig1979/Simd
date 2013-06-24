@@ -547,6 +547,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdStretchGray2x2.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdStretchGray2x2.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdYuvToBgr.cpp"
 				>
 			</File>

@@ -455,6 +455,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestStretchGray.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestStretchGray.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestYuvToBgra.cpp"
 				>
 			</File>

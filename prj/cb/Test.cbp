@@ -192,6 +192,12 @@
 		<Unit filename="../../src/Test/TestStatistic.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestStretchGray.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestStretchGray.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestUtils.cpp">
 			<Option virtualFolder="Sys/" />
 		</Unit>

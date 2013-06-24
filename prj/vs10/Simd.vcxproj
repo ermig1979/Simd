@@ -197,6 +197,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSquaredDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdStatistic.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStretchGray2x2.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.h" />
@@ -230,6 +231,7 @@
     <ClCompile Include="..\..\src\Simd\SimdShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdStatistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdStretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdView.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgra.cpp" />
