@@ -50,6 +50,24 @@ namespace Simd
 				hi += hiStride;
 			}
 		}
+
+		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(value[col] < lo[col])
+						lo[col] = value[col];
+					if(value[col] > hi[col])
+						hi[col] = value[col];
+				}
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -101,6 +119,49 @@ namespace Simd
 			else
 				BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
+
+		template <bool align> void BackgroundGrowRangeFast(const uchar * value, uchar * lo, uchar * hi)
+		{
+			const __m128i _value = Load<align>((__m128i*)value);
+			const __m128i _lo = Load<align>((__m128i*)lo);
+			const __m128i _hi = Load<align>((__m128i*)hi);
+
+			Store<align>((__m128i*)lo, _mm_min_epu8(_lo, _value));
+			Store<align>((__m128i*)hi, _mm_max_epu8(_hi, _value));
+		}
+
+		template <bool align> void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundGrowRangeFast<align>(value + col, lo + col, hi + col);
+				if(alignedWidth != width)
+					BackgroundGrowRangeFast<false>(value + width - A, lo + width - A, hi + width - A);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
+
+		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				BackgroundGrowRangeFast<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+			else
+				BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -115,11 +176,30 @@ namespace Simd
 			Base::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
 	}
 
+	void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+		uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+	}
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi)
 	{
 		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
 		assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8);
 
 		BackgroundGrowRangeSlow(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+	}
+
+	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi)
+	{
+		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
+		assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8);
+
+		BackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
 	}
 }
