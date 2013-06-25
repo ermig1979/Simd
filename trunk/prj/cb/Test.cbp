@@ -108,6 +108,12 @@
 		<Unit filename="../../src/Test/TestAverage.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestBackground.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBackground.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestBgrToGray.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

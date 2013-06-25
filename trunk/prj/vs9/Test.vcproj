@@ -359,6 +359,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Test\TestBackground.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestBackground.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Test\TestBgraToGray.cpp"
 				>
 			</File>

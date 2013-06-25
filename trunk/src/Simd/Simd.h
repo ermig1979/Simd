@@ -43,6 +43,7 @@
 #include "Simd/SimdAbsGradientSaturatedSum.h"
 #include "Simd/SimdAbsSecondDerivativeHistogram.h"
 #include "Simd/SimdAverage.h"
+#include "Simd/SimdBackground.h"
 #include "Simd/SimdBgraToBgr.h"
 #include "Simd/SimdBgraToGray.h"
 #include "Simd/SimdBgrToBgra.h"
