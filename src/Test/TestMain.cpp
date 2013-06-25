@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::StretchGray2x2Test);
 
 	EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
+	EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

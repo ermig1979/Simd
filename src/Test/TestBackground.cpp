@@ -50,7 +50,7 @@ namespace Test
 
 #define FUNC1(function) Func1(function, std::string(#function))
 
-	bool BackgroundGrowRangeSlowTest(int width, int height, const Func1 & f1, const Func1 & f2)
+	bool BackgroundGrowRangeTest(int width, int height, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -82,9 +82,18 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundGrowRangeSlowTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
-		result = result && BackgroundGrowRangeSlowTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
+		result = result && BackgroundGrowRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
+		result = result && BackgroundGrowRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
 
 		return result;
 	}
-}
+
+	bool BackgroundGrowRangeFastTest()
+	{
+		bool result = true;
+
+		result = result && BackgroundGrowRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
+		result = result && BackgroundGrowRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
+
+		return result;
+	}}

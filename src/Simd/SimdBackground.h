@@ -32,6 +32,9 @@ namespace Simd
 	{
 		void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -39,12 +42,20 @@ namespace Simd
 	{
 		void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 
 	void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
 
+	void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+		uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
+
+	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi);
 }
 #endif//__SimdBackground_h__
