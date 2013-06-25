@@ -35,6 +35,10 @@ namespace Simd
 
 		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -45,6 +49,10 @@ namespace Simd
 
 		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -54,8 +62,15 @@ namespace Simd
 	void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
 
+	void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+		const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+		uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
 
 	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi);
+
+	void BackgroundIncrementCount(const View & value, const View & loValue, const View & hiValue, 
+		View & loCount, View & hiCount);
 }
 #endif//__SimdBackground_h__

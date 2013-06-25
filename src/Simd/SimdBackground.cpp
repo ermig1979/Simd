@@ -68,12 +68,33 @@ namespace Simd
 				hi += hiStride;
 			}
 		}
+
+		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(value[col] < loValue[col] && loCount[col] < 0xFF)
+						loCount[col]++;
+					if(value[col] > hiValue[col] && hiCount[col] < 0xFF)
+						hiCount[col]++;
+				}
+				value += valueStride;
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		template <bool align> void BackgroundGrowRangeSlow(const uchar * value, uchar * lo, uchar * hi, __m128i incDecMask)
+		template <bool align> SIMD_INLINE void BackgroundGrowRangeSlow(const uchar * value, uchar * lo, uchar * hi, __m128i incDecMask)
 		{
 			const __m128i _value = Load<align>((__m128i*)value);
 			const __m128i _lo = Load<align>((__m128i*)lo);
@@ -120,7 +141,7 @@ namespace Simd
 				BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
 
-		template <bool align> void BackgroundGrowRangeFast(const uchar * value, uchar * lo, uchar * hi)
+		template <bool align> SIMD_INLINE void BackgroundGrowRangeFast(const uchar * value, uchar * lo, uchar * hi)
 		{
 			const __m128i _value = Load<align>((__m128i*)value);
 			const __m128i _lo = Load<align>((__m128i*)lo);
@@ -162,6 +183,64 @@ namespace Simd
 			else
 				BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundIncrementCount(const uchar * value, 
+			const uchar * loValue, const uchar * hiValue, uchar * loCount, uchar * hiCount, size_t offset, __m128i incMask)
+		{
+			const __m128i _value = Load<align>((__m128i*)(value + offset));
+			const __m128i _loValue = Load<align>((__m128i*)(loValue + offset));
+			const __m128i _loCount = Load<align>((__m128i*)(loCount + offset));
+			const __m128i _hiValue = Load<align>((__m128i*)(hiValue + offset));
+			const __m128i _hiCount = Load<align>((__m128i*)(hiCount + offset));
+
+			const __m128i incLo = _mm_and_si128(incMask, LesserThenU8(_value, _loValue));
+			const __m128i incHi = _mm_and_si128(incMask, GreaterThenU8(_value, _hiValue));
+
+			Store<align>((__m128i*)(loCount + offset), _mm_adds_epu8(_loCount, incLo));
+			Store<align>((__m128i*)(hiCount + offset), _mm_adds_epu8(_hiCount, incHi));
+		}
+
+		template <bool align> void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundIncrementCount<align>(value, loValue, hiValue, loCount, hiCount, col, K8_01);
+				if(alignedWidth != width)
+					BackgroundIncrementCount<false>(value, loValue, hiValue, loCount, hiCount, width - A, tailMask);
+				value += valueStride;
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
+		{
+			if(Aligned(value) && Aligned(valueStride) && 
+				Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+				BackgroundIncrementCount<true>(value, valueStride, width, height,
+				loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+			else
+				BackgroundIncrementCount<false>(value, valueStride, width, height,
+				loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -187,6 +266,20 @@ namespace Simd
 			Base::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
 	}
 
+	void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+		const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+		uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundIncrementCount(value, valueStride, width, height,
+			loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundIncrementCount(value, valueStride, width, height,
+			loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+	}
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi)
 	{
 		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
@@ -201,5 +294,20 @@ namespace Simd
 		assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8);
 
 		BackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+	}
+
+	void BackgroundIncrementCount(const View & value, const View & loValue, const View & hiValue, 
+		View & loCount, View & hiCount)
+	{
+		assert(value.width == loValue.width && value.height == loValue.height && 
+			value.width == hiValue.width && value.height == hiValue.height &&
+			value.width == loCount.width && value.height == loCount.height && 
+			value.width == hiCount.width && value.height == hiCount.height &&);
+		assert(value.format == View::Gray8 && loValue.format == View::Gray8 && hiValue.format == View::Gray8 && 
+			loCount.format == View::Gray8 && hiCount.format == View::Gray8);
+
+		BackgroundIncrementCount(value.data, value.stride, value.width, value.height,
+			loValue.data, loValue.stride, hiValue.data, hiValue.stride,
+			loCount.data, loCount.stride, hiCount.data, hiCount.stride);
 	}
 }
