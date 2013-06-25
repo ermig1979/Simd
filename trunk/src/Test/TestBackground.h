@@ -29,6 +29,8 @@ namespace Test
 	bool BackgroundGrowRangeSlowTest();
 
 	bool BackgroundGrowRangeFastTest();
+
+	bool BackgroundIncrementCountTest();
 }
 
 #endif//__TestBackground_h__

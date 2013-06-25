@@ -78,6 +78,66 @@ namespace Test
 		return result;
 	}
 
+	namespace
+	{
+		struct Func2
+		{
+			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
+				const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+				uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+
+			FuncPtr func;
+			std::string description;
+
+			Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & value, const View & loValue, const View & hiValue,
+				const View & loCountSrc, const View & hiCountSrc, View & loCountDst, View & hiCountDst) const
+			{
+				Simd::Copy(loCountSrc, loCountDst);
+				Simd::Copy(hiCountSrc, hiCountDst);
+				TEST_PERFORMANCE_TEST(description);
+				func(value.data, value.stride, value.width, value.height, 
+					loValue.data, loValue.stride, hiValue.data, hiValue.stride,
+					loCountDst.data, loCountDst.stride, hiCountDst.data, hiCountDst.stride);
+			}
+		};
+	}
+
+#define FUNC2(function) Func2(function, std::string(#function))
+
+	bool BackgroundIncrementCountTest(int width, int height, const Func2 & f1, const Func2 & f2)
+	{
+		bool result = true;
+
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(value);
+		View loValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loValue);
+		View hiValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiValue);
+		View loCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loCountSrc);
+		View hiCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiCountSrc);
+
+		View loCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst1, hiCountDst1));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst2, hiCountDst2));
+
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10);
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10);
+
+		return result;
+	}
+
 	bool BackgroundGrowRangeSlowTest()
 	{
 		bool result = true;
@@ -96,4 +156,15 @@ namespace Test
 		result = result && BackgroundGrowRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
 
 		return result;
-	}}
+	}
+
+	bool BackgroundIncrementCountTest()
+	{
+		bool result = true;
+
+		result = result && BackgroundIncrementCountTest(W, H, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(Simd::BackgroundIncrementCount));
+		result = result && BackgroundIncrementCountTest(W + 1, H - 1, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(Simd::BackgroundIncrementCount));
+
+		return result;
+	}
+}
