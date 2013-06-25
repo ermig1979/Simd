@@ -24,6 +24,7 @@
 #include "Test/TestPerformance.h"
 
 #include "Test/TestAverage.h"
+#include "Test/TestBackground.h"
 #include "Test/TestBgraToGray.h"
 #include "Test/TestBgrToGray.h"
 #include "Test/TestBinarization.h"
@@ -98,6 +99,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(Test::GetStatisticTest);
 
 	EXECUTE_TEST(Test::StretchGray2x2Test);
+
+	EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

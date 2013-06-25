@@ -173,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestAverage.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
@@ -194,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestAverage.h" />
+    <ClInclude Include="..\..\src\Test\TestBackground.h" />
     <ClInclude Include="..\..\src\Test\TestBgraToGray.h" />
     <ClInclude Include="..\..\src\Test\TestBgrToGray.h" />
     <ClInclude Include="..\..\src\Test\TestBinarization.h" />

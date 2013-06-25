@@ -134,6 +134,12 @@
 		<Unit filename="../../src/Simd/SimdAverage.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBackground.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBackground.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

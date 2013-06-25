@@ -197,7 +197,7 @@ namespace Simd
 	void GreaterThenBinarization(const View & src, uchar value, uchar positive, uchar negative, View & dst)
 	{
 		assert(src.width == dst.width && src.height == dst.height);
-		assert(src.format == View::Gray8 || dst.format == View::Gray8);
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
 		GreaterThenBinarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride);
 	}
@@ -205,7 +205,7 @@ namespace Simd
 	void LesserThenBinarization(const View & src, uchar value, uchar positive, uchar negative, View & dst)
 	{
 		assert(src.width == dst.width && src.height == dst.height);
-		assert(src.format == View::Gray8 || dst.format == View::Gray8);
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
 		LesserThenBinarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride);
 	}
@@ -213,7 +213,7 @@ namespace Simd
 	void EqualToBinarization(const View & src, uchar value, uchar positive, uchar negative, View & dst)
 	{
 		assert(src.width == dst.width && src.height == dst.height);
-		assert(src.format == View::Gray8 || dst.format == View::Gray8);
+		assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
 		EqualToBinarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride);
 	}

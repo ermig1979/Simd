@@ -199,6 +199,16 @@ namespace Simd
 		{
 			return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
 		}
+
+		SIMD_INLINE __m128i GreaterThenU8(__m128i a, __m128i b)
+		{
+			return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_min_epu8(a, b), a), K_INV_ZERO);
+		}
+
+		SIMD_INLINE __m128i LesserThenU8(__m128i a, __m128i b)
+		{
+			return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_max_epu8(a, b), a), K_INV_ZERO);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 }

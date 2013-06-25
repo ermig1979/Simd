@@ -387,6 +387,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdBackground.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdBackground.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdBgraToBgr.cpp"
 				>
 			</File>
