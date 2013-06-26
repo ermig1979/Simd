@@ -55,7 +55,8 @@ namespace Test
 		}
 	}
 
-    bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle)
+    bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
+		const std::string & description)
     {
         assert(a.data && b.data && a.height == b.height && a.width == b.width && a.format == b.format);
         assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
@@ -82,6 +83,10 @@ namespace Test
                     errorCount++;
                     if(printError)
                     {
+						if(errorCount == 1 && description.length() > 0)
+						{
+							std::cout << "Fail comparison: " << description << std::endl;
+						}
                         size_t col = offset/colors;
                         std::cout << "Error at [" << col << "," << row << "] : (" << (int)pA[col*colors];
                         for(size_t color = 1; color < colors; ++color)

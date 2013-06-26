@@ -31,6 +31,10 @@ namespace Test
 	bool BackgroundGrowRangeFastTest();
 
 	bool BackgroundIncrementCountTest();
+
+	bool BackgroundAdjustRangeTest();
+
+	bool MaskedBackgroundAdjustRangeTest();
 }
 
 #endif//__TestBackground_h__

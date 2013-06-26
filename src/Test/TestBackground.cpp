@@ -72,8 +72,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loSrc, hiSrc, loDst2, hiDst2));
 
-		result = result && Compare(loDst1, loDst2, 0, true, 10);
-		result = result && Compare(hiDst1, hiDst2, 0, true, 10);
+		result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
+		result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
 
 		return result;
 	}
@@ -132,8 +132,144 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst2, hiCountDst2));
 
-		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10);
-		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10);
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "lo");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hi");
+
+		return result;
+	}
+
+	namespace
+	{
+		struct Func3
+		{
+			typedef void (*FuncPtr)(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+				uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+				uchar * hiValue, size_t hiValueStride, uchar threshold);
+
+			FuncPtr func;
+			std::string description;
+
+			Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
+				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uchar threshold) const
+			{
+				Simd::Copy(loCountSrc, loCountDst);
+				Simd::Copy(loValueSrc, loValueDst);
+				Simd::Copy(hiCountSrc, hiCountDst);
+				Simd::Copy(hiValueSrc, hiValueDst);
+				TEST_PERFORMANCE_TEST(description);
+				func(loCountDst.data, loCountDst.stride, loValueDst.width, loValueDst.height, loValueDst.data, loValueDst.stride, 
+					hiCountDst.data, hiCountDst.stride, hiValueDst.data, hiValueDst.stride, threshold);
+			}
+		};
+	}
+
+#define FUNC3(function) Func3(function, std::string(#function))
+
+	bool BackgroundAdjustRangeTest(int width, int height, const Func3 & f1, const Func3 & f2)
+	{
+		bool result = true;
+
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+		View loCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loCountSrc);
+		View loValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loValueSrc);
+		View hiCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiCountSrc);
+		View hiValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiValueSrc);
+
+		View loCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
+			loCountDst1, loValueDst1, hiCountDst1, hiValueDst1, 0x80));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
+			loCountDst2, loValueDst2, hiCountDst2, hiValueDst2, 0x80));
+
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "loCount");
+		result = result && Compare(loValueDst1, loValueDst2, 0, true, 10, 0, "loValue");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hiCount");
+		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 10, 0, "hiValue");
+
+		return result;
+	}
+
+	namespace
+	{
+		struct Func4
+		{
+			typedef void (*FuncPtr)(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+				uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+				uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+
+			FuncPtr func;
+			std::string description;
+
+			Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
+				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uchar threshold, const View & mask) const
+			{
+				Simd::Copy(loCountSrc, loCountDst);
+				Simd::Copy(loValueSrc, loValueDst);
+				Simd::Copy(hiCountSrc, hiCountDst);
+				Simd::Copy(hiValueSrc, hiValueDst);
+				TEST_PERFORMANCE_TEST(description + "<m>");
+				func(loCountDst.data, loCountDst.stride, loValueDst.width, loValueDst.height, loValueDst.data, loValueDst.stride, 
+					hiCountDst.data, hiCountDst.stride, hiValueDst.data, hiValueDst.stride, threshold, mask.data, mask.stride);
+			}
+		};
+	}
+
+#define FUNC4(function) Func4(function, std::string(#function))
+
+	bool MaskedBackgroundAdjustRangeTest(int width, int height, const Func4 & f1, const Func4 & f2)
+	{
+		bool result = true;
+
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+		View loCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loCountSrc);
+		View loValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loValueSrc);
+		View hiCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiCountSrc);
+		View hiValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiValueSrc);
+		View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandomMask(mask, 0xFF);
+
+		View loCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
+			loCountDst1, loValueDst1, hiCountDst1, hiValueDst1, 0x80, mask));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
+			loCountDst2, loValueDst2, hiCountDst2, hiValueDst2, 0x80, mask));
+
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "loCount");
+		result = result && Compare(loValueDst1, loValueDst2, 0, true, 10, 0, "loValue");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hiCount");
+		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 10, 0, "hiValue");
 
 		return result;
 	}
@@ -164,6 +300,26 @@ namespace Test
 
 		result = result && BackgroundIncrementCountTest(W, H, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(Simd::BackgroundIncrementCount));
 		result = result && BackgroundIncrementCountTest(W + 1, H - 1, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(Simd::BackgroundIncrementCount));
+
+		return result;
+	}
+
+	bool BackgroundAdjustRangeTest()
+	{
+		bool result = true;
+
+		result = result && BackgroundAdjustRangeTest(W, H, FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(Simd::BackgroundAdjustRange));
+		result = result && BackgroundAdjustRangeTest(W + 1, H - 1, FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(Simd::BackgroundAdjustRange));
+
+		return result;
+	}
+
+	bool MaskedBackgroundAdjustRangeTest()
+	{
+		bool result = true;
+
+		result = result && MaskedBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Base::BackgroundAdjustRange), FUNC4(Simd::BackgroundAdjustRange));
+		result = result && MaskedBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Base::BackgroundAdjustRange), FUNC4(Simd::BackgroundAdjustRange));
 
 		return result;
 	}
