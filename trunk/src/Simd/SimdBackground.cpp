@@ -89,19 +89,91 @@ namespace Simd
 				hiCount += hiCountStride;
 			}
 		}
+
+		SIMD_INLINE void AdjustLo(const uchar & count, uchar & value, int threshold)
+		{
+			if(count > threshold)
+			{
+				if(value > 0)
+					value--;
+			}
+			else if(count < threshold)
+			{
+				if(value < 0xFF)
+					value++;
+			}
+		}
+
+		SIMD_INLINE void AdjustHi(const uchar & count, uchar & value, int threshold)
+		{
+			if(count > threshold)
+			{
+				if(value < 0xFF)
+					value++;
+			}
+			else if(count < threshold)
+			{
+				if(value > 0)
+					value--;
+			}
+		}
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					AdjustLo(loCount[col], loValue[col], threshold);
+					AdjustHi(hiCount[col], hiValue[col], threshold);
+					loCount[col] = 0;
+					hiCount[col] = 0;
+				}
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(mask[col])
+					{
+						AdjustLo(loCount[col], loValue[col], threshold);
+						AdjustHi(hiCount[col], hiValue[col], threshold);
+					}
+					loCount[col] = 0;
+					hiCount[col] = 0;
+				}
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+				mask += maskStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		template <bool align> SIMD_INLINE void BackgroundGrowRangeSlow(const uchar * value, uchar * lo, uchar * hi, __m128i incDecMask)
+		template <bool align> SIMD_INLINE void BackgroundGrowRangeSlow(const uchar * value, uchar * lo, uchar * hi, __m128i tailMask)
 		{
 			const __m128i _value = Load<align>((__m128i*)value);
 			const __m128i _lo = Load<align>((__m128i*)lo);
 			const __m128i _hi = Load<align>((__m128i*)hi);
 
-			const __m128i inc = _mm_and_si128(incDecMask, GreaterThenU8(_value, _hi));
-			const __m128i dec = _mm_and_si128(incDecMask, LesserThenU8(_value, _lo));
+			const __m128i inc = _mm_and_si128(tailMask, GreaterThenU8(_value, _hi));
+			const __m128i dec = _mm_and_si128(tailMask, LesserThenU8(_value, _lo));
 
 			Store<align>((__m128i*)lo, _mm_subs_epu8(_lo, dec));
 			Store<align>((__m128i*)hi, _mm_adds_epu8(_hi, inc));
@@ -185,7 +257,7 @@ namespace Simd
 		}
 
 		template <bool align> SIMD_INLINE void BackgroundIncrementCount(const uchar * value, 
-			const uchar * loValue, const uchar * hiValue, uchar * loCount, uchar * hiCount, size_t offset, __m128i incMask)
+			const uchar * loValue, const uchar * hiValue, uchar * loCount, uchar * hiCount, size_t offset, __m128i tailMask)
 		{
 			const __m128i _value = Load<align>((__m128i*)(value + offset));
 			const __m128i _loValue = Load<align>((__m128i*)(loValue + offset));
@@ -193,8 +265,8 @@ namespace Simd
 			const __m128i _hiValue = Load<align>((__m128i*)(hiValue + offset));
 			const __m128i _hiCount = Load<align>((__m128i*)(hiCount + offset));
 
-			const __m128i incLo = _mm_and_si128(incMask, LesserThenU8(_value, _loValue));
-			const __m128i incHi = _mm_and_si128(incMask, GreaterThenU8(_value, _hiValue));
+			const __m128i incLo = _mm_and_si128(tailMask, LesserThenU8(_value, _loValue));
+			const __m128i incHi = _mm_and_si128(tailMask, GreaterThenU8(_value, _hiValue));
 
 			Store<align>((__m128i*)(loCount + offset), _mm_adds_epu8(_loCount, incLo));
 			Store<align>((__m128i*)(hiCount + offset), _mm_adds_epu8(_hiCount, incHi));
@@ -241,6 +313,124 @@ namespace Simd
 				BackgroundIncrementCount<false>(value, valueStride, width, height,
 				loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 		}
+
+		SIMD_INLINE __m128i AdjustLo(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
+		{
+			const __m128i dec = _mm_and_si128(mask, GreaterThenU8(count, threshold));
+			const __m128i inc = _mm_and_si128(mask, LesserThenU8(count, threshold));
+			return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
+		}
+
+		SIMD_INLINE __m128i AdjustHi(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
+		{
+			const __m128i inc = _mm_and_si128(mask, GreaterThenU8(count, threshold));
+			const __m128i dec = _mm_and_si128(mask, LesserThenU8(count, threshold));
+			return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
+		}
+
+		template <bool align> SIMD_INLINE void BackgroundAdjustRange(uchar * loCount, uchar * loValue, 
+			uchar * hiCount, uchar * hiValue, size_t offset, const __m128i & threshold, const __m128i & mask)
+		{
+			const __m128i _loCount = Load<align>((__m128i*)(loCount + offset));
+			const __m128i _loValue = Load<align>((__m128i*)(loValue + offset));
+			const __m128i _hiCount = Load<align>((__m128i*)(hiCount + offset));
+			const __m128i _hiValue = Load<align>((__m128i*)(hiValue + offset));
+
+			Store<align>((__m128i*)(loValue + offset), AdjustLo(_loCount, _loValue, mask, threshold));
+			Store<align>((__m128i*)(hiValue + offset), AdjustHi(_hiCount, _hiValue, mask, threshold));
+			Store<align>((__m128i*)(loCount + offset), K_ZERO);
+			Store<align>((__m128i*)(hiCount + offset), K_ZERO);
+		}
+
+		template <bool align> void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+			}
+
+			const __m128i _threshold = _mm_set1_epi8((char)threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, col, _threshold, K8_01);
+				if(alignedWidth != width)
+					BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, width - A, _threshold, tailMask);
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold)
+		{
+			if(	Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+				BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
+				hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+			else
+				BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
+				hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+		}
+
+		template <bool align> SIMD_INLINE void BackgroundAdjustRange(uchar * loCount, uchar * loValue, uchar * hiCount, uchar * hiValue, 
+			const uchar * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
+		{
+			const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
+			BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, offset, threshold, _mm_and_si128(_mask, tailMask));
+		}
+
+		template <bool align> void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			const __m128i _threshold = _mm_set1_epi8((char)threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, mask, col, _threshold, K8_01);
+				if(alignedWidth != width)
+					BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, mask, width - A, _threshold, tailMask);
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+				mask += maskStride;
+			}		
+		}
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+		{
+			if(	Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride) &&
+				Aligned(mask) && Aligned(maskStride))
+				BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
+				hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+			else
+				BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
+				hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -280,6 +470,34 @@ namespace Simd
 			loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 	}
 
+	void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+		uchar * hiValue, size_t hiValueStride, uchar threshold)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+			hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
+			hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+	}
+
+	void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+		uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+			hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+			hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+	}
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi)
 	{
 		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
@@ -302,12 +520,40 @@ namespace Simd
 		assert(value.width == loValue.width && value.height == loValue.height && 
 			value.width == hiValue.width && value.height == hiValue.height &&
 			value.width == loCount.width && value.height == loCount.height && 
-			value.width == hiCount.width && value.height == hiCount.height &&);
+			value.width == hiCount.width && value.height == hiCount.height);
 		assert(value.format == View::Gray8 && loValue.format == View::Gray8 && hiValue.format == View::Gray8 && 
 			loCount.format == View::Gray8 && hiCount.format == View::Gray8);
 
 		BackgroundIncrementCount(value.data, value.stride, value.width, value.height,
 			loValue.data, loValue.stride, hiValue.data, hiValue.stride,
 			loCount.data, loCount.stride, hiCount.data, hiCount.stride);
+	}
+
+	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
+		uchar threshold)
+	{
+		assert(loValue.width == hiValue.width && loValue.height == hiValue.height &&
+			loValue.width == loCount.width && loValue.height == loCount.height && 
+			loValue.width == hiCount.width && loValue.height == hiCount.height);
+		assert(loValue.format == View::Gray8 && hiValue.format == View::Gray8 && 
+			loCount.format == View::Gray8 && hiCount.format == View::Gray8);
+
+		BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
+			loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, threshold);
+	}
+
+	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
+		uchar threshold, const View & mask)
+	{
+		assert(loValue.width == hiValue.width && loValue.height == hiValue.height &&
+			loValue.width == loCount.width && loValue.height == loCount.height && 
+			loValue.width == hiCount.width && loValue.height == hiCount.height &&
+			loValue.width == mask.width && loValue.height == mask.height);
+		assert(loValue.format == View::Gray8 && hiValue.format == View::Gray8 && 
+			loCount.format == View::Gray8 && hiCount.format == View::Gray8);
+
+		BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
+			loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, 
+			threshold, mask.data, mask.stride);
 	}
 }

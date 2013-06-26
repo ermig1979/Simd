@@ -39,6 +39,14 @@ namespace Simd
 		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
 			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
 			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold);
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -53,6 +61,14 @@ namespace Simd
 		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
 			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
 			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold);
+
+		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -66,11 +82,25 @@ namespace Simd
 		const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
 		uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
 
+	void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+		uchar * hiValue, size_t hiValueStride, uchar threshold);
+
+	void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+		uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
 
 	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi);
 
 	void BackgroundIncrementCount(const View & value, const View & loValue, const View & hiValue, 
 		View & loCount, View & hiCount);
+
+	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
+		uchar threshold);
+
+	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
+		uchar threshold, const View & mask);
 }
 #endif//__SimdBackground_h__

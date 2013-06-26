@@ -38,7 +38,8 @@ namespace Test
 	void FillRandomMask(View & view, uchar index);
     
     bool Compare(const View & a, const View & b, 
-		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0);
+		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0, 
+		const std::string & description = "");
 
 	bool Compare(const Histogram a, const Histogram b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0);
