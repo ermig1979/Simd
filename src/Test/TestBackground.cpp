@@ -290,7 +290,7 @@ namespace Test
 			{
 				Simd::Copy(loSrc, loDst);
 				Simd::Copy(hiSrc, hiDst);
-				TEST_PERFORMANCE_TEST(description);
+				TEST_PERFORMANCE_TEST(description + "<m>");
 				func(value.data, value.stride, value.width, value.height, loDst.data, loDst.stride, hiDst.data, hiDst.stride,
 					mask.data, mask.stride);
 			}
@@ -325,6 +325,52 @@ namespace Test
 
 		result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
 		result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+
+		return result;
+	}
+
+	namespace
+	{
+		struct Func6
+		{
+			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height,
+				uchar index, uchar value, uchar * dst, size_t dstStride);
+
+			FuncPtr func;
+			std::string description;
+
+			Func6(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & src, uchar index, uchar value, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
+			}
+		};
+	}
+
+#define FUNC6(function) Func6(function, std::string(#function))
+
+	bool BackgroundInitMaskTest(int width, int height, const Func6 & f1, const Func6 & f2)
+	{
+		bool result = true;
+
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+		uchar index = 1 + Random(255);
+		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandomMask(src, index);
+
+		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		memset(dst1.data, 0, dst1.stride*height);
+		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		memset(dst2.data, 0, dst2.stride*height);
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, index, 0xFF, dst1));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, index, 0xFF, dst2));
+
+		result = result && Compare(dst1, dst2, 0, true, 10);
 
 		return result;
 	}
@@ -395,6 +441,16 @@ namespace Test
 
 		result = result && MaskedBackgroundShiftRangeTest(W, H, FUNC5(Simd::Base::BackgroundShiftRange), FUNC5(Simd::BackgroundShiftRange));
 		result = result && MaskedBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Base::BackgroundShiftRange), FUNC5(Simd::BackgroundShiftRange));
+
+		return result;
+	}
+
+	bool BackgroundInitMaskTest()
+	{
+		bool result = true;
+
+		result = result && BackgroundInitMaskTest(W, H, FUNC6(Simd::Base::BackgroundInitMask), FUNC6(Simd::BackgroundInitMask));
+		result = result && BackgroundInitMaskTest(W + 1, H - 1, FUNC6(Simd::Base::BackgroundInitMask), FUNC6(Simd::BackgroundInitMask));
 
 		return result;
 	}

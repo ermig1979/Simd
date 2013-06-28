@@ -39,6 +39,8 @@ namespace Test
 	bool BackgroundShiftRangeTest();
 
 	bool MaskedBackgroundShiftRangeTest();
+
+	bool BackgroundInitMaskTest();
 }
 
 #endif//__TestBackground_h__

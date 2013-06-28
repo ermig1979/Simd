@@ -53,6 +53,9 @@ namespace Simd
 
 		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
+
+		void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+			uchar index, uchar value, uchar * dst, size_t dstStride);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -81,6 +84,9 @@ namespace Simd
 
 		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
 			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
+
+		void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+			uchar index, uchar value, uchar * dst, size_t dstStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -108,6 +114,9 @@ namespace Simd
 	void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
 
+	void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+		uchar index, uchar value, uchar * dst, size_t dstStride);
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
 
 	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi);
@@ -124,5 +133,7 @@ namespace Simd
 	void BackgroundShiftRange(const View & value, View & lo, View & hi);
 
 	void BackgroundShiftRange(const View & value, View & lo, View & hi, const View & mask);
+
+	void BackgroundInitMask(const View & src, uchar index, uchar value, View & dst);
 }
 #endif//__SimdBackground_h__
