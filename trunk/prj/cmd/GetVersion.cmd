@@ -2,7 +2,7 @@
 
 echo Try to estimate SVN revision:
 
-set USER_VERSION=0.0.5
+set USER_VERSION=0.0.6
 set SUBWCREV_EXE=SubWCRev.exe
 set TRUNK_DIR=..\..
 set SIMD_VERSION_FILE=%TRUNK_DIR%\src\Simd\SimdVersion.h
