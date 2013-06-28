@@ -35,6 +35,10 @@ namespace Test
 	bool BackgroundAdjustRangeTest();
 
 	bool MaskedBackgroundAdjustRangeTest();
+
+	bool BackgroundShiftRangeTest();
+
+	bool MaskedBackgroundShiftRangeTest();
 }
 
 #endif//__TestBackground_h__

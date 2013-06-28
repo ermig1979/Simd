@@ -161,6 +161,52 @@ namespace Simd
 				mask += maskStride;
 			}
 		}
+
+		SIMD_INLINE void BackgroundShiftRange(const uchar & value, uchar & lo, uchar & hi)
+		{
+			int add = int(value) - int(hi);
+			int sub = int(lo) - int(value);
+			if(add > 0)
+			{
+				lo = Min(lo + add, 0xFF);
+				hi = Min(hi + add, 0xFF);
+			}
+			if(sub > 0)
+			{
+				lo = Max(lo - sub, 0);
+				hi = Max(hi - sub, 0);
+			}
+		}
+
+		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+					BackgroundShiftRange(value[col], lo[col], hi[col]);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
+
+		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(mask[col])
+						BackgroundShiftRange(value[col], lo[col], hi[col]);
+				}
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+				mask += maskStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -431,6 +477,97 @@ namespace Simd
 				BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
 				hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundShiftRange(const uchar * value, uchar * lo, uchar * hi, size_t offset, __m128i mask)
+		{
+			const __m128i _value = Load<align>((__m128i*)(value + offset));
+			const __m128i _lo = Load<align>((__m128i*)(lo + offset));
+			const __m128i _hi = Load<align>((__m128i*)(hi + offset));
+
+			const __m128i add = _mm_and_si128(mask, _mm_subs_epu8(_value, _hi));
+			const __m128i sub = _mm_and_si128(mask, _mm_subs_epu8(_lo, _value));
+
+			Store<align>((__m128i*)(lo + offset), _mm_subs_epu8(_mm_adds_epu8(_lo, add), sub));
+			Store<align>((__m128i*)(hi + offset), _mm_subs_epu8(_mm_adds_epu8(_hi, add), sub));
+		}
+
+		template <bool align> void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundShiftRange<align>(value, lo, hi, col, K_INV_ZERO);
+				if(alignedWidth != width)
+					BackgroundShiftRange<false>(value, lo, hi, width - A, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
+
+		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+		{
+			if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+			else
+				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		}
+
+		template <bool align> SIMD_INLINE void BackgroundShiftRange(const uchar * value, uchar * lo, uchar * hi, const uchar * mask, 
+			size_t offset, __m128i tailMask)
+		{
+			const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
+			BackgroundShiftRange<align>(value, lo, hi, offset, _mm_and_si128(_mask, tailMask));
+		}
+
+		template <bool align> void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundShiftRange<align>(value, lo, hi, mask, col, K_INV_ZERO);
+				if(alignedWidth != width)
+					BackgroundShiftRange<false>(value, lo, hi, mask, width - A, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+				mask += maskStride;
+			}
+		}
+
+		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
+		{
+			if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
+				Aligned(hi) && Aligned(hiStride) &&  Aligned(mask) && Aligned(maskStride))
+				BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+			else
+				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -498,6 +635,30 @@ namespace Simd
 			hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 	}
 
+	void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+		uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+	}
+
+	void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+		uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+			mask, maskStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, 
+			maskStride);
+	}
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi)
 	{
 		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
@@ -555,5 +716,24 @@ namespace Simd
 		BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
 			loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, 
 			threshold, mask.data, mask.stride);
+	}
+
+	void BackgroundShiftRange(const View & value, View & lo, View & hi)
+	{
+		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
+		assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8);
+
+		BackgroundShiftRange(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+	}
+
+	void BackgroundShiftRange(const View & value, View & lo, View & hi, const View & mask)
+	{
+		assert(value.width == lo.width && value.height == lo.height && 
+			value.width == hi.width && value.height == hi.height &&
+			value.width == mask.width && value.height == mask.height);
+		assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8 && mask.format == View::Gray8);
+
+		BackgroundShiftRange(value.data, value.stride, value.width, value.height, 
+			lo.data, lo.stride, hi.data, hi.stride, mask.data, mask.stride);
 	}
 }
