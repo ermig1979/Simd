@@ -107,6 +107,7 @@ int main(int argc, char* argv[])
 	EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
 	EXECUTE_TEST(Test::BackgroundShiftRangeTest);
 	EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
+	EXECUTE_TEST(Test::BackgroundInitMaskTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

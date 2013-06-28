@@ -207,6 +207,21 @@ namespace Simd
 				mask += maskStride;
 			}
 		}
+
+		void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+			uchar index, uchar value, uchar * dst, size_t dstStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(src[col] == index)
+						dst[col] = value;
+				}
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -568,6 +583,47 @@ namespace Simd
 			else
 				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundInitMask(const uchar * src, uchar * dst, const __m128i & index, const __m128i & value)
+		{
+			__m128i _mask = _mm_cmpeq_epi8(Load<align>((__m128i*)src), index);
+			__m128i _old = _mm_andnot_si128(_mask, Load<align>((__m128i*)dst));
+			__m128i _new = _mm_and_si128(_mask, value);
+			Store<align>((__m128i*)dst, _mm_or_si128(_old, _new));
+		}
+
+		template <bool align> void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+			uchar index, uchar value, uchar * dst, size_t dstStride)
+		{
+			assert(width >= A);
+			if(align)
+			{
+				assert(Aligned(src) && Aligned(srcStride));
+				assert(Aligned(dst) && Aligned(dstStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__m128i _index = _mm_set1_epi8(index);
+			__m128i _value = _mm_set1_epi8(value);
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0; col < alignedWidth; col += A)
+					BackgroundInitMask<align>(src + col, dst + col, _index, _value);
+				if(alignedWidth != width)
+					BackgroundInitMask<false>(src + width - A, dst + width - A, _index, _value);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+			uchar index, uchar value, uchar * dst, size_t dstStride)
+		{
+			if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
+			else
+				BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
+		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -659,6 +715,17 @@ namespace Simd
 			maskStride);
 	}
 
+	void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+		uchar index, uchar value, uchar * dst, size_t dstStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width >= Sse2::A)
+			Sse2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+	}
+
 	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi)
 	{
 		assert(value.width == lo.width && value.height == lo.height && value.width == hi.width && value.height == hi.height);
@@ -735,5 +802,14 @@ namespace Simd
 
 		BackgroundShiftRange(value.data, value.stride, value.width, value.height, 
 			lo.data, lo.stride, hi.data, hi.stride, mask.data, mask.stride);
+	}
+
+	void BackgroundInitMask(const View & src, uchar index, uchar value, View & dst)
+	{
+		assert(src.width == dst.width && src.height == dst.height);
+		assert(src.format == View::Gray8 && dst.format);
+
+		BackgroundInitMask(src.data, src.stride, src.width, src.height, 
+			index, value, dst.data, dst.stride);
 	}
 }
