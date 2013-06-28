@@ -50,7 +50,7 @@ namespace Test
 
 #define FUNC1(function) Func1(function, std::string(#function))
 
-	bool BackgroundGrowRangeTest(int width, int height, const Func1 & f1, const Func1 & f2)
+	bool BackgroundChangeRangeTest(int width, int height, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -274,12 +274,67 @@ namespace Test
 		return result;
 	}
 
+	namespace
+	{
+		struct Func5
+		{
+			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
+				uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
+
+			FuncPtr func;
+			std::string description;
+
+			Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & value, const View & loSrc, const View & hiSrc, View & loDst, View & hiDst, const View & mask) const
+			{
+				Simd::Copy(loSrc, loDst);
+				Simd::Copy(hiSrc, hiDst);
+				TEST_PERFORMANCE_TEST(description);
+				func(value.data, value.stride, value.width, value.height, loDst.data, loDst.stride, hiDst.data, hiDst.stride,
+					mask.data, mask.stride);
+			}
+		};
+	}
+
+#define FUNC5(function) Func5(function, std::string(#function))
+
+	bool MaskedBackgroundShiftRangeTest(int width, int height, const Func5 & f1, const Func5 & f2)
+	{
+		bool result = true;
+
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(value);
+		View loSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(loSrc);
+		View hiSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(hiSrc);
+		View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandomMask(mask, 0xFF);
+
+		View loDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View loDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View hiDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(value, loSrc, hiSrc, loDst1, hiDst1, mask));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loSrc, hiSrc, loDst2, hiDst2, mask));
+
+		result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
+		result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+
+		return result;
+	}
+
 	bool BackgroundGrowRangeSlowTest()
 	{
 		bool result = true;
 
-		result = result && BackgroundGrowRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
-		result = result && BackgroundGrowRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
+		result = result && BackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
+		result = result && BackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(Simd::BackgroundGrowRangeSlow));
 
 		return result;
 	}
@@ -288,8 +343,8 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundGrowRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
-		result = result && BackgroundGrowRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
+		result = result && BackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
+		result = result && BackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(Simd::BackgroundGrowRangeFast));
 
 		return result;
 	}
@@ -320,6 +375,26 @@ namespace Test
 
 		result = result && MaskedBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Base::BackgroundAdjustRange), FUNC4(Simd::BackgroundAdjustRange));
 		result = result && MaskedBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Base::BackgroundAdjustRange), FUNC4(Simd::BackgroundAdjustRange));
+
+		return result;
+	}
+
+	bool BackgroundShiftRangeTest()
+	{
+		bool result = true;
+
+		result = result && BackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(Simd::BackgroundShiftRange));
+		result = result && BackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(Simd::BackgroundShiftRange));
+
+		return result;
+	}
+
+	bool MaskedBackgroundShiftRangeTest()
+	{
+		bool result = true;
+
+		result = result && MaskedBackgroundShiftRangeTest(W, H, FUNC5(Simd::Base::BackgroundShiftRange), FUNC5(Simd::BackgroundShiftRange));
+		result = result && MaskedBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Base::BackgroundShiftRange), FUNC5(Simd::BackgroundShiftRange));
 
 		return result;
 	}
