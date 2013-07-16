@@ -1,5 +1,5 @@
 /*
-* Simd Library.
+* Simd Library Tests.
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
@@ -21,38 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAverage_h__
-#define __SimdAverage_h__
+#ifndef __TestOperation_h__
+#define __TestOperation_h__
 
-#include "Simd/SimdView.h"
-
-namespace Simd
+namespace Test
 {
-	namespace Base
-	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-	}
+	bool AverageTest();
 
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-	}
-#endif// SIMD_AVX2_ENABLE
-
-	void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-
-	void Average(const View & a, const View & b, View & dst);
+	bool AndTest();
 }
-#endif//__SimdAverage_h__
+
+#endif//__TestOperation_h__

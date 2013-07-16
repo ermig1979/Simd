@@ -48,10 +48,13 @@ namespace Test
 
 #define ARGS1(format, width, height, function1, function2) \
 	format, width, height, \
-	Func1(function1, std::string(#function1) + ColorDescription(format)), \
-	Func1(function2, std::string(#function2) + ColorDescription(format))
+	Func1(function1.func, function1.description + ColorDescription(format)), \
+	Func1(function2.func, function2.description + ColorDescription(format))
 
-	bool AverageTest(View::Format format, int width, int height, const Func1 & f1, const Func1 & f2)
+#define ARGS2(function1, function2) \
+	Func1(function1, std::string(#function1)), Func1(function2, std::string(#function2))
+
+	bool OperationTest(View::Format format, int width, int height, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -75,55 +78,49 @@ namespace Test
 		return result;
 	}
 
+	bool OperationTest(const Func1 & f1, const Func1 & f2)
+	{
+		bool result = true;
+
+		result = result && OperationTest(ARGS1(View::Gray8, W, H, f1, f2));
+		result = result && OperationTest(ARGS1(View::Gray8, W + 1, H - 1, f1, f2));
+
+		result = result && OperationTest(ARGS1(View::Uv16, W, H, f1, f2));
+		result = result && OperationTest(ARGS1(View::Uv16, W + 1, H - 1, f1, f2));
+
+		result = result && OperationTest(ARGS1(View::Bgr24, W, H, f1, f2));
+		result = result && OperationTest(ARGS1(View::Bgr24, W + 1, H - 1, f1, f2));
+
+		result = result && OperationTest(ARGS1(View::Bgra32, W, H, f1, f2));
+		result = result && OperationTest(ARGS1(View::Bgra32, W + 1, H - 1, f1, f2));
+
+		return result;
+	}
+
 	bool AverageTest()
 	{
 		bool result = true;
 
-		result = result && AverageTest(ARGS1(View::Gray8, W, H, Simd::Base::Average, Simd::Average));
-		result = result && AverageTest(ARGS1(View::Gray8, W + 2, H - 1, Simd::Base::Average, Simd::Average));
-
-		result = result && AverageTest(ARGS1(View::Uv16, W, H, Simd::Base::Average, Simd::Average));
-		result = result && AverageTest(ARGS1(View::Uv16, W + 2, H - 1, Simd::Base::Average, Simd::Average));
-
-		result = result && AverageTest(ARGS1(View::Bgr24, W, H, Simd::Base::Average, Simd::Average));
-		result = result && AverageTest(ARGS1(View::Bgr24, W + 2, H - 1, Simd::Base::Average, Simd::Average));
-
-		result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Base::Average, Simd::Average));
-		result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Base::Average, Simd::Average));
+		result = result && OperationTest(ARGS2(Simd::Base::Average, Simd::Average));
 
 #ifdef SIMD_SSE2_ENABLE
 		if(Simd::Sse2::Enable)
-		{
-			result = result && AverageTest(ARGS1(View::Gray8, W, H, Simd::Sse2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Gray8, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Uv16, W, H, Simd::Sse2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Uv16, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Bgr24, W, H, Simd::Sse2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Bgr24, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Sse2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Sse2::Average, Simd::Average));
-		}
+			result = result && OperationTest(ARGS2(Simd::Sse2::Average, Simd::Average));
 #endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
 		if(Simd::Avx2::Enable)
-		{
-			result = result && AverageTest(ARGS1(View::Gray8, W, H, Simd::Avx2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Gray8, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Uv16, W, H, Simd::Avx2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Uv16, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Bgr24, W, H, Simd::Avx2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Bgr24, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
-
-			result = result && AverageTest(ARGS1(View::Bgra32, W, H, Simd::Avx2::Average, Simd::Average));
-			result = result && AverageTest(ARGS1(View::Bgra32, W + 2, H - 1, Simd::Avx2::Average, Simd::Average));
-		}
+			result = result && OperationTest(ARGS2(Simd::Avx2::Average, Simd::Average));
 #endif//SIMD_AVX2_ENABLE
+
+		return result;
+	}
+
+	bool AndTest()
+	{
+		bool result = true;
+
+		result = result && OperationTest(ARGS2(Simd::Base::And, Simd::And));
 
 		return result;
 	}

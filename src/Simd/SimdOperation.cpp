@@ -27,7 +27,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdAverage.h"
+#include "Simd/SimdOperation.h"
 
 namespace Simd
 {
@@ -46,12 +46,43 @@ namespace Simd
 				dst += dstStride;
 			}
 		}
+
+		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		{
+			size_t size = width*channelCount;
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t offset = 0; offset < size; ++offset)
+					dst[offset] = a[offset] & b[offset];
+				a += aStride;
+				b += bStride;
+				dst += dstStride;
+			}
+		}
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		template <bool align> void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		enum OperationType
+		{
+			OperationAverage,
+			OperationAnd,
+		};
+		template <OperationType type> SIMD_INLINE __m128i Operation(const __m128i & a, const __m128i & b);
+
+		template <> SIMD_INLINE __m128i Operation<OperationAverage>(const __m128i & a, const __m128i & b)
+		{
+			return _mm_avg_epu8(a, b);
+		}
+
+		template <> SIMD_INLINE __m128i Operation<OperationAnd>(const __m128i & a, const __m128i & b)
+		{
+			return _mm_and_si128(a, b);
+		}
+
+		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 		{
 			assert(width*channelCount >= A);
@@ -66,13 +97,13 @@ namespace Simd
 				{
 					const __m128i a_ = Load<align>((__m128i*)(a + offset));
 					const __m128i b_ = Load<align>((__m128i*)(b + offset));
-					Store<align>((__m128i*)(dst + offset), _mm_avg_epu8(a_, b_));
+					Store<align>((__m128i*)(dst + offset), Operation<type>(a_, b_));
 				}
 				if(alignedSize != size)
 				{
 					const __m128i a_ = Load<false>((__m128i*)(a + size - A));
 					const __m128i b_ = Load<false>((__m128i*)(b + size - A));
-					Store<false>((__m128i*)(dst + size - A), _mm_avg_epu8(a_, b_));
+					Store<false>((__m128i*)(dst + size - A), Operation<type>(a_, b_));
 				}
 				a += aStride;
 				b += bStride;
@@ -84,9 +115,18 @@ namespace Simd
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-				Average<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<true, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			else
-				Average<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<false, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+		}
+
+		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		{
+			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+				Operation<true, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			else
+				Operation<false, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
@@ -150,6 +190,17 @@ namespace Simd
 			Base::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 	}
 
+	void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+	{
+#ifdef SIMD_SSE2_ENABLE
+		if(Sse2::Enable && width*channelCount >= Sse2::A)
+			Sse2::And(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+		else
+#endif// SIMD_SSE2_ENABLE
+			Base::And(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+	}
+
 	void Average(const View & a, const View & b, View & dst)
 	{
 		assert(a.width == b.width && a.height == b.height && a.format == b.format);
@@ -157,5 +208,14 @@ namespace Simd
 		assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
 
 		Average(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride);
+	}
+
+	void And(const View & a, const View & b, View & dst)
+	{
+		assert(a.width == b.width && a.height == b.height && a.format == b.format);
+		assert(a.width == dst.width && a.height == dst.height && a.format == dst.format);
+		assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
+
+		And(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride);
 	}
 }

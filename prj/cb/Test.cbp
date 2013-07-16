@@ -102,12 +102,6 @@
 		<Compiler>
 			<Add option="-march=core2" />
 		</Compiler>
-		<Unit filename="../../src/Test/TestAverage.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestAverage.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestBackground.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
@@ -167,6 +161,12 @@
 		</Unit>
 		<Unit filename="../../src/Test/TestMain.cpp">
 			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestOperation.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestOperation.h">
+			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestPerformance.cpp">
 			<Option virtualFolder="Sys/" />
