@@ -128,12 +128,6 @@
 		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAverage.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAverage.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdBackground.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -241,6 +235,12 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMemory.h">
 			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdOperation.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdOperation.h">
+			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />

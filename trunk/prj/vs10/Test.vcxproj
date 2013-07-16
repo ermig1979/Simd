@@ -183,7 +183,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Test\TestAverage.h" />
     <ClInclude Include="..\..\src\Test\TestBackground.h" />
     <ClInclude Include="..\..\src\Test\TestBinarization.h" />
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
@@ -191,6 +190,7 @@
     <ClInclude Include="..\..\src\Test\TestDifferenceSum.h" />
     <ClInclude Include="..\..\src\Test\TestFilter.h" />
     <ClInclude Include="..\..\src\Test\TestHistogram.h" />
+    <ClInclude Include="..\..\src\Test\TestOperation.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestResize.h" />
     <ClInclude Include="..\..\src\Test\TestShift.h" />
@@ -205,13 +205,13 @@
     <ClInclude Include="..\..\src\Test\TestYuvToHue.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Test\TestAverage.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestResize.cpp" />
     <ClCompile Include="..\..\src\Test\TestShift.cpp" />

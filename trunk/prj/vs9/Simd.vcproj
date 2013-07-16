@@ -379,14 +379,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\Simd\SimdAverage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\Simd\SimdAverage.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\Simd\SimdBackground.cpp"
 				>
 			</File>
@@ -488,6 +480,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\Simd\SimdMedianFilterSquare5x5.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdOperation.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdOperation.h"
 				>
 			</File>
 			<File

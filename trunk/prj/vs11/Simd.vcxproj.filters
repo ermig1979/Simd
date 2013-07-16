@@ -70,9 +70,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAverage.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
@@ -92,6 +89,9 @@
       <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBackground.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdOperation.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
   </ItemGroup>
@@ -201,9 +201,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAverage.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
     </ClInclude>
@@ -226,6 +223,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBackground.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdOperation.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

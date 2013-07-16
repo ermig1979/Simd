@@ -172,7 +172,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Test\TestAverage.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
@@ -183,6 +182,7 @@
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
     <ClCompile Include="..\..\src\Test\TestMain.cpp" />
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestResize.cpp" />
@@ -194,7 +194,6 @@
     <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Test\TestAverage.h" />
     <ClInclude Include="..\..\src\Test\TestBackground.h" />
     <ClInclude Include="..\..\src\Test\TestBgraToGray.h" />
     <ClInclude Include="..\..\src\Test\TestBgrToGray.h" />
@@ -205,6 +204,7 @@
     <ClInclude Include="..\..\src\Test\TestDifferenceSum.h" />
     <ClInclude Include="..\..\src\Test\TestFilter.h" />
     <ClInclude Include="..\..\src\Test\TestHistogram.h" />
+    <ClInclude Include="..\..\src\Test\TestOperation.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestReduceGray.h" />
     <ClInclude Include="..\..\src\Test\TestResize.h" />

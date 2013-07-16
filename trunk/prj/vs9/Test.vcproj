@@ -351,14 +351,6 @@
 			Name="Test"
 			>
 			<File
-				RelativePath="..\..\src\Test\TestAverage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\Test\TestAverage.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\Test\TestBackground.cpp"
 				>
 			</File>
@@ -428,6 +420,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\Test\TestHistogram.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestOperation.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Test\TestOperation.h"
 				>
 			</File>
 			<File

@@ -165,7 +165,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAverage.h" />
     <ClInclude Include="..\..\src\Simd\SimdBackground.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgraToGray.h" />
@@ -188,6 +187,7 @@
     <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare3x3.h" />
     <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare5x5.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdOperation.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray2x2.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray3x3.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray4x4.h" />
@@ -210,7 +210,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAverage.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp" />
@@ -225,6 +224,7 @@
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray4x4.cpp" />
