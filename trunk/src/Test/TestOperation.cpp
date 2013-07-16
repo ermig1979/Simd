@@ -31,30 +31,45 @@ namespace Test
 		struct Func1
 		{
 			typedef void (*FuncPtr)(const uchar * a, size_t aStride, const uchar * b, size_t bStride,
-				size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+				size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, Simd::OperationType type);
 
 			FuncPtr func;
 			std::string description;
 
 			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & a, const View & b, View & dst) const
+			void Call(const View & a, const View & b, View & dst, Simd::OperationType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride);
+				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride, type);
 			}
 		};
 	}
 
-#define ARGS1(format, width, height, function1, function2) \
-	format, width, height, \
-	Func1(function1.func, function1.description + ColorDescription(format)), \
-	Func1(function2.func, function2.description + ColorDescription(format))
+    SIMD_INLINE std::string OperationTypeDescription(Simd::OperationType type)
+    {
+        switch(type)
+        {
+        case Simd::OperationAverage:
+            return "<Avg>";
+        case Simd::OperationAnd:
+            return "<And>";
+        case Simd::OperationMax:
+            return "<Max>";
+        }
+		assert(0);
+		return "<Unknown";
+    }
+
+#define ARGS1(format, width, height, type, function1, function2) \
+	format, width, height, type, \
+	Func1(function1.func, function1.description + OperationTypeDescription(type) + ColorDescription(format)), \
+	Func1(function2.func, function2.description + OperationTypeDescription(type) + ColorDescription(format))
 
 #define ARGS2(function1, function2) \
 	Func1(function1, std::string(#function1)), Func1(function2, std::string(#function2))
 
-	bool OperationTest(View::Format format, int width, int height, const Func1 & f1, const Func1 & f2)
+	bool OperationTest(View::Format format, int width, int height, Simd::OperationType type, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -69,9 +84,9 @@ namespace Test
 		View d1(width, height, format, NULL, TEST_ALIGN(width));
 		View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, d1));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, d1, type));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, d2));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, d2, type));
 
 		result = result && Compare(d1, d2, 0, true, 10);
 
@@ -82,45 +97,39 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && OperationTest(ARGS1(View::Gray8, W, H, f1, f2));
-		result = result && OperationTest(ARGS1(View::Gray8, W + 1, H - 1, f1, f2));
+        for(Simd::OperationType type = Simd::OperationAverage; type <= Simd::OperationMax && result; type = Simd::OperationType(type + 1))
+        {
+            result = result && OperationTest(ARGS1(View::Gray8, W, H, type, f1, f2));
+            result = result && OperationTest(ARGS1(View::Gray8, W + 1, H - 1, type, f1, f2));
 
-		result = result && OperationTest(ARGS1(View::Uv16, W, H, f1, f2));
-		result = result && OperationTest(ARGS1(View::Uv16, W + 1, H - 1, f1, f2));
+            result = result && OperationTest(ARGS1(View::Uv16, W, H, type, f1, f2));
+            result = result && OperationTest(ARGS1(View::Uv16, W + 1, H - 1, type, f1, f2));
 
-		result = result && OperationTest(ARGS1(View::Bgr24, W, H, f1, f2));
-		result = result && OperationTest(ARGS1(View::Bgr24, W + 1, H - 1, f1, f2));
+            result = result && OperationTest(ARGS1(View::Bgr24, W, H, type, f1, f2));
+            result = result && OperationTest(ARGS1(View::Bgr24, W + 1, H - 1, type, f1, f2));
 
-		result = result && OperationTest(ARGS1(View::Bgra32, W, H, f1, f2));
-		result = result && OperationTest(ARGS1(View::Bgra32, W + 1, H - 1, f1, f2));
+            result = result && OperationTest(ARGS1(View::Bgra32, W, H, type, f1, f2));
+            result = result && OperationTest(ARGS1(View::Bgra32, W + 1, H - 1, type, f1, f2));
+        }
 
 		return result;
 	}
 
-	bool AverageTest()
+	bool OperationTest()
 	{
 		bool result = true;
 
-		result = result && OperationTest(ARGS2(Simd::Base::Average, Simd::Average));
+		result = result && OperationTest(ARGS2(Simd::Base::Operation, Simd::Operation));
 
 #ifdef SIMD_SSE2_ENABLE
 		if(Simd::Sse2::Enable)
-			result = result && OperationTest(ARGS2(Simd::Sse2::Average, Simd::Average));
+			result = result && OperationTest(ARGS2(Simd::Sse2::Operation, Simd::Operation));
 #endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
 		if(Simd::Avx2::Enable)
-			result = result && OperationTest(ARGS2(Simd::Avx2::Average, Simd::Average));
+			result = result && OperationTest(ARGS2(Simd::Avx2::Operation, Simd::Operation));
 #endif//SIMD_AVX2_ENABLE
-
-		return result;
-	}
-
-	bool AndTest()
-	{
-		bool result = true;
-
-		result = result && OperationTest(ARGS2(Simd::Base::And, Simd::And));
 
 		return result;
 	}

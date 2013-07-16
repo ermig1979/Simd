@@ -28,42 +28,38 @@
 
 namespace Simd
 {
+	enum OperationType
+	{
+		OperationAverage,
+		OperationAnd,
+		OperationMax,
+	};
+
 	namespace Base
 	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-
-		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-
-		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
 	}
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
 	}
 #endif// SIMD_AVX2_ENABLE
 
-	void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+	void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
 
-	void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
-
-	void Average(const View & a, const View & b, View & dst);
-
-	void And(const View & a, const View & b, View & dst);
+	void Operation(const View & a, const View & b, View & dst, OperationType type);
 }
 #endif//__SimdOperation_h__
