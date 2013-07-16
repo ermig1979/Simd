@@ -33,31 +33,50 @@ namespace Simd
 {
 	namespace Base
 	{
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		template <OperationType type> SIMD_INLINE uchar Operation(const uchar & a, const uchar & b);
+
+		template <> SIMD_INLINE uchar Operation<OperationAverage>(const uchar & a, const uchar & b)
+		{
+			return Average(a, b);
+		}
+
+		template <> SIMD_INLINE uchar Operation<OperationAnd>(const uchar & a, const uchar & b)
+		{
+			return  a & b;
+		}
+
+		template <> SIMD_INLINE uchar Operation<OperationMax>(const uchar & a, const uchar & b)
+		{
+			return  MaxU8(a, b);
+		}
+
+		template <OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 		{
 			size_t size = width*channelCount;
 			for(size_t row = 0; row < height; ++row)
 			{
 				for(size_t offset = 0; offset < size; ++offset)
-					dst[offset] = Average(a[offset], b[offset]);
+					dst[offset] = Operation<type>(a[offset], b[offset]);
 				a += aStride;
 				b += bStride;
 				dst += dstStride;
 			}
 		}
 
-		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
 		{
-			size_t size = width*channelCount;
-			for(size_t row = 0; row < height; ++row)
+			switch(type)
 			{
-				for(size_t offset = 0; offset < size; ++offset)
-					dst[offset] = a[offset] & b[offset];
-				a += aStride;
-				b += bStride;
-				dst += dstStride;
+			case OperationAverage:
+				return Operation<OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationAnd:
+				return Operation<OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMax:
+				return Operation<OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			default:
+				assert(0);
 			}
 		}
 	}
@@ -65,11 +84,6 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		enum OperationType
-		{
-			OperationAverage,
-			OperationAnd,
-		};
 		template <OperationType type> SIMD_INLINE __m128i Operation(const __m128i & a, const __m128i & b);
 
 		template <> SIMD_INLINE __m128i Operation<OperationAverage>(const __m128i & a, const __m128i & b)
@@ -80,6 +94,11 @@ namespace Simd
 		template <> SIMD_INLINE __m128i Operation<OperationAnd>(const __m128i & a, const __m128i & b)
 		{
 			return _mm_and_si128(a, b);
+		}
+
+		template <> SIMD_INLINE __m128i Operation<OperationMax>(const __m128i & a, const __m128i & b)
+		{
+			return _mm_max_epu8(a, b);
 		}
 
 		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
@@ -111,22 +130,29 @@ namespace Simd
 			}
 		}
 
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		template <bool align> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
 		{
-			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-				Operation<true, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			else
-				Operation<false, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			switch(type)
+			{
+			case OperationAverage:
+				return Operation<align, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationAnd:
+				return Operation<align, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMax:
+				return Operation<align, OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			default:
+				assert(0);
+			}
 		}
 
-		void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-				Operation<true, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 			else
-				Operation<false, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
@@ -134,7 +160,24 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-		template <bool align> void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		template <OperationType type> SIMD_INLINE __m256i Operation(const __m256i & a, const __m256i & b);
+
+		template <> SIMD_INLINE __m256i Operation<OperationAverage>(const __m256i & a, const __m256i & b)
+		{
+			return _mm256_avg_epu8(a, b);
+		}
+
+		template <> SIMD_INLINE __m256i Operation<OperationAnd>(const __m256i & a, const __m256i & b)
+		{
+			return _mm256_and_si256(a, b);
+		}
+
+		template <> SIMD_INLINE __m256i Operation<OperationMax>(const __m256i & a, const __m256i & b)
+		{
+			return _mm256_max_epu8(a, b);
+		}
+
+		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 		{
 			assert(width*channelCount >= A);
@@ -149,13 +192,13 @@ namespace Simd
 				{
 					const __m256i a_ = Load<align>((__m256i*)(a + offset));
 					const __m256i b_ = Load<align>((__m256i*)(b + offset));
-					Store<align>((__m256i*)(dst + offset), _mm256_avg_epu8(a_, b_));
+					Store<align>((__m256i*)(dst + offset), Operation<type>(a_, b_));
 				}
 				if(alignedSize != size)
 				{
 					const __m256i a_ = Load<false>((__m256i*)(a + size - A));
 					const __m256i b_ = Load<false>((__m256i*)(b + size - A));
-					Store<false>((__m256i*)(dst + size - A), _mm256_avg_epu8(a_, b_));
+					Store<false>((__m256i*)(dst + size - A), Operation<type>(a_, b_));
 				}
 				a += aStride;
 				b += bStride;
@@ -163,59 +206,56 @@ namespace Simd
 			}
 		}
 
-		void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		template <bool align> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
+		{
+			switch(type)
+			{
+			case OperationAverage:
+				return Operation<align, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationAnd:
+				return Operation<align, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMax:
+				return Operation<align, OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			default:
+				assert(0);
+			}
+		}
+
+		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-				Average<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 			else
-				Average<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
+
 	}
 #endif// SIMD_AVX2_ENABLE
 
-	void Average(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+	void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
 	{
 #ifdef SIMD_AVX2_ENABLE
 		if(Avx2::Enable && width*channelCount >= Avx2::A)
-			Avx2::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			Avx2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width*channelCount >= Sse2::A)
-			Sse2::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			Sse2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		else
 #endif// SIMD_SSE2_ENABLE
-			Base::Average(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			Base::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 	}
 
-	void And(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
-	{
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width*channelCount >= Sse2::A)
-			Sse2::And(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-		else
-#endif// SIMD_SSE2_ENABLE
-			Base::And(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-	}
-
-	void Average(const View & a, const View & b, View & dst)
+	void Operation(const View & a, const View & b, View & dst, OperationType type)
 	{
 		assert(a.width == b.width && a.height == b.height && a.format == b.format);
 		assert(a.width == dst.width && a.height == dst.height && a.format == dst.format);
 		assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
 
-		Average(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride);
-	}
-
-	void And(const View & a, const View & b, View & dst)
-	{
-		assert(a.width == b.width && a.height == b.height && a.format == b.format);
-		assert(a.width == dst.width && a.height == dst.height && a.format == dst.format);
-		assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
-
-		And(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride);
+		Operation(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride, type);
 	}
 }

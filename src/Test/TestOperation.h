@@ -26,9 +26,7 @@
 
 namespace Test
 {
-	bool AverageTest();
-
-	bool AndTest();
+	bool OperationTest();
 }
 
 #endif//__TestOperation_h__

@@ -55,60 +55,59 @@
 
 int main(int argc, char* argv[])
 {
-    //EXECUTE_TEST(Test::ReduceGray2x2Test);
-    //EXECUTE_TEST(Test::ReduceGray3x3Test);
-    //EXECUTE_TEST(Test::ReduceGray4x4Test);
-    //EXECUTE_TEST(Test::ReduceGray5x5Test);
+    EXECUTE_TEST(Test::ReduceGray2x2Test);
+    EXECUTE_TEST(Test::ReduceGray3x3Test);
+    EXECUTE_TEST(Test::ReduceGray4x4Test);
+    EXECUTE_TEST(Test::ReduceGray5x5Test);
 
-    //EXECUTE_TEST(Test::Crc32Test);
+    EXECUTE_TEST(Test::Crc32Test);
 
-    //EXECUTE_TEST(Test::BgraToGrayTest);
+    EXECUTE_TEST(Test::BgraToGrayTest);
 
-    //EXECUTE_TEST(Test::BgrToGrayTest);
+    EXECUTE_TEST(Test::BgrToGrayTest);
 
-    //EXECUTE_TEST(Test::Yuv444ToHueTest);
-    //EXECUTE_TEST(Test::Yuv420ToHueTest);
+    EXECUTE_TEST(Test::Yuv444ToHueTest);
+    EXECUTE_TEST(Test::Yuv420ToHueTest);
 
-    //EXECUTE_TEST(Test::Yuv444ToBgraTest);
-    //EXECUTE_TEST(Test::Yuv420ToBgraTest);
+    EXECUTE_TEST(Test::Yuv444ToBgraTest);
+    EXECUTE_TEST(Test::Yuv420ToBgraTest);
 
-    //EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
-    //EXECUTE_TEST(Test::MedianFilterSquare5x5Test);
-    //EXECUTE_TEST(Test::GaussianBlur3x3Test);
-    //EXECUTE_TEST(Test::AbsGradientSaturatedSumTest);
+    EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
+    EXECUTE_TEST(Test::MedianFilterSquare5x5Test);
+    EXECUTE_TEST(Test::GaussianBlur3x3Test);
+    EXECUTE_TEST(Test::AbsGradientSaturatedSumTest);
 
-    //EXECUTE_TEST(Test::SquareDifferenceSumTest);
-    //EXECUTE_TEST(Test::MaskedSquareDifferenceSumTest);
-    //EXECUTE_TEST(Test::AbsDifferenceSumTest);
-    //EXECUTE_TEST(Test::MaskedAbsDifferenceSumTest);
+    EXECUTE_TEST(Test::SquareDifferenceSumTest);
+    EXECUTE_TEST(Test::MaskedSquareDifferenceSumTest);
+    EXECUTE_TEST(Test::AbsDifferenceSumTest);
+    EXECUTE_TEST(Test::MaskedAbsDifferenceSumTest);
 
-    //EXECUTE_TEST(Test::ResizeBilinearTest);
+    EXECUTE_TEST(Test::ResizeBilinearTest);
 
-    //EXECUTE_TEST(Test::DeinterleaveUvTest);
+    EXECUTE_TEST(Test::DeinterleaveUvTest);
 
-    EXECUTE_TEST(Test::AverageTest);
-	EXECUTE_TEST(Test::AndTest);
+    EXECUTE_TEST(Test::OperationTest);
 
- //   EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
+    EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
 
- //   EXECUTE_TEST(Test::GreaterThenBinarizationTest);
- //   EXECUTE_TEST(Test::LesserThenBinarizationTest);
- //   EXECUTE_TEST(Test::EqualToBinarizationTest);
+    EXECUTE_TEST(Test::GreaterThenBinarizationTest);
+    EXECUTE_TEST(Test::LesserThenBinarizationTest);
+    EXECUTE_TEST(Test::EqualToBinarizationTest);
 
- //   EXECUTE_TEST(Test::ShiftBilinearTest);
+    EXECUTE_TEST(Test::ShiftBilinearTest);
 
- //   EXECUTE_TEST(Test::GetStatisticTest);
+    EXECUTE_TEST(Test::GetStatisticTest);
 
-	//EXECUTE_TEST(Test::StretchGray2x2Test);
+	EXECUTE_TEST(Test::StretchGray2x2Test);
 
-	//EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
-	//EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
-	//EXECUTE_TEST(Test::BackgroundIncrementCountTest);
-	//EXECUTE_TEST(Test::BackgroundAdjustRangeTest);
-	//EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
-	//EXECUTE_TEST(Test::BackgroundShiftRangeTest);
-	//EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
-	//EXECUTE_TEST(Test::BackgroundInitMaskTest);
+	EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
+	EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
+	EXECUTE_TEST(Test::BackgroundIncrementCountTest);
+	EXECUTE_TEST(Test::BackgroundAdjustRangeTest);
+	EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
+	EXECUTE_TEST(Test::BackgroundShiftRangeTest);
+	EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
+	EXECUTE_TEST(Test::BackgroundInitMaskTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
