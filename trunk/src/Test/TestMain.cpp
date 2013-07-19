@@ -98,16 +98,16 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(Test::GetStatisticTest);
 
-	EXECUTE_TEST(Test::StretchGray2x2Test);
+    EXECUTE_TEST(Test::StretchGray2x2Test);
 
-	EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
-	EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
-	EXECUTE_TEST(Test::BackgroundIncrementCountTest);
-	EXECUTE_TEST(Test::BackgroundAdjustRangeTest);
-	EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
-	EXECUTE_TEST(Test::BackgroundShiftRangeTest);
-	EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
-	EXECUTE_TEST(Test::BackgroundInitMaskTest);
+    EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
+    EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
+    EXECUTE_TEST(Test::BackgroundIncrementCountTest);
+    EXECUTE_TEST(Test::BackgroundAdjustRangeTest);
+    EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
+    EXECUTE_TEST(Test::BackgroundShiftRangeTest);
+    EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
+    EXECUTE_TEST(Test::BackgroundInitMaskTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
