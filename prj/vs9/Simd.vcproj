@@ -475,6 +475,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp"
 				>
 			</File>
@@ -488,6 +492,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\Simd\SimdOperation.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\Simd\SimdOperationA.cpp"
 				>
 			</File>
 			<File

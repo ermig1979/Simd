@@ -227,6 +227,9 @@
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3A.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -240,6 +243,9 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdOperation.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdOperationA.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
