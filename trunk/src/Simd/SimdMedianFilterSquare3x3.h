@@ -42,6 +42,14 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
 		size_t channelCount, uchar * dst, size_t dstStride);
 

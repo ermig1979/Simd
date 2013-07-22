@@ -211,5 +211,17 @@ namespace Simd
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        SIMD_INLINE void SortU8(__m256i & a, __m256i & b)
+        {
+            __m256i t = a;
+            a = _mm256_min_epu8(t, b);
+            b = _mm256_max_epu8(t, b);
+        }
+    }
+#endif// SIMD_AVX2_ENABLE
 }
 #endif//__SimdMath_h__

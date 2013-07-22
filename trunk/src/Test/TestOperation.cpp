@@ -121,15 +121,10 @@ namespace Test
 
 		result = result && OperationTest(ARGS2(Simd::Base::Operation, Simd::Operation));
 
-#ifdef SIMD_SSE2_ENABLE
-		if(Simd::Sse2::Enable)
-			result = result && OperationTest(ARGS2(Simd::Sse2::Operation, Simd::Operation));
-#endif//SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE
-		if(Simd::Avx2::Enable)
-			result = result && OperationTest(ARGS2(Simd::Avx2::Operation, Simd::Operation));
-#endif//SIMD_AVX2_ENABLE
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+		if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+			result = result && OperationTest(ARGS2(Simd::Avx2::Operation, Simd::Sse2::Operation));
+#endif 
 
 		return result;
 	}

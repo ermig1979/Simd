@@ -61,12 +61,16 @@ namespace Test
 		};
 	}
 
-#define ARGS(format, width, height, function1, function2) \
-	format, width, height, \
-	ColorFunc(function1, std::string(#function1) + ColorDescription(format)), \
-	ColorFunc(function2, std::string(#function2) + ColorDescription(format))
+#define ARGS_C1(format, width, height, function1, function2) \
+    format, width, height, \
+    ColorFunc(function1.func, function1.description + ColorDescription(format)), \
+    ColorFunc(function2.func, function2.description + ColorDescription(format))
 
-#define FUNC(function) GrayFunc(function, std::string(#function))
+#define ARGS_C2(function1, function2) \
+    ColorFunc(function1, std::string(#function1)), ColorFunc(function2, std::string(#function2))
+
+#define ARGS_G(function1, function2) \
+    GrayFunc(function1, std::string(#function1)), GrayFunc(function2, std::string(#function2))
 
 	bool ColorFilterTest(View::Format format, int width, int height, const ColorFunc & f1, const ColorFunc & f2)
 	{
@@ -110,21 +114,35 @@ namespace Test
 		return result;
 	}
 
+    bool ColorFilterTest(const ColorFunc & f1, const ColorFunc & f2)
+    {
+        bool result = true;
+
+        result = result && ColorFilterTest(ARGS_C1(View::Gray8, W, H, f1, f2));
+        result = result && ColorFilterTest(ARGS_C1(View::Gray8, W + 1, H - 1, f1, f2));
+
+        result = result && ColorFilterTest(ARGS_C1(View::Uv16, W, H, f1, f2));
+        result = result && ColorFilterTest(ARGS_C1(View::Uv16, W + 1, H - 1, f1, f2));
+
+        result = result && ColorFilterTest(ARGS_C1(View::Bgr24, W, H, f1, f2));
+        result = result && ColorFilterTest(ARGS_C1(View::Bgr24, W + 1, H - 1, f1, f2));
+
+        result = result && ColorFilterTest(ARGS_C1(View::Bgra32, W, H, f1, f2));
+        result = result && ColorFilterTest(ARGS_C1(View::Bgra32, W + 1, H - 1, f1, f2));
+
+        return result;
+    }
+
 	bool MedianFilterSquare3x3Test()
 	{
 		bool result = true;
 
-		result = result && ColorFilterTest(ARGS(View::Gray8, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-		result = result && ColorFilterTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
 
-		result = result && ColorFilterTest(ARGS(View::Uv16, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-		result = result && ColorFilterTest(ARGS(View::Uv16, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W, H, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W + 2, H - 1, Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, Simd::Avx2::MedianFilterSquare3x3));
+#endif 
 
 		return result;
 	}
@@ -133,17 +151,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && ColorFilterTest(ARGS(View::Gray8, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-		result = result && ColorFilterTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-
-		result = result && ColorFilterTest(ARGS(View::Uv16, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-		result = result && ColorFilterTest(ARGS(View::Uv16, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W, H, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W + 2, H - 1, Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
 
 		return result;
 	}
@@ -152,17 +160,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && ColorFilterTest(ARGS(View::Gray8, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-		result = result && ColorFilterTest(ARGS(View::Gray8, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-
-		result = result && ColorFilterTest(ARGS(View::Uv16, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-		result = result && ColorFilterTest(ARGS(View::Uv16, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-		result = result && ColorFilterTest(ARGS(View::Bgr24, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W, H, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
-		result = result && ColorFilterTest(ARGS(View::Bgra32, W + 1, H - 1, Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
 
 		return result;
 	}
@@ -171,8 +169,8 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && GrayFilterTest(W, H, FUNC(Simd::Base::AbsGradientSaturatedSum), FUNC(Simd::AbsGradientSaturatedSum));
-		result = result && GrayFilterTest(W + 1, H - 1, FUNC(Simd::Base::AbsGradientSaturatedSum), FUNC(Simd::AbsGradientSaturatedSum));
+		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
+		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
 
 		return result;
 	}

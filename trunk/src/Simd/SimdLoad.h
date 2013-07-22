@@ -122,6 +122,31 @@ namespace Simd
 		{
 			return _mm256_load_si256(p); 
 		}
+
+        template <bool align, size_t step> SIMD_INLINE void LoadNose3(const uchar * p, __m256i a[3])
+        {
+            __m128i lo = Sse2::LoadBeforeFirst<step>(Sse2::Load<align>((__m128i*)p));
+            __m128i hi = _mm_loadu_si128((__m128i*)(p + Sse2::A - step));
+            a[0] = _mm256_inserti128_si256(_mm256_castsi128_si256(lo), (hi), 0x1);
+            a[1] = Load<align>((__m256i*)p);
+            a[2] = _mm256_loadu_si256((__m256i*)(p + step));
+        }
+
+        template <bool align, size_t step> SIMD_INLINE void LoadBody3(const uchar * p, __m256i a[3])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[1] = Load<align>((__m256i*)p);
+            a[2] = _mm256_loadu_si256((__m256i*)(p + step));
+        }
+
+        template <bool align, size_t step> SIMD_INLINE void LoadTail3(const uchar * p, __m256i a[3])
+        {
+            a[0] = _mm256_loadu_si256((__m256i*)(p - step));
+            a[1] = Load<align>((__m256i*)p);
+            __m128i lo = _mm_loadu_si128((__m128i*)(p + step)); 
+            __m128i hi = Sse2::LoadAfterLast<step>(Sse2::Load<align>((__m128i*)(p + Sse2::A)));
+            a[2] = _mm256_inserti128_si256(_mm256_castsi128_si256(lo), (hi), 0x1);
+        }
 	}
 #endif//SIMD_AVX2_ENABLE
 }
