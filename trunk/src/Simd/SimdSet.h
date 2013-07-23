@@ -25,6 +25,7 @@
 #define __SimdSet_h__
 
 #include "Simd/SimdTypes.h"
+#include "Simd/SimdConst.h"
 
 namespace Simd
 {
@@ -75,6 +76,18 @@ namespace Simd
 		{
 			return _mm256_unpacklo_ps(_mm256_set1_ps(a0), _mm256_set1_ps(a1));
 		}
+
+        template <class T> SIMD_INLINE __m256i SetMask(T first, size_t position, T second)
+        {
+            const size_t size = A/sizeof(T);
+            assert(position <= size);
+            T mask[size];
+            for(size_t i = 0; i < position; ++i)
+                mask[i] = first;
+            for(size_t i = position; i < size; ++i)
+                mask[i] = second;
+            return _mm256_loadu_si256((__m256i*)mask);
+        }
 	}
 #endif// SIMD_AVX2_ENABLE
 }

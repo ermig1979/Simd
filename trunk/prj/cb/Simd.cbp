@@ -134,6 +134,9 @@
 		<Unit filename="../../src/Simd/SimdBackground.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBackgroundA.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
