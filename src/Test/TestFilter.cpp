@@ -153,6 +153,11 @@ namespace Test
 
         result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, Simd::Avx2::MedianFilterSquare5x5));
+#endif 
+
 		return result;
 	}
 

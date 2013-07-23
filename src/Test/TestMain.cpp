@@ -42,6 +42,7 @@
 #include "Test/TestYuvToHue.h"
 
 #define EXECUTE_TEST(test)\
+if(argc < 2 || std::string(argv[1]) == std::string(#test)) \
 {\
 	std::cout << #test << " is started :" << std::endl; \
 	bool result = test(); \
