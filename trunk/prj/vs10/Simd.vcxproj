@@ -225,6 +225,7 @@
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5A.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdOperationA.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2.cpp" />

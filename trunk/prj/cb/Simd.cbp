@@ -236,6 +236,9 @@
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5A.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdMemory.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
