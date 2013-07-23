@@ -134,6 +134,11 @@ namespace Simd
     void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
     {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && srcWidth >= Avx2::A)
+            Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
         if(Sse2::Enable && srcWidth >= Sse2::A)
             Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
