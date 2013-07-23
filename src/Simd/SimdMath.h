@@ -221,6 +221,16 @@ namespace Simd
             a = _mm256_min_epu8(t, b);
             b = _mm256_max_epu8(t, b);
         }
+
+        SIMD_INLINE __m256i GreaterThenU8(__m256i a, __m256i b)
+        {
+            return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_min_epu8(a, b), a), K_INV_ZERO);
+        }
+
+        SIMD_INLINE __m256i LesserThenU8(__m256i a, __m256i b)
+        {
+            return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_max_epu8(a, b), a), K_INV_ZERO);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

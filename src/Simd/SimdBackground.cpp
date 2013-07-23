@@ -630,6 +630,11 @@ namespace Simd
 	void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -641,6 +646,11 @@ namespace Simd
 	void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -653,6 +663,12 @@ namespace Simd
 		const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
 		uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundIncrementCount(value, valueStride, width, height,
+            loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundIncrementCount(value, valueStride, width, height,
@@ -667,6 +683,12 @@ namespace Simd
 		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
 		uchar * hiValue, size_t hiValueStride, uchar threshold)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+            hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
@@ -681,6 +703,12 @@ namespace Simd
 		uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
 		uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+            hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
@@ -694,6 +722,11 @@ namespace Simd
 	void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
@@ -705,6 +738,12 @@ namespace Simd
 	void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
 		uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+            mask, maskStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, 
@@ -718,6 +757,11 @@ namespace Simd
 	void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
 		uchar index, uchar value, uchar * dst, size_t dstStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+        else
+#endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);

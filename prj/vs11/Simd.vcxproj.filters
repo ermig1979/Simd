@@ -103,6 +103,9 @@
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5A.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBackgroundA.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">

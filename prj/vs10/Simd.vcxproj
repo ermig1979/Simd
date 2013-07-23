@@ -211,6 +211,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBackgroundA.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBgrToBgra.cpp" />
