@@ -109,7 +109,7 @@ namespace Simd
 
         template <bool compensation> SIMD_INLINE __m128i ReduceRow(const __m128i & r0, const __m128i & r1, const __m128i & r2)
         {
-            return _mm_packus_epi16(_mm_and_si128(DivideBy16<compensation>(BinomialSum16(r0, r1, r2)), K16_00FF), K_ZERO);
+            return _mm_packus_epi16(DivideBy16<compensation>(BinomialSum16(r0, r1, r2)), K_ZERO);
         }
         
         template<bool align, bool compensation> void ReduceGray3x3(
@@ -172,7 +172,7 @@ namespace Simd
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
     {
 #ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::A)
+        if(Avx2::Enable && srcWidth >= Avx2::DA)
             Avx2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
         else
 #endif//SIMD_AVX2_ENABLE
