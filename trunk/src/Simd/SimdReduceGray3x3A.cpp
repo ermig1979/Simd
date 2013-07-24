@@ -58,6 +58,13 @@ namespace Simd
                 _mm256_and_si256(_mm256_srli_si256(t, 1), K16_00FF));
         }
 
+        template<bool align> SIMD_INLINE void ReduceColNose(const uchar * s[3], __m256i a[3]) 
+        {
+            a[0] = ReduceColNose<align>(s[0]);
+            a[1] = ReduceColNose<align>(s[1]);
+            a[2] = ReduceColNose<align>(s[2]);
+        }
+
         template<bool align> SIMD_INLINE __m256i ReduceColBody(const uchar * p) 
         {
             const __m256i t = Load<align>((__m256i*)p);
@@ -67,10 +74,18 @@ namespace Simd
                 _mm256_and_si256(_mm256_srli_si256(t, 1), K16_00FF));
         }
 
-        template <bool compensation> SIMD_INLINE __m128i ReduceRow(const __m256i & r0, const __m256i & r1, const __m256i & r2)
+        template<bool align> SIMD_INLINE void ReduceColBody(const uchar * s[3], size_t offset, __m256i a[3]) 
         {
-            return _mm256_extracti128_si256(_mm256_permute4x64_epi64(_mm256_packus_epi16(
-                _mm256_and_si256(DivideBy16<compensation>(BinomialSum16(r0, r1, r2)), K16_00FF), K_ZERO), 0xD8), 0);
+            a[0] = ReduceColBody<align>(s[0] + offset);
+            a[1] = ReduceColBody<align>(s[1] + offset);
+            a[2] = ReduceColBody<align>(s[2] + offset);
+        }
+
+        template <bool compensation> SIMD_INLINE __m256i ReduceRow(const __m256i lo[3], const __m256i hi[3])
+        {
+            return _mm256_permute4x64_epi64(_mm256_packus_epi16(
+                DivideBy16<compensation>(BinomialSum16(lo[0], lo[1], lo[2])), 
+                DivideBy16<compensation>(BinomialSum16(hi[0], hi[1], hi[2]))), 0xD8);
         }
         
         template<bool align, bool compensation> void ReduceGray3x3(
@@ -82,28 +97,35 @@ namespace Simd
 				assert(Aligned(src) && Aligned(srcStride));
 
             size_t lastOddCol = srcWidth - AlignLo(srcWidth, 2);
-            size_t bodyWidth = AlignLo(srcWidth, A);
+            size_t bodyWidth = AlignLo(srcWidth, DA);
             for(size_t row = 0; row < srcHeight; row += 2, dst += dstStride, src += 2*srcStride)
             {
-                const uchar * s1 = src;
-                const uchar * s0 = s1 - (row ? srcStride : 0);
-                const uchar * s2 = s1 + (row != srcHeight - 1 ? srcStride : 0);
+                const uchar * s[3];
+                s[1] = src;
+                s[0] = s[1] - (row ? srcStride : 0);
+                s[2] = s[1] + (row != srcHeight - 1 ? srcStride : 0);
 
-                Sse2::Store<align>((__m128i*)dst, ReduceRow<compensation>(ReduceColNose<align>(s0), 
-                    ReduceColNose<align>(s1), ReduceColNose<align>(s2)));
+                __m256i lo[3], hi[3];
+                ReduceColNose<align>(s, lo);
+                ReduceColBody<align>(s, A, hi);
+                Store<align>((__m256i*)dst, ReduceRow<compensation>(lo, hi));
 
-                for(size_t srcCol = A, dstCol = HA; srcCol < bodyWidth; srcCol += A, dstCol += HA)
-                    Sse2::Store<align>((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody<align>(s0 + srcCol), 
-                        ReduceColBody<align>(s1 + srcCol), ReduceColBody<align>(s2 + srcCol)));
+                for(size_t srcCol = DA, dstCol = A; srcCol < bodyWidth; srcCol += DA, dstCol += A)
+                {
+                    ReduceColBody<align>(s, srcCol, lo);
+                    ReduceColBody<align>(s, srcCol + A, hi);
+                    Store<align>((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
+                }
                 
                 if(bodyWidth != srcWidth)
                 {
-                    size_t srcCol = srcWidth - A - lastOddCol;
-                    size_t dstCol = dstWidth - HA - lastOddCol;
-                    Sse2::Store<align>((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody<false>(s0 + srcCol), 
-                        ReduceColBody<false>(s1 + srcCol), ReduceColBody<false>(s2 + srcCol)));
+                    size_t srcCol = srcWidth - DA - lastOddCol;
+                    size_t dstCol = dstWidth - A - lastOddCol;
+                    ReduceColBody<false>(s, srcCol, lo);
+                    ReduceColBody<false>(s, srcCol + A, hi);
+                    Store<false>((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
                     if(lastOddCol)
-                        dst[dstWidth - 1] = Base::GaussianBlur<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
+                        dst[dstWidth - 1] = Base::GaussianBlur<compensation>(s[0] + srcWidth, s[1]+ srcWidth, s[2] + srcWidth, -2, -1, -1);
                 }
             }
         }
