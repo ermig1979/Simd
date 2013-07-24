@@ -269,6 +269,9 @@
 		<Unit filename="../../src/Simd/SimdReduceGray3x3.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray3x3A.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray4x4.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
