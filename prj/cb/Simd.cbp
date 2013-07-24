@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -135,7 +135,7 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBackgroundA.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
@@ -231,7 +231,7 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3A.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.cpp">
 			<Option virtualFolder="Alg/" />
@@ -240,7 +240,7 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5A.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMemory.h">
 			<Option virtualFolder="Sys/" />
@@ -252,7 +252,7 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdOperationA.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />
@@ -261,7 +261,7 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2A.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray3x3.cpp">
 			<Option virtualFolder="Alg/" />
@@ -270,13 +270,16 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray3x3A.cpp">
-			<Option virtualFolder="Alg/" />
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray4x4.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray4x4.h">
 			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray4x4A.cpp">
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray5x5.cpp">
 			<Option virtualFolder="Alg/" />

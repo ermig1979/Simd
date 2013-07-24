@@ -91,7 +91,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 10);
+		result = result && Compare(d1, d2, 0, true, 64);
 
 		return result;
 	}
@@ -151,6 +151,15 @@ namespace Test
 		result = result && ReduceGrayTest(W, H, FUNC1(Simd::Base::ReduceGray4x4), FUNC1(Simd::ReduceGray4x4));
 		result = result && ReduceGrayTest(W + 2, H, FUNC1(Simd::Base::ReduceGray4x4), FUNC1(Simd::ReduceGray4x4));
 		result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Base::ReduceGray4x4), FUNC1(Simd::ReduceGray4x4));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && ReduceGrayTest(W, H, FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
+            result = result && ReduceGrayTest(W + 2, H, FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
+            result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
+        }
+#endif 
 
 		return result;
 	}

@@ -42,6 +42,14 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
