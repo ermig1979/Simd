@@ -94,23 +94,26 @@
     <ClCompile Include="..\..\src\Simd\SimdOperation.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp">
-      <Filter>Alg</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdBackgroundA.cpp">
+      <Filter>Alg\Avx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdOperationA.cpp">
-      <Filter>Alg</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp">
+      <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5A.cpp">
-      <Filter>Alg</Filter>
+      <Filter>Alg\Avx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBackgroundA.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2A.cpp">
-      <Filter>Alg</Filter>
+    <ClCompile Include="..\..\src\Simd\SimdOperationA.cpp">
+      <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdReduceGray3x3A.cpp">
-      <Filter>Alg</Filter>
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2A.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdReduceGray4x4A.cpp">
+      <Filter>Alg\Avx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -253,6 +256,9 @@
     </Filter>
     <Filter Include="Alg">
       <UniqueIdentifier>{1eaeb16f-e2de-490d-8e53-eeaebaecba0c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg\Avx">
+      <UniqueIdentifier>{429522a9-21b7-457b-b889-c7cfe3265b3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
