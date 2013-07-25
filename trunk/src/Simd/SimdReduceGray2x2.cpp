@@ -83,7 +83,7 @@ namespace Simd
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= DA);
 			if(align)
 			{
 				assert(Aligned(src) && Aligned(srcStride));
@@ -135,12 +135,12 @@ namespace Simd
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
     {
 #ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::A)
+        if(Avx2::Enable && srcWidth >= Avx2::DA)
             Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && srcWidth >= Sse2::A)
+        if(Sse2::Enable && srcWidth >= Sse2::DA)
             Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         else
 #endif//SIMD_SSE2_ENABLE

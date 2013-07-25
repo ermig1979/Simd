@@ -72,12 +72,12 @@ namespace Simd
 		SIMD_INLINE __m256i ReduceColNose(const uchar * src)
 		{
 			const __m256i t1 = _mm256_loadu_si256((__m256i*)src);
-			const __m256i t3 = _mm256_loadu_si256((__m256i*)(src + 2));
+			const __m256i t2 = _mm256_loadu_si256((__m256i*)(src + 1));
 			return BinomialSum16(
 				_mm256_and_si256(LoadBeforeFirst<false, 1>(src), K16_00FF),
 				_mm256_and_si256(t1, K16_00FF),
-				_mm256_and_si256(_mm256_srli_si256(t1, 1), K16_00FF),
-				_mm256_and_si256(t3, K16_00FF));
+                _mm256_and_si256(t2, K16_00FF),
+                _mm256_and_si256(_mm256_srli_si256(t2, 1), K16_00FF));
 		}
 
 		SIMD_INLINE __m256i ReduceColBody(const uchar * src)
@@ -128,13 +128,13 @@ namespace Simd
 		{
             __m256i lo = ReduceRow16<align>(buffer, offset);
             __m256i hi = ReduceRow16<align>(buffer, offset + HA);
-			return _mm256_permute4x64_epi64(_mm256_packus_epi16(lo, hi), 0xD8);
+			return PackI16ToU8(lo, hi);
 		}
 
 		template <bool even> void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth > DA);
 
 			size_t alignedDstWidth = Simd::AlignLo(dstWidth, A);
 			size_t srcTail = Simd::AlignHi(srcWidth - A, 2);

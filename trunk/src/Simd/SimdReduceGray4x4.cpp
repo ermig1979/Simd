@@ -155,12 +155,12 @@ namespace Simd
 		SIMD_INLINE __m128i ReduceColNose(const uchar *src)
 		{
 			const __m128i t1 = _mm_loadu_si128((__m128i*)src);
-			const __m128i t3 = _mm_loadu_si128((__m128i*)(src + 2));
+			const __m128i t2 = _mm_loadu_si128((__m128i*)(src + 1));
 			return BinomialSum16(
 				_mm_and_si128(LoadBeforeFirst<1>(t1), K16_00FF),
 				_mm_and_si128(t1, K16_00FF),
-				_mm_and_si128(_mm_srli_si128(t1, 1), K16_00FF),
-				_mm_and_si128(t3, K16_00FF));
+                _mm_and_si128(t2, K16_00FF),
+                _mm_and_si128(_mm_srli_si128(t2, 1), K16_00FF));
 		}
 
 		SIMD_INLINE __m128i ReduceColBody(const uchar *src)
@@ -210,7 +210,7 @@ namespace Simd
 		template <bool even> void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth > A);
 
 			size_t alignedDstWidth = Simd::AlignLo(dstWidth, A);
 			size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
@@ -280,12 +280,12 @@ namespace Simd
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 	{
 #ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::A)
+        if(Avx2::Enable && srcWidth > Avx2::DA)
             Avx2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && srcWidth >= Sse2::A)
+		if(Sse2::Enable && srcWidth > Sse2::A)
 			Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 		else
 #endif//SIMD_SSE2_ENABLE
