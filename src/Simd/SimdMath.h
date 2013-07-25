@@ -222,6 +222,11 @@ namespace Simd
             b = _mm256_max_epu8(t, b);
         }
 
+        SIMD_INLINE __m256i AbsDifferenceU8(__m256i a, __m256i b)
+        {
+            return _mm256_sub_epi8(_mm256_max_epu8(a, b), _mm256_min_epu8(a, b));
+        }
+
         SIMD_INLINE __m256i GreaterThenU8(__m256i a, __m256i b)
         {
             return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_min_epu8(a, b), a), K_INV_ZERO);

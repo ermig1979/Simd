@@ -177,6 +177,14 @@ namespace Test
 		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
 		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GrayFilterTest(W, H, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
+            result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
+        }
+#endif 
+
 		return result;
 	}
 }

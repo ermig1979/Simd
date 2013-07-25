@@ -125,6 +125,9 @@
 		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSumA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
