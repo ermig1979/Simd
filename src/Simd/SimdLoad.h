@@ -123,6 +123,11 @@ namespace Simd
 			return _mm256_load_si256(p); 
 		}
 
+        template <bool align> SIMD_INLINE __m256i LoadMaskI8(const __m256i * p, __m256i index)
+        {
+            return _mm256_cmpeq_epi8(Load<align>(p), index);
+        }
+
         template <bool align, size_t step> SIMD_INLINE __m256i LoadBeforeFirst(const uchar * p)
         {
             __m128i lo = Sse2::LoadBeforeFirst<step>(Sse2::Load<align>((__m128i*)p));

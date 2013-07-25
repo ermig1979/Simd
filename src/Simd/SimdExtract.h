@@ -66,6 +66,31 @@ namespace Simd
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        template <class T> SIMD_INLINE T Extract(__m256i a, size_t index)
+        {
+            const size_t size = A/sizeof(T);
+            assert(index < size);
+            T buffer[size];
+            _mm256_storeu_si256((__m256i*)buffer, a);
+            return buffer[index];
+        }
+
+        template <class T> SIMD_INLINE T ExtractSum(__m256i a)
+        {
+            const size_t size = A/sizeof(T);
+            T buffer[size];
+            _mm256_storeu_si256((__m256i*)buffer, a);
+            T sum = 0;
+            for(size_t i = 0; i < size; ++i)
+                sum += buffer[i];
+            return sum;
+        }
+    }
+#endif// SIMD_AVX2_ENABLE
 }
 
 #endif//__SimdExtract_h__

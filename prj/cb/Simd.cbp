@@ -116,6 +116,9 @@
 		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAbsDifferenceSumA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -286,6 +289,9 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray5x5.h">
 			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdReduceGray5x5A.cpp">
+			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdResizeBilinear.cpp">
 			<Option virtualFolder="Alg/" />
