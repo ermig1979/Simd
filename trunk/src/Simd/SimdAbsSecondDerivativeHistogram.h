@@ -42,7 +42,15 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
-	void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint * histogram);
+    }
+#endif// SIMD_AVX2_ENABLE
+
+    void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
 		size_t step, size_t indent, uint * histogram);
 
 	void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);

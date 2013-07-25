@@ -31,41 +31,8 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-		SIMD_INLINE int AbsSecondDerivative(const uchar * src, ptrdiff_t step)
-		{
-			return AbsDifferenceU8(Average(src[step], src[-step]), src[0]);
-		}
-
-		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
-			size_t step, size_t indent, uint * histogram)
-		{
-			assert(width > 2*indent && 2*height > indent && indent >= step);
-
-			memset(histogram, 0, sizeof(uint)*HISTOGRAM_SIZE);
-
-			src += indent*(stride + 1);
-			height -= 2*indent;
-			width -= 2*indent;
-
-			size_t rowStep = step*stride;
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					const int sdX = AbsSecondDerivative(src + col, step);
-					const int sdY = AbsSecondDerivative(src + col, rowStep);
-					const int sd = MaxU8(sdY, sdX);
-					++histogram[sd];
-				}
-				src += stride;
-			}
-		}
-	}
-
-#ifdef SIMD_SSE2_ENABLE
-	namespace Sse2
+#ifdef SIMD_AVX2_ENABLE
+	namespace Avx2
 	{
 		namespace
 		{
@@ -89,20 +56,20 @@ namespace Simd
 		}
 
 		template <bool srcAlign, bool stepAlign>
-		SIMD_INLINE __m128i AbsSecondDerivative(const uchar * src, ptrdiff_t step)
+		SIMD_INLINE __m256i AbsSecondDerivative(const uchar * src, ptrdiff_t step)
 		{
-			const __m128i s0 = Load<srcAlign && stepAlign>((__m128i*)(src - step));
-			const __m128i s1 = Load<srcAlign>((__m128i*)src);
-			const __m128i s2 = Load<srcAlign && stepAlign>((__m128i*)(src + step));
-			return AbsDifferenceU8(_mm_avg_epu8(s0, s2), s1);
+			const __m256i s0 = Load<srcAlign && stepAlign>((__m256i*)(src - step));
+			const __m256i s1 = Load<srcAlign>((__m256i*)src);
+			const __m256i s2 = Load<srcAlign && stepAlign>((__m256i*)(src + step));
+			return AbsDifferenceU8(_mm256_avg_epu8(s0, s2), s1);
 		}
 
 		template <bool align>
 		SIMD_INLINE void AbsSecondDerivative(const uchar * src, ptrdiff_t colStep, ptrdiff_t rowStep, uchar * dst)
 		{
-			const __m128i sdX = AbsSecondDerivative<align, false>(src, colStep);
-			const __m128i sdY = AbsSecondDerivative<align, true>(src, rowStep);
-			Store<align>((__m128i*)dst, _mm_max_epu8(sdY, sdX));
+			const __m256i sdX = AbsSecondDerivative<align, false>(src, colStep);
+			const __m256i sdY = AbsSecondDerivative<align, true>(src, rowStep);
+			Store<align>((__m256i*)dst, _mm256_max_epu8(sdY, sdX));
 		}
 
 		template<bool align> void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
@@ -146,28 +113,5 @@ namespace Simd
 				AbsSecondDerivativeHistogram<false>(src, width, height, stride, step, indent, histogram);
 		}
 	}
-#endif// SIMD_SSE2_ENABLE
-
-	void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
-		size_t step, size_t indent, uint * histogram)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A + 2*indent)
-            Avx2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A + 2*indent)
-			Sse2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
-	}
-
-	void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
-	{
-		assert(src.format == View::Gray8);
-
-		AbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
-	}
+#endif// SIMD_AVX2_ENABLE
 }
