@@ -121,6 +121,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSumA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSumA.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">

@@ -101,6 +101,11 @@ namespace Simd
 
 	void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
