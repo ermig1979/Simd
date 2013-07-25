@@ -46,7 +46,7 @@ if(argc < 2 || std::string(argv[1]) == std::string(#test)) \
 {\
 	std::cout << #test << " is started :" << std::endl; \
 	bool result = test(); \
-	std::cout << #test << " is finished "  << (result ? " successfully." : " with errors!") << std::endl << std::endl; \
+	std::cout << #test << " is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; \
 	if(!result) \
 	{ \
 		std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \

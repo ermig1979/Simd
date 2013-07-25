@@ -83,16 +83,16 @@ namespace Simd
 
         template <bool compensation> SIMD_INLINE __m256i ReduceRow(const __m256i lo[3], const __m256i hi[3])
         {
-            return _mm256_permute4x64_epi64(_mm256_packus_epi16(
+            return PackI16ToU8(
                 DivideBy16<compensation>(BinomialSum16(lo[0], lo[1], lo[2])), 
-                DivideBy16<compensation>(BinomialSum16(hi[0], hi[1], hi[2]))), 0xD8);
+                DivideBy16<compensation>(BinomialSum16(hi[0], hi[1], hi[2])));
         }
         
         template<bool align, bool compensation> void ReduceGray3x3(
             const uchar* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uchar* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)	
         {
-            assert(srcWidth >= A && (srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
+            assert(srcWidth >= DA && (srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
 			if(align)
 				assert(Aligned(src) && Aligned(srcStride));
 

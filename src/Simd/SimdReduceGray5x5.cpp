@@ -455,7 +455,7 @@ namespace Simd
 			const uchar* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uchar* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
 
 			size_t alignedWidth = Simd::AlignLo(srcWidth, A);
 			size_t bufferDstTail = Simd::AlignHi(srcWidth - A, 2);
@@ -507,6 +507,11 @@ namespace Simd
 	void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && srcWidth >= Avx2::DA)
+            Avx2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && srcWidth >= Sse2::A)
 			Sse2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);

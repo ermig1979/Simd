@@ -176,6 +176,19 @@ namespace Test
 		result = result && ReduceGrayTest(W + 2, H, FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(Simd::ReduceGray5x5, true));
 		result = result && ReduceGrayTest(W - 1, H + 1, FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(Simd::ReduceGray5x5, true));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && ReduceGrayTest(W, H, FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
+            result = result && ReduceGrayTest(W + 2, H, FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
+            result = result && ReduceGrayTest(W - 1, H + 1, FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
+
+            result = result && ReduceGrayTest(W, H, FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
+            result = result && ReduceGrayTest(W + 2, H, FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
+            result = result && ReduceGrayTest(W - 1, H + 1, FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
+        }
+#endif 
+
 		return result;
 	}
 }

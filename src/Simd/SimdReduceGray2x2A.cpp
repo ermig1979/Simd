@@ -48,14 +48,14 @@ namespace Simd
                 _mm256_and_si256(_mm256_srli_si256(s01, 1), K16_00FF),                
                 _mm256_and_si256(s11, K16_00FF), 
                 _mm256_and_si256(_mm256_srli_si256(s11, 1), K16_00FF));
-            return _mm256_permute4x64_epi64(_mm256_packus_epi16(lo, hi), 0xD8);
+            return PackI16ToU8(lo, hi);
         }
 
 		template <bool align> void ReduceGray2x2(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
 			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= DA);
 			if(align)
 			{
 				assert(Aligned(src) && Aligned(srcStride));

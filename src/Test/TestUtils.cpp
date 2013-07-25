@@ -96,7 +96,7 @@ namespace Test
                             std::cout << "," << (int)pB[col*colors + color]; 
                         std::cout << ")." << std::endl;
                     }
-                    if(errorCount > errorCountMax)
+                    if(errorCount >= errorCountMax)
                     {
                         if(printError)
                             std::cout << "Stop comparison." << std::endl;
