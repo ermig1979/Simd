@@ -170,6 +170,9 @@
 		<Unit filename="../../src/Simd/SimdBgraToGray.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBgraToGrayA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBinarization.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

@@ -40,6 +40,13 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+    }
+#endif// SIMD_AVX2_ENABLE
+
     void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
 
 	void BgraToGray(const View & bgra, View & gray);
