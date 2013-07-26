@@ -47,29 +47,32 @@ namespace Simd
         }
     }
 
+#if defined(SIMD_SSE2_ENABLE) || defined(SIMD_AVX2_ENABLE)
+    namespace
+    {
+        struct Buffer
+        {
+            Buffer(size_t width)
+            {
+                _p = Allocate(sizeof(uchar)*4*width);
+                bgra = (uchar*)_p;
+            }
+
+            ~Buffer()
+            {
+                Free(_p);
+            }
+
+            uchar * bgra;
+        private:
+            void *_p;
+        };	
+    }
+#endif//defined(SIMD_SSE2_ENABLE) || defined(SIMD_AVX2_ENABLE)
+
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-		namespace
-		{
-			struct Buffer
-			{
-				Buffer(size_t width)
-				{
-					_p = Allocate(sizeof(uchar)*4*width);
-					bgra = (uchar*)_p;
-				}
-
-				~Buffer()
-				{
-					Free(_p);
-				}
-
-				uchar * bgra;
-			private:
-				void *_p;
-			};	
-		}
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
         {
             assert(width >= A);
@@ -89,10 +92,37 @@ namespace Simd
     }
 #endif//SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+        {
+            assert(width >= A);
+
+            Buffer buffer(width);
+
+            for(size_t row = 1; row < height; ++row)
+            {
+                Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
+                Avx2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
+                bgr += bgrStride;
+                gray += grayStride;
+            }
+            Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
+            Avx2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
+        }
+    }
+#endif//SIMD_Avx2_ENABLE
+
     void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
     {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-        if(width >= Sse2::A)
+        if(Sse2::Enable && width >= Sse2::A)
             Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
         else
 #endif//SIMD_SSE2_ENABLE       
