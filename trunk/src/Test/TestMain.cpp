@@ -91,9 +91,7 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
 
-    EXECUTE_TEST(Test::GreaterThenBinarizationTest);
-    EXECUTE_TEST(Test::LesserThenBinarizationTest);
-    EXECUTE_TEST(Test::EqualToBinarizationTest);
+    EXECUTE_TEST(Test::BinarizationTest);
 
     EXECUTE_TEST(Test::ShiftBilinearTest);
 

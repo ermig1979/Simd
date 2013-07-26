@@ -31,24 +31,46 @@ namespace Test
 		struct Func
 		{
 			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-				uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride);
+				uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, Simd::CompareType type);
 
 			FuncPtr func;
 			std::string description;
 
 			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uchar value, uchar positive, uchar negative, View & dst) const
+			void Call(const View & src, uchar value, uchar positive, uchar negative, View & dst, Simd::CompareType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride);
+				func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, type);
 			}
 		};
 	}
 
-#define FUNC(function) Func(function, std::string(#function))
+    SIMD_INLINE std::string CompareTypeDescription(Simd::CompareType type)
+    {
+        switch(type)
+        {
+        case Simd::CompareGreaterThen:
+            return "(>)";
+        case Simd::CompareLesserThen:
+            return "(<)";
+        case Simd::CompareEqualTo:
+            return "(=)";
+        }
+        assert(0);
+        return "(Unknown)";
+    }
 
-	bool BinarizationTest(int width, int height, const Func & f1, const Func & f2)
+#define ARGS1(width, height, type, function1, function2) \
+    width, height, type, \
+    Func(function1.func, function1.description + CompareTypeDescription(type)), \
+    Func(function2.func, function2.description + CompareTypeDescription(type))
+
+#define ARGS2(function1, function2) \
+    Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
+
+
+	bool BinarizationTest(int width, int height, Simd::CompareType type, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -64,41 +86,38 @@ namespace Test
 		View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, positive, negative, d1));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, positive, negative, d1, type));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, positive, negative, d2));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, positive, negative, d2, type));
 
 		result = result && Compare(d1, d2, 0, true, 10);
 
 		return result;
 	}
 
-	bool GreaterThenBinarizationTest()
+    bool BinarizationTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        for(Simd::CompareType type = Simd::CompareGreaterThen; type <= Simd::CompareEqualTo && result; type = Simd::CompareType(type + 1))
+        {
+            result = result && BinarizationTest(ARGS1(W, H, type, f1, f2));
+            result = result && BinarizationTest(ARGS1(W + 1, H - 1, type, f1, f2));
+        }
+
+        return result;
+    }
+
+	bool BinarizationTest()
 	{
 		bool result = true;
 
-		result = result && BinarizationTest(W, H, FUNC(Simd::Base::GreaterThenBinarization), FUNC(Simd::GreaterThenBinarization));
-		result = result && BinarizationTest(W + 1, H - 1, FUNC(Simd::Base::GreaterThenBinarization), FUNC(Simd::GreaterThenBinarization));
+		result = result && BinarizationTest(ARGS2(Simd::Base::Binarization, Simd::Binarization));
 
-		return result;
-	}
-
-	bool LesserThenBinarizationTest()
-	{
-		bool result = true;
-
-		result = result && BinarizationTest(W, H, FUNC(Simd::Base::LesserThenBinarization), FUNC(Simd::LesserThenBinarization));
-		result = result && BinarizationTest(W + 1, H - 1, FUNC(Simd::Base::LesserThenBinarization), FUNC(Simd::LesserThenBinarization));
-
-		return result;
-	}
-
-	bool EqualToBinarizationTest()
-	{
-		bool result = true;
-
-		result = result && BinarizationTest(W, H, FUNC(Simd::Base::EqualToBinarization), FUNC(Simd::EqualToBinarization));
-		result = result && BinarizationTest(W + 1, H - 1, FUNC(Simd::Base::EqualToBinarization), FUNC(Simd::EqualToBinarization));
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && BinarizationTest(ARGS2(Simd::Avx2::Binarization, Simd::Sse2::Binarization));
+#endif 
 
 		return result;
 	}
