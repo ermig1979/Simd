@@ -209,6 +209,9 @@
 		<Unit filename="../../src/Simd/SimdDeinterleaveUv.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdDeinterleaveUvA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdEnable.cpp">
 			<Option virtualFolder="Sys/" />
 		</Unit>

@@ -80,6 +80,14 @@ namespace Test
 		result = result && Deinterleave2Test(W, H, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(Simd::DeinterleaveUv));
 		result = result && Deinterleave2Test(W - 1, H + 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(Simd::DeinterleaveUv));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && Deinterleave2Test(W, H, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
+            result = result && Deinterleave2Test(W - 1, H + 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
+        }
+#endif 
+
 		return result;
 	}
 }
