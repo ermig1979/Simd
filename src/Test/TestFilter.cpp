@@ -167,6 +167,11 @@ namespace Test
 
         result = result && ColorFilterTest(ARGS_C2(Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::GaussianBlur3x3, Simd::Avx2::GaussianBlur3x3));
+#endif 
+
 		return result;
 	}
 
