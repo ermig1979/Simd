@@ -114,12 +114,12 @@ namespace Simd
     void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
     {
 #ifdef SIMD_AVX2_ENABLE
-        if(width >= Avx2::A)
+        if(Avx2::Enable && width >= Avx2::A)
             Avx2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
         else
 #endif//SIMD_AVX2_ENABLE 
 #ifdef SIMD_SSE2_ENABLE
-        if(width >= Sse2::A)
+        if(Sse2::Enable && width >= Sse2::A)
             Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
         else
 #endif//SIMD_SSE2_ENABLE       
