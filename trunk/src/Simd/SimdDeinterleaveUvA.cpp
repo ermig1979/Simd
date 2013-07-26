@@ -30,36 +30,17 @@
 
 namespace Simd
 {
-	namespace Base
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
 	{
-		void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-			uchar * u, size_t uStride, uchar * v, size_t vStride)
+		SIMD_INLINE __m256i DeinterleavedU(__m256i uv0, __m256i uv1)
 		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0, offset = 0; col < width; ++col, offset += 2)
-				{
-					u[col] = uv[offset];
-					v[col] = uv[offset + 1];
-				}
-				uv += uvStride;
-				u += uStride;
-				v += vStride;
-			}
-		}
-	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		SIMD_INLINE __m128i DeinterleavedU(__m128i uv0, __m128i uv1)
-		{
-			return _mm_packus_epi16(_mm_and_si128(uv0, K16_00FF), _mm_and_si128(uv1, K16_00FF));
+			return PackI16ToU8(_mm256_and_si256(uv0, K16_00FF), _mm256_and_si256(uv1, K16_00FF));
 		}
 
-		SIMD_INLINE __m128i DeinterleavedV(__m128i uv0, __m128i uv1)
+		SIMD_INLINE __m256i DeinterleavedV(__m256i uv0, __m256i uv1)
 		{
-			return DeinterleavedU(_mm_srli_si128(uv0, 1), _mm_srli_si128(uv1, 1));
+			return DeinterleavedU(_mm256_srli_si256(uv0, 1), _mm256_srli_si256(uv1, 1));
 		}
 
 		template <bool align> void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
@@ -77,19 +58,19 @@ namespace Simd
 			{
 				for(size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
 				{
-					__m128i uv0 = Load<align>((__m128i*)(uv + offset));
-					__m128i uv1 = Load<align>((__m128i*)(uv + offset + A));
-					Store<align>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
-					Store<align>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
+					__m256i uv0 = Load<align>((__m256i*)(uv + offset));
+					__m256i uv1 = Load<align>((__m256i*)(uv + offset + A));
+					Store<align>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
+					Store<align>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
 				}
 				if(tail)
 				{
 					size_t col = width - A;
 					size_t offset = 2*col;
-					__m128i uv0 = Load<false>((__m128i*)(uv + offset));
-					__m128i uv1 = Load<false>((__m128i*)(uv + offset + A));
-					Store<false>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
-					Store<false>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
+					__m256i uv0 = Load<false>((__m256i*)(uv + offset));
+					__m256i uv1 = Load<false>((__m256i*)(uv + offset + A));
+					Store<false>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
+					Store<false>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
 				}
 				uv += uvStride;
 				u += uStride;
@@ -106,29 +87,5 @@ namespace Simd
 				DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
 		}
 	}
-#endif// SIMD_SSE2_ENABLE
-
-	void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-		uchar * u, size_t uStride, uchar * v, size_t vStride)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
-	}
-
-	void DeinterleaveUv(const View & uv, View & u, View & v)
-	{
-		assert(uv.width == u.width && uv.height == u.height && uv.width == v.width && uv.height == v.height);
-		assert(uv.format == View::Uv16 && u.format == View::Gray8 && v.format == View::Gray8);
-
-		DeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
-	}
+#endif// SIMD_AVX2_ENABLE
 }

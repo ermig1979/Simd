@@ -42,6 +42,14 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
+            uchar * u, size_t uStride, uchar * v, size_t vStride);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
 		uchar * u, size_t uStride, uchar * v, size_t vStride);
 
