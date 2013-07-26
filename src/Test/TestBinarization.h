@@ -26,11 +26,7 @@
 
 namespace Test
 {
-	bool GreaterThenBinarizationTest();
-
-	bool LesserThenBinarizationTest();
-
-	bool EqualToBinarizationTest();
+	bool BinarizationTest();
 }
 
 #endif//__TestBinarization_h__
