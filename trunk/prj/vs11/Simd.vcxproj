@@ -121,6 +121,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3A.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp">
