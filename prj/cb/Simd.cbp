@@ -389,6 +389,9 @@
 		<Unit filename="../../src/Simd/SimdYuvToHue.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToHueA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Extensions>
 			<code_completion />
 			<envvars />

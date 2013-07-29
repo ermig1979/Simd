@@ -33,8 +33,6 @@ namespace Simd
 {
 	namespace Base
 	{
-		const float KF_255_DIV_6 = 255.0f/6.0f;
-
 		SIMD_INLINE int YuvToHue(int y, int u, int v)
 		{
 			int red = YuvToRed(y, v);
@@ -251,9 +249,15 @@ namespace Simd
 	void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 		size_t width, size_t height, uchar * hue, size_t hueStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::DA)
+            Avx2::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::DA)
 			Sse2::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+        else
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 	}
@@ -261,9 +265,15 @@ namespace Simd
 	void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 		size_t width, size_t height, uchar * hue, size_t hueStride)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+        else
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 	}
