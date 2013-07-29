@@ -326,6 +326,9 @@
 		<Unit filename="../../src/Simd/SimdShiftBilinear.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdShiftBilinearA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

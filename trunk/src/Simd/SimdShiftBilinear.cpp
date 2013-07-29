@@ -34,15 +34,6 @@ namespace Simd
 {
 	namespace Base
 	{
-		const int LINEAR_SHIFT = 4;
-		const int LINEAR_ROUND_TERM = 1 << (LINEAR_SHIFT - 1);
-
-		const int BILINEAR_SHIFT = LINEAR_SHIFT*2;
-		const int BILINEAR_ROUND_TERM = 1 << (BILINEAR_SHIFT - 1);
-
-		const int FRACTION_RANGE = 1 << LINEAR_SHIFT;
-		const double FRACTION_ROUND_TERM = 0.5/FRACTION_RANGE;
-
 		static void CopyBackground(const uchar * src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
 			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
 		{
@@ -236,6 +227,44 @@ namespace Simd
 			}
 		}
 
+        void CommonShiftAction(
+            const uchar * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
+            const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * & dst, size_t dstStride,
+            int & fDx, int & fDy)
+        {
+            assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
+            assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
+
+            CopyBackground(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+
+            dst += dstStride*cropTop + cropLeft*channelCount;
+            src += srcStride*cropTop + cropLeft*channelCount;
+            bkg += bkgStride*cropTop + cropLeft*channelCount;
+            width = cropRight - cropLeft;
+            height = cropBottom - cropTop;
+
+            ptrdiff_t iDx = (ptrdiff_t)floor(shiftX + FRACTION_ROUND_TERM);
+            ptrdiff_t iDy = (ptrdiff_t)floor(shiftY + FRACTION_ROUND_TERM);
+            fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
+            fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
+
+            ptrdiff_t left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
+            ptrdiff_t top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
+            ptrdiff_t right = (iDx < 0 ? width : width - iDx);
+            ptrdiff_t bottom = (iDy < 0 ? height : height - iDy);
+
+            CopyBackground(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
+
+            MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
+
+            src += Simd::Max((ptrdiff_t)0, iDy)*srcStride + Simd::Max((ptrdiff_t)0, iDx)*channelCount;
+            dst += Simd::Max((ptrdiff_t)0,-iDy)*dstStride + Simd::Max((ptrdiff_t)0,-iDx)*channelCount;
+
+            width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
+            height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
+        }
+
 		void ShiftBilinear(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
 			int fDx, int fDy, uchar * dst, size_t dstStride)
 		{
@@ -302,44 +331,6 @@ namespace Simd
 					}
 				}
 			}
-		}
-
-		void CommonShiftAction(
-			const uchar * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
-			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * & dst, size_t dstStride,
-			int & fDx, int & fDy)
-		{
-			assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
-			assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
-
-			CopyBackground(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
-
-			dst += dstStride*cropTop + cropLeft*channelCount;
-			src += srcStride*cropTop + cropLeft*channelCount;
-			bkg += bkgStride*cropTop + cropLeft*channelCount;
-			width = cropRight - cropLeft;
-			height = cropBottom - cropTop;
-
-			ptrdiff_t iDx = (ptrdiff_t)floor(shiftX + FRACTION_ROUND_TERM);
-			ptrdiff_t iDy = (ptrdiff_t)floor(shiftY + FRACTION_ROUND_TERM);
-			fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
-			fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
-
-			ptrdiff_t left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
-			ptrdiff_t top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
-			ptrdiff_t right = (iDx < 0 ? width : width - iDx);
-			ptrdiff_t bottom = (iDy < 0 ? height : height - iDy);
-
-			CopyBackground(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
-
-			MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
-
-			src += Simd::Max((ptrdiff_t)0, iDy)*srcStride + Simd::Max((ptrdiff_t)0, iDx)*channelCount;
-			dst += Simd::Max((ptrdiff_t)0,-iDy)*dstStride + Simd::Max((ptrdiff_t)0,-iDx)*channelCount;
-
-			width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
-			height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
 		}
 
 		void ShiftBilinear(
@@ -519,7 +510,12 @@ namespace Simd
 		const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
 		size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
 	{
-
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && shiftX + Avx2::A < cropRight - cropLeft)
+            Avx2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+            shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && shiftX + Sse2::A < cropRight - cropLeft)
 			Sse2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
