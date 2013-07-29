@@ -203,6 +203,12 @@
     <ClCompile Include="..\..\src\Simd\SimdView.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdYuvToBgraA.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdYuvToHue.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -380,6 +380,9 @@
 		<Unit filename="../../src/Simd/SimdYuvToBgra.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdYuvToBgraA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToHue.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

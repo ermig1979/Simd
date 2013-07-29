@@ -60,6 +60,17 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha = 0xFF);
+
+        void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha = 0xFF);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void YuvToBgra(uchar *bgra, size_t width, size_t height, size_t stride,
 		const int *y, const int *u, const int *v, int dx, int dy, int precision, uchar alpha = 0xFF);
 
