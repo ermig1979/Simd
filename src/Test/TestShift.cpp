@@ -49,10 +49,13 @@ namespace Test
 		};
 	}
 
-#define ARGS(format, width, height, function1, function2) \
+#define ARGS1(format, width, height, function1, function2) \
 	format, width, height, \
-	Func(function1, std::string(#function1) + ColorDescription(format)), \
-	Func(function2, std::string(#function2) + ColorDescription(format))
+	Func(function1.func, function1.description + ColorDescription(format)), \
+	Func(function2.func, function2.description + ColorDescription(format))
+
+#define ARGS2(function1, function2) \
+    Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
 
 	bool ShiftTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
 	{
@@ -90,21 +93,35 @@ namespace Test
 		return result;
 	}
 
+    bool ShiftBilinearTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        result = result && ShiftTest(ARGS1(View::Gray8, W, H, f1, f2));
+        result = result && ShiftTest(ARGS1(View::Gray8, W + 1, H - 1, f1, f2));
+
+        result = result && ShiftTest(ARGS1(View::Uv16, W, H, f1, f2));
+        result = result && ShiftTest(ARGS1(View::Uv16, W + 1, H - 1, f1, f2));
+
+        result = result && ShiftTest(ARGS1(View::Bgr24, W, H, f1, f2));
+        result = result && ShiftTest(ARGS1(View::Bgr24, W + 1, H - 1, f1, f2));
+
+        result = result && ShiftTest(ARGS1(View::Bgra32, W, H, f1, f2));
+        result = result && ShiftTest(ARGS1(View::Bgra32, W + 1, H - 1, f1, f2));
+
+        return result;
+    }
+
 	bool ShiftBilinearTest()
 	{
 		bool result = true;
 
-		result = result && ShiftTest(ARGS(View::Gray8, W, H, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-		result = result && ShiftTest(ARGS(View::Gray8, W + 2, H - 1, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
+		result = result && ShiftBilinearTest(ARGS2(Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
 
-		result = result && ShiftTest(ARGS(View::Uv16, W, H, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-		result = result && ShiftTest(ARGS(View::Uv16, W + 2, H - 1, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-
-		result = result && ShiftTest(ARGS(View::Bgr24, W, H, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-		result = result && ShiftTest(ARGS(View::Bgr24, W + 2, H - 1, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-
-		result = result && ShiftTest(ARGS(View::Bgra32, W, H, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
-		result = result && ShiftTest(ARGS(View::Bgra32, W + 2, H - 1, Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ShiftBilinearTest(ARGS2(Simd::Sse2::ShiftBilinear, Simd::Avx2::ShiftBilinear));
+#endif 
 
 		return result;
 	}
