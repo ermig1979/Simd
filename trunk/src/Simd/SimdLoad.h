@@ -123,6 +123,11 @@ namespace Simd
 			return _mm256_load_si256(p); 
 		}
 
+        template <bool align> SIMD_INLINE __m256i LoadPermuted(const __m256i * p)
+        {
+            return _mm256_permute4x64_epi64(Load<align>(p), 0xD8); 
+        }
+
         template <bool align> SIMD_INLINE __m256i LoadMaskI8(const __m256i * p, __m256i index)
         {
             return _mm256_cmpeq_epi8(Load<align>(p), index);

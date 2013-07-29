@@ -215,6 +215,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        SIMD_INLINE __m256i SaturateI16ToU8(__m256i value)
+        {
+            return _mm256_min_epi16(K16_00FF, _mm256_max_epi16(value, K_ZERO));
+        }
+
         SIMD_INLINE void SortU8(__m256i & a, __m256i & b)
         {
             __m256i t = a;

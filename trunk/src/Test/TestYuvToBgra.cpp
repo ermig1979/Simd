@@ -71,7 +71,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, bgra2));
 
-		result = result && Compare(bgra1, bgra2, 0, true, 10);
+		result = result && Compare(bgra1, bgra2, 0, true, 64);
 
 		return result;
 	}
@@ -81,8 +81,15 @@ namespace Test
 		bool result = true;
 
 		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv444ToBgra), FUNC(Simd::Yuv444ToBgra), false);
-		result = result && YuvToBgraTest(W + 3, H - 1, FUNC(Simd::Base::Yuv444ToBgra), FUNC(Simd::Yuv444ToBgra), false);
-		result = result && YuvToBgraTest(W - 2, H + 1, FUNC(Simd::Base::Yuv444ToBgra), FUNC(Simd::Yuv444ToBgra), false);
+		result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444ToBgra), FUNC(Simd::Yuv444ToBgra), false);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv444ToBgra), FUNC(Simd::Avx2::Yuv444ToBgra), false);
+            result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444ToBgra), FUNC(Simd::Avx2::Yuv444ToBgra), false);
+        }
+#endif 
 
 		return result;
 	}
@@ -92,7 +99,15 @@ namespace Test
 		bool result = true;
 
 		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv420ToBgra), FUNC(Simd::Yuv420ToBgra), true);
-		result = result && YuvToBgraTest(W - 2, H + 4, FUNC(Simd::Base::Yuv420ToBgra), FUNC(Simd::Yuv420ToBgra), true);
+		result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420ToBgra), FUNC(Simd::Yuv420ToBgra), true);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv420ToBgra), FUNC(Simd::Avx2::Yuv420ToBgra), true);
+            result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420ToBgra), FUNC(Simd::Avx2::Yuv420ToBgra), true);
+        }
+#endif 
 
 		return result;
 	}

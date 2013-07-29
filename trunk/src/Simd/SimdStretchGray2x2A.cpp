@@ -55,13 +55,13 @@ namespace Simd
 				uchar * dstOdd = dst + dstStride;
 				for(size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += DA)
 				{
-					__m256i value = _mm256_permute4x64_epi64(Load<align>((__m256i*)(src + srcCol)), 0xD8);
+					__m256i value = LoadPermuted<align>((__m256i*)(src + srcCol));
 					StoreUnpacked<align>(value, dstEven + dstCol);
 					StoreUnpacked<align>(value, dstOdd + dstCol);
 				}
 				if(alignedWidth != srcWidth)
 				{
-					__m256i value = _mm256_permute4x64_epi64(Load<false>((__m256i*)(src + srcWidth - A)), 0xD8);
+					__m256i value = LoadPermuted<false>((__m256i*)(src + srcWidth - A));
 					StoreUnpacked<false>(value, dstEven + dstWidth - 2*A);
 					StoreUnpacked<false>(value, dstOdd + dstWidth - 2*A);
 				}
