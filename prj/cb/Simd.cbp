@@ -341,6 +341,9 @@
 		<Unit filename="../../src/Simd/SimdStatistic.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdStatisticA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdStore.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
