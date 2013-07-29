@@ -145,6 +145,9 @@
     <ClCompile Include="..\..\src\Simd\SimdStatisticA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdStretchGray2x2A.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
