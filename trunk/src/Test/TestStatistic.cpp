@@ -89,6 +89,14 @@ namespace Test
 		result = result && GetStatisticTest(W, H, FUNC(Simd::Base::GetStatistic), FUNC(Simd::GetStatistic));
 		result = result && GetStatisticTest(W + 1, H - 1, FUNC(Simd::Base::GetStatistic), FUNC(Simd::GetStatistic));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GetStatisticTest(W, H, FUNC(Simd::Sse2::GetStatistic), FUNC(Simd::Avx2::GetStatistic));
+            result = result && GetStatisticTest(W + 1, H - 1, FUNC(Simd::Sse2::GetStatistic), FUNC(Simd::Avx2::GetStatistic));
+        }
+#endif 
+
 		return result;
 	}
 }

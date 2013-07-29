@@ -42,6 +42,14 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
+            uchar * min, uchar * max, uchar * average);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
 		uchar * min, uchar * max, uchar * average);
 
