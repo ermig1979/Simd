@@ -332,6 +332,9 @@
 		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSquaredDifferenceSumA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdStatistic.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
