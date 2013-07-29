@@ -30,6 +30,8 @@ namespace Simd
 {
 	namespace Base
 	{
+        const float KF_255_DIV_6 = 255.0f/6.0f;
+
 		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 			size_t width, size_t height, uchar * hue, size_t hueStride);
 
@@ -47,6 +49,17 @@ namespace Simd
 			size_t width, size_t height, uchar * hue, size_t hueStride);
 	}
 #endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * hue, size_t hueStride);
+
+        void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * hue, size_t hueStride);
+    }
+#endif// SIMD_AVX2_ENABLE
 
 	void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 		size_t width, size_t height, uchar * hue, size_t hueStride);

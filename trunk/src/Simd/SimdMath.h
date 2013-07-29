@@ -220,6 +220,16 @@ namespace Simd
             return _mm256_min_epi16(K16_00FF, _mm256_max_epi16(value, K_ZERO));
         }
 
+        SIMD_INLINE __m256i MaxI16(__m256i a, __m256i b, __m256i c)
+        {
+            return _mm256_max_epi16(a, _mm256_max_epi16(b, c));
+        }
+
+        SIMD_INLINE __m256i MinI16(__m256i a, __m256i b, __m256i c)
+        {
+            return _mm256_min_epi16(a, _mm256_min_epi16(b, c));
+        }
+
         SIMD_INLINE void SortU8(__m256i & a, __m256i & b)
         {
             __m256i t = a;
