@@ -48,6 +48,17 @@ namespace Simd
 }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            size_t width, size_t height, uint64_t * sum);
+
+        void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
+    }
+#endif// SIMD_AVX2_ENABLE
+
 	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 		size_t width, size_t height, uint64_t * sum);
 

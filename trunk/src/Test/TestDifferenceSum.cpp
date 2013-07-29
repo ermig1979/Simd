@@ -129,6 +129,14 @@ namespace Test
 		result = result && DifferenceTest(W, H, FUNC1(Simd::Base::SquaredDifferenceSum), FUNC1(Simd::SquaredDifferenceSum));
 		result = result && DifferenceTest(W + 1, H - 1, FUNC1(Simd::Base::SquaredDifferenceSum), FUNC1(Simd::SquaredDifferenceSum));
 
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && DifferenceTest(W, H, FUNC1(Simd::Sse2::SquaredDifferenceSum), FUNC1(Simd::Avx2::SquaredDifferenceSum));
+            result = result && DifferenceTest(W + 1, H - 1, FUNC1(Simd::Sse2::SquaredDifferenceSum), FUNC1(Simd::Avx2::SquaredDifferenceSum));
+        }
+#endif 
+
 		return result;
 	}
 
@@ -138,6 +146,14 @@ namespace Test
 
 		result = result && MaskedDifferenceTest(W, H, FUNC2(Simd::Base::SquaredDifferenceSum), FUNC2(Simd::SquaredDifferenceSum));
 		result = result && MaskedDifferenceTest(W + 1, H - 1, FUNC2(Simd::Base::SquaredDifferenceSum), FUNC2(Simd::SquaredDifferenceSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && MaskedDifferenceTest(W, H, FUNC2(Simd::Sse2::SquaredDifferenceSum), FUNC2(Simd::Avx2::SquaredDifferenceSum));
+            result = result && MaskedDifferenceTest(W + 1, H - 1, FUNC2(Simd::Sse2::SquaredDifferenceSum), FUNC2(Simd::Avx2::SquaredDifferenceSum));
+        }
+#endif 
 
 		return result;
 	}

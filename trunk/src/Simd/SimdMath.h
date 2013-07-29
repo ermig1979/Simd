@@ -222,6 +222,11 @@ namespace Simd
             b = _mm256_max_epu8(t, b);
         }
 
+        SIMD_INLINE __m256i HorizontalSum32(__m256i a)
+        {
+            return _mm256_unpacklo_epi32(_mm256_hadd_epi32(a, K_ZERO), K_ZERO);
+        }
+
         SIMD_INLINE __m256i AbsDifferenceU8(__m256i a, __m256i b)
         {
             return _mm256_sub_epi8(_mm256_max_epu8(a, b), _mm256_min_epu8(a, b));

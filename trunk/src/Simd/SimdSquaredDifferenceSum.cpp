@@ -188,6 +188,11 @@ namespace Simd
 	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 		size_t width, size_t height, uint64_t * sum)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -199,6 +204,11 @@ namespace Simd
 	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 		const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
 			Sse2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
