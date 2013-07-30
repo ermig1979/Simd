@@ -98,6 +98,7 @@ namespace Simd
         const __m256i K16_00FF = SIMD_MM256_SET1_EPI16(0x00FF);
 
 		const __m256i K32_000000FF = SIMD_MM256_SET1_EPI32(0x000000FF);
+        const __m256i K32_0000FFFF = SIMD_MM256_SET1_EPI32(0x0000FFFF);
 	}
 #endif// SIMD_AVX2_ENABLE
 }

@@ -68,7 +68,13 @@ namespace Simd
         SIMD_INLINE __m256i PackI32ToI16(__m256i lo, __m256i hi)
         {
             return _mm256_permute4x64_epi64(_mm256_packs_epi32(lo, hi), 0xD8); 
-        }	}
+        }	
+
+        SIMD_INLINE __m256i PackU32ToI16(__m256i lo, __m256i hi)
+        {
+            return _mm256_permute4x64_epi64(_mm256_packus_epi32(lo, hi), 0xD8); 
+        }    
+    }
 #endif//SIMD_SAVX2_ENABLE
 }
 #endif//__SimdStore_h__

@@ -48,10 +48,13 @@ namespace Test
 		};
 	}
 
-#define ARGS(format, width, height, k, function1, function2) \
-	format, width, height, k, \
-	Func(function1, std::string(#function1) + ColorDescription(format)), \
-	Func(function2, std::string(#function2) + ColorDescription(format))
+#define ARGS1(format, width, height, k, function1, function2) \
+    format, width, height, k, \
+    Func(function1.func, function1.description + ColorDescription(format)), \
+    Func(function2.func, function2.description + ColorDescription(format))
+
+#define ARGS2(function1, function2) \
+    Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
 
 	bool ResizeTest(View::Format format, int width, int height, double k, const Func & f1, const Func & f2)
 	{
@@ -70,27 +73,41 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 10);
+		result = result && Compare(d1, d2, 0, true, 64);
 
 		return result;
 	}
 
-	bool ResizeBilinearTest()
-	{
-		bool result = true;
+    bool ResizeBilinearTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		result = result && ResizeTest(ARGS(View::Gray8, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
-		result = result && ResizeTest(ARGS(View::Gray8, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+        result = result && ResizeTest(ARGS1(View::Gray8, W, H, 0.9, f1, f2));
+        result = result && ResizeTest(ARGS1(View::Gray8, W + 1, H - 1, 1.1, f1, f2));
 
-		result = result && ResizeTest(ARGS(View::Uv16, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
-		result = result && ResizeTest(ARGS(View::Uv16, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+        result = result && ResizeTest(ARGS1(View::Uv16, W, H, 0.9, f1, f2));
+        result = result && ResizeTest(ARGS1(View::Uv16, W + 1, H - 1, 1.1, f1, f2));
 
-		result = result && ResizeTest(ARGS(View::Bgr24, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
-		result = result && ResizeTest(ARGS(View::Bgr24, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+        result = result && ResizeTest(ARGS1(View::Bgr24, W, H, 0.9, f1, f2));
+        result = result && ResizeTest(ARGS1(View::Bgr24, W + 1, H - 1, 1.1, f1, f2));
 
-		result = result && ResizeTest(ARGS(View::Bgra32, W, H, 0.9, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
-		result = result && ResizeTest(ARGS(View::Bgra32, W - 1, H + 1, 1.1, Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+        result = result && ResizeTest(ARGS1(View::Bgra32, W, H, 0.9, f1, f2));
+        result = result && ResizeTest(ARGS1(View::Bgra32, W + 1, H - 1, 1.1, f1, f2));
 
-		return result;
-	}
+        return result;
+    }
+
+    bool ResizeBilinearTest()
+    {
+        bool result = true;
+
+        result = result && ResizeBilinearTest(ARGS2(Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ResizeBilinearTest(ARGS2(Simd::Sse2::ResizeBilinear, Simd::Avx2::ResizeBilinear));
+#endif 
+
+        return result;
+    }
 }
