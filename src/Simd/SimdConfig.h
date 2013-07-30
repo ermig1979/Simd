@@ -32,4 +32,6 @@
 
 //#define SIMD_AVX2_DEPRECATE
 
+#define SIMD_AVX2_GATHER_DEPRECATE
+
 #endif//__SimdConfig_h__

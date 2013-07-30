@@ -30,6 +30,8 @@ namespace Simd
 {
     namespace Base
     {
+        void EstimateAlphaIndex(size_t srcSize, size_t dstSize, int * indexes, int * alphas, size_t channelCount);
+
         void ResizeBilinear(
             const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
@@ -38,11 +40,20 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
-		void ResizeBilinearGray(
+		void ResizeBilinear(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 	}
 #endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        void ResizeBilinear(
+            const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+    }
+#endif// SIMD_AVX2_ENABLE
 
 	void ResizeBilinear(
 		const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,

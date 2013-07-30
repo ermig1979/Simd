@@ -29,52 +29,11 @@
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCopy.h"
+#include "Simd/SimdShiftBilinear.h"
 #include "Simd/SimdResizeBilinear.h"
 
 namespace Simd
 {
-	const int FRACTION_SHIFT = 4;
-	const int FRACTION_DOUBLE_SHIFT = FRACTION_SHIFT*2;
-	const int FRACTION_RANGE = 1 << FRACTION_SHIFT;
-	const int FRACTION_ROUND_TERM = 1 << (FRACTION_DOUBLE_SHIFT - 1);
-
-	struct IndexAlpha
-	{
-		size_t index;
-		int alpha;
-	};
-
-	template <size_t CHANNEL_COUNT>
-	void EstimateAlphaIndex(size_t srcSize, size_t dstSize, IndexAlpha * indexAlpha)
-	{
-		float scale = (float)srcSize/dstSize;
-
-		for(size_t i = 0; i < dstSize; ++i)
-		{
-			float alpha = (float)((i + 0.5)*scale - 0.5);
-			size_t index = (size_t)::floor(alpha);
-			alpha -= index;
-
-			if((ptrdiff_t)index < 0)
-			{
-				index = 0;
-				alpha = 0;
-			}
-
-			if(index > srcSize - 2)
-			{
-				index = srcSize - 2;
-				alpha = 1;
-			}
-
-			for(size_t c = 0; c < CHANNEL_COUNT; c++)
-			{
-				indexAlpha[i*CHANNEL_COUNT + c].index = CHANNEL_COUNT*index + c;
-				indexAlpha[i*CHANNEL_COUNT + c].alpha = (int)(alpha * FRACTION_RANGE + 0.5);
-			}
-		}
-	}
-
 	namespace Base
 	{
 		namespace
@@ -83,10 +42,12 @@ namespace Simd
 			{
 				Buffer(size_t width, size_t height)
 				{
-					_p = Allocate(sizeof(IndexAlpha)*(width + height) + sizeof(int)*2*width);
-					iax = (IndexAlpha*)_p;
-					iay = iax + width;
-					pbx[0] = (int*)(iay + height);
+					_p = Allocate(2*sizeof(int)*(2*width + height));
+					ix = (int*)_p;
+                    ax = ix + width;
+					iy = ax + width;
+                    ay = iy + height;
+					pbx[0] = (int*)(ay + height);
 					pbx[1] = pbx[0] + width;
 				}
 
@@ -95,33 +56,67 @@ namespace Simd
 					Free(_p);
 				}
 
-				IndexAlpha * iax;
-				IndexAlpha * iay;
+				int * ix;
+                int * ax;
+                int * iy;
+                int * ay;
 				int * pbx[2];
 			private:
 				void *_p;
 			};
 		}
 
-		template <size_t CHANNEL_COUNT>
+        void EstimateAlphaIndex(size_t srcSize, size_t dstSize, int * indexes, int * alphas, size_t channelCount)
+        {
+            float scale = (float)srcSize/dstSize;
+
+            for(size_t i = 0; i < dstSize; ++i)
+            {
+                float alpha = (float)((i + 0.5)*scale - 0.5);
+                ptrdiff_t index = (ptrdiff_t)::floor(alpha);
+                alpha -= index;
+
+                if(index < 0)
+                {
+                    index = 0;
+                    alpha = 0;
+                }
+
+                if(index > (ptrdiff_t)srcSize - 2)
+                {
+                    index = srcSize - 2;
+                    alpha = 1;
+                }
+
+                for(size_t c = 0; c < channelCount; c++)
+                {
+                    size_t offset = i*channelCount + c;
+                    indexes[offset] = (int)(channelCount*index + c);
+                    alphas[offset] = (int)(alpha * FRACTION_RANGE + 0.5);
+                }
+            }
+        }
+
 		void ResizeBilinear(
 			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 		{
-			size_t dstRowSize = CHANNEL_COUNT*dstWidth;
+            assert(channelCount >= 1 && channelCount <= 4);
+
+			size_t dstRowSize = channelCount*dstWidth;
 
 			Buffer buffer(dstRowSize, dstHeight);
 
-			EstimateAlphaIndex<1>(srcHeight, dstHeight, buffer.iay);
+			EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
 
-			EstimateAlphaIndex<CHANNEL_COUNT>(srcWidth, dstWidth, buffer.iax);
+			EstimateAlphaIndex(srcWidth, dstWidth, buffer.ix, buffer.ax, channelCount);
 
 			ptrdiff_t previous = -2;
 
 			for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
 			{
-				int fy = buffer.iay[yDst].alpha;
-				ptrdiff_t sy = buffer.iay[yDst].index;
+				int fy = buffer.ay[yDst];
+				ptrdiff_t sy = buffer.iy[yDst];
 				int k = 0;
 
 				if(sy == previous)
@@ -140,50 +135,27 @@ namespace Simd
 					const uchar* ps = src + (sy + k)*srcStride;
 					for(size_t x = 0; x < dstRowSize; x++)
 					{
-						size_t sx = buffer.iax[x].index;
-						int fx = buffer.iax[x].alpha;
+						size_t sx = buffer.ix[x];
+						int fx = buffer.ax[x];
 						int t = ps[sx];
-						pb[x] = (t << FRACTION_SHIFT) + (ps[sx + CHANNEL_COUNT] - t)*fx;
+						pb[x] = (t << LINEAR_SHIFT) + (ps[sx + channelCount] - t)*fx;
 					}
 				}
 
 				if(fy == 0)
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
-						dst[xDst] = ((buffer.pbx[0][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						dst[xDst] = ((buffer.pbx[0][xDst] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
 				else if(fy == FRACTION_RANGE)
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
-						dst[xDst] = ((buffer.pbx[1][xDst] << FRACTION_SHIFT) + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						dst[xDst] = ((buffer.pbx[1][xDst] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
 				else
 				{
 					for(size_t xDst = 0; xDst < dstRowSize; xDst++)
 					{
 						int t = buffer.pbx[0][xDst];
-						dst[xDst] = ((t << FRACTION_SHIFT) + (buffer.pbx[1][xDst] - t)*fy + FRACTION_ROUND_TERM) >> FRACTION_DOUBLE_SHIFT;
+						dst[xDst] = ((t << LINEAR_SHIFT) + (buffer.pbx[1][xDst] - t)*fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
 					}
 				}
-			}
-		}
-
-		void ResizeBilinear(
-			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
-		{
-			assert(channelCount >= 1 && channelCount <= 4);
-
-			switch(channelCount)
-			{
-			case 1:
-				ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-				break;
-			case 2:
-				ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-				break;
-			case 3:
-				ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-				break;
-			case 4:
-				ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-				break;
 			}
 		}
 	}
@@ -197,12 +169,13 @@ namespace Simd
 			{
 				Buffer(size_t width, size_t height)
 				{
-					_p = Allocate(sizeof(IndexAlpha)*height + sizeof(size_t)*width + sizeof(short)*4*width);
-					ix = (size_t*)_p;
+					_p = Allocate(sizeof(int)*(2*height + width) + sizeof(short)*4*width);
+					ix = (int*)_p;
 					ax = (short*)(ix + width);
-					pbx[0] = ax + 2*width;
+					pbx[0] = (short*)(ax + 2*width);
 					pbx[1] = pbx[0] + width;
-					iay = (IndexAlpha*)(pbx[1] + width);
+                    iy = (int*)(pbx[1] + width);
+                    ay = iy + height;
 				}
 
 				~Buffer()
@@ -210,47 +183,48 @@ namespace Simd
 					Free(_p);
 				}
 
-				size_t * ix;
+				int * ix;
 				short * ax;
+                int * iy;
+                int * ay;
 				short * pbx[2];
-				IndexAlpha * iay;
 			private:
 				void *_p;
 			};
 		}
 
-		const __m128i K16_FRACTION_ROUND_TERM = SIMD_MM_SET1_EPI16(FRACTION_ROUND_TERM);
+		const __m128i K16_FRACTION_ROUND_TERM = SIMD_MM_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
 
-		void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, size_t * indexes, short *alphas)
+		void EstimateAlphaIndexGrayX(size_t srcSize, size_t dstSize, int * indexes, short * alphas)
 		{
 			float scale = (float)srcSize/dstSize;
 
 			for(size_t i = 0; i < dstSize; ++i)
 			{
 				float alpha = (float)((i + 0.5)*scale - 0.5);
-				size_t index = (int)::floor(alpha);
+				ptrdiff_t index = (ptrdiff_t)::floor(alpha);
 				alpha -= index;
 
-				if((ptrdiff_t)index < 0)
+				if(index < 0)
 				{
 					index = 0;
 					alpha = 0;
 				}
 
-				if(index > srcSize - 2)
+				if(index > (ptrdiff_t)srcSize - 2)
 				{
 					index = srcSize - 2;
 					alpha = 1;
 				}
 
-				indexes[i] = index;
-				alphas[1] = (short)(alpha * FRACTION_RANGE + 0.5);
-				alphas[0] = (short)(FRACTION_RANGE - alphas[1]);
+				indexes[i] = (int)index;
+				alphas[1] = (short)(alpha * Base::FRACTION_RANGE + 0.5);
+				alphas[0] = (short)(Base::FRACTION_RANGE - alphas[1]);
 				alphas += 2;
 			}
 		}
 
-		SIMD_INLINE void InterpolateX(const short* src, const short * alpha, short* dst)
+		SIMD_INLINE void InterpolateGrayX(const short* src, const short * alpha, short* dst)
 		{
 			__m128i s = _mm_load_si128((const __m128i*)src);
 			__m128i lo = _mm_madd_epi16(_mm_unpacklo_epi8(s, K_ZERO), _mm_load_si128((const __m128i*)alpha + 0));
@@ -258,10 +232,10 @@ namespace Simd
 			_mm_store_si128((__m128i*)dst, _mm_packs_epi32(lo, hi));
 		}
 
-		SIMD_INLINE void InterpolateY(__m128i s[2], __m128i a[2], uchar *dst)
+		SIMD_INLINE void InterpolateGrayY(__m128i s[2], __m128i a[2], uchar *dst)
 		{
 			__m128i sum = _mm_add_epi16(_mm_mullo_epi16(s[0], a[0]), _mm_mullo_epi16(s[1], a[1]));
-			__m128i val = _mm_srli_epi16(_mm_add_epi16(sum, K16_FRACTION_ROUND_TERM), FRACTION_DOUBLE_SHIFT);
+			__m128i val = _mm_srli_epi16(_mm_add_epi16(sum, K16_FRACTION_ROUND_TERM), Base::BILINEAR_SHIFT);
 			_mm_storel_epi64((__m128i*)dst, _mm_packus_epi16(val, K_ZERO));
 		}
 
@@ -276,9 +250,9 @@ namespace Simd
 
 			Buffer buffer(bufferWidth, dstHeight);
 
-			EstimateAlphaIndex<1>(srcHeight, dstHeight, buffer.iay);
+			Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
 
-			EstimateAlphaIndexX(srcWidth, dstWidth, buffer.ix, buffer.ax);
+			EstimateAlphaIndexGrayX(srcWidth, dstWidth, buffer.ix, buffer.ax);
 
 			ptrdiff_t previous = -2;
 
@@ -286,10 +260,10 @@ namespace Simd
 
 			for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
 			{
-				a[0] = _mm_set1_epi16(short(FRACTION_RANGE - buffer.iay[yDst].alpha));
-				a[1] = _mm_set1_epi16(short(buffer.iay[yDst].alpha));
+				a[0] = _mm_set1_epi16(short(Base::FRACTION_RANGE - buffer.ay[yDst]));
+				a[1] = _mm_set1_epi16(short(buffer.ay[yDst]));
 
-				ptrdiff_t sy = buffer.iay[yDst].index;
+				ptrdiff_t sy = buffer.iy[yDst];
 				int k = 0;
 
 				if(sy == previous)
@@ -311,7 +285,7 @@ namespace Simd
 
 					for(size_t i = 0; i < bufferWidth; i += HA)
 					{
-						InterpolateX(pb + i, buffer.ax + 2*i, pb + i);
+						InterpolateGrayX(pb + i, buffer.ax + 2*i, pb + i);
 					}
 				}
 
@@ -319,27 +293,39 @@ namespace Simd
 				{
 					s[0] = _mm_load_si128((__m128i*)(buffer.pbx[0] + i));
 					s[1] = _mm_load_si128((__m128i*)(buffer.pbx[1] + i));
-					InterpolateY(s, a, dst + i);
+					InterpolateGrayY(s, a, dst + i);
 				}
 
 				s[0] = _mm_loadu_si128((__m128i*)(buffer.pbx[0] + dstWidth - HA));
 				s[1] = _mm_loadu_si128((__m128i*)(buffer.pbx[1] + dstWidth - HA));
-				InterpolateY(s, a, dst + dstWidth - HA);
+				InterpolateGrayY(s, a, dst + dstWidth - HA);
 			}
 		}
-	}
-#endif//SIMD_SSE2_ENABLE
-}
 
-namespace Simd
-{
+        void ResizeBilinear(
+            const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
+        {
+            if(channelCount == 1)
+                ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            else
+                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+        }	
+    }
+#endif//SIMD_SSE2_ENABLE
+
 	void ResizeBilinear(
 		const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 	{
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && srcWidth >= Avx2::A)
+            Avx2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+        else
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && channelCount == 1 && srcWidth >= Sse2::A)
-			Sse2::ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        if(Sse2::Enable && srcWidth >= Sse2::A)
+			Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 		else
 #endif//SIMD_SSE2_ENABLE
 			Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
