@@ -166,6 +166,12 @@
     <ClCompile Include="..\..\src\Simd\SimdEdgeBackground.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAddFeatureDifferenceA.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAddFeatureDifference.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -301,6 +307,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEdgeBackground.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAddFeatureDifference.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

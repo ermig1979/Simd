@@ -137,6 +137,15 @@
 		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogramA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAddFeatureDifference.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAddFeatureDifference.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAddFeatureDifferenceA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBackground.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
