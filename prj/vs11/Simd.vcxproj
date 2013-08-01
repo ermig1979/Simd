@@ -35,6 +35,7 @@
     <ClInclude Include="..\..\src\Simd\SimdCrc32.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEdgeBackground.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur3x3.h" />
@@ -114,6 +115,13 @@
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUvA.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdEdgeBackgroundA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
