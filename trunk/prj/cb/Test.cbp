@@ -147,6 +147,12 @@
 		<Unit filename="../../src/Test/TestDifferenceSum.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestEdgeBackground.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestEdgeBackground.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestFilter.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

@@ -822,7 +822,7 @@ namespace Simd
 			loValue.width == hiCount.width && loValue.height == hiCount.height &&
 			loValue.width == mask.width && loValue.height == mask.height);
 		assert(loValue.format == View::Gray8 && hiValue.format == View::Gray8 && 
-			loCount.format == View::Gray8 && hiCount.format == View::Gray8);
+			loCount.format == View::Gray8 && hiCount.format == View::Gray8 && mask.format == View::Gray8);
 
 		BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
 			loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, 

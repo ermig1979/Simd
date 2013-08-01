@@ -30,6 +30,7 @@
 #include "Test/TestCrc32.h"
 #include "Test/TestDeinterleave.h"
 #include "Test/TestDifferenceSum.h"
+#include "Test/TestEdgeBackground.h"
 #include "Test/TestFilter.h"
 #include "Test/TestHistogram.h"
 #include "Test/TestOperation.h"
@@ -107,6 +108,14 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(Test::BackgroundShiftRangeTest);
     EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
     EXECUTE_TEST(Test::BackgroundInitMaskTest);
+
+    EXECUTE_TEST(Test::EdgeBackgroundGrowRangeSlowTest);
+    EXECUTE_TEST(Test::EdgeBackgroundGrowRangeFastTest);
+    EXECUTE_TEST(Test::EdgeBackgroundIncrementCountTest);
+    EXECUTE_TEST(Test::EdgeBackgroundAdjustRangeTest);
+    EXECUTE_TEST(Test::MaskedEdgeBackgroundAdjustRangeTest);
+    EXECUTE_TEST(Test::EdgeBackgroundShiftRangeTest);
+    EXECUTE_TEST(Test::MaskedEdgeBackgroundShiftRangeTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

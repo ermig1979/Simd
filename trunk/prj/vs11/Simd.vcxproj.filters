@@ -160,6 +160,12 @@
     <ClCompile Include="..\..\src\Simd\SimdResizeBilinearA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdEdgeBackgroundA.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdEdgeBackground.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -292,6 +298,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdOperation.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEdgeBackground.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
