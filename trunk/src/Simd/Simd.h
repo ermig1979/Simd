@@ -42,6 +42,7 @@
 #include "Simd/SimdAbsDifferenceSum.h"
 #include "Simd/SimdAbsGradientSaturatedSum.h"
 #include "Simd/SimdAbsSecondDerivativeHistogram.h"
+#include "Simd/SimdAddFeatureDifference.h"
 #include "Simd/SimdBackground.h"
 #include "Simd/SimdBgraToBgr.h"
 #include "Simd/SimdBgraToGray.h"

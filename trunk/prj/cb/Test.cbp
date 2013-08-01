@@ -102,6 +102,12 @@
 		<Compiler>
 			<Add option="-march=core2" />
 		</Compiler>
+		<Unit filename="../../src/Test/TestAddFeatureDifference.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestAddFeatureDifference.h">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestBackground.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

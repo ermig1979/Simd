@@ -41,6 +41,7 @@
 #include "Test/TestStretchGray.h"
 #include "Test/TestYuvToBgra.h"
 #include "Test/TestYuvToHue.h"
+#include "Test/TestAddFeatureDifference.h"
 
 #define EXECUTE_TEST(test)\
 if(argc < 2 || std::string(argv[1]) == std::string(#test)) \
@@ -116,6 +117,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(Test::MaskedEdgeBackgroundAdjustRangeTest);
     EXECUTE_TEST(Test::EdgeBackgroundShiftRangeTest);
     EXECUTE_TEST(Test::MaskedEdgeBackgroundShiftRangeTest);
+
+    EXECUTE_TEST(Test::AddFeatureDifferenceTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
