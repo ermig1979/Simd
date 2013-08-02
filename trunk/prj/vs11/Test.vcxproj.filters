@@ -67,24 +67,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Test\TestCrc32.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestBgrToGray.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestBgraToGray.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestReduceGray.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestYuvToBgra.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestYuvToHue.h">
-      <Filter>Test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
       <Filter>Sys</Filter>
     </ClInclude>
@@ -94,43 +76,7 @@
     <ClInclude Include="..\..\src\Test\TestUtils.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestFilter.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestDifferenceSum.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestResize.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestDeinterleave.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestHistogram.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestBinarization.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestShift.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestStatistic.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestStretchGray.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestBackground.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestOperation.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestEdgeBackground.h">
-      <Filter>Test</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Test\TestAddFeatureDifference.h">
+    <ClInclude Include="..\..\src\Test\Test.h">
       <Filter>Test</Filter>
     </ClInclude>
   </ItemGroup>

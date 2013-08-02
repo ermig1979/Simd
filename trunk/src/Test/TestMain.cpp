@@ -23,25 +23,7 @@
 */
 #include "Test/TestPerformance.h"
 
-#include "Test/TestBackground.h"
-#include "Test/TestBgraToGray.h"
-#include "Test/TestBgrToGray.h"
-#include "Test/TestBinarization.h"
-#include "Test/TestCrc32.h"
-#include "Test/TestDeinterleave.h"
-#include "Test/TestDifferenceSum.h"
-#include "Test/TestEdgeBackground.h"
-#include "Test/TestFilter.h"
-#include "Test/TestHistogram.h"
-#include "Test/TestOperation.h"
-#include "Test/TestReduceGray.h"
-#include "Test/TestResize.h"
-#include "Test/TestShift.h"
-#include "Test/TestStatistic.h"
-#include "Test/TestStretchGray.h"
-#include "Test/TestYuvToBgra.h"
-#include "Test/TestYuvToHue.h"
-#include "Test/TestAddFeatureDifference.h"
+#include "Test/Test.h"
 
 #define EXECUTE_TEST(test)\
 if(argc < 2 || std::string(argv[1]) == std::string(#test)) \

@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/Test.h"
 
 namespace Test
 {

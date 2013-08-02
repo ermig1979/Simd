@@ -102,34 +102,22 @@
 		<Compiler>
 			<Add option="-march=core2" />
 		</Compiler>
-		<Unit filename="../../src/Test/TestAddFeatureDifference.cpp">
+		<Unit filename="../../src/Test/Test.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestAddFeatureDifference.h">
+		<Unit filename="../../src/Test/TestAddFeatureDifference.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBackground.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestBackground.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestBgrToGray.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestBgrToGray.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBgraToGray.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestBgraToGray.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestBinarization.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestBinarization.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestConfig.h">
@@ -138,46 +126,25 @@
 		<Unit filename="../../src/Test/TestCrc32.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestCrc32.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestDeinterleave.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestDeinterleave.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestDifferenceSum.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestDifferenceSum.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestEdgeBackground.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestEdgeBackground.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestFilter.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestFilter.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestHistogram.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestHistogram.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestMain.cpp">
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestOperation.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestOperation.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestPerformance.cpp">
@@ -189,31 +156,16 @@
 		<Unit filename="../../src/Test/TestReduceGray.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestReduceGray.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestResize.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestResize.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestShift.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestShift.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestStatistic.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestStatistic.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestStretchGray.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestStretchGray.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestUtils.cpp">
@@ -225,13 +177,7 @@
 		<Unit filename="../../src/Test/TestYuvToBgra.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestYuvToBgra.h">
-			<Option virtualFolder="Test/" />
-		</Unit>
 		<Unit filename="../../src/Test/TestYuvToHue.cpp">
-			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestYuvToHue.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Extensions>
