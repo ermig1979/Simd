@@ -49,6 +49,7 @@
 #include "Simd/SimdBgrToBgra.h"
 #include "Simd/SimdBgrToGray.h"
 #include "Simd/SimdBinarization.h"
+#include "Simd/SimdBoostedSaturatedGradient.h"
 #include "Simd/SimdCopy.h"
 #include "Simd/SimdCrc32.h"
 #include "Simd/SimdDeinterleaveUv.h"

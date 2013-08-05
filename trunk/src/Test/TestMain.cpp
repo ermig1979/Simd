@@ -40,67 +40,71 @@ if(argc < 2 || std::string(argv[1]) == std::string(#test)) \
 
 int main(int argc, char* argv[])
 {
-    EXECUTE_TEST(Test::ReduceGray2x2Test);
-    EXECUTE_TEST(Test::ReduceGray3x3Test);
-    EXECUTE_TEST(Test::ReduceGray4x4Test);
-    EXECUTE_TEST(Test::ReduceGray5x5Test);
+    using namespace Test;
 
-    EXECUTE_TEST(Test::Crc32Test);
+    EXECUTE_TEST(ReduceGray2x2Test);
+    EXECUTE_TEST(ReduceGray3x3Test);
+    EXECUTE_TEST(ReduceGray4x4Test);
+    EXECUTE_TEST(ReduceGray5x5Test);
 
-    EXECUTE_TEST(Test::BgraToGrayTest);
+    EXECUTE_TEST(Crc32Test);
 
-    EXECUTE_TEST(Test::BgrToGrayTest);
+    EXECUTE_TEST(BgraToGrayTest);
 
-    EXECUTE_TEST(Test::Yuv444ToHueTest);
-    EXECUTE_TEST(Test::Yuv420ToHueTest);
+    EXECUTE_TEST(BgrToGrayTest);
 
-    EXECUTE_TEST(Test::Yuv444ToBgraTest);
-    EXECUTE_TEST(Test::Yuv420ToBgraTest);
+    EXECUTE_TEST(Yuv444ToHueTest);
+    EXECUTE_TEST(Yuv420ToHueTest);
 
-    EXECUTE_TEST(Test::MedianFilterSquare3x3Test);
-    EXECUTE_TEST(Test::MedianFilterSquare5x5Test);
-    EXECUTE_TEST(Test::GaussianBlur3x3Test);
-    EXECUTE_TEST(Test::AbsGradientSaturatedSumTest);
+    EXECUTE_TEST(Yuv444ToBgraTest);
+    EXECUTE_TEST(Yuv420ToBgraTest);
 
-    EXECUTE_TEST(Test::SquareDifferenceSumTest);
-    EXECUTE_TEST(Test::MaskedSquareDifferenceSumTest);
-    EXECUTE_TEST(Test::AbsDifferenceSumTest);
-    EXECUTE_TEST(Test::MaskedAbsDifferenceSumTest);
+    EXECUTE_TEST(MedianFilterSquare3x3Test);
+    EXECUTE_TEST(MedianFilterSquare5x5Test);
+    EXECUTE_TEST(GaussianBlur3x3Test);
+    EXECUTE_TEST(AbsGradientSaturatedSumTest);
 
-    EXECUTE_TEST(Test::ResizeBilinearTest);
+    EXECUTE_TEST(SquareDifferenceSumTest);
+    EXECUTE_TEST(MaskedSquareDifferenceSumTest);
+    EXECUTE_TEST(AbsDifferenceSumTest);
+    EXECUTE_TEST(MaskedAbsDifferenceSumTest);
 
-    EXECUTE_TEST(Test::DeinterleaveUvTest);
+    EXECUTE_TEST(ResizeBilinearTest);
 
-    EXECUTE_TEST(Test::OperationTest);
+    EXECUTE_TEST(DeinterleaveUvTest);
 
-    EXECUTE_TEST(Test::AbsSecondDerivativeHistogramTest);
+    EXECUTE_TEST(OperationTest);
 
-    EXECUTE_TEST(Test::BinarizationTest);
+    EXECUTE_TEST(AbsSecondDerivativeHistogramTest);
 
-    EXECUTE_TEST(Test::ShiftBilinearTest);
+    EXECUTE_TEST(BinarizationTest);
 
-    EXECUTE_TEST(Test::GetStatisticTest);
+    EXECUTE_TEST(ShiftBilinearTest);
 
-    EXECUTE_TEST(Test::StretchGray2x2Test);
+    EXECUTE_TEST(GetStatisticTest);
 
-    EXECUTE_TEST(Test::BackgroundGrowRangeSlowTest);
-    EXECUTE_TEST(Test::BackgroundGrowRangeFastTest);
-    EXECUTE_TEST(Test::BackgroundIncrementCountTest);
-    EXECUTE_TEST(Test::BackgroundAdjustRangeTest);
-    EXECUTE_TEST(Test::MaskedBackgroundAdjustRangeTest);
-    EXECUTE_TEST(Test::BackgroundShiftRangeTest);
-    EXECUTE_TEST(Test::MaskedBackgroundShiftRangeTest);
-    EXECUTE_TEST(Test::BackgroundInitMaskTest);
+    EXECUTE_TEST(StretchGray2x2Test);
 
-    EXECUTE_TEST(Test::EdgeBackgroundGrowRangeSlowTest);
-    EXECUTE_TEST(Test::EdgeBackgroundGrowRangeFastTest);
-    EXECUTE_TEST(Test::EdgeBackgroundIncrementCountTest);
-    EXECUTE_TEST(Test::EdgeBackgroundAdjustRangeTest);
-    EXECUTE_TEST(Test::MaskedEdgeBackgroundAdjustRangeTest);
-    EXECUTE_TEST(Test::EdgeBackgroundShiftRangeTest);
-    EXECUTE_TEST(Test::MaskedEdgeBackgroundShiftRangeTest);
+    EXECUTE_TEST(BackgroundGrowRangeSlowTest);
+    EXECUTE_TEST(BackgroundGrowRangeFastTest);
+    EXECUTE_TEST(BackgroundIncrementCountTest);
+    EXECUTE_TEST(BackgroundAdjustRangeTest);
+    EXECUTE_TEST(MaskedBackgroundAdjustRangeTest);
+    EXECUTE_TEST(BackgroundShiftRangeTest);
+    EXECUTE_TEST(MaskedBackgroundShiftRangeTest);
+    EXECUTE_TEST(BackgroundInitMaskTest);
 
-    EXECUTE_TEST(Test::AddFeatureDifferenceTest);
+    EXECUTE_TEST(EdgeBackgroundGrowRangeSlowTest);
+    EXECUTE_TEST(EdgeBackgroundGrowRangeFastTest);
+    EXECUTE_TEST(EdgeBackgroundIncrementCountTest);
+    EXECUTE_TEST(EdgeBackgroundAdjustRangeTest);
+    EXECUTE_TEST(MaskedEdgeBackgroundAdjustRangeTest);
+    EXECUTE_TEST(EdgeBackgroundShiftRangeTest);
+    EXECUTE_TEST(MaskedEdgeBackgroundShiftRangeTest);
+
+    EXECUTE_TEST(AddFeatureDifferenceTest);
+
+    EXECUTE_TEST(BoostedSaturatedGradientTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

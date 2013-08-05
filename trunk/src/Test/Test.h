@@ -87,5 +87,7 @@ namespace Test
     bool MaskedEdgeBackgroundShiftRangeTest();
 
     bool AddFeatureDifferenceTest();
+
+    bool BoostedSaturatedGradientTest();
 }
 #endif//__Test_h__
