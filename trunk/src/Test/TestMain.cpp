@@ -105,6 +105,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(AddFeatureDifferenceTest);
 
     EXECUTE_TEST(TextureBoostedSaturatedGradientTest);
+    EXECUTE_TEST(TextureBoostedUvTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;

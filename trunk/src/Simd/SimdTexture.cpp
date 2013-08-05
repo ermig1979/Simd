@@ -63,6 +63,25 @@ namespace Simd
 			memset(dx, 0, width);
             memset(dy, 0, width);
 		}
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride)
+        {
+            assert(boost < 128);
+
+            int min = 128 - (128/boost);
+            int max = 255 - min;
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                {
+                    dst[col] = (RestrictRange(src[col], min, max) - min)*boost;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -94,7 +113,7 @@ namespace Simd
         template<bool align> void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
 		{
-            assert(width >= A);
+            assert(width >= A && int(2)*saturation*boost <= 0xFF);
             if(align)
             {
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride));
@@ -137,7 +156,54 @@ namespace Simd
 			else
 				TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 		}
-	}
+
+        template<bool align> SIMD_INLINE void TextureBoostedUv(const uchar * src, uchar * dst, __m128i min8, __m128i max8, __m128i boost16)
+        {
+            const __m128i _src = Load<false>((__m128i*)src);
+            const __m128i saturated = _mm_sub_epi8(_mm_max_epu8(min8, _mm_min_epu8(max8, _src)), min8);
+            const __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(saturated, K_ZERO), boost16);
+            const __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(saturated, K_ZERO), boost16);
+            Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
+        }
+
+        template<bool align> void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride)
+        {
+            assert(width >= A && boost < 0x80);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            int min = 128 - (128/boost);
+            int max = 255 - min;
+
+            __m128i min8 = _mm_set1_epi8(min);
+            __m128i max8 = _mm_set1_epi8(max);
+            __m128i boost16 = _mm_set1_epi16(boost);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureBoostedUv<align>(src + col, dst + col, min8, max8, boost16);
+                if(width != alignedWidth)
+                    TextureBoostedUv<false>(src + width - A, dst + width - A, min8, max8, boost16);
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+            else
+                TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+        }
+    }
 #endif// SIMD_SSE2_ENABLE
 
     void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
@@ -156,6 +222,22 @@ namespace Simd
 			Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 	}
 
+    void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        uchar boost, uchar * dst, size_t dstStride)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+        else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A)
+            Sse2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+        else
+#endif//SIMD_SSE2_ENABLE
+            Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+    }
+
     void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
 	{
 		assert(src.width == dx.width && src.height == dx.height && src.format == dx.format);
@@ -164,4 +246,11 @@ namespace Simd
 
 		TextureBoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
 	}
+
+    void TextureBoostedUv(const View & src, uchar boost, View & dst)
+    {
+        assert(src.width == dst.width && src.height == dst.height && src.format == dst.format && src.format == View::Gray8);
+
+        TextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
+    }
 }
