@@ -30,4 +30,4 @@ namespace Simd
 {
 	void Copy(const View & src, View & dst);
 }
-#endif//__SimdCrc32_h__
+#endif//__SimdCopy_h__

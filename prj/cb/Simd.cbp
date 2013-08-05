@@ -191,6 +191,15 @@
 		<Unit filename="../../src/Simd/SimdBinarizationA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBoostedSaturatedGradient.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBoostedSaturatedGradient.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBoostedSaturatedGradientA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdConfig.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
