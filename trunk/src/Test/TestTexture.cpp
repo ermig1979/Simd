@@ -48,7 +48,7 @@ namespace Test
     }
 #define FUNC(function) Func(function, #function)
 
-    bool BoostedSaturatedGradientTest(int width, int height, const Func & f1, const Func & f2)
+    bool TextureBoostedSaturatedGradientTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -72,18 +72,18 @@ namespace Test
         return result;
     }
 
-    bool BoostedSaturatedGradientTest()
+    bool TextureBoostedSaturatedGradientTest()
     {
         bool result = true;
 
-        result = result && BoostedSaturatedGradientTest(W, H, FUNC(Simd::Base::BoostedSaturatedGradient), FUNC(Simd::BoostedSaturatedGradient));
-        result = result && BoostedSaturatedGradientTest(W - 1, H + 1, FUNC(Simd::Base::BoostedSaturatedGradient), FUNC(Simd::BoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientTest(W, H, FUNC(Simd::Base::TextureBoostedSaturatedGradient), FUNC(Simd::TextureBoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientTest(W - 1, H + 1, FUNC(Simd::Base::TextureBoostedSaturatedGradient), FUNC(Simd::TextureBoostedSaturatedGradient));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && BoostedSaturatedGradientTest(W, H, FUNC(Simd::Sse2::BoostedSaturatedGradient), FUNC(Simd::Avx2::BoostedSaturatedGradient));
-            result = result && BoostedSaturatedGradientTest(W - 1, H + 1, FUNC(Simd::Sse2::BoostedSaturatedGradient), FUNC(Simd::Avx2::BoostedSaturatedGradient));
+            result = result && TextureBoostedSaturatedGradientTest(W, H, FUNC(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC(Simd::Avx2::TextureBoostedSaturatedGradient));
+            result = result && TextureBoostedSaturatedGradientTest(W - 1, H + 1, FUNC(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC(Simd::Avx2::TextureBoostedSaturatedGradient));
         }
 #endif 
 

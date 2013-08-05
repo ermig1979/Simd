@@ -172,10 +172,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAddFeatureDifference.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBoostedSaturatedGradient.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdTexture.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBoostedSaturatedGradientA.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
   </ItemGroup>
@@ -318,7 +318,7 @@
     <ClInclude Include="..\..\src\Simd\SimdAddFeatureDifference.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBoostedSaturatedGradient.h">
+    <ClInclude Include="..\..\src\Simd\SimdTexture.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
