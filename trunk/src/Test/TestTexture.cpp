@@ -173,4 +173,71 @@ namespace Test
 
         return result;
     }
+
+    namespace
+    {
+        struct Func3
+        {
+            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+            FuncPtr func;
+            std::string description;
+
+            Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & lo, const View & hi, int64_t * sum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, sum);
+            }
+        };
+    }
+#define FUNC3(function) Func3(function, #function)
+
+    bool TextureGetDifferenceSumTest(int width, int height, const Func3 & f1, const Func3 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+        View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(lo);
+        View hi(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(hi);
+
+        int64_t s1, s2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, lo, hi, &s1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lo, hi, &s2));
+
+        if(s1 != s2)
+        {
+            result = false;
+            std::cout << "Error sum: (" << s1 << " != " << s2 << ")! " << std::endl;
+        }
+
+        return result;
+    }
+
+    bool TextureGetDifferenceSumTest()
+    {
+        bool result = true;
+
+        result = result && TextureGetDifferenceSumTest(W, H, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(Simd::TextureGetDifferenceSum));
+        result = result && TextureGetDifferenceSumTest(W - 1, H + 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(Simd::TextureGetDifferenceSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && TextureGetDifferenceSumTest(W, H, FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(Simd::Avx2::TextureGetDifferenceSum));
+            result = result && TextureGetDifferenceSumTest(W - 1, H + 1, FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(Simd::Avx2::TextureGetDifferenceSum));
+        }
+#endif 
+
+        return result;
+    }
 }
