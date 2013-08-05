@@ -24,18 +24,18 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdBoostedSaturatedGradient.h"
+#include "Simd/SimdTexture.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-        SIMD_INLINE int BoostedSaturatedGradient(const uchar * src, ptrdiff_t step, int saturation, int boost)
+        SIMD_INLINE int TextureBoostedSaturatedGradient(const uchar * src, ptrdiff_t step, int saturation, int boost)
         {
             return (saturation + RestrictRange((int)src[step] - (int)src[-step], -saturation, saturation))*boost;
         }
 
-        void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
 		{
             assert(int(2)*saturation*boost <= 0xFF);
@@ -51,8 +51,8 @@ namespace Simd
                 dy[0] = 0;
 				for (size_t col = 1; col < width - 1; ++col)
 				{
-					dy[col] = BoostedSaturatedGradient(src + col, srcStride, saturation, boost);
-					dx[col] = BoostedSaturatedGradient(src + col, 1, saturation, boost);
+					dy[col] = TextureBoostedSaturatedGradient(src + col, srcStride, saturation, boost);
+					dx[col] = TextureBoostedSaturatedGradient(src + col, 1, saturation, boost);
 				}
 				dx[width - 1] = 0;
                 dy[width - 1] = 0;
@@ -68,30 +68,30 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-        SIMD_INLINE __m128i BoostedSaturatedGradient16(__m128i a, __m128i b, __m128i saturation, const __m128i & boost)
+        SIMD_INLINE __m128i TextureBoostedSaturatedGradient16(__m128i a, __m128i b, __m128i saturation, const __m128i & boost)
         {
             return _mm_mullo_epi16(_mm_max_epi16(K_ZERO, _mm_add_epi16(saturation, _mm_min_epi16(_mm_sub_epi16(b, a), saturation))), boost);
         }
 
-        SIMD_INLINE __m128i BoostedSaturatedGradient8(__m128i a, __m128i b, __m128i saturation, const __m128i & boost) 
+        SIMD_INLINE __m128i TextureBoostedSaturatedGradient8(__m128i a, __m128i b, __m128i saturation, const __m128i & boost) 
         {
-            __m128i lo = BoostedSaturatedGradient16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO), saturation, boost);
-            __m128i hi = BoostedSaturatedGradient16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO), saturation, boost);
+            __m128i lo = TextureBoostedSaturatedGradient16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO), saturation, boost);
+            __m128i hi = TextureBoostedSaturatedGradient16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO), saturation, boost);
             return _mm_packus_epi16(lo, hi);
         }
 
-		template<bool align> SIMD_INLINE void BoostedSaturatedGradient(const uchar * src, uchar * dx, uchar * dy, 
+		template<bool align> SIMD_INLINE void TextureBoostedSaturatedGradient(const uchar * src, uchar * dx, uchar * dy, 
             size_t stride, __m128i saturation, __m128i boost)
 		{
 			const __m128i s10 = Load<false>((__m128i*)(src - 1));
 			const __m128i s12 = Load<false>((__m128i*)(src + 1));
 			const __m128i s01 = Load<align>((__m128i*)(src - stride));
 			const __m128i s21 = Load<align>((__m128i*)(src + stride));
-			Store<align>((__m128i*)dx, BoostedSaturatedGradient8(s10, s12, saturation, boost));
-			Store<align>((__m128i*)dy, BoostedSaturatedGradient8(s01, s21, saturation, boost));
+			Store<align>((__m128i*)dx, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost));
+			Store<align>((__m128i*)dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
 		}
 
-        template<bool align> void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        template<bool align> void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
 		{
             assert(width >= A);
@@ -112,9 +112,9 @@ namespace Simd
 			for (size_t row = 2; row < height; ++row)
 			{
 				for (size_t col = 0; col < alignedWidth; col += A)
-					BoostedSaturatedGradient<align>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
+					TextureBoostedSaturatedGradient<align>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
 				if(width != alignedWidth)
-                    BoostedSaturatedGradient<false>(src + width - A, dx + width - A, dy + width - A, srcStride, _saturation, _boost);
+                    TextureBoostedSaturatedGradient<false>(src + width - A, dx + width - A, dy + width - A, srcStride, _saturation, _boost);
 
 				dx[0] = 0;
                 dy[0] = 0;
@@ -129,39 +129,39 @@ namespace Simd
             memset(dy, 0, width);
 		}
 
-        void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
 		{
 			if(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
-				BoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+				TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 			else
-				BoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+				TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
 
-    void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+    void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
         uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
 	{
 #ifdef SIMD_AVX2_ENABLE
         if(Avx2::Enable && width >= Avx2::A)
-            Avx2::BoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+            Avx2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
 		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::BoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+			Sse2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 		else
 #endif//SIMD_SSE2_ENABLE
-			Base::BoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+			Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 	}
 
-    void BoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
+    void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
 	{
 		assert(src.width == dx.width && src.height == dx.height && src.format == dx.format);
         assert(src.width == dy.width && src.height == dy.height && src.format == dy.format);
 		assert(src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
 
-		BoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
+		TextureBoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
 	}
 }

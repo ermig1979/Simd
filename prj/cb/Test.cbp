@@ -120,7 +120,7 @@
 		<Unit filename="../../src/Test/TestBinarization.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
-		<Unit filename="../../src/Test/TestBoostedSaturatedGradient.cpp">
+		<Unit filename="../../src/Test/TestTexture.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestConfig.h">

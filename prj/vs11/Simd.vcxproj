@@ -29,7 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBoostedSaturatedGradient.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTexture.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
@@ -113,8 +113,8 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBoostedSaturatedGradient.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBoostedSaturatedGradientA.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>

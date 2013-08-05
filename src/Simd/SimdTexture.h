@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdBoostedSaturatedGradient_h__
-#define __SimdBoostedSaturatedGradient_h__
+#ifndef __SimdTexture_h__
+#define __SimdTexture_h__
 
 #include "Simd/SimdView.h"
 
@@ -30,14 +30,14 @@ namespace Simd
 {
 	namespace Base
 	{
-		void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+		void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-        void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
 	}
 #endif// SIMD_SSE2_ENABLE
@@ -45,14 +45,14 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
     }
 #endif// SIMD_AVX2_ENABLE
 
-    void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+    void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
         uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
 
-    void BoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy);
+    void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy);
 }
-#endif//__SimdBoostedSaturatedGradient_h__
+#endif//__SimdTexture_h__

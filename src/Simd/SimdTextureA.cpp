@@ -24,37 +24,37 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdAbsGradientSaturatedSum.h"
+#include "Simd/SimdTexture.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-        SIMD_INLINE __m256i BoostedSaturatedGradient16(__m256i a, __m256i b, __m256i saturation, const __m256i & boost)
+        SIMD_INLINE __m256i TextureBoostedSaturatedGradient16(__m256i a, __m256i b, __m256i saturation, const __m256i & boost)
         {
             return _mm256_mullo_epi16(_mm256_max_epi16(K_ZERO, _mm256_add_epi16(saturation, _mm256_min_epi16(_mm256_sub_epi16(b, a), saturation))), boost);
         }
 
-        SIMD_INLINE __m256i BoostedSaturatedGradient8(__m256i a, __m256i b, __m256i saturation, const __m256i & boost) 
+        SIMD_INLINE __m256i TextureBoostedSaturatedGradient8(__m256i a, __m256i b, __m256i saturation, const __m256i & boost) 
         {
-            __m256i lo = BoostedSaturatedGradient16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO), saturation, boost);
-            __m256i hi = BoostedSaturatedGradient16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO), saturation, boost);
+            __m256i lo = TextureBoostedSaturatedGradient16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO), saturation, boost);
+            __m256i hi = TextureBoostedSaturatedGradient16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO), saturation, boost);
             return _mm256_packus_epi16(lo, hi);
         }
 
-        template<bool align> SIMD_INLINE void BoostedSaturatedGradient(const uchar * src, uchar * dx, uchar * dy, 
+        template<bool align> SIMD_INLINE void TextureBoostedSaturatedGradient(const uchar * src, uchar * dx, uchar * dy, 
             size_t stride, __m256i saturation, __m256i boost)
         {
             const __m256i s10 = Load<false>((__m256i*)(src - 1));
             const __m256i s12 = Load<false>((__m256i*)(src + 1));
             const __m256i s01 = Load<align>((__m256i*)(src - stride));
             const __m256i s21 = Load<align>((__m256i*)(src + stride));
-            Store<align>((__m256i*)dx, BoostedSaturatedGradient8(s10, s12, saturation, boost));
-            Store<align>((__m256i*)dy, BoostedSaturatedGradient8(s01, s21, saturation, boost));
+            Store<align>((__m256i*)dx, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost));
+            Store<align>((__m256i*)dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
         }
 
-        template<bool align> void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        template<bool align> void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
         {
             assert(width >= A);
@@ -75,9 +75,9 @@ namespace Simd
             for (size_t row = 2; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
-                    BoostedSaturatedGradient<align>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
+                    TextureBoostedSaturatedGradient<align>(src + col, dx + col, dy + col, srcStride, _saturation, _boost);
                 if(width != alignedWidth)
-                    BoostedSaturatedGradient<false>(src + width - A, dx + width - A, dy + width - A, srcStride, _saturation, _boost);
+                    TextureBoostedSaturatedGradient<false>(src + width - A, dx + width - A, dy + width - A, srcStride, _saturation, _boost);
 
                 dx[0] = 0;
                 dy[0] = 0;
@@ -92,13 +92,13 @@ namespace Simd
             memset(dy, 0, width);
         }
 
-        void BoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
-                BoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+                TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
             else
-                BoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+                TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
