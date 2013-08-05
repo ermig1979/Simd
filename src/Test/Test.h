@@ -90,5 +90,6 @@ namespace Test
 
     bool TextureBoostedSaturatedGradientTest();
     bool TextureBoostedUvTest();
+    bool TextureGetDifferenceSumTest();
 }
 #endif//__Test_h__

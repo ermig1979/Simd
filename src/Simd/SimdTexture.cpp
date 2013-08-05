@@ -24,6 +24,7 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdTexture.h"
 
 namespace Simd
@@ -80,6 +81,23 @@ namespace Simd
                 }
                 src += srcStride;
                 dst += dstStride;
+            }
+        }
+
+        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        {
+            *sum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                int rowSum = 0;
+                for (size_t col = 0; col < width; ++col)
+                    rowSum += src[col] - Average(lo[col], hi[col]);
+                *sum += rowSum;
+
+                src += srcStride;
+                lo += loStride;
+                hi += hiStride;
             }
         }
 	}
@@ -159,7 +177,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void TextureBoostedUv(const uchar * src, uchar * dst, __m128i min8, __m128i max8, __m128i boost16)
         {
-            const __m128i _src = Load<false>((__m128i*)src);
+            const __m128i _src = Load<align>((__m128i*)src);
             const __m128i saturated = _mm_sub_epi8(_mm_max_epu8(min8, _mm_min_epu8(max8, _src)), min8);
             const __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(saturated, K_ZERO), boost16);
             const __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(saturated, K_ZERO), boost16);
@@ -203,6 +221,53 @@ namespace Simd
             else
                 TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
         }
+
+        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uchar * src, const uchar * lo, const uchar * hi, 
+            __m128i & positive, __m128i & negative, const __m128i & mask)
+        {
+            const __m128i _src = Load<align>((__m128i*)src);
+            const __m128i _lo = Load<align>((__m128i*)lo);
+            const __m128i _hi = Load<align>((__m128i*)hi);
+            const __m128i average = _mm_and_si128(mask, _mm_avg_epu8(_lo, _hi));
+            const __m128i current = _mm_and_si128(mask, _src);
+            positive = _mm_add_epi64(positive, _mm_sad_epu8(_mm_subs_epu8(current, average), K_ZERO));
+            negative = _mm_add_epi64(negative, _mm_sad_epu8(_mm_subs_epu8(average, current), K_ZERO));
+        }
+
+        template <bool align> void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        {
+            assert(width >= A && sum != NULL);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            __m128i positive = _mm_setzero_si128();
+            __m128i negative = _mm_setzero_si128();
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureGetDifferenceSum<align>(src + col, lo + col, hi + col, positive, negative, K_INV_ZERO);
+                if(width != alignedWidth)
+                    TextureGetDifferenceSum<false>(src + width - A, lo + width - A, hi + width - A, positive, negative, tailMask);
+                src += srcStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+            *sum = ExtractInt64Sum(positive) - ExtractInt64Sum(negative);
+        }
+
+        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+                TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+            else
+                TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -238,6 +303,22 @@ namespace Simd
             Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     }
 
+    void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+        else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A)
+            Sse2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+        else
+#endif//SIMD_SSE2_ENABLE
+            Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+    }
+
     void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
 	{
 		assert(src.width == dx.width && src.height == dx.height && src.format == dx.format);
@@ -252,5 +333,14 @@ namespace Simd
         assert(src.width == dst.width && src.height == dst.height && src.format == dst.format && src.format == View::Gray8);
 
         TextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
+    }
+
+    void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t * sum)
+    {
+        assert(src.width == lo.width && src.height == lo.height && src.format == lo.format);
+        assert(src.width == hi.width && src.height == hi.height && src.format == hi.format);
+        assert(src.format == View::Gray8 && sum != NULL);
+
+        TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, sum);
     }
 }

@@ -24,6 +24,8 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdTexture.h"
 
 namespace Simd
@@ -146,6 +148,53 @@ namespace Simd
                 TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
             else
                 TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+        }
+
+        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uchar * src, const uchar * lo, const uchar * hi, 
+            __m256i & positive, __m256i & negative, const __m256i & mask)
+        {
+            const __m256i _src = Load<align>((__m256i*)src);
+            const __m256i _lo = Load<align>((__m256i*)lo);
+            const __m256i _hi = Load<align>((__m256i*)hi);
+            const __m256i average = _mm256_and_si256(mask, _mm256_avg_epu8(_lo, _hi));
+            const __m256i current = _mm256_and_si256(mask, _src);
+            positive = _mm256_add_epi64(positive, _mm256_sad_epu8(_mm256_subs_epu8(current, average), K_ZERO));
+            negative = _mm256_add_epi64(negative, _mm256_sad_epu8(_mm256_subs_epu8(average, current), K_ZERO));
+        }
+
+        template <bool align> void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        {
+            assert(width >= A && sum != NULL);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i positive = _mm256_setzero_si256();
+            __m256i negative = _mm256_setzero_si256();
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureGetDifferenceSum<align>(src + col, lo + col, hi + col, positive, negative, K_INV_ZERO);
+                if(width != alignedWidth)
+                    TextureGetDifferenceSum<false>(src + width - A, lo + width - A, hi + width - A, positive, negative, tailMask);
+                src += srcStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+            *sum = ExtractSum<int64_t>(positive) - ExtractSum<int64_t>(negative);
+        }
+
+        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+                TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+            else
+                TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
         }
     }
 #endif// SIMD_AVX2_ENABLE
