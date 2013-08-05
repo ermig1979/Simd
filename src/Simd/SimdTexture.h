@@ -32,14 +32,20 @@ namespace Simd
 	{
 		void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
-	}
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride);
+}
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
         void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
-	}
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride);
+}
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
@@ -47,12 +53,20 @@ namespace Simd
     {
         void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride);
     }
 #endif// SIMD_AVX2_ENABLE
 
     void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
         uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
 
+    void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        uchar boost, uchar * dst, size_t dstStride);
+
     void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy);
+
+    void TextureBoostedUv(const View & src, uchar boost, View & dst);
 }
 #endif//__SimdTexture_h__

@@ -209,6 +209,13 @@ namespace Simd
 		{
 			return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_max_epu8(a, b), a), K_INV_ZERO);
 		}
+
+        SIMD_INLINE __m128i MulU8(__m128i a, __m128i b)
+        {
+            __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO));
+            __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO));
+            return _mm_packus_epi16(lo, hi);
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -255,6 +262,13 @@ namespace Simd
         SIMD_INLINE __m256i LesserThenU8(__m256i a, __m256i b)
         {
             return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_max_epu8(a, b), a), K_INV_ZERO);
+        }
+
+        SIMD_INLINE __m256i MulU8(__m256i a, __m256i b)
+        {
+            __m256i lo = _mm256_mullo_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO));
+            __m256i hi = _mm256_mullo_epi16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO));
+            return _mm256_packus_epi16(lo, hi);
         }
     }
 #endif// SIMD_AVX2_ENABLE

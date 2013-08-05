@@ -57,7 +57,7 @@ namespace Simd
         template<bool align> void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
         {
-            assert(width >= A);
+            assert(width >= A && int(2)*saturation*boost <= 0xFF);
             if(align)
             {
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride));
@@ -99,6 +99,53 @@ namespace Simd
                 TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
             else
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+        }
+
+        template<bool align> SIMD_INLINE void TextureBoostedUv(const uchar * src, uchar * dst, __m256i min8, __m256i max8, __m256i boost16)
+        {
+            const __m256i _src = Load<false>((__m256i*)src);
+            const __m256i saturated = _mm256_sub_epi8(_mm256_max_epu8(min8, _mm256_min_epu8(max8, _src)), min8);
+            const __m256i lo = _mm256_mullo_epi16(_mm256_unpacklo_epi8(saturated, K_ZERO), boost16);
+            const __m256i hi = _mm256_mullo_epi16(_mm256_unpackhi_epi8(saturated, K_ZERO), boost16);
+            Store<align>((__m256i*)dst, _mm256_packus_epi16(lo, hi));
+        }
+
+        template<bool align> void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride)
+        {
+            assert(width >= A && boost < 0x80);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            int min = 128 - (128/boost);
+            int max = 255 - min;
+
+            __m256i min8 = _mm256_set1_epi8(min);
+            __m256i max8 = _mm256_set1_epi8(max);
+            __m256i boost16 = _mm256_set1_epi16(boost);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureBoostedUv<align>(src + col, dst + col, min8, max8, boost16);
+                if(width != alignedWidth)
+                    TextureBoostedUv<false>(src + width - A, dst + width - A, min8, max8, boost16);
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+            else
+                TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
