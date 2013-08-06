@@ -25,18 +25,21 @@
 
 namespace Simd
 {
+    void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
+    {
+        size_t rowSize = width*pixelSize;
+        for(size_t row = 0; row < height; ++row)
+        {
+            memcpy(dst, src, rowSize);
+            src += srcStride;
+            dst += dstStride;
+        }
+    }
+
 	void Copy(const View & src, View & dst)
 	{
 		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
 
-		size_t rowSize = src.width*View::SizeOf(src.format);
-		uchar * srcData = src.data;
-		uchar * dstData = dst.data;
-		for(size_t row = 0; row < src.height; ++row)
-		{
-			memcpy(dstData, srcData, rowSize);
-			srcData += src.stride;
-			dstData += dst.stride;
-		}
+        Copy(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), dst.data, dst.stride);
 	}
 }

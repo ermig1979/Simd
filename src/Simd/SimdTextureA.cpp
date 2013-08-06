@@ -26,6 +26,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdTexture.h"
 
 namespace Simd
@@ -195,6 +196,72 @@ namespace Simd
                 TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
             else
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+        }
+
+        template <bool align> void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride)
+        {
+            assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m256i tailMask = src == dst ? SetMask<uchar>(0, A - width + alignedWidth, 0xFF) : K_INV_ZERO;
+            if(shift > 0)
+            {
+                __m256i _shift = _mm256_set1_epi8((char)shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m256i _src = Load<align>((__m256i*) (src + col));
+                        Store<align>((__m256i*) (dst + col),  _mm256_adds_epu8(_src, _shift));
+                    }
+                    if(width != alignedWidth)
+                    {
+                        const __m256i _src = Load<false>((__m256i*) (src + width - A));
+                        Store<false>((__m256i*) (dst + width - A),  _mm256_adds_epu8(_src, _mm256_and_si256(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+            if(shift < 0)
+            {
+                __m256i _shift = _mm256_set1_epi8((char)-shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m256i _src = Load<align>((__m256i*) (src + col));
+                        Store<align>((__m256i*) (dst + col),  _mm256_subs_epu8(_src, _shift));
+                    }
+                    if(width != alignedWidth)
+                    {
+                        const __m256i _src = Load<false>((__m256i*) (src + width - A));
+                        Store<false>((__m256i*) (dst + width - A),  _mm256_subs_epu8(_src, _mm256_and_si256(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+        }
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride)
+        {
+            if(shift == 0)
+            {
+                if(src != dst)
+                    Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+            else
+                TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
