@@ -38,6 +38,12 @@ namespace Simd
 
         void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
             const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -51,6 +57,9 @@ namespace Simd
 
         void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
             const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -65,6 +74,9 @@ namespace Simd
 
         void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
             const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride);
     }
 #endif// SIMD_AVX2_ENABLE
 
@@ -77,10 +89,15 @@ namespace Simd
     void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
         const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
 
+    void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        int shift, uchar * dst, size_t dstStride);
+
     void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy);
 
     void TextureBoostedUv(const View & src, uchar boost, View & dst);
 
     void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t * sum);
+
+    void TexturePerformCompensation(const View & src, int shift, View & dst);
 }
 #endif//__SimdTexture_h__

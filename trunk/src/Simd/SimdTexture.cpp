@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdCopy.h"
 #include "Simd/SimdTexture.h"
 
 namespace Simd
@@ -98,6 +99,39 @@ namespace Simd
                 src += srcStride;
                 lo += loStride;
                 hi += hiStride;
+            }
+        }
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride)
+        {
+            assert(shift > -0xFF && shift < 0xFF);
+
+            if(shift == 0)
+            {
+                if(src != dst)
+                    Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
+            else if(shift > 0)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                        dst[col] = Min(src[col] + shift, 0xFF);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+            else if(shift < 0)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                        dst[col] = Max(src[col] + shift, 0);
+                    src += srcStride;
+                    dst += dstStride;
+                }
             }
         }
 	}
@@ -268,6 +302,72 @@ namespace Simd
             else
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
         }
+
+        template <bool align> void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride)
+        {
+            assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = src == dst ? ShiftLeft(K_INV_ZERO, A - width + alignedWidth) : K_INV_ZERO;
+            if(shift > 0)
+            {
+                __m128i _shift = _mm_set1_epi8((char)shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m128i _src = Load<align>((__m128i*) (src + col));
+                        Store<align>((__m128i*) (dst + col),  _mm_adds_epu8(_src, _shift));
+                    }
+                    if(width != alignedWidth)
+                    {
+                        const __m128i _src = Load<false>((__m128i*) (src + width - A));
+                        Store<false>((__m128i*) (dst + width - A),  _mm_adds_epu8(_src, _mm_and_si128(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+            if(shift < 0)
+            {
+                __m128i _shift = _mm_set1_epi8((char)-shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m128i _src = Load<align>((__m128i*) (src + col));
+                        Store<align>((__m128i*) (dst + col),  _mm_subs_epu8(_src, _shift));
+                    }
+                    if(width != alignedWidth)
+                    {
+                        const __m128i _src = Load<false>((__m128i*) (src + width - A));
+                        Store<false>((__m128i*) (dst + width - A),  _mm_subs_epu8(_src, _mm_and_si128(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+        }
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride)
+        {
+            if(shift == 0)
+            {
+                if(src != dst)
+                    Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+            else
+                TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -319,6 +419,22 @@ namespace Simd
             Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     }
 
+    void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        int shift, uchar * dst, size_t dstStride)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+        else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A)
+            Sse2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+        else
+#endif//SIMD_SSE2_ENABLE
+            Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+    }
+
     void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
 	{
 		assert(src.width == dx.width && src.height == dx.height && src.format == dx.format);
@@ -342,5 +458,13 @@ namespace Simd
         assert(src.format == View::Gray8 && sum != NULL);
 
         TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, sum);
+    }
+
+    void TexturePerformCompensation(const View & src, int shift, View & dst)
+    {
+        assert(src.width == dst.width && src.height == dst.height && src.format == dst.format && src.format == View::Gray8);
+        assert(shift > -0xFF && shift < 0xFF);
+
+        TexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
     }
 }

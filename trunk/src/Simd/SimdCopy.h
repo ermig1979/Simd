@@ -28,6 +28,8 @@
 
 namespace Simd
 {
+    void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
+
 	void Copy(const View & src, View & dst);
 }
 #endif//__SimdCopy_h__

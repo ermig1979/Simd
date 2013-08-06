@@ -240,4 +240,78 @@ namespace Test
 
         return result;
     }
+
+    namespace
+    {
+        struct Func4
+        {
+            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                int shift, uchar * dst, size_t dstStride);
+
+            FuncPtr func;
+            std::string description;
+
+            Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, int shift, View &  dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
+            }
+        };
+    }
+#define FUNC4(function) Func4(function, #function)
+
+    bool TexturePerformCompensationTest(int width, int height, int shift, const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description 
+            << " [" << width << ", " << height << "] <" << shift << ">." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, shift, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, shift, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 32, 0);
+
+        return result;
+    }
+
+    bool TexturePerformCompensationTest(int width, int height, const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        result = result && TexturePerformCompensationTest(width, height, 17, f1, f2);
+        result = result && TexturePerformCompensationTest(width, height, 3, f1, f2);
+        result = result && TexturePerformCompensationTest(width, height, 0, f1, f2);
+        result = result && TexturePerformCompensationTest(width, height, -4, f1, f2);
+        result = result && TexturePerformCompensationTest(width, height, -33, f1, f2);
+
+        return result;
+    }
+
+    bool TexturePerformCompensationTest()
+    {
+        bool result = true;
+
+        result = result && TexturePerformCompensationTest(W, H, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(Simd::TexturePerformCompensation));
+        result = result && TexturePerformCompensationTest(W - 1, H + 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(Simd::TexturePerformCompensation));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && TexturePerformCompensationTest(W, H, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
+            result = result && TexturePerformCompensationTest(W - 1, H + 1, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
+        }
+#endif 
+
+        return result;
+    }
 }
