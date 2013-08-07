@@ -108,13 +108,13 @@ namespace Simd
                 __m256i lo[3], hi[3];
                 ReduceColNose<align>(s, lo);
                 ReduceColBody<align>(s, A, hi);
-                Store<align>((__m256i*)dst, ReduceRow<compensation>(lo, hi));
+                Store<false>((__m256i*)dst, ReduceRow<compensation>(lo, hi));
 
                 for(size_t srcCol = DA, dstCol = A; srcCol < bodyWidth; srcCol += DA, dstCol += A)
                 {
                     ReduceColBody<align>(s, srcCol, lo);
                     ReduceColBody<align>(s, srcCol + A, hi);
-                    Store<align>((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
+                    Store<false>((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
                 }
                 
                 if(bodyWidth != srcWidth)
