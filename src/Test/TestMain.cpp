@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(ShiftBilinearTest);
 
     EXECUTE_TEST(GetStatisticTest);
+    EXECUTE_TEST(GetMomentsTest);
 
     EXECUTE_TEST(StretchGray2x2Test);
 

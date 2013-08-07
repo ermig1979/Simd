@@ -58,6 +58,46 @@ namespace Simd
 			*min = min_;
 			*max = max_;
 		}
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            *area = 0;
+            *x = 0;
+            *y = 0;
+            *xx = 0;
+            *xy = 0;
+            *yy = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t rowArea = 0;
+                size_t rowX = 0;
+                size_t rowY = 0;
+                size_t rowXX = 0;
+                size_t rowXY = 0;
+                size_t rowYY = 0;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col] == index)
+                    {
+                        rowArea++;
+                        rowX += col;
+                        rowY += row;
+                        rowXX += col*col;
+                        rowXY += col*row;
+                        rowYY += row*row;
+                    }               
+                }
+                *area += rowArea;
+                *x += rowX;
+                *y += rowY;
+                *xx += rowXX;
+                *xy += rowXY;
+                *yy += rowYY;
+
+                mask += stride;
+            }
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -115,6 +155,97 @@ namespace Simd
 			else
 				GetStatistic<false>(src, stride, width, height, min, max, average);
 		}
+
+        SIMD_INLINE void GetMoments16(__m128i row, __m128i col, 
+            __m128i & x, __m128i & y, __m128i & xx, __m128i & xy, __m128i & yy)
+        {
+            x = _mm_add_epi32(x, _mm_madd_epi16(col, K16_0001));
+            y = _mm_add_epi32(y, _mm_madd_epi16(row, K16_0001));
+            xx = _mm_add_epi32(xx, _mm_madd_epi16(col, col));
+            xy = _mm_add_epi32(xy, _mm_madd_epi16(col, row));
+            yy = _mm_add_epi32(yy, _mm_madd_epi16(row,row));
+        }
+
+        SIMD_INLINE void GetMoments8(__m128i mask, __m128i & row, __m128i & col, 
+            __m128i & area, __m128i & x, __m128i & y, __m128i & xx, __m128i & xy, __m128i & yy)
+        {
+            area = _mm_add_epi64(area, _mm_sad_epu8(_mm_and_si128(K8_01, mask), K_ZERO));
+
+            const __m128i lo = _mm_cmpeq_epi16(_mm_unpacklo_epi8(mask, K_ZERO), K16_00FF);
+            GetMoments16(_mm_and_si128(lo, row), _mm_and_si128(lo, col), x, y, xx, xy, yy);
+            col = _mm_add_epi16(col, K16_0008);
+
+            const __m128i hi = _mm_cmpeq_epi16(_mm_unpackhi_epi8(mask, K_ZERO), K16_00FF);
+            GetMoments16(_mm_and_si128(hi, row), _mm_and_si128(hi, col), x, y, xx, xy, yy);
+            col = _mm_add_epi16(col, K16_0008);
+        }
+
+        template <bool align> void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            assert(width >= A && width < SHRT_MAX && height < SHRT_MAX);
+            if(align)
+                assert(Aligned(mask) && Aligned(stride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+
+            const __m128i K16_I = _mm_setr_epi16(0, 1, 2, 3, 4, 5, 6, 7);
+            const __m128i _index = _mm_set1_epi8(index);
+            const __m128i tailCol = _mm_add_epi16(K16_I, _mm_set1_epi16((ushort)(width - A)));
+
+            __m128i _area = _mm_setzero_si128();
+            __m128i _x = _mm_setzero_si128();
+            __m128i _y = _mm_setzero_si128();
+            __m128i _xx = _mm_setzero_si128();
+            __m128i _xy = _mm_setzero_si128();
+            __m128i _yy = _mm_setzero_si128();
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m128i _col = K16_I;
+                __m128i _row = _mm_set1_epi16((short)row);
+
+                __m128i _rowX = _mm_setzero_si128();
+                __m128i _rowY = _mm_setzero_si128();
+                __m128i _rowXX = _mm_setzero_si128();
+                __m128i _rowXY = _mm_setzero_si128();
+                __m128i _rowYY = _mm_setzero_si128();
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    __m128i _mask = _mm_cmpeq_epi8(Load<align>((__m128i*)(mask + col)), _index);
+                    GetMoments8(_mask, _row, _col, _area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
+                }
+                if(alignedWidth != width)
+                {
+                    __m128i _mask = _mm_and_si128(_mm_cmpeq_epi8(Load<false>((__m128i*)(mask + width - A)), _index), tailMask);
+                    _col = tailCol;
+                    GetMoments8(_mask, _row, _col, _area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
+                }
+                _x = _mm_add_epi64(_x, HorizontalSum32(_rowX));
+                _y = _mm_add_epi64(_y, HorizontalSum32(_rowY));
+                _xx = _mm_add_epi64(_xx, HorizontalSum32(_rowXX));
+                _xy = _mm_add_epi64(_xy, HorizontalSum32(_rowXY));
+                _yy = _mm_add_epi64(_yy, HorizontalSum32(_rowYY));
+
+                mask += stride;
+            }
+            *area = ExtractInt64Sum(_area);
+            *x = ExtractInt64Sum(_x);
+            *y = ExtractInt64Sum(_y);
+            *xx = ExtractInt64Sum(_xx);
+            *xy = ExtractInt64Sum(_xy);
+            *yy = ExtractInt64Sum(_yy);
+       }
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                GetMoments<true>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+            else
+                GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -134,10 +265,33 @@ namespace Simd
 			Base::GetStatistic(src, stride, width, height, min, max, average);
 	}
 
-	void Average(const View & src, uchar * min, uchar * max, uchar * average)
+    void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+        uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
+            Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+        else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A && width < SHRT_MAX && height < SHRT_MAX)
+            Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+        else
+#endif// SIMD_SSE2_ENABLE
+            Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);    
+    }
+
+	void GetStatistic(const View & src, uchar * min, uchar * max, uchar * average)
 	{
 		assert(src.format == View::Gray8);
 
 		GetStatistic(src.data, src.stride, src.width, src.height, min, max, average);
 	}
+
+    void GetMoments(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+    {
+        assert(mask.format == View::Gray8);
+
+        GetMoments(mask.data, mask.stride, mask.width, mask.height, index, area, x, y, xx, xy, yy);
+    }
 }
