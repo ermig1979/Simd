@@ -66,6 +66,7 @@ namespace Test
     bool ShiftBilinearTest();
 
     bool GetStatisticTest();
+    bool GetMomentsTest();
 
     bool StretchGray2x2Test();
 

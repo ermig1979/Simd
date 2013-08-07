@@ -32,14 +32,20 @@ namespace Simd
 	{
 		void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
 			uchar * min, uchar * max, uchar * average);
-	}
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+    }
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
 		void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
 			uchar * min, uchar * max, uchar * average);
-	}
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
@@ -47,12 +53,20 @@ namespace Simd
     {
         void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
             uchar * min, uchar * max, uchar * average);
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
     }
 #endif// SIMD_AVX2_ENABLE
 
 	void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
 		uchar * min, uchar * max, uchar * average);
 
+    void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+        uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+
 	void GetStatistic(const View & src, uchar * min, uchar * max, uchar * average);
+
+    void GetMoments(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 }
 #endif//__SimdStatistic_h__
