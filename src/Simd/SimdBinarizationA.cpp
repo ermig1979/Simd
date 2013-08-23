@@ -78,8 +78,8 @@ namespace Simd
 				}
 				if(alignedWidth != width)
 				{
-					const __m256i mask = Compare<compareType>(Load<align>((__m256i*)(src + width - A)), value_);
-					Store<align>((__m256i*)(dst + width - A), Combine(mask, positive_, negative_));
+					const __m256i mask = Compare<compareType>(Load<false>((__m256i*)(src + width - A)), value_);
+					Store<false>((__m256i*)(dst + width - A), Combine(mask, positive_, negative_));
 				}
 				src += srcStride;
 				dst += dstStride;
