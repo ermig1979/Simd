@@ -214,7 +214,7 @@ namespace Simd
             a[2] = Load<align>((__m256i*)p);
             LoadAfterLast<align, step>(p, a[3], a[4]);
         }
-	}
+    }
 #endif//SIMD_AVX2_ENABLE
 }
 #endif//__SimdLoad_h__

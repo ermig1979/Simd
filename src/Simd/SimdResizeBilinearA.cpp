@@ -118,7 +118,7 @@ namespace Simd
 		{
             __m256i lo = InterpolateGrayY16<align>(buffer, offset, a);
             __m256i hi = InterpolateGrayY16<align>(buffer, offset + HA, a);
-			_mm256_storeu_si256((__m256i*)(dst + offset), PackI16ToU8(lo, hi));
+			_mm256_storeu_si256((__m256i*)(dst + offset), PackU16ToU8(lo, hi));
 		}
 
         template <bool align> SIMD_INLINE __m256i GatherGray(const uchar * src, const int * index)

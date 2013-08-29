@@ -39,6 +39,10 @@ namespace Simd
 	{
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType);
+
+        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+            uchar * dst, size_t dstStride, CompareType compareType);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -46,7 +50,11 @@ namespace Simd
 	{
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType);
-	}
+
+        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+            uchar * dst, size_t dstStride, CompareType compareType);
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
@@ -54,12 +62,23 @@ namespace Simd
     {
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType);
+
+        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+            uchar * dst, size_t dstStride, CompareType compareType);
     }
 #endif// SIMD_AVX2_ENABLE
 
     void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
         uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType);
 
+    void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+        uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+        uchar * dst, size_t dstStride, CompareType compareType);
+
     void Binarization(const View & src, uchar value, uchar positive, uchar negative, View & dst, CompareType compareType);
+
+    void AveragingBinarization(const View & src, uchar value, size_t neighborhood, 
+        uchar threshold, uchar positive, uchar negative, View & dst, CompareType compareType);
 }
 #endif//__SimdBinarization_h__
