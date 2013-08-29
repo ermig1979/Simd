@@ -32,7 +32,8 @@ namespace Simd
 	{
 		OperationAverage,
 		OperationAnd,
-		OperationMax,
+		OperationMaximum,
+        OperationSaturatedSubtraction,
 	};
 
 	namespace Base

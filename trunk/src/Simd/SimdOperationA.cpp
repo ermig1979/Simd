@@ -46,10 +46,15 @@ namespace Simd
 			return _mm256_and_si256(a, b);
 		}
 
-		template <> SIMD_INLINE __m256i Operation<OperationMax>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m256i Operation<OperationMaximum>(const __m256i & a, const __m256i & b)
 		{
 			return _mm256_max_epu8(a, b);
 		}
+
+        template <> SIMD_INLINE __m256i Operation<OperationSaturatedSubtraction>(const __m256i & a, const __m256i & b)
+        {
+            return _mm256_subs_epu8(a, b);
+        }
 
 		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
@@ -89,8 +94,10 @@ namespace Simd
 				return Operation<align, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case OperationAnd:
 				return Operation<align, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case OperationMax:
-				return Operation<align, OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMaximum:
+				return Operation<align, OperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case OperationSaturatedSubtraction:
+                return Operation<align, OperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}
@@ -104,7 +111,6 @@ namespace Simd
 			else
 				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
-
 	}
 #endif// SIMD_AVX2_ENABLE
 }

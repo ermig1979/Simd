@@ -133,6 +133,13 @@ namespace Simd
 			int m = ~(d >> 8);
 			return a - (d & m);
 		}
+
+        SIMD_INLINE int SaturatedSubtractionU8(int a, int b)
+        {
+            int d = a - b;
+            int m = ~(d >> 8);
+            return (d & m);
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
