@@ -45,10 +45,15 @@ namespace Simd
 			return  a & b;
 		}
 
-		template <> SIMD_INLINE uchar Operation<OperationMax>(const uchar & a, const uchar & b)
+		template <> SIMD_INLINE uchar Operation<OperationMaximum>(const uchar & a, const uchar & b)
 		{
 			return  MaxU8(a, b);
 		}
+
+        template <> SIMD_INLINE uchar Operation<OperationSaturatedSubtraction>(const uchar & a, const uchar & b)
+        {
+            return  SaturatedSubtractionU8(a, b);
+        }
 
 		template <OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
@@ -73,8 +78,10 @@ namespace Simd
 				return Operation<OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case OperationAnd:
 				return Operation<OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case OperationMax:
-				return Operation<OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMaximum:
+				return Operation<OperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case OperationSaturatedSubtraction:
+                return Operation<OperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}
@@ -96,10 +103,15 @@ namespace Simd
 			return _mm_and_si128(a, b);
 		}
 
-		template <> SIMD_INLINE __m128i Operation<OperationMax>(const __m128i & a, const __m128i & b)
+		template <> SIMD_INLINE __m128i Operation<OperationMaximum>(const __m128i & a, const __m128i & b)
 		{
 			return _mm_max_epu8(a, b);
 		}
+
+        template <> SIMD_INLINE __m128i Operation<OperationSaturatedSubtraction>(const __m128i & a, const __m128i & b)
+        {
+            return _mm_subs_epu8(a, b);
+        }
 
 		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
@@ -139,8 +151,10 @@ namespace Simd
 				return Operation<align, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case OperationAnd:
 				return Operation<align, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case OperationMax:
-				return Operation<align, OperationMax>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case OperationMaximum:
+				return Operation<align, OperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case OperationSaturatedSubtraction:
+                return Operation<align, OperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}

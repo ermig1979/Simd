@@ -55,8 +55,10 @@ namespace Test
             return "<Avg>";
         case Simd::OperationAnd:
             return "<And>";
-        case Simd::OperationMax:
+        case Simd::OperationMaximum:
             return "<Max>";
+        case Simd::OperationSaturatedSubtraction:
+            return "<Subs>";
         }
 		assert(0);
 		return "<Unknown";
@@ -98,7 +100,7 @@ namespace Test
 	{
 		bool result = true;
 
-        for(Simd::OperationType type = Simd::OperationAverage; type <= Simd::OperationMax && result; type = Simd::OperationType(type + 1))
+        for(Simd::OperationType type = Simd::OperationAverage; type <= Simd::OperationSaturatedSubtraction && result; type = Simd::OperationType(type + 1))
         {
             result = result && OperationTest(ARGS1(View::Gray8, W, H, type, f1, f2));
             result = result && OperationTest(ARGS1(View::Gray8, W + 1, H - 1, type, f1, f2));
