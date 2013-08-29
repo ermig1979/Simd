@@ -62,6 +62,7 @@ namespace Test
     bool AbsSecondDerivativeHistogramTest();
 
     bool BinarizationTest();
+    bool AveragingBinarizationTest();
 
     bool ShiftBilinearTest();
 

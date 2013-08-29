@@ -48,7 +48,7 @@ namespace Simd
                 _mm256_and_si256(_mm256_srli_si256(s01, 1), K16_00FF),                
                 _mm256_and_si256(s11, K16_00FF), 
                 _mm256_and_si256(_mm256_srli_si256(s11, 1), K16_00FF));
-            return PackI16ToU8(lo, hi);
+            return PackU16ToU8(lo, hi);
         }
 
 		template <bool align> void ReduceGray2x2(

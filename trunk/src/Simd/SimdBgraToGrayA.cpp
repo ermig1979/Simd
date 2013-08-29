@@ -49,7 +49,7 @@ namespace Simd
         {
             const __m256i lo = PackI32ToI16(BgraToGray32(bgra[0]), BgraToGray32(bgra[1]));
             const __m256i hi = PackI32ToI16(BgraToGray32(bgra[2]), BgraToGray32(bgra[3]));
-            return PackI16ToU8(lo, hi);
+            return PackU16ToU8(lo, hi);
         }
 
 		template <bool align> SIMD_INLINE void Load(const uchar* p, __m256i a[4])

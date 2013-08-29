@@ -35,7 +35,7 @@ namespace Simd
 	{
 		SIMD_INLINE __m256i DeinterleavedU(__m256i uv0, __m256i uv1)
 		{
-			return PackI16ToU8(_mm256_and_si256(uv0, K16_00FF), _mm256_and_si256(uv1, K16_00FF));
+			return PackU16ToU8(_mm256_and_si256(uv0, K16_00FF), _mm256_and_si256(uv1, K16_00FF));
 		}
 
 		SIMD_INLINE __m256i DeinterleavedV(__m256i uv0, __m256i uv1)

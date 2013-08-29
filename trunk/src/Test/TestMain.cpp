@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(AbsSecondDerivativeHistogramTest);
 
     EXECUTE_TEST(BinarizationTest);
+    EXECUTE_TEST(AveragingBinarizationTest);
 
     EXECUTE_TEST(ShiftBilinearTest);
 
