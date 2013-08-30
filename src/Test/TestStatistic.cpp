@@ -163,4 +163,83 @@ namespace Test
 
         return result;
     }
+
+    namespace
+    {
+        struct Func3
+        {
+            typedef void (*FuncPtr)(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+            FuncPtr func;
+            std::string description;
+
+            Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint * sums) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, sums);
+            }
+        };
+    }
+
+#define FUNC3(function) Func3(function, #function)
+
+    bool GetSumsTest(int width, int height, const Func3 & f1, const Func3 & f2, bool isRow)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        size_t size = isRow ? height : width;
+        Sums sums1(size, 0);
+        Sums sums2(size, 0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, sums1.data()));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, sums2.data()));
+
+        result = result && Compare(sums1, sums2, 0, true, 32);
+
+        return result;
+    }
+
+    bool GetRowSumsTest()
+    {
+        bool result = true;
+
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(Simd::GetRowSums), true);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(Simd::GetRowSums), true);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
+            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
+        }
+#endif 
+
+        return result;
+    }
+
+    bool GetColSumsTest()
+    {
+        bool result = true;
+
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetColSums), FUNC3(Simd::GetColSums), false);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetColSums), FUNC3(Simd::GetColSums), false);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
+            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
+        }
+#endif 
+
+        return result;
+    }
 }

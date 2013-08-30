@@ -178,6 +178,122 @@ namespace Simd
             else
                 GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
+
+        template <bool align> void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+
+            memset(sums, 0, sizeof(uint)*height);
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m256i sum = _mm256_setzero_si256();
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    __m256i _src = Load<align>((__m256i*)(src + col));
+                    sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src, K_ZERO));
+                }
+                if(alignedWidth != width)
+                {
+                    __m256i _src = _mm256_and_si256(Load<false>((__m256i*)(src + width - A)), tailMask);
+                    sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src, K_ZERO));
+                }
+                sums[row] = ExtractSum<uint32_t>(sum);
+                src += stride;
+            }
+        }
+
+        void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetRowSums<true>(src, stride, width, height, sums);
+            else
+                GetRowSums<false>(src, stride, width, height, sums);
+        }
+
+        namespace
+        {
+            struct Buffer
+            {
+                Buffer(size_t width)
+                {
+                    _p = Allocate(sizeof(ushort)*width + sizeof(uint)*width);
+                    sums16 = (ushort*)_p;
+                    sums32 = (uint*)(sums16 + width);
+                }
+
+                ~Buffer()
+                {
+                    Free(_p);
+                }
+
+                ushort * sums16;
+                uint * sums32;
+            private:
+                void *_p;
+            };
+        }
+
+        template <bool align> SIMD_INLINE void Sum16(__m256i src8, ushort * sums16)
+        {
+            Store<align>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<align>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
+            Store<align>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<align>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
+        }
+
+        SIMD_INLINE void Sum16To32(const ushort * src, uint * dst)
+        {
+            __m256i lo = LoadPermuted<true>((__m256i*)src + 0);
+            __m256i hi = LoadPermuted<true>((__m256i*)src + 1);
+            Store<true>((__m256i*)dst + 0, _mm256_add_epi32(Load<true>((__m256i*)dst + 0), _mm256_unpacklo_epi16(lo, K_ZERO)));
+            Store<true>((__m256i*)dst + 1, _mm256_add_epi32(Load<true>((__m256i*)dst + 1), _mm256_unpacklo_epi16(hi, K_ZERO)));
+            Store<true>((__m256i*)dst + 2, _mm256_add_epi32(Load<true>((__m256i*)dst + 2), _mm256_unpackhi_epi16(lo, K_ZERO)));
+            Store<true>((__m256i*)dst + 3, _mm256_add_epi32(Load<true>((__m256i*)dst + 3), _mm256_unpackhi_epi16(hi, K_ZERO)));
+        }
+
+        template <bool align> void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            size_t alignedLoWidth = AlignLo(width, A);
+            size_t alignedHiWidth = AlignHi(width, A);
+            __m256i tailMask = SetMask<uchar>(0, A - width + alignedLoWidth, 0xFF);
+            size_t stepSize = SCHAR_MAX + 1;
+            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint)*alignedHiWidth);
+            for(size_t step = 0; step < stepCount; ++step)
+            {
+                size_t rowStart = step*stepSize;
+                size_t rowEnd = Min(rowStart + stepSize, height);
+
+                memset(buffer.sums16, 0, sizeof(ushort)*width);
+                for(size_t row = rowStart; row < rowEnd; ++row)
+                {
+                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    {
+                        __m256i src8 = Load<align>((__m256i*)(src + col));
+                        Sum16<true>(src8, buffer.sums16 + col);
+                    }
+                    if(alignedLoWidth != width)
+                    {
+                        __m256i src8 = _mm256_and_si256(Load<false>((__m256i*)(src + width - A)), tailMask);
+                        Sum16<false>(src8, buffer.sums16 + width - A);
+                    }
+                    src += stride;
+                }
+
+                for(size_t col = 0; col < alignedHiWidth; col += A)
+                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+            }
+            memcpy(sums, buffer.sums32, sizeof(uint)*width);
+        }
+
+        void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetColSums<true>(src, stride, width, height, sums);
+            else
+                GetColSums<false>(src, stride, width, height, sums);
+        }
 	}
 #endif// SIMD_AVX2_ENABLE
 }

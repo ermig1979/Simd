@@ -44,6 +44,9 @@ namespace Test
 	bool Compare(const Histogram a, const Histogram b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
+    bool Compare(const Sums & a, const Sums b, 
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0);
+
 	std::string ColorDescription(View::Format format);
 }
 
