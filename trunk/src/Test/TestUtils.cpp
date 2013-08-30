@@ -108,35 +108,46 @@ namespace Test
         return errorCount == 0;
     }
 
+    template <class T> bool Compare(const T * a, const T * b, size_t size, int differenceMax, bool printError, int errorCountMax)
+    {
+        int errorCount = 0;
+        for(size_t i = 0; i < size; ++i)
+        {
+            if(a[i] != b[i])
+            {
+                if(differenceMax > 0)
+                {
+                    int difference = Simd::Base::Max(a[i], b[i]) - Simd::Base::Min(a[i], b[i]);
+                    if(difference <= differenceMax)
+                        continue;
+                }
+                errorCount++;
+                if(printError)
+                {
+                    std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
+                }
+                if(errorCount > errorCountMax)
+                {
+                    if(printError)
+                        std::cout << "Stop comparison." << std::endl;
+                    return false;
+                }
+            }
+        }
+        return errorCount == 0;
+    }
+
 	bool Compare(const Histogram a, const Histogram b, int differenceMax, bool printError, int errorCountMax)
 	{
-		int errorCount = 0;
-		for(size_t i = 0; i < Simd::HISTOGRAM_SIZE; ++i)
-		{
-			if(a[i] != b[i])
-			{
-				if(differenceMax > 0)
-				{
-					int difference = Simd::Base::Max(a[i], b[i]) - Simd::Base::Min(a[i], b[i]);
-					if(difference <= differenceMax)
-						continue;
-				}
-				errorCount++;
-				if(printError)
-				{
-					std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
-				}
-				if(errorCount > errorCountMax)
-				{
-					if(printError)
-						std::cout << "Stop comparison." << std::endl;
-					return false;
-				}
-			}
-		}
-		return errorCount == 0;
+        return Compare(a, b, Simd::HISTOGRAM_SIZE, differenceMax, printError, errorCountMax);
 	}
 
+    bool Compare(const Sums & a, const Sums b, int differenceMax, bool printError, int errorCountMax)
+    {
+        assert(a.size() == b.size());
+        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
+    }
+    
 	std::string ColorDescription(View::Format format)
 	{
 		std::stringstream ss;

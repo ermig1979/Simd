@@ -48,6 +48,7 @@ namespace Test
 	typedef Simd::uint uint;
 	typedef Simd::View View;
 	typedef uint Histogram[Simd::HISTOGRAM_SIZE];
+    typedef std::vector<uint> Sums;
 
 #ifdef _DEBUG
 	const int W = 128;
