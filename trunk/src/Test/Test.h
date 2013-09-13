@@ -70,6 +70,8 @@ namespace Test
     bool GetMomentsTest();
     bool GetRowSumsTest();
     bool GetColSumsTest();
+    bool GetAbsDyRowSumsTest();
+    bool GetAbsDxColSumsTest();
 
     bool StretchGray2x2Test();
 

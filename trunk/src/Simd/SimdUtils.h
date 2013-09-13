@@ -97,6 +97,8 @@ namespace Simd
     void GetMoments(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
     void GetRowSums(const View & src, uint * sums);
     void GetColSums(const View & src, uint * sums);
+    void GetAbsDyRowSums(const View & src, uint * sums);
+    void GetAbsDxColSums(const View & src, uint * sums);
 
     void StretchGray2x2(const View & src, View & dst);
 

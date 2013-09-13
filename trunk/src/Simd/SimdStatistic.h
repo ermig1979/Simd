@@ -39,6 +39,10 @@ namespace Simd
         void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 
         void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -53,6 +57,10 @@ namespace Simd
         void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 
         void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -68,6 +76,10 @@ namespace Simd
         void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 
         void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
     }
 #endif// SIMD_AVX2_ENABLE
 
@@ -80,5 +92,9 @@ namespace Simd
     void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 
     void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+    void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+    void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 }
 #endif//__SimdStatistic_h__

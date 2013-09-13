@@ -242,4 +242,40 @@ namespace Test
 
         return result;
     }
+
+    bool GetAbsDyRowSumsTest()
+    {
+        bool result = true;
+
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(Simd::GetAbsDyRowSums), true);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(Simd::GetAbsDyRowSums), true);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
+            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
+        }
+#endif 
+
+        return result;
+    }
+
+    bool GetAbsDxColSumsTest()
+    {
+        bool result = true;
+
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(Simd::GetAbsDxColSums), false);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(Simd::GetAbsDxColSums), false);
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
+            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
+        }
+#endif 
+
+        return result;
+    }
 }

@@ -86,6 +86,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(GetMomentsTest);
     EXECUTE_TEST(GetRowSumsTest);
     EXECUTE_TEST(GetColSumsTest);
+    EXECUTE_TEST(GetAbsDyRowSumsTest);
+    EXECUTE_TEST(GetAbsDxColSumsTest);
 
     EXECUTE_TEST(StretchGray2x2Test);
 
