@@ -234,10 +234,10 @@ namespace Simd
             };
         }
 
-        template <bool align> SIMD_INLINE void Sum16(__m256i src8, ushort * sums16)
+        SIMD_INLINE void Sum16(__m256i src8, ushort * sums16)
         {
-            Store<align>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<align>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
-            Store<align>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<align>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
+            Store<true>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
+            Store<true>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
         }
 
         SIMD_INLINE void Sum16To32(const ushort * src, uint * dst)
@@ -254,7 +254,6 @@ namespace Simd
         {
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedLoWidth, 0xFF);
             size_t stepSize = SCHAR_MAX + 1;
             size_t stepCount = (height + SCHAR_MAX)/stepSize;
 
@@ -265,18 +264,18 @@ namespace Simd
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(buffer.sums16, 0, sizeof(ushort)*width);
+                memset(buffer.sums16, 0, sizeof(ushort)*alignedHiWidth);
                 for(size_t row = rowStart; row < rowEnd; ++row)
                 {
                     for(size_t col = 0; col < alignedLoWidth; col += A)
                     {
                         __m256i src8 = Load<align>((__m256i*)(src + col));
-                        Sum16<true>(src8, buffer.sums16 + col);
+                        Sum16(src8, buffer.sums16 + col);
                     }
                     if(alignedLoWidth != width)
                     {
-                        __m256i src8 = _mm256_and_si256(Load<false>((__m256i*)(src + width - A)), tailMask);
-                        Sum16<false>(src8, buffer.sums16 + width - A);
+                        __m256i src8 = Load<false>((__m256i*)(src + width - A));
+                        Sum16(src8, buffer.sums16 + alignedLoWidth);
                     }
                     src += stride;
                 }
@@ -284,7 +283,9 @@ namespace Simd
                 for(size_t col = 0; col < alignedHiWidth; col += A)
                     Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint)*width);
+            memcpy(sums, buffer.sums32, sizeof(uint)*alignedLoWidth);
+            if(alignedLoWidth != width)
+                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint)*(width - alignedLoWidth));
         }
 
         void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
@@ -293,6 +294,94 @@ namespace Simd
                 GetColSums<true>(src, stride, width, height, sums);
             else
                 GetColSums<false>(src, stride, width, height, sums);
+        }
+
+        template <bool align> void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+
+            memset(sums, 0, sizeof(uint)*height);
+            const uchar * src0 = src;
+            const uchar * src1 = src + stride;
+            height--;
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m256i sum = _mm256_setzero_si256();
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    __m256i _src0 = Load<align>((__m256i*)(src0 + col));
+                    __m256i _src1 = Load<align>((__m256i*)(src1 + col));
+                    sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src0, _src1));
+                }
+                if(alignedWidth != width)
+                {
+                    __m256i _src0 = _mm256_and_si256(Load<false>((__m256i*)(src0 + width - A)), tailMask);
+                    __m256i _src1 = _mm256_and_si256(Load<false>((__m256i*)(src1 + width - A)), tailMask);
+                    sum = _mm256_add_epi32(sum, _mm256_sad_epu8(_src0, _src1));
+                }
+                sums[row] = ExtractSum<uint32_t>(sum);
+                src0 += stride;
+                src1 += stride;
+            }
+        }
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetAbsDyRowSums<true>(src, stride, width, height, sums);
+            else
+                GetAbsDyRowSums<false>(src, stride, width, height, sums);
+        }
+
+        template <bool align> void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            width--;
+            size_t alignedLoWidth = AlignLo(width, A);
+            size_t alignedHiWidth = AlignHi(width, A);
+            size_t stepSize = SCHAR_MAX + 1;
+            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint)*alignedHiWidth);
+            for(size_t step = 0; step < stepCount; ++step)
+            {
+                size_t rowStart = step*stepSize;
+                size_t rowEnd = Min(rowStart + stepSize, height);
+
+                memset(buffer.sums16, 0, sizeof(ushort)*alignedHiWidth);
+                for(size_t row = rowStart; row < rowEnd; ++row)
+                {
+                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    {
+                        __m256i _src0 = Load<align>((__m256i*)(src + col + 0));
+                        __m256i _src1 = Load<false>((__m256i*)(src + col + 1));
+                        Sum16(AbsDifferenceU8(_src0, _src1), buffer.sums16 + col);
+                    }
+                    if(alignedLoWidth != width)
+                    {
+                        __m256i _src0 = Load<false>((__m256i*)(src + width - A + 0));
+                        __m256i _src1 = Load<false>((__m256i*)(src + width - A + 1));
+                        Sum16(AbsDifferenceU8(_src0, _src1), buffer.sums16 + alignedLoWidth);
+                    }
+                    src += stride;
+                }
+
+                for(size_t col = 0; col < alignedHiWidth; col += A)
+                    Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
+            }
+            memcpy(sums, buffer.sums32, sizeof(uint)*alignedLoWidth);
+            if(alignedLoWidth != width)
+                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint)*(width - alignedLoWidth));
+            sums[width] = 0;
+        }
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetAbsDxColSums<true>(src, stride, width, height, sums);
+            else
+                GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
 	}
 #endif// SIMD_AVX2_ENABLE

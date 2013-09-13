@@ -121,6 +121,38 @@ namespace Simd
                 src += stride;
             }
         }
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            const uchar * src0 = src;
+            const uchar * src1 = src + stride;
+            height--;
+            sums[height] = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                uint sum = 0;
+                for(size_t col = 0; col < width; ++col)
+                    sum += AbsDifferenceU8(src0[col], src1[col]);
+                sums[row] = sum;
+                src0 += stride;
+                src1 += stride;
+            }
+        }
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            const uchar * src0 = src;
+            const uchar * src1 = src + 1;
+            memset(sums, 0, sizeof(uint)*width);
+            width--;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    sums[col] += AbsDifferenceU8(src0[col], src1[col]);
+                src0 += stride;
+                src1 += stride;
+            }
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -384,6 +416,96 @@ namespace Simd
             else
                 GetColSums<false>(src, stride, width, height, sums);
         }
+
+        template <bool align> void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+
+            memset(sums, 0, sizeof(uint)*height);
+            const uchar * src0 = src;
+            const uchar * src1 = src + stride;
+            height--;
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m128i sum = _mm_setzero_si128();
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    __m128i _src0 = Load<align>((__m128i*)(src0 + col));
+                    __m128i _src1 = Load<align>((__m128i*)(src1 + col));
+                    sum = _mm_add_epi32(sum, _mm_sad_epu8(_src0, _src1));
+                }
+                if(alignedWidth != width)
+                {
+                    __m128i _src0 = _mm_and_si128(Load<false>((__m128i*)(src0 + width - A)), tailMask);
+                    __m128i _src1 = _mm_and_si128(Load<false>((__m128i*)(src1 + width - A)), tailMask);
+                    sum = _mm_add_epi32(sum, _mm_sad_epu8(_src0, _src1));
+                }
+                sums[row] = ExtractInt32Sum(sum);
+                src0 += stride;
+                src1 += stride;
+            }
+        }
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetAbsDyRowSums<true>(src, stride, width, height, sums);
+            else
+                GetAbsDyRowSums<false>(src, stride, width, height, sums);
+        }
+
+        template <bool align> void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            width--;
+            size_t alignedLoWidth = AlignLo(width, A);
+            size_t alignedHiWidth = AlignHi(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedLoWidth);
+            size_t stepSize = SCHAR_MAX + 1;
+            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint)*alignedHiWidth);
+            for(size_t step = 0; step < stepCount; ++step)
+            {
+                size_t rowStart = step*stepSize;
+                size_t rowEnd = Min(rowStart + stepSize, height);
+
+                memset(buffer.sums16, 0, sizeof(ushort)*width);
+                for(size_t row = rowStart; row < rowEnd; ++row)
+                {
+                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    {
+                        __m128i _src0 = Load<align>((__m128i*)(src + col + 0));
+                        __m128i _src1 = Load<false>((__m128i*)(src + col + 1));
+                        Sum16<true>(AbsDifferenceU8(_src0, _src1), buffer.sums16 + col);
+                    }
+                    if(alignedLoWidth != width)
+                    {
+                        __m128i _src0 = Load<false>((__m128i*)(src + width - A + 0));
+                        __m128i _src1 = Load<false>((__m128i*)(src + width - A + 1));
+                        Sum16<false>(_mm_and_si128(AbsDifferenceU8(_src0, _src1), tailMask), buffer.sums16 + width - A);
+                    }
+                    src += stride;
+                }
+
+                for(size_t col = 0; col < alignedHiWidth; col += HA)
+                {
+                    __m128i src16 = Load<true>((__m128i*)(buffer.sums16 + col));
+                    Sum32<true>(src16, buffer.sums32 + col);
+                }
+            }
+            memcpy(sums, buffer.sums32, sizeof(uint)*width);
+            sums[width] = 0;
+        }
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetAbsDxColSums<true>(src, stride, width, height, sums);
+            else
+                GetAbsDxColSums<false>(src, stride, width, height, sums);
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -447,5 +569,35 @@ namespace Simd
         else
 #endif// SIMD_SSE2_ENABLE
             Base::GetColSums(src, stride, width, height, sums);
+    }
+
+    void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::GetAbsDyRowSums(src, stride, width, height, sums);
+        else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A)
+            Sse2::GetAbsDyRowSums(src, stride, width, height, sums);
+        else
+#endif// SIMD_SSE2_ENABLE
+            Base::GetAbsDyRowSums(src, stride, width, height, sums);
+    }
+
+    void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+    {
+#ifdef SIMD_AVX2_ENABLE
+        if(Avx2::Enable && width >= Avx2::A)
+            Avx2::GetAbsDxColSums(src, stride, width, height, sums);
+        else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+        if(Sse2::Enable && width >= Sse2::A)
+            Sse2::GetAbsDxColSums(src, stride, width, height, sums);
+        else
+#endif// SIMD_SSE2_ENABLE
+            Base::GetAbsDxColSums(src, stride, width, height, sums);
     }
 }

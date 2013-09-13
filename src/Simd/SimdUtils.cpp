@@ -409,6 +409,20 @@ namespace Simd
         GetColSums(src.data, src.stride, src.width, src.height, sums);
     }
 
+    void GetAbsDyRowSums(const View & src, uint * sums)
+    {
+        assert(src.format == View::Gray8);
+
+        GetAbsDyRowSums(src.data, src.stride, src.width, src.height, sums);
+    }
+
+    void GetAbsDxColSums(const View & src, uint * sums)
+    {
+        assert(src.format == View::Gray8);
+
+        GetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
+    }
+
     void StretchGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
