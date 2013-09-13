@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdStretchGray2x2.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUtils.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.h" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
@@ -236,6 +237,7 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdUtils.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdView.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdYuvToBgra.cpp" />

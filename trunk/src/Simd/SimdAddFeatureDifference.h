@@ -24,7 +24,7 @@
 #ifndef __SimdAddFeatureDifference_h__
 #define __SimdAddFeatureDifference_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -56,7 +56,5 @@ namespace Simd
     void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
         const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
         ushort weight, uchar * difference, size_t differenceStride);
-
-    void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference);
 }
 #endif//__SimdAddFeatureDifference_h__

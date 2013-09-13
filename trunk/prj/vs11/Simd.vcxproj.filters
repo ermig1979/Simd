@@ -55,9 +55,6 @@
     <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdView.cpp">
-      <Filter>Sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdCopy.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
@@ -178,6 +175,12 @@
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdView.cpp">
+      <Filter>Utl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdUtils.cpp">
+      <Filter>Utl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -267,9 +270,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare5x5.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdView.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdCopy.h">
       <Filter>Alg</Filter>
     </ClInclude>
@@ -321,6 +321,12 @@
     <ClInclude Include="..\..\src\Simd\SimdTexture.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdView.h">
+      <Filter>Utl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUtils.h">
+      <Filter>Utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">
@@ -331,6 +337,9 @@
     </Filter>
     <Filter Include="Alg\Avx">
       <UniqueIdentifier>{429522a9-21b7-457b-b889-c7cfe3265b3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utl">
+      <UniqueIdentifier>{d4e389b9-f885-4050-869b-6bfbab14ceb0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

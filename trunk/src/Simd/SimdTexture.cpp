@@ -434,37 +434,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
             Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     }
-
-    void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View &  dx, View & dy)
-	{
-		assert(src.width == dx.width && src.height == dx.height && src.format == dx.format);
-        assert(src.width == dy.width && src.height == dy.height && src.format == dy.format);
-		assert(src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
-
-		TextureBoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
-	}
-
-    void TextureBoostedUv(const View & src, uchar boost, View & dst)
-    {
-        assert(src.width == dst.width && src.height == dst.height && src.format == dst.format && src.format == View::Gray8);
-
-        TextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
-    }
-
-    void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t * sum)
-    {
-        assert(src.width == lo.width && src.height == lo.height && src.format == lo.format);
-        assert(src.width == hi.width && src.height == hi.height && src.format == hi.format);
-        assert(src.format == View::Gray8 && sum != NULL);
-
-        TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, sum);
-    }
-
-    void TexturePerformCompensation(const View & src, int shift, View & dst)
-    {
-        assert(src.width == dst.width && src.height == dst.height && src.format == dst.format && src.format == View::Gray8);
-        assert(shift > -0xFF && shift < 0xFF);
-
-        TexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
-    }
 }

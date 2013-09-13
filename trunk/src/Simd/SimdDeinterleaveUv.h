@@ -24,7 +24,7 @@
 #ifndef __SimdDeinterleaveUv_h__
 #define __SimdDeinterleaveUv_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -52,7 +52,5 @@ namespace Simd
 
 	void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
 		uchar * u, size_t uStride, uchar * v, size_t vStride);
-
-	void DeinterleaveUv(const View & uv, View & u, View & v);
 }
 #endif//__SimdDeinterleaveUv_h__

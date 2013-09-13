@@ -24,7 +24,7 @@
 #ifndef __SimdEdgeBackground_h__
 #define __SimdEdgeBackground_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -124,19 +124,5 @@ namespace Simd
 
     void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
         uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride);
-
-	void BackgroundGrowRangeSlow(const View & value, View & background);
-
-	void BackgroundGrowRangeFast(const View & value, View & background);
-
-	void BackgroundIncrementCount(const View & value, const View & backgroundValue, View & backgroundCount);
-
-	void BackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uchar threshold);
-
-	void BackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uchar threshold, const View & mask);
-
-	void BackgroundShiftRange(const View & value, View & background);
-
-	void BackgroundShiftRange(const View & value, View & background, const View & mask);
 }
 #endif//__SimdEdgeBackground_h__

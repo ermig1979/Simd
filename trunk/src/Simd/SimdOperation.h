@@ -24,7 +24,7 @@
 #ifndef __SimdOperation_h__
 #define __SimdOperation_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -60,7 +60,5 @@ namespace Simd
 
 	void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
-
-	void Operation(const View & a, const View & b, View & dst, OperationType type);
 }
 #endif//__SimdOperation_h__

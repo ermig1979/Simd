@@ -24,7 +24,7 @@
 #ifndef __SimdReduceGray3x3_h__
 #define __SimdReduceGray3x3_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -69,7 +69,5 @@ namespace Simd
 
     void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true);
-
-	void ReduceGray3x3(const View & src, View & dst, bool compensation = true);
 }
 #endif//__SimdReduceGray3x3_h__

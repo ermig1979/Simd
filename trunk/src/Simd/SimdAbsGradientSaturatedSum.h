@@ -24,7 +24,7 @@
 #ifndef __SimdAbsGradientSaturatedSum_h__
 #define __SimdAbsGradientSaturatedSum_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -48,7 +48,5 @@ namespace Simd
 #endif// SIMD_AVX2_ENABLE
 
 	void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
-
-	void AbsGradientSaturatedSum(const View & src, View & dst);
 }
 #endif//__SimdAbsGradientSaturatedSum_h__

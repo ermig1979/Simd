@@ -24,7 +24,7 @@
 #ifndef __SimdShiftBilinear_h__
 #define __SimdShiftBilinear_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -75,8 +75,5 @@ namespace Simd
 		const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
 		const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
 		size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride);
-
-	void ShiftBilinear(const View & src, const View & bkg, double shiftX, double shiftY, 
-		size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst);
 }
 #endif//__SimdShiftBilinear_h__

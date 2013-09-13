@@ -113,12 +113,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 	}
-
-	void AbsGradientSaturatedSum(const View & src, View & dst)
-	{
-		assert(src.width == dst.width && src.height == dst.height && src.format == dst.format);
-		assert(src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
-
-		AbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
-	}
 }

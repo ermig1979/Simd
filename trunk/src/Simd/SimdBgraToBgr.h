@@ -24,7 +24,7 @@
 #ifndef __SimdBgraToBgr_h__
 #define __SimdBgraToBgr_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -39,7 +39,5 @@ namespace Simd
 	{
 		Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
 	}
-
-	void BgraToBgr(const View & bgra, View & bgr);
 }
 #endif//__SimdBgraToBgr_h__

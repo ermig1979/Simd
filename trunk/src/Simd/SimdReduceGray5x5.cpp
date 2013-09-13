@@ -519,11 +519,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
 	}
-
-	void ReduceGray5x5(const View & src, View & dst, bool compensation)
-	{
-		assert(src.format == View::Gray8 && dst.format == View::Gray8);
-
-		ReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
-	}
 }

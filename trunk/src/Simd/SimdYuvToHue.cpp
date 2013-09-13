@@ -277,26 +277,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 	}
-
-	void Yuv444ToHue(const View & y, const View & u, const View & v, View & hue)
-	{
-		assert(y.width == u.width && y.height == u.height && y.format == u.format);
-		assert(y.width == v.width && y.height == v.height && y.format == v.format);
-		assert(y.width == hue.width && y.height == hue.height);
-		assert(y.format == View::Gray8 && hue.format == View::Gray8);
-
-		Yuv444ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, hue.data, hue.stride);
-	}
-
-	void Yuv420ToHue(const View & y, const View & u, const View & v, View & hue)
-	{
-		assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
-		assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
-		assert(y.width == hue.width && y.height == hue.height);
-		assert(y.format == View::Gray8 && hue.format == View::Gray8);
-
-		Yuv420ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, hue.data, hue.stride);
-	}
 }

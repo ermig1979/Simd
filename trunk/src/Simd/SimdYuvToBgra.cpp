@@ -345,26 +345,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::Yuv444ToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 	}
-
-	void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha)
-	{
-		assert(y.width == u.width && y.height == u.height && y.format == u.format);
-		assert(y.width == v.width && y.height == v.height && y.format == v.format);
-		assert(y.width == bgra.width && y.height == bgra.height);
-		assert(y.format == View::Gray8 && bgra.format == View::Bgra32);
-
-		Yuv444ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, bgra.data, bgra.stride, alpha);
-	}
-
-	void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha)
-	{
-		assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
-		assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
-		assert(y.width == bgra.width && y.height == bgra.height);
-		assert(y.format == View::Gray8 && bgra.format == View::Bgra32);
-
-		Yuv420ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, bgra.data, bgra.stride, alpha);
-	}
 }

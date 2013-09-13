@@ -24,7 +24,7 @@
 #ifndef __SimdYuvToBgr_h__
 #define __SimdYuvToBgr_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 #include "Simd/SimdMath.h"
 
 namespace Simd
@@ -213,9 +213,5 @@ namespace Simd
 
 	void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
-
-	void Yuv444ToBgr(const View & y, const View & u, const View & v, View & bgr);
-
-	void Yuv420ToBgr(const View & y, const View & u, const View & v, View & bgr);
 }
 #endif//__SimdYuvToBgr_h__

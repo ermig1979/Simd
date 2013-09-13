@@ -25,6 +25,7 @@
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdMemory.h"
 #include "Simd/SimdBgrToGray.h"
 #include "Simd/SimdBgraToGray.h"
 

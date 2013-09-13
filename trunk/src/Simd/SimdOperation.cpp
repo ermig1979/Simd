@@ -186,13 +186,4 @@ namespace Simd
 #endif// SIMD_SSE2_ENABLE
 			Base::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 	}
-
-	void Operation(const View & a, const View & b, View & dst, OperationType type)
-	{
-		assert(a.width == b.width && a.height == b.height && a.format == b.format);
-		assert(a.width == dst.width && a.height == dst.height && a.format == dst.format);
-		assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
-
-		Operation(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride, type);
-	}
 }

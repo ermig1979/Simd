@@ -24,7 +24,7 @@
 #ifndef __SimdBackground_h__
 #define __SimdBackground_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -148,24 +148,5 @@ namespace Simd
 
 	void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
 		uchar index, uchar value, uchar * dst, size_t dstStride);
-
-	void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
-
-	void BackgroundGrowRangeFast(const View & value, View & lo, View & hi);
-
-	void BackgroundIncrementCount(const View & value, const View & loValue, const View & hiValue, 
-		View & loCount, View & hiCount);
-
-	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
-		uchar threshold);
-
-	void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, 
-		uchar threshold, const View & mask);
-
-	void BackgroundShiftRange(const View & value, View & lo, View & hi);
-
-	void BackgroundShiftRange(const View & value, View & lo, View & hi, const View & mask);
-
-	void BackgroundInitMask(const View & src, uchar index, uchar value, View & dst);
 }
 #endif//__SimdBackground_h__
