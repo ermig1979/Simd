@@ -24,7 +24,7 @@
 #ifndef __SimdSquaredDifferenceSum_h__
 #define __SimdSquaredDifferenceSum_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -64,9 +64,5 @@ namespace Simd
 
 	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 		const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
-
-	void SquaredDifferenceSum(const View & a, const View & b, uint64_t & sum);
-
-	void SquaredDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum);
 }
 #endif//__SimdSquaredDifferenceSum_h__

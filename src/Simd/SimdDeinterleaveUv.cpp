@@ -123,12 +123,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 	}
-
-	void DeinterleaveUv(const View & uv, View & u, View & v)
-	{
-		assert(uv.width == u.width && uv.height == u.height && uv.width == v.width && uv.height == v.height);
-		assert(uv.format == View::Uv16 && u.format == View::Gray8 && v.format == View::Gray8);
-
-		DeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
-	}
 }

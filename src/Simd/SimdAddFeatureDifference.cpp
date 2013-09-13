@@ -157,15 +157,4 @@ namespace Simd
 #endif// SIMD_SSE2_ENABLE
             Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     }
-
-    void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference)
-    {
-        assert(value.width == lo.width && value.height == lo.height &&
-            value.width == hi.width && value.height == hi.height &&
-            value.width == difference.width && value.height == difference.height);
-        assert(value.format == View::Gray8 && lo.format == View::Gray8 && hi.format == View::Gray8 && difference.format == View::Gray8);
-
-        AddFeatureDifference(value.data, value.stride, value.width, value.height, 
-            lo.data, lo.stride, hi.data, hi.stride, weight, difference.data, difference.stride);
-    }
 }

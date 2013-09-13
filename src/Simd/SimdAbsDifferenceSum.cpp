@@ -193,20 +193,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::AbsDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 	}
-
-	void AbsDifferenceSum(const View & a, const View & b, uint64_t & sum)
-	{
-		assert(a.width == b.width && a.height == b.height);
-		assert(a.format == View::Gray8 && b.format == View::Gray8);
-
-		AbsDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
-	}
-
-	void AbsDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum)
-	{
-		assert(a.width == b.width && a.height == b.height && a.width == mask.width && a.height == mask.height);
-		assert(a.format == View::Gray8 && b.format == View::Gray8 && mask.format == View::Gray8);
-
-		AbsDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
-	}
 }

@@ -163,11 +163,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 	}
-
-	void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
-	{
-		assert(src.format == View::Gray8);
-
-		AbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
-	}
 }

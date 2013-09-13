@@ -24,7 +24,7 @@
 #ifndef __SimdAbsSecondDerivativeHistogram_h__
 #define __SimdAbsSecondDerivativeHistogram_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -52,7 +52,5 @@ namespace Simd
 
     void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
 		size_t step, size_t indent, uint * histogram);
-
-	void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);
 }
 #endif//__SimdAbsSecondDerivativeHistogram_h__

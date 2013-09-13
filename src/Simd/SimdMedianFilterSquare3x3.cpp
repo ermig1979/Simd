@@ -205,12 +205,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 	}
-
-	void MedianFilterSquare3x3(const View & src, View & dst)
-	{
-		assert(src.width == dst.width && src.height == dst.height && src.format == dst.format);
-		assert(src.format == View::Gray8 || src.format == View::Uv16 || src.format == View::Bgr24 || src.format == View::Bgra32);
-
-		MedianFilterSquare3x3(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), dst.data, dst.stride);
-	}
 }

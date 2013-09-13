@@ -291,11 +291,4 @@ namespace Simd
 #endif//SIMD_SSE2_ENABLE
 			Base::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 	}
-
-	void ReduceGray4x4(const View & src, View & dst)
-	{
-		assert(src.format == View::Gray8 && dst.format == View::Gray8);
-
-		ReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
-	}
 }

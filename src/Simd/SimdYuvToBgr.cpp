@@ -89,26 +89,4 @@ namespace Simd
 	{
 		Base::Yuv444ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 	}
-
-	void Yuv444ToBgr(const View & y, const View & u, const View & v, View & bgr)
-	{
-		assert(y.width == u.width && y.height == u.height && y.format == u.format);
-		assert(y.width == v.width && y.height == v.height && y.format == v.format);
-		assert(y.width == bgr.width && y.height == bgr.height);
-		assert(y.format == View::Gray8 && bgr.format == View::Bgr24);
-
-		Yuv444ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, bgr.data, bgr.stride);
-	}
-
-	void Yuv420ToBgr(const View & y, const View & u, const View & v, View & bgr)
-	{
-		assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
-		assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
-		assert(y.width == bgr.width && y.height == bgr.height);
-		assert(y.format == View::Gray8 && bgr.format == View::Bgr24);
-
-		Yuv420ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, 
-			y.width, y.height, bgr.data, bgr.stride);
-	}
 }

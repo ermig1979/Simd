@@ -37,7 +37,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdView.h"
 
 #include "Simd/SimdAbsDifferenceSum.h"
 #include "Simd/SimdAbsGradientSaturatedSum.h"
@@ -71,5 +70,8 @@
 #include "Simd/SimdYuvToBgra.h"
 #include "Simd/SimdYuvToBgr.h"
 #include "Simd/SimdYuvToHue.h"
+
+#include "Simd/SimdView.h"
+#include "Simd/SimdUtils.h"
 
 #endif//__Simd_h__

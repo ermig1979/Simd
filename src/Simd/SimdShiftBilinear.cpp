@@ -525,16 +525,5 @@ namespace Simd
 			Base::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
 			shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 	}
-
-	void ShiftBilinear(const View & src, const View & bkg, double shiftX, double shiftY, 
-		size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst)
-	{
-		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
-		assert(src.format == bkg.format && src.width == bkg.width && src.height == bkg.height);
-		assert(src.format == View::Gray8 || src.format == View::Uv16 || src.format == View::Bgr24 || src.format == View::Bgra32);
-
-		ShiftBilinear(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), bkg.data, bkg.stride,
-			shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.data, dst.stride);
-	}
 }
 

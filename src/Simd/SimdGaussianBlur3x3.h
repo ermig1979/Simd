@@ -24,7 +24,7 @@
 #ifndef __SimdGaussianBlur3x3_h__
 #define __SimdGaussianBlur3x3_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -52,7 +52,5 @@ namespace Simd
 
 	void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
 		size_t channelCount, uchar * dst, size_t dstStride);
-
-	void GaussianBlur3x3(const View & src, View & dst);
 }
 #endif//__SimdGaussianBlur3x3_h__

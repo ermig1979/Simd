@@ -24,12 +24,10 @@
 #ifndef __SimdCopy_h__
 #define __SimdCopy_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
     void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
-
-	void Copy(const View & src, View & dst);
 }
 #endif//__SimdCopy_h__

@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utl\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -189,15 +189,6 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBinarizationA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTexture.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTexture.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTextureA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdConfig.h">
@@ -389,17 +380,32 @@
 		<Unit filename="../../src/Simd/SimdStretchGray2x2A.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdTexture.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdTexture.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdTextureA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdTypes.h">
 			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdUtils.cpp">
+			<Option virtualFolder="Utl/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdUtils.h">
+			<Option virtualFolder="Utl/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdVersion.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdView.cpp">
-			<Option virtualFolder="Sys/" />
+			<Option virtualFolder="Utl/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdView.h">
-			<Option virtualFolder="Sys/" />
+			<Option virtualFolder="Utl/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToBgr.cpp">
 			<Option virtualFolder="Alg/" />

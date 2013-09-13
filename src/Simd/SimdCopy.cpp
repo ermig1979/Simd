@@ -35,11 +35,4 @@ namespace Simd
             dst += dstStride;
         }
     }
-
-	void Copy(const View & src, View & dst)
-	{
-		assert(src.format == dst.format && src.width == dst.width && src.height == dst.height);
-
-        Copy(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), dst.data, dst.stride);
-	}
 }

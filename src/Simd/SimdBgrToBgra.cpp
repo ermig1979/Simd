@@ -78,12 +78,4 @@ namespace Simd
 	{
 		Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
 	}
-
-	void BgrToBgra(const View & bgr, View & bgra, uchar alpha)
-	{
-		assert(bgra.width == bgr.width && bgra.height == bgr.height);
-		assert(bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
-
-		BgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride, alpha);
-	}
 }

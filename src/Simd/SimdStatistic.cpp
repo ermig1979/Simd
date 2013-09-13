@@ -448,32 +448,4 @@ namespace Simd
 #endif// SIMD_SSE2_ENABLE
             Base::GetColSums(src, stride, width, height, sums);
     }
-
-	void GetStatistic(const View & src, uchar * min, uchar * max, uchar * average)
-	{
-		assert(src.format == View::Gray8);
-
-		GetStatistic(src.data, src.stride, src.width, src.height, min, max, average);
-	}
-
-    void GetMoments(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
-    {
-        assert(mask.format == View::Gray8);
-
-        GetMoments(mask.data, mask.stride, mask.width, mask.height, index, area, x, y, xx, xy, yy);
-    }
-
-    void GetRowSums(const View & src, uint * sums)
-    {
-        assert(src.format == View::Gray8);
-
-        GetRowSums(src.data, src.stride, src.width, src.height, sums);
-    }
-
-    void GetColSums(const View & src, uint * sums)
-    {
-        assert(src.format == View::Gray8);
-
-        GetColSums(src.data, src.stride, src.width, src.height, sums);
-    }
 }

@@ -24,7 +24,7 @@
 #ifndef __SimdBinarization_h__
 #define __SimdBinarization_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -75,10 +75,5 @@ namespace Simd
     void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
         uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
         uchar * dst, size_t dstStride, CompareType compareType);
-
-    void Binarization(const View & src, uchar value, uchar positive, uchar negative, View & dst, CompareType compareType);
-
-    void AveragingBinarization(const View & src, uchar value, size_t neighborhood, 
-        uchar threshold, uchar positive, uchar negative, View & dst, CompareType compareType);
 }
 #endif//__SimdBinarization_h__

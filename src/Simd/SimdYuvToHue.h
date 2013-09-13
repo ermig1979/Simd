@@ -24,7 +24,7 @@
 #ifndef __SimdYuvToHue_h__
 #define __SimdYuvToHue_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
@@ -66,9 +66,5 @@ namespace Simd
 
 	void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
 		size_t width, size_t height, uchar * hue, size_t hueStride);
-
-	void Yuv444ToHue(const View & y, const View & u, const View & v, View & hue);
-
-	void Yuv420ToHue(const View & y, const View & u, const View & v, View & hue);
 }
 #endif//__SimdYuvToHue_h__

@@ -24,6 +24,7 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdMath.h"
 #include "Simd/SimdReduceGray2x2.h"
 
 namespace Simd
