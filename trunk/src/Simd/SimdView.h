@@ -24,7 +24,7 @@
 #ifndef __SimdView_h__
 #define __SimdView_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdPoint.h"
 #include "Simd/SimdMemory.h"
 
 namespace Simd
