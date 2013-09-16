@@ -293,6 +293,9 @@
 		<Unit filename="../../src/Simd/SimdOperationA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdPoint.h">
+			<Option virtualFolder="Utl/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
     <ClInclude Include="..\..\src\Simd\SimdTexture.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />

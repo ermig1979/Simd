@@ -327,6 +327,9 @@
     <ClInclude Include="..\..\src\Simd\SimdUtils.h">
       <Filter>Utl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoint.h">
+      <Filter>Utl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">

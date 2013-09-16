@@ -71,6 +71,7 @@
 #include "Simd/SimdYuvToBgr.h"
 #include "Simd/SimdYuvToHue.h"
 
+#include "Simd/SimdPoint.h"
 #include "Simd/SimdView.h"
 #include "Simd/SimdUtils.h"
 
