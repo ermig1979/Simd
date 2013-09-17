@@ -140,10 +140,10 @@ namespace Test
 				View & backgroundCountDst, View & backgroundValueDst, uchar threshold) const
 			{
 				Simd::Copy(backgroundCountSrc, backgroundCountDst);
-				Simd::Copy(backgroundCountSrc, backgroundCountDst);
+				Simd::Copy(backgroundValueSrc, backgroundValueDst);
 				TEST_PERFORMANCE_TEST(description);
 				func(backgroundCountDst.data, backgroundCountDst.stride, backgroundValueDst.width, backgroundValueDst.height, 
-                    backgroundCountDst.data, backgroundCountDst.stride, threshold);
+                    backgroundValueDst.data, backgroundValueDst.stride, threshold);
 			}
 		};
 	}
@@ -192,10 +192,10 @@ namespace Test
                 View & backgroundCountDst, View & backgroundValueDst, uchar threshold, const View & mask) const
 			{
                 Simd::Copy(backgroundCountSrc, backgroundCountDst);
-                Simd::Copy(backgroundCountSrc, backgroundCountDst);
+                Simd::Copy(backgroundValueSrc, backgroundValueDst);
 				TEST_PERFORMANCE_TEST(description + "<m>");
                 func(backgroundCountDst.data, backgroundCountDst.stride, backgroundValueDst.width, backgroundValueDst.height, 
-                    backgroundCountDst.data, backgroundCountDst.stride, threshold, mask.data, mask.stride);
+                    backgroundValueDst.data, backgroundValueDst.stride, threshold, mask.data, mask.stride);
 			}
 		};
 	}
@@ -222,7 +222,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst1, backgroundValueDst1, 0x80, mask));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst1, backgroundValueDst1, 0x80, mask));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst2, backgroundValueDst2, 0x80, mask));
 
         result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 10, 0, "backgroundCount");
         result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 10, 0, "backgroundValue");
@@ -284,12 +284,14 @@ namespace Test
 
 		result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::EdgeBackgroundGrowRangeSlow));
 		result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::EdgeBackgroundGrowRangeSlow));
+        result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::EdgeBackgroundGrowRangeSlow));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
             result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
+            result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
         }
 #endif 
 
@@ -302,12 +304,14 @@ namespace Test
 
 		result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(Simd::EdgeBackgroundGrowRangeFast));
 		result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(Simd::EdgeBackgroundGrowRangeFast));
+        result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(Simd::EdgeBackgroundGrowRangeFast));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
             result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
+            result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
         }
 #endif 
 
@@ -320,12 +324,14 @@ namespace Test
 
 		result = result && EdgeBackgroundIncrementCountTest(W, H, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(Simd::EdgeBackgroundIncrementCount));
 		result = result && EdgeBackgroundIncrementCountTest(W + 1, H - 1, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(Simd::EdgeBackgroundIncrementCount));
+        result = result && EdgeBackgroundIncrementCountTest(W - 1, H + 1, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(Simd::EdgeBackgroundIncrementCount));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && EdgeBackgroundIncrementCountTest(W, H, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
             result = result && EdgeBackgroundIncrementCountTest(W + 1, H - 1, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
+            result = result && EdgeBackgroundIncrementCountTest(W - 1, H + 1, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
         }
 #endif 
 
@@ -338,12 +344,14 @@ namespace Test
 
 		result = result && EdgeBackgroundAdjustRangeTest(W, H, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(Simd::EdgeBackgroundAdjustRange));
 		result = result && EdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(Simd::EdgeBackgroundAdjustRange));
+        result = result && EdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(Simd::EdgeBackgroundAdjustRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && EdgeBackgroundAdjustRangeTest(W, H, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
             result = result && EdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
+            result = result && EdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
         }
 #endif 
 
@@ -356,12 +364,14 @@ namespace Test
 
 		result = result && MaskedEdgeBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
 		result = result && MaskedEdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
+        result = result && MaskedEdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && MaskedEdgeBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
             result = result && MaskedEdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
+            result = result && MaskedEdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
         }
 #endif 
 
@@ -374,12 +384,14 @@ namespace Test
 
 		result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(Simd::EdgeBackgroundShiftRange));
 		result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(Simd::EdgeBackgroundShiftRange));
+        result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(Simd::EdgeBackgroundShiftRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && EdgeBackgroundChangeRangeTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
             result = result && EdgeBackgroundChangeRangeTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
+            result = result && EdgeBackgroundChangeRangeTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
         }
 #endif 
 
@@ -392,12 +404,14 @@ namespace Test
 
 		result = result && MaskedEdgeBackgroundShiftRangeTest(W, H, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
 		result = result && MaskedEdgeBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
+        result = result && MaskedEdgeBackgroundShiftRangeTest(W - 1, H + 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && MaskedEdgeBackgroundShiftRangeTest(W, H, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
             result = result && MaskedEdgeBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
+            result = result && MaskedEdgeBackgroundShiftRangeTest(W - 1, H + 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
         }
 #endif 
 
