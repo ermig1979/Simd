@@ -83,12 +83,14 @@ namespace Test
 
 		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv444ToHue), FUNC(Simd::Yuv444ToHue), false);
 		result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444ToHue), FUNC(Simd::Yuv444ToHue), false);
+        result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444ToHue), FUNC(Simd::Yuv444ToHue), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
             result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
+            result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
         }
 #endif 
 
@@ -100,13 +102,15 @@ namespace Test
 		bool result = true;
 
 		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv420ToHue), FUNC(Simd::Yuv420ToHue), true);
-		result = result && YuvToHueTest(W - 2, H + 4, FUNC(Simd::Base::Yuv420ToHue), FUNC(Simd::Yuv420ToHue), true);
+		result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420ToHue), FUNC(Simd::Yuv420ToHue), true);
+        result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420ToHue), FUNC(Simd::Yuv420ToHue), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
-            result = result && YuvToHueTest(W - 2, H + 4, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
+            result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
+            result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
         }
 #endif 
 

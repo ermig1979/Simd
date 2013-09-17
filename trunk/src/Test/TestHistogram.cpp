@@ -79,7 +79,7 @@ namespace Test
 		result = result && HistogramTest(W, H, 1, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(Simd::AbsSecondDerivativeHistogram));
 		result = result && HistogramTest(W + 1, H - 1, 2, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(Simd::AbsSecondDerivativeHistogram));
 		result = result && HistogramTest(W, H, 3, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(Simd::AbsSecondDerivativeHistogram));
-		result = result && HistogramTest(W + 1, H - 1, 4, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(Simd::AbsSecondDerivativeHistogram));
+		result = result && HistogramTest(W - 1, H + 1, 4, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(Simd::AbsSecondDerivativeHistogram));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -87,7 +87,7 @@ namespace Test
             result = result && HistogramTest(W, H, 1, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
             result = result && HistogramTest(W + 1, H - 1, 2, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
             result = result && HistogramTest(W, H, 3, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
-            result = result && HistogramTest(W + 1, H - 1, 4, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
+            result = result && HistogramTest(W - 1, H + 1, 4, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
         }
 #endif 
 

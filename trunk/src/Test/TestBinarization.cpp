@@ -103,6 +103,7 @@ namespace Test
         {
             result = result && BinarizationTest(ARGS11(W, H, type, f1, f2));
             result = result && BinarizationTest(ARGS11(W + 1, H - 1, type, f1, f2));
+            result = result && BinarizationTest(ARGS11(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
@@ -186,6 +187,7 @@ namespace Test
         {
             result = result && AveragingBinarizationTest(ARGS21(W, H, type, f1, f2));
             result = result && AveragingBinarizationTest(ARGS21(W + 1, H - 1, type, f1, f2));
+            result = result && AveragingBinarizationTest(ARGS21(W - 1, H + 1, type, f1, f2));
         }
 
         return result;

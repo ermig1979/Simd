@@ -98,17 +98,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ShiftTest(ARGS1(View::Gray8, W, H, f1, f2));
-        result = result && ShiftTest(ARGS1(View::Gray8, W + 1, H - 1, f1, f2));
-
-        result = result && ShiftTest(ARGS1(View::Uv16, W, H, f1, f2));
-        result = result && ShiftTest(ARGS1(View::Uv16, W + 1, H - 1, f1, f2));
-
-        result = result && ShiftTest(ARGS1(View::Bgr24, W, H, f1, f2));
-        result = result && ShiftTest(ARGS1(View::Bgr24, W + 1, H - 1, f1, f2));
-
-        result = result && ShiftTest(ARGS1(View::Bgra32, W, H, f1, f2));
-        result = result && ShiftTest(ARGS1(View::Bgra32, W + 1, H - 1, f1, f2));
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ShiftTest(ARGS1(format, W, H, f1, f2));
+            result = result && ShiftTest(ARGS1(format, W + 1, H - 1, f1, f2));
+            result = result && ShiftTest(ARGS1(format, W - 1, H + 1, f1, f2));
+        }
 
         return result;
     }

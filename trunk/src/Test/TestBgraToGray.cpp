@@ -74,12 +74,14 @@ namespace Test
 
         result = result && BgraToGrayTest(W, H, FUNC(Simd::Base::BgraToGray), FUNC(Simd::BgraToGray));
         result = result && BgraToGrayTest(W + 1, H - 1, FUNC(Simd::Base::BgraToGray), FUNC(Simd::BgraToGray));
+        result = result && BgraToGrayTest(W - 1, H + 1, FUNC(Simd::Base::BgraToGray), FUNC(Simd::BgraToGray));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && BgraToGrayTest(W, H, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
             result = result && BgraToGrayTest(W + 1, H - 1, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
+            result = result && BgraToGrayTest(W - 1, H + 1, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
         }
 #endif 
 

@@ -96,12 +96,14 @@ namespace Test
 
         result = result && AddFeatureDifferenceTest(W, H, FUNC(Simd::Base::AddFeatureDifference), FUNC(Simd::AddFeatureDifference));
         result = result && AddFeatureDifferenceTest(W + 1, H - 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(Simd::AddFeatureDifference));
+        result = result && AddFeatureDifferenceTest(W - 1, H + 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(Simd::AddFeatureDifference));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && AddFeatureDifferenceTest(W, H, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
             result = result && AddFeatureDifferenceTest(W + 1, H - 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
+            result = result && AddFeatureDifferenceTest(W - 1, H + 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
         }
 #endif 
 

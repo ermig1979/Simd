@@ -78,12 +78,14 @@ namespace Test
 		bool result = true;
 
 		result = result && StretchGrayTest(W, H, FUNC(Simd::Base::StretchGray2x2), FUNC(Simd::StretchGray2x2));
-		result = result && StretchGrayTest(W - 1, H + 1, FUNC(Simd::Base::StretchGray2x2), FUNC(Simd::StretchGray2x2));
+		result = result && StretchGrayTest(W + 1, H - 1, FUNC(Simd::Base::StretchGray2x2), FUNC(Simd::StretchGray2x2));
+        result = result && StretchGrayTest(W - 1, H + 1, FUNC(Simd::Base::StretchGray2x2), FUNC(Simd::StretchGray2x2));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && StretchGrayTest(W, H, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
+            result = result && StretchGrayTest(W + 1, H - 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
             result = result && StretchGrayTest(W - 1, H + 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
         }
 #endif 
