@@ -44,7 +44,7 @@ namespace Test
 				size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), bkg.data, bkg.stride,
+				func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), bkg.data, bkg.stride,
 					shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.data, dst.stride);
 			}
 		};

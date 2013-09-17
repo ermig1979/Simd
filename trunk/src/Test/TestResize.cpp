@@ -44,7 +44,7 @@ namespace Test
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.width, src.height, src.stride,
-					dst.data, dst.width, dst.height, dst.stride, View::SizeOf(src.format));
+					dst.data, dst.width, dst.height, dst.stride, View::PixelSize(src.format));
 			}
 		};
 	}

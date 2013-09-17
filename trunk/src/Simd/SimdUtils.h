@@ -88,7 +88,7 @@ namespace Simd
 
     void ResizeBilinear(const View & src, View & dst);
 
-    void ShiftBilinear(const View & src, const View & bkg, double shiftX, double shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst);
+    void ShiftBilinear(const View & src, const View & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View & dst);
 
     void SquaredDifferenceSum(const View & a, const View & b, uint64_t & sum);
     void SquaredDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum);

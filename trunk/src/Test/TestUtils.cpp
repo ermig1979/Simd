@@ -29,7 +29,7 @@ namespace Test
     {
         assert(view.data);
 
-        size_t width = view.width*View::SizeOf(view.format);
+        size_t width = view.width*View::PixelSize(view.format);
         for(size_t row = 0; row < view.height; ++row)
         {
             ptrdiff_t offset = row*view.stride;
@@ -44,7 +44,7 @@ namespace Test
 	{
 		assert(view.data);
 
-		size_t width = view.width*View::SizeOf(view.format);
+		size_t width = view.width*View::PixelSize(view.format);
 		for(size_t row = 0; row < view.height; ++row)
 		{
 			ptrdiff_t offset = row*view.stride;
@@ -62,7 +62,7 @@ namespace Test
         assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
 
         int errorCount = 0;
-        size_t colors = Simd::View::SizeOf(a.format);
+        size_t colors = Simd::View::PixelSize(a.format);
         size_t width = colors*a.width;
         for(size_t row = 0; row < a.height; ++row)
         {
@@ -151,7 +151,7 @@ namespace Test
 	std::string ColorDescription(View::Format format)
 	{
 		std::stringstream ss;
-		ss << "<" << View::SizeOf(format) << ">";
+		ss << "<" << View::PixelSize(format) << ">";
 		return ss.str();
 	}
 }
