@@ -42,7 +42,7 @@ namespace Test
 			void Call(const View & a, const View & b, View & dst, Simd::OperationType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::SizeOf(a.format), dst.data, dst.stride, type);
+				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::PixelSize(a.format), dst.data, dst.stride, type);
 			}
 		};
 	}

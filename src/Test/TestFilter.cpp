@@ -41,7 +41,7 @@ namespace Test
 			void Call(const View & src, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, View::SizeOf(src.format), dst.data, dst.stride);
+				func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
 			}
 		};
 
