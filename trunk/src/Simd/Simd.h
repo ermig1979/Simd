@@ -54,6 +54,7 @@
 #include "Simd/SimdEdgeBackground.h"
 #include "Simd/SimdGaussianBlur3x3.h"
 #include "Simd/SimdInterleaveBgra.h"
+#include "Simd/SimdLbp.h"
 #include "Simd/SimdMedianFilterSquare3x3.h"
 #include "Simd/SimdMedianFilterSquare5x5.h"
 #include "Simd/SimdOperation.h"

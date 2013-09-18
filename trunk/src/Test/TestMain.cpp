@@ -63,6 +63,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(MedianFilterSquare5x5Test);
     EXECUTE_TEST(GaussianBlur3x3Test);
     EXECUTE_TEST(AbsGradientSaturatedSumTest);
+    EXECUTE_TEST(LbpEstimateTest);
 
     EXECUTE_TEST(SquareDifferenceSumTest);
     EXECUTE_TEST(MaskedSquareDifferenceSumTest);

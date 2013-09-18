@@ -83,8 +83,10 @@ namespace Simd
         View Region(const Rectangle<ptrdiff_t> & rect) const;
         View Region(const Point<ptrdiff_t> & size, Position position) const;
 
-        Point<ptrdiff_t> Dimensions() const;
-        size_t Size() const;
+        View Flipped() const;
+
+        Point<ptrdiff_t> Size() const;
+        size_t DataSize() const;
         size_t Area() const;
 
         template <class T> const T & At(size_t x, size_t y) const;
@@ -137,12 +139,17 @@ namespace Simd
         return Region(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
     }
 
-    SIMD_INLINE Point<ptrdiff_t> View::Dimensions() const 
+    SIMD_INLINE View View::Flipped() const
+    {
+        return View(width, height, -stride, format, data + (height - 1)*stride);
+    }
+
+    SIMD_INLINE Point<ptrdiff_t> View::Size() const 
     {
         return Point<ptrdiff_t>(width, height);
     }
 
-    SIMD_INLINE size_t View::Size() const 
+    SIMD_INLINE size_t View::DataSize() const 
     {
         return stride*height;
     }

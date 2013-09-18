@@ -257,6 +257,15 @@
 		<Unit filename="../../src/Simd/SimdInterleaveBgra.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdLbp.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdLbp.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdLbpA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdLoad.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
