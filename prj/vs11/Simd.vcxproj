@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLbp.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h" />
     <ClInclude Include="..\..\src\Simd\SimdTexture.h" />
@@ -111,6 +112,13 @@
     <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBinarizationA.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdLbpA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>

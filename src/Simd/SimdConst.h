@@ -47,6 +47,13 @@ namespace Simd
 		const __m128i K_INV_ZERO = SIMD_MM_SET1_EPI8(0xFF);
 
 		const __m128i K8_01 = SIMD_MM_SET1_EPI8(0x01);
+        const __m128i K8_02 = SIMD_MM_SET1_EPI8(0x02);
+        const __m128i K8_04 = SIMD_MM_SET1_EPI8(0x04);
+        const __m128i K8_08 = SIMD_MM_SET1_EPI8(0x08);
+        const __m128i K8_10 = SIMD_MM_SET1_EPI8(0x10);
+        const __m128i K8_20 = SIMD_MM_SET1_EPI8(0x20);
+        const __m128i K8_40 = SIMD_MM_SET1_EPI8(0x40);
+        const __m128i K8_80 = SIMD_MM_SET1_EPI8(0x80);
 
 		const __m128i K16_0001 = SIMD_MM_SET1_EPI16(0x0001);
 		const __m128i K16_0002 = SIMD_MM_SET1_EPI16(0x0002);
@@ -85,6 +92,13 @@ namespace Simd
 		const __m256i K_INV_ZERO = SIMD_MM256_SET1_EPI8(0xFF);
 
         const __m256i K8_01 = SIMD_MM256_SET1_EPI8(0x01);
+        const __m256i K8_02 = SIMD_MM256_SET1_EPI8(0x02);
+        const __m256i K8_04 = SIMD_MM256_SET1_EPI8(0x04);
+        const __m256i K8_08 = SIMD_MM256_SET1_EPI8(0x08);
+        const __m256i K8_10 = SIMD_MM256_SET1_EPI8(0x10);
+        const __m256i K8_20 = SIMD_MM256_SET1_EPI8(0x20);
+        const __m256i K8_40 = SIMD_MM256_SET1_EPI8(0x40);
+        const __m256i K8_80 = SIMD_MM256_SET1_EPI8(0x80);
 
 		const __m256i K16_0001 = SIMD_MM256_SET1_EPI16(0x0001);
         const __m256i K16_0002 = SIMD_MM256_SET1_EPI16(0x0002);

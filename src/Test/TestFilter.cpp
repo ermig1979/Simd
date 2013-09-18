@@ -190,4 +190,24 @@ namespace Test
 
 		return result;
 	}
+
+    bool LbpEstimateTest()
+    {
+        bool result = true;
+
+        result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
+        result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
+        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && GrayFilterTest(W, H, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+            result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+            result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+        }
+#endif 
+
+        return result;
+    }
 }

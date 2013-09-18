@@ -181,6 +181,12 @@
     <ClCompile Include="..\..\src\Simd\SimdUtils.cpp">
       <Filter>Utl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdLbpA.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdLbp.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -332,6 +338,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h">
       <Filter>Utl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLbp.h">
+      <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

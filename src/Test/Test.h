@@ -47,6 +47,7 @@ namespace Test
     bool MedianFilterSquare5x5Test();
     bool GaussianBlur3x3Test();
     bool AbsGradientSaturatedSumTest();
+    bool LbpEstimateTest();
 
     bool SquareDifferenceSumTest();
     bool MaskedSquareDifferenceSumTest();
