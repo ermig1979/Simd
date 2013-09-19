@@ -55,12 +55,16 @@ namespace Simd
 	template <typename T> bool operator != (const Point<T> & p1, const Point<T> & p2);
 	template <typename T> Point<T> operator + (const Point<T> & p1, const Point<T> & p2);
 	template <typename T> Point<T> operator - (const Point<T> & p1, const Point<T> & p2);
+    template <typename T> Point<T> operator * (const Point<T> & p1, const Point<T> & p2);
+    template <typename T> Point<T> operator / (const Point<T> & p1, const Point<T> & p2);
 	template <typename T> Point<T> operator - (const Point<T> & p);
 	template <typename T> Point<double> operator / (const Point<T> & p, double a);
 	template <typename TP, typename TA> Point<TP> operator * (const Point<TP> & p, const TA & a);
 	template <typename TP, typename TA> Point<TP> operator * (const TA & a, const Point<TP> & p);
 
     template <typename T> T SquaredDistance(const Point<T> & p1, const Point<T> & p2);
+    template <typename T> T DotProduct(const Point<T> & p1, const Point<T> & p2);
+    template <typename T> T CrossProduct(const Point<T> & p1, const Point<T> & p2);
 
 	//-------------------------------------------------------------------------
 
@@ -176,6 +180,18 @@ namespace Simd
 		return Point<T>(p1.x - p2.x, p1.y - p2.y);
 	}
 
+    template <typename T> 
+    SIMD_INLINE Point<T> operator * (const Point<T> & p1, const Point<T> & p2)
+    {
+        return Point<T>(p1.x * p2.x, p1.y * p2.y);
+    }
+
+    template <typename T> 
+    SIMD_INLINE Point<T> operator / (const Point<T> & p1, const Point<T> & p2)
+    {
+        return Point<T>(p1.x / p2.x, p1.y / p2.y);
+    }
+
 	template <typename T> 
 	SIMD_INLINE Point<T> operator - (const Point<T> & p)
 	{
@@ -205,6 +221,18 @@ namespace Simd
     {
         Point<T> dp = p2 - p1;
         return dp.x*dp.x + dp.y*dp.y;
+    }
+
+    template <typename T>
+    SIMD_INLINE T DotProduct(const Point<T> & p1, const Point<T> & p2)
+    {
+        return (p1.x * p2.x + p1.y * p2.y);
+    }
+
+    template <typename T>
+    SIMD_INLINE T CrossProduct(const Point<T> & p1, const Point<T> & p2)
+    {
+        return (p1.x * p2.y - p1.y * p2.x);
     }
 }
 #endif//__SimdPoint_h__
