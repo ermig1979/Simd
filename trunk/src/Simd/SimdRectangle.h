@@ -193,7 +193,7 @@ namespace Simd
     template <typename T> template <typename TB> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetBottom(const TB & b)
     {
-        bottom = (T)bottom;
+        bottom = (T)b;
         return *this;
     }
 
