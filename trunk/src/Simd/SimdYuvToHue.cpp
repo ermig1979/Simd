@@ -102,21 +102,19 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		const __m128 KF_255_DIV_6 = SIMD_MM_SET1_PS(Base::KF_255_DIV_6);
-
-		SIMD_INLINE __m128i MulDiv32(__m128i dividend, __m128i divisor)
+		SIMD_INLINE __m128i MulDiv32(__m128i dividend, __m128i divisor, const __m128 & KF_255_DIV_6)
 		{
 			return _mm_cvttps_epi32(_mm_div_ps(_mm_mul_ps(KF_255_DIV_6, _mm_cvtepi32_ps(dividend)), _mm_cvtepi32_ps(divisor)));
 		}
 
-		SIMD_INLINE __m128i MulDiv16(__m128i dividend, __m128i divisor)
+		SIMD_INLINE __m128i MulDiv16(__m128i dividend, __m128i divisor, const __m128 & KF_255_DIV_6)
 		{
-			const __m128i quotientLo = MulDiv32(_mm_unpacklo_epi16(dividend, K_ZERO), _mm_unpacklo_epi16(divisor, K_ZERO));
-			const __m128i quotientHi = MulDiv32(_mm_unpackhi_epi16(dividend, K_ZERO), _mm_unpackhi_epi16(divisor, K_ZERO));
+			const __m128i quotientLo = MulDiv32(_mm_unpacklo_epi16(dividend, K_ZERO), _mm_unpacklo_epi16(divisor, K_ZERO), KF_255_DIV_6);
+			const __m128i quotientHi = MulDiv32(_mm_unpackhi_epi16(dividend, K_ZERO), _mm_unpackhi_epi16(divisor, K_ZERO), KF_255_DIV_6);
 			return _mm_packs_epi32(quotientLo, quotientHi);
 		}
 
-		SIMD_INLINE __m128i AdjustedYuvToHue16(__m128i y, __m128i u, __m128i v)
+		SIMD_INLINE __m128i AdjustedYuvToHue16(__m128i y, __m128i u, __m128i v, const __m128 & KF_255_DIV_6)
 		{
 			const __m128i red = AdjustedYuvToRed16(y, v);
 			const __m128i green = AdjustedYuvToGreen16(y, u, v);
@@ -137,25 +135,25 @@ namespace Simd
 
 			const __m128i dividend = _mm_or_si128(_mm_or_si128(redMaxCase, greenMaxCase), blueMaxCase);
 
-			return _mm_andnot_si128(_mm_cmpeq_epi16(range, K_ZERO), _mm_and_si128(MulDiv16(dividend, range), K16_00FF));
+			return _mm_andnot_si128(_mm_cmpeq_epi16(range, K_ZERO), _mm_and_si128(MulDiv16(dividend, range, KF_255_DIV_6), K16_00FF));
 		}
 
-		SIMD_INLINE __m128i YuvToHue16(__m128i y, __m128i u, __m128i v)
+		SIMD_INLINE __m128i YuvToHue16(__m128i y, __m128i u, __m128i v, const __m128 & KF_255_DIV_6)
 		{
-			return AdjustedYuvToHue16(AdjustY16(y), AdjustUV16(u), AdjustUV16(v));
+			return AdjustedYuvToHue16(AdjustY16(y), AdjustUV16(u), AdjustUV16(v), KF_255_DIV_6);
 		}
 
-		SIMD_INLINE __m128i YuvToHue8(__m128i y, __m128i u, __m128i v)
+		SIMD_INLINE __m128i YuvToHue8(__m128i y, __m128i u, __m128i v, const __m128 & KF_255_DIV_6)
 		{
 			return _mm_packus_epi16(
-				YuvToHue16(_mm_unpacklo_epi8(y, K_ZERO), _mm_unpacklo_epi8(u, K_ZERO), _mm_unpacklo_epi8(v, K_ZERO)), 
-				YuvToHue16(_mm_unpackhi_epi8(y, K_ZERO), _mm_unpackhi_epi8(u, K_ZERO), _mm_unpackhi_epi8(v, K_ZERO)));		
+				YuvToHue16(_mm_unpacklo_epi8(y, K_ZERO), _mm_unpacklo_epi8(u, K_ZERO), _mm_unpacklo_epi8(v, K_ZERO), KF_255_DIV_6), 
+				YuvToHue16(_mm_unpackhi_epi8(y, K_ZERO), _mm_unpackhi_epi8(u, K_ZERO), _mm_unpackhi_epi8(v, K_ZERO), KF_255_DIV_6));		
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420ToHue(const uchar * y, __m128i u, __m128i v, uchar * hue)
+		template <bool align> SIMD_INLINE void Yuv420ToHue(const uchar * y, __m128i u, __m128i v, uchar * hue, const __m128 & KF_255_DIV_6)
 		{
-			Store<align>((__m128i*)(hue), YuvToHue8(Load<align>((__m128i*)(y)), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v)));
-			Store<align>((__m128i*)(hue + A), YuvToHue8(Load<align>((__m128i*)(y + A)), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v)));
+			Store<align>((__m128i*)(hue), YuvToHue8(Load<align>((__m128i*)(y)), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), KF_255_DIV_6));
+			Store<align>((__m128i*)(hue + A), YuvToHue8(Load<align>((__m128i*)(y + A)), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), KF_255_DIV_6));
 		}
 
 		template <bool align> void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
@@ -168,6 +166,8 @@ namespace Simd
 				assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
 			}
 
+            const __m128 KF_255_DIV_6 = _mm_set_ps1(Base::KF_255_DIV_6);
+
 			size_t bodyWidth = AlignLo(width, DA);
 			size_t tail = width - bodyWidth;
 			for(size_t row = 0; row < height; row += 2)
@@ -176,16 +176,16 @@ namespace Simd
 				{
 					__m128i u_ = Load<align>((__m128i*)(u + colUV));
 					__m128i v_ = Load<align>((__m128i*)(v + colUV));
-					Yuv420ToHue<align>(y + colY, u_, v_, hue + col_hue);
-					Yuv420ToHue<align>(y + yStride + colY, u_, v_, hue + hueStride + col_hue);
+					Yuv420ToHue<align>(y + colY, u_, v_, hue + col_hue, KF_255_DIV_6);
+					Yuv420ToHue<align>(y + yStride + colY, u_, v_, hue + hueStride + col_hue, KF_255_DIV_6);
 				}
 				if(tail)
 				{
 					size_t offset = width - DA;
 					__m128i u_ = Load<false>((__m128i*)(u + offset/2));
 					__m128i v_ = Load<false>((__m128i*)(v + offset/2));
-					Yuv420ToHue<false>(y + offset, u_, v_, hue + offset);
-					Yuv420ToHue<false>(y + yStride + offset, u_, v_, hue + hueStride + offset);
+					Yuv420ToHue<false>(y + offset, u_, v_, hue + offset, KF_255_DIV_6);
+					Yuv420ToHue<false>(y + yStride + offset, u_, v_, hue + hueStride + offset, KF_255_DIV_6);
 				}
 				y += 2*yStride;
 				u += uStride;
@@ -204,6 +204,8 @@ namespace Simd
 				assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
 			}
 
+            const __m128 KF_255_DIV_6 = _mm_set_ps1(Base::KF_255_DIV_6);
+
 			size_t bodyWidth = AlignLo(width, A);
 			size_t tail = width - bodyWidth;
 			for(size_t row = 0; row < height; row += 1)
@@ -211,13 +213,13 @@ namespace Simd
 				for(size_t col = 0; col < bodyWidth; col += A)
 				{
 					Store<align>((__m128i*)(hue + col), YuvToHue8(Load<align>((__m128i*)(y + col)), 
-						Load<align>((__m128i*)(u + col)), Load<align>((__m128i*)(v + col))));
+						Load<align>((__m128i*)(u + col)), Load<align>((__m128i*)(v + col)), KF_255_DIV_6));
 				}
 				if(tail)
 				{
 					size_t offset = width - A;
 					Store<false>((__m128i*)(hue + offset), YuvToHue8(Load<false>((__m128i*)(y + offset)), 
-						Load<false>((__m128i*)(u + offset)), Load<false>((__m128i*)(v + offset))));
+						Load<false>((__m128i*)(u + offset)), Load<false>((__m128i*)(v + offset)), KF_255_DIV_6));
 				}
 				y += yStride;
 				u += uStride;

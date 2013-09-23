@@ -132,12 +132,6 @@ namespace Simd
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
-#define SIMD_MM_SET1_PS(a) \
-	{float(a), float(a), float(a), float(a)}
-
-#define SIMD_MM_SET2_PS(a0, a1) \
-	{float(a0), float(a1), float(a0), float(a1)}
-
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
@@ -211,14 +205,6 @@ namespace Simd
     SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a0, a1)}
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
-
-#define SIMD_MM256_SET1_PS(a) \
-	{float(a), float(a), float(a), float(a), \
-	float(a), float(a), float(a), float(a)}
-
-#define SIMD_MM256_SET2_PS(a0, a1) \
-	{float(a0), float(a1), float(a0), float(a1), \
-	float(a0), float(a1), float(a0), float(a1)}
 
 #endif// SIMD_AVX2_ENABLE
 }
