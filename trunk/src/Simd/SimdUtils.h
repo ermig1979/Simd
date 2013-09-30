@@ -59,6 +59,7 @@ namespace Simd
     void AveragingBinarization(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, CompareType compareType);
 
     void Copy(const View & src, View & dst);
+    void CopyFrame(const View & src, const Rectangle<ptrdiff_t> & frame, View & dst);
 
     void DeinterleaveUv(const View & uv, View & u, View & v);
 
