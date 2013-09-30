@@ -71,6 +71,8 @@ namespace Simd
     void EdgeBackgroundShiftRange(const View & value, View & background);
     void EdgeBackgroundShiftRange(const View & value, View & background, const View & mask);
 
+    void Fill(View & dst, uchar value);
+
     void GaussianBlur3x3(const View & src, View & dst);
 
     void MedianFilterSquare3x3(const View & src, View & dst);

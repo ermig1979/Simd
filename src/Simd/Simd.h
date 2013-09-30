@@ -52,6 +52,7 @@
 #include "Simd/SimdCrc32.h"
 #include "Simd/SimdDeinterleaveUv.h"
 #include "Simd/SimdEdgeBackground.h"
+#include "Simd/SimdFill.h"
 #include "Simd/SimdGaussianBlur3x3.h"
 #include "Simd/SimdInterleaveBgra.h"
 #include "Simd/SimdLbp.h"

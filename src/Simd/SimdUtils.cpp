@@ -171,14 +171,14 @@ namespace Simd
     {
         assert(Compatible(src, dst));
 
-        Copy(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
+        Copy(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
     }
 
     void CopyFrame(const View & src, const Rectangle<ptrdiff_t> & frame, View & dst)
     {
         assert(Compatible(src, dst));
 
-        CopyFrame(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), 
+        CopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(), 
             frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
     }
 
@@ -240,6 +240,11 @@ namespace Simd
 
         EdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height, 
             background.data, background.stride, mask.data, mask.stride);
+    }
+
+    void Fill(View & dst, uchar value)
+    {
+        Fill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
     }
 
     void GaussianBlur3x3(const View & src, View & dst)
