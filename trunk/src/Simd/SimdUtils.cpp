@@ -247,6 +247,13 @@ namespace Simd
         Fill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
     }
 
+    void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha)
+    {
+        assert(dst.format == View::Bgra32);
+
+        FillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
+    }
+
     void GaussianBlur3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);

@@ -99,5 +99,7 @@ namespace Test
     bool TextureBoostedUvTest();
     bool TextureGetDifferenceSumTest();
     bool TexturePerformCompensationTest();
+
+    bool FillBgraTest();
 }
 #endif//__Test_h__

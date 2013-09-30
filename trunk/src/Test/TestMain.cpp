@@ -116,6 +116,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(TextureGetDifferenceSumTest);
     EXECUTE_TEST(TexturePerformCompensationTest);
 
+    EXECUTE_TEST(FillBgraTest);
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
 	std::cout << Test::PerformanceMeasurerStorage::s_storage.Statistic() << std::endl;

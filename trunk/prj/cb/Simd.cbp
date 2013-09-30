@@ -245,6 +245,9 @@
 		<Unit filename="../../src/Simd/SimdFill.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdFillA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
