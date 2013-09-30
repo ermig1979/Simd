@@ -174,6 +174,14 @@ namespace Simd
         Copy(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
     }
 
+    void CopyFrame(const View & src, const Rectangle<ptrdiff_t> & frame, View & dst)
+    {
+        assert(Compatible(src, dst));
+
+        CopyFrame(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), 
+            frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
+    }
+
     void DeinterleaveUv(const View & uv, View & u, View & v)
     {
         assert(EqualSize(uv, u, v) && uv.format == View::Uv16 && u.format == View::Gray8 && v.format == View::Gray8);

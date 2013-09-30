@@ -34,59 +34,6 @@ namespace Simd
 {
 	namespace Base
 	{
-		static void CopyBackground(const uchar * src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
-		{
-			if(cropTop)
-			{
-				size_t srcOffset = 0;
-				size_t dstOffset = 0;
-				size_t size = width*channelCount;
-				for(size_t row = 0; row < cropTop; ++row)
-				{
-					memcpy(dst + dstOffset, src + srcOffset, size);
-					srcOffset += srcStride;
-					dstOffset += dstStride;
-				}
-			}
-			if(height - cropBottom)
-			{
-				size_t srcOffset = cropBottom*srcStride;
-				size_t dstOffset = cropBottom*dstStride;
-				size_t size = width*channelCount;
-				for(size_t row = cropBottom; row < height; ++row)
-				{
-					memcpy(dst + dstOffset, src + srcOffset, size);
-					srcOffset += srcStride;
-					dstOffset += dstStride;
-				}
-			}
-			if(cropLeft)
-			{
-				size_t srcOffset = cropTop*srcStride;
-				size_t dstOffset = cropTop*dstStride;
-				size_t size = cropLeft*channelCount;
-				for(size_t row = cropTop; row < cropBottom; ++row)
-				{
-					memcpy(dst + dstOffset, src + srcOffset, size);
-					srcOffset += srcStride;
-					dstOffset += dstStride;
-				}
-			}
-			if(width - cropRight)
-			{
-				size_t srcOffset = cropTop*srcStride + cropRight*channelCount;
-				size_t dstOffset = cropTop*dstStride + cropRight*channelCount;
-				size_t size = (width - cropRight)*channelCount;
-				for(size_t row = cropTop; row < cropBottom; ++row)
-				{
-					memcpy(dst + dstOffset, src + srcOffset, size);
-					srcOffset += srcStride;
-					dstOffset += dstStride;
-				}
-			}
-		}
-
 		SIMD_INLINE int Interpolate(int s[2][2], int k[2][2])
 		{
 			return (s[0][0]*k[0][0] + s[0][1]*k[0][1] + 
@@ -236,7 +183,7 @@ namespace Simd
             assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
             assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
 
-            CopyBackground(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+            CopyFrame(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 
             dst += dstStride*cropTop + cropLeft*channelCount;
             src += srcStride*cropTop + cropLeft*channelCount;
@@ -254,7 +201,7 @@ namespace Simd
             ptrdiff_t right = (iDx < 0 ? width : width - iDx);
             ptrdiff_t bottom = (iDy < 0 ? height : height - iDy);
 
-            CopyBackground(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
+            CopyFrame(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
 
             MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
 
