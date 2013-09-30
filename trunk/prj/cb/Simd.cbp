@@ -239,6 +239,12 @@
 		<Unit filename="../../src/Simd/SimdExtract.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdFill.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdFill.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
