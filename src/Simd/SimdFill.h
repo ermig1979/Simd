@@ -28,6 +28,27 @@
 
 namespace Simd
 {
+    namespace Base
+    {
+        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
+    }
+
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
+    {
+        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
+    }
+#endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
+    }
+#endif// SIMD_AVX2_ENABLE
+
     void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value);
+
+    void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
 }
 #endif//__SimdFill_h__
