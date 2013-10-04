@@ -30,6 +30,8 @@ namespace Simd
 {
     namespace Base
     {
+        void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value);
+
         void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
     }
 
@@ -47,7 +49,10 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-    void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value);
+    SIMD_INLINE void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
+    {
+        Base::Fill(dst, stride, width, height, pixelSize, value);
+    }
 
     void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
 }

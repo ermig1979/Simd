@@ -27,7 +27,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdAbsSecondDerivativeHistogram.h"
+#include "Simd/SimdHistogram.h"
 
 namespace Simd
 {

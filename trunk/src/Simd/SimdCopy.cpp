@@ -25,66 +25,69 @@
 
 namespace Simd
 {
-    void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
+    namespace Base
     {
-        size_t rowSize = width*pixelSize;
-        for(size_t row = 0; row < height; ++row)
+        void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
         {
-            memcpy(dst, src, rowSize);
-            src += srcStride;
-            dst += dstStride;
+            size_t rowSize = width*pixelSize;
+            for(size_t row = 0; row < height; ++row)
+            {
+                memcpy(dst, src, rowSize);
+                src += srcStride;
+                dst += dstStride;
+            }
         }
-    }
 
-    void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
-    {
-        if(frameTop)
+        void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
         {
-            size_t srcOffset = 0;
-            size_t dstOffset = 0;
-            size_t size = width*pixelSize;
-            for(size_t row = 0; row < frameTop; ++row)
+            if(frameTop)
             {
-                memcpy(dst + dstOffset, src + srcOffset, size);
-                srcOffset += srcStride;
-                dstOffset += dstStride;
+                size_t srcOffset = 0;
+                size_t dstOffset = 0;
+                size_t size = width*pixelSize;
+                for(size_t row = 0; row < frameTop; ++row)
+                {
+                    memcpy(dst + dstOffset, src + srcOffset, size);
+                    srcOffset += srcStride;
+                    dstOffset += dstStride;
+                }
             }
-        }
-        if(height - frameBottom)
-        {
-            size_t srcOffset = frameBottom*srcStride;
-            size_t dstOffset = frameBottom*dstStride;
-            size_t size = width*pixelSize;
-            for(size_t row = frameBottom; row < height; ++row)
+            if(height - frameBottom)
             {
-                memcpy(dst + dstOffset, src + srcOffset, size);
-                srcOffset += srcStride;
-                dstOffset += dstStride;
+                size_t srcOffset = frameBottom*srcStride;
+                size_t dstOffset = frameBottom*dstStride;
+                size_t size = width*pixelSize;
+                for(size_t row = frameBottom; row < height; ++row)
+                {
+                    memcpy(dst + dstOffset, src + srcOffset, size);
+                    srcOffset += srcStride;
+                    dstOffset += dstStride;
+                }
             }
-        }
-        if(frameLeft)
-        {
-            size_t srcOffset = frameTop*srcStride;
-            size_t dstOffset = frameTop*dstStride;
-            size_t size = frameLeft*pixelSize;
-            for(size_t row = frameTop; row < frameBottom; ++row)
+            if(frameLeft)
             {
-                memcpy(dst + dstOffset, src + srcOffset, size);
-                srcOffset += srcStride;
-                dstOffset += dstStride;
+                size_t srcOffset = frameTop*srcStride;
+                size_t dstOffset = frameTop*dstStride;
+                size_t size = frameLeft*pixelSize;
+                for(size_t row = frameTop; row < frameBottom; ++row)
+                {
+                    memcpy(dst + dstOffset, src + srcOffset, size);
+                    srcOffset += srcStride;
+                    dstOffset += dstStride;
+                }
             }
-        }
-        if(width - frameRight)
-        {
-            size_t srcOffset = frameTop*srcStride + frameRight*pixelSize;
-            size_t dstOffset = frameTop*dstStride + frameRight*pixelSize;
-            size_t size = (width - frameRight)*pixelSize;
-            for(size_t row = frameTop; row < frameBottom; ++row)
+            if(width - frameRight)
             {
-                memcpy(dst + dstOffset, src + srcOffset, size);
-                srcOffset += srcStride;
-                dstOffset += dstStride;
+                size_t srcOffset = frameTop*srcStride + frameRight*pixelSize;
+                size_t dstOffset = frameTop*dstStride + frameRight*pixelSize;
+                size_t size = (width - frameRight)*pixelSize;
+                for(size_t row = frameTop; row < frameBottom; ++row)
+                {
+                    memcpy(dst + dstOffset, src + srcOffset, size);
+                    srcOffset += srcStride;
+                    dstOffset += dstStride;
+                }
             }
         }
     }

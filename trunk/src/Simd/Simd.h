@@ -40,7 +40,6 @@
 
 #include "Simd/SimdAbsDifferenceSum.h"
 #include "Simd/SimdAbsGradientSaturatedSum.h"
-#include "Simd/SimdAbsSecondDerivativeHistogram.h"
 #include "Simd/SimdAddFeatureDifference.h"
 #include "Simd/SimdBackground.h"
 #include "Simd/SimdBgraToBgr.h"
@@ -54,6 +53,7 @@
 #include "Simd/SimdEdgeBackground.h"
 #include "Simd/SimdFill.h"
 #include "Simd/SimdGaussianBlur3x3.h"
+#include "Simd/SimdHistogram.h"
 #include "Simd/SimdInterleaveBgra.h"
 #include "Simd/SimdLbp.h"
 #include "Simd/SimdMedianFilterSquare3x3.h"

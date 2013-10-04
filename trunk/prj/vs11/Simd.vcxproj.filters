@@ -67,7 +67,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp">
@@ -121,7 +121,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSumA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogramA.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBgraToGrayA.cpp">
@@ -300,7 +300,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h">
+    <ClInclude Include="..\..\src\Simd\SimdHistogram.h">
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h">

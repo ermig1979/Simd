@@ -31,6 +31,16 @@ namespace Simd
 {
     namespace Base
     {
+        void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
+        {
+            size_t rowSize = width*pixelSize;
+            for(size_t row = 0; row < height; ++row)
+            {
+                memset(dst, value, rowSize);
+                dst += stride;
+            }
+        }
+
         void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
         {
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
@@ -84,16 +94,6 @@ namespace Simd
         }
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
-    {
-        size_t rowSize = width*pixelSize;
-        for(size_t row = 0; row < height; ++row)
-        {
-            memset(dst, value, rowSize);
-            dst += stride;
-        }
-    }
 
     void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
     {

@@ -34,8 +34,6 @@ namespace Simd
 
     void AbsGradientSaturatedSum(const View & src, View & dst);
 
-    void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);
-
     void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference);
 
     void BackgroundGrowRangeSlow(const View & value, View & lo, View & hi);
@@ -75,6 +73,9 @@ namespace Simd
     void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
 
     void GaussianBlur3x3(const View & src, View & dst);
+
+    void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);
+    void Histogram(const View & src, uint * histogram);
 
     void MedianFilterSquare3x3(const View & src, View & dst);
 
