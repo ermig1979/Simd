@@ -47,13 +47,6 @@ namespace Simd
         AbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
-    void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
-    {
-        assert(src.format == View::Gray8);
-
-        AbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
-    }
-
     void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference)
     {
         assert(Compatible(value, lo, hi, difference) && value.format == View::Gray8);
@@ -259,6 +252,20 @@ namespace Simd
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
         GaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+    }
+
+    void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
+    {
+        assert(src.format == View::Gray8);
+
+        AbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
+    }
+
+    void Histogram(const View & src, uint * histogram)
+    {
+        assert(src.format == View::Gray8);
+
+        Histogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
     void MedianFilterSquare3x3(const View & src, View & dst)

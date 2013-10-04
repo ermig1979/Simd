@@ -28,9 +28,23 @@
 
 namespace Simd
 {
-    void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
+    namespace Base
+    {
+        void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
 
-    void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride);
+        void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride);
+    }
+
+    SIMD_INLINE void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
+    {
+        Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
+    }
+
+    SIMD_INLINE void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
+    {
+        Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
+    }
 }
 #endif//__SimdCopy_h__

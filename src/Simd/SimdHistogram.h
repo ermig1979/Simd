@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAbsSecondDerivativeHistogram_h__
-#define __SimdAbsSecondDerivativeHistogram_h__
+#ifndef __SimdHistogram_h__
+#define __SimdHistogram_h__
 
 #include "Simd/SimdTypes.h"
 
@@ -32,6 +32,8 @@ namespace Simd
 	{
 		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
 			size_t step, size_t indent, uint * histogram);
+
+        void Histogram(const uchar *src, size_t width, size_t height, size_t stride, uint * histogram);
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -52,5 +54,10 @@ namespace Simd
 
     void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
 		size_t step, size_t indent, uint * histogram);
+
+    SIMD_INLINE void Histogram(const uchar *src, size_t width, size_t height, size_t stride, uint * histogram)
+    {
+        Base::Histogram(src, width, height, stride, histogram);
+    }
 }
-#endif//__SimdAbsSecondDerivativeHistogram_h__
+#endif//__SimdHistogram_h__

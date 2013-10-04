@@ -27,7 +27,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdAbsSecondDerivativeHistogram.h"
+#include "Simd/SimdHistogram.h"
 
 namespace Simd
 {
@@ -62,6 +62,17 @@ namespace Simd
 				src += stride;
 			}
 		}
+
+        void Histogram(const uchar * src, size_t width, size_t height, size_t stride, uint * histogram)
+        {
+            memset(histogram, 0, sizeof(uint)*HISTOGRAM_SIZE);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    ++histogram[src[col]];
+                src += stride;
+            }
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE

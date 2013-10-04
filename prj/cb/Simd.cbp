@@ -128,13 +128,13 @@
 		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSumA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.cpp">
+		<Unit filename="../../src/Simd/SimdHistogram.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogram.h">
+		<Unit filename="../../src/Simd/SimdHistogram.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsSecondDerivativeHistogramA.cpp">
+		<Unit filename="../../src/Simd/SimdHistogramA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdAddFeatureDifference.cpp">

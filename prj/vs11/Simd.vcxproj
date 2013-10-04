@@ -22,7 +22,7 @@
     <ClInclude Include="..\..\src\Simd\Simd.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h" />
     <ClInclude Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.h" />
+    <ClInclude Include="..\..\src\Simd\SimdHistogram.h" />
     <ClInclude Include="..\..\src\Simd\SimdBackground.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgraToGray.h" />
@@ -87,8 +87,8 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAbsSecondDerivativeHistogramA.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
