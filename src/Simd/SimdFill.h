@@ -32,6 +32,9 @@ namespace Simd
     {
         void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value);
 
+        void FillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value);
+
         void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
     }
 
@@ -52,6 +55,12 @@ namespace Simd
     SIMD_INLINE void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
     {
         Base::Fill(dst, stride, width, height, pixelSize, value);
+    }
+
+    SIMD_INLINE void FillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value)
+    {
+        Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
     }
 
     void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
