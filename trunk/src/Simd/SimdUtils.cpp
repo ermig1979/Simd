@@ -240,6 +240,12 @@ namespace Simd
         Fill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
     }
 
+    void FillFrame(View & dst, const Rectangle<ptrdiff_t> & frame, uchar value)
+    {
+        FillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), 
+            frame.left, frame.top, frame.right, frame.bottom, value);
+    }
+
     void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha)
     {
         assert(dst.format == View::Bgra32);

@@ -41,6 +41,51 @@ namespace Simd
             }
         }
 
+        void FillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value)
+        {
+            if(frameTop)
+            {
+                size_t offset = 0;
+                size_t size = width*pixelSize;
+                for(size_t row = 0; row < frameTop; ++row)
+                {
+                    memset(dst + offset, value, size);
+                    offset += stride;
+                }
+            }
+            if(height - frameBottom)
+            {
+                size_t offset = frameBottom*stride;
+                size_t size = width*pixelSize;
+                for(size_t row = frameBottom; row < height; ++row)
+                {
+                    memset(dst + offset, value, size);
+                    offset += stride;
+                }
+            }
+            if(frameLeft)
+            {
+                size_t offset = frameTop*stride;
+                size_t size = frameLeft*pixelSize;
+                for(size_t row = frameTop; row < frameBottom; ++row)
+                {
+                    memset(dst + offset, value, size);
+                    offset += stride;
+                }
+            }
+            if(width - frameRight)
+            {
+                size_t offset = frameTop*stride + frameRight*pixelSize;
+                size_t size = (width - frameRight)*pixelSize;
+                for(size_t row = frameTop; row < frameBottom; ++row)
+                {
+                    memset(dst + offset, value, size);
+                    offset += stride;
+                }
+            }
+        }
+
         void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
         {
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);

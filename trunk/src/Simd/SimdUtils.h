@@ -70,6 +70,7 @@ namespace Simd
     void EdgeBackgroundShiftRange(const View & value, View & background, const View & mask);
 
     void Fill(View & dst, uchar value);
+    void FillFrame(View & dst, const Rectangle<ptrdiff_t> & frame, uchar value);
     void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
 
     void GaussianBlur3x3(const View & src, View & dst);
