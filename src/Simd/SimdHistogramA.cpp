@@ -105,7 +105,7 @@ namespace Simd
 		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
 			size_t step, size_t indent, uint * histogram)
 		{
-			assert(width > 2*indent && height > 2*indent && indent >= step && width > A + 2*indent);
+			assert(width > 2*indent && height > 2*indent && indent >= step && width >= A + 2*indent);
 
 			if(Aligned(src) && Aligned(stride))
 				AbsSecondDerivativeHistogram<true>(src, width, height, stride, step, indent, histogram);
