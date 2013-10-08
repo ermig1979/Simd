@@ -75,6 +75,8 @@ namespace Simd
 
     void GaussianBlur3x3(const View & src, View & dst);
 
+    void GrayToBgra(const View & gray, View & bgra, uchar alpha = 0xFF);
+
     void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram);
     void Histogram(const View & src, uint * histogram);
 

@@ -177,6 +177,7 @@
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
+    <ClCompile Include="..\..\src\Test\TestGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
     <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />

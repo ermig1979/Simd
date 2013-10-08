@@ -260,6 +260,13 @@ namespace Simd
         GaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
+    void GrayToBgra(const View & gray, View & bgra, uchar alpha)
+    {
+        assert(EqualSize(gray, bgra) && bgra.format == View::Bgra32 && gray.format == View::Gray8);
+
+        GrayToBgra(gray.data, gray.width, gray.height, gray.stride, bgra.data, bgra.stride, alpha);
+    }
+
     void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
     {
         assert(src.format == View::Gray8);
