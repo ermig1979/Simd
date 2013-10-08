@@ -227,12 +227,12 @@ namespace Simd
 			return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_max_epu8(a, b), a), K_INV_ZERO);
 		}
 
-        SIMD_INLINE __m128i GreaterOrEqualThenU8(__m128i & a, __m128i & b)
+        SIMD_INLINE __m128i GreaterOrEqualThenU8(__m128i a, __m128i b)
         {
             return _mm_cmpeq_epi8(_mm_max_epu8(a, b), a);
         }
 
-        SIMD_INLINE __m128i LesserOrEqualThenU8(__m128i & a, __m128i & b)
+        SIMD_INLINE __m128i LesserOrEqualThenU8(__m128i a, __m128i b)
         {
             return _mm_cmpeq_epi8(_mm_min_epu8(a, b), a);
         }
@@ -291,12 +291,12 @@ namespace Simd
             return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_max_epu8(a, b), a), K_INV_ZERO);
         }
 
-        SIMD_INLINE __m256i GreaterOrEqualThenU8(__m256i & a, __m256i & b)
+        SIMD_INLINE __m256i GreaterOrEqualThenU8(__m256i a, __m256i b)
         {
             return _mm256_cmpeq_epi8(_mm256_max_epu8(a, b), a);
         }
 
-        SIMD_INLINE __m256i LesserOrEqualThenU8(__m256i & a, __m256i & b)
+        SIMD_INLINE __m256i LesserOrEqualThenU8(__m256i a, __m256i b)
         {
             return _mm256_cmpeq_epi8(_mm256_min_epu8(a, b), a);
         }
