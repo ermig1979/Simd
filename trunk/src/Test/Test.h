@@ -101,5 +101,7 @@ namespace Test
     bool TexturePerformCompensationTest();
 
     bool FillBgraTest();
+
+    bool GrayToBgraTest();
 }
 #endif//__Test_h__

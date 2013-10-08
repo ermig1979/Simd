@@ -128,15 +128,6 @@
 		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSumA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogram.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogram.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogramA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdAddFeatureDifference.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -255,6 +246,24 @@
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdGaussianBlur3x3A.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdGrayToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdGrayToBgra.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdGrayToBgraA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdHistogram.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdHistogram.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdHistogramA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdInit.h">

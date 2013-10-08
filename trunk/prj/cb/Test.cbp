@@ -141,6 +141,9 @@
 		<Unit filename="../../src/Test/TestFilter.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestGrayToBgra.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestHistogram.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

@@ -118,6 +118,8 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(FillBgraTest);
 
+    EXECUTE_TEST(GrayToBgraTest);
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
 	std::cout << Test::PerformanceMeasurerStorage::s_storage.Statistic() << std::endl;

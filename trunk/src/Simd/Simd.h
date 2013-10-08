@@ -53,6 +53,7 @@
 #include "Simd/SimdEdgeBackground.h"
 #include "Simd/SimdFill.h"
 #include "Simd/SimdGaussianBlur3x3.h"
+#include "Simd/SimdGrayToBgra.h"
 #include "Simd/SimdHistogram.h"
 #include "Simd/SimdInterleaveBgra.h"
 #include "Simd/SimdLbp.h"
