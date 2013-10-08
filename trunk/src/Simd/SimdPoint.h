@@ -31,6 +31,8 @@ namespace Simd
 	template <typename T> 
 	struct Point
 	{
+        typedef T Type;
+
 		T x, y;
 
 		Point();
