@@ -40,14 +40,18 @@ namespace Simd
 	{
 		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
-	}
+
+        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
+    }
 
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
 		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
-	}
+
+        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
@@ -55,10 +59,14 @@ namespace Simd
 	{
 		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
+
+        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
 	}
 #endif// SIMD_AVX2_ENABLE
 
 	void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 		size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type);
+
+    void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
 }
 #endif//__SimdOperation_h__
