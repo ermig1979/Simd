@@ -111,6 +111,40 @@ namespace Simd
 			else
 				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
+
+        template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uchar * horizontal, uchar * dst)
+        {
+            __m256i _horizontal = Load<align>((__m256i*)horizontal);
+            __m256i lo = DivideI16By255(_mm256_mullo_epi16(vertical, _mm256_unpacklo_epi8(_horizontal, K_ZERO)));
+            __m256i hi = DivideI16By255(_mm256_mullo_epi16(vertical, _mm256_unpackhi_epi8(_horizontal, K_ZERO)));
+            Store<align>((__m256i*)dst, _mm256_packus_epi16(lo, hi));
+        } 
+
+        template <bool align> void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m256i _vertical = _mm256_set1_epi16(vertical[row]);
+                for(size_t col = 0; col < width; col += A)
+                    VectorProduct<align>(_vertical, horizontal + col, dst + col);
+                if(alignedWidth != width)
+                    VectorProduct<false>(_vertical, horizontal + width - A, dst + width - A);
+                dst += stride;
+            }
+        }
+
+        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+        {
+            if(Aligned(horizontal) && Aligned(dst) && Aligned(stride))
+                VectorProduct<true>(vertical, horizontal, dst, stride, width, height);
+            else
+                VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
+        }
 	}
 #endif// SIMD_AVX2_ENABLE
 }

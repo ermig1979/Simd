@@ -309,6 +309,13 @@ namespace Simd
         Operation(a.data, a.stride, b.data, b.stride, a.width, a.height, a.ChannelCount(), dst.data, dst.stride, type);
     }
 
+    void VectorProduct(const uchar * vertical, const uchar * horizontal, View & dst)
+    {
+        assert(dst.format == View::Gray8);
+
+        VectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
+    }
+
     void ReduceGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);

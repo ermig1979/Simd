@@ -87,6 +87,7 @@ namespace Simd
     void MedianFilterSquare5x5(const View & src, View & dst);
 
     void Operation(const View & a, const View & b, View & dst, OperationType type);
+    void VectorProduct(const uchar * vertical, const uchar * horizontal, View & dst);
 
     void ReduceGray2x2(const View & src, View & dst);
 
