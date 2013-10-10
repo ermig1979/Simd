@@ -132,6 +132,9 @@
 		<Unit filename="../../src/Test/TestDifferenceSum.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestDrawing.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestEdgeBackground.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

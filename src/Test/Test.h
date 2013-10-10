@@ -103,5 +103,7 @@ namespace Test
     bool FillBgraTest();
 
     bool GrayToBgraTest();
+
+    bool AlphaBlendingTest();
 }
 #endif//__Test_h__

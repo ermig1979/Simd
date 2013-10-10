@@ -50,6 +50,7 @@
 #include "Simd/SimdCopy.h"
 #include "Simd/SimdCrc32.h"
 #include "Simd/SimdDeinterleaveUv.h"
+#include "Simd/SimdDrawing.h"
 #include "Simd/SimdEdgeBackground.h"
 #include "Simd/SimdFill.h"
 #include "Simd/SimdGaussianBlur3x3.h"

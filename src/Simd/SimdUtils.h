@@ -61,6 +61,8 @@ namespace Simd
 
     void DeinterleaveUv(const View & uv, View & u, View & v);
 
+    void AlphaBlending(const View & src, const View & alpha, View & dst);
+
     void EdgeBackgroundGrowRangeSlow(const View & value, View & background);
     void EdgeBackgroundGrowRangeFast(const View & value, View & background);
     void EdgeBackgroundIncrementCount(const View & value, const View & backgroundValue, View & backgroundCount);
