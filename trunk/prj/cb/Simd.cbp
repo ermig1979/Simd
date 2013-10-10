@@ -212,6 +212,15 @@
 		<Unit filename="../../src/Simd/SimdDeinterleaveUvA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdDrawing.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDrawing.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDrawingA.cpp">
+			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdEdgeBackground.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

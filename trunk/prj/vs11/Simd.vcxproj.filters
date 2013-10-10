@@ -199,6 +199,12 @@
     <ClCompile Include="..\..\src\Simd\SimdGrayToBgra.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdDrawingA.cpp">
+      <Filter>Alg\Avx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd.h">
@@ -358,6 +364,9 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdGrayToBgra.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDrawing.h">
       <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>

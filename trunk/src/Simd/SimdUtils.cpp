@@ -182,6 +182,13 @@ namespace Simd
         DeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
     }
 
+    void AlphaBlending(const View & src, const View & alpha, View & dst)
+    {
+        assert(Compatible(src, dst) && EqualSize(src, alpha) && alpha.format == View::Gray8 && src.ChannelSize() == 1);
+
+        AlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
+    }
+
     void EdgeBackgroundGrowRangeSlow(const View & value, View & background)
     {
         assert(Compatible(value, background) && value.format == View::Gray8);

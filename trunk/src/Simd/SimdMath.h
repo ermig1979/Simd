@@ -150,6 +150,11 @@ namespace Simd
             int m = ~(d >> 8);
             return (d & m);
         }
+
+        SIMD_INLINE int DivideBy255(int value)
+        {
+            return (value + 1 + (value >> 8)) >> 8;
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -243,6 +248,11 @@ namespace Simd
             __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO));
             return _mm_packus_epi16(lo, hi);
         }
+
+        SIMD_INLINE __m128i DivideI16By255(__m128i value)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(value, K16_0001), _mm_srli_epi16(value, 8)), 8);
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -306,6 +316,11 @@ namespace Simd
             __m256i lo = _mm256_mullo_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO));
             __m256i hi = _mm256_mullo_epi16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO));
             return _mm256_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m256i DivideI16By255(__m256i value)
+        {
+            return _mm256_srli_epi16(_mm256_add_epi16(_mm256_add_epi16(value, K16_0001), _mm256_srli_epi16(value, 8)), 8);
         }
     }
 #endif// SIMD_AVX2_ENABLE
