@@ -276,8 +276,8 @@ namespace Simd
 					size_t offset = width - DA;
 					__m128i u_ = Load<false>((__m128i*)(u + offset/2));
 					__m128i v_ = Load<false>((__m128i*)(v + offset/2));
-					Yuv420ToBgra<align>(y + offset, u_, v_, a_0, bgra + 4*offset);
-					Yuv420ToBgra<align>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
+					Yuv420ToBgra<false>(y + offset, u_, v_, a_0, bgra + 4*offset);
+					Yuv420ToBgra<false>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
 				}
 				y += 2*yStride;
 				u += uStride;
