@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utl\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;View\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -330,10 +330,10 @@
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdPoint.h">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdRectangle.h">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />
@@ -435,19 +435,19 @@
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdUtils.cpp">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdUtils.h">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdVersion.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdView.cpp">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdView.h">
-			<Option virtualFolder="Utl/" />
+			<Option virtualFolder="View/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToBgr.cpp">
 			<Option virtualFolder="Alg/" />
