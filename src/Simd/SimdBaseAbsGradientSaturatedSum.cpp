@@ -21,32 +21,34 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAbsGradientSaturatedSum_h__
-#define __SimdAbsGradientSaturatedSum_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-		void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
+		void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+		{
+			memset(dst, 0, width);
+			src += srcStride;
+			dst += dstStride;
+			for (size_t row = 2; row < height; ++row)
+			{
+				dst[0] = 0;
+				for (size_t col = 1; col < width - 1; ++col)
+				{
+					const int dy = AbsDifferenceU8(src[col - srcStride], src[col + srcStride]);
+					const int dx = AbsDifferenceU8(src[col - 1], src[col + 1]);
+					dst[col] = MinU8(dx + dy, 0xFF);
+				}
+				dst[width - 1] = 0;
+
+				src += srcStride;
+				dst += dstStride;
+			}
+			memset(dst, 0, width);
+		}
 	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
-    {
-        void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
-    }
-#endif// SIMD_AVX2_ENABLE
-
-	void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
 }
-#endif//__SimdAbsGradientSaturatedSum_h__

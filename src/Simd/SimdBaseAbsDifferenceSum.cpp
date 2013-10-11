@@ -21,19 +21,51 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdInit.h"
+#include "Simd/SimdExtract.h"
+#include "Simd/SimdConst.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
-//#define SIMD_SSE2_DEPRECATE
+namespace Simd
+{
+	namespace Base
+	{
+		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			size_t width, size_t height, uint64_t * sum)
+		{
+			*sum = 0;
+			for(size_t row = 0; row < height; ++row)
+			{
+				int rowSum = 0;
+				for(size_t col = 0; col < width; ++col)
+				{
+					rowSum += AbsDifferenceU8(a[col], b[col]);
+				}
+				*sum += rowSum;
+				a += aStride;
+				b += bStride;
+			}
+		}
 
-//#define SIMD_SSE42_DEPRECATE
-
-//#define SIMD_AVX_DEPRECATE
-
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_STATIC
-
-#endif//__SimdConfig_h__
+		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		{
+			*sum = 0;
+			for(size_t row = 0; row < height; ++row)
+			{
+				int rowSum = 0;
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(mask[col] == index)
+						rowSum += AbsDifferenceU8(a[col], b[col]);
+				}
+				*sum += rowSum;
+				a += aStride;
+				b += bStride;
+				mask += maskStride;
+			}
+		}
+	}
+}

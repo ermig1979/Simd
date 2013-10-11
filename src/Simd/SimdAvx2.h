@@ -21,19 +21,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdAvx2_h__
+#define __SimdAvx2_h__
 
-//#define SIMD_SSE2_DEPRECATE
+#include "Simd/SimdTypes.h"
 
-//#define SIMD_SSE42_DEPRECATE
+namespace Simd
+{
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            size_t width, size_t height, uint64_t * sum);
 
-//#define SIMD_AVX_DEPRECATE
+        void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_STATIC
-
-#endif//__SimdConfig_h__
+        void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
+    }
+#endif// SIMD_AVX2_ENABLE
+}
+#endif//__SimdAvx2_h__

@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAbsDifferenceSum_h__
-#define __SimdAbsDifferenceSum_h__
+#ifndef __SimdBase_h__
+#define __SimdBase_h__
 
 #include "Simd/SimdTypes.h"
 
@@ -35,34 +35,8 @@ namespace Simd
 
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
+
+        void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
 	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			size_t width, size_t height, uint64_t * sum);
-
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
-    {
-        void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-            size_t width, size_t height, uint64_t * sum);
-
-        void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
-    }
-#endif// SIMD_AVX2_ENABLE
-
-	void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-		size_t width, size_t height, uint64_t * sum);
-
-	void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-		const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 }
-#endif//__SimdAbsDifferenceSum_h__
+#endif//__SimdBase_h__
