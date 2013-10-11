@@ -64,16 +64,10 @@
     <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSum.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdShiftBilinear.cpp">
@@ -113,12 +107,6 @@
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdReduceGray5x5A.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsDifferenceSumA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAbsGradientSaturatedSumA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
@@ -199,11 +187,29 @@
     <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\simd.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
+      <Filter>Alg\Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
+      <Filter>Alg\Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp">
+      <Filter>Alg\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseAbsGradientSaturatedSum.cpp">
+      <Filter>Alg\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp">
+      <Filter>Alg\Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp">
+      <Filter>Alg\Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Simd\Simd.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Sys</Filter>
     </ClInclude>
@@ -300,9 +306,6 @@
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur3x3.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAbsDifferenceSum.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
     </ClInclude>
@@ -310,9 +313,6 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAbsGradientSaturatedSum.h">
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftBilinear.h">
@@ -363,6 +363,21 @@
     <ClInclude Include="..\..\src\Simd\SimdDrawing.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAll.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\Simd.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Alg\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
+      <Filter>Alg\Sse2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
+      <Filter>Alg\Avx2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">
@@ -376,6 +391,18 @@
     </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{d4e389b9-f885-4050-869b-6bfbab14ceb0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{b07bfaef-24f8-445e-98e1-1d2f75501783}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg\Avx2">
+      <UniqueIdentifier>{e08271fe-ad4b-4322-b337-537c8180ef44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg\Base">
+      <UniqueIdentifier>{fd126936-f249-4dff-a192-244880dee7a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg\Sse2">
+      <UniqueIdentifier>{ee469791-524a-4708-8efa-820d667795d2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

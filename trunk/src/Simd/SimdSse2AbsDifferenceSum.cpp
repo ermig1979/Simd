@@ -21,19 +21,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdSet.h"
-#include "Simd/SimdAbsDifferenceSum.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
 	{
 		template <bool align> void AbsDifferenceSum(
 			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
@@ -44,26 +42,26 @@ namespace Simd
 				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
-			__m256i fullSum = _mm256_setzero_si256();
+			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+			__m128i fullSum = _mm_setzero_si128();
 			for(size_t row = 0; row < height; ++row)
 			{
 				for(size_t col = 0; col < bodyWidth; col += A)
 				{
-					const __m256i a_ = Load<align>((__m256i*)(a + col));
-					const __m256i b_ = Load<align>((__m256i*)(b + col));
-					fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
+					const __m128i a_ = Load<align>((__m128i*)(a + col));
+					const __m128i b_ = Load<align>((__m128i*)(b + col));
+					fullSum = _mm_add_epi64(_mm_sad_epu8(a_, b_), fullSum);
 				}
 				if(width - bodyWidth)
 				{
-					const __m256i a_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(a + width - A)));
-					const __m256i b_ = _mm256_and_si256(tailMask, Load<false>((__m256i*)(b + width - A))); 
-					fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
+					const __m128i a_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(a + width - A)));
+					const __m128i b_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(b + width - A))); 
+					fullSum = _mm_add_epi64(_mm_sad_epu8(a_, b_), fullSum);
 				}
 				a += aStride;
 				b += bStride;
 			}
-            *sum = ExtractSum<uint64_t>(fullSum);
+			*sum = ExtractInt64Sum(fullSum);
 		}
 
 		template <bool align> void AbsDifferenceSum(
@@ -78,30 +76,30 @@ namespace Simd
 			}
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
-			__m256i fullSum = _mm256_setzero_si256();
-			__m256i index_= _mm256_set1_epi8(index);
+			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+			__m128i fullSum = _mm_setzero_si128();
+			__m128i index_= _mm_set1_epi8(index);
 			for(size_t row = 0; row < height; ++row)
 			{
 				for(size_t col = 0; col < bodyWidth; col += A)
 				{
-					const __m256i mask_ = LoadMaskI8<align>((__m256i*)(mask + col), index_);
-					const __m256i a_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(a + col)));
-					const __m256i b_ = _mm256_and_si256(mask_, Load<align>((__m256i*)(b + col))); 
-					fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
+					const __m128i mask_ = LoadMaskI8<align>((__m128i*)(mask + col), index_);
+					const __m128i a_ = _mm_and_si128(mask_, Load<align>((__m128i*)(a + col)));
+					const __m128i b_ = _mm_and_si128(mask_, Load<align>((__m128i*)(b + col))); 
+					fullSum = _mm_add_epi64(_mm_sad_epu8(a_, b_), fullSum);
 				}
 				if(width - bodyWidth)
 				{
-					const __m256i mask_ = _mm256_and_si256(tailMask, LoadMaskI8<align>((__m256i*)(mask + width - A), index_));
-					const __m256i a_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(a + width - A)));
-					const __m256i b_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(b + width - A))); 
-					fullSum = _mm256_add_epi64(_mm256_sad_epu8(a_, b_), fullSum);
+					const __m128i mask_ = _mm_and_si128(tailMask, LoadMaskI8<align>((__m128i*)(mask + width - A), index_));
+					const __m128i a_ = _mm_and_si128(mask_, Load<false>((__m128i*)(a + width - A)));
+					const __m128i b_ = _mm_and_si128(mask_, Load<false>((__m128i*)(b + width - A))); 
+					fullSum = _mm_add_epi64(_mm_sad_epu8(a_, b_), fullSum);
 				}
 				a += aStride;
 				b += bStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum<uint64_t>(fullSum);
+			*sum = ExtractInt64Sum(fullSum);
 		}
 
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
@@ -122,5 +120,5 @@ namespace Simd
 				AbsDifferenceSum<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 		}
 	}
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

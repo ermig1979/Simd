@@ -22,6 +22,8 @@
 * SOFTWARE.
 */
 
+#include "Simd/simd.h"
+
 #include "Simd/SimdView.h"
 
 #ifndef __SimdUtils_h__
@@ -33,21 +35,21 @@ namespace Simd
     {
         assert(Compatible(a, b) && a.format == View::Gray8);
 
-        AbsDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
+        simd_abs_difference_sum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
     }
 
     SIMD_INLINE void AbsDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum)
     {
         assert(Compatible(a, b, mask) && a.format == View::Gray8);
 
-        AbsDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
+        simd_masked_abs_difference_sum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
     }
 
     SIMD_INLINE void AbsGradientSaturatedSum(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
 
-        AbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+        simd_abs_gradient_saturated_sum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
     SIMD_INLINE void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference)

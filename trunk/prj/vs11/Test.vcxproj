@@ -167,8 +167,11 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="Simd.vcxproj">
+    <ProjectReference Include="SimdLib.vcxproj">
       <Project>{679eee54-ee9a-41d5-ad3d-fd70348bcf14}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdDll.vcxproj">
+      <Project>{8c6214e5-cb36-40b5-b2bd-cb76c6e63dfd}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

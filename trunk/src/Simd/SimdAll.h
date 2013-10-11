@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __Simd_h__
-#define __Simd_h__
+#ifndef __SimdAll_h__
+#define __SimdAll_h__
 
 #include "Simd/SimdVersion.h"
 #include "Simd/SimdConfig.h"
@@ -38,8 +38,10 @@
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 
-#include "Simd/SimdAbsDifferenceSum.h"
-#include "Simd/SimdAbsGradientSaturatedSum.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
+#include "Simd/SimdAvx2.h"
+
 #include "Simd/SimdAddFeatureDifference.h"
 #include "Simd/SimdBackground.h"
 #include "Simd/SimdBgraToBgr.h"
@@ -80,4 +82,4 @@
 #include "Simd/SimdView.h"
 #include "Simd/SimdUtils.h"
 
-#endif//__Simd_h__
+#endif//__SimdAll_h__

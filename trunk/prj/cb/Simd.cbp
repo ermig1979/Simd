@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;View\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -107,9 +107,6 @@
 		<Compiler>
 			<Add option="-march=core2" />
 		</Compiler>
-		<Unit filename="../../src/Simd/Simd.h">
-			<Option virtualFolder="Sys/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -136,6 +133,9 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdAddFeatureDifferenceA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAll.h">
+			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBackground.cpp">
 			<Option virtualFolder="Alg/" />
@@ -330,10 +330,10 @@
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdPoint.h">
-			<Option virtualFolder="View/" />
+			<Option virtualFolder="Utils/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdRectangle.h">
-			<Option virtualFolder="View/" />
+			<Option virtualFolder="Utils/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />
@@ -434,20 +434,14 @@
 		<Unit filename="../../src/Simd/SimdTypes.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdUtils.cpp">
-			<Option virtualFolder="View/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdUtils.h">
-			<Option virtualFolder="View/" />
+			<Option virtualFolder="Utils/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdVersion.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdView.cpp">
-			<Option virtualFolder="View/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdView.h">
-			<Option virtualFolder="View/" />
+			<Option virtualFolder="Utils/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToBgr.cpp">
 			<Option virtualFolder="Alg/" />
@@ -472,6 +466,12 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToHueA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
+		</Unit>
+		<Unit filename="../../src/Simd/simd.cpp">
+			<Option virtualFolder="Lib/" />
+		</Unit>
+		<Unit filename="../../src/Simd/simd.h">
+			<Option virtualFolder="Lib/" />
 		</Unit>
 		<Extensions>
 			<code_completion />

@@ -175,9 +175,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
-		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
-        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
+		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, simd_abs_gradient_saturated_sum));
+		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, simd_abs_gradient_saturated_sum));
+        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, simd_abs_gradient_saturated_sum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
