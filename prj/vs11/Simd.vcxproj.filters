@@ -175,12 +175,6 @@
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdView.cpp">
-      <Filter>Utl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdUtils.cpp">
-      <Filter>Utl</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdLbpA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
@@ -346,16 +340,16 @@
       <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdView.h">
-      <Filter>Utl</Filter>
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdUtils.h">
-      <Filter>Utl</Filter>
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdPoint.h">
-      <Filter>Utl</Filter>
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h">
-      <Filter>Utl</Filter>
+      <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdLbp.h">
       <Filter>Alg</Filter>
@@ -380,7 +374,7 @@
     <Filter Include="Alg\Avx">
       <UniqueIdentifier>{429522a9-21b7-457b-b889-c7cfe3265b3d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Utl">
+    <Filter Include="Utils">
       <UniqueIdentifier>{d4e389b9-f885-4050-869b-6bfbab14ceb0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

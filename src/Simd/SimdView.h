@@ -106,10 +106,6 @@ namespace Simd
 
     private:
         bool _owner;
-
-        static const size_t s_pixelSizes[];
-        static const size_t s_channelSizes[];
-        static const size_t s_channelCounts[];
     };
 
     bool EqualSize(const View & a, const View & b);
@@ -124,9 +120,135 @@ namespace Simd
 
     // struct View implementation:
 
+    SIMD_INLINE View::View()
+        : width(0)
+        , height(0)
+        , stride(0)
+        , format(None)
+        , data(NULL)
+        , _owner(false)
+    {
+    }
+
+    SIMD_INLINE View::View(const View & view)
+        : width(view.width)
+        , height(view.height)
+        , stride(view.stride)
+        , format(view.format)
+        , data(view.data)
+        , _owner(false)
+    {
+    }
+
+    SIMD_INLINE View::View(size_t w, size_t h, ptrdiff_t s, Format f, void * d)
+        : width(w)
+        , height(h)
+        , stride(s)
+        , format(f)
+        , data(d ? (unsigned char*)d : (unsigned char*)Simd::Allocate(height*stride))
+        , _owner(data == NULL)
+    {
+    }
+
+    SIMD_INLINE View::View(size_t w, size_t h, Format f, void * d, size_t align)
+        : width(0)
+        , height(0)
+        , stride(0)
+        , format(None)
+        , data(NULL)
+        , _owner(false)
+    {
+        Recreate(w, h, f, d, align);
+    }
+
+    SIMD_INLINE View::View(const Point<ptrdiff_t> size, Format f)
+        : width(0)
+        , height(0)
+        , stride(0)
+        , format(None)
+        , data(NULL)
+        , _owner(false)
+    {
+        Recreate(size.x, size.y, f);
+    }
+
+    SIMD_INLINE View::~View()
+    {
+        if(_owner && data)
+        {
+            Simd::Free(data);
+        }
+    }
+
+    SIMD_INLINE View * View::Clone() const
+    {
+        View * view = new View(width, height, format);
+        size_t size = width*PixelSize();
+        for(size_t row = 0; row < height; ++row)
+            memcpy(view->data + view->stride*row, data + stride*row, size);
+        return view;
+    }
+
+    SIMD_INLINE View & View::operator = (const View & view)
+    {
+        if(this !=  &view)
+        {
+            if(_owner && data)
+            {
+                Simd::Free(data);
+                assert(0);
+            }
+            *(size_t*)&width = view.width;
+            *(size_t*)&height = view.height;
+            *(Format*)&format = view.format;
+            *(ptrdiff_t*)&stride = view.stride;
+            *(unsigned char**)&data = view.data;
+            _owner = false;
+        }
+        return *this;
+    }
+
+    SIMD_INLINE void View::Recreate(size_t w, size_t h, Format f, void * d, size_t align)
+    {
+        if(_owner && data)
+        {
+            Simd::Free(data);
+            *(void**)&data = NULL;
+            _owner = false;
+        }
+        *(size_t*)&width = w;
+        *(size_t*)&height = h;
+        *(Format*)&format = f;
+        *(ptrdiff_t*)&stride = Simd::AlignHi(width*PixelSize(format), align);
+        if(d)
+        {
+            *(void**)&data = Simd::AlignHi(d, align);
+            _owner = false;
+        }
+        else
+        {
+            *(void**)&data = Simd::Allocate(height*stride, align);
+            _owner = true;
+        }
+    }
+
     SIMD_INLINE void View::Recreate(Point<ptrdiff_t> size, Format f)
     {
         Recreate(size.x, size.y, f);
+    }
+
+    SIMD_INLINE View View::Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const
+    {
+        if(data != NULL && right >= left && bottom >= top)
+        {
+            left = RestrictRange<ptrdiff_t>(left, 0, width);
+            top = RestrictRange<ptrdiff_t>(top, 0, height);
+            right = RestrictRange<ptrdiff_t>(right, 0, width);
+            bottom = RestrictRange<ptrdiff_t>(bottom, 0, height);
+            return View(right - left, bottom - top, stride, format, data + top*stride + left*PixelSize(format));
+        }
+        else
+            return View();
     }
 
     SIMD_INLINE View View::Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const
@@ -137,6 +259,34 @@ namespace Simd
     SIMD_INLINE View View::Region(const Rectangle<ptrdiff_t> & rect) const
     {
         return Region(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
+    }
+
+    SIMD_INLINE View View::Region(const Point<ptrdiff_t> & size, Position position) const
+    {
+        switch(position)
+        {
+        case TopLeft: 
+            return Region(0, 0, size.x, size.y);
+        case TopCenter:
+            return Region((width - size.x)/2, 0, (width + size.x)/2, size.y);
+        case TopRight:
+            return Region(width - size.x, 0, width, size.y);
+        case MiddleLeft: 
+            return Region(0, (height - size.y)/2, size.x, (height + size.y)/2);
+        case MiddleCenter:
+            return Region((width - size.x)/2, (height - size.y)/2, (width + size.x)/2, (height + size.y)/2);
+        case MiddleRight:
+            return Region(width - size.x, (height - size.y)/2, width, (height + size.y)/2);
+        case BottomLeft: 
+            return Region(0, height - size.y, size.x, height);
+        case BottomCenter:
+            return Region((width - size.x)/2, height - size.y, (width + size.x)/2, height);
+        case BottomRight:
+            return Region(width - size.x, height - size.y, width, height);
+        default:
+            assert(0);
+        }
+        return View();
     }
 
     SIMD_INLINE View View::Flipped() const
@@ -183,14 +333,65 @@ namespace Simd
         return At<T>(p.x, p.y);
     }
 
+    SIMD_INLINE size_t View::PixelSize(Format format)
+    {
+        switch(format)
+        {
+        case None:   return 0;
+        case Gray8:  return 1;
+        case Uv16:   return 2;
+        case Bgr24:  return 3;
+        case Bgra32: return 4;
+        case Int32:  return 4;
+        case Int64:  return 8;
+        case Float:  return 4;
+        case Double: return 8;
+        default: assert(0); return 0;
+        }
+    }
+
     SIMD_INLINE size_t View::PixelSize() const
     {
         return PixelSize(format);
     }
 
+    SIMD_INLINE size_t View::ChannelSize(Format format)
+    {
+        switch(format)
+        {
+        case None:   return 0;
+        case Gray8:  return 1;
+        case Uv16:   return 1;
+        case Bgr24:  return 1;
+        case Bgra32: return 1;
+        case Int32:  return 4;
+        case Int64:  return 8;
+        case Float:  return 4;
+        case Double: return 8;
+        default: assert(0); return 0;
+        }
+    }
+
     SIMD_INLINE size_t View::ChannelSize() const
     {
         return ChannelSize(format);
+    }
+
+    SIMD_INLINE size_t View::ChannelCount(Format format)
+    {
+        switch(format)
+        {
+        case None:   return 0;
+        case Gray8:  return 1;
+        case Uv16:   return 2;
+        case Bgr24:  return 3;
+        case Bgra32: return 4;
+        case Int32:  return 1;
+        case Int64:  return 1;
+        case Float:  return 1;
+        case Double: return 1;
+        default: assert(0); return 0;
+        }
     }
 
     SIMD_INLINE size_t View::ChannelCount() const
