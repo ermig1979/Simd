@@ -30,6 +30,7 @@
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
 
 #ifdef WIN32
@@ -302,6 +303,76 @@ SIMD_API void SimdBgrToGray(const uchar *bgr, size_t width, size_t height, size_
     else
 #endif//SIMD_SSE2_ENABLE       
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+}
+
+SIMD_API void SimdBinarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                  uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+}
+
+SIMD_API void SimdAveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+                           uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+                           uchar * dst, size_t dstStride, SimdCompareType compareType)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+}
+
+SIMD_API void SimdCopy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
+{
+    Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
+}
+
+SIMD_API void SimdCopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+                           size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
+{
+    Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
+}
+
+SIMD_API uint32_t SimdCrc32(const void * src, size_t size)
+{
+#ifdef SIMD_SSE42_ENABLE
+    if(Sse42::Enable)
+        return Sse42::Crc32(src, size);
+    else
+#endif//SIMD_SSE42_ENABLE
+        return Base::Crc32(src, size);
+}
+
+SIMD_API void SimdDeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
+                    uchar * u, size_t uStride, uchar * v, size_t vStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
 

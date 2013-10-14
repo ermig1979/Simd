@@ -24,6 +24,7 @@
 #ifndef __SimdAvx2_h__
 #define __SimdAvx2_h__
 
+#include "Simd/SimdLib.h"
 #include "Simd/SimdTypes.h"
 
 namespace Simd
@@ -73,6 +74,15 @@ namespace Simd
         void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
 
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
+
+        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType);
+
+        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+            uchar * dst, size_t dstStride, SimdCompareType compareType);
+
+        void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, uchar * u, size_t uStride, uchar * v, size_t vStride);
     }
 #endif// SIMD_AVX2_ENABLE
 }

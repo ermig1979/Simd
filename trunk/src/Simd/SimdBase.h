@@ -24,6 +24,7 @@
 #ifndef __SimdBase_h__
 #define __SimdBase_h__
 
+#include "Simd/SimdLib.h"
 #include "Simd/SimdTypes.h"
 
 namespace Simd
@@ -80,6 +81,22 @@ namespace Simd
         void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
 
         void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
-	}
+
+        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType);
+
+        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+            uchar * dst, size_t dstStride, SimdCompareType compareType);
+
+        void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
+
+        void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride);
+
+        uint32_t Crc32(const void * src, size_t size);
+
+        void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, uchar * u, size_t uStride, uchar * v, size_t vStride);
+    }
 }
 #endif//__SimdBase_h__

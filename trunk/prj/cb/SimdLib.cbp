@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;Base\;Avx2\;Sse2\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;Base\;Avx2\;Sse2\;Sse42\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -135,6 +135,12 @@
 		<Unit filename="../../src/Simd/SimdAvx2BgraToGray.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Binarization.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2DeinterleaveUv.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBase.h">
 			<Option virtualFolder="Base/" />
 		</Unit>
@@ -162,17 +168,20 @@
 		<Unit filename="../../src/Simd/SimdBaseBgraToGray.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBinarization.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseCopy.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseCrc32.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseDeinterleaveUv.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToGray.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBinarization.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBinarization.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBinarizationA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdConfig.h">
 			<Option virtualFolder="Sys/" />
@@ -180,29 +189,8 @@
 		<Unit filename="../../src/Simd/SimdConst.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdCopy.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdCopy.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdCrc32.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdCrc32.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdDefs.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdDeinterleaveUv.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdDeinterleaveUv.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdDeinterleaveUvA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdDrawing.cpp">
 			<Option virtualFolder="Alg/" />
@@ -419,6 +407,18 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2BgraToGray.cpp">
 			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Binarization.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2DeinterleaveUv.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse42.h">
+			<Option virtualFolder="Sse42/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse42Crc32.cpp">
+			<Option virtualFolder="Sse42/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdStatistic.cpp">
 			<Option virtualFolder="Alg/" />

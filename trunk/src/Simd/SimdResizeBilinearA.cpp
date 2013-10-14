@@ -28,7 +28,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdCopy.h"
 #include "Simd/SimdShiftBilinear.h"
 #include "Simd/SimdResizeBilinear.h"
 

@@ -27,15 +27,15 @@
 
 namespace Test
 {
-    SIMD_INLINE std::string CompareTypeDescription(Simd::CompareType type)
+    SIMD_INLINE std::string CompareTypeDescription(SimdCompareType type)
     {
         switch(type)
         {
-        case Simd::CompareGreaterThen:
+        case SimdCompareGreaterThen:
             return "(>)";
-        case Simd::CompareLesserThen:
+        case SimdCompareLesserThen:
             return "(<)";
-        case Simd::CompareEqualTo:
+        case SimdCompareEqualTo:
             return "(=)";
         }
         assert(0);
@@ -47,14 +47,14 @@ namespace Test
 		struct Func1
 		{
 			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-				uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, Simd::CompareType type);
+				uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType type);
 
 			FuncPtr func;
 			std::string description;
 
 			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uchar value, uchar positive, uchar negative, View & dst, Simd::CompareType type) const
+			void Call(const View & src, uchar value, uchar positive, uchar negative, View & dst, SimdCompareType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, type);
@@ -70,7 +70,7 @@ namespace Test
 #define ARGS12(function1, function2) \
     Func1(function1, std::string(#function1)), Func1(function2, std::string(#function2))
 
-	bool BinarizationTest(int width, int height, Simd::CompareType type, const Func1 & f1, const Func1 & f2)
+	bool BinarizationTest(int width, int height, SimdCompareType type, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -99,7 +99,7 @@ namespace Test
     {
         bool result = true;
 
-        for(Simd::CompareType type = Simd::CompareGreaterThen; type <= Simd::CompareEqualTo && result; type = Simd::CompareType(type + 1))
+        for(SimdCompareType type = SimdCompareGreaterThen; type <= SimdCompareEqualTo && result; type = SimdCompareType(type + 1))
         {
             result = result && BinarizationTest(ARGS11(W, H, type, f1, f2));
             result = result && BinarizationTest(ARGS11(W + 1, H - 1, type, f1, f2));
@@ -129,14 +129,14 @@ namespace Test
         {
             typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
                 uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-                uchar * dst, size_t dstStride, Simd::CompareType type);
+                uchar * dst, size_t dstStride, SimdCompareType type);
 
             FuncPtr func;
             std::string description;
 
             Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, Simd::CompareType type) const
+            void Call(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, SimdCompareType type) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, value, neighborhood, threshold, positive, negative, dst.data, dst.stride, type);
@@ -152,7 +152,7 @@ namespace Test
 #define ARGS22(function1, function2) \
     Func2(function1, std::string(#function1)), Func2(function2, std::string(#function2))
 
-    bool AveragingBinarizationTest(int width, int height, Simd::CompareType type, const Func2 & f1, const Func2 & f2)
+    bool AveragingBinarizationTest(int width, int height, SimdCompareType type, const Func2 & f1, const Func2 & f2)
     {
         bool result = true;
 
@@ -183,7 +183,7 @@ namespace Test
     {
         bool result = true;
 
-        for(Simd::CompareType type = Simd::CompareGreaterThen; type < Simd::CompareEqualTo && result; type = Simd::CompareType(type + 1))
+        for(SimdCompareType type = SimdCompareGreaterThen; type < SimdCompareEqualTo && result; type = SimdCompareType(type + 1))
         {
             result = result && AveragingBinarizationTest(ARGS21(W, H, type, f1, f2));
             result = result && AveragingBinarizationTest(ARGS21(W + 1, H - 1, type, f1, f2));

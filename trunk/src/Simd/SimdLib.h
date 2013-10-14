@@ -41,6 +41,13 @@ extern "C"
 {
 #endif//__cplusplus
 
+    typedef enum SimdCompareType
+    {
+        SimdCompareGreaterThen,
+        SimdCompareLesserThen,
+        SimdCompareEqualTo,
+    } SimdCompareType;
+
     SIMD_API const char * SimdVersion();
 
     SIMD_API void SimdAbsDifferenceSum(const unsigned char *a, size_t aStride, const unsigned char * b, size_t bStride, 
@@ -90,6 +97,23 @@ extern "C"
     SIMD_API void SimdBgrToBgra(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *bgra, size_t bgraStride, unsigned char alpha);
 
     SIMD_API void SimdBgrToGray(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *gray, size_t grayStride);
+
+    SIMD_API void SimdBinarization(const unsigned char * src, size_t srcStride, size_t width, size_t height, 
+        unsigned char value, unsigned char positive, unsigned char negative, unsigned char * dst, size_t dstStride, SimdCompareType compareType);
+
+    SIMD_API void SimdAveragingBinarization(const unsigned char * src, size_t srcStride, size_t width, size_t height,
+        unsigned char value, size_t neighborhood, unsigned char threshold, unsigned char positive, unsigned char negative, 
+        unsigned char * dst, size_t dstStride, SimdCompareType compareType);
+
+    SIMD_API void SimdCopy(const unsigned char * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdCopyFrame(const unsigned char * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, unsigned char * dst, size_t dstStride);
+
+    SIMD_API unsigned int SimdCrc32(const void * src, size_t size);
+
+    SIMD_API void SimdDeinterleaveUv(const unsigned char * uv, size_t uvStride, size_t width, size_t height, 
+        unsigned char * u, size_t uStride, unsigned char * v, size_t vStride);
 
 #ifdef __cplusplus 
 }

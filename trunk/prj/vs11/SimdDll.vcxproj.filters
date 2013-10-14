@@ -13,18 +13,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdCopy.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBinarizationA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUvA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdDrawingA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
@@ -99,12 +87,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp">
       <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp">
-      <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp">
       <Filter>Alg</Filter>
@@ -223,6 +205,33 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2BgrToGray.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Binarization.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseCopy.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse42Crc32.cpp">
+      <Filter>Sse42</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseCrc32.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleaveUv.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DeinterleaveUv.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2DeinterleaveUv.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -239,12 +248,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBinarization.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdCopy.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Sys</Filter>
@@ -290,12 +293,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTypes.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdCrc32.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDrawing.h">
       <Filter>Alg</Filter>
@@ -378,6 +375,9 @@
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h">
       <Filter>Sys</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse42.h">
+      <Filter>Sse42</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Lib">
@@ -403,6 +403,9 @@
     </Filter>
     <Filter Include="Sse2">
       <UniqueIdentifier>{2a489655-4d7e-49d2-bc9d-04ed46a138c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse42">
+      <UniqueIdentifier>{a76eadc2-efd8-4708-a679-0662b8a1f5b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
