@@ -4,18 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgrToBgra.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
@@ -104,9 +92,6 @@
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgraToGrayA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBinarizationA.cpp">
@@ -214,6 +199,30 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToBgr.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToGray.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgraToGray.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBgra.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgrToGray.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
@@ -248,18 +257,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgraToGray.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdCrc32.h">
       <Filter>Alg</Filter>
@@ -363,9 +360,6 @@
     <ClInclude Include="..\..\src\Simd\SimdDrawing.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAll.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
       <Filter>Base</Filter>
     </ClInclude>
@@ -380,6 +374,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdLib.h">
       <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h">
+      <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -83,6 +83,14 @@ extern "C"
     SIMD_API void SimdBackgroundInitMask(const unsigned char * src, size_t srcStride, size_t width, size_t height,
         unsigned char index, unsigned char value, unsigned char * dst, size_t dstStride);
 
+    SIMD_API void SimdBgraToBgr(const unsigned char *bgra, size_t width, size_t height, size_t bgraStride, unsigned char *bgr, size_t bgrStride);
+
+    SIMD_API void SimdBgraToGray(const unsigned char *bgra, size_t width, size_t height, size_t bgraStride, unsigned char *gray, size_t grayStride);
+
+    SIMD_API void SimdBgrToBgra(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *bgra, size_t bgraStride, unsigned char alpha);
+
+    SIMD_API void SimdBgrToGray(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *gray, size_t grayStride);
+
 #ifdef __cplusplus 
 }
 #endif // __cplusplus

@@ -21,44 +21,43 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBgrToGray.h"
-#include "Simd/SimdBgraToGray.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
-        const __m256i K16_BLUE_RED = SIMD_MM256_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);        
-        const __m256i K16_GREEN_0000 = SIMD_MM256_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0x0000);
-        const __m256i K32_ROUND_TERM = SIMD_MM256_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
+        const __m128i K16_BLUE_RED = SIMD_MM_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);        
+        const __m128i K16_GREEN_0000 = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0x0000);
+        const __m128i K32_ROUND_TERM = SIMD_MM_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
 
-        SIMD_INLINE __m256i BgraToGray32(__m256i bgra)
+        SIMD_INLINE __m128i BgraToGray32(__m128i bgra)
         {
-            const __m256i g0a0 = _mm256_and_si256(_mm256_srli_si256(bgra, 1), K16_00FF);
-            const __m256i b0r0 = _mm256_and_si256(bgra, K16_00FF);
-            const __m256i weightedSum = _mm256_add_epi32(_mm256_madd_epi16(g0a0, K16_GREEN_0000), _mm256_madd_epi16(b0r0, K16_BLUE_RED));
-            return _mm256_srli_epi32(_mm256_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+            const __m128i g0a0 = _mm_and_si128(_mm_srli_si128(bgra, 1), K16_00FF);
+            const __m128i b0r0 = _mm_and_si128(bgra, K16_00FF);
+            const __m128i weightedSum = _mm_add_epi32(_mm_madd_epi16(g0a0, K16_GREEN_0000), _mm_madd_epi16(b0r0, K16_BLUE_RED));
+            return _mm_srli_epi32(_mm_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
         }
 
-        SIMD_INLINE __m256i BgraToGray(__m256i bgra[4])
+        SIMD_INLINE __m128i BgraToGray(__m128i bgra[4])
         {
-            const __m256i lo = PackI32ToI16(BgraToGray32(bgra[0]), BgraToGray32(bgra[1]));
-            const __m256i hi = PackI32ToI16(BgraToGray32(bgra[2]), BgraToGray32(bgra[3]));
-            return PackU16ToU8(lo, hi);
+            const __m128i lo = _mm_packs_epi32(BgraToGray32(bgra[0]), BgraToGray32(bgra[1]));
+            const __m128i hi = _mm_packs_epi32(BgraToGray32(bgra[2]), BgraToGray32(bgra[3]));
+            return _mm_packus_epi16(lo, hi);
         }
 
-		template <bool align> SIMD_INLINE void Load(const uchar* p, __m256i a[4])
+		template <bool align> SIMD_INLINE void Load(const uchar* p, __m128i a[4])
 		{
-			a[0] = Load<align>((__m256i*)p + 0);
-			a[1] = Load<align>((__m256i*)p + 1);
-			a[2] = Load<align>((__m256i*)p + 2);
-			a[3] = Load<align>((__m256i*)p + 3);
+			a[0] = Load<align>((__m128i*)p + 0);
+			a[1] = Load<align>((__m128i*)p + 1);
+			a[2] = Load<align>((__m128i*)p + 2);
+			a[3] = Load<align>((__m128i*)p + 3);
 		}
 
         template <bool align> void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
@@ -68,18 +67,18 @@ namespace Simd
 				assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
 
 			size_t alignedWidth = AlignLo(width, A);
-			__m256i a[4];
+			__m128i a[4];
 			for(size_t row = 0; row < height; ++row)
 			{
 				for(size_t col = 0; col < alignedWidth; col += A)
 				{
 					Load<align>(bgra + 4*col, a);
-					Store<align>((__m256i*)(gray + col), BgraToGray(a));
+					Store<align>((__m128i*)(gray + col), BgraToGray(a));
 				}
 				if(alignedWidth != width)
 				{
 					Load<false>(bgra + 4*(width - A), a);
-					Store<false>((__m256i*)(gray + width - A), BgraToGray(a));
+					Store<false>((__m128i*)(gray + width - A), BgraToGray(a));
 				}
 				bgra += bgraStride;
 				gray += grayStride;
@@ -94,5 +93,5 @@ namespace Simd
 				BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
 		}
     }
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

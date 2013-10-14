@@ -68,6 +68,18 @@ namespace Simd
 
         void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar index, uchar value, uchar * dst, size_t dstStride);
+
+        void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow = true);
+
+        void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride);
+
+        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+
+        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha = true, bool lastRow = true, uchar alpha = 0xFF);
+
+        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
+
+        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
 	}
 }
 #endif//__SimdBase_h__

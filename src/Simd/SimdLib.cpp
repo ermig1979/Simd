@@ -264,6 +264,48 @@ SIMD_API void SimdBackgroundInitMask(const uchar * src, size_t srcStride, size_t
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 
+SIMD_API void SimdBgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
+{
+    Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+}
+
+SIMD_API void SimdBgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+    else
+#endif//SIMD_SSE2_ENABLE       
+        Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+}
+
+SIMD_API void SimdBgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha)
+{
+    Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+}
+
+SIMD_API void SimdBgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif//SIMD_SSE2_ENABLE       
+        Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+}
+
+
+
 
 
 

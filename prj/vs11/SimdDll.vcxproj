@@ -22,13 +22,10 @@
     <ClInclude Include="..\..\src\Simd\SimdAlg.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdDrawing.h" />
     <ClInclude Include="..\..\src\Simd\SimdGrayToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdHistogram.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBgraToGray.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBgrToBgra.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
     <ClInclude Include="..\..\src\Simd\SimdFill.h" />
     <ClInclude Include="..\..\src\Simd\SimdLbp.h" />
@@ -89,10 +86,16 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDrawingA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -114,16 +117,6 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBgraToGrayA.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBgrToBgra.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBinarizationA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -150,6 +143,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2AddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Background.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
