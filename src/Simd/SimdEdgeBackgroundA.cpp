@@ -27,8 +27,9 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdBackground.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdEdgeBackground.h"
+
 
 namespace Simd
 {

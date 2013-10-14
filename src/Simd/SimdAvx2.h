@@ -38,6 +38,37 @@ namespace Simd
             const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 
         void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
+
+        void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
+            ushort weight, uchar * difference, size_t differenceStride);
+
+        void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+        void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+        void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+            const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
+            uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+
+        void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+            uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+            uchar * hiValue, size_t hiValueStride, uchar threshold);
+
+        void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
+            uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
+            uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+
+        void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+
+        void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
+
+        void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
+            uchar index, uchar value, uchar * dst, size_t dstStride);
     }
 #endif// SIMD_AVX2_ENABLE
 }

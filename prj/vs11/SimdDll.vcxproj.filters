@@ -1,29 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\simd.cpp">
-      <Filter>Lib</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp">
-      <Filter>Alg\Base</Filter>
+      <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsGradientSaturatedSum.cpp">
-      <Filter>Alg\Base</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAddFeatureDifferenceA.cpp">
-      <Filter>Alg\Avx</Filter>
+      <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
-      <Filter>Alg\Avx2</Filter>
+      <Filter>Avx2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
-      <Filter>Alg\Avx2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAddFeatureDifference.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBackground.cpp">
-      <Filter>Alg</Filter>
+      <Filter>Avx2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBgraToBgr.cpp">
       <Filter>Alg</Filter>
@@ -42,9 +30,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdCopy.cpp">
       <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBackgroundA.cpp">
-      <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBgraToGrayA.cpp">
       <Filter>Alg\Avx</Filter>
@@ -125,10 +110,10 @@
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp">
-      <Filter>Alg\Sse2</Filter>
+      <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp">
-      <Filter>Alg\Sse2</Filter>
+      <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp">
       <Filter>Alg</Filter>
@@ -208,19 +193,34 @@
     <ClCompile Include="..\..\src\Simd\SimdYuvToHue.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdLib.cpp">
+      <Filter>Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AddFeatureDifference.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseAddFeatureDifference.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2AddFeatureDifference.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBackground.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Background.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Simd\simd.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
-      <Filter>Alg\Base</Filter>
+      <Filter>Base</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
-      <Filter>Alg\Avx2</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAll.h">
-      <Filter>Sys</Filter>
+      <Filter>Avx2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Sys</Filter>
@@ -230,12 +230,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdDefs.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAddFeatureDifference.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBackground.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBgraToBgr.h">
       <Filter>Alg</Filter>
@@ -277,7 +271,7 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse2.h">
-      <Filter>Alg\Sse2</Filter>
+      <Filter>Sse2</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
@@ -378,6 +372,12 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToHue.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlg.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Lib">
@@ -386,23 +386,23 @@
     <Filter Include="Alg">
       <UniqueIdentifier>{901f3c29-3fa5-4698-bcc4-8e830684f67b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Alg\Base">
-      <UniqueIdentifier>{8d817ebb-58d3-40c1-94c5-bbdddaf7e6d8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sys">
       <UniqueIdentifier>{1b8dd2ff-9c98-4fe2-b9d6-25769df28a40}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Alg\Sse2">
-      <UniqueIdentifier>{2a489655-4d7e-49d2-bc9d-04ed46a138c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Alg\Avx2">
-      <UniqueIdentifier>{05ca0a74-e53a-4aea-9799-3b0cc25bd030}</UniqueIdentifier>
     </Filter>
     <Filter Include="Alg\Avx">
       <UniqueIdentifier>{7f56b091-44f2-46a3-a406-48119e843aab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{b88993c2-9cf5-4cb0-a5d5-7bf514f5e573}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Base">
+      <UniqueIdentifier>{8d817ebb-58d3-40c1-94c5-bbdddaf7e6d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Avx2">
+      <UniqueIdentifier>{05ca0a74-e53a-4aea-9799-3b0cc25bd030}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sse2">
+      <UniqueIdentifier>{2a489655-4d7e-49d2-bc9d-04ed46a138c2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

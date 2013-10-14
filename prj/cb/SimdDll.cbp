@@ -2,18 +2,18 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="Simd" />
+		<Option title="SimdDll" />
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;" />
+		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;Base\;Sse2\;Avx2\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
-				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/Simd" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/Simd" />
-				<Option type="2" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/SimdDll" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="$(ProjectDir)/../../bin/cb/Win32/Debug" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/SimdDll" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
@@ -34,10 +34,10 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="Debug x64">
-				<Option output="$(ProjectDir)/../../bin/cb/x64/Debug/Simd" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Debug/Simd" />
-				<Option type="2" />
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Debug/SimdDll" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="$(ProjectDir)/../../bin/cb/x64/Debug" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Debug/SimdDll" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
@@ -58,10 +58,10 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="Release Win32">
-				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/Simd" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/Simd" />
-				<Option type="2" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/SimdDll" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="$(ProjectDir)/../../bin/cb/Win32/Release" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/SimdDll" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
@@ -81,10 +81,10 @@
 				</ExtraCommands>
 			</Target>
 			<Target title="Release x64">
-				<Option output="$(ProjectDir)/../../bin/cb/x64/Release/Simd" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Release/Simd" />
-				<Option type="2" />
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Release/SimdDll" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="$(ProjectDir)/../../bin/cb/x64/Release" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Release/SimdDll" />
+				<Option type="3" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
@@ -106,45 +106,43 @@
 		</Build>
 		<Compiler>
 			<Add option="-march=core2" />
+			<Add option="-DSIMD_EXPORTS" />
 		</Compiler>
-		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsDifferenceSum.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsDifferenceSumA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSum.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAbsGradientSaturatedSumA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAddFeatureDifference.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAddFeatureDifference.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAddFeatureDifferenceA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
+		<Unit filename="../../src/Simd/SimdAlg.h">
+			<Option virtualFolder="Lib/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdAll.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBackground.cpp">
-			<Option virtualFolder="Alg/" />
+		<Unit filename="../../src/Simd/SimdAvx2.h">
+			<Option virtualFolder="Avx2/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBackground.h">
-			<Option virtualFolder="Alg/" />
+		<Unit filename="../../src/Simd/SimdAvx2AbsDifferenceSum.cpp">
+			<Option virtualFolder="Avx2/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBackgroundA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
+		<Unit filename="../../src/Simd/SimdAvx2AbsGradientSaturatedSum.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2AddFeatureDifference.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Background.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBase.h">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAbsDifferenceSum.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAbsGradientSaturatedSum.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAddFeatureDifference.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBackground.cpp">
+			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
@@ -293,6 +291,12 @@
 		<Unit filename="../../src/Simd/SimdLbpA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdLib.cpp">
+			<Option virtualFolder="Lib/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdLib.h">
+			<Option virtualFolder="Lib/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdLoad.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
@@ -401,6 +405,21 @@
 		<Unit filename="../../src/Simd/SimdSquaredDifferenceSumA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2.h">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2AbsDifferenceSum.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2AbsGradientSaturatedSum.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2AddFeatureDifference.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Background.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdStatistic.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
@@ -466,12 +485,6 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToHueA.cpp">
 			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/simd.cpp">
-			<Option virtualFolder="Lib/" />
-		</Unit>
-		<Unit filename="../../src/Simd/simd.h">
-			<Option virtualFolder="Lib/" />
 		</Unit>
 		<Extensions>
 			<code_completion />
