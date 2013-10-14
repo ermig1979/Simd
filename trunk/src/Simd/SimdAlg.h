@@ -106,12 +106,28 @@ namespace Simd
     {
         SimdBackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     }
+
+    SIMD_INLINE void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
+    {
+        SimdBgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+    }
+
+    SIMD_INLINE void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
+    {
+        SimdBgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+    }
+
+    SIMD_INLINE void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF)
+    {
+        SimdBgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+    }
+
+    SIMD_INLINE void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+    {
+        SimdBgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    }
 }
 
-#include "Simd/SimdBgraToBgr.h"
-#include "Simd/SimdBgraToGray.h"
-#include "Simd/SimdBgrToBgra.h"
-#include "Simd/SimdBgrToGray.h"
 #include "Simd/SimdBinarization.h"
 #include "Simd/SimdCopy.h"
 #include "Simd/SimdCrc32.h"

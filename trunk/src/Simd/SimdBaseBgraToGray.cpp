@@ -21,38 +21,28 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdBgraToBgr.h"
+#include "Simd/SimdBgrToGray.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow)
-		{
-			for(size_t i = (lastRow ? 1 : 0); i < size; ++i, bgr += 3, bgra += 4)
-			{
-				*(int32_t*)bgr = (*(int32_t*)bgra);
-			}
-			if(lastRow)
-			{
-				bgr[0] = bgra[0];
-				bgr[1] = bgra[1];
-				bgr[2] = bgra[2];
-			}
-		}
-
-		void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
-		{
-			for(size_t row = 1; row < height; ++row)
-			{
-				BgraToBgr(bgra, width, bgr, false);
-				bgr += bgrStride;
-				bgra += bgraStride;
-			}
-			BgraToBgr(bgra, width, bgr, true);
-		}
-	}
+    namespace Base
+    {
+        void BgraToGray(const uchar * bgra, size_t width, size_t height, size_t bgraStride, uchar * gray, size_t grayStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+				const uchar * pBgra = bgra + row*bgraStride;
+				uchar * pGray = gray + row*grayStride;
+				for(const uchar *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgra += 4)
+				{
+					*pGray = BgrToGray(pBgra[0], pBgra[1], pBgra[2]);
+				}
+            }
+        }
+    }
 }

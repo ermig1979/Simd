@@ -21,20 +21,37 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdBgrToBgra_h__
-#define __SimdBgrToBgra_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdInit.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        void BgrToBgra(const uchar *bgr, size_t size, uchar *bgra, bool fillAlpha = true, bool lastRow = true, uchar alpha = 0xFF);
+	namespace Base
+	{
+		void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow)
+		{
+			for(size_t i = (lastRow ? 1 : 0); i < size; ++i, bgr += 3, bgra += 4)
+			{
+				*(int32_t*)bgr = (*(int32_t*)bgra);
+			}
+			if(lastRow)
+			{
+				bgr[0] = bgra[0];
+				bgr[1] = bgra[1];
+				bgr[2] = bgra[2];
+			}
+		}
 
-        void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
-    }
-
-    void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
+		void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
+		{
+			for(size_t row = 1; row < height; ++row)
+			{
+				BgraToBgr(bgra, width, bgr, false);
+				bgr += bgrStride;
+				bgra += bgraStride;
+			}
+			BgraToBgr(bgra, width, bgr, true);
+		}
+	}
 }
-#endif//__SimdBgrToBgra_h__

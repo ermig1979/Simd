@@ -69,6 +69,10 @@ namespace Simd
 
         void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar index, uchar value, uchar * dst, size_t dstStride);
+
+        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+
+        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride);
 	}
 #endif// SIMD_SSE2_ENABLE
 }

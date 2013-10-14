@@ -21,23 +21,24 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdBgraToBgr_h__
-#define __SimdBgraToBgr_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdBgrToGray.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow = true);
-
-		void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride);
-	}
-
-	SIMD_INLINE void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
-	{
-		Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
-	}
+    namespace Base
+    {
+        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+        {
+			for(size_t row = 0; row < height; ++row)
+			{
+				const uchar * pBgr = bgr + row*bgrStride;
+				uchar * pGray = gray + row*grayStride;
+				for(const uchar *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgr += 3)
+				{
+					*pGray = BgrToGray(pBgr[0], pBgr[1], pBgr[2]);
+				}
+			}
+        }
+    }
 }
-#endif//__SimdBgraToBgr_h__

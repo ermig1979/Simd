@@ -21,32 +21,54 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdBgraToGray_h__
-#define __SimdBgraToGray_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdInit.h"
+#include "Simd/SimdConst.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
-    }
-    
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
-    }
-#endif// SIMD_SSE2_ENABLE
+        namespace
+        {
+            struct Buffer
+            {
+                Buffer(size_t width)
+                {
+                    _p = Allocate(sizeof(uchar)*4*width);
+                    bgra = (uchar*)_p;
+                }
 
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
-    {
-        void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
-    }
-#endif// SIMD_AVX2_ENABLE
+                ~Buffer()
+                {
+                    Free(_p);
+                }
 
-    void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+                uchar * bgra;
+            private:
+                void *_p;
+            };	
+        }
+
+        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+        {
+            assert(width >= A);
+
+            Buffer buffer(width);
+
+			for(size_t row = 1; row < height; ++row)
+			{
+				Base::BgrToBgra(bgr, width, buffer.bgra, false, false);
+				Sse2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
+				bgr += bgrStride;
+				gray += grayStride;
+			}
+			Base::BgrToBgra(bgr, width, buffer.bgra, false, true);
+			Sse2::BgraToGray(buffer.bgra, width, 1, 4*width, gray, width);
+        }
+    }
+#endif//SIMD_SSE2_ENABLE
 }
-#endif//__SimdBgraToGray_h__

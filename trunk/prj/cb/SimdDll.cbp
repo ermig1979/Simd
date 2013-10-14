@@ -129,6 +129,12 @@
 		<Unit filename="../../src/Simd/SimdAvx2Background.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2BgrToGray.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2BgraToGray.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBase.h">
 			<Option virtualFolder="Base/" />
 		</Unit>
@@ -144,32 +150,20 @@
 		<Unit filename="../../src/Simd/SimdBaseBackground.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBgrToBgra.cpp">
-			<Option virtualFolder="Alg/" />
+		<Unit filename="../../src/Simd/SimdBaseBgrToBgra.cpp">
+			<Option virtualFolder="Base/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBgrToBgra.h">
-			<Option virtualFolder="Alg/" />
+		<Unit filename="../../src/Simd/SimdBaseBgrToGray.cpp">
+			<Option virtualFolder="Base/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBgrToGray.cpp">
-			<Option virtualFolder="Alg/" />
+		<Unit filename="../../src/Simd/SimdBaseBgraToBgr.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBgraToGray.cpp">
+			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToGray.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBgraToBgr.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBgraToBgr.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBgraToGray.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBgraToGray.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBgraToGrayA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
+			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBinarization.cpp">
 			<Option virtualFolder="Alg/" />
@@ -418,6 +412,12 @@
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2Background.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2BgrToGray.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2BgraToGray.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdStatistic.cpp">

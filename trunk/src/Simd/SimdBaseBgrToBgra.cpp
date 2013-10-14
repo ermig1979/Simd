@@ -21,10 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdBgrToBgra.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -73,9 +70,4 @@ namespace Simd
             BgrToBgra(bgr, width, bgra, true, true, alpha);
         }
     }
-
-	void BgrToBgra(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *bgra, size_t bgraStride, uchar alpha)
-	{
-		Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
-	}
 }
