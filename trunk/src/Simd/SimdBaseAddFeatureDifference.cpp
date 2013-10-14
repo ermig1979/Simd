@@ -21,40 +21,46 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAddFeatureDifference_h__
-#define __SimdAddFeatureDifference_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdConst.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-		void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-			const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride);
-	}
+        const int SHIFT = 16;
 
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
+        SIMD_INLINE uint ShiftedWeightedSquare(int difference, int weight)
+        {
+            return difference*difference*weight >> SHIFT;
+        }
+
+        SIMD_INLINE int FeatureDifference(int value, int lo, int hi)
+        {
+            return Max(0, Max(value - hi, lo - value));
+        }
+
         void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
             const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
-    {
-        void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride);
+            ushort weight, uchar * difference, size_t differenceStride)
+		{
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    int featureDifference = FeatureDifference(value[col], lo[col], hi[col]);
+                    int sum = difference[col] + ShiftedWeightedSquare(featureDifference, weight);
+                    difference[col] = Min(sum, 0xFF);
+                }
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+                difference += differenceStride;
+            }
+		}
     }
-#endif// SIMD_AVX2_ENABLE
-
-    void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-        const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-        ushort weight, uchar * difference, size_t differenceStride);
 }
-#endif//__SimdAddFeatureDifference_h__

@@ -39,10 +39,13 @@
 #include <limits>
 #include <iomanip>
 
-#include "Simd/SimdAll.h"
-
 #define SIMD_STATIC
-#include "Simd/simd.h"
+#include "Simd/SimdEnable.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
+#include "Simd/SimdAvx2.h"
+#include "Simd/SimdAlg.h"
+#include "Simd/SimdUtils.h"
 
 namespace Test
 {

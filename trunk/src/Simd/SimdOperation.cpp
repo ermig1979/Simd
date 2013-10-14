@@ -198,7 +198,7 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 __m128i _vertical = _mm_set1_epi16(vertical[row]);
-                for(size_t col = 0; col < width; col += A)
+                for(size_t col = 0; col < alignedWidth; col += A)
                     VectorProduct<align>(_vertical, horizontal + col, dst + col);
                 if(alignedWidth != width)
                     VectorProduct<false>(_vertical, horizontal + width - A, dst + width - A);

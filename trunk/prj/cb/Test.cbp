@@ -28,7 +28,7 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\Win32\Debug\libSimd.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdLib.a" />
 				</Linker>
 			</Target>
 			<Target title="Debug x64">
@@ -51,7 +51,7 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\x64\Debug\libSimd.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimdLib.a" />
 				</Linker>
 			</Target>
 			<Target title="Release Win32">
@@ -73,7 +73,7 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\Win32\Release\libSimd.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdLib.a" />
 				</Linker>
 			</Target>
 			<Target title="Release x64">
@@ -95,7 +95,7 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\x64\Release\libSimd.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimdLib.a" />
 				</Linker>
 			</Target>
 		</Build>
