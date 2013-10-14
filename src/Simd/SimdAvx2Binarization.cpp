@@ -21,33 +21,32 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdSet.h"
-#include "Simd/SimdBinarization.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-		template<CompareType compareType> SIMD_INLINE __m256i Compare(__m256i a, __m256i b);
+		template<SimdCompareType compareType> SIMD_INLINE __m256i Compare(__m256i a, __m256i b);
 
-		template<> SIMD_INLINE __m256i Compare<CompareGreaterThen>(__m256i a, __m256i b)
+		template<> SIMD_INLINE __m256i Compare<SimdCompareGreaterThen>(__m256i a, __m256i b)
 		{
 			return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_min_epu8(a, b), a), K_INV_ZERO);
 		}
 
-		template<> SIMD_INLINE __m256i Compare<CompareLesserThen>(__m256i a, __m256i b)
+		template<> SIMD_INLINE __m256i Compare<SimdCompareLesserThen>(__m256i a, __m256i b)
 		{
 			return _mm256_andnot_si256(_mm256_cmpeq_epi8(_mm256_max_epu8(a, b), a), K_INV_ZERO);
 		}
 
-		template<> SIMD_INLINE __m256i Compare<CompareEqualTo>(__m256i a, __m256i b)
+		template<> SIMD_INLINE __m256i Compare<SimdCompareEqualTo>(__m256i a, __m256i b)
 		{
 			return _mm256_cmpeq_epi8(a, b);
 		}
@@ -57,7 +56,7 @@ namespace Simd
 			return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
 		}
 
-		template <bool align, CompareType compareType> 
+		template <bool align, SimdCompareType compareType> 
 		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
 			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
 		{
@@ -87,7 +86,7 @@ namespace Simd
 			}
 		}
 
-        template <CompareType compareType> 
+        template <SimdCompareType compareType> 
 		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
 			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
 		{
@@ -98,16 +97,16 @@ namespace Simd
 		}
 
 		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType)
+			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
 		{
             switch(compareType)
             {
-            case CompareGreaterThen:
-                return Binarization<CompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return Binarization<CompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return Binarization<CompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreaterThen:
+                return Binarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesserThen:
+                return Binarization<SimdCompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareEqualTo:
+                return Binarization<SimdCompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
             default:
                 assert(0);
             }
@@ -140,7 +139,7 @@ namespace Simd
             };
         }
 
-        template <bool srcAlign, bool dstAlign, CompareType compareType>
+        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uchar * src, ushort * sa, const __m256i & value, const __m256i & mask)
         {
             const __m256i inc = _mm256_permute4x64_epi64(_mm256_and_si256(Compare<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
@@ -148,7 +147,7 @@ namespace Simd
             Store<dstAlign>((__m256i*)sa + 1, _mm256_add_epi8(Load<dstAlign>((__m256i*)sa + 1), _mm256_unpackhi_epi8(inc, mask)));
         }
 
-        template <bool srcAlign, bool dstAlign, CompareType compareType>
+        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const uchar * src, ushort * sa, const __m256i & value, const __m256i & mask)
         {
             const __m256i dec = _mm256_permute4x64_epi64(_mm256_and_si256(Compare<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
@@ -166,7 +165,7 @@ namespace Simd
             return PackI16ToI8(PackI32ToI16(mask0, mask1), PackI32ToI16(mask2, mask3));
         }
 
-        template <bool align, CompareType compareType>
+        template <bool align, SimdCompareType compareType>
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -243,7 +242,7 @@ namespace Simd
             }
         }
 
-        template <CompareType compareType> 
+        template <SimdCompareType compareType> 
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -255,16 +254,16 @@ namespace Simd
 
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-            uchar * dst, size_t dstStride, CompareType compareType)
+            uchar * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
-            case CompareGreaterThen:
-                return AveragingBinarization<CompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return AveragingBinarization<CompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return AveragingBinarization<CompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareGreaterThen:
+                return AveragingBinarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareLesserThen:
+                return AveragingBinarization<SimdCompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareEqualTo:
+                return AveragingBinarization<SimdCompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
             default:
                 assert(0);
             }

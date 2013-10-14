@@ -25,7 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdCopy.h"
+#include "Simd/SimdBase.h"
 #include "Simd/SimdTexture.h"
 
 namespace Simd
@@ -110,7 +110,7 @@ namespace Simd
             if(shift == 0)
             {
                 if(src != dst)
-                    Copy(src, srcStride, width, height, 1, dst, dstStride);
+                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
                 return;
             }
             else if(shift > 0)
@@ -360,7 +360,7 @@ namespace Simd
             if(shift == 0)
             {
                 if(src != dst)
-                    Copy(src, srcStride, width, height, 1, dst, dstStride);
+                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
                 return;
             }
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))

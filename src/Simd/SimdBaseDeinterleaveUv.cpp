@@ -21,30 +21,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdCopy_h__
-#define __SimdCopy_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride);
-
-        void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
-            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride);
-    }
-
-    SIMD_INLINE void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
-    {
-        Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
-    }
-
-    SIMD_INLINE void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
-    {
-        Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
-    }
+	namespace Base
+	{
+		void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
+			uchar * u, size_t uStride, uchar * v, size_t vStride)
+		{
+			for(size_t row = 0; row < height; ++row)
+			{
+				for(size_t col = 0, offset = 0; col < width; ++col, offset += 2)
+				{
+					u[col] = uv[offset];
+					v[col] = uv[offset + 1];
+				}
+				uv += uvStride;
+				u += uStride;
+				v += vStride;
+			}
+		}
+	}
 }
-#endif//__SimdCopy_h__

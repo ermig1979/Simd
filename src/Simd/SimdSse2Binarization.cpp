@@ -21,178 +21,32 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdSet.h"
-#include "Simd/SimdBinarization.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-        template <CompareType type> SIMD_INLINE bool Compare(const uchar & src, const uchar & b);
-
-        template <> SIMD_INLINE bool Compare<CompareGreaterThen>(const uchar & a, const uchar & b)
-        {
-            return a > b;
-        }
-
-        template <> SIMD_INLINE bool Compare<CompareLesserThen>(const uchar & a, const uchar & b)
-        {
-            return a < b;
-        }
-
-        template <> SIMD_INLINE bool Compare<CompareEqualTo>(const uchar & a, const uchar & b)
-        {
-            return a == b;
-        }
-
-        template <CompareType compareType> 
-		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-					dst[col] = Compare<compareType>(src[col], value) ? positive : negative;
-				src += srcStride;
-				dst += dstStride;
-			}
-		}
-
-        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType)
-        {
-            switch(compareType)
-            {
-            case CompareGreaterThen:
-                return Binarization<CompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return Binarization<CompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return Binarization<CompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            default:
-                assert(0);
-            }
-        }
-
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width, size_t edge)
-                {
-                    size_t size = sizeof(uint)*(width + 2*edge);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    sa = (uint*)_p + edge;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint * sa;
-            private:
-                void *_p;
-            };
-        }
-
-        template <CompareType compareType>
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
-        {
-            assert(width > neighborhood && height > neighborhood && neighborhood < 0x80);
-
-            Buffer buffer(width, neighborhood + 1);
-
-            union SaSum
-            {
-                uint sum;
-                ushort sa[2];
-            };
-
-            for(size_t row = 0; row < neighborhood; ++row)
-            {
-                const uchar * s = src + row*srcStride;
-                for(size_t col = 0; col < width; ++col)
-                { 
-                    buffer.sa[col] += Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
-                }
-            }
-
-            for(size_t row = 0; row < height; ++row)
-            {
-                if(row < height - neighborhood)
-                {
-                    const uchar * s = src + (row + neighborhood)*srcStride;
-                    for(size_t col = 0; col < width; ++col)
-                    {
-                        buffer.sa[col] += Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
-                    }
-                }
-
-                if(row > neighborhood)
-                {
-                    const uchar * s = src + (row - neighborhood - 1)*srcStride;
-                    for(size_t col = 0; col < width; ++col)
-                    {
-                        buffer.sa[col] -= Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
-                    }
-                }
-
-                SaSum saSum = {0};
-                for(size_t col = 0; col < neighborhood; ++col)
-                    saSum.sum += buffer.sa[col];
-                for(size_t col = 0; col < width; ++col)
-                {
-                    saSum.sum += buffer.sa[col + neighborhood];
-                    saSum.sum -= buffer.sa[col - neighborhood - 1];
-                    dst[col] = (saSum.sa[0]*0xFF > threshold*saSum.sa[1]) ? positive : negative;
-                }
-                dst += dstStride;
-            }
-        }
-
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-            uchar * dst, size_t dstStride, CompareType compareType)
-        {
-            switch(compareType)
-            {
-            case CompareGreaterThen:
-                return AveragingBinarization<CompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return AveragingBinarization<CompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return AveragingBinarization<CompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            default:
-                assert(0);
-            }
-        }
-	}
-
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-        template<CompareType compareType> SIMD_INLINE __m128i Compare(__m128i a, __m128i b);
+        template<SimdCompareType compareType> SIMD_INLINE __m128i Compare(__m128i a, __m128i b);
 
-        template<> SIMD_INLINE __m128i Compare<CompareGreaterThen>(__m128i a, __m128i b)
+        template<> SIMD_INLINE __m128i Compare<SimdCompareGreaterThen>(__m128i a, __m128i b)
         {
             return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_min_epu8(a, b), a), K_INV_ZERO);
         }
 
-        template<> SIMD_INLINE __m128i Compare<CompareLesserThen>(__m128i a, __m128i b)
+        template<> SIMD_INLINE __m128i Compare<SimdCompareLesserThen>(__m128i a, __m128i b)
         {
             return _mm_andnot_si128(_mm_cmpeq_epi8(_mm_max_epu8(a, b), a), K_INV_ZERO);
         }
 
-        template<> SIMD_INLINE __m128i Compare<CompareEqualTo>(__m128i a, __m128i b)
+        template<> SIMD_INLINE __m128i Compare<SimdCompareEqualTo>(__m128i a, __m128i b)
         {
             return _mm_cmpeq_epi8(a, b);
         }
@@ -202,7 +56,7 @@ namespace Simd
             return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
         }
 
-        template <bool align, CompareType compareType> 
+        template <bool align, SimdCompareType compareType> 
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -232,7 +86,7 @@ namespace Simd
             }
         }
 
-        template <CompareType compareType> 
+        template <SimdCompareType compareType> 
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
             uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -243,16 +97,16 @@ namespace Simd
         }
 
         void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType)
+            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
-            case CompareGreaterThen:
-                return Binarization<CompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return Binarization<CompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return Binarization<CompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreaterThen:
+                return Binarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesserThen:
+                return Binarization<SimdCompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareEqualTo:
+                return Binarization<SimdCompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
             default:
                 assert(0);
             }
@@ -285,7 +139,7 @@ namespace Simd
             };
         }
 
-        template <bool srcAlign, bool dstAlign, CompareType compareType>
+        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uchar * src, ushort * sa, const __m128i & value, const __m128i & mask)
         {
             const __m128i inc = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
@@ -293,7 +147,7 @@ namespace Simd
             Store<dstAlign>((__m128i*)sa + 1, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 1), _mm_unpackhi_epi8(inc, mask)));
         }
 
-        template <bool srcAlign, bool dstAlign, CompareType compareType>
+        template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const uchar * src, ushort * sa, const __m128i & value, const __m128i & mask)
         {
             const __m128i dec = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
@@ -311,7 +165,7 @@ namespace Simd
             return _mm_packs_epi16(_mm_packs_epi32(mask0, mask1), _mm_packs_epi32(mask2, mask3));
         }
 
-        template <bool align, CompareType compareType>
+        template <bool align, SimdCompareType compareType>
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -388,7 +242,7 @@ namespace Simd
             }
         }
 
-        template <CompareType compareType> 
+        template <SimdCompareType compareType> 
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
         {
@@ -400,53 +254,20 @@ namespace Simd
 
         void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-            uchar * dst, size_t dstStride, CompareType compareType)
+            uchar * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
-            case CompareGreaterThen:
-                return AveragingBinarization<CompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareLesserThen:
-                return AveragingBinarization<CompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case CompareEqualTo:
-                return AveragingBinarization<CompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareGreaterThen:
+                return AveragingBinarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareLesserThen:
+                return AveragingBinarization<SimdCompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareEqualTo:
+                return AveragingBinarization<SimdCompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
             default:
                 assert(0);
             }
         }
     }
 #endif// SIMD_SSE2_ENABLE
-
-	void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-		uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, CompareType compareType)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
-        else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
-		else
-#endif// SIMD_SSE2_ENABLE
-			Base::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
-	}
-
-    void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-        uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-        uchar * dst, size_t dstStride, CompareType compareType)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
-        else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
-        else
-#endif// SIMD_SSE2_ENABLE
-            Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
-    }
 }

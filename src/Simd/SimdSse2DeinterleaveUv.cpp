@@ -21,26 +21,25 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
-#include "Simd/SimdDeinterleaveUv.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
 	{
-		SIMD_INLINE __m256i DeinterleavedU(__m256i uv0, __m256i uv1)
+		SIMD_INLINE __m128i DeinterleavedU(__m128i uv0, __m128i uv1)
 		{
-			return PackU16ToU8(_mm256_and_si256(uv0, K16_00FF), _mm256_and_si256(uv1, K16_00FF));
+			return _mm_packus_epi16(_mm_and_si128(uv0, K16_00FF), _mm_and_si128(uv1, K16_00FF));
 		}
 
-		SIMD_INLINE __m256i DeinterleavedV(__m256i uv0, __m256i uv1)
+		SIMD_INLINE __m128i DeinterleavedV(__m128i uv0, __m128i uv1)
 		{
-			return DeinterleavedU(_mm256_srli_si256(uv0, 1), _mm256_srli_si256(uv1, 1));
+			return DeinterleavedU(_mm_srli_si128(uv0, 1), _mm_srli_si128(uv1, 1));
 		}
 
 		template <bool align> void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
@@ -58,19 +57,19 @@ namespace Simd
 			{
 				for(size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
 				{
-					__m256i uv0 = Load<align>((__m256i*)(uv + offset));
-					__m256i uv1 = Load<align>((__m256i*)(uv + offset + A));
-					Store<align>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
-					Store<align>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
+					__m128i uv0 = Load<align>((__m128i*)(uv + offset));
+					__m128i uv1 = Load<align>((__m128i*)(uv + offset + A));
+					Store<align>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
+					Store<align>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
 				}
 				if(tail)
 				{
 					size_t col = width - A;
 					size_t offset = 2*col;
-					__m256i uv0 = Load<false>((__m256i*)(uv + offset));
-					__m256i uv1 = Load<false>((__m256i*)(uv + offset + A));
-					Store<false>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
-					Store<false>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
+					__m128i uv0 = Load<false>((__m128i*)(uv + offset));
+					__m128i uv1 = Load<false>((__m128i*)(uv + offset + A));
+					Store<false>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
+					Store<false>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
 				}
 				uv += uvStride;
 				u += uStride;
@@ -87,5 +86,5 @@ namespace Simd
 				DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
 		}
 	}
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

@@ -27,7 +27,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdCopy.h"
+#include "Simd/SimdBase.h"
 #include "Simd/SimdShiftBilinear.h"
 
 namespace Simd
@@ -183,7 +183,7 @@ namespace Simd
             assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
             assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
 
-            CopyFrame(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+            Base::CopyFrame(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 
             dst += dstStride*cropTop + cropLeft*channelCount;
             src += srcStride*cropTop + cropLeft*channelCount;
@@ -201,7 +201,7 @@ namespace Simd
             ptrdiff_t right = (iDx < 0 ? width : width - iDx);
             ptrdiff_t bottom = (iDy < 0 ? height : height - iDy);
 
-            CopyFrame(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
+            Base::CopyFrame(bkg, bkgStride, width, height, channelCount, left, top, right, bottom, dst, dstStride);
 
             MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
 

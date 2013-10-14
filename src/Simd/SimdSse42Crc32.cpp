@@ -21,25 +21,46 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdCrc32_h__
-#define __SimdCrc32_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdEnable.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdInit.h"
+#include "Simd/SimdSse42.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        uint32_t Crc32(const void * src, size_t size);
-    }
-
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        uint32_t Crc32(const void * src, size_t size);
+        SIMD_INLINE void Crc32(size_t & crc, const size_t * p, const size_t * end)
+        {
+            while(p < end)
+            {
+#if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__)
+                crc = _mm_crc32_u64(crc, *p++);
+#else
+                crc = _mm_crc32_u32(crc, *p++);
+#endif
+            }
+        }
+
+        SIMD_INLINE void Crc32(size_t & crc, const uchar * p, const uchar * end)
+        {
+            while(p < end)
+                crc = _mm_crc32_u8((uint)crc, *p++);
+        }
+
+        uint32_t Crc32(const void *src, size_t size)
+        {
+            uchar * nose = (uchar*)src;
+            size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
+            size_t * tail = (size_t*)AlignLo(nose + size, sizeof(size_t));
+
+            size_t crc = 0;
+            Crc32(crc, nose, (uchar*)body);
+            Crc32(crc, body, tail);
+            Crc32(crc, (uchar*)tail, nose + size);
+            return (uint32_t)crc;
+        }
     }
 #endif// SIMD_SSE42_ENABLE
-
-	uint32_t Crc32(const void * src, size_t size);
 }
-#endif//__SimdCrc32_h__

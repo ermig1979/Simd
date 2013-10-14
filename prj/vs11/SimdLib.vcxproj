@@ -26,20 +26,17 @@
     <ClInclude Include="..\..\src\Simd\SimdDrawing.h" />
     <ClInclude Include="..\..\src\Simd\SimdGrayToBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdHistogram.h" />
-    <ClInclude Include="..\..\src\Simd\SimdBinarization.h" />
     <ClInclude Include="..\..\src\Simd\SimdFill.h" />
     <ClInclude Include="..\..\src\Simd\SimdLbp.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse42.h" />
     <ClInclude Include="..\..\src\Simd\SimdTexture.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
-    <ClInclude Include="..\..\src\Simd\SimdCopy.h" />
-    <ClInclude Include="..\..\src\Simd\SimdCrc32.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
-    <ClInclude Include="..\..\src\Simd\SimdDeinterleaveUv.h" />
     <ClInclude Include="..\..\src\Simd\SimdEdgeBackground.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
@@ -88,6 +85,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2DeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NoExtensions</EnableEnhancedInstructionSet>
@@ -106,6 +105,10 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseCopy.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseCrc32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdDrawingA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -122,13 +125,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBinarization.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBinarizationA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -165,17 +161,11 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Binarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2DeinterleaveUv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse42Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdCopy.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdCrc32.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUv.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdDeinterleaveUvA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>

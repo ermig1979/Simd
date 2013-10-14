@@ -149,14 +149,14 @@ namespace Simd
         BgrToGray(bgr.data, bgr.width, bgr.height, bgr.stride, gray.data, gray.stride);
     }
 
-    SIMD_INLINE void Binarization(const View & src, uchar value, uchar positive, uchar negative, View & dst, CompareType compareType)
+    SIMD_INLINE void Binarization(const View & src, uchar value, uchar positive, uchar negative, View & dst, SimdCompareType compareType)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
         Binarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, compareType);
     }
 
-    SIMD_INLINE void AveragingBinarization(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, CompareType compareType)
+    SIMD_INLINE void AveragingBinarization(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, SimdCompareType compareType)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 

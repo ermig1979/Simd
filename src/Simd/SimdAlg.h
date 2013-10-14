@@ -126,12 +126,43 @@ namespace Simd
     {
         SimdBgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     }
+
+    SIMD_INLINE void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
+    {
+        SimdBinarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+    }
+
+    SIMD_INLINE void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
+        uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
+        uchar * dst, size_t dstStride, SimdCompareType compareType)
+    {
+        SimdAveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+    }
+
+    SIMD_INLINE void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
+    {
+        SimdCopy(src, srcStride, width, height, pixelSize, dst, dstStride);
+    }
+
+    SIMD_INLINE void CopyFrame(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar * dst, size_t dstStride)
+    {
+        SimdCopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
+    }
+
+    SIMD_INLINE uint32_t Crc32(const void * src, size_t size)
+    {
+        return SimdCrc32(src, size);
+    }
+
+    SIMD_INLINE void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
+        uchar * u, size_t uStride, uchar * v, size_t vStride)
+    {
+        SimdDeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    }
 }
 
-#include "Simd/SimdBinarization.h"
-#include "Simd/SimdCopy.h"
-#include "Simd/SimdCrc32.h"
-#include "Simd/SimdDeinterleaveUv.h"
 #include "Simd/SimdDrawing.h"
 #include "Simd/SimdEdgeBackground.h"
 #include "Simd/SimdFill.h"

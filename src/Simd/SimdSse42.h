@@ -21,36 +21,19 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdDeinterleaveUv_h__
-#define __SimdDeinterleaveUv_h__
+#ifndef __SimdSse42_h__
+#define __SimdSse42_h__
 
+#include "Simd/SimdLib.h"
 #include "Simd/SimdTypes.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-			uchar * u, size_t uStride, uchar * v, size_t vStride);
-	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-			uchar * u, size_t uStride, uchar * v, size_t vStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_SSE42_ENABLE
+    namespace Sse42
     {
-        void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-            uchar * u, size_t uStride, uchar * v, size_t vStride);
+        uint32_t Crc32(const void * src, size_t size);
     }
-#endif// SIMD_AVX2_ENABLE
-
-	void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, 
-		uchar * u, size_t uStride, uchar * v, size_t vStride);
+#endif// SIMD_SSE42_ENABLE
 }
-#endif//__SimdDeinterleaveUv_h__
+#endif//__SimdSse42_h__
