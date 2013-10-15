@@ -126,6 +126,9 @@
 		<Unit filename="../../src/Simd/SimdAvx2AddFeatureDifference.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2AlphaBlending.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2Background.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
@@ -141,6 +144,18 @@
 		<Unit filename="../../src/Simd/SimdAvx2DeinterleaveUv.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2EdgeBackground.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Fill.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2GaussianBlur3x3.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2GrayToBgra.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBase.h">
 			<Option virtualFolder="Base/" />
 		</Unit>
@@ -151,6 +166,9 @@
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseAddFeatureDifference.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAlphaBlending.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseBackground.cpp">
@@ -180,6 +198,18 @@
 		<Unit filename="../../src/Simd/SimdBaseDeinterleaveUv.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseEdgeBackground.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseFill.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseGaussianBlur3x3.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseGrayToBgra.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToGray.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
@@ -192,24 +222,6 @@
 		<Unit filename="../../src/Simd/SimdDefs.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdDrawing.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdDrawing.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdDrawingA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdEdgeBackground.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdEdgeBackground.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdEdgeBackgroundA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdEnable.cpp">
 			<Option virtualFolder="Sys/" />
 		</Unit>
@@ -218,33 +230,6 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdExtract.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdFill.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdFill.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdFillA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGaussianBlur3x3.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGaussianBlur3x3A.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGrayToBgra.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGrayToBgra.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdGrayToBgraA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdHistogram.cpp">
 			<Option virtualFolder="Alg/" />
@@ -399,6 +384,9 @@
 		<Unit filename="../../src/Simd/SimdSse2AddFeatureDifference.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2AlphaBlending.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2Background.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
@@ -412,6 +400,18 @@
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2DeinterleaveUv.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2EdgeBackground.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Fill.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2GaussianBlur3x3.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2GrayToBgra.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse42.h">

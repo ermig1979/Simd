@@ -13,23 +13,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdDrawingA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdEdgeBackgroundA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp">
       <Filter>Sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3A.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdFillA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdGrayToBgraA.cpp">
-      <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
       <Filter>Alg\Avx</Filter>
@@ -87,21 +72,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp">
       <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdDrawing.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdEdgeBackground.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdFill.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdGaussianBlur3x3.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdGrayToBgra.cpp">
-      <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp">
       <Filter>Alg</Filter>
@@ -232,6 +202,51 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2DeinterleaveUv.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2AlphaBlending.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2EdgeBackground.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur3x3.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseAlphaBlending.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseEdgeBackground.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2AlphaBlending.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2EdgeBackground.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Fill.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -293,21 +308,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTypes.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdDrawing.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdEdgeBackground.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdFill.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur3x3.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdGrayToBgra.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdHistogram.h">
       <Filter>Alg</Filter>

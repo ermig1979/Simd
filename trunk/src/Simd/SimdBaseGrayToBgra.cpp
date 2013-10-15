@@ -21,36 +21,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdGaussianBlur3x3_h__
-#define __SimdGaussianBlur3x3_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride);
-	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+    namespace Base
     {
-        void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride);
-    }
-#endif// SIMD_AVX2_ENABLE
+        SIMD_INLINE uint GrayToBgra(uint gray, uint alpha)
+        {
+            return gray | (gray << 8) | (gray << 16)  | (alpha << 24);
+        }
 
-	void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-		size_t channelCount, uchar * dst, size_t dstStride);
+        void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+				for(size_t col = 0; col < width; ++col)
+                    ((uint*)bgra)[col] = GrayToBgra(gray[col], alpha);
+                gray += grayStride;
+                bgra += bgraStride;
+            }
+        }
+    }
 }
-#endif//__SimdGaussianBlur3x3_h__
