@@ -22,83 +22,14 @@
 * SOFTWARE.
 */
 #include "Simd/SimdTypes.h"
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdYuvToHue.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		SIMD_INLINE int YuvToHue(int y, int u, int v)
-		{
-			int red = YuvToRed(y, v);
-			int green = YuvToGreen(y, u, v);
-			int blue = YuvToBlue(y, u);
-
-			int max = Max(red, Max(green, blue));
-			int min = Min(red, Min(green, blue));
-			int range = max - min; 
-
-			if(range)
-			{
-				int dividend;
-
-				if (red == max)
-					dividend = green - blue + 6*range;
-				else if (green == max)
-					dividend = blue - red + 2*range;
-				else
-					dividend = red - green + 4*range;
-
-				return int(KF_255_DIV_6*dividend/range);
-			}
-			return 0;
-		}
-
-		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
-		{
-			assert((width%2 == 0) && (height%2 == 0) && (width >= 2) && (height >= 2));
-
-			for(size_t row = 0; row < height; row += 2)
-			{
-				for(size_t col1 = 0, col2 = 0; col2 < width; col2 += 2, col1++)
-				{
-					int u_ = u[col1];
-					int v_ = v[col1];
-					hue[col2] = YuvToHue(y[col2], u_, v_);
-					hue[col2 + 1] = YuvToHue(y[col2 + 1], u_, v_);
-					hue[col2 + hueStride] = YuvToHue(y[col2 + yStride], u_, v_);
-					hue[col2 + hueStride + 1] = YuvToHue(y[col2 + yStride + 1], u_, v_);
-				}
-				y += 2*yStride;
-				u += uStride;
-				v += vStride;
-				hue += 2*hueStride;
-			}
-		}
-
-		void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					hue[col] = YuvToHue(y[col], u[col], v[col]);
-				}
-				y += yStride;
-				u += uStride;
-				v += vStride;
-				hue += hueStride;
-			}
-		}
-	}
-
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
@@ -247,36 +178,4 @@ namespace Simd
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
-
-	void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * hue, size_t hueStride)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::DA)
-            Avx2::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::DA)
-			Sse2::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-			Base::Yuv420ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-	}
-
-	void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * hue, size_t hueStride)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-			Base::Yuv444ToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-	}
 }

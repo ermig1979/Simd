@@ -32,7 +32,7 @@ namespace Test
 		struct Func
 		{
 			typedef void (*FuncPtr)(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-				size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha);
+				size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha);
 
 			FuncPtr func;
 			std::string description;

@@ -21,39 +21,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdStretchGray2x2.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert(srcWidth*2 == dstWidth && srcHeight*2 == dstHeight);
-
-			for(size_t row = 0; row < srcHeight; ++row)
-			{
-				uchar * dstEven = dst;
-				uchar * dstOdd = dst + dstStride;
-				for(size_t srcCol = 0; srcCol < srcWidth; srcCol += 1, dstEven += 2, dstOdd += 2)
-				{
-					uchar value = src[srcCol];
-					dstEven[0] = value;
-					dstEven[1] = value;
-					dstOdd[0] = value;
-					dstOdd[1] = value;
-				}
-				src += srcStride;
-				dst += 2*dstStride;
-			}
-        }
-    }
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -106,20 +80,4 @@ namespace Simd
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::A)
-            Avx2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && srcWidth >= Sse2::A)
-            Sse2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    }
 }
