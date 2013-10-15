@@ -21,11 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdReduceGray3x3.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
@@ -125,7 +124,7 @@ namespace Simd
                     ReduceColBody<false>(s, srcCol + A, hi);
                     Store<false>((__m256i*)(dst + dstCol), ReduceRow<compensation>(lo, hi));
                     if(lastOddCol)
-                        dst[dstWidth - 1] = Base::GaussianBlur<compensation>(s[0] + srcWidth, s[1]+ srcWidth, s[2] + srcWidth, -2, -1, -1);
+                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s[0] + srcWidth, s[1]+ srcWidth, s[2] + srcWidth, -2, -1, -1);
                 }
             }
         }

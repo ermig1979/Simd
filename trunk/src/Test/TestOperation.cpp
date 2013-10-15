@@ -32,14 +32,14 @@ namespace Test
 		struct FuncO
 		{
 			typedef void (*FuncPtr)(const uchar * a, size_t aStride, const uchar * b, size_t bStride,
-				size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, Simd::OperationType type);
+				size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type);
 
 			FuncPtr func;
 			std::string description;
 
 			FuncO(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & a, const View & b, View & dst, Simd::OperationType type) const
+			void Call(const View & a, const View & b, View & dst, SimdOperationType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::PixelSize(a.format), dst.data, dst.stride, type);
@@ -63,17 +63,17 @@ namespace Test
         };
 	}
 
-    SIMD_INLINE std::string OperationTypeDescription(Simd::OperationType type)
+    SIMD_INLINE std::string OperationTypeDescription(SimdOperationType type)
     {
         switch(type)
         {
-        case Simd::OperationAverage:
+        case SimdOperationAverage:
             return "<Avg>";
-        case Simd::OperationAnd:
+        case SimdOperationAnd:
             return "<And>";
-        case Simd::OperationMaximum:
+        case SimdOperationMaximum:
             return "<Max>";
-        case Simd::OperationSaturatedSubtraction:
+        case SimdOperationSaturatedSubtraction:
             return "<Subs>";
         }
 		assert(0);
@@ -90,7 +90,7 @@ namespace Test
 
 #define ARGS_VP(function) FuncVP(function, std::string(#function))
 
-	bool OperationTest(View::Format format, int width, int height, Simd::OperationType type, const FuncO & f1, const FuncO & f2)
+	bool OperationTest(View::Format format, int width, int height, SimdOperationType type, const FuncO & f1, const FuncO & f2)
 	{
 		bool result = true;
 
@@ -118,7 +118,7 @@ namespace Test
 	{
 		bool result = true;
 
-        for(Simd::OperationType type = Simd::OperationAverage; type <= Simd::OperationSaturatedSubtraction && result; type = Simd::OperationType(type + 1))
+        for(SimdOperationType type = SimdOperationAverage; type <= SimdOperationSaturatedSubtraction && result; type = SimdOperationType(type + 1))
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {

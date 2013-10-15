@@ -125,6 +125,26 @@ namespace Simd
 
         void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uchar * dst, size_t dstStride);
+
+        void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+            size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type);
+
+        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
+
+        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true);
+
+        void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true);
+
+        void ResizeBilinear(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
     }
 #endif// SIMD_SSE2_ENABLE
 }

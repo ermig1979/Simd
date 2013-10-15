@@ -21,42 +21,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdReduceGray2x2.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
-
-            size_t evenWidth = AlignLo(srcWidth, 2);
-            for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
-            {
-                const uchar *s0 = src;
-                const uchar *s1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                const uchar *end = src + evenWidth;
-                uchar *d = dst;
-                for(; s0 < end; s0 += 2, s1 += 2, d += 1)
-                {
-                    d[0] = Average(s0[0], s0[1], s1[0], s1[1]);
-                }
-                if(evenWidth != srcWidth)
-                {
-                    d[0] = Average(s0[0], s1[0]);
-                }
-                src += 2*srcStride;
-                dst += dstStride;
-            }
-        }
-    }
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -131,20 +102,4 @@ namespace Simd
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::DA)
-            Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && srcWidth >= Sse2::DA)
-            Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    }
 }

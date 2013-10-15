@@ -272,14 +272,49 @@ namespace Simd
     {
         SimdMedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     }
+
+    SIMD_INLINE void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+        size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
+    {
+        SimdOperation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    }
+
+    SIMD_INLINE void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+    {
+        SimdVectorProduct(vertical, horizontal, dst, stride, width, height);
+    }
+
+    SIMD_INLINE void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+    {
+        SimdReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    }
+
+    SIMD_INLINE void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true)
+    {
+        SimdReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    }
+
+    SIMD_INLINE void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+    {
+        SimdReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    }
+
+    SIMD_INLINE void ReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation = true)
+    {
+        SimdReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    }
+
+    SIMD_INLINE void ResizeBilinear(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
+    {
+        SimdResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+    }
 }
 
-#include "Simd/SimdOperation.h"
-#include "Simd/SimdReduceGray2x2.h"
-#include "Simd/SimdReduceGray3x3.h"
-#include "Simd/SimdReduceGray4x4.h"
-#include "Simd/SimdReduceGray5x5.h"
-#include "Simd/SimdResizeBilinear.h"
 #include "Simd/SimdShiftBilinear.h"
 #include "Simd/SimdSquaredDifferenceSum.h"
 #include "Simd/SimdStatistic.h"

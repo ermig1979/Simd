@@ -48,6 +48,14 @@ extern "C"
         SimdCompareEqualTo,
     } SimdCompareType;
 
+    typedef enum SimdOperationType
+    {
+        SimdOperationAverage,
+        SimdOperationAnd,
+        SimdOperationMaximum,
+        SimdOperationSaturatedSubtraction,
+    } SimdOperationType;
+
     SIMD_API const char * SimdVersion();
 
     SIMD_API void SimdAbsDifferenceSum(const unsigned char *a, size_t aStride, const unsigned char * b, size_t bStride, 
@@ -170,6 +178,27 @@ extern "C"
 
     SIMD_API void SimdMedianFilterSquare5x5(const unsigned char * src, size_t srcStride, size_t width, size_t height, 
         size_t channelCount, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdOperation(const unsigned char * a, size_t aStride, const unsigned char * b, size_t bStride, 
+        size_t width, size_t height, size_t channelCount, unsigned char * dst, size_t dstStride, SimdOperationType type);
+
+    SIMD_API void SimdVectorProduct(const unsigned char * vertical, const unsigned char * horizontal, 
+        unsigned char * dst, size_t stride, size_t width, size_t height);
+
+    SIMD_API void SimdReduceGray2x2(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+    SIMD_API void SimdReduceGray3x3(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+
+    SIMD_API void SimdReduceGray4x4(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+    SIMD_API void SimdReduceGray5x5(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+
+    SIMD_API void SimdResizeBilinear(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
 #ifdef __cplusplus 
 }
