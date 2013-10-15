@@ -21,34 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdGrayToBgra.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        SIMD_INLINE uint GrayToBgra(uint gray, uint alpha)
-        {
-            return gray | (gray << 8) | (gray << 16)  | (alpha << 24);
-        }
-
-        void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
-        {
-            for(size_t row = 0; row < height; ++row)
-            {
-				for(size_t col = 0; col < width; ++col)
-                    ((uint*)bgra)[col] = GrayToBgra(gray[col], alpha);
-                gray += grayStride;
-                bgra += bgraStride;
-            }
-        }
-    }
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -99,19 +79,4 @@ namespace Simd
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
-        else
-#endif//SIMD_AVX2_ENABLE 
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
-        else
-#endif//SIMD_SSE2_ENABLE       
-            Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
-    }
 }

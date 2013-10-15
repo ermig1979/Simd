@@ -63,6 +63,9 @@ extern "C"
         const unsigned char * lo, size_t loStride, const unsigned char * hi, size_t hiStride,
         unsigned short weight, unsigned char * difference, size_t differenceStride);
 
+    SIMD_API void SimdAlphaBlending(const unsigned char *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+        const unsigned char *alpha, size_t alphaStride, unsigned char *dst, size_t dstStride);
+
     SIMD_API void SimdBackgroundGrowRangeSlow(const unsigned char * value, size_t valueStride, size_t width, size_t height,
         unsigned char * lo, size_t loStride, unsigned char * hi, size_t hiStride);
 
@@ -114,6 +117,41 @@ extern "C"
 
     SIMD_API void SimdDeinterleaveUv(const unsigned char * uv, size_t uvStride, size_t width, size_t height, 
         unsigned char * u, size_t uStride, unsigned char * v, size_t vStride);
+
+    SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const unsigned char * value, size_t valueStride, size_t width, size_t height,
+        unsigned char * background, size_t backgroundStride);
+
+    SIMD_API void SimdEdgeBackgroundGrowRangeFast(const unsigned char * value, size_t valueStride, size_t width, size_t height,
+        unsigned char * background, size_t backgroundStride);
+
+    SIMD_API void SimdEdgeBackgroundIncrementCount(const unsigned char * value, size_t valueStride, size_t width, size_t height,
+        const unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char * backgroundCount, size_t backgroundCountStride);
+
+    SIMD_API void SimdEdgeBackgroundAdjustRange(unsigned char * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char threshold);
+
+    SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(unsigned char * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char threshold, const unsigned char * mask, size_t maskStride);
+
+    SIMD_API void SimdEdgeBackgroundShiftRange(const unsigned char * value, size_t valueStride, size_t width, size_t height,
+        unsigned char * background, size_t backgroundStride);
+
+    SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const unsigned char * value, size_t valueStride, size_t width, size_t height,
+        unsigned char * background, size_t backgroundStride, const unsigned char * mask, size_t maskStride);
+
+    SIMD_API void SimdFill(unsigned char * dst, size_t stride, size_t width, size_t height, size_t pixelSize, unsigned char value);
+
+    SIMD_API void SimdFillFrame(unsigned char * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, unsigned char value);
+
+    SIMD_API void SimdFillBgra(unsigned char * dst, size_t stride, size_t width, size_t height, 
+        unsigned char blue, unsigned char green, unsigned char red, unsigned char alpha);
+
+    SIMD_API void SimdGaussianBlur3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height, 
+        size_t channelCount, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdGrayToBgra(const unsigned char *gray, size_t width, size_t height, size_t grayStride, 
+        unsigned char *bgra, size_t bgraStride, unsigned char alpha);
 
 #ifdef __cplusplus 
 }

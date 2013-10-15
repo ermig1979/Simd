@@ -53,6 +53,12 @@ namespace Simd
         SimdAddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     }
 
+    SIMD_INLINE void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+        const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+    {
+        SimdAlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+    }
+
     SIMD_INLINE void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
         uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
     {
@@ -161,13 +167,77 @@ namespace Simd
     {
         SimdDeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     }
+
+    SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
+        uchar * background, size_t backgroundStride)
+    {
+        SimdEdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
+    }
+
+    SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+        uchar * background, size_t backgroundStride)
+    {
+        SimdEdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+    }
+
+    SIMD_INLINE void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+        const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
+    {
+        SimdEdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+    }
+
+    SIMD_INLINE void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
+    {
+        SimdEdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
+    }
+
+    SIMD_INLINE void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+    {
+        SimdEdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+    }
+
+    SIMD_INLINE void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+        uchar * background, size_t backgroundStride)
+    {
+        SimdEdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+    }
+
+    SIMD_INLINE void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+        uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
+    {
+        SimdEdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+    }
+
+    SIMD_INLINE void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
+    {
+        SimdFill(dst, stride, width, height, pixelSize, value);
+    }
+
+    SIMD_INLINE void FillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value)
+    {
+        SimdFillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
+    }
+
+    SIMD_INLINE void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+    {
+        SimdFillBgra(dst, stride, width, height, blue, green, red, alpha);
+    }
+
+    SIMD_INLINE void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        size_t channelCount, uchar * dst, size_t dstStride)
+    {
+        SimdGaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    }
+
+    SIMD_INLINE void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF)
+    {
+        SimdGrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+    }
 }
 
-#include "Simd/SimdDrawing.h"
-#include "Simd/SimdEdgeBackground.h"
-#include "Simd/SimdFill.h"
-#include "Simd/SimdGaussianBlur3x3.h"
-#include "Simd/SimdGrayToBgra.h"
 #include "Simd/SimdHistogram.h"
 #include "Simd/SimdInterleaveBgra.h"
 #include "Simd/SimdLbp.h"

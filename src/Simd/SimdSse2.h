@@ -44,6 +44,9 @@ namespace Simd
             const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
             ushort weight, uchar * difference, size_t differenceStride);
 
+        void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride);
+
         void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
             uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
 
@@ -83,6 +86,34 @@ namespace Simd
             uchar * dst, size_t dstStride, SimdCompareType compareType);
 
         void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, uchar * u, size_t uStride, uchar * v, size_t vStride);
+
+        void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride);
+
+        void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride);
+
+        void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+            const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride);
+
+        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold);
+
+        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+
+        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride);
+
+        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride);
+
+        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF);
+
+        void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
+
+        void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
     }
 #endif// SIMD_SSE2_ENABLE
 }

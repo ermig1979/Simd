@@ -21,42 +21,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdSet.h"
-#include "Simd/SimdDrawing.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
-        SIMD_INLINE __m256i AlphaBlendingI16(__m256i src, __m256i dst, __m256i alpha)
+        SIMD_INLINE __m128i AlphaBlendingI16(__m128i src, __m128i dst, __m128i alpha)
         {
-            return DivideI16By255(_mm256_add_epi16(_mm256_mullo_epi16(src, alpha), _mm256_mullo_epi16(dst, _mm256_sub_epi16(K16_00FF, alpha))));
+            return DivideI16By255(_mm_add_epi16(_mm_mullo_epi16(src, alpha), _mm_mullo_epi16(dst, _mm_sub_epi16(K16_00FF, alpha))));
         }
 
-        template <bool align> SIMD_INLINE void AlphaBlending(const __m256i * src, __m256i * dst, __m256i alpha)
+        template <bool align> SIMD_INLINE void AlphaBlending(const __m128i * src, __m128i * dst, __m128i alpha)
         {
-            __m256i _src = Load<align>(src);
-            __m256i _dst = Load<align>(dst);
-            __m256i lo = AlphaBlendingI16(_mm256_unpacklo_epi8(_src, K_ZERO), _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
-            __m256i hi = AlphaBlendingI16(_mm256_unpackhi_epi8(_src, K_ZERO), _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm256_packus_epi16(lo, hi));
+            __m128i _src = Load<align>(src);
+            __m128i _dst = Load<align>(dst);
+            __m128i lo = AlphaBlendingI16(_mm_unpacklo_epi8(_src, K_ZERO), _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
+            __m128i hi = AlphaBlendingI16(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
+            Store<align>(dst, _mm_packus_epi16(lo, hi));
         } 
 
         template <bool align, size_t channelCount> struct AlphaBlender
         {
-            void operator()(const __m256i * src, __m256i * dst, __m256i alpha);
+           void operator()(const __m128i * src, __m128i * dst, __m128i alpha);
         };
 
         template <bool align> struct AlphaBlender<align, 1>
         {
-            SIMD_INLINE void operator()(const __m256i * src, __m256i * dst, __m256i alpha)
+            SIMD_INLINE void operator()(const __m128i * src, __m128i * dst, __m128i alpha)
             {
                 AlphaBlending<align>(src, dst, alpha);
             }
@@ -64,25 +63,23 @@ namespace Simd
 
         template <bool align> struct AlphaBlender<align, 2>
         {
-            SIMD_INLINE void operator()(const __m256i * src, __m256i * dst, __m256i alpha)
+            SIMD_INLINE void operator()(const __m128i * src, __m128i * dst, __m128i alpha)
             {
-                alpha = _mm256_permute4x64_epi64(alpha, 0xD8);
-                AlphaBlending<align>(src + 0, dst + 0, _mm256_unpacklo_epi8(alpha, alpha));
-                AlphaBlending<align>(src + 1, dst + 1, _mm256_unpackhi_epi8(alpha, alpha));
+                AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(alpha, alpha));
+                AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(alpha, alpha));
             }
         };
 
         template <bool align> struct AlphaBlender<align, 4>
         {
-            SIMD_INLINE void operator()(const __m256i * src, __m256i * dst, __m256i alpha)
+            SIMD_INLINE void operator()(const __m128i * src, __m128i * dst, __m128i alpha)
             {
-                alpha = _mm256_permute4x64_epi64(alpha, 0xD8);
-                __m256i lo = _mm256_permute4x64_epi64(_mm256_unpacklo_epi8(alpha, alpha), 0xD8);
-                AlphaBlending<align>(src + 0, dst + 0, _mm256_unpacklo_epi8(lo, lo));
-                AlphaBlending<align>(src + 1, dst + 1, _mm256_unpackhi_epi8(lo, lo));
-                __m256i hi = _mm256_permute4x64_epi64(_mm256_unpackhi_epi8(alpha, alpha), 0xD8);
-                AlphaBlending<align>(src + 2, dst + 2, _mm256_unpacklo_epi8(hi, hi));
-                AlphaBlending<align>(src + 3, dst + 3, _mm256_unpackhi_epi8(hi, hi));
+                __m128i lo = _mm_unpacklo_epi8(alpha, alpha);
+                AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(lo, lo));
+                AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(lo, lo));
+                __m128i hi = _mm_unpackhi_epi8(alpha, alpha);
+                AlphaBlending<align>(src + 2, dst + 2, _mm_unpacklo_epi8(hi, hi));
+                AlphaBlending<align>(src + 3, dst + 3, _mm_unpackhi_epi8(hi, hi));
             }
         };
 
@@ -90,19 +87,19 @@ namespace Simd
             const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
             size_t step = channelCount*A;
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
                 {
-                    __m256i _alpha = Load<align>((__m256i*)(alpha + col));
-                    AlphaBlender<align, channelCount>()((__m256i*)(src + offset), (__m256i*)(dst + offset), _alpha);
+                    __m128i _alpha = Load<align>((__m128i*)(alpha + col));
+                    AlphaBlender<align, channelCount>()((__m128i*)(src + offset), (__m128i*)(dst + offset), _alpha);
                 }
                 if(alignedWidth != width)
                 {
-                    __m256i _alpha = _mm256_and_si256(Load<false>((__m256i*)(alpha + width - A)), tailMask);
-                    AlphaBlender<false, channelCount>()((__m256i*)(src + (width - A)*channelCount), (__m256i*)(dst + (width - A)*channelCount), _alpha);
+                    __m128i _alpha = _mm_and_si128(Load<false>((__m128i*)(alpha + width - A)), tailMask);
+                    AlphaBlender<false, channelCount>()((__m128i*)(src + (width - A)*channelCount), (__m128i*)(dst + (width - A)*channelCount), _alpha);
                 }
                 src += srcStride;
                 alpha += alphaStride;
@@ -133,7 +130,7 @@ namespace Simd
 
         void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
-        {
+		{
             if(channelCount == 3)
                 Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
             else
@@ -143,7 +140,7 @@ namespace Simd
                 else
                     AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
             }
-        }
+		}
     }
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

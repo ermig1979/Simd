@@ -1,0 +1,150 @@
+/*
+* Simd Library.
+*
+* Copyright (c) 2011-2013 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+* copies of the Software, and to permit persons to whom the Software is 
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in 
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
+
+namespace Simd
+{
+	namespace Base
+	{
+        void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if (value[col] > background[col])
+                        background[col]++;
+                }
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
+
+        void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    background[col] = MaxU8(value[col], background[col]);
+                }
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
+
+        void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+            const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(value[col] > backgroundValue[col] && backgroundCount[col] < 0xFF)
+                        backgroundCount[col]++;
+                }
+                value += valueStride;
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
+
+        SIMD_INLINE void AdjustEdge(const uchar & count, uchar & value, uchar threshold)
+        {
+            if(count < threshold)
+            {
+                if(value > 0)
+                    value--;
+            }
+            else if(count > threshold)
+            {
+                if(value < 0xFF)
+                    value++;
+            }
+        }
+
+        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    AdjustEdge(backgroundCount[col], backgroundValue[col], threshold);
+                    backgroundCount[col] = 0;
+                }
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
+
+        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col])
+                        AdjustEdge(backgroundCount[col], backgroundValue[col], threshold);
+                    backgroundCount[col] = 0;
+                }
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+                mask += maskStride;
+            }
+        }
+
+        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    background[col] = value[col];
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
+
+        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+            uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col])
+                        background[col] = value[col];
+                }
+                value += valueStride;
+                background += backgroundStride;
+                mask += maskStride;
+            }
+        }
+	}
+}

@@ -122,6 +122,22 @@ SIMD_API void SimdAddFeatureDifference(const uchar * value, size_t valueStride, 
         Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
 }
 
+SIMD_API void SimdAlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+                   const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE       
+        Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
                                           uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
 {
@@ -375,6 +391,183 @@ SIMD_API void SimdDeinterleaveUv(const uchar * uv, size_t uvStride, size_t width
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
+SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
+                                 uchar * background, size_t backgroundStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
+}
+
+SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
+                                 uchar * background, size_t backgroundStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+}
+
+SIMD_API void SimdEdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
+                                  const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
+        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
+        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundIncrementCount(value, valueStride, width, height,
+        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+}
+
+SIMD_API void SimdEdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+                               uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold);
+}
+
+SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+                               uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+}
+
+SIMD_API void SimdEdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
+                              uchar * background, size_t backgroundStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+}
+
+SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uchar * value, size_t valueStride, size_t width, size_t height,
+                              uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+}
+
+SIMD_API void SimdFill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
+{
+    Base::Fill(dst, stride, width, height, pixelSize, value);
+}
+
+SIMD_API void SimdFillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+                           size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value)
+{
+    Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
+}
+
+SIMD_API void SimdFillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+}
+
+SIMD_API void SimdGaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                     size_t channelCount, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+SIMD_API void SimdGrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+    else
+#endif//SIMD_SSE2_ENABLE       
+        Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+}
 
 
 

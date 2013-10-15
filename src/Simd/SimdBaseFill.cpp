@@ -21,11 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdStore.h"
-#include "Simd/SimdFill.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -110,48 +107,5 @@ namespace Simd
             }
 #endif        
         }
-    }
-
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-        template <bool align> void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
-        {
-            uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
-            size_t alignedWidth = AlignLo(width, 4);
-            __m128i bgra128 = _mm_set1_epi32(bgra32);
-            for(size_t row = 0; row < height; ++row)
-            {
-                for(size_t col = 0; col < alignedWidth; col += 4)
-                    Store<align>((__m128i*)((uint32_t*)dst + col), bgra128);
-                if(width != alignedWidth)
-                    Store<false>((__m128i*)((uint32_t*)dst + width - 4), bgra128);
-                dst += stride;
-            }
-        }
-
-        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
-        {
-            if(Aligned(dst) && Aligned(stride))
-                FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
-            else
-                FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
-        }
-    }
-#endif// SIMD_SSE2_ENABLE
-
-    void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-        else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
-        else
-#endif// SIMD_SSE2_ENABLE
-            Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     }
 }
