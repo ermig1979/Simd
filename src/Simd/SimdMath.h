@@ -155,6 +155,23 @@ namespace Simd
         {
             return (value + 1 + (value >> 8)) >> 8;
         }
+
+        template <bool compensation> SIMD_INLINE int DivideBy16(int value);
+
+        template <> SIMD_INLINE int DivideBy16<true>(int value)
+        {
+            return (value + 8) >> 4;
+        }
+
+        template <> SIMD_INLINE int DivideBy16<false>(int value)
+        {
+            return value >> 4;
+        }
+
+        template <bool compensation> SIMD_INLINE int GaussianBlur3x3(const uchar *s0, const uchar *s1, const uchar *s2, size_t x0, size_t x1, size_t x2)
+        {
+            return DivideBy16<compensation>(s0[x0] + 2*s0[x1] + s0[x2] + (s1[x0] + 2*s1[x1] + s1[x2])*2 + s2[x0] + 2*s2[x1] + s2[x2]);
+        }
 	}
 
 #ifdef SIMD_SSE2_ENABLE    

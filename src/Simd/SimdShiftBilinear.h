@@ -30,15 +30,6 @@ namespace Simd
 {
 	namespace Base
 	{
-        const int LINEAR_SHIFT = 4;
-        const int LINEAR_ROUND_TERM = 1 << (LINEAR_SHIFT - 1);
-
-        const int BILINEAR_SHIFT = LINEAR_SHIFT*2;
-        const int BILINEAR_ROUND_TERM = 1 << (BILINEAR_SHIFT - 1);
-
-        const int FRACTION_RANGE = 1 << LINEAR_SHIFT;
-        const double FRACTION_ROUND_TERM = 0.5/FRACTION_RANGE;
-
         void CommonShiftAction(
             const uchar * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
             const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 

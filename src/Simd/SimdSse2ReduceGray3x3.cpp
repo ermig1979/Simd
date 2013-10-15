@@ -21,54 +21,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdReduceGray3x3.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-        template <bool compensation> void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-        {
-            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
-
-            for(size_t col = 0; col < srcHeight; col += 2, dst += dstStride)
-            {
-                const uchar *src0 = src + srcStride*(col - 1);
-                const uchar *src1 = src0 + srcStride;
-                const uchar *src2 = src1 + srcStride;
-                if(col == 0)
-                    src0 = src1;
-                if(col == srcHeight - 1)
-                    src2 = src1;
-
-                uchar *pDst = dst;
-                size_t row;
-
-                *pDst++ = GaussianBlur<compensation>(src0, src1, src2, 0, 0, 1);
-
-                for(row = 2; row < srcWidth - 1; row += 2)
-                    *pDst++ = GaussianBlur<compensation>(src0, src1, src2, row - 1, row, row + 1);
-
-                if(row == srcWidth - 1)
-                    *pDst++ = GaussianBlur<compensation>(src0, src1, src2, srcWidth - 2, srcWidth - 1, srcWidth - 1);
-            }
-        }
-
-		void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
-		{
-			if(compensation)
-				ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
-    }
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -142,7 +101,7 @@ namespace Simd
                     _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody<false>(s0 + srcCol), 
                         ReduceColBody<false>(s1 + srcCol), ReduceColBody<false>(s2 + srcCol)));
                     if(lastOddCol)
-                        dst[dstWidth - 1] = Base::GaussianBlur<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
+                        dst[dstWidth - 1] = Base::GaussianBlur3x3<compensation>(s0 + srcWidth, s1 + srcWidth, s2 + srcWidth, -2, -1, -1);
                 }
             }
         }
@@ -167,20 +126,4 @@ namespace Simd
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && srcWidth >= Avx2::DA)
-            Avx2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && srcWidth >= Sse2::A)
-			Sse2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-    }
 }

@@ -21,42 +21,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdOperation.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
+#ifdef SIMD_SSE2_ENABLE    
+	namespace Sse2
 	{
-		template <OperationType type> SIMD_INLINE __m256i Operation(const __m256i & a, const __m256i & b);
+		template <SimdOperationType type> SIMD_INLINE __m128i Operation(const __m128i & a, const __m128i & b);
 
-		template <> SIMD_INLINE __m256i Operation<OperationAverage>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m128i Operation<SimdOperationAverage>(const __m128i & a, const __m128i & b)
 		{
-			return _mm256_avg_epu8(a, b);
+			return _mm_avg_epu8(a, b);
 		}
 
-		template <> SIMD_INLINE __m256i Operation<OperationAnd>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m128i Operation<SimdOperationAnd>(const __m128i & a, const __m128i & b)
 		{
-			return _mm256_and_si256(a, b);
+			return _mm_and_si128(a, b);
 		}
 
-		template <> SIMD_INLINE __m256i Operation<OperationMaximum>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m128i Operation<SimdOperationMaximum>(const __m128i & a, const __m128i & b)
 		{
-			return _mm256_max_epu8(a, b);
+			return _mm_max_epu8(a, b);
 		}
 
-        template <> SIMD_INLINE __m256i Operation<OperationSaturatedSubtraction>(const __m256i & a, const __m256i & b)
+        template <> SIMD_INLINE __m128i Operation<SimdOperationSaturatedSubtraction>(const __m128i & a, const __m128i & b)
         {
-            return _mm256_subs_epu8(a, b);
+            return _mm_subs_epu8(a, b);
         }
 
-		template <bool align, OperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+		template <bool align, SimdOperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 		{
 			assert(width*channelCount >= A);
@@ -69,15 +68,15 @@ namespace Simd
 			{
 				for(size_t offset = 0; offset < alignedSize; offset += A)
 				{
-					const __m256i a_ = Load<align>((__m256i*)(a + offset));
-					const __m256i b_ = Load<align>((__m256i*)(b + offset));
-					Store<align>((__m256i*)(dst + offset), Operation<type>(a_, b_));
+					const __m128i a_ = Load<align>((__m128i*)(a + offset));
+					const __m128i b_ = Load<align>((__m128i*)(b + offset));
+					Store<align>((__m128i*)(dst + offset), Operation<type>(a_, b_));
 				}
 				if(alignedSize != size)
 				{
-					const __m256i a_ = Load<false>((__m256i*)(a + size - A));
-					const __m256i b_ = Load<false>((__m256i*)(b + size - A));
-					Store<false>((__m256i*)(dst + size - A), Operation<type>(a_, b_));
+					const __m128i a_ = Load<false>((__m128i*)(a + size - A));
+					const __m128i b_ = Load<false>((__m128i*)(b + size - A));
+					Store<false>((__m128i*)(dst + size - A), Operation<type>(a_, b_));
 				}
 				a += aStride;
 				b += bStride;
@@ -86,25 +85,25 @@ namespace Simd
 		}
 
 		template <bool align> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
 		{
 			switch(type)
 			{
-			case OperationAverage:
-				return Operation<align, OperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case OperationAnd:
-				return Operation<align, OperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case OperationMaximum:
-				return Operation<align, OperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-            case OperationSaturatedSubtraction:
-                return Operation<align, OperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationAverage:
+				return Operation<align, SimdOperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationAnd:
+				return Operation<align, SimdOperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationMaximum:
+				return Operation<align, SimdOperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationSaturatedSubtraction:
+                return Operation<align, SimdOperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}
 		}
 
 		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, OperationType type)
+			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
 				Operation<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
@@ -112,12 +111,12 @@ namespace Simd
 				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
 
-        template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uchar * horizontal, uchar * dst)
+        template <bool align> SIMD_INLINE void VectorProduct(const __m128i & vertical, const uchar * horizontal, uchar * dst)
         {
-            __m256i _horizontal = Load<align>((__m256i*)horizontal);
-            __m256i lo = DivideI16By255(_mm256_mullo_epi16(vertical, _mm256_unpacklo_epi8(_horizontal, K_ZERO)));
-            __m256i hi = DivideI16By255(_mm256_mullo_epi16(vertical, _mm256_unpackhi_epi8(_horizontal, K_ZERO)));
-            Store<align>((__m256i*)dst, _mm256_packus_epi16(lo, hi));
+            __m128i _horizontal = Load<align>((__m128i*)horizontal);
+            __m128i lo = DivideI16By255(_mm_mullo_epi16(vertical, _mm_unpacklo_epi8(_horizontal, K_ZERO)));
+            __m128i hi = DivideI16By255(_mm_mullo_epi16(vertical, _mm_unpackhi_epi8(_horizontal, K_ZERO)));
+            Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
         } 
 
         template <bool align> void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
@@ -129,7 +128,7 @@ namespace Simd
             size_t alignedWidth = Simd::AlignLo(width, A);
             for(size_t row = 0; row < height; ++row)
             {
-                __m256i _vertical = _mm256_set1_epi16(vertical[row]);
+                __m128i _vertical = _mm_set1_epi16(vertical[row]);
                 for(size_t col = 0; col < alignedWidth; col += A)
                     VectorProduct<align>(_vertical, horizontal + col, dst + col);
                 if(alignedWidth != width)
@@ -146,5 +145,5 @@ namespace Simd
                 VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
         }
 	}
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

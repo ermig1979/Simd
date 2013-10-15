@@ -306,7 +306,7 @@ namespace Simd
         MedianFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
-    SIMD_INLINE void Operation(const View & a, const View & b, View & dst, OperationType type)
+    SIMD_INLINE void Operation(const View & a, const View & b, View & dst, SimdOperationType type)
     {
         assert(Compatible(a, b, dst) && a.ChannelSize() == 1);
 

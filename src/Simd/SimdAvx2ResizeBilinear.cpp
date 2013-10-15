@@ -24,12 +24,11 @@
 
 #include <math.h>
 
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdShiftBilinear.h"
-#include "Simd/SimdResizeBilinear.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {

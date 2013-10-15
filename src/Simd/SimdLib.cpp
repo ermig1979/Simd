@@ -645,10 +645,116 @@ SIMD_API void SimdMedianFilterSquare5x5(const uchar * src, size_t srcStride, siz
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
+SIMD_API void SimdOperation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
+               size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+}
 
+SIMD_API void SimdVectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
+}
 
+SIMD_API void SimdReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+                   uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && srcWidth >= Avx2::DA)
+        Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && srcWidth >= Sse2::DA)
+        Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+}
 
+SIMD_API void SimdReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+                   uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && srcWidth >= Avx2::DA)
+        Avx2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && srcWidth >= Sse2::A)
+        Sse2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+}
 
+SIMD_API void SimdReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+                   uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && srcWidth > Avx2::DA)
+        Avx2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && srcWidth > Sse2::A)
+        Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+}
+
+SIMD_API void SimdReduceGray5x5(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+                   uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && srcWidth >= Avx2::DA)
+        Avx2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && srcWidth >= Sse2::A)
+        Sse2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+}
+
+SIMD_API void SimdResizeBilinear(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+    uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && srcWidth >= Avx2::A)
+        Avx2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && srcWidth >= Sse2::A)
+        Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+}
 
 
 

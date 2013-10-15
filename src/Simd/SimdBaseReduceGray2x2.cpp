@@ -21,36 +21,37 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdReduceGray4x4_h__
-#define __SimdReduceGray4x4_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-		void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-	}
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+    namespace Base
     {
-        void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
-#endif// SIMD_AVX2_ENABLE
+        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
 
-	void ReduceGray4x4(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-		uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+            size_t evenWidth = AlignLo(srcWidth, 2);
+            for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
+            {
+                const uchar *s0 = src;
+                const uchar *s1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
+                const uchar *end = src + evenWidth;
+                uchar *d = dst;
+                for(; s0 < end; s0 += 2, s1 += 2, d += 1)
+                {
+                    d[0] = Average(s0[0], s0[1], s1[0], s1[1]);
+                }
+                if(evenWidth != srcWidth)
+                {
+                    d[0] = Average(s0[0], s1[0]);
+                }
+                src += 2*srcStride;
+                dst += dstStride;
+            }
+        }
+    }
 }
-#endif//__SimdReduceGray4x4_h__
