@@ -153,6 +153,24 @@ extern "C"
     SIMD_API void SimdGrayToBgra(const unsigned char *gray, size_t width, size_t height, size_t grayStride, 
         unsigned char *bgra, size_t bgraStride, unsigned char alpha);
 
+    SIMD_API void SimdAbsSecondDerivativeHistogram(const unsigned char *src, size_t width, size_t height, size_t stride,
+        size_t step, size_t indent, unsigned int * histogram);
+
+    SIMD_API void SimdHistogram(const unsigned char *src, size_t width, size_t height, size_t stride, unsigned int * histogram);
+
+    SIMD_API void SimdInterleaveBgrToBgra(unsigned char *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
+        const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, unsigned char alpha);
+
+    SIMD_API void SimdInterleaveGrayToBgra(unsigned char *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, unsigned char alpha);
+
+    SIMD_API void SimdLbpEstimate(const unsigned char * src, size_t srcStride, size_t width, size_t height, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdMedianFilterSquare3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height, 
+        size_t channelCount, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdMedianFilterSquare5x5(const unsigned char * src, size_t srcStride, size_t width, size_t height, 
+        size_t channelCount, unsigned char * dst, size_t dstStride);
+
 #ifdef __cplusplus 
 }
 #endif // __cplusplus

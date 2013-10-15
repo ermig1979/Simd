@@ -236,13 +236,44 @@ namespace Simd
     {
         SimdGrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     }
+
+    SIMD_INLINE void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint * histogram)
+    {
+        SimdAbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+    }
+
+    SIMD_INLINE void Histogram(const uchar *src, size_t width, size_t height, size_t stride, uint * histogram)
+    {
+        SimdHistogram(src, width, height, stride, histogram);
+    }
+
+    SIMD_INLINE void InterleaveBgra(uchar *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
+        const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, uchar alpha = 0xFF)
+    {
+        SimdInterleaveBgrToBgra(bgra, size, blue, bluePrecision, blueSigned, green, greenPrecision, greenSigned, red, redPrecision, redSigned, alpha);
+    }
+
+    SIMD_INLINE void InterleaveBgra(uchar *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, uchar alpha = 0xFF)
+    {
+        SimdInterleaveGrayToBgra(bgra, size, gray, grayPrecision, graySigned, alpha);
+    }
+
+    SIMD_INLINE void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+    {
+        SimdLbpEstimate(src, srcStride, width, height, dst, dstStride);
+    }
+
+    SIMD_INLINE void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+    {
+        SimdMedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    }
+
+    SIMD_INLINE void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+    {
+        SimdMedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    }
 }
 
-#include "Simd/SimdHistogram.h"
-#include "Simd/SimdInterleaveBgra.h"
-#include "Simd/SimdLbp.h"
-#include "Simd/SimdMedianFilterSquare3x3.h"
-#include "Simd/SimdMedianFilterSquare5x5.h"
 #include "Simd/SimdOperation.h"
 #include "Simd/SimdReduceGray2x2.h"
 #include "Simd/SimdReduceGray3x3.h"

@@ -23,8 +23,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h" />
-    <ClInclude Include="..\..\src\Simd\SimdHistogram.h" />
-    <ClInclude Include="..\..\src\Simd\SimdLbp.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h" />
@@ -37,11 +35,8 @@
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
-    <ClInclude Include="..\..\src\Simd\SimdInterleaveBgra.h" />
     <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
-    <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare3x3.h" />
-    <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare5x5.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdOperation.h" />
     <ClInclude Include="..\..\src\Simd\SimdReduceGray2x2.h" />
@@ -87,6 +82,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilterSquare3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilterSquare5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NoExtensions</EnableEnhancedInstructionSet>
@@ -114,20 +113,11 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdLbp.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdLbpA.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseInterleaveBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilterSquare3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilterSquare5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdLib.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
@@ -152,6 +142,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilterSquare3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilterSquare5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse42Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
@@ -161,21 +155,6 @@
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5A.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Release|x64'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdOperationA.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>

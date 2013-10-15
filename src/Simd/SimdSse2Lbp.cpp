@@ -21,51 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdLbp.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-        SIMD_INLINE int LbpEstimate(const uchar * src, ptrdiff_t stride)
-        {
-            int threshold = src[0];
-            int lbp = 0;
-            lbp |= (src[-stride - 1] >= threshold ? 0x01 : 0);
-            lbp |= (src[-stride]     >= threshold ? 0x02 : 0);
-            lbp |= (src[-stride + 1] >= threshold ? 0x04 : 0);
-            lbp |= (src[1]           >= threshold ? 0x08 : 0);
-            lbp |= (src[stride + 1]  >= threshold ? 0x10 : 0);
-            lbp |= (src[stride]      >= threshold ? 0x20 : 0);
-            lbp |= (src[stride - 1]  >= threshold ? 0x40 : 0);
-            lbp |= (src[-1]          >= threshold ? 0x80 : 0);
-            return lbp;
-        }
-
-		void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
-		{
-            memset(dst, 0, width);
-            src += srcStride;
-            dst += dstStride;
-            for (size_t row = 2; row < height; ++row)
-            {
-                dst[0] = 0;
-                for (size_t col = 1; col < width - 1; ++col)
-                {
-                    dst[col] = LbpEstimate(src + col, srcStride);
-                }
-                dst[width - 1] = 0;
-
-                src += srcStride;
-                dst += dstStride;
-            }
-            memset(dst, 0, width);
-		}
-	}
-
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
@@ -120,19 +81,4 @@ namespace Simd
 		}
 	}
 #endif// SIMD_SSE2_ENABLE
-
-	void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A + 2)
-            Avx2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A + 2)
-			Sse2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
-	}
 }
