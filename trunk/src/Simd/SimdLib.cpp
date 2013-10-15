@@ -569,6 +569,83 @@ SIMD_API void SimdGrayToBgra(const uchar *gray, size_t width, size_t height, siz
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
+SIMD_API void SimdAbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint * histogram)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A + 2*indent)
+        Avx2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A + 2*indent)
+        Sse2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+}
+
+SIMD_API void SimdHistogram(const uchar *src, size_t width, size_t height, size_t stride, uint * histogram)
+{
+    Base::Histogram(src, width, height, stride, histogram);
+}
+
+SIMD_API void SimdInterleaveBgra(uchar *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
+    const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, uchar alpha)
+{
+    Base::InterleaveBgra(bgra, size, blue, bluePrecision, blueSigned, green, greenPrecision, greenSigned, red, redPrecision, redSigned, alpha);
+}
+
+SIMD_API void SimdInterleaveBgra(uchar *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, uchar alpha)
+{
+    Base::InterleaveBgra(bgra, size, gray, grayPrecision, graySigned, alpha);
+}
+
+SIMD_API void SimdLbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A + 2)
+        Avx2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A + 2)
+        Sse2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdMedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+SIMD_API void SimdMedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+
 
 
 

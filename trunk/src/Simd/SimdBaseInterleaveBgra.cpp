@@ -21,10 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdInterleaveBgra.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -106,28 +103,4 @@ namespace Simd
             }
         }
     }
-
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-    }
-#endif// SIMD_SSE2_ENABLE
-
-	void InterleaveBgra(
-		uchar *bgra, size_t size, 
-		const int *blue, int bluePrecision, bool blueSigned, 
-		const int *green, int greenPrecision, bool greenSigned,
-		const int *red, int redPrecision, bool redSigned,
-		uchar alpha)
-	{
-		Base::InterleaveBgra(bgra, size, blue, bluePrecision, blueSigned, 
-			green, greenPrecision, greenSigned, red, redPrecision, redSigned, alpha);
-	}
-
-	void InterleaveBgra(uchar *bgra, size_t size, 
-		const int *gray, int grayPrecision, bool graySigned, 
-		uchar alpha)
-	{
-		Base::InterleaveBgra(bgra, size, gray, grayPrecision, graySigned, alpha);
-	}
 }

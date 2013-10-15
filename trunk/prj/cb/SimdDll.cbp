@@ -156,6 +156,18 @@
 		<Unit filename="../../src/Simd/SimdAvx2GrayToBgra.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Histogram.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Lbp.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2MedianFilterSquare3x3.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2MedianFilterSquare5x5.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBase.h">
 			<Option virtualFolder="Base/" />
 		</Unit>
@@ -210,6 +222,21 @@
 		<Unit filename="../../src/Simd/SimdBaseGrayToBgra.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseHistogram.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseInterleaveBgra.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseLbp.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseMedianFilterSquare3x3.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseMedianFilterSquare5x5.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToGray.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
@@ -231,32 +258,8 @@
 		<Unit filename="../../src/Simd/SimdExtract.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogram.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogram.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdHistogramA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdInit.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdInterleaveBgra.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdInterleaveBgra.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdLbp.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdLbp.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdLbpA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdLib.cpp">
 			<Option virtualFolder="Lib/" />
@@ -269,24 +272,6 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMath.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare3x3A.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdMedianFilterSquare5x5A.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdMemory.h">
 			<Option virtualFolder="Sys/" />
@@ -412,6 +397,18 @@
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2GrayToBgra.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Histogram.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Lbp.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2MedianFilterSquare3x3.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2MedianFilterSquare5x5.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse42.h">

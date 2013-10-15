@@ -21,18 +21,17 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdHistogram.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
+#ifdef SIMD_SSE2_ENABLE
+	namespace Sse2
 	{
 		namespace
 		{
@@ -56,20 +55,20 @@ namespace Simd
 		}
 
 		template <bool srcAlign, bool stepAlign>
-		SIMD_INLINE __m256i AbsSecondDerivative(const uchar * src, ptrdiff_t step)
+		SIMD_INLINE __m128i AbsSecondDerivative(const uchar * src, ptrdiff_t step)
 		{
-			const __m256i s0 = Load<srcAlign && stepAlign>((__m256i*)(src - step));
-			const __m256i s1 = Load<srcAlign>((__m256i*)src);
-			const __m256i s2 = Load<srcAlign && stepAlign>((__m256i*)(src + step));
-			return AbsDifferenceU8(_mm256_avg_epu8(s0, s2), s1);
+			const __m128i s0 = Load<srcAlign && stepAlign>((__m128i*)(src - step));
+			const __m128i s1 = Load<srcAlign>((__m128i*)src);
+			const __m128i s2 = Load<srcAlign && stepAlign>((__m128i*)(src + step));
+			return AbsDifferenceU8(_mm_avg_epu8(s0, s2), s1);
 		}
 
 		template <bool align>
 		SIMD_INLINE void AbsSecondDerivative(const uchar * src, ptrdiff_t colStep, ptrdiff_t rowStep, uchar * dst)
 		{
-			const __m256i sdX = AbsSecondDerivative<align, false>(src, colStep);
-			const __m256i sdY = AbsSecondDerivative<align, true>(src, rowStep);
-			Store<align>((__m256i*)dst, _mm256_max_epu8(sdY, sdX));
+			const __m128i sdX = AbsSecondDerivative<align, false>(src, colStep);
+			const __m128i sdY = AbsSecondDerivative<align, true>(src, rowStep);
+			Store<align>((__m128i*)dst, _mm_max_epu8(sdY, sdX));
 		}
 
 		template<bool align> void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
@@ -113,5 +112,5 @@ namespace Simd
 				AbsSecondDerivativeHistogram<false>(src, width, height, stride, step, indent, histogram);
 		}
 	}
-#endif// SIMD_AVX2_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

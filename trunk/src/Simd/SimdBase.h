@@ -133,6 +133,24 @@ namespace Simd
             size_t channelCount, uchar * dst, size_t dstStride);
 
         void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha = 0xFF);
+
+        void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint * histogram);
+
+        void Histogram(const uchar *src, size_t width, size_t height, size_t stride, uint * histogram);
+
+        void InterleaveBgra(uchar *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
+            const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, uchar alpha = 0xFF);
+
+        void InterleaveBgra(uchar *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, uchar alpha = 0xFF);
+
+        void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
+
+        void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
+
+        void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
     }
 }
 #endif//__SimdBase_h__

@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdEnable.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdInterleaveBgra.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdReduceGray2x2.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
@@ -34,15 +31,6 @@
     <ClCompile Include="..\..\src\Simd\SimdYuvToHue.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHistogram.cpp">
-      <Filter>Alg</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdShiftBilinear.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
@@ -54,12 +42,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdOperation.cpp">
       <Filter>Alg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare3x3A.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdMedianFilterSquare5x5A.cpp">
-      <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdOperationA.cpp">
       <Filter>Alg\Avx</Filter>
@@ -74,9 +56,6 @@
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdReduceGray5x5A.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdHistogramA.cpp">
       <Filter>Alg\Avx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSquaredDifferenceSumA.cpp">
@@ -105,12 +84,6 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdTextureA.cpp">
       <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdLbpA.cpp">
-      <Filter>Alg\Avx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdLbp.cpp">
-      <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
       <Filter>Avx2</Filter>
@@ -247,6 +220,45 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseInterleaveBgra.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilterSquare3x3.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilterSquare5x5.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilterSquare3x3.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilterSquare5x5.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilterSquare3x3.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilterSquare5x5.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
@@ -282,9 +294,6 @@
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdInterleaveBgra.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdReduceGray2x2.h">
       <Filter>Alg</Filter>
     </ClInclude>
@@ -312,20 +321,11 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToHue.h">
       <Filter>Alg</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare3x3.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdMedianFilterSquare5x5.h">
-      <Filter>Alg</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdVersion.h">
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdHistogram.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdShiftBilinear.h">
       <Filter>Alg</Filter>
@@ -353,9 +353,6 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdRectangle.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdLbp.h">
-      <Filter>Alg</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
       <Filter>Base</Filter>
