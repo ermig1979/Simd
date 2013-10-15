@@ -40,6 +40,8 @@ namespace Simd
 
         const int FRACTION_RANGE = 1 << LINEAR_SHIFT;
         const double FRACTION_ROUND_TERM = 0.5/FRACTION_RANGE;
+
+        const float KF_255_DIV_6 = 255.0f/6.0f;
     }
 
 #ifdef SIMD_SSE2_ENABLE    

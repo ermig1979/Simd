@@ -21,36 +21,51 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdStretchGray2x2_h__
-#define __SimdStretchGray2x2_h__
-
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
     namespace Base
     {
-        void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width < 0x10000);
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-		void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
-#endif// SIMD_SSE2_ENABLE
+			*sum = 0;
+			for(size_t row = 0; row < height; ++row)
+			{
+				int rowSum = 0;
+				for(size_t col = 0; col < width; ++col)
+				{
+					rowSum += SquaredDifference(a[col], b[col]);
+				}
+				*sum += rowSum;
+				a += aStride;
+				b += bStride;
+			}
+		}
 
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
-    {
-        void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-    }
-#endif// SIMD_AVX2_ENABLE
+		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width < 0x10000);
 
-    void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-        uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+			*sum = 0;
+			for(size_t row = 0; row < height; ++row)
+			{
+				int rowSum = 0;
+				for(size_t col = 0; col < width; ++col)
+				{
+					if(mask[col] == index)
+						rowSum += SquaredDifference(a[col], b[col]);
+				}
+				*sum += rowSum;
+				a += aStride;
+				b += bStride;
+				mask += maskStride;
+			}
+		}
+    }
 }
-#endif//__SimdStretchGray2x2_h__

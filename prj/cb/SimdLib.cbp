@@ -6,7 +6,7 @@
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
-		<Option virtualFolders="Sys\;Alg\;Alg\Avx\;Utils\;Lib\;Base\;Avx2\;Sse2\;Sse42\;" />
+		<Option virtualFolders="Sys\;Utils\;Lib\;Base\;Avx2\;Sse2\;Sse42\;" />
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
@@ -186,6 +186,27 @@
 		<Unit filename="../../src/Simd/SimdAvx2ResizeBilinear.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2ShiftBilinear.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2SquaredDifferenceSum.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Statistic.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2StretchGray2x2.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Texture.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2YuvToBgra.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2YuvToHue.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBase.h">
 			<Option virtualFolder="Base/" />
 		</Unit>
@@ -273,6 +294,30 @@
 		<Unit filename="../../src/Simd/SimdBaseResizeBilinear.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseShiftBilinear.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseSquaredDifferenceSum.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseStatistic.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseStretchGray2x2.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseTexture.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToBgr.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToBgra.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToHue.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBgrToGray.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
@@ -320,24 +365,6 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSet.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdShiftBilinear.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdShiftBilinear.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdShiftBilinearA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdSquaredDifferenceSum.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdSquaredDifferenceSumA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2.h">
 			<Option virtualFolder="Sse2/" />
@@ -411,41 +438,35 @@
 		<Unit filename="../../src/Simd/SimdSse2ResizeBilinear.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2ShiftBilinear.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2SquaredDifferenceSum.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Statistic.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2StretchGray2x2.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Texture.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2YuvToBgra.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2YuvToHue.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSse42.h">
 			<Option virtualFolder="Sse42/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse42Crc32.cpp">
 			<Option virtualFolder="Sse42/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdStatistic.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdStatistic.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdStatisticA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdStore.h">
 			<Option virtualFolder="Sys/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdStretchGray2x2.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdStretchGray2x2.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdStretchGray2x2A.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTexture.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTexture.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdTextureA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdTypes.h">
 			<Option virtualFolder="Sys/" />
@@ -459,29 +480,8 @@
 		<Unit filename="../../src/Simd/SimdView.h">
 			<Option virtualFolder="Utils/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToBgr.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdYuvToBgr.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToBgra.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToBgra.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToBgraA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToHue.cpp">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToHue.h">
-			<Option virtualFolder="Alg/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToHueA.cpp">
-			<Option virtualFolder="Alg/Avx/" />
+			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Extensions>
 			<code_completion />

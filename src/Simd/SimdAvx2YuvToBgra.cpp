@@ -21,11 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdYuvToBgra.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
@@ -144,7 +143,7 @@ namespace Simd
 		}
 
 		void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha)
+			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
@@ -154,7 +153,7 @@ namespace Simd
 		}
 
 		void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, ptrdiff_t bgraStride, uchar alpha)
+			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))

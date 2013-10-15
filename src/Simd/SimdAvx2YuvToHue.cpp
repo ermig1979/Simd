@@ -22,12 +22,11 @@
 * SOFTWARE.
 */
 #include "Simd/SimdTypes.h"
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdYuvToHue.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {

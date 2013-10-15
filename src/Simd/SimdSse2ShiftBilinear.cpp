@@ -23,56 +23,56 @@
 */
 #include <math.h>
 
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdShiftBilinear.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
+#ifdef SIMD_SSE2_ENABLE
+	namespace Sse2
 	{
-		const __m256i K16_LINEAR_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::LINEAR_ROUND_TERM);
-		const __m256i K16_BILINEAR_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
+		const __m128i K16_LINEAR_ROUND_TERM = SIMD_MM_SET1_EPI16(Base::LINEAR_ROUND_TERM);
+		const __m128i K16_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
 
-		SIMD_INLINE __m256i Interpolate(__m256i s[2][2], __m256i k[2][2])
+		SIMD_INLINE __m128i Interpolate(__m128i s[2][2], __m128i k[2][2])
 		{
-			__m256i r = _mm256_mullo_epi16(s[0][0], k[0][0]);
-			r = _mm256_add_epi16(r, _mm256_mullo_epi16(s[0][1], k[0][1]));
-			r = _mm256_add_epi16(r, _mm256_mullo_epi16(s[1][0], k[1][0]));
-			r = _mm256_add_epi16(r, _mm256_mullo_epi16(s[1][1], k[1][1]));
-			r = _mm256_add_epi16(r, K16_BILINEAR_ROUND_TERM);
-			return _mm256_srli_epi16(r, Base::BILINEAR_SHIFT);
+			__m128i r = _mm_mullo_epi16(s[0][0], k[0][0]);
+			r = _mm_add_epi16(r, _mm_mullo_epi16(s[0][1], k[0][1]));
+			r = _mm_add_epi16(r, _mm_mullo_epi16(s[1][0], k[1][0]));
+			r = _mm_add_epi16(r, _mm_mullo_epi16(s[1][1], k[1][1]));
+			r = _mm_add_epi16(r, K16_BILINEAR_ROUND_TERM);
+			return _mm_srli_epi16(r, Base::BILINEAR_SHIFT);
 		}
 
-		SIMD_INLINE __m256i Interpolate(__m256i s[2][2][2], __m256i k[2][2])
+		SIMD_INLINE __m128i Interpolate(__m128i s[2][2][2], __m128i k[2][2])
 		{
-			return _mm256_packus_epi16(Interpolate(s[0], k), Interpolate(s[1], k));
+			return _mm_packus_epi16(Interpolate(s[0], k), Interpolate(s[1], k));
 		}
 
-		SIMD_INLINE __m256i Interpolate(__m256i s[2], __m256i k[2])
+		SIMD_INLINE __m128i Interpolate(__m128i s[2], __m128i k[2])
 		{
-			__m256i r = _mm256_mullo_epi16(s[0], k[0]);
-			r = _mm256_add_epi16(r, _mm256_mullo_epi16(s[1], k[1]));
-			r = _mm256_add_epi16(r, K16_LINEAR_ROUND_TERM);
-			return _mm256_srli_epi16(r, Base::LINEAR_SHIFT);
+			__m128i r = _mm_mullo_epi16(s[0], k[0]);
+			r = _mm_add_epi16(r, _mm_mullo_epi16(s[1], k[1]));
+			r = _mm_add_epi16(r, K16_LINEAR_ROUND_TERM);
+			return _mm_srli_epi16(r, Base::LINEAR_SHIFT);
 		}
 
-		SIMD_INLINE __m256i Interpolate(__m256i s[2][2], __m256i k[2])
+		SIMD_INLINE __m128i Interpolate(__m128i s[2][2], __m128i k[2])
 		{
-			return _mm256_packus_epi16(Interpolate(s[0], k), Interpolate(s[1], k));
+			return _mm_packus_epi16(Interpolate(s[0], k), Interpolate(s[1], k));
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, __m256i &lo, __m256i &hi)
+		SIMD_INLINE void LoadBlock(const uchar *src, __m128i &lo, __m128i &hi)
 		{
-			const __m256i t = _mm256_loadu_si256((__m256i*)(src));
-			lo = _mm256_unpacklo_epi8(t, K_ZERO);
-			hi = _mm256_unpackhi_epi8(t, K_ZERO);
+			const __m128i t = _mm_loadu_si128((__m128i*)(src));
+			lo = _mm_unpacklo_epi8(t, K_ZERO);
+			hi = _mm_unpackhi_epi8(t, K_ZERO);
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, size_t dx, size_t dy, __m256i s[2][2][2])
+		SIMD_INLINE void LoadBlock(const uchar *src, size_t dx, size_t dy, __m128i s[2][2][2])
 		{
 			LoadBlock(src, s[0][0][0], s[1][0][0]);
 			LoadBlock(src + dx, s[0][0][1], s[1][0][1]);
@@ -80,7 +80,7 @@ namespace Simd
 			LoadBlock(src + dy + dx, s[0][1][1], s[1][1][1]);
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, size_t dr, __m256i s[2][2])
+		SIMD_INLINE void LoadBlock(const uchar *src, size_t dr, __m128i s[2][2])
 		{
 			LoadBlock(src, s[0][0], s[1][0]);
 			LoadBlock(src + dr, s[0][1], s[1][1]);
@@ -96,22 +96,22 @@ namespace Simd
 			{
 				if(fDx)
 				{
-					__m256i k[2][2], s[2][2][2];
-					k[0][0] = _mm256_set1_epi16((Base::FRACTION_RANGE - fDx)*(Base::FRACTION_RANGE - fDy)); 
-					k[0][1] = _mm256_set1_epi16(fDx*(Base::FRACTION_RANGE - fDy)); 
-					k[1][0] = _mm256_set1_epi16((Base::FRACTION_RANGE - fDx)*fDy); 
-					k[1][1] = _mm256_set1_epi16(fDx*fDy);
+					__m128i k[2][2], s[2][2][2];
+					k[0][0] = _mm_set1_epi16((Base::FRACTION_RANGE - fDx)*(Base::FRACTION_RANGE - fDy)); 
+					k[0][1] = _mm_set1_epi16(fDx*(Base::FRACTION_RANGE - fDy)); 
+					k[1][0] = _mm_set1_epi16((Base::FRACTION_RANGE - fDx)*fDy); 
+					k[1][1] = _mm_set1_epi16(fDx*fDy);
 					for(size_t row = 0; row < height; ++row)
 					{
 						for(size_t col = 0; col < alignedSize; col += A)
 						{
 							LoadBlock(src + col, channelCount, srcStride, s);
-							_mm256_storeu_si256((__m256i*)(dst + col), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + col), Interpolate(s, k));
 						}
 						if(size != alignedSize)
 						{
 							LoadBlock(src + size - A, channelCount, srcStride, s);
-							_mm256_storeu_si256((__m256i*)(dst + size - A), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + size - A), Interpolate(s, k));
 						}
 						src += srcStride;
 						dst += dstStride;
@@ -119,20 +119,20 @@ namespace Simd
 				}
 				else
 				{
-					__m256i k[2], s[2][2];
-					k[0] = _mm256_set1_epi16(Base::FRACTION_RANGE - fDy); 
-					k[1] = _mm256_set1_epi16(fDy); 
+					__m128i k[2], s[2][2];
+					k[0] = _mm_set1_epi16(Base::FRACTION_RANGE - fDy); 
+					k[1] = _mm_set1_epi16(fDy); 
 					for(size_t row = 0; row < height; ++row)
 					{
 						for(size_t col = 0; col < alignedSize; col += A)
 						{
 							LoadBlock(src + col, srcStride, s);
-							_mm256_storeu_si256((__m256i*)(dst + col), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + col), Interpolate(s, k));
 						}
 						if(size != alignedSize)
 						{
 							LoadBlock(src + size - A, srcStride, s);
-							_mm256_storeu_si256((__m256i*)(dst + size - A), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + size - A), Interpolate(s, k));
 						}
 						src += srcStride;
 						dst += dstStride;
@@ -143,20 +143,20 @@ namespace Simd
 			{
 				if(fDx)
 				{
-					__m256i k[2], s[2][2];
-					k[0] = _mm256_set1_epi16(Base::FRACTION_RANGE - fDx); 
-					k[1] = _mm256_set1_epi16(fDx); 
+					__m128i k[2], s[2][2];
+					k[0] = _mm_set1_epi16(Base::FRACTION_RANGE - fDx); 
+					k[1] = _mm_set1_epi16(fDx); 
 					for(size_t row = 0; row < height; ++row)
 					{
 						for(size_t col = 0; col < alignedSize; col += A)
 						{
 							LoadBlock(src + col, channelCount, s);
-							_mm256_storeu_si256((__m256i*)(dst + col), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + col), Interpolate(s, k));
 						}
 						if(size != alignedSize)
 						{
 							LoadBlock(src + size - A, channelCount, s);
-							_mm256_storeu_si256((__m256i*)(dst + size - A), Interpolate(s, k));
+							_mm_storeu_si128((__m128i*)(dst + size - A), Interpolate(s, k));
 						}
 						src += srcStride;
 						dst += dstStride;
@@ -188,6 +188,6 @@ namespace Simd
 			ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
 		}
 	}
-#endif//SIMD_AVX2_ENABLE
+#endif//SIMD_SSE2_ENABLE
 }
 

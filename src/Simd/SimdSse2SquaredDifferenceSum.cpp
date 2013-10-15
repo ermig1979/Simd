@@ -21,59 +21,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdInit.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdSquaredDifferenceSum.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-    namespace Base
-    {
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			size_t width, size_t height, uint64_t * sum)
-		{
-			assert(width < 0x10000);
-
-			*sum = 0;
-			for(size_t row = 0; row < height; ++row)
-			{
-				int rowSum = 0;
-				for(size_t col = 0; col < width; ++col)
-				{
-					rowSum += SquaredDifference(a[col], b[col]);
-				}
-				*sum += rowSum;
-				a += aStride;
-				b += bStride;
-			}
-		}
-
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
-		{
-			assert(width < 0x10000);
-
-			*sum = 0;
-			for(size_t row = 0; row < height; ++row)
-			{
-				int rowSum = 0;
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(mask[col] == index)
-						rowSum += SquaredDifference(a[col], b[col]);
-				}
-				*sum += rowSum;
-				a += aStride;
-				b += bStride;
-				mask += maskStride;
-			}
-		}
-    }
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -184,36 +140,4 @@ namespace Simd
 		}
     }
 #endif// SIMD_SSE2_ENABLE
-
-	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-		size_t width, size_t height, uint64_t * sum)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
-	}
-
-	void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-		const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-	}
 }

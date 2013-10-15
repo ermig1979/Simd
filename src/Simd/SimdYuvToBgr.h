@@ -66,22 +66,13 @@ namespace Simd
 			bgr[2] = YuvToRed(y, v);
 		}
 
-		void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
-
-		SIMD_INLINE void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride, bool flip)
-		{
-			if(flip)
-			{
-				bgr = bgr + bgrStride*(height - 2);
-				bgrStride = -bgrStride;
-			}
-			Yuv420ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-		}
-
-		void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
+        SIMD_INLINE void YuvToBgra(int y, int u, int v, int alpha, uchar * bgra)
+        {
+            bgra[0] = YuvToBlue(y, u);
+            bgra[1] = YuvToGreen(y, u, v);
+            bgra[2] = YuvToRed(y, v);
+            bgra[3] = alpha;
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -207,11 +198,5 @@ namespace Simd
         }	
     }
 #endif// SIMD_AVX2_ENABLE
-
-	void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
-
-	void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride);
 }
 #endif//__SimdYuvToBgr_h__

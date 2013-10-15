@@ -21,9 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
+#include "Simd/SimdBase.h"
 #include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
@@ -37,7 +35,7 @@ namespace Simd
 		}
 
 		void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride)
+			size_t width, size_t height, uchar * bgr, size_t bgrStride)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= 2) && (height >= 2));
 
@@ -58,7 +56,7 @@ namespace Simd
 		}
 
 		void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride)
+			size_t width, size_t height, uchar * bgr, size_t bgrStride)
 		{
 			for(size_t row = 0; row < height; ++row)
 			{
@@ -70,23 +68,5 @@ namespace Simd
 				bgr += bgrStride;
 			}
 		}
-	}
-
-#ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-	}
-#endif// SIMD_SSE2_ENABLE
-
-	void Yuv420ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride)
-	{
-		Base::Yuv420ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-	}
-
-	void Yuv444ToBgr(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-		size_t width, size_t height, uchar * bgr, ptrdiff_t bgrStride)
-	{
-		Base::Yuv444ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 	}
 }

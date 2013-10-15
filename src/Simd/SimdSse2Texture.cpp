@@ -21,121 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdTexture.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-	namespace Base
-	{
-        SIMD_INLINE int TextureBoostedSaturatedGradient(const uchar * src, ptrdiff_t step, int saturation, int boost)
-        {
-            return (saturation + RestrictRange((int)src[step] - (int)src[-step], -saturation, saturation))*boost;
-        }
-
-        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
-		{
-            assert(int(2)*saturation*boost <= 0xFF);
-
-			memset(dx, 0, width);
-            memset(dy, 0, width);
-			src += srcStride;
-			dx += dxStride;
-            dy += dyStride;
-			for (size_t row = 2; row < height; ++row)
-			{
-				dx[0] = 0;
-                dy[0] = 0;
-				for (size_t col = 1; col < width - 1; ++col)
-				{
-					dy[col] = TextureBoostedSaturatedGradient(src + col, srcStride, saturation, boost);
-					dx[col] = TextureBoostedSaturatedGradient(src + col, 1, saturation, boost);
-				}
-				dx[width - 1] = 0;
-                dy[width - 1] = 0;
-				src += srcStride;
-				dx += dxStride;
-                dy += dyStride;
-			}
-			memset(dx, 0, width);
-            memset(dy, 0, width);
-		}
-
-        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar boost, uchar * dst, size_t dstStride)
-        {
-            assert(boost < 128);
-
-            int min = 128 - (128/boost);
-            int max = 255 - min;
-
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < width; ++col)
-                {
-                    dst[col] = (RestrictRange(src[col], min, max) - min)*boost;
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
-        {
-            *sum = 0;
-            for (size_t row = 0; row < height; ++row)
-            {
-                int rowSum = 0;
-                for (size_t col = 0; col < width; ++col)
-                    rowSum += src[col] - Average(lo[col], hi[col]);
-                *sum += rowSum;
-
-                src += srcStride;
-                lo += loStride;
-                hi += hiStride;
-            }
-        }
-
-        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            int shift, uchar * dst, size_t dstStride)
-        {
-            assert(shift > -0xFF && shift < 0xFF);
-
-            if(shift == 0)
-            {
-                if(src != dst)
-                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
-                return;
-            }
-            else if(shift > 0)
-            {
-                for (size_t row = 0; row < height; ++row)
-                {
-                    for (size_t col = 0; col < width; ++col)
-                        dst[col] = Min(src[col] + shift, 0xFF);
-                    src += srcStride;
-                    dst += dstStride;
-                }
-            }
-            else if(shift < 0)
-            {
-                for (size_t row = 0; row < height; ++row)
-                {
-                    for (size_t col = 0; col < width; ++col)
-                        dst[col] = Max(src[col] + shift, 0);
-                    src += srcStride;
-                    dst += dstStride;
-                }
-            }
-        }
-	}
-
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
@@ -370,68 +263,4 @@ namespace Simd
         }
     }
 #endif// SIMD_SSE2_ENABLE
-
-    void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
-	{
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-		if(Sse2::Enable && width >= Sse2::A)
-			Sse2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-		else
-#endif//SIMD_SSE2_ENABLE
-			Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-	}
-
-    void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        uchar boost, uchar * dst, size_t dstStride)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
-    }
-
-    void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-    }
-
-    void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        int shift, uchar * dst, size_t dstStride)
-    {
-#ifdef SIMD_AVX2_ENABLE
-        if(Avx2::Enable && width >= Avx2::A)
-            Avx2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
-        else
-#endif//SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-        if(Sse2::Enable && width >= Sse2::A)
-            Sse2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
-        else
-#endif//SIMD_SSE2_ENABLE
-            Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
-    }
 }

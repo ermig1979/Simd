@@ -145,6 +145,57 @@ namespace Simd
 
         void ResizeBilinear(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+        void ShiftBilinear(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride);
+
+        void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            size_t width, size_t height, uint64_t * sum);
+
+        void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
+
+        void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
+            uchar * min, uchar * max, uchar * average);
+
+        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+
+        void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+
+        void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
+
+        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            uchar boost, uchar * dst, size_t dstStride);
+
+        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+
+        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uchar * dst, size_t dstStride);
+
+        void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha = 0xFF);
+
+        void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha = 0xFF);
+
+        void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * hue, size_t hueStride);
+
+        void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
+            size_t width, size_t height, uchar * hue, size_t hueStride);
     }
 #endif// SIMD_SSE2_ENABLE
 }
