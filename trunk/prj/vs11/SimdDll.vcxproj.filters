@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdEnable.cpp">
-      <Filter>Sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
@@ -366,13 +363,10 @@
     <ClInclude Include="..\..\src\Simd\SimdAlg.h">
       <Filter>Lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse42.h">
       <Filter>Sse42</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
       <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>

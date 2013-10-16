@@ -25,7 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdBgrToGray.h"
+#include "Simd/SimdConversion.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd

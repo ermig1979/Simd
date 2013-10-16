@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdEnable.cpp">
-      <Filter>Sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsDifferenceSum.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
@@ -366,13 +363,10 @@
     <ClInclude Include="..\..\src\Simd\SimdLib.h">
       <Filter>Lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBgrToGray.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse42.h">
       <Filter>Sse42</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
       <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>

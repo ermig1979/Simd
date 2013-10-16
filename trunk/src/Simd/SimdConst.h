@@ -42,6 +42,22 @@ namespace Simd
         const double FRACTION_ROUND_TERM = 0.5/FRACTION_RANGE;
 
         const float KF_255_DIV_6 = 255.0f/6.0f;
+
+        const int BGR_TO_GRAY_AVERAGING_SHIFT = 14;
+        const int BGR_TO_GRAY_ROUND_TERM = 1 << (BGR_TO_GRAY_AVERAGING_SHIFT - 1);
+        const int BLUE_TO_GRAY_WEIGHT = int(0.114*(1 << BGR_TO_GRAY_AVERAGING_SHIFT) + 0.5);
+        const int GREEN_TO_GRAY_WEIGHT = int(0.587*(1 << BGR_TO_GRAY_AVERAGING_SHIFT) + 0.5);
+        const int RED_TO_GRAY_WEIGHT = int(0.299*(1 << BGR_TO_GRAY_AVERAGING_SHIFT) + 0.5);
+
+        const int Y_ADJUST = 16; 
+        const int UV_ADJUST = 128;
+        const int YUV_TO_BGR_AVERAGING_SHIFT = 13;
+        const int YUV_TO_BGR_ROUND_TERM = 1 << (YUV_TO_BGR_AVERAGING_SHIFT - 1); 
+        const int Y_TO_RGB_WEIGHT = int(1.164*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
+        const int U_TO_BLUE_WEIGHT = int(2.018*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
+        const int U_TO_GREEN_WEIGHT = -int(0.391*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
+        const int V_TO_GREEN_WEIGHT = -int(0.813*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
+        const int V_TO_RED_WEIGHT = int(1.596*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -79,6 +95,14 @@ namespace Simd
 		const __m128i K32_000000FF = SIMD_MM_SET1_EPI32(0x000000FF);
 
 		const __m128i K64_00000000FFFFFFFF = SIMD_MM_SET2_EPI32(0xFFFFFFFF, 0);
+
+        const __m128i K16_Y_ADJUST = SIMD_MM_SET1_EPI16(Base::Y_ADJUST); 
+        const __m128i K16_UV_ADJUST = SIMD_MM_SET1_EPI16(Base::UV_ADJUST);
+
+        const __m128i K16_YRGB_RT = SIMD_MM_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
+        const __m128i K16_VR_0 = SIMD_MM_SET2_EPI16(Base::V_TO_RED_WEIGHT, 0);
+        const __m128i K16_UG_VG = SIMD_MM_SET2_EPI16(Base::U_TO_GREEN_WEIGHT, Base::V_TO_GREEN_WEIGHT);
+        const __m128i K16_UB_0 = SIMD_MM_SET2_EPI16(Base::U_TO_BLUE_WEIGHT, 0);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -125,6 +149,14 @@ namespace Simd
 
 		const __m256i K32_000000FF = SIMD_MM256_SET1_EPI32(0x000000FF);
         const __m256i K32_0000FFFF = SIMD_MM256_SET1_EPI32(0x0000FFFF);
+
+        const __m256i K16_Y_ADJUST = SIMD_MM256_SET1_EPI16(Base::Y_ADJUST); 
+        const __m256i K16_UV_ADJUST = SIMD_MM256_SET1_EPI16(Base::UV_ADJUST);
+
+        const __m256i K16_YRGB_RT = SIMD_MM256_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
+        const __m256i K16_VR_0 = SIMD_MM256_SET2_EPI16(Base::V_TO_RED_WEIGHT, 0);
+        const __m256i K16_UG_VG = SIMD_MM256_SET2_EPI16(Base::U_TO_GREEN_WEIGHT, Base::V_TO_GREEN_WEIGHT);
+        const __m256i K16_UB_0 = SIMD_MM256_SET2_EPI16(Base::U_TO_BLUE_WEIGHT, 0);
 	}
 #endif// SIMD_AVX2_ENABLE
 }

@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
-#include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdConversion.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd

@@ -486,7 +486,7 @@ namespace Simd
         Yuv444ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
-    SIMD_INLINE void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha)
+    SIMD_INLINE void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha = 0xFF)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);

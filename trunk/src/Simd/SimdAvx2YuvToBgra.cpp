@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdInit.h"
-#include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdConversion.h"
 #include "Simd/SimdAvx2.h"
 
 namespace Simd
