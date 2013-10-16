@@ -318,19 +318,16 @@
 		<Unit filename="../../src/Simd/SimdBaseYuvToHue.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBgrToGray.h">
-			<Option virtualFolder="Sys/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdConfig.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdConst.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdDefs.h">
+		<Unit filename="../../src/Simd/SimdConversion.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdEnable.cpp">
+		<Unit filename="../../src/Simd/SimdDefs.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdEnable.h">
@@ -479,9 +476,6 @@
 		</Unit>
 		<Unit filename="../../src/Simd/SimdView.h">
 			<Option virtualFolder="Utils/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdYuvToBgr.h">
-			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Extensions>
 			<code_completion />

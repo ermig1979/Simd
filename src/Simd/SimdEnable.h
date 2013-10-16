@@ -24,15 +24,90 @@
 #ifndef __SimdEnable_h__
 #define __SimdEnable_h__
 
-#include "Simd/SimdDefs.h"
+#if defined(_MSC_VER)
+#define NOMINMAX
+#include <windows.h>
+#include <intrin.h>
+#elif defined(__GNUC__)
+#include <cpuid.h>
+#else
+#error Do not know how to detect CPU info
+#endif
+
+#include "Simd/SimdTypes.h"
 
 namespace Simd
 {
+    namespace Cpuid
+    {
+        enum Level
+        {
+            Ordinary = 1,
+            Extended = 7,
+        };
+
+        enum Register
+        {
+            Eax = 0,
+            Ebx = 1,
+            Ecx = 2,
+            Edx = 3,
+        };
+
+        enum Bit
+        {
+            //	Ordinary:
+            //Edx:
+            SSE2 = 1 << 26,
+
+            //Ecx:
+            SSE42 = 1 << 20,
+            OSXSAVE = 1 << 27,
+            AVX = 1 << 28,
+
+            //	Extended:
+            //Ebx:
+            AVX2 = 1 << 5,
+        };
+
+        SIMD_INLINE bool CheckBit(Level level, Register index, Bit bit)
+        {
+            unsigned int registers[4] = {0, 0, 0, 0};
+#if defined(_MSC_VER)
+            __cpuid((int*)registers, level);
+#elif (defined __GNUC__)
+            __get_cpuid(level, registers + Eax, registers + Ebx, registers + Ecx, registers + Edx);
+#else
+#error Do not know how to detect CPU info!
+#endif
+            return (registers[index] & bit) == bit;
+        }
+    }
+
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
-        bool SupportedByCPU();
-        bool SupportedByOS();
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE2);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                __m128d value = _mm_set1_pd(1.0);// try to execute of SSE2 instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
@@ -41,8 +116,27 @@ namespace Simd
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        bool SupportedByCPU();
-        bool SupportedByOS();
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                uint32_t value = _mm_crc32_u8(0, 1); // try to execute of SSE42 instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
@@ -51,8 +145,29 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE
 	namespace Avx
 	{
-		bool SupportedByCPU();
-		bool SupportedByOS();
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return
+                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                __m256d value = _mm256_set1_pd(1.0);// try to execute of AVX instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
@@ -61,8 +176,29 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
 	namespace Avx2
 	{
-		bool SupportedByCPU();
-		bool SupportedByOS();
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return
+                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                __m256i value = _mm256_abs_epi8(_mm256_set1_epi8(1));// try to execute of AVX2 instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}

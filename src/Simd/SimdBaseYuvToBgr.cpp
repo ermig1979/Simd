@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "Simd/SimdConversion.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
