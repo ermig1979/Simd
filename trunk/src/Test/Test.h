@@ -50,9 +50,9 @@ namespace Test
     bool LbpEstimateTest();
 
     bool SquareDifferenceSumTest();
-    bool MaskedSquareDifferenceSumTest();
+    bool SquareDifferenceSumMaskedTest();
     bool AbsDifferenceSumTest();
-    bool MaskedAbsDifferenceSumTest();
+    bool AbsDifferenceSumMaskedTest();
 
     bool ResizeBilinearTest();
 
@@ -81,18 +81,18 @@ namespace Test
     bool BackgroundGrowRangeFastTest();
     bool BackgroundIncrementCountTest();
     bool BackgroundAdjustRangeTest();
-    bool MaskedBackgroundAdjustRangeTest();
+    bool BackgroundAdjustRangeMaskedTest();
     bool BackgroundShiftRangeTest();
-    bool MaskedBackgroundShiftRangeTest();
+    bool BackgroundShiftRangeMaskedTest();
     bool BackgroundInitMaskTest();
 
     bool EdgeBackgroundGrowRangeSlowTest();
     bool EdgeBackgroundGrowRangeFastTest();
     bool EdgeBackgroundIncrementCountTest();
     bool EdgeBackgroundAdjustRangeTest();
-    bool MaskedEdgeBackgroundAdjustRangeTest();
+    bool EdgeBackgroundAdjustRangeMaskedTest();
     bool EdgeBackgroundShiftRangeTest();
-    bool MaskedEdgeBackgroundShiftRangeTest();
+    bool EdgeBackgroundShiftRangeMaskedTest();
 
     bool AddFeatureDifferenceTest();
 

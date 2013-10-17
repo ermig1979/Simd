@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -55,7 +55,7 @@ namespace Simd
     {
         assert(Compatible(value, lo, hi, difference) && value.format == View::Gray8);
 
-        AddFeatureDifference(value.data, value.stride, value.width, value.height, 
+        AddFeatureDifference(value.data, value.stride, value.width, value.height,
             lo.data, lo.stride, hi.data, hi.stride, weight, difference.data, difference.stride);
     }
 
@@ -86,7 +86,7 @@ namespace Simd
     {
         assert(Compatible(loValue, hiValue, loCount, hiCount) && loValue.format == View::Gray8);
 
-        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
+        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height,
             loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, threshold);
     }
 
@@ -94,8 +94,8 @@ namespace Simd
     {
         assert(Compatible(loValue, hiValue, loCount, hiCount, mask) && loValue.format == View::Gray8);
 
-        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height, 
-            loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, 
+        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height,
+            loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride,
             threshold, mask.data, mask.stride);
     }
 
@@ -110,7 +110,7 @@ namespace Simd
     {
         assert(Compatible(value, lo, hi, mask) && value.format == View::Gray8);
 
-        BackgroundShiftRange(value.data, value.stride, value.width, value.height, 
+        BackgroundShiftRange(value.data, value.stride, value.width, value.height,
             lo.data, lo.stride, hi.data, hi.stride, mask.data, mask.stride);
     }
 
@@ -160,7 +160,7 @@ namespace Simd
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
-        AveragingBinarization(src.data, src.stride, src.width, src.height, value, 
+        AveragingBinarization(src.data, src.stride, src.width, src.height, value,
             neighborhood, threshold, positive, negative, dst.data, dst.stride, compareType);
     }
 
@@ -175,7 +175,7 @@ namespace Simd
     {
         assert(Compatible(src, dst));
 
-        CopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(), 
+        CopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
             frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
     }
 
@@ -219,7 +219,7 @@ namespace Simd
     {
         assert(Compatible(backgroundCount, backgroundValue) && backgroundCount.format == View::Gray8);
 
-        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height, 
+        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
             backgroundValue.data, backgroundValue.stride, threshold);
     }
 
@@ -227,7 +227,7 @@ namespace Simd
     {
         assert(Compatible(backgroundCount, backgroundValue, mask) && backgroundCount.format == View::Gray8);
 
-        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height, 
+        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
             backgroundValue.data, backgroundValue.stride, threshold, mask.data, mask.stride);
     }
 
@@ -242,7 +242,7 @@ namespace Simd
     {
         assert(Compatible(value, background, mask) && value.format == View::Gray8);
 
-        EdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height, 
+        EdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height,
             background.data, background.stride, mask.data, mask.stride);
     }
 
@@ -253,7 +253,7 @@ namespace Simd
 
     SIMD_INLINE void FillFrame(View & dst, const Rectangle<ptrdiff_t> & frame, uchar value)
     {
-        FillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), 
+        FillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
             frame.left, frame.top, frame.right, frame.bottom, value);
     }
 
@@ -327,7 +327,7 @@ namespace Simd
         ReduceGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
-    SIMD_INLINE void ReduceGray3x3(const View & src, View & dst, bool compensation)
+    SIMD_INLINE void ReduceGray3x3(const View & src, View & dst, bool compensation = true)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
@@ -341,7 +341,7 @@ namespace Simd
         ReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
-    SIMD_INLINE void ReduceGray5x5(const View & src, View & dst, bool compensation)
+    SIMD_INLINE void ReduceGray5x5(const View & src, View & dst, bool compensation = true)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
