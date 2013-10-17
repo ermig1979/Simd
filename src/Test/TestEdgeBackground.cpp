@@ -202,7 +202,7 @@ namespace Test
 
 #define FUNC4(function) Func4(function, std::string(#function))
 
-	bool MaskedEdgeBackgroundAdjustRangeTest(int width, int height, const Func4 & f1, const Func4 & f2)
+	bool EdgeBackgroundAdjustRangeMaskedTest(int width, int height, const Func4 & f1, const Func4 & f2)
 	{
 		bool result = true;
 
@@ -253,7 +253,7 @@ namespace Test
 
 #define FUNC5(function) Func5(function, std::string(#function))
 
-	bool MaskedEdgeBackgroundShiftRangeTest(int width, int height, const Func5 & f1, const Func5 & f2)
+	bool EdgeBackgroundShiftRangeMaskedTest(int width, int height, const Func5 & f1, const Func5 & f2)
 	{
 		bool result = true;
 
@@ -358,20 +358,20 @@ namespace Test
 		return result;
 	}
 
-	bool MaskedEdgeBackgroundAdjustRangeTest()
+	bool EdgeBackgroundAdjustRangeMaskedTest()
 	{
 		bool result = true;
 
-		result = result && MaskedEdgeBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
-		result = result && MaskedEdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
-        result = result && MaskedEdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
+		result = result && EdgeBackgroundAdjustRangeMaskedTest(W, H, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
+		result = result && EdgeBackgroundAdjustRangeMaskedTest(W + 1, H - 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
+        result = result && EdgeBackgroundAdjustRangeMaskedTest(W - 1, H + 1, FUNC4(Simd::Base::EdgeBackgroundAdjustRange), FUNC4(Simd::EdgeBackgroundAdjustRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && MaskedEdgeBackgroundAdjustRangeTest(W, H, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
-            result = result && MaskedEdgeBackgroundAdjustRangeTest(W + 1, H - 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
-            result = result && MaskedEdgeBackgroundAdjustRangeTest(W - 1, H + 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
+            result = result && EdgeBackgroundAdjustRangeMaskedTest(W, H, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
+            result = result && EdgeBackgroundAdjustRangeMaskedTest(W + 1, H - 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
+            result = result && EdgeBackgroundAdjustRangeMaskedTest(W - 1, H + 1, FUNC4(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC4(Simd::Avx2::EdgeBackgroundAdjustRange));
         }
 #endif 
 
@@ -398,20 +398,20 @@ namespace Test
 		return result;
 	}
 
-	bool MaskedEdgeBackgroundShiftRangeTest()
+	bool EdgeBackgroundShiftRangeMaskedTest()
 	{
 		bool result = true;
 
-		result = result && MaskedEdgeBackgroundShiftRangeTest(W, H, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
-		result = result && MaskedEdgeBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
-        result = result && MaskedEdgeBackgroundShiftRangeTest(W - 1, H + 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
+		result = result && EdgeBackgroundShiftRangeMaskedTest(W, H, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
+		result = result && EdgeBackgroundShiftRangeMaskedTest(W + 1, H - 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
+        result = result && EdgeBackgroundShiftRangeMaskedTest(W - 1, H + 1, FUNC5(Simd::Base::EdgeBackgroundShiftRange), FUNC5(Simd::EdgeBackgroundShiftRange));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && MaskedEdgeBackgroundShiftRangeTest(W, H, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
-            result = result && MaskedEdgeBackgroundShiftRangeTest(W + 1, H - 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
-            result = result && MaskedEdgeBackgroundShiftRangeTest(W - 1, H + 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
+            result = result && EdgeBackgroundShiftRangeMaskedTest(W, H, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
+            result = result && EdgeBackgroundShiftRangeMaskedTest(W + 1, H - 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
+            result = result && EdgeBackgroundShiftRangeMaskedTest(W - 1, H + 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRange), FUNC5(Simd::Avx2::EdgeBackgroundShiftRange));
         }
 #endif 
 

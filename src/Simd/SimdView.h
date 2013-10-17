@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2013 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -63,9 +63,9 @@ namespace Simd
         const Format format;
         unsigned char * const data;
 
-        View(); 
-        View(const View & view); 
-        View(size_t w, size_t h, ptrdiff_t s, Format f, void * d); 
+        View();
+        View(const View & view);
+        View(size_t w, size_t h, ptrdiff_t s, Format f, void * d);
         View(size_t w, size_t h, Format f, void * d = NULL, size_t align = Simd::DEFAULT_MEMORY_ALIGN);
         View(const Point<ptrdiff_t> size, Format f);
 
@@ -74,6 +74,8 @@ namespace Simd
         View * Clone() const;
 
         View & operator = (const View & view);
+
+        View & Ref();
 
         void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = Simd::DEFAULT_MEMORY_ALIGN);
         void Recreate(Point<ptrdiff_t> size, Format f);
@@ -191,7 +193,7 @@ namespace Simd
 
     SIMD_INLINE View & View::operator = (const View & view)
     {
-        if(this !=  &view)
+        if(this != &view)
         {
             if(_owner && data)
             {
@@ -205,6 +207,11 @@ namespace Simd
             *(unsigned char**)&data = view.data;
             _owner = false;
         }
+        return *this;
+    }
+
+    SIMD_INLINE View & View::Ref()
+    {
         return *this;
     }
 
@@ -265,19 +272,19 @@ namespace Simd
     {
         switch(position)
         {
-        case TopLeft: 
+        case TopLeft:
             return Region(0, 0, size.x, size.y);
         case TopCenter:
             return Region((width - size.x)/2, 0, (width + size.x)/2, size.y);
         case TopRight:
             return Region(width - size.x, 0, width, size.y);
-        case MiddleLeft: 
+        case MiddleLeft:
             return Region(0, (height - size.y)/2, size.x, (height + size.y)/2);
         case MiddleCenter:
             return Region((width - size.x)/2, (height - size.y)/2, (width + size.x)/2, (height + size.y)/2);
         case MiddleRight:
             return Region(width - size.x, (height - size.y)/2, width, (height + size.y)/2);
-        case BottomLeft: 
+        case BottomLeft:
             return Region(0, height - size.y, size.x, height);
         case BottomCenter:
             return Region((width - size.x)/2, height - size.y, (width + size.x)/2, height);
@@ -294,40 +301,40 @@ namespace Simd
         return View(width, height, -stride, format, data + (height - 1)*stride);
     }
 
-    SIMD_INLINE Point<ptrdiff_t> View::Size() const 
+    SIMD_INLINE Point<ptrdiff_t> View::Size() const
     {
         return Point<ptrdiff_t>(width, height);
     }
 
-    SIMD_INLINE size_t View::DataSize() const 
+    SIMD_INLINE size_t View::DataSize() const
     {
         return stride*height;
     }
 
-    SIMD_INLINE size_t View::Area() const 
+    SIMD_INLINE size_t View::Area() const
     {
         return width*height;
     }
 
-    template <class T> 
+    template <class T>
     SIMD_INLINE const T & View::At(size_t x, size_t y) const
     {
         return ((const T*)(data + y*stride))[x];
     }
 
-    template <class T> 
+    template <class T>
     SIMD_INLINE T & View::At(size_t x, size_t y)
     {
         return ((T*)(data + y*stride))[x];
     }
 
-    template <class T> 
+    template <class T>
     SIMD_INLINE const T & View::At(const Point<ptrdiff_t> & p) const
     {
         return At<T>(p.x, p.y);
     }
 
-    template <class T> 
+    template <class T>
     SIMD_INLINE T & View::At(const Point<ptrdiff_t> & p)
     {
         return At<T>(p.x, p.y);
@@ -403,33 +410,33 @@ namespace Simd
 
     SIMD_INLINE bool EqualSize(const View & a, const View & b)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height);
     }
 
     SIMD_INLINE bool EqualSize(const View & a, const View & b, const View & c)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height) &&
             (a.width == c.width && a.height == c.height);
     }
 
     SIMD_INLINE bool Compatible(const View & a, const View & b)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height && a.format == b.format);
     }
 
     SIMD_INLINE bool Compatible(const View & a, const View & b, const View & c)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&
             (a.width == c.width && a.height == c.height && a.format == c.format);
     }
 
     SIMD_INLINE bool Compatible(const View & a, const View & b, const View & c, const View & d)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&
             (a.width == c.width && a.height == c.height && a.format == c.format) &&
             (a.width == d.width && a.height == d.height && a.format == d.format);
@@ -437,7 +444,7 @@ namespace Simd
 
     SIMD_INLINE bool Compatible(const View & a, const View & b, const View & c, const View & d, const View & e)
     {
-        return 
+        return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&
             (a.width == c.width && a.height == c.height && a.format == c.format) &&
             (a.width == d.width && a.height == d.height && a.format == d.format) &&

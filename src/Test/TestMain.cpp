@@ -66,9 +66,9 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(LbpEstimateTest);
 
     EXECUTE_TEST(SquareDifferenceSumTest);
-    EXECUTE_TEST(MaskedSquareDifferenceSumTest);
+    EXECUTE_TEST(SquareDifferenceSumMaskedTest);
     EXECUTE_TEST(AbsDifferenceSumTest);
-    EXECUTE_TEST(MaskedAbsDifferenceSumTest);
+    EXECUTE_TEST(AbsDifferenceSumMaskedTest);
 
     EXECUTE_TEST(ResizeBilinearTest);
 
@@ -97,18 +97,18 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(BackgroundGrowRangeFastTest);
     EXECUTE_TEST(BackgroundIncrementCountTest);
     EXECUTE_TEST(BackgroundAdjustRangeTest);
-    EXECUTE_TEST(MaskedBackgroundAdjustRangeTest);
+    EXECUTE_TEST(BackgroundAdjustRangeMaskedTest);
     EXECUTE_TEST(BackgroundShiftRangeTest);
-    EXECUTE_TEST(MaskedBackgroundShiftRangeTest);
+    EXECUTE_TEST(BackgroundShiftRangeMaskedTest);
     EXECUTE_TEST(BackgroundInitMaskTest);
 
     EXECUTE_TEST(EdgeBackgroundGrowRangeSlowTest);
     EXECUTE_TEST(EdgeBackgroundGrowRangeFastTest);
     EXECUTE_TEST(EdgeBackgroundIncrementCountTest);
     EXECUTE_TEST(EdgeBackgroundAdjustRangeTest);
-    EXECUTE_TEST(MaskedEdgeBackgroundAdjustRangeTest);
+    EXECUTE_TEST(EdgeBackgroundAdjustRangeMaskedTest);
     EXECUTE_TEST(EdgeBackgroundShiftRangeTest);
-    EXECUTE_TEST(MaskedEdgeBackgroundShiftRangeTest);
+    EXECUTE_TEST(EdgeBackgroundShiftRangeMaskedTest);
 
     EXECUTE_TEST(AddFeatureDifferenceTest);
 
