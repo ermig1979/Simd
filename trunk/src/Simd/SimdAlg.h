@@ -263,6 +263,16 @@ namespace Simd
         SimdLbpEstimate(src, srcStride, width, height, dst, dstStride);
     }
 
+    SIMD_INLINE void MedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+    {
+        SimdMedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    }
+
+    SIMD_INLINE void MedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+    {
+        SimdMedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    }
+
     SIMD_INLINE void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
     {
         SimdMedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);

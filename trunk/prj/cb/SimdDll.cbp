@@ -159,10 +159,7 @@
 		<Unit filename="../../src/Simd/SimdAvx2Lbp.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAvx2MedianFilterSquare3x3.cpp">
-			<Option virtualFolder="Avx2/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdAvx2MedianFilterSquare5x5.cpp">
+		<Unit filename="../../src/Simd/SimdAvx2MedianFilter.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2Operation.cpp">
@@ -267,10 +264,7 @@
 		<Unit filename="../../src/Simd/SimdBaseLbp.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdBaseMedianFilterSquare3x3.cpp">
-			<Option virtualFolder="Base/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdBaseMedianFilterSquare5x5.cpp">
+		<Unit filename="../../src/Simd/SimdBaseMedianFilter.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseOperation.cpp">
@@ -408,10 +402,7 @@
 		<Unit filename="../../src/Simd/SimdSse2Lbp.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdSse2MedianFilterSquare3x3.cpp">
-			<Option virtualFolder="Sse2/" />
-		</Unit>
-		<Unit filename="../../src/Simd/SimdSse2MedianFilterSquare5x5.cpp">
+		<Unit filename="../../src/Simd/SimdSse2MedianFilter.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2Operation.cpp">

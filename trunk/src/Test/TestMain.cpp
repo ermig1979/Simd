@@ -26,7 +26,7 @@
 #include "Test/Test.h"
 
 #define EXECUTE_TEST(test)\
-if(argc < 2 || std::string(argv[1]) == std::string(#test)) \
+if(argc < 2 || std::string(#test).find(argv[1]) != std::string::npos) \
 {\
 	std::cout << #test << " is started :" << std::endl; \
 	bool result = test(); \
@@ -59,6 +59,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(Yuv444ToBgraTest);
     EXECUTE_TEST(Yuv420ToBgraTest);
 
+    EXECUTE_TEST(MedianFilterRhomb3x3Test);
+    EXECUTE_TEST(MedianFilterRhomb5x5Test);
     EXECUTE_TEST(MedianFilterSquare3x3Test);
     EXECUTE_TEST(MedianFilterSquare5x5Test);
     EXECUTE_TEST(GaussianBlur3x3Test);

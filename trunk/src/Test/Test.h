@@ -43,6 +43,8 @@ namespace Test
     bool Yuv444ToBgraTest();
     bool Yuv420ToBgraTest();
 
+    bool MedianFilterRhomb3x3Test();
+    bool MedianFilterRhomb5x5Test();
     bool MedianFilterSquare3x3Test();
     bool MedianFilterSquare5x5Test();
     bool GaussianBlur3x3Test();
