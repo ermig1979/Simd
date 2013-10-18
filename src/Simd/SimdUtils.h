@@ -292,6 +292,20 @@ namespace Simd
         Histogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
+    SIMD_INLINE void MedianFilterRhomb3x3(const View & src, View & dst)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        MedianFilterRhomb3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+    }
+
+    SIMD_INLINE void MedianFilterRhomb5x5(const View & src, View & dst)
+    {
+        assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+        MedianFilterRhomb5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+    }
+
     SIMD_INLINE void MedianFilterSquare3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);

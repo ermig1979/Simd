@@ -146,6 +146,12 @@ namespace Simd
 
         void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
 
+        void MedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
+
+        void MedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uchar * dst, size_t dstStride);
+
         void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uchar * dst, size_t dstStride);
 

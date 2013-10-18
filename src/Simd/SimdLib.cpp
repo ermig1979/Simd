@@ -615,6 +615,36 @@ SIMD_API void SimdLbpEstimate(const uchar * src, size_t srcStride, size_t width,
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdMedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+SIMD_API void SimdMedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width*channelCount >= Avx2::A)
+        Avx2::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width*channelCount >= Sse2::A)
+        Sse2::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
 SIMD_API void SimdMedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

@@ -129,6 +129,34 @@ namespace Test
         return result;
     }
 
+    bool MedianFilterRhomb3x3Test()
+    {
+        bool result = true;
+
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, Simd::MedianFilterRhomb3x3));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, Simd::Avx2::MedianFilterRhomb3x3));
+#endif 
+
+        return result;
+    }
+
+    bool MedianFilterRhomb5x5Test()
+    {
+        bool result = true;
+
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, Simd::MedianFilterRhomb5x5));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, Simd::Avx2::MedianFilterRhomb5x5));
+#endif 
+
+        return result;
+    }
+
 	bool MedianFilterSquare3x3Test()
 	{
 		bool result = true;

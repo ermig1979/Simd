@@ -173,6 +173,12 @@ extern "C"
 
     SIMD_API void SimdLbpEstimate(const unsigned char * src, size_t srcStride, size_t width, size_t height, unsigned char * dst, size_t dstStride);
 
+    SIMD_API void SimdMedianFilterRhomb3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, unsigned char * dst, size_t dstStride);
+
+    SIMD_API void SimdMedianFilterRhomb5x5(const unsigned char * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, unsigned char * dst, size_t dstStride);
+
     SIMD_API void SimdMedianFilterSquare3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, unsigned char * dst, size_t dstStride);
 

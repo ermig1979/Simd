@@ -3,9 +3,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test.vcxproj", "{423128F2-9D4E-408D-9123-49CE57A32B0A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdLib", "SimdLib.vcxproj", "{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdDll", "SimdLib.vcxproj", "{679EEE54-EE9A-41D5-AD3D-FD70348BCF14}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdDll", "SimdDll.vcxproj", "{8C6214E5-CB36-40B5-B2BD-CB76C6E63DFD}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdLib", "SimdDll.vcxproj", "{8C6214E5-CB36-40B5-B2BD-CB76C6E63DFD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{679EEE54-EE9A-41D5-AD3D-FD70348BCF14} = {679EEE54-EE9A-41D5-AD3D-FD70348BCF14}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
