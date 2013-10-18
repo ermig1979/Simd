@@ -111,9 +111,6 @@
 		<Unit filename="../../src/Simd/SimdAlg.h">
 			<Option virtualFolder="Lib/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdAll.h">
-			<Option virtualFolder="Sys/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2.h">
 			<Option virtualFolder="Avx2/" />
 		</Unit>

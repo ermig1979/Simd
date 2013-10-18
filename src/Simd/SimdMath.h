@@ -65,7 +65,7 @@ namespace Simd
 
     SIMD_INLINE int Round(double value)
     {
-#if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__)
+#if defined(SIMD_SSE2_ENABLE) && ((defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined(__x86_64__))) 
         __m128d t = _mm_set_sd(value);
         return _mm_cvtsd_si32(t);
 #else
