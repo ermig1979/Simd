@@ -21,19 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "Simd/SimdConfig.h"
 
-#include "Simd/SimdLib.h"
+#if defined(WIN32) && !defined(SIMD_STATIC)
 
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdVersion.h"
-#include "Simd/SimdConst.h"
+#define SIMD_EXPORTS
 
-#include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
-#include "Simd/SimdSse42.h"
-#include "Simd/SimdAvx2.h"
-
-#ifdef WIN32
 #include <windows.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
@@ -50,12 +43,23 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 }
 #endif//WIN32
 
+#include "Simd/SimdLib.h"
+
+#include "Simd/SimdEnable.h"
+#include "Simd/SimdVersion.h"
+#include "Simd/SimdConst.h"
+
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse42.h"
+#include "Simd/SimdAvx2.h"
+
+using namespace Simd;
+
 SIMD_API const char * SimdVersion()
 {
     return SIMD_VERSION;
 }
-
-using namespace Simd;
 
 SIMD_API void SimdAbsDifferenceSum(const uchar *a, size_t aStride, const uchar * b, size_t bStride, 
                                    size_t width, size_t height, uint64_t * sum)
