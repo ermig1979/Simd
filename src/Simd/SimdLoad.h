@@ -123,6 +123,28 @@ namespace Simd
 			return _mm256_load_si256(p); 
 		}
 
+        template <bool align> SIMD_INLINE __m128i LoadHalf(const __m128i * p);
+
+        template <> SIMD_INLINE __m128i LoadHalf<false>(const __m128i * p)
+        {
+            return _mm_loadu_si128(p); 
+        }
+
+        template <> SIMD_INLINE __m128i LoadHalf<true>(const __m128i * p)
+        {
+            return _mm_load_si128(p); 
+        }
+
+        template <size_t count> SIMD_INLINE __m128i LoadHalfBeforeFirst(__m128i first)
+        {
+            return _mm_or_si128(_mm_slli_si128(first, count), _mm_and_si128(first, _mm_srli_si128(Sse2::K_INV_ZERO, HA - count)));
+        }
+
+        template <size_t count> SIMD_INLINE __m128i LoadHalfAfterLast(__m128i last)
+        {
+            return _mm_or_si128(_mm_srli_si128(last, count), _mm_and_si128(last, _mm_slli_si128(Sse2::K_INV_ZERO, HA - count)));
+        }
+
         template <bool align> SIMD_INLINE __m256i LoadPermuted(const __m256i * p)
         {
             return _mm256_permute4x64_epi64(Load<align>(p), 0xD8); 
@@ -135,37 +157,37 @@ namespace Simd
 
         template <bool align, size_t step> SIMD_INLINE __m256i LoadBeforeFirst(const uchar * p)
         {
-            __m128i lo = Sse2::LoadBeforeFirst<step>(Sse2::Load<align>((__m128i*)p));
-            __m128i hi = _mm_loadu_si128((__m128i*)(p + Sse2::A - step));
+            __m128i lo = LoadHalfBeforeFirst<step>(LoadHalf<align>((__m128i*)p));
+            __m128i hi = _mm_loadu_si128((__m128i*)(p + HA - step));
             return _mm256_inserti128_si256(_mm256_castsi128_si256(lo), hi, 0x1);
         }
 
         template <bool align, size_t step> SIMD_INLINE void LoadBeforeFirst(const uchar * p, __m256i & first, __m256i & second)
         {
-            __m128i firstLo = Sse2::LoadBeforeFirst<step>(Sse2::Load<align>((__m128i*)p));
-            __m128i firstHi= _mm_loadu_si128((__m128i*)(p + Sse2::A - step));
+            __m128i firstLo = LoadHalfBeforeFirst<step>(LoadHalf<align>((__m128i*)p));
+            __m128i firstHi= _mm_loadu_si128((__m128i*)(p + HA - step));
             first = _mm256_inserti128_si256(_mm256_castsi128_si256(firstLo), firstHi, 0x1);
 
-            __m128i secondLo = Sse2::LoadBeforeFirst<step>(firstLo);
-            __m128i secondHi= _mm_loadu_si128((__m128i*)(p + Sse2::A - 2*step));
+            __m128i secondLo = LoadHalfBeforeFirst<step>(firstLo);
+            __m128i secondHi= _mm_loadu_si128((__m128i*)(p + HA - 2*step));
             second = _mm256_inserti128_si256(_mm256_castsi128_si256(secondLo), secondHi, 0x1);
         }
 
         template <bool align, size_t step> SIMD_INLINE __m256i LoadAfterLast(const uchar * p)
         {
             __m128i lo = _mm_loadu_si128((__m128i*)(p + step)); 
-            __m128i hi = Sse2::LoadAfterLast<step>(Sse2::Load<align>((__m128i*)(p + Sse2::A)));
+            __m128i hi = LoadHalfAfterLast<step>(LoadHalf<align>((__m128i*)(p + HA)));
             return _mm256_inserti128_si256(_mm256_castsi128_si256(lo), hi, 0x1);
         }
 
         template <bool align, size_t step> SIMD_INLINE void LoadAfterLast(const uchar * p, __m256i & first, __m256i & second)
         {
             __m128i firstLo = _mm_loadu_si128((__m128i*)(p + step)); 
-            __m128i firstHi = Sse2::LoadAfterLast<step>(Sse2::Load<align>((__m128i*)(p + Sse2::A)));
+            __m128i firstHi = LoadHalfAfterLast<step>(LoadHalf<align>((__m128i*)(p + HA)));
             first = _mm256_inserti128_si256(_mm256_castsi128_si256(firstLo), firstHi, 0x1);
 
             __m128i secondLo = _mm_loadu_si128((__m128i*)(p + 2*step)); 
-            __m128i secondHi = Sse2::LoadAfterLast<step>(firstHi);
+            __m128i secondHi = LoadHalfAfterLast<step>(firstHi);
             second = _mm256_inserti128_si256(_mm256_castsi128_si256(secondLo), secondHi, 0x1);
         }
 

@@ -74,7 +74,7 @@ namespace Simd
 
 		template <bool align> SIMD_INLINE __m256i LoadUnpacked(const void * src)
 		{
-			return _mm256_cvtepu8_epi16(Sse2::Load<align>((const __m128i*)src));
+			return _mm256_cvtepu8_epi16(LoadHalf<align>((const __m128i*)src));
 		}
 
 		template<bool align> SIMD_INLINE void FirstRow5x5(__m256i src, Buffer & buffer, size_t offset)
