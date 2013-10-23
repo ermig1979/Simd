@@ -44,6 +44,21 @@ namespace Simd
         AbsDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
     }
 
+    SIMD_INLINE void AbsDifferenceSums3x3(const View & current, const View & background, uint64_t * sums)
+    {
+        assert(Compatible(current, background) && current.format == View::Gray8 && current.width > 2 && current.height > 2);
+
+        AbsDifferenceSums3x3(current.data, current.stride, background.data, background.stride, current.width, current.height, sums);
+    }
+
+    SIMD_INLINE void AbsDifferenceSums3x3(const View & current, const View & background, const View & mask, uchar index, uint64_t * sums)
+    {
+        assert(Compatible(current, background, mask) && current.format == View::Gray8 && current.width > 2 && current.height > 2);
+
+        AbsDifferenceSums3x3(current.data, current.stride, background.data, background.stride, 
+            mask.data, mask.stride, index, current.width, current.height, sums);
+    }
+
     SIMD_INLINE void AbsGradientSaturatedSum(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8 && src.height >= 3 && src.width >= 3);

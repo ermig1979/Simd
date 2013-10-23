@@ -93,6 +93,38 @@ SIMD_API void SimdAbsDifferenceSumMasked(const uchar *a, size_t aStride, const u
         Base::AbsDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 }
 
+SIMD_API void SimdAbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar * background, size_t backgroundStride,
+                                       size_t width, size_t height, uint64_t * sums)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A + 2)
+        Avx2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width > Sse2::A + 2)
+        Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+    else
+#endif
+        Base::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+}
+
+SIMD_API void SimdAbsDifferenceSums3x3Masked(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
+                                             const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A + 2)
+        Avx2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width > Sse2::A + 2)
+        Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+    else
+#endif
+        Base::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+}
+
 SIMD_API void SimdAbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
                                           uchar * dst, size_t dstStride)
 {

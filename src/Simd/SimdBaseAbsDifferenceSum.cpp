@@ -67,5 +67,90 @@ namespace Simd
 				mask += maskStride;
 			}
 		}
+
+        void AbsDifferenceSums3x3(const uchar * current, size_t currentStride, const uchar * background, size_t backgroundStride,
+            size_t width, size_t height, uint64_t * sums)
+        {
+            assert(width > 2 && height > 2);
+
+            for(size_t i = 0; i < 9; ++i)
+                sums[i] = 0;
+
+            height -= 2;
+            width -= 2;
+            current += 1 + currentStride;
+            background += 1 + backgroundStride;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSums[9];
+                for(size_t i = 0; i < 9; ++i)
+                    rowSums[i] = 0;
+
+                for(size_t col = 0; col < width; ++col)
+                {
+                    int value = current[col];
+                    rowSums[0] += AbsDifferenceU8(value, background[col - backgroundStride - 1]);
+                    rowSums[1] += AbsDifferenceU8(value, background[col - backgroundStride]);
+                    rowSums[2] += AbsDifferenceU8(value, background[col - backgroundStride + 1]);
+                    rowSums[3] += AbsDifferenceU8(value, background[col - 1]);
+                    rowSums[4] += AbsDifferenceU8(value, background[col]);
+                    rowSums[5] += AbsDifferenceU8(value, background[col + 1]);
+                    rowSums[6] += AbsDifferenceU8(value, background[col + backgroundStride - 1]);
+                    rowSums[7] += AbsDifferenceU8(value, background[col + backgroundStride]);
+                    rowSums[8] += AbsDifferenceU8(value, background[col + backgroundStride + 1]);
+                }
+
+                for(size_t i = 0; i < 9; ++i)
+                    sums[i] += rowSums[i];
+
+                current += currentStride;
+                background += backgroundStride;
+            }
+        }
+
+        void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
+            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+        {
+            assert(width > 2 && height > 2);
+
+            for(size_t i = 0; i < 9; ++i)
+                sums[i] = 0;
+
+            height -= 2;
+            width -= 2;
+            current += 1 + currentStride;
+            background += 1 + backgroundStride;
+            mask += 1 + maskStride;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSums[9];
+                for(size_t i = 0; i < 9; ++i)
+                    rowSums[i] = 0;
+
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col] == index)
+                    {
+                        int value = current[col];
+                        rowSums[0] += AbsDifferenceU8(value, background[col - backgroundStride - 1]);
+                        rowSums[1] += AbsDifferenceU8(value, background[col - backgroundStride]);
+                        rowSums[2] += AbsDifferenceU8(value, background[col - backgroundStride + 1]);
+                        rowSums[3] += AbsDifferenceU8(value, background[col - 1]);
+                        rowSums[4] += AbsDifferenceU8(value, background[col]);
+                        rowSums[5] += AbsDifferenceU8(value, background[col + 1]);
+                        rowSums[6] += AbsDifferenceU8(value, background[col + backgroundStride - 1]);
+                        rowSums[7] += AbsDifferenceU8(value, background[col + backgroundStride]);
+                        rowSums[8] += AbsDifferenceU8(value, background[col + backgroundStride + 1]);
+                    }
+                }
+
+                for(size_t i = 0; i < 9; ++i)
+                    sums[i] += rowSums[i];
+
+                current += currentStride;
+                background += backgroundStride;
+                mask += maskStride;
+            }
+        }
 	}
 }

@@ -38,6 +38,12 @@ namespace Simd
 		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
 			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
 
+        void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar * background, size_t backgroundStride,
+            size_t width, size_t height, uint64_t * sums);
+
+        void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
+            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums);
+
         void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
 
         void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 

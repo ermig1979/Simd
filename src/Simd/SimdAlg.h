@@ -41,6 +41,18 @@ namespace Simd
         SimdAbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     }
 
+    SIMD_INLINE void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar * background, size_t backgroundStride,
+        size_t width, size_t height, uint64_t * sums)
+    {
+        SimdAbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+    }
+
+    SIMD_INLINE void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
+        const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+    {
+        SimdAbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+    }
+
     SIMD_INLINE void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
     {
         SimdAbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);

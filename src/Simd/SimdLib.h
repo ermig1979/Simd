@@ -62,7 +62,13 @@ extern "C"
         size_t width, size_t height, unsigned long long * sum);
 
     SIMD_API void SimdAbsDifferenceSumMasked(const unsigned char *a, size_t aStride, const unsigned char *b, size_t bStride,
-        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sum);
+        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sums);
+
+    SIMD_API void SimdAbsDifferenceSums3x3(const unsigned char *current, size_t currentStride, const unsigned char * background, size_t backgroundStride,
+        size_t width, size_t height, unsigned long long * sums);
+
+    SIMD_API void SimdAbsDifferenceSums3x3Masked(const unsigned char *current, size_t currentStride, const unsigned char *background, size_t backgroundStride,
+        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sums);
 
     SIMD_API void SimdAbsGradientSaturatedSum(const unsigned char * src, size_t srcStride, size_t width, size_t height,
         unsigned char * dst, size_t dstStride);
