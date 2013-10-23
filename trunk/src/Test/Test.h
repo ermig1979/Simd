@@ -55,6 +55,8 @@ namespace Test
     bool SquareDifferenceSumMaskedTest();
     bool AbsDifferenceSumTest();
     bool AbsDifferenceSumMaskedTest();
+    bool AbsDifferenceSums3x3Test();
+    bool AbsDifferenceSums3x3MaskedTest();
 
     bool ResizeBilinearTest();
 

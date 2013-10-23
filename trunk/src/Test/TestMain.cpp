@@ -71,6 +71,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(SquareDifferenceSumMaskedTest);
     EXECUTE_TEST(AbsDifferenceSumTest);
     EXECUTE_TEST(AbsDifferenceSumMaskedTest);
+    EXECUTE_TEST(AbsDifferenceSums3x3Test);
+    EXECUTE_TEST(AbsDifferenceSums3x3MaskedTest);
 
     EXECUTE_TEST(ResizeBilinearTest);
 
