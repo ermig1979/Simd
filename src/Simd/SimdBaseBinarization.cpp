@@ -22,29 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-        template <SimdCompareType type> SIMD_INLINE bool Compare(const uchar & src, const uchar & b);
-
-        template <> SIMD_INLINE bool Compare<SimdCompareGreaterThen>(const uchar & a, const uchar & b)
-        {
-            return a > b;
-        }
-
-        template <> SIMD_INLINE bool Compare<SimdCompareLesserThen>(const uchar & a, const uchar & b)
-        {
-            return a < b;
-        }
-
-        template <> SIMD_INLINE bool Compare<SimdCompareEqualTo>(const uchar & a, const uchar & b)
-        {
-            return a == b;
-        }
-
         template <SimdCompareType compareType> 
 		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
 			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
@@ -63,13 +47,19 @@ namespace Simd
         {
             switch(compareType)
             {
-            case SimdCompareGreaterThen:
-                return Binarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case SimdCompareLesserThen:
-                return Binarization<SimdCompareLesserThen>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            case SimdCompareEqualTo:
-                return Binarization<SimdCompareEqualTo>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
-            default:
+            case SimdCompareEqual: 
+                return Binarization<SimdCompareEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareNotEqual: 
+                return Binarization<SimdCompareNotEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreater: 
+                return Binarization<SimdCompareGreater>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareGreaterOrEqual: 
+                return Binarization<SimdCompareGreaterOrEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesser: 
+                return Binarization<SimdCompareLesser>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            case SimdCompareLesserOrEqual: 
+                return Binarization<SimdCompareLesserOrEqual>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
+            default: 
                 assert(0);
             }
         }
@@ -159,13 +149,19 @@ namespace Simd
         {
             switch(compareType)
             {
-            case SimdCompareGreaterThen:
-                return AveragingBinarization<SimdCompareGreaterThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case SimdCompareLesserThen:
-                return AveragingBinarization<SimdCompareLesserThen>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            case SimdCompareEqualTo:
-                return AveragingBinarization<SimdCompareEqualTo>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
-            default:
+            case SimdCompareEqual: 
+                return AveragingBinarization<SimdCompareEqual>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareNotEqual: 
+                return AveragingBinarization<SimdCompareNotEqual>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareGreater: 
+                return AveragingBinarization<SimdCompareGreater>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareGreaterOrEqual: 
+                return AveragingBinarization<SimdCompareGreaterOrEqual>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareLesser: 
+                return AveragingBinarization<SimdCompareLesser>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            case SimdCompareLesserOrEqual: 
+                return AveragingBinarization<SimdCompareLesserOrEqual>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
+            default: 
                 assert(0);
             }
         }

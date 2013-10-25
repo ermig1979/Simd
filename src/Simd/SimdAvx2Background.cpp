@@ -27,6 +27,7 @@
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdAvx2.h"
 namespace Simd
 {
@@ -39,8 +40,8 @@ namespace Simd
 			const __m256i _lo = Load<align>((__m256i*)lo);
 			const __m256i _hi = Load<align>((__m256i*)hi);
 
-			const __m256i inc = _mm256_and_si256(tailMask, GreaterThenU8(_value, _hi));
-			const __m256i dec = _mm256_and_si256(tailMask, LesserThenU8(_value, _lo));
+			const __m256i inc = _mm256_and_si256(tailMask, GreaterU8(_value, _hi));
+			const __m256i dec = _mm256_and_si256(tailMask, LesserU8(_value, _lo));
 
 			Store<align>((__m256i*)lo, _mm256_subs_epu8(_lo, dec));
 			Store<align>((__m256i*)hi, _mm256_adds_epu8(_hi, inc));
@@ -132,8 +133,8 @@ namespace Simd
 			const __m256i _hiValue = Load<align>((__m256i*)(hiValue + offset));
 			const __m256i _hiCount = Load<align>((__m256i*)(hiCount + offset));
 
-			const __m256i incLo = _mm256_and_si256(tailMask, LesserThenU8(_value, _loValue));
-			const __m256i incHi = _mm256_and_si256(tailMask, GreaterThenU8(_value, _hiValue));
+			const __m256i incLo = _mm256_and_si256(tailMask, LesserU8(_value, _loValue));
+			const __m256i incHi = _mm256_and_si256(tailMask, GreaterU8(_value, _hiValue));
 
 			Store<align>((__m256i*)(loCount + offset), _mm256_adds_epu8(_loCount, incLo));
 			Store<align>((__m256i*)(hiCount + offset), _mm256_adds_epu8(_hiCount, incHi));
@@ -183,15 +184,15 @@ namespace Simd
 
 		SIMD_INLINE __m256i AdjustLo(const __m256i &count, const __m256i & value, const __m256i & mask, const __m256i & threshold)
 		{
-			const __m256i dec = _mm256_and_si256(mask, GreaterThenU8(count, threshold));
-			const __m256i inc = _mm256_and_si256(mask, LesserThenU8(count, threshold));
+			const __m256i dec = _mm256_and_si256(mask, GreaterU8(count, threshold));
+			const __m256i inc = _mm256_and_si256(mask, LesserU8(count, threshold));
 			return _mm256_subs_epu8(_mm256_adds_epu8(value, inc), dec);
 		}
 
 		SIMD_INLINE __m256i AdjustHi(const __m256i &count, const __m256i & value, const __m256i & mask, const __m256i & threshold)
 		{
-			const __m256i inc = _mm256_and_si256(mask, GreaterThenU8(count, threshold));
-			const __m256i dec = _mm256_and_si256(mask, LesserThenU8(count, threshold));
+			const __m256i inc = _mm256_and_si256(mask, GreaterU8(count, threshold));
+			const __m256i dec = _mm256_and_si256(mask, LesserU8(count, threshold));
 			return _mm256_subs_epu8(_mm256_adds_epu8(value, inc), dec);
 		}
 

@@ -21,10 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdLoad.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdBase.h"
 

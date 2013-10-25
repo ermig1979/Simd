@@ -22,7 +22,9 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdAvx2.h"
 
 namespace Simd
@@ -34,14 +36,14 @@ namespace Simd
         {
             __m256i threshold = Load<false>((__m256i*)src);
             __m256i lbp = _mm256_setzero_si256();
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<align>((__m256i*)(src - 1 - stride)), threshold), K8_01));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<false>((__m256i*)(src     - stride)), threshold), K8_02));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<false>((__m256i*)(src + 1 - stride)), threshold), K8_04));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<false>((__m256i*)(src + 1         )), threshold), K8_08));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<false>((__m256i*)(src + 1 + stride)), threshold), K8_10));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<false>((__m256i*)(src     + stride)), threshold), K8_20));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<align>((__m256i*)(src - 1 + stride)), threshold), K8_40));
-            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualThenU8(Load<align>((__m256i*)(src - 1         )), threshold), K8_80));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<align>((__m256i*)(src - 1 - stride)), threshold), K8_01));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<false>((__m256i*)(src     - stride)), threshold), K8_02));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<false>((__m256i*)(src + 1 - stride)), threshold), K8_04));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<false>((__m256i*)(src + 1         )), threshold), K8_08));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<false>((__m256i*)(src + 1 + stride)), threshold), K8_10));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<false>((__m256i*)(src     + stride)), threshold), K8_20));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<align>((__m256i*)(src - 1 + stride)), threshold), K8_40));
+            lbp = _mm256_or_si256(lbp, _mm256_and_si256(GreaterOrEqualU8(Load<align>((__m256i*)(src - 1         )), threshold), K8_80));
             Store<false>((__m256i*)dst, lbp);
         }
 

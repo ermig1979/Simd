@@ -22,6 +22,7 @@
     <ClInclude Include="..\..\src\Simd\SimdAlg.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
