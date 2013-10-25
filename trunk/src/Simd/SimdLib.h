@@ -26,6 +26,28 @@
 
 #include <stdlib.h>
 
+#if defined(__GCC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+#include <stdint.h>
+#else
+#  if (_MSC_VER < 1300)
+typedef signed char       int8_t;
+typedef signed short      int16_t;
+typedef signed int        int32_t;
+typedef unsigned char     uint8_t;
+typedef unsigned short    uint16_t;
+typedef unsigned int      uint32_t;
+#  else
+typedef signed __int8     int8_t;
+typedef signed __int16    int16_t;
+typedef signed __int32    int32_t;
+typedef unsigned __int8   uint8_t;
+typedef unsigned __int16  uint16_t;
+typedef unsigned __int32  uint32_t;
+#  endif
+typedef signed __int64    int64_t;
+typedef unsigned __int64  uint64_t;
+#endif
+
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
 #    define SIMD_API __declspec(dllexport)
@@ -61,219 +83,219 @@ extern "C"
 
     SIMD_API const char * SimdVersion();
 
-    SIMD_API void SimdAbsDifferenceSum(const unsigned char *a, size_t aStride, const unsigned char * b, size_t bStride,
-        size_t width, size_t height, unsigned long long * sum);
+    SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride,
+        size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdAbsDifferenceSumMasked(const unsigned char *a, size_t aStride, const unsigned char *b, size_t bStride,
-        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sums);
+    SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+        const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-    SIMD_API void SimdAbsDifferenceSums3x3(const unsigned char *current, size_t currentStride, const unsigned char * background, size_t backgroundStride,
-        size_t width, size_t height, unsigned long long * sums);
+    SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+        size_t width, size_t height, uint64_t * sums);
 
-    SIMD_API void SimdAbsDifferenceSums3x3Masked(const unsigned char *current, size_t currentStride, const unsigned char *background, size_t backgroundStride,
-        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sums);
+    SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+        const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-    SIMD_API void SimdAbsGradientSaturatedSum(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdAddFeatureDifference(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        const unsigned char * lo, size_t loStride, const unsigned char * hi, size_t hiStride,
-        unsigned short weight, unsigned char * difference, size_t differenceStride);
+    SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+        uint16_t weight, uint8_t * difference, size_t differenceStride);
 
-    SIMD_API void SimdAlphaBlending(const unsigned char *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-        const unsigned char *alpha, size_t alphaStride, unsigned char *dst, size_t dstStride);
+    SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+        const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
-    SIMD_API void SimdBackgroundGrowRangeSlow(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * lo, size_t loStride, unsigned char * hi, size_t hiStride);
+    SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    SIMD_API void SimdBackgroundGrowRangeFast(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * lo, size_t loStride, unsigned char * hi, size_t hiStride);
+    SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    SIMD_API void SimdBackgroundIncrementCount(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        const unsigned char * loValue, size_t loValueStride, const unsigned char * hiValue, size_t hiValueStride,
-        unsigned char * loCount, size_t loCountStride, unsigned char * hiCount, size_t hiCountStride);
+    SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+        uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
-    SIMD_API void SimdBackgroundAdjustRange(unsigned char * loCount, size_t loCountStride, size_t width, size_t height,
-        unsigned char * loValue, size_t loValueStride, unsigned char * hiCount, size_t hiCountStride,
-        unsigned char * hiValue, size_t hiValueStride, unsigned char threshold);
+    SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+        uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+        uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-    SIMD_API void SimdBackgroundAdjustRangeMasked(unsigned char * loCount, size_t loCountStride, size_t width, size_t height,
-        unsigned char * loValue, size_t loValueStride, unsigned char * hiCount, size_t hiCountStride,
-        unsigned char * hiValue, size_t hiValueStride, unsigned char threshold, const unsigned char * mask, size_t maskStride);
+    SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+        uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+        uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    SIMD_API void SimdBackgroundShiftRange(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * lo, size_t loStride, unsigned char * hi, size_t hiStride);
+    SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    SIMD_API void SimdBackgroundShiftRangeMasked(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * lo, size_t loStride, unsigned char * hi, size_t hiStride, const unsigned char * mask, size_t maskStride);
+    SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-    SIMD_API void SimdBackgroundInitMask(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char index, unsigned char value, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdBgraToBgr(const unsigned char *bgra, size_t width, size_t height, size_t bgraStride, unsigned char *bgr, size_t bgrStride);
+    SIMD_API void SimdBgraToBgr(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride);
 
-    SIMD_API void SimdBgraToGray(const unsigned char *bgra, size_t width, size_t height, size_t bgraStride, unsigned char *gray, size_t grayStride);
+    SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride);
 
-    SIMD_API void SimdBgrToBgra(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *bgra, size_t bgraStride, unsigned char alpha);
+    SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
-    SIMD_API void SimdBgrToGray(const unsigned char *bgr, size_t width, size_t height, size_t bgrStride, unsigned char *gray, size_t grayStride);
+    SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
 
-    SIMD_API void SimdBinarization(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char value, unsigned char positive, unsigned char negative, unsigned char * dst, size_t dstStride, SimdCompareType compareType);
+    SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    SIMD_API void SimdAveragingBinarization(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char value, size_t neighborhood, unsigned char threshold, unsigned char positive, unsigned char negative,
-        unsigned char * dst, size_t dstStride, SimdCompareType compareType);
+    SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
+        uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    SIMD_API void SimdCopy(const unsigned char * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdCopyFrame(const unsigned char * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-    SIMD_API unsigned int SimdCrc32(const void * src, size_t size);
+    SIMD_API uint32_t SimdCrc32(const void * src, size_t size);
 
-    SIMD_API void SimdDeinterleaveUv(const unsigned char * uv, size_t uvStride, size_t width, size_t height,
-        unsigned char * u, size_t uStride, unsigned char * v, size_t vStride);
+    SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
+        uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * background, size_t backgroundStride);
+    SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * background, size_t backgroundStride);
 
-    SIMD_API void SimdEdgeBackgroundGrowRangeFast(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * background, size_t backgroundStride);
+    SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * background, size_t backgroundStride);
 
-    SIMD_API void SimdEdgeBackgroundIncrementCount(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        const unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char * backgroundCount, size_t backgroundCountStride);
+    SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
-    SIMD_API void SimdEdgeBackgroundAdjustRange(unsigned char * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
-        unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char threshold);
+    SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+        uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
-    SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(unsigned char * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
-        unsigned char * backgroundValue, size_t backgroundValueStride, unsigned char threshold, const unsigned char * mask, size_t maskStride);
+    SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+        uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    SIMD_API void SimdEdgeBackgroundShiftRange(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * background, size_t backgroundStride);
+    SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * background, size_t backgroundStride);
 
-    SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const unsigned char * value, size_t valueStride, size_t width, size_t height,
-        unsigned char * background, size_t backgroundStride, const unsigned char * mask, size_t maskStride);
+    SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
-    SIMD_API void SimdFill(unsigned char * dst, size_t stride, size_t width, size_t height, size_t pixelSize, unsigned char value);
+    SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-    SIMD_API void SimdFillFrame(unsigned char * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
-        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, unsigned char value);
+    SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
+        size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
-    SIMD_API void SimdFillBgra(unsigned char * dst, size_t stride, size_t width, size_t height,
-        unsigned char blue, unsigned char green, unsigned char red, unsigned char alpha);
+    SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
+        uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-    SIMD_API void SimdGaussianBlur3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        size_t channelCount, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdGrayToBgra(const unsigned char *gray, size_t width, size_t height, size_t grayStride,
-        unsigned char *bgra, size_t bgraStride, unsigned char alpha);
+    SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
+        uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
-    SIMD_API void SimdAbsSecondDerivativeHistogram(const unsigned char *src, size_t width, size_t height, size_t stride,
-        size_t step, size_t indent, unsigned int * histogram);
+    SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
+        size_t step, size_t indent, uint32_t * histogram);
 
-    SIMD_API void SimdHistogram(const unsigned char *src, size_t width, size_t height, size_t stride, unsigned int * histogram);
+    SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
-    SIMD_API void SimdInterleaveBgrToBgra(unsigned char *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned,
-        const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, unsigned char alpha);
+    SIMD_API void SimdInterleaveBgrToBgra(uint8_t *bgra, size_t size, const int32_t *blue, int32_t bluePrecision, bool blueSigned,
+        const int32_t *green, int32_t greenPrecision, bool greenSigned, const int32_t *red, int32_t redPrecision, bool redSigned, uint8_t alpha);
 
-    SIMD_API void SimdInterleaveGrayToBgra(unsigned char *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, unsigned char alpha);
+    SIMD_API void SimdInterleaveGrayToBgra(uint8_t *bgra, size_t size, const int32_t *gray, int32_t grayPrecision, bool graySigned, uint8_t alpha);
 
-    SIMD_API void SimdLbpEstimate(const unsigned char * src, size_t srcStride, size_t width, size_t height, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdMedianFilterRhomb3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        size_t channelCount, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdMedianFilterRhomb5x5(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        size_t channelCount, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdMedianFilterSquare3x3(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        size_t channelCount, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdMedianFilterSquare5x5(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        size_t channelCount, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdOperation(const unsigned char * a, size_t aStride, const unsigned char * b, size_t bStride,
-        size_t width, size_t height, size_t channelCount, unsigned char * dst, size_t dstStride, SimdOperationType type);
+    SIMD_API void SimdOperation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type);
 
-    SIMD_API void SimdVectorProduct(const unsigned char * vertical, const unsigned char * horizontal,
-        unsigned char * dst, size_t stride, size_t width, size_t height);
+    SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
+        uint8_t * dst, size_t stride, size_t width, size_t height);
 
-    SIMD_API void SimdReduceGray2x2(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    SIMD_API void SimdReduceGray3x3(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+    SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
 
-    SIMD_API void SimdReduceGray4x4(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    SIMD_API void SimdReduceGray5x5(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+    SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
 
-    SIMD_API void SimdResizeBilinear(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+    SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
-    SIMD_API void SimdShiftBilinear(const unsigned char * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-        const unsigned char * bkg, size_t bkgStride, double shiftX, double shiftY,
-        size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+        const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY,
+        size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdSquaredDifferenceSum(const unsigned char *a, size_t aStride, const unsigned char *b, size_t bStride,
-        size_t width, size_t height, unsigned long long * sum);
+    SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+        size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdSquaredDifferenceSumMasked(const unsigned char *a, size_t aStride, const unsigned char *b, size_t bStride,
-        const unsigned char *mask, size_t maskStride, unsigned char index, size_t width, size_t height, unsigned long long * sum);
+    SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+        const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdGetStatistic(const unsigned char * src, size_t stride, size_t width, size_t height,
-        unsigned char * min, unsigned char * max, unsigned char * average);
+    SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
+        uint8_t * min, uint8_t * max, uint8_t * average);
 
-    SIMD_API void SimdGetMoments(const unsigned char * mask, size_t stride, size_t width, size_t height, unsigned char index,
-        unsigned long long * area, unsigned long long * x, unsigned long long * y, unsigned long long * xx, unsigned long long * xy, unsigned long long * yy);
+    SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+        uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
-    SIMD_API void SimdGetRowSums(const unsigned char * src, size_t stride, size_t width, size_t height, unsigned int * sums);
+    SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    SIMD_API void SimdGetColSums(const unsigned char * src, size_t stride, size_t width, size_t height, unsigned int * sums);
+    SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    SIMD_API void SimdGetAbsDyRowSums(const unsigned char * src, size_t stride, size_t width, size_t height, unsigned int * sums);
+    SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    SIMD_API void SimdGetAbsDxColSums(const unsigned char * src, size_t stride, size_t width, size_t height, unsigned int * sums);
+    SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    SIMD_API void SimdStretchGray2x2(const unsigned char *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        unsigned char *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    SIMD_API void SimdTextureBoostedSaturatedGradient(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char saturation, unsigned char boost, unsigned char * dx, size_t dxStride, unsigned char * dy, size_t dyStride);
+    SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
-    SIMD_API void SimdTextureBoostedUv(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        unsigned char boost, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        uint8_t boost, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdTextureGetDifferenceSum(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        const unsigned char * lo, size_t loStride, const unsigned char * hi, size_t hiStride, long long * sum);
+    SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
-    SIMD_API void SimdTexturePerformCompensation(const unsigned char * src, size_t srcStride, size_t width, size_t height,
-        int shift, unsigned char * dst, size_t dstStride);
+    SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+        int32_t shift, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdYuv420ToBgr(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * bgr, size_t bgrStride);
+    SIMD_API void SimdYuv420ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    SIMD_API void SimdYuv444ToBgr(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * bgr, size_t bgrStride);
+    SIMD_API void SimdYuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    SIMD_API void SimdYuvToBgra(unsigned char *bgra, size_t width, size_t height, size_t stride,
-        const int *y, const int *u, const int *v, int dx, int dy, int precision, unsigned char alpha);
+    SIMD_API void SimdYuvToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
+        const int32_t *y, const int32_t *u, const int32_t *v, int32_t dx, int32_t dy, int32_t precision, uint8_t alpha);
 
-    SIMD_API void SimdYuv420ToBgra(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * bgra, size_t bgraStride, unsigned char alpha = 0xFF);
+    SIMD_API void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
 
-    SIMD_API void SimdYuv444ToBgra(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * bgra, size_t bgraStride, unsigned char alpha = 0xFF);
+    SIMD_API void SimdYuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
 
-    SIMD_API void SimdYuv420ToHue(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * hue, size_t hueStride);
+    SIMD_API void SimdYuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
-    SIMD_API void SimdYuv444ToHue(const unsigned char * y, size_t yStride, const unsigned char * u, size_t uStride, const unsigned char * v, size_t vStride,
-        size_t width, size_t height, unsigned char * hue, size_t hueStride);
+    SIMD_API void SimdYuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
 #ifdef __cplusplus
 }
