@@ -24,6 +24,8 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdSse2.h"
 
 namespace Simd

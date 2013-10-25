@@ -31,12 +31,18 @@ namespace Test
     {
         switch(type)
         {
-        case SimdCompareGreaterThen:
-            return "(>)";
-        case SimdCompareLesserThen:
-            return "(<)";
-        case SimdCompareEqualTo:
-            return "(=)";
+        case SimdCompareEqual:
+            return "(==)";
+        case SimdCompareNotEqual:
+            return "(!=)";
+        case SimdCompareGreater:
+            return "(> )";
+        case SimdCompareGreaterOrEqual:
+            return "(>=)";
+        case SimdCompareLesser:
+            return "(< )";
+        case SimdCompareLesserOrEqual:
+            return "(<=)";
         }
         assert(0);
         return "(Unknown)";
@@ -99,7 +105,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareGreaterThen; type <= SimdCompareEqualTo && result; type = SimdCompareType(type + 1))
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && BinarizationTest(ARGS11(W, H, type, f1, f2));
             result = result && BinarizationTest(ARGS11(W + 1, H - 1, type, f1, f2));
@@ -183,7 +189,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareGreaterThen; type < SimdCompareEqualTo && result; type = SimdCompareType(type + 1))
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && AveragingBinarizationTest(ARGS21(W, H, type, f1, f2));
             result = result && AveragingBinarizationTest(ARGS21(W + 1, H - 1, type, f1, f2));

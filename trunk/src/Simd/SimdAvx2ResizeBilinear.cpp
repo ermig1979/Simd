@@ -26,6 +26,8 @@
 
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx2.h"

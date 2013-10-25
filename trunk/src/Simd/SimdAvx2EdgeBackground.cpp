@@ -22,10 +22,10 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdConst.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdConst.h"
-#include "Simd/SimdMath.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdAvx2.h"
 
@@ -38,7 +38,7 @@ namespace Simd
 		{
 			const __m256i _value = Load<align>((__m256i*)value);
 			const __m256i _background = Load<align>((__m256i*)background);
-			const __m256i inc = _mm256_and_si256(tailMask, GreaterThenU8(_value, _background));
+			const __m256i inc = _mm256_and_si256(tailMask, GreaterU8(_value, _background));
 			Store<align>((__m256i*)background, _mm256_adds_epu8(_background, inc));
 		}
 
@@ -119,7 +119,7 @@ namespace Simd
 			const __m256i _backgroundValue = Load<align>((__m256i*)(backgroundValue + offset));
 			const __m256i _backgroundCount = Load<align>((__m256i*)(backgroundCount + offset));
 
-			const __m256i inc = _mm256_and_si256(tailMask, GreaterThenU8(_value, _backgroundValue));
+			const __m256i inc = _mm256_and_si256(tailMask, GreaterU8(_value, _backgroundValue));
 
 			Store<align>((__m256i*)(backgroundCount + offset), _mm256_adds_epu8(_backgroundCount, inc));
 		}
@@ -163,8 +163,8 @@ namespace Simd
 
 		SIMD_INLINE __m256i AdjustEdge(const __m256i &count, const __m256i & value, const __m256i & mask, const __m256i & threshold)
 		{
-			const __m256i inc = _mm256_and_si256(mask, GreaterThenU8(count, threshold));
-			const __m256i dec = _mm256_and_si256(mask, LesserThenU8(count, threshold));
+			const __m256i inc = _mm256_and_si256(mask, GreaterU8(count, threshold));
+			const __m256i dec = _mm256_and_si256(mask, LesserU8(count, threshold));
 			return _mm256_subs_epu8(_mm256_adds_epu8(value, inc), dec);
 		}
 

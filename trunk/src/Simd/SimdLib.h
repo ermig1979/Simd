@@ -43,9 +43,12 @@ extern "C"
 
     typedef enum SimdCompareType
     {
-        SimdCompareGreaterThen,
-        SimdCompareLesserThen,
-        SimdCompareEqualTo,
+        SimdCompareEqual,
+        SimdCompareNotEqual,
+        SimdCompareGreater,
+        SimdCompareGreaterOrEqual,
+        SimdCompareLesser,
+        SimdCompareLesserOrEqual,
     } SimdCompareType;
 
     typedef enum SimdOperationType
