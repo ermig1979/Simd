@@ -26,7 +26,7 @@
 
 #include <stdlib.h>
 
-#if defined(__GCC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
 #include <stdint.h>
 #else
 #  if (_MSC_VER < 1300)
