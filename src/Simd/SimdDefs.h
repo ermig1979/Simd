@@ -35,12 +35,6 @@
 
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
-#if _MSC_VER >= 1600
-#include <stdint.h>
-#else
-#define SIMD_OWN_STDINT
-#endif
-
 #define SIMD_INLINE __forceinline
 
 #if !defined(SIMD_SSE2_DEPRECATE) && _MSC_VER >= 1300
@@ -60,8 +54,6 @@
 #endif
 
 #elif defined(__GNUC__)
-
-#include <stdint.h>
 
 #define SIMD_INLINE inline __attribute__ ((always_inline))
 
