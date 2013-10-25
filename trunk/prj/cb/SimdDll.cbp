@@ -106,7 +106,6 @@
 		</Build>
 		<Compiler>
 			<Add option="-march=core2" />
-			<Add option="-DSIMD_EXPORTS" />
 		</Compiler>
 		<Unit filename="../../src/Simd/SimdAlg.h">
 			<Option virtualFolder="Lib/" />
