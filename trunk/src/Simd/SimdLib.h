@@ -261,6 +261,9 @@ extern "C"
 
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
+    SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        uint8_t value, SimdCompareType compareType, uint32_t * count);
+
     SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 

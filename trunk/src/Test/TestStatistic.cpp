@@ -290,4 +290,81 @@ namespace Test
 
         return result;
     }
+
+    namespace
+    {
+        struct Func4
+        {
+            typedef void (*FuncPtr)(const uchar * src, size_t stride, size_t width, size_t height, 
+                uchar value, SimdCompareType compareType, uint * count);
+
+            FuncPtr func;
+            std::string description;
+
+            Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uchar value, SimdCompareType compareType, uint * count) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, value, compareType, count);
+            }
+        };
+    }
+
+#define ARGS41(width, height, type, function1, function2) \
+    width, height, type, \
+    Func4(function1.func, function1.description + CompareTypeDescription(type)), \
+    Func4(function2.func, function2.description + CompareTypeDescription(type))
+
+#define ARGS42(function1, function2) \
+    Func4(function1, std::string(#function1)), Func4(function2, std::string(#function2))
+
+    bool ConditionalCountTest(int width, int height, SimdCompareType type, const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        uchar value = 127;
+        uint c1, c2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, type, &c1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, type, &c2));
+
+        TEST_CHECK_VALUE(c);
+
+        return result;
+    }
+
+    bool ConditionalCountTest(const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalCountTest(ARGS41(W, H, type, f1, f2));
+            result = result && ConditionalCountTest(ARGS41(W + 1, H - 1, type, f1, f2));
+            result = result && ConditionalCountTest(ARGS41(W - 1, H + 1, type, f1, f2));
+        }
+
+        return result;
+    }
+
+    bool ConditionalCountTest()
+    {
+        bool result = true;
+
+        result = result && ConditionalCountTest(ARGS42(Simd::Base::ConditionalCount, Simd::ConditionalCount));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ConditionalCountTest(ARGS42(Simd::Avx2::ConditionalCount, Simd::Sse2::ConditionalCount));
+#endif 
+
+        return result;
+    }
 }

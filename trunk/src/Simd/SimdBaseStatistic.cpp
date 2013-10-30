@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
@@ -146,6 +147,43 @@ namespace Simd
                     sums[col] += AbsDifferenceU8(src0[col], src1[col]);
                 src0 += stride;
                 src1 += stride;
+            }
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        {
+            *count = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(Compare<compareType>(src[col], value))
+                        (*count)++;
+                }
+                src += stride;
+            }
+        }
+
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+            uchar value, SimdCompareType compareType, uint * count)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalCount<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual: 
+                return ConditionalCount<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater: 
+                return ConditionalCount<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalCount<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser: 
+                return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
             }
         }
 	}

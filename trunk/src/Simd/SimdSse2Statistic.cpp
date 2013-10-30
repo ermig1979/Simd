@@ -27,6 +27,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdSse2.h"
 
 namespace Simd
@@ -381,6 +382,66 @@ namespace Simd
                 GetAbsDxColSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
+        }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+
+            __m128i _value = _mm_set1_epi8(value);
+            __m128i _count = _mm_setzero_si128();
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const __m128i mask = Compare<compareType>(Load<align>((__m128i*)(src + col)), _value);
+                    _count = _mm_add_epi64(_count, _mm_sad_epu8(_mm_and_si128(mask, K8_01), K_ZERO));
+                }
+                if(alignedWidth != width)
+                {
+                    const __m128i mask = _mm_and_si128(Compare<compareType>(Load<false>((__m128i*)(src + width - A)), _value), tailMask);
+                    _count = _mm_add_epi64(_count, _mm_sad_epu8(_mm_and_si128(mask, K8_01), K_ZERO));
+                }
+                src += stride;
+            }
+            *count = ExtractInt32Sum(_count);
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        {
+            if(Aligned(src) && Aligned(stride))
+                ConditionalCount<true, compareType>(src, stride, width, height, value, count);
+            else
+                ConditionalCount<false, compareType>(src, stride, width, height, value, count);
+        }
+
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+            uchar value, SimdCompareType compareType, uint * count)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalCount<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual: 
+                return ConditionalCount<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater: 
+                return ConditionalCount<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalCount<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser: 
+                return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
+            }
         }
 	}
 #endif// SIMD_SSE2_ENABLE

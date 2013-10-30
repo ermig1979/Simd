@@ -388,6 +388,12 @@ namespace Simd
         SimdGetAbsDxColSums(src, stride, width, height, sums);
     }
 
+    SIMD_INLINE void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+        uchar value, SimdCompareType compareType, uint * count)
+    {
+        SimdConditionalCount(src, stride, width, height, value, compareType, count);
+    }
+
     SIMD_INLINE void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
         uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
     {

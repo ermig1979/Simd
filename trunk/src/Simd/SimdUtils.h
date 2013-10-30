@@ -456,6 +456,13 @@ namespace Simd
         GetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
     }
 
+    SIMD_INLINE void ConditionalCount(const View & src, uchar value, SimdCompareType compareType, uint & count)
+    {
+        assert(src.format == View::Gray8);
+
+        ConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
+    }
+
     SIMD_INLINE void StretchGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
