@@ -27,27 +27,6 @@
 
 namespace Test
 {
-    SIMD_INLINE std::string CompareTypeDescription(SimdCompareType type)
-    {
-        switch(type)
-        {
-        case SimdCompareEqual:
-            return "(==)";
-        case SimdCompareNotEqual:
-            return "(!=)";
-        case SimdCompareGreater:
-            return "(> )";
-        case SimdCompareGreaterOrEqual:
-            return "(>=)";
-        case SimdCompareLesser:
-            return "(< )";
-        case SimdCompareLesserOrEqual:
-            return "(<=)";
-        }
-        assert(0);
-        return "(Unknown)";
-    }	
-    
     namespace
 	{
 		struct Func1

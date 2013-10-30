@@ -154,4 +154,25 @@ namespace Test
 		ss << "<" << View::PixelSize(format) << ">";
 		return ss.str();
 	}
+
+    std::string CompareTypeDescription(SimdCompareType type)
+    {
+        switch(type)
+        {
+        case SimdCompareEqual:
+            return "(==)";
+        case SimdCompareNotEqual:
+            return "(!=)";
+        case SimdCompareGreater:
+            return "(> )";
+        case SimdCompareGreaterOrEqual:
+            return "(>=)";
+        case SimdCompareLesser:
+            return "(< )";
+        case SimdCompareLesserOrEqual:
+            return "(<=)";
+        }
+        assert(0);
+        return "(Unknown)";
+    }
 }

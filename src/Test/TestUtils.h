@@ -48,6 +48,8 @@ namespace Test
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
 	std::string ColorDescription(View::Format format);
+
+    std::string CompareTypeDescription(SimdCompareType type);
 }
 
 #endif//__TestUtils_h__
