@@ -303,10 +303,10 @@ namespace Test
 
             Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar value, SimdCompareType compareType, uint * count) const
+            void Call(const View & src, uchar value, SimdCompareType compareType, uint & count) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, value, compareType, count);
+                func(src.data, src.stride, src.width, src.height, value, compareType, &count);
             }
         };
     }
@@ -331,9 +331,9 @@ namespace Test
         uchar value = 127;
         uint c1, c2;
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, type, &c1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, type, c1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, type, &c2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, type, c2));
 
         TEST_CHECK_VALUE(c);
 
@@ -363,6 +363,85 @@ namespace Test
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
             result = result && ConditionalCountTest(ARGS42(Simd::Avx2::ConditionalCount, Simd::Sse2::ConditionalCount));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
+        struct Func5
+        {
+            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+
+            FuncPtr func;
+            std::string description;
+
+            Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+            }
+        };
+    }
+
+#define ARGS51(width, height, type, function1, function2) \
+    width, height, type, \
+    Func5(function1.func, function1.description + CompareTypeDescription(type)), \
+    Func5(function2.func, function2.description + CompareTypeDescription(type))
+
+#define ARGS52(function1, function2) \
+    Func5(function1, std::string(#function1)), Func5(function2, std::string(#function2))
+
+    bool ConditionalSumTest(int width, int height, SimdCompareType type, const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(mask);
+
+        uchar value = 127;
+        uint64_t s1, s2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, mask, value, type, s1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, mask, value, type, s2));
+
+        TEST_CHECK_VALUE(s);
+
+        return result;
+    }
+
+    bool ConditionalSumTest(const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalSumTest(ARGS51(W, H, type, f1, f2));
+            result = result && ConditionalSumTest(ARGS51(W + 1, H - 1, type, f1, f2));
+            result = result && ConditionalSumTest(ARGS51(W - 1, H + 1, type, f1, f2));
+        }
+
+        return result;
+    }
+
+    bool ConditionalSumTest()
+    {
+        bool result = true;
+
+        result = result && ConditionalSumTest(ARGS52(Simd::Base::ConditionalSum, Simd::ConditionalSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ConditionalSumTest(ARGS52(Simd::Avx2::ConditionalSum, Simd::Sse2::ConditionalSum));
 #endif 
 
         return result;

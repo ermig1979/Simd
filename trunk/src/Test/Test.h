@@ -79,6 +79,7 @@ namespace Test
     bool GetAbsDyRowSumsTest();
     bool GetAbsDxColSumsTest();
     bool ConditionalCountTest();
+    bool ConditionalSumTest();
 
     bool StretchGray2x2Test();
 

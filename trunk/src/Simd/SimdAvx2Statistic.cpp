@@ -444,6 +444,71 @@ namespace Simd
                 assert(0);
             }
         }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);;
+
+            __m256i _value = _mm256_set1_epi8(value);
+            __m256i _sum = _mm256_setzero_si256();
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const __m256i _src = Load<align>((__m256i*)(src + col));
+                    const __m256i _mask = Compare<compareType>(Load<align>((__m256i*)(mask + col)), _value);
+                    _sum = _mm256_add_epi64(_sum, _mm256_sad_epu8(_mm256_and_si256(_mask, _src), K_ZERO));
+                }
+                if(alignedWidth != width)
+                {
+                    const __m256i _src = Load<false>((__m256i*)(src + width - A));
+                    const __m256i _mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(mask + width - A)), _value), tailMask);
+                    _sum = _mm256_add_epi64(_sum, _mm256_sad_epu8(_mm256_and_si256(_mask, _src), K_ZERO));
+                }
+                src += srcStride;
+                mask += maskStride;
+            }
+            *sum = ExtractSum<uint64_t>(_sum);
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+                ConditionalSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+            else
+                ConditionalSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+        }
+
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual: 
+                return ConditionalSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater: 
+                return ConditionalSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser: 
+                return ConditionalSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default: 
+                assert(0);
+            }
+        }
 	}
 #endif// SIMD_AVX2_ENABLE
 }
