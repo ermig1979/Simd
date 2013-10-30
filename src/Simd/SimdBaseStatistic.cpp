@@ -186,5 +186,46 @@ namespace Simd
                 assert(0);
             }
         }
+
+        template <SimdCompareType compareType> 
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                uint rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(Compare<compareType>(mask[col], value))
+                        rowSum += src[col];
+                }
+                *sum += rowSum;
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
+
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual: 
+                return ConditionalSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater: 
+                return ConditionalSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser: 
+                return ConditionalSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default: 
+                assert(0);
+            }
+        }
 	}
 }

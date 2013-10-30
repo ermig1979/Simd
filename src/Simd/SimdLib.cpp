@@ -982,6 +982,22 @@ SIMD_API void SimdConditionalCount(const uchar * src, size_t stride, size_t widt
         Base::ConditionalCount(src, stride, width, height, value, compareType, count);
 }
 
+SIMD_API void SimdConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                                 const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+}
+
 SIMD_API void SimdStretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
                     uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
