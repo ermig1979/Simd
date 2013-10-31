@@ -138,6 +138,9 @@
 		<Unit filename="../../src/Simd/SimdAvx2Binarization.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Conditional.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2DeinterleaveUv.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
@@ -232,6 +235,9 @@
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseBinarization.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseConditional.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseCopy.cpp">
@@ -382,6 +388,9 @@
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2Binarization.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Conditional.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2DeinterleaveUv.cpp">

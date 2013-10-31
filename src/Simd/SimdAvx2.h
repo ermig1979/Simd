@@ -91,6 +91,18 @@ namespace Simd
             uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
             uchar * dst, size_t dstStride, SimdCompareType compareType);
 
+        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+            uchar value, SimdCompareType compareType, uint * count);
+
+        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+
+        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+
         void DeinterleaveUv(const uchar * uv, size_t uvStride, size_t width, size_t height, uchar * u, size_t uStride, uchar * v, size_t vStride);
 
         void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
@@ -181,15 +193,6 @@ namespace Simd
         void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
 
         void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
-
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
-            uchar value, SimdCompareType compareType, uint * count);
-
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
-
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
 
         void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);

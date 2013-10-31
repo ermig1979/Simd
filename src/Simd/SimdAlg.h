@@ -158,6 +158,30 @@ namespace Simd
         SimdAveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     }
 
+    SIMD_INLINE void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+        uchar value, SimdCompareType compareType, uint * count)
+    {
+        SimdConditionalCount(src, stride, width, height, value, compareType, count);
+    }
+
+    SIMD_INLINE void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+    {
+        SimdConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    }
+
+    SIMD_INLINE void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+    {
+        SimdConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    }
+
+    SIMD_INLINE void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+        const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+    {
+        SimdConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    }
+
     SIMD_INLINE void Copy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
     {
         SimdCopy(src, srcStride, width, height, pixelSize, dst, dstStride);
@@ -386,24 +410,6 @@ namespace Simd
     SIMD_INLINE void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
     {
         SimdGetAbsDxColSums(src, stride, width, height, sums);
-    }
-
-    SIMD_INLINE void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
-        uchar value, SimdCompareType compareType, uint * count)
-    {
-        SimdConditionalCount(src, stride, width, height, value, compareType, count);
-    }
-
-    SIMD_INLINE void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
-    {
-        SimdConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    }
-
-    SIMD_INLINE void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-        const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
-    {
-        SimdConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     }
 
     SIMD_INLINE void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 

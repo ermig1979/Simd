@@ -94,9 +94,6 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(GetColSumsTest);
     EXECUTE_TEST(GetAbsDyRowSumsTest);
     EXECUTE_TEST(GetAbsDxColSumsTest);
-    EXECUTE_TEST(ConditionalCountTest);
-    EXECUTE_TEST(ConditionalSumTest);
-    EXECUTE_TEST(ConditionalSquareSumTest);
 
     EXECUTE_TEST(StretchGray2x2Test);
 
@@ -129,6 +126,11 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(GrayToBgraTest);
 
     EXECUTE_TEST(AlphaBlendingTest);
+
+    EXECUTE_TEST(ConditionalCountTest);
+    EXECUTE_TEST(ConditionalSumTest);
+    EXECUTE_TEST(ConditionalSquareSumTest);
+    EXECUTE_TEST(ConditionalSquareGradientSumTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	std::cout << "Function execution times:" << std::endl;
