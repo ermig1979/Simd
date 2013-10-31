@@ -470,6 +470,13 @@ namespace Simd
         ConditionalSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
+    SIMD_INLINE void ConditionalSquareSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    {
+        assert(Compatible(src, mask) && src.format == View::Gray8);
+
+        ConditionalSquareSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+    }
+
     SIMD_INLINE void StretchGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
