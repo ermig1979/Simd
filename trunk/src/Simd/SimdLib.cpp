@@ -390,6 +390,70 @@ SIMD_API void SimdAveragingBinarization(const uchar * src, size_t srcStride, siz
         Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
 }
 
+SIMD_API void SimdConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
+                                   uchar value, SimdCompareType compareType, uint * count)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ConditionalCount(src, stride, width, height, value, compareType, count);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ConditionalCount(src, stride, width, height, value, compareType, count);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ConditionalCount(src, stride, width, height, value, compareType, count);
+}
+
+SIMD_API void SimdConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                                 const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+}
+
+SIMD_API void SimdConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                                       const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+}
+
+SIMD_API void SimdConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+                                       const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A + 3)
+        Avx2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A + 3)
+        Sse2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+}
+
 SIMD_API void SimdCopy(const uchar * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uchar * dst, size_t dstStride)
 {
     Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
@@ -964,54 +1028,6 @@ SIMD_API void SimdGetAbsDxColSums(const uchar * src, size_t stride, size_t width
     else
 #endif// SIMD_SSE2_ENABLE
         Base::GetAbsDxColSums(src, stride, width, height, sums);
-}
-
-SIMD_API void SimdConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
-                                   uchar value, SimdCompareType compareType, uint * count)
-{
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
-        Avx2::ConditionalCount(src, stride, width, height, value, compareType, count);
-    else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalCount(src, stride, width, height, value, compareType, count);
-    else
-#endif// SIMD_SSE2_ENABLE
-        Base::ConditionalCount(src, stride, width, height, value, compareType, count);
-}
-
-SIMD_API void SimdConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                                 const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
-{
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
-        Avx2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif// SIMD_SSE2_ENABLE
-        Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-}
-
-SIMD_API void SimdConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                                 const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
-{
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
-        Avx2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif// SIMD_AVX2_ENABLE
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
-    else
-#endif// SIMD_SSE2_ENABLE
-        Base::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
 SIMD_API void SimdStretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 

@@ -179,6 +179,34 @@ namespace Simd
             neighborhood, threshold, positive, negative, dst.data, dst.stride, compareType);
     }
 
+    SIMD_INLINE void ConditionalCount(const View & src, uchar value, SimdCompareType compareType, uint & count)
+    {
+        assert(src.format == View::Gray8);
+
+        ConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
+    }
+
+    SIMD_INLINE void ConditionalSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    {
+        assert(Compatible(src, mask) && src.format == View::Gray8);
+
+        ConditionalSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+    }
+
+    SIMD_INLINE void ConditionalSquareSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    {
+        assert(Compatible(src, mask) && src.format == View::Gray8);
+
+        ConditionalSquareSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+    }
+
+    SIMD_INLINE void ConditionalSquareGradientSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    {
+        assert(Compatible(src, mask) && src.format == View::Gray8 && src.width >= 3 && src.height >= 3);
+
+        ConditionalSquareGradientSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+    }
+
     SIMD_INLINE void Copy(const View & src, View & dst)
     {
         assert(Compatible(src, dst));
@@ -454,27 +482,6 @@ namespace Simd
         assert(src.format == View::Gray8);
 
         GetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
-    }
-
-    SIMD_INLINE void ConditionalCount(const View & src, uchar value, SimdCompareType compareType, uint & count)
-    {
-        assert(src.format == View::Gray8);
-
-        ConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
-    }
-
-    SIMD_INLINE void ConditionalSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
-    {
-        assert(Compatible(src, mask) && src.format == View::Gray8);
-
-        ConditionalSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
-    }
-
-    SIMD_INLINE void ConditionalSquareSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
-    {
-        assert(Compatible(src, mask) && src.format == View::Gray8);
-
-        ConditionalSquareSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
     SIMD_INLINE void StretchGray2x2(const View & src, View & dst)

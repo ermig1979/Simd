@@ -120,6 +120,9 @@
 		<Unit filename="../../src/Test/TestBinarization.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestConditional.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestConfig.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>

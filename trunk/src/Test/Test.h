@@ -78,9 +78,6 @@ namespace Test
     bool GetColSumsTest();
     bool GetAbsDyRowSumsTest();
     bool GetAbsDxColSumsTest();
-    bool ConditionalCountTest();
-    bool ConditionalSumTest();
-    bool ConditionalSquareSumTest();
 
     bool StretchGray2x2Test();
 
@@ -113,5 +110,10 @@ namespace Test
     bool GrayToBgraTest();
 
     bool AlphaBlendingTest();
+
+    bool ConditionalCountTest();
+    bool ConditionalSumTest();
+    bool ConditionalSquareSumTest();
+    bool ConditionalSquareGradientSumTest();
 }
 #endif//__Test_h__
