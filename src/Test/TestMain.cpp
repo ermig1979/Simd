@@ -96,6 +96,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(GetAbsDxColSumsTest);
     EXECUTE_TEST(ConditionalCountTest);
     EXECUTE_TEST(ConditionalSumTest);
+    EXECUTE_TEST(ConditionalSquareSumTest);
 
     EXECUTE_TEST(StretchGray2x2Test);
 

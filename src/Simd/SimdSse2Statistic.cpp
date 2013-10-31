@@ -508,6 +508,80 @@ namespace Simd
                 assert(0);
             }
         }
+
+        SIMD_INLINE __m128i Square(__m128i value)
+        {
+            const __m128i lo = _mm_unpacklo_epi8(value, _mm_setzero_si128());
+            const __m128i hi = _mm_unpackhi_epi8(value, _mm_setzero_si128());
+            return _mm_add_epi32(_mm_madd_epi16(lo, lo), _mm_madd_epi16(hi, hi));
+        }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+
+            __m128i _value = _mm_set1_epi8(value);
+            __m128i _sum = _mm_setzero_si128();
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m128i rowSum = _mm_setzero_si128();
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const __m128i _src = Load<align>((__m128i*)(src + col));
+                    const __m128i _mask = Compare<compareType>(Load<align>((__m128i*)(mask + col)), _value);
+                    rowSum = _mm_add_epi32(rowSum, Square(_mm_and_si128(_mask, _src)));
+                }
+                if(alignedWidth != width)
+                {
+                    const __m128i _src = Load<false>((__m128i*)(src + width - A));
+                    const __m128i _mask = _mm_and_si128(Compare<compareType>(Load<false>((__m128i*)(mask + width - A)), _value), tailMask);
+                    rowSum = _mm_add_epi32(rowSum, Square(_mm_and_si128(_mask, _src)));
+                }
+                _sum = _mm_add_epi64(_sum, HorizontalSum32(rowSum));
+                src += srcStride;
+                mask += maskStride;
+            }
+            *sum = ExtractInt64Sum(_sum);
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+                ConditionalSquareSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+            else
+                ConditionalSquareSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+        }
+
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalSquareSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual: 
+                return ConditionalSquareSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater: 
+                return ConditionalSquareSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalSquareSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser: 
+                return ConditionalSquareSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalSquareSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default: 
+                assert(0);
+            }
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 }

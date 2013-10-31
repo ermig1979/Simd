@@ -220,6 +220,9 @@ namespace Simd
         void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
             const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
 
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+
         void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 

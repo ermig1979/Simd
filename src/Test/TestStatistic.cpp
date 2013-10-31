@@ -446,4 +446,18 @@ namespace Test
 
         return result;
     }
+
+    bool ConditionalSquareSumTest()
+    {
+        bool result = true;
+
+        result = result && ConditionalSumTest(ARGS52(Simd::Base::ConditionalSquareSum, Simd::ConditionalSquareSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            result = result && ConditionalSumTest(ARGS52(Simd::Avx2::ConditionalSquareSum, Simd::Sse2::ConditionalSquareSum));
+#endif 
+
+        return result;
+    }
 }

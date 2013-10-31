@@ -227,5 +227,46 @@ namespace Simd
                 assert(0);
             }
         }
+
+        template <SimdCompareType compareType> 
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        {
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                uint rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(Compare<compareType>(mask[col], value))
+                        rowSum += Square(src[col]);
+                }
+                *sum += rowSum;
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
+
+        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
+            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalSquareSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual: 
+                return ConditionalSquareSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater: 
+                return ConditionalSquareSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalSquareSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser: 
+                return ConditionalSquareSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalSquareSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            default: 
+                assert(0);
+            }
+        }
 	}
 }
