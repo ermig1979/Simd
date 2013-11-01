@@ -257,7 +257,7 @@ namespace Simd
         SimdFillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
     }
 
-    SIMD_INLINE void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+    SIMD_INLINE void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha = 0xFF)
     {
         SimdFillBgra(dst, stride, width, height, blue, green, red, alpha);
     }

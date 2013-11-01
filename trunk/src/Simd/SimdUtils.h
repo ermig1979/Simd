@@ -150,7 +150,7 @@ namespace Simd
         BgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
     }
 
-    SIMD_INLINE void BgrToBgra(const View & bgr, View & bgra, uchar alpha)
+    SIMD_INLINE void BgrToBgra(const View & bgr, View & bgra, uchar alpha = 0xFF)
     {
         assert(EqualSize(bgr, bgra) && bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
 
@@ -300,7 +300,7 @@ namespace Simd
             frame.left, frame.top, frame.right, frame.bottom, value);
     }
 
-    SIMD_INLINE void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha)
+    SIMD_INLINE void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha = 0xFF)
     {
         assert(dst.format == View::Bgra32);
 
@@ -314,7 +314,7 @@ namespace Simd
         GaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
-    SIMD_INLINE void GrayToBgra(const View & gray, View & bgra, uchar alpha)
+    SIMD_INLINE void GrayToBgra(const View & gray, View & bgra, uchar alpha = 0xFF)
     {
         assert(EqualSize(gray, bgra) && bgra.format == View::Bgra32 && gray.format == View::Gray8);
 
@@ -442,18 +442,18 @@ namespace Simd
         SquaredDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
     }
 
-    SIMD_INLINE void GetStatistic(const View & src, uchar * min, uchar * max, uchar * average)
+    SIMD_INLINE void GetStatistic(const View & src, uchar & min, uchar & max, uchar & average)
     {
         assert(src.format == View::Gray8);
 
-        GetStatistic(src.data, src.stride, src.width, src.height, min, max, average);
+        GetStatistic(src.data, src.stride, src.width, src.height, &min, &max, &average);
     }
 
-    SIMD_INLINE void GetMoments(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+    SIMD_INLINE void GetMoments(const View & mask, uchar index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy)
     {
         assert(mask.format == View::Gray8);
 
-        GetMoments(mask.data, mask.stride, mask.width, mask.height, index, area, x, y, xx, xy, yy);
+        GetMoments(mask.data, mask.stride, mask.width, mask.height, index, &area, &x, &y, &xx, &xy, &yy);
     }
 
     SIMD_INLINE void GetRowSums(const View & src, uint * sums)
@@ -505,11 +505,11 @@ namespace Simd
         TextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
     }
 
-    SIMD_INLINE void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t * sum)
+    SIMD_INLINE void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t & sum)
     {
         assert(Compatible(src, lo, hi) && src.format == View::Gray8 && sum != NULL);
 
-        TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, sum);
+        TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, &sum);
     }
 
     SIMD_INLINE void TexturePerformCompensation(const View & src, int shift, View & dst)
@@ -536,7 +536,7 @@ namespace Simd
         Yuv420ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
     }
 
-    SIMD_INLINE void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha)
+    SIMD_INLINE void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha = 0xFF)
     {
         assert(Compatible(y, u, v) && EqualSize(y, bgra) && y.format == View::Gray8 && bgra.format == View::Bgra32);
 
