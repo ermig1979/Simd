@@ -462,9 +462,6 @@
 		<Unit filename="../../src/Simd/SimdStore.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdTypes.h">
-			<Option virtualFolder="Sys/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdUtils.h">
 			<Option virtualFolder="Utils/" />
 		</Unit>
