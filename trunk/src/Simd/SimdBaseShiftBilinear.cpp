@@ -48,8 +48,8 @@ namespace Simd
 			return (src[0]*k[0] + src[dr]*k[1] + LINEAR_ROUND_TERM) >> LINEAR_SHIFT;
 		}
 
-		void MixBorder(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount,            
-			const uchar * bkg, size_t bkgStride, ptrdiff_t iDx, ptrdiff_t iDy, int fDx, int fDy, uchar * dst, size_t dstStride)
+		void MixBorder(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,            
+			const uint8_t * bkg, size_t bkgStride, ptrdiff_t iDx, ptrdiff_t iDy, int fDx, int fDy, uint8_t * dst, size_t dstStride)
 		{
 			size_t bkgWidth = Abs(iDx) - (iDx < 0 && fDx ? 1 : 0);
 			size_t bkgHeight = Abs(iDy) - (iDy < 0 && fDy ? 1 : 0);
@@ -65,7 +65,7 @@ namespace Simd
 
 			if(fDx)
 			{
-				const uchar * ps[2][2];
+				const uint8_t * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
 				size_t srcOffset = (iDy > 0 ? 0 : - iDy)*srcStride + xOffset;
 				size_t bkgOffset = (iDy > 0 ? 0 : - iDy)*bkgStride + xOffset;
@@ -107,7 +107,7 @@ namespace Simd
 
 			if(fDy)
 			{
-				const uchar * ps[2][2];
+				const uint8_t * ps[2][2];
 				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + (iDx > 0 ? 0 : -iDx)*channelCount;
@@ -148,7 +148,7 @@ namespace Simd
 
 			if(fDx && fDy)
 			{
-				const uchar * ps[2][2];
+				const uint8_t * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
 				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + xOffset;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + xOffset;
@@ -172,9 +172,9 @@ namespace Simd
 		}
 
         void CommonShiftAction(
-            const uchar * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
-            const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
-            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * & dst, size_t dstStride,
+            const uint8_t * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
+            const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * & dst, size_t dstStride,
             int & fDx, int & fDy)
         {
             assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
@@ -209,8 +209,8 @@ namespace Simd
             height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
         }
 
-		void ShiftBilinear(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			int fDx, int fDy, uchar * dst, size_t dstStride)
+		void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+			int fDx, int fDy, uint8_t * dst, size_t dstStride)
 		{
 			size_t size = width*channelCount;
 			if(fDy)
@@ -278,9 +278,9 @@ namespace Simd
 		}
 
 		void ShiftBilinear(
-			const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
+			const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+			const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 		{
 			int fDx, fDy;
 			CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 

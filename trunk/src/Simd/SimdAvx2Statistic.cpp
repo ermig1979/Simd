@@ -34,60 +34,60 @@
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
-		template <bool align> void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
-			uchar * min, uchar * max, uchar * average)
-		{
-			assert(width*height && width >= A);
-			if(align)
-				assert(Aligned(src) && Aligned(stride));
+    namespace Avx2
+    {
+        template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t * min, uint8_t * max, uint8_t * average)
+        {
+            assert(width*height && width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
 
-			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
-			__m256i sum = _mm256_setzero_si256();
-			__m256i min_ = K_INV_ZERO;
-			__m256i max_ = K_ZERO;
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < bodyWidth; col += A)
-				{
-					const __m256i value = Load<align>((__m256i*)(src + col));
-					min_ = _mm256_min_epu8(min_, value);
-					max_ = _mm256_max_epu8(max_, value);
-					sum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), sum);
-				}
-				if(width - bodyWidth)
-				{
-					const __m256i value = Load<false>((__m256i*)(src + width - A));
-					min_ = _mm256_min_epu8(min_, value);
-					max_ = _mm256_max_epu8(max_, value);
-					sum = _mm256_add_epi64(_mm256_sad_epu8(_mm256_and_si256(tailMask, value), K_ZERO), sum);
-				}
-				src += stride;
-			}
+            size_t bodyWidth = AlignLo(width, A);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
+            __m256i sum = _mm256_setzero_si256();
+            __m256i min_ = K_INV_ZERO;
+            __m256i max_ = K_ZERO;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const __m256i value = Load<align>((__m256i*)(src + col));
+                    min_ = _mm256_min_epu8(min_, value);
+                    max_ = _mm256_max_epu8(max_, value);
+                    sum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), sum);
+                }
+                if(width - bodyWidth)
+                {
+                    const __m256i value = Load<false>((__m256i*)(src + width - A));
+                    min_ = _mm256_min_epu8(min_, value);
+                    max_ = _mm256_max_epu8(max_, value);
+                    sum = _mm256_add_epi64(_mm256_sad_epu8(_mm256_and_si256(tailMask, value), K_ZERO), sum);
+                }
+                src += stride;
+            }
 
-			uchar min_buffer[A], max_buffer[A];
-			_mm256_storeu_si256((__m256i*)min_buffer, min_);
-			_mm256_storeu_si256((__m256i*)max_buffer, max_);
-			*min = UCHAR_MAX;
-			*max = 0;
-			for (size_t i = 0; i < A; ++i)
-			{
-				*min = Base::MinU8(min_buffer[i], *min);
-				*max = Base::MaxU8(max_buffer[i], *max);
-			}
-			*average = (uchar)((ExtractSum<uint64_t>(sum) + UCHAR_MAX/2)/(width*height));
-		}
+            uint8_t min_buffer[A], max_buffer[A];
+            _mm256_storeu_si256((__m256i*)min_buffer, min_);
+            _mm256_storeu_si256((__m256i*)max_buffer, max_);
+            *min = UCHAR_MAX;
+            *max = 0;
+            for (size_t i = 0; i < A; ++i)
+            {
+                *min = Base::MinU8(min_buffer[i], *min);
+                *max = Base::MaxU8(max_buffer[i], *max);
+            }
+            *average = (uint8_t)((ExtractSum<uint64_t>(sum) + UCHAR_MAX/2)/(width*height));
+        }
 
-		void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
-			uchar * min, uchar * max, uchar * average)
-		{
-			if(Aligned(src) && Aligned(stride))
-				GetStatistic<true>(src, stride, width, height, min, max, average);
-			else
-				GetStatistic<false>(src, stride, width, height, min, max, average);
-		}
+        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t * min, uint8_t * max, uint8_t * average)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetStatistic<true>(src, stride, width, height, min, max, average);
+            else
+                GetStatistic<false>(src, stride, width, height, min, max, average);
+        }
 
         SIMD_INLINE void GetMoments16(__m256i row, __m256i col, 
             __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy)
@@ -113,7 +113,7 @@ namespace Simd
             col = _mm256_add_epi16(col, K16_0018);
         }
 
-        template <bool align> void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+        template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
             assert(width >= A && width < SHRT_MAX && height < SHRT_MAX);
@@ -121,11 +121,11 @@ namespace Simd
                 assert(Aligned(mask) && Aligned(stride));
 
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
             const __m256i K16_I = _mm256_setr_epi16(0, 1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19, 20, 21, 22, 23);
             const __m256i _index = _mm256_set1_epi8(index);
-            const __m256i tailCol = _mm256_add_epi16(K16_I, _mm256_set1_epi16((ushort)(width - A)));
+            const __m256i tailCol = _mm256_add_epi16(K16_I, _mm256_set1_epi16((uint16_t)(width - A)));
 
             __m256i _area = _mm256_setzero_si256();
             __m256i _x = _mm256_setzero_si256();
@@ -171,7 +171,7 @@ namespace Simd
             *yy = ExtractSum<int64_t>(_yy);
         }
 
-        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
             if(Aligned(mask) && Aligned(stride))
@@ -180,12 +180,12 @@ namespace Simd
                 GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
 
-        template <bool align> void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
-            memset(sums, 0, sizeof(uint)*height);
+            memset(sums, 0, sizeof(uint32_t)*height);
             for(size_t row = 0; row < height; ++row)
             {
                 __m256i sum = _mm256_setzero_si256();
@@ -204,7 +204,7 @@ namespace Simd
             }
         }
 
-        void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             if(Aligned(src) && Aligned(stride))
                 GetRowSums<true>(src, stride, width, height, sums);
@@ -218,9 +218,9 @@ namespace Simd
             {
                 Buffer(size_t width)
                 {
-                    _p = Allocate(sizeof(ushort)*width + sizeof(uint)*width);
-                    sums16 = (ushort*)_p;
-                    sums32 = (uint*)(sums16 + width);
+                    _p = Allocate(sizeof(uint16_t)*width + sizeof(uint32_t)*width);
+                    sums16 = (uint16_t*)_p;
+                    sums32 = (uint32_t*)(sums16 + width);
                 }
 
                 ~Buffer()
@@ -228,20 +228,20 @@ namespace Simd
                     Free(_p);
                 }
 
-                ushort * sums16;
-                uint * sums32;
+                uint16_t * sums16;
+                uint32_t * sums32;
             private:
                 void *_p;
             };
         }
 
-        SIMD_INLINE void Sum16(__m256i src8, ushort * sums16)
+        SIMD_INLINE void Sum16(__m256i src8, uint16_t * sums16)
         {
             Store<true>((__m256i*)sums16 + 0, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 0), _mm256_unpacklo_epi8(src8, K_ZERO)));
             Store<true>((__m256i*)sums16 + 1, _mm256_add_epi16(Load<true>((__m256i*)sums16 + 1), _mm256_unpackhi_epi8(src8, K_ZERO)));
         }
 
-        SIMD_INLINE void Sum16To32(const ushort * src, uint * dst)
+        SIMD_INLINE void Sum16To32(const uint16_t * src, uint32_t * dst)
         {
             __m256i lo = LoadPermuted<true>((__m256i*)src + 0);
             __m256i hi = LoadPermuted<true>((__m256i*)src + 1);
@@ -251,7 +251,7 @@ namespace Simd
             Store<true>((__m256i*)dst + 3, _mm256_add_epi32(Load<true>((__m256i*)dst + 3), _mm256_unpackhi_epi16(hi, K_ZERO)));
         }
 
-        template <bool align> void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        template <bool align> void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedLoWidth = AlignLo(width, A);
             size_t alignedHiWidth = AlignHi(width, A);
@@ -259,13 +259,13 @@ namespace Simd
             size_t stepCount = (height + SCHAR_MAX)/stepSize;
 
             Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint)*alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for(size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(buffer.sums16, 0, sizeof(ushort)*alignedHiWidth);
+                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 for(size_t row = rowStart; row < rowEnd; ++row)
                 {
                     for(size_t col = 0; col < alignedLoWidth; col += A)
@@ -284,12 +284,12 @@ namespace Simd
                 for(size_t col = 0; col < alignedHiWidth; col += A)
                     Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint)*alignedLoWidth);
+            memcpy(sums, buffer.sums32, sizeof(uint32_t)*alignedLoWidth);
             if(alignedLoWidth != width)
-                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint)*(width - alignedLoWidth));
+                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint32_t)*(width - alignedLoWidth));
         }
 
-        void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             if(Aligned(src) && Aligned(stride))
                 GetColSums<true>(src, stride, width, height, sums);
@@ -297,14 +297,14 @@ namespace Simd
                 GetColSums<false>(src, stride, width, height, sums);
         }
 
-        template <bool align> void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
-            memset(sums, 0, sizeof(uint)*height);
-            const uchar * src0 = src;
-            const uchar * src1 = src + stride;
+            memset(sums, 0, sizeof(uint32_t)*height);
+            const uint8_t * src0 = src;
+            const uint8_t * src1 = src + stride;
             height--;
             for(size_t row = 0; row < height; ++row)
             {
@@ -327,7 +327,7 @@ namespace Simd
             }
         }
 
-        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             if(Aligned(src) && Aligned(stride))
                 GetAbsDyRowSums<true>(src, stride, width, height, sums);
@@ -335,7 +335,7 @@ namespace Simd
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
         }
 
-        template <bool align> void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             width--;
             size_t alignedLoWidth = AlignLo(width, A);
@@ -344,13 +344,13 @@ namespace Simd
             size_t stepCount = (height + SCHAR_MAX)/stepSize;
 
             Buffer buffer(alignedHiWidth);
-            memset(buffer.sums32, 0, sizeof(uint)*alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
             for(size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(buffer.sums16, 0, sizeof(ushort)*alignedHiWidth);
+                memset(buffer.sums16, 0, sizeof(uint16_t)*alignedHiWidth);
                 for(size_t row = rowStart; row < rowEnd; ++row)
                 {
                     for(size_t col = 0; col < alignedLoWidth; col += A)
@@ -371,19 +371,19 @@ namespace Simd
                 for(size_t col = 0; col < alignedHiWidth; col += A)
                     Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
             }
-            memcpy(sums, buffer.sums32, sizeof(uint)*alignedLoWidth);
+            memcpy(sums, buffer.sums32, sizeof(uint32_t)*alignedLoWidth);
             if(alignedLoWidth != width)
-                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint)*(width - alignedLoWidth));
+                memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint32_t)*(width - alignedLoWidth));
             sums[width] = 0;
         }
 
-        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             if(Aligned(src) && Aligned(stride))
                 GetAbsDxColSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
-	}
+    }
 #endif// SIMD_AVX2_ENABLE
 }

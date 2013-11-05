@@ -32,7 +32,7 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        template <bool align> SIMD_INLINE void GrayToBgra(uchar * bgra, __m128i gray, __m128i alpha)
+        template <bool align> SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m128i gray, __m128i alpha)
         {
             __m128i bgLo = _mm_unpacklo_epi8(gray, gray);
             __m128i bgHi = _mm_unpackhi_epi8(gray, gray);
@@ -45,7 +45,7 @@ namespace Simd
             Store<align>((__m128i*)bgra + 3, _mm_unpackhi_epi16(bgHi, raHi));
         }
 
-        template <bool align> void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
+        template <bool align> void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= A);
 			if(align)
@@ -70,7 +70,7 @@ namespace Simd
             }
         }
 
-		void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
+		void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
 		{
 			if(Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
 				GrayToBgra<true>(gray, width, height, grayStride, bgra, bgraStride, alpha);

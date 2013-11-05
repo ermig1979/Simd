@@ -28,30 +28,30 @@ namespace Simd
 {
 	namespace Base
 	{
-		template <SimdOperationType type> SIMD_INLINE uchar Operation(const uchar & a, const uchar & b);
+		template <SimdOperationType type> SIMD_INLINE uint8_t Operation(const uint8_t & a, const uint8_t & b);
 
-		template <> SIMD_INLINE uchar Operation<SimdOperationAverage>(const uchar & a, const uchar & b)
+		template <> SIMD_INLINE uint8_t Operation<SimdOperationAverage>(const uint8_t & a, const uint8_t & b)
 		{
 			return Average(a, b);
 		}
 
-		template <> SIMD_INLINE uchar Operation<SimdOperationAnd>(const uchar & a, const uchar & b)
+		template <> SIMD_INLINE uint8_t Operation<SimdOperationAnd>(const uint8_t & a, const uint8_t & b)
 		{
 			return  a & b;
 		}
 
-		template <> SIMD_INLINE uchar Operation<SimdOperationMaximum>(const uchar & a, const uchar & b)
+		template <> SIMD_INLINE uint8_t Operation<SimdOperationMaximum>(const uint8_t & a, const uint8_t & b)
 		{
 			return  MaxU8(a, b);
 		}
 
-        template <> SIMD_INLINE uchar Operation<SimdOperationSaturatedSubtraction>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE uint8_t Operation<SimdOperationSaturatedSubtraction>(const uint8_t & a, const uint8_t & b)
         {
             return  SaturatedSubtractionU8(a, b);
         }
 
-		template <SimdOperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		template <SimdOperationType type> void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
 			size_t size = width*channelCount;
 			for(size_t row = 0; row < height; ++row)
@@ -64,8 +64,8 @@ namespace Simd
 			}
 		}
 
-		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
+		void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
 		{
 			switch(type)
 			{
@@ -82,7 +82,7 @@ namespace Simd
 			}
 		}
 
-        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
             for(size_t row = 0; row < height; ++row)
             {

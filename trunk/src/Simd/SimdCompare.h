@@ -31,34 +31,34 @@ namespace Simd
 {
     namespace Base
     {
-        template <SimdCompareType type> SIMD_INLINE bool Compare(const uchar & src, const uchar & b);
+        template <SimdCompareType type> SIMD_INLINE bool Compare(const uint8_t & src, const uint8_t & b);
 
-        template <> SIMD_INLINE bool Compare<SimdCompareEqual>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareEqual>(const uint8_t & a, const uint8_t & b)
         {
             return a == b;
         }
 
-        template <> SIMD_INLINE bool Compare<SimdCompareNotEqual>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareNotEqual>(const uint8_t & a, const uint8_t & b)
         {
             return a != b;
         }
 
-        template <> SIMD_INLINE bool Compare<SimdCompareGreater>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareGreater>(const uint8_t & a, const uint8_t & b)
         {
             return a > b;
         }
 
-        template <> SIMD_INLINE bool Compare<SimdCompareGreaterOrEqual>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareGreaterOrEqual>(const uint8_t & a, const uint8_t & b)
         {
             return a >= b;
         }
 
-        template <> SIMD_INLINE bool Compare<SimdCompareLesser>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareLesser>(const uint8_t & a, const uint8_t & b)
         {
             return a < b;
         }
 
-        template <> SIMD_INLINE bool Compare<SimdCompareLesserOrEqual>(const uchar & a, const uchar & b)
+        template <> SIMD_INLINE bool Compare<SimdCompareLesserOrEqual>(const uint8_t & a, const uint8_t & b)
         {
             return a <= b;
         }

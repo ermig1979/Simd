@@ -28,13 +28,13 @@ namespace Simd
 {
     namespace Base
     {
-		SIMD_INLINE void Yuv420ToBgra(const uchar *y, int u, int v, int alpha, uchar * bgra)
+		SIMD_INLINE void Yuv420ToBgra(const uint8_t *y, int u, int v, int alpha, uint8_t * bgra)
 		{
 			YuvToBgra(y[0], u, v, alpha, bgra);
 			YuvToBgra(y[1], u, v, alpha, bgra + 4);
 		}
 
-        void RowYuv444ToBgra(uchar *bgra, size_t width, const int *y, const int *u, const int *v, int shift, uchar alpha)
+        void RowYuv444ToBgra(uint8_t *bgra, size_t width, const int *y, const int *u, const int *v, int shift, uint8_t alpha)
         {
             const int *end = y + width;
             for(;y < end; y += 1, u += 1, v += 1, bgra += 4)
@@ -49,8 +49,8 @@ namespace Simd
             }
         }
 
-        void Yuv444ToBgra(uchar *bgra, size_t width, size_t height, size_t stride,
-            const int *y, const int *u, const int *v, int shift, uchar alpha)
+        void Yuv444ToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
+            const int *y, const int *u, const int *v, int shift, uint8_t alpha)
         {
             for(size_t row  = 0; row < height; ++row)
             {
@@ -62,8 +62,8 @@ namespace Simd
             }
         }
 
-        void Yuv422ToBgra(uchar *bgra, size_t width, size_t height, size_t stride,
-            const int *y, const int *u, const int *v, int shift, uchar alpha)
+        void Yuv422ToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
+            const int *y, const int *u, const int *v, int shift, uint8_t alpha)
         {
             assert(height%2 == 0);
 
@@ -81,7 +81,7 @@ namespace Simd
             }
         }
 
-        void RowYuv420ToBgra(uchar *bgra, size_t width, const int *y, const int *u, const int *v, int shift, uchar alpha)
+        void RowYuv420ToBgra(uint8_t *bgra, size_t width, const int *y, const int *u, const int *v, int shift, uint8_t alpha)
         {
             const int *end = y + width;
             for(;y < end; y += 2, u += 1, v += 1, bgra += 8)
@@ -101,8 +101,8 @@ namespace Simd
             }
         }
 
-        void Yuv420ToBgra(uchar *bgra, size_t width, size_t height, size_t stride,
-            const int *y, const int *u, const int *v, int shift, uchar alpha)
+        void Yuv420ToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
+            const int *y, const int *u, const int *v, int shift, uint8_t alpha)
         {
             assert(width%2 == 0 && height%2 == 0);
 
@@ -121,8 +121,8 @@ namespace Simd
             }
         }
 
-        void YuvToBgra(uchar *bgra, size_t width, size_t height, size_t stride,
-            const int *y, const int *u, const int *v, int dx, int dy, int precision, uchar alpha)
+        void YuvToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
+            const int *y, const int *u, const int *v, int dx, int dy, int precision, uint8_t alpha)
         {
             assert(precision >= 8 && (dx == 1 || dx == 2) && (dy == 1 || dy == 2) && (dy != 1 || dx != 2));
 
@@ -137,8 +137,8 @@ namespace Simd
                 Yuv444ToBgra(bgra, width, height, stride, y, u, v, precision - 8, alpha);
         }
 
-		void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= 2) && (height >= 2));
 
@@ -158,8 +158,8 @@ namespace Simd
 			}
 		}
 
-		void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			for(size_t row = 0; row < height; ++row)
 			{

@@ -37,7 +37,7 @@ namespace Simd
 	namespace Avx2
 	{
 		template <bool align> void AbsDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
             assert(width >= A);
@@ -45,7 +45,7 @@ namespace Simd
 				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+			__m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
 			__m256i fullSum = _mm256_setzero_si256();
 			for(size_t row = 0; row < height; ++row)
 			{
@@ -68,8 +68,8 @@ namespace Simd
 		}
 
 		template <bool align> void AbsDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
             assert(width >= A);
 			if(align)
@@ -79,7 +79,7 @@ namespace Simd
 			}
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+			__m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
 			__m256i fullSum = _mm256_setzero_si256();
 			__m256i index_= _mm256_set1_epi8(index);
 			for(size_t row = 0; row < height; ++row)
@@ -105,7 +105,7 @@ namespace Simd
 			*sum = ExtractSum<uint64_t>(fullSum);
 		}
 
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
@@ -114,8 +114,8 @@ namespace Simd
 				AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
 		}
 
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
 				AbsDifferenceSum<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
@@ -123,36 +123,36 @@ namespace Simd
 				AbsDifferenceSum<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 		}
 
-        template <bool align> void AbsDifferenceSums3(__m256i current, const uchar * background, __m256i sums[3])
+        template <bool align> void AbsDifferenceSums3(__m256i current, const uint8_t * background, __m256i sums[3])
         {
             sums[0] = _mm256_add_epi64(sums[0], _mm256_sad_epu8(current, Load<align>((__m256i*)(background - 1))));
             sums[1] = _mm256_add_epi64(sums[1], _mm256_sad_epu8(current, Load<false>((__m256i*)(background))));
             sums[2] = _mm256_add_epi64(sums[2], _mm256_sad_epu8(current, Load<false>((__m256i*)(background + 1))));
         }
 
-        template <bool align> void AbsDifferenceSums3x3(__m256i current, const uchar * background, size_t stride, __m256i sums[9])
+        template <bool align> void AbsDifferenceSums3x3(__m256i current, const uint8_t * background, size_t stride, __m256i sums[9])
         {
             AbsDifferenceSums3<align>(current, background - stride, sums + 0);
             AbsDifferenceSums3<align>(current, background, sums + 3);
             AbsDifferenceSums3<align>(current, background + stride, sums + 6);
         }
 
-        template <bool align> void AbsDifferenceSums3(__m256i current, const uchar * background, __m256i mask, __m256i sums[3])
+        template <bool align> void AbsDifferenceSums3(__m256i current, const uint8_t * background, __m256i mask, __m256i sums[3])
         {
             sums[0] = _mm256_add_epi64(sums[0], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<align>((__m256i*)(background - 1)))));
             sums[1] = _mm256_add_epi64(sums[1], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<false>((__m256i*)(background)))));
             sums[2] = _mm256_add_epi64(sums[2], _mm256_sad_epu8(current, _mm256_and_si256(mask, Load<false>((__m256i*)(background + 1)))));
         }
 
-        template <bool align> void AbsDifferenceSums3x3(__m256i current, const uchar * background, size_t stride, __m256i mask, __m256i sums[9])
+        template <bool align> void AbsDifferenceSums3x3(__m256i current, const uint8_t * background, size_t stride, __m256i mask, __m256i sums[9])
         {
             AbsDifferenceSums3<align>(current, background - stride, mask, sums + 0);
             AbsDifferenceSums3<align>(current, background, mask, sums + 3);
             AbsDifferenceSums3<align>(current, background + stride, mask, sums + 6);
         }
 
-        template <bool align> void AbsDifferenceSums3x3(const uchar * current, size_t currentStride, 
-            const uchar * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums)
+        template <bool align> void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, 
+            const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums)
         {
             assert(height > 2 && width > A + 2);
             if(align)
@@ -164,7 +164,7 @@ namespace Simd
             background += 1 + backgroundStride;
 
             size_t bodyWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
 
             __m256i fullSums[9];
             for(size_t i = 0; i < 9; ++i)
@@ -190,7 +190,7 @@ namespace Simd
                 sums[i] = ExtractSum<uint64_t>(fullSums[i]);
         }
 
-        void AbsDifferenceSums3x3(const uchar * current, size_t currentStride, const uchar * background, size_t backgroundStride,
+        void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
             size_t width, size_t height, uint64_t * sums)
         {
             if(Aligned(background) && Aligned(backgroundStride))
@@ -199,8 +199,8 @@ namespace Simd
                 AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
         }
 
-        template <bool align> void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
-            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+        template <bool align> void AbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
         {
             assert(height > 2 && width > A + 2);
             if(align)
@@ -213,7 +213,7 @@ namespace Simd
             mask += 1 + maskStride;
 
             size_t bodyWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
             __m256i _index = _mm256_set1_epi8(index);
 
             __m256i fullSums[9];
@@ -243,8 +243,8 @@ namespace Simd
                 sums[i] = ExtractSum<uint64_t>(fullSums[i]);
         }
 
-        void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
-            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+        void AbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
         {
             if(Aligned(background) && Aligned(backgroundStride))
                 AbsDifferenceSums3x3<true>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);

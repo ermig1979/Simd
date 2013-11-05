@@ -27,17 +27,17 @@ namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE uint GrayToBgra(uint gray, uint alpha)
+        SIMD_INLINE uint32_t GrayToBgra(uint32_t gray, uint32_t alpha)
         {
-            return gray | (gray << 8) | (gray << 16)  | (alpha << 24);
+            return gray | (gray << 8) | (gray << 16) | (alpha << 24);
         }
 
-        void GrayToBgra(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha)
+        void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
             for(size_t row = 0; row < height; ++row)
             {
 				for(size_t col = 0; col < width; ++col)
-                    ((uint*)bgra)[col] = GrayToBgra(gray[col], alpha);
+                    ((uint32_t*)bgra)[col] = GrayToBgra(gray[col], alpha);
                 gray += grayStride;
                 bgra += bgraStride;
             }

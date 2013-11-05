@@ -31,7 +31,7 @@ namespace Test
 	{
 		struct ColorFunc
 		{
-			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride);
+			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
 			std::string description;
@@ -47,7 +47,7 @@ namespace Test
 
 		struct GrayFunc
 		{
-			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride);
+			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
 			std::string description;

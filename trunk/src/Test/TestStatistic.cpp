@@ -31,15 +31,15 @@ namespace Test
 	{
 		struct Func1
 		{
-			typedef void (*FuncPtr)(const uchar *src, size_t stride, size_t width, size_t height, 
-				uchar * min, uchar * max, uchar * average);
+			typedef void (*FuncPtr)(const uint8_t *src, size_t stride, size_t width, size_t height, 
+				 uint8_t * min, uint8_t * max, uint8_t * average);
 
 			FuncPtr func;
 			std::string description;
 
 			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uchar * min, uchar * max, uchar * average) const
+			void Call(const View & src, uint8_t * min, uint8_t * max, uint8_t * average) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.stride, src.width, src.height, min, max, average);
@@ -58,8 +58,8 @@ namespace Test
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(src);
 
-		uchar min1, max1, average1;
-		uchar min2, max2, average2;
+		 uint8_t min1, max1, average1;
+		 uint8_t min2, max2, average2;
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, &min1, &max1, &average1));
 
@@ -96,7 +96,7 @@ namespace Test
     {
         struct Func2
         {
-            typedef void (*FuncPtr)(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+            typedef void (*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
             FuncPtr func;
@@ -104,7 +104,7 @@ namespace Test
 
             Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & mask, uchar index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy) const
+            void Call(const View & mask, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(mask.data, mask.stride, mask.width, mask.height, index, area, x, y, xx, xy, yy);
@@ -120,7 +120,7 @@ namespace Test
 
         std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-        const uchar index = 7;
+        const uint8_t index = 7;
         View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandomMask(mask, index);
 
@@ -165,14 +165,14 @@ namespace Test
     {
         struct Func3
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t stride, size_t width, size_t height, uint * sums);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
             FuncPtr func;
             std::string description;
 
             Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uint * sums) const
+            void Call(const View & src, uint32_t * sums) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, sums);

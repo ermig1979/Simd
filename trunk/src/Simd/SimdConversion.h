@@ -56,14 +56,14 @@ namespace Simd
                 YUV_TO_BGR_ROUND_TERM) >> YUV_TO_BGR_AVERAGING_SHIFT);
         }
 
-        SIMD_INLINE void YuvToBgr(int y, int u, int v, uchar * bgr)
+        SIMD_INLINE void YuvToBgr(int y, int u, int v, uint8_t * bgr)
         {
             bgr[0] = YuvToBlue(y, u);
             bgr[1] = YuvToGreen(y, u, v);
             bgr[2] = YuvToRed(y, v);
         }
 
-        SIMD_INLINE void YuvToBgra(int y, int u, int v, int alpha, uchar * bgra)
+        SIMD_INLINE void YuvToBgra(int y, int u, int v, int alpha, uint8_t * bgra)
         {
             bgra[0] = YuvToBlue(y, u);
             bgra[1] = YuvToGreen(y, u, v);

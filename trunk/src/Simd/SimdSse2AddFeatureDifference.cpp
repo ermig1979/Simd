@@ -50,8 +50,8 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void AddFeatureDifference(const uchar * value, const uchar * lo, const uchar * hi, 
-            uchar * difference, size_t offset, __m128i weight, __m128i mask)
+        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, 
+            uint8_t * difference, size_t offset, __m128i weight, __m128i mask)
         {
             const __m128i _value = Load<align>((__m128i*)(value + offset));
             const __m128i _lo = Load<align>((__m128i*)(lo + offset));
@@ -63,9 +63,9 @@ namespace Simd
             Store<align>((__m128i*)(difference + offset), _mm_adds_epu8(_difference, inc));
         }
 
-        template <bool align> void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride)
+        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+            uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             assert(width >= A);
             if(align)
@@ -93,9 +93,9 @@ namespace Simd
             }
         }
 
-        void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride)
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+            uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
                 Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))

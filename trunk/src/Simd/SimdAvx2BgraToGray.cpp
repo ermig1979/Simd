@@ -52,7 +52,7 @@ namespace Simd
             return PackU16ToU8(lo, hi);
         }
 
-		template <bool align> SIMD_INLINE void Load(const uchar* p, __m256i a[4])
+		template <bool align> SIMD_INLINE void Load(const uint8_t* p, __m256i a[4])
 		{
 			a[0] = Load<align>((__m256i*)p + 0);
 			a[1] = Load<align>((__m256i*)p + 1);
@@ -60,7 +60,7 @@ namespace Simd
 			a[3] = Load<align>((__m256i*)p + 3);
 		}
 
-        template <bool align> void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
+        template <bool align> void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
         {
             assert(width >= A);
 			if(align)
@@ -85,7 +85,7 @@ namespace Simd
 			}
         }
 
-		void BgraToGray(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride)
+		void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
 		{
 			if(Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
 				BgraToGray<true>(bgra, width, height, bgraStride, gray, grayStride);

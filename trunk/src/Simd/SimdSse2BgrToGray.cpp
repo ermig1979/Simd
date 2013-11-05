@@ -38,8 +38,8 @@ namespace Simd
             {
                 Buffer(size_t width)
                 {
-                    _p = Allocate(sizeof(uchar)*4*width);
-                    bgra = (uchar*)_p;
+                    _p = Allocate(sizeof(uint8_t)*4*width);
+                    bgra = (uint8_t*)_p;
                 }
 
                 ~Buffer()
@@ -47,13 +47,13 @@ namespace Simd
                     Free(_p);
                 }
 
-                uchar * bgra;
+                uint8_t * bgra;
             private:
                 void *_p;
             };	
         }
 
-        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+        void BgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride)
         {
             assert(width >= A);
 

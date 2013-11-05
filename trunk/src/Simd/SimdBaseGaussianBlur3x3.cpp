@@ -32,15 +32,15 @@ namespace Simd
 			return (value + 8) >> 4;
 		}
 
-		SIMD_INLINE int GaussianBlur(const uchar *s0, const uchar *s1, const uchar *s2, size_t x0, size_t x1, size_t x2)
+		SIMD_INLINE int GaussianBlur(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
 		{
 			return DivideBy16(s0[x0] + 2*s0[x1] + s0[x2] + (s1[x0] + 2*s1[x1] + s1[x2])*2 + s2[x0] + 2*s2[x1] + s2[x2]);
 		}
 
-		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride)
+		void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
-			const uchar *src0, *src1, *src2;
+			const uint8_t *src0, *src1, *src2;
 
 			size_t size = channelCount*width;
 			for(size_t row = 0; row < height; ++row)

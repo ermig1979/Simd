@@ -53,55 +53,55 @@ namespace Simd
             return PackU16ToU8(lo, hi);
         }
 
-		template <bool align> void ReduceGray2x2(
-			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-		{
-			assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= DA);
-			if(align)
-			{
-				assert(Aligned(src) && Aligned(srcStride));
-				assert(Aligned(dst) && Aligned(dstStride));
-			}
+        template <bool align> void ReduceGray2x2(
+            const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= DA);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
 
-			size_t alignedWidth = AlignLo(srcWidth, DA);
-			size_t evenWidth = AlignLo(srcWidth, 2);
-			for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
-			{
-				const uchar *src0 = src;
-				const uchar *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-				size_t srcOffset = 0, dstOffset = 0;
-				for(; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
-				{
-					Store<align>((__m256i*)(dst + dstOffset), Average8(
-						Load<align>((__m256i*)(src0 + srcOffset)), Load<align>((__m256i*)(src0 + srcOffset + A)), 
-						Load<align>((__m256i*)(src1 + srcOffset)), Load<align>((__m256i*)(src1 + srcOffset + A))));
-				}
-				if(alignedWidth != srcWidth)
-				{
-					dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
-					srcOffset = evenWidth - DA;
-					Store<align>((__m256i*)(dst + dstOffset), Average8(
-						Load<align>((__m256i*)(src0 + srcOffset)), Load<align>((__m256i*)(src0 + srcOffset + A)), 
-						Load<align>((__m256i*)(src1 + srcOffset)), Load<align>((__m256i*)(src1 + srcOffset + A))));
-					if(evenWidth != srcWidth)
-					{
-						dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
-					}
-				}
-				src += 2*srcStride;
-				dst += dstStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(srcWidth, DA);
+            size_t evenWidth = AlignLo(srcWidth, 2);
+            for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
+            {
+                const uint8_t *src0 = src;
+                const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
+                size_t srcOffset = 0, dstOffset = 0;
+                for(; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
+                {
+                    Store<align>((__m256i*)(dst + dstOffset), Average8(
+                        Load<align>((__m256i*)(src0 + srcOffset)), Load<align>((__m256i*)(src0 + srcOffset + A)), 
+                        Load<align>((__m256i*)(src1 + srcOffset)), Load<align>((__m256i*)(src1 + srcOffset + A))));
+                }
+                if(alignedWidth != srcWidth)
+                {
+                    dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
+                    srcOffset = evenWidth - DA;
+                    Store<align>((__m256i*)(dst + dstOffset), Average8(
+                        Load<align>((__m256i*)(src0 + srcOffset)), Load<align>((__m256i*)(src0 + srcOffset + A)), 
+                        Load<align>((__m256i*)(src1 + srcOffset)), Load<align>((__m256i*)(src1 + srcOffset + A))));
+                    if(evenWidth != srcWidth)
+                    {
+                        dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
+                    }
+                }
+                src += 2*srcStride;
+                dst += dstStride;
+            }
+        }
 
-		void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-		{
-			if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
-				ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
+        void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
+                ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            else
+                ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

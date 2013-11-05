@@ -32,15 +32,15 @@ namespace Test
 		struct Func
 		{
 			typedef void (*FuncPtr)(
-				const uchar *src, size_t width, size_t height, size_t stride,
-				size_t step, size_t indent, uint * histogram);
+				const uint8_t *src, size_t width, size_t height, size_t stride,
+				size_t step, size_t indent, uint32_t * histogram);
 
 			FuncPtr func;
 			std::string description;
 
 			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, size_t step, size_t indent, uint * histogram) const
+			void Call(const View & src, size_t step, size_t indent, uint32_t * histogram) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.width, src.height, src.stride,

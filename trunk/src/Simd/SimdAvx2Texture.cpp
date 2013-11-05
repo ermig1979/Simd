@@ -47,7 +47,7 @@ namespace Simd
             return _mm256_packus_epi16(lo, hi);
         }
 
-        template<bool align> SIMD_INLINE void TextureBoostedSaturatedGradient(const uchar * src, uchar * dx, uchar * dy, 
+        template<bool align> SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, uint8_t * dx, uint8_t * dy, 
             size_t stride, __m256i saturation, __m256i boost)
         {
             const __m256i s10 = Load<false>((__m256i*)(src - 1));
@@ -58,8 +58,8 @@ namespace Simd
             Store<align>((__m256i*)dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
         }
 
-        template<bool align> void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
+        template<bool align> void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
         {
             assert(width >= A && int(2)*saturation*boost <= 0xFF);
             if(align)
@@ -96,8 +96,8 @@ namespace Simd
             memset(dy, 0, width);
         }
 
-        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
+        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
                 TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
@@ -105,7 +105,7 @@ namespace Simd
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
 
-        template<bool align> SIMD_INLINE void TextureBoostedUv(const uchar * src, uchar * dst, __m256i min8, __m256i max8, __m256i boost16)
+        template<bool align> SIMD_INLINE void TextureBoostedUv(const uint8_t * src, uint8_t * dst, __m256i min8, __m256i max8, __m256i boost16)
         {
             const __m256i _src = Load<false>((__m256i*)src);
             const __m256i saturated = _mm256_sub_epi8(_mm256_max_epu8(min8, _mm256_min_epu8(max8, _src)), min8);
@@ -114,8 +114,8 @@ namespace Simd
             Store<align>((__m256i*)dst, _mm256_packus_epi16(lo, hi));
         }
 
-        template<bool align> void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar boost, uchar * dst, size_t dstStride)
+        template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t boost, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A && boost < 0x80);
             if(align)
@@ -143,8 +143,8 @@ namespace Simd
             }
         }
 
-        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar boost, uchar * dst, size_t dstStride)
+        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t boost, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
@@ -152,7 +152,7 @@ namespace Simd
                 TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
         }
 
-        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uchar * src, const uchar * lo, const uchar * hi, 
+        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, 
             __m256i & positive, __m256i & negative, const __m256i & mask)
         {
             const __m256i _src = Load<align>((__m256i*)src);
@@ -164,8 +164,8 @@ namespace Simd
             negative = _mm256_add_epi64(negative, _mm256_sad_epu8(_mm256_subs_epu8(average, current), K_ZERO));
         }
 
-        template <bool align> void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
             assert(width >= A && sum != NULL);
             if(align)
@@ -174,7 +174,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
             __m256i positive = _mm256_setzero_si256();
             __m256i negative = _mm256_setzero_si256();
             for (size_t row = 0; row < height; ++row)
@@ -190,8 +190,8 @@ namespace Simd
             *sum = ExtractSum<int64_t>(positive) - ExtractSum<int64_t>(negative);
         }
 
-        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
                 TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
@@ -199,8 +199,8 @@ namespace Simd
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
         }
 
-        template <bool align> void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            int shift, uchar * dst, size_t dstStride)
+        template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
             if(align)
@@ -209,7 +209,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = src == dst ? SetMask<uchar>(0, A - width + alignedWidth, 0xFF) : K_INV_ZERO;
+            __m256i tailMask = src == dst ? SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF) : K_INV_ZERO;
             if(shift > 0)
             {
                 __m256i _shift = _mm256_set1_epi8((char)shift);
@@ -250,8 +250,8 @@ namespace Simd
             }
         }
 
-        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            int shift, uchar * dst, size_t dstStride)
+        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uint8_t * dst, size_t dstStride)
         {
             if(shift == 0)
             {

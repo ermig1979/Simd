@@ -48,12 +48,9 @@
 
 namespace Test
 {
-	typedef Simd::uchar uchar;
-    typedef Simd::ushort ushort;
-	typedef Simd::uint uint;
 	typedef Simd::View View;
-	typedef uint Histogram[Simd::HISTOGRAM_SIZE];
-    typedef std::vector<uint> Sums;
+	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
+    typedef std::vector<uint32_t> Sums;
 
 #ifdef _DEBUG
 	const int W = 128;

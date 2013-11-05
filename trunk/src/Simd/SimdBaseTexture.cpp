@@ -28,13 +28,13 @@ namespace Simd
 {
 	namespace Base
 	{
-        SIMD_INLINE int TextureBoostedSaturatedGradient(const uchar * src, ptrdiff_t step, int saturation, int boost)
+        SIMD_INLINE int TextureBoostedSaturatedGradient(const uint8_t * src, ptrdiff_t step, int saturation, int boost)
         {
             return (saturation + RestrictRange((int)src[step] - (int)src[-step], -saturation, saturation))*boost;
         }
 
-        void TextureBoostedSaturatedGradient(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride)
+        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 		{
             assert(int(2)*saturation*boost <= 0xFF);
 
@@ -62,8 +62,8 @@ namespace Simd
             memset(dy, 0, width);
 		}
 
-        void TextureBoostedUv(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar boost, uchar * dst, size_t dstStride)
+        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t boost, uint8_t * dst, size_t dstStride)
         {
             assert(boost < 128);
 
@@ -81,8 +81,8 @@ namespace Simd
             }
         }
 
-        void TextureGetDifferenceSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum)
+        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
             *sum = 0;
             for (size_t row = 0; row < height; ++row)
@@ -98,8 +98,8 @@ namespace Simd
             }
         }
 
-        void TexturePerformCompensation(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            int shift, uchar * dst, size_t dstStride)
+        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uint8_t * dst, size_t dstStride)
         {
             assert(shift > -0xFF && shift < 0xFF);
 

@@ -49,7 +49,7 @@ namespace Simd
         }
 
 		template <bool align> void SquaredDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			assert(width < 0x10000);
@@ -84,8 +84,8 @@ namespace Simd
 		}
 
 		template <bool align> void SquaredDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			assert(width < 0x10000);
 			if(align)
@@ -123,7 +123,7 @@ namespace Simd
 			*sum = ExtractInt64Sum(fullSum);
 		}
 
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
@@ -132,8 +132,8 @@ namespace Simd
 				SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
 		}
 
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
 				SquaredDifferenceSum<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);

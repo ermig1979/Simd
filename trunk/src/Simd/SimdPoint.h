@@ -24,7 +24,7 @@
 #ifndef __SimdPoint_h__
 #define __SimdPoint_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdLib.h"
 
 namespace Simd
 {

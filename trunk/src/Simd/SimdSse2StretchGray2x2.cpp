@@ -33,53 +33,53 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-		template<bool align> SIMD_INLINE void StoreUnpacked(__m128i value, uchar * dst)
-		{
-			Store<align>((__m128i*)(dst + 0), _mm_unpacklo_epi8(value, value));
-			Store<align>((__m128i*)(dst + A), _mm_unpackhi_epi8(value, value));
-		}
+        template<bool align> SIMD_INLINE void StoreUnpacked(__m128i value, uint8_t * dst)
+        {
+            Store<align>((__m128i*)(dst + 0), _mm_unpacklo_epi8(value, value));
+            Store<align>((__m128i*)(dst + A), _mm_unpackhi_epi8(value, value));
+        }
 
-		template <bool align> void StretchGray2x2(
-			const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-		{
-			assert(srcWidth*2 == dstWidth && srcHeight*2 == dstHeight && srcWidth >= A);
-			if(align)
-			{
-				assert(Aligned(src) && Aligned(srcStride));
-				assert(Aligned(dst) && Aligned(dstStride));
-			}
+        template <bool align> void StretchGray2x2(
+            const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            assert(srcWidth*2 == dstWidth && srcHeight*2 == dstHeight && srcWidth >= A);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
 
-			size_t alignedWidth = AlignLo(srcWidth, A);
-			for(size_t row = 0; row < srcHeight; ++row)
-			{
-				uchar * dstEven = dst;
-				uchar * dstOdd = dst + dstStride;
-				for(size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += DA)
-				{
-					__m128i value = Load<align>((__m128i*)(src + srcCol));
-					StoreUnpacked<align>(value, dstEven + dstCol);
-					StoreUnpacked<align>(value, dstOdd + dstCol);
-				}
-				if(alignedWidth != srcWidth)
-				{
-					__m128i value = Load<false>((__m128i*)(src + srcWidth - A));
-					StoreUnpacked<false>(value, dstEven + dstWidth - 2*A);
-					StoreUnpacked<false>(value, dstOdd + dstWidth - 2*A);
-				}
-				src += srcStride;
-				dst += 2*dstStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(srcWidth, A);
+            for(size_t row = 0; row < srcHeight; ++row)
+            {
+                 uint8_t * dstEven = dst;
+                 uint8_t * dstOdd = dst + dstStride;
+                for(size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += DA)
+                {
+                    __m128i value = Load<align>((__m128i*)(src + srcCol));
+                    StoreUnpacked<align>(value, dstEven + dstCol);
+                    StoreUnpacked<align>(value, dstOdd + dstCol);
+                }
+                if(alignedWidth != srcWidth)
+                {
+                    __m128i value = Load<false>((__m128i*)(src + srcWidth - A));
+                    StoreUnpacked<false>(value, dstEven + dstWidth - 2*A);
+                    StoreUnpacked<false>(value, dstOdd + dstWidth - 2*A);
+                }
+                src += srcStride;
+                dst += 2*dstStride;
+            }
+        }
 
-		void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
-		{
-			if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-				StretchGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				StretchGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
+        void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                StretchGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            else
+                StretchGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }

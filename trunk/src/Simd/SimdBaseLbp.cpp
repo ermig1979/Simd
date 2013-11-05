@@ -27,7 +27,7 @@ namespace Simd
 {
 	namespace Base
 	{
-        SIMD_INLINE int LbpEstimate(const uchar * src, ptrdiff_t stride)
+        SIMD_INLINE int LbpEstimate(const uint8_t * src, ptrdiff_t stride)
         {
             int threshold = src[0];
             int lbp = 0;
@@ -42,7 +42,7 @@ namespace Simd
             return lbp;
         }
 
-		void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+		void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
             memset(dst, 0, width);
             src += srcStride;

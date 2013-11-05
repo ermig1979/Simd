@@ -28,17 +28,17 @@ namespace Simd
 {
     namespace Base
     {
-        void BgrToGray(const uchar *bgr, size_t width, size_t height, size_t bgrStride, uchar *gray, size_t grayStride)
+        void BgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride)
         {
-			for(size_t row = 0; row < height; ++row)
-			{
-				const uchar * pBgr = bgr + row*bgrStride;
-				uchar * pGray = gray + row*grayStride;
-				for(const uchar *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgr += 3)
-				{
-					*pGray = BgrToGray(pBgr[0], pBgr[1], pBgr[2]);
-				}
-			}
+            for(size_t row = 0; row < height; ++row)
+            {
+                const uint8_t * pBgr = bgr + row*bgrStride;
+                uint8_t * pGray = gray + row*grayStride;
+                for(const uint8_t *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgr += 3)
+                {
+                    *pGray = BgrToGray(pBgr[0], pBgr[1], pBgr[2]);
+                }
+            }
         }
     }
 }

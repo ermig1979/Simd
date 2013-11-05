@@ -28,7 +28,7 @@ namespace Simd
 {
     namespace Base
     {
-        void Fill(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uchar value)
+        void Fill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)
         {
             size_t rowSize = width*pixelSize;
             for(size_t row = 0; row < height; ++row)
@@ -38,8 +38,8 @@ namespace Simd
             }
         }
 
-        void FillFrame(uchar * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
-            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uchar value)
+        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
         {
             if(frameTop)
             {
@@ -83,7 +83,7 @@ namespace Simd
             }
         }
 
-        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
 

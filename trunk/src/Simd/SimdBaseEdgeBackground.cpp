@@ -28,8 +28,8 @@ namespace Simd
 {
 	namespace Base
 	{
-        void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
-            uchar * background, size_t backgroundStride)
+        void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -43,8 +43,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
-            uchar * background, size_t backgroundStride)
+        void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -57,8 +57,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
-            const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
+        void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -73,7 +73,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void AdjustEdge(const uchar & count, uchar & value, uchar threshold)
+        SIMD_INLINE void AdjustEdge(const uint8_t & count, uint8_t & value, uint8_t threshold)
         {
             if(count < threshold)
             {
@@ -87,8 +87,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
+        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -102,8 +102,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-            uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
+        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -119,8 +119,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-            uchar * background, size_t backgroundStride)
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -131,8 +131,8 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-            uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
         {
             for(size_t row = 0; row < height; ++row)
             {

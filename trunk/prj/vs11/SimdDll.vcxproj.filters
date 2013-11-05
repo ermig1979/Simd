@@ -354,9 +354,6 @@
     <ClInclude Include="..\..\src\Simd\SimdView.h">
       <Filter>Utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdTypes.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdLib.h">
       <Filter>Lib</Filter>
     </ClInclude>

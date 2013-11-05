@@ -27,35 +27,35 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-		void GetStatistic(const uchar * src, size_t stride, size_t width, size_t height, 
-			uchar * min, uchar * max, uchar * average)
-		{
-			assert(width*height);
+    namespace Base
+    {
+        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t * min, uint8_t * max, uint8_t * average)
+        {
+            assert(width*height);
 
-			uint64_t sum = 0;
-			int min_ = UCHAR_MAX;
-			int max_ = 0;
-			for(size_t row = 0; row < height; ++row)
-			{
-				int rowSum = 0;
-				for(size_t col = 0; col < width; ++col)
-				{
-					int value = src[col];
-					max_ = MaxU8(value, max_);
-					min_ = MinU8(value, min_);
-					rowSum += value;
-				}
-				sum += rowSum;
-				src += stride;
-			}
-			*average = (uchar)((sum + UCHAR_MAX/2)/(width*height));
-			*min = min_;
-			*max = max_;
-		}
+            uint64_t sum = 0;
+            int min_ = UCHAR_MAX;
+            int max_ = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    int value = src[col];
+                    max_ = MaxU8(value, max_);
+                    min_ = MinU8(value, min_);
+                    rowSum += value;
+                }
+                sum += rowSum;
+                src += stride;
+            }
+            *average = (uint8_t)((sum + UCHAR_MAX/2)/(width*height));
+            *min = min_;
+            *max = max_;
+        }
 
-        void GetMoments(const uchar * mask, size_t stride, size_t width, size_t height, uchar index, 
+        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
             *area = 0;
@@ -95,11 +95,11 @@ namespace Simd
             }
         }
 
-        void GetRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             for(size_t row = 0; row < height; ++row)
             {
-                uint sum = 0;
+                uint32_t sum = 0;
                 for(size_t col = 0; col < width; ++col)
                     sum += src[col];
                 sums[row] = sum;
@@ -107,9 +107,9 @@ namespace Simd
             }
         }
 
-        void GetColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            memset(sums, 0, sizeof(uint)*width);
+            memset(sums, 0, sizeof(uint32_t)*width);
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < width; ++col)
@@ -118,15 +118,15 @@ namespace Simd
             }
         }
 
-        void GetAbsDyRowSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            const uchar * src0 = src;
-            const uchar * src1 = src + stride;
+            const uint8_t * src0 = src;
+            const uint8_t * src1 = src + stride;
             height--;
             sums[height] = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                uint sum = 0;
+                uint32_t sum = 0;
                 for(size_t col = 0; col < width; ++col)
                     sum += AbsDifferenceU8(src0[col], src1[col]);
                 sums[row] = sum;
@@ -135,11 +135,11 @@ namespace Simd
             }
         }
 
-        void GetAbsDxColSums(const uchar * src, size_t stride, size_t width, size_t height, uint * sums)
+        void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            const uchar * src0 = src;
-            const uchar * src1 = src + 1;
-            memset(sums, 0, sizeof(uint)*width);
+            const uint8_t * src0 = src;
+            const uint8_t * src1 = src + 1;
+            memset(sums, 0, sizeof(uint32_t)*width);
             width--;
             for(size_t row = 0; row < height; ++row)
             {
@@ -149,5 +149,5 @@ namespace Simd
                 src1 += stride;
             }
         }
-	}
+    }
 }

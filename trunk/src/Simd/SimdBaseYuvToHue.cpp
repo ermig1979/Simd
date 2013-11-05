@@ -54,8 +54,8 @@ namespace Simd
 			return 0;
 		}
 
-		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		void Yuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= 2) && (height >= 2));
 
@@ -77,8 +77,8 @@ namespace Simd
 			}
 		}
 
-		void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		void Yuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			for(size_t row = 0; row < height; ++row)
 			{

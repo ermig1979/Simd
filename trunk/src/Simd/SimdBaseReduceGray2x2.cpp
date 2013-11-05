@@ -29,18 +29,18 @@ namespace Simd
 {
     namespace Base
     {
-        void ReduceGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
 
             size_t evenWidth = AlignLo(srcWidth, 2);
             for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
             {
-                const uchar *s0 = src;
-                const uchar *s1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                const uchar *end = src + evenWidth;
-                uchar *d = dst;
+                const uint8_t *s0 = src;
+                const uint8_t *s1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
+                const uint8_t *end = src + evenWidth;
+                uint8_t *d = dst;
                 for(; s0 < end; s0 += 2, s1 += 2, d += 1)
                 {
                     d[0] = Average(s0[0], s0[1], s1[0], s1[1]);

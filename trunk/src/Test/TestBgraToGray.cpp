@@ -31,7 +31,7 @@ namespace Test
 	{
 		struct Func
 		{
-			typedef void(*FuncPtr)(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *gray, size_t grayStride);
+			typedef void(*FuncPtr)(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride);
 			FuncPtr func;
 			std::string description;
 

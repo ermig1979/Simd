@@ -33,7 +33,7 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-		template<bool align> SIMD_INLINE __m128i AbsGradientSaturatedSum(const uchar * src, size_t stride)
+		template<bool align> SIMD_INLINE __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
 		{
 			const __m128i s10 = Load<false>((__m128i*)(src - 1));
 			const __m128i s12 = Load<false>((__m128i*)(src + 1));
@@ -44,7 +44,7 @@ namespace Simd
 			return _mm_adds_epu8(dx, dy);
 		}
 
-		template<bool align> void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+		template<bool align> void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
 			size_t alignedWidth = AlignLo(width, A);
 			memset(dst, 0, width);
@@ -66,7 +66,7 @@ namespace Simd
 			memset(dst, 0, width);
 		}
 
-		void AbsGradientSaturatedSum(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+		void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
 			if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
 				AbsGradientSaturatedSum<true>(src, srcStride, width, height, dst, dstStride);

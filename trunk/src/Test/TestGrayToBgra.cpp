@@ -31,13 +31,13 @@ namespace Test
 	{
 		struct Func
 		{
-			typedef void(*FuncPtr)(const uchar *gray, size_t width, size_t height, size_t grayStride, uchar *bgra, size_t bgraStride, uchar alpha);
+			typedef void(*FuncPtr)(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 			FuncPtr func;
 			std::string description;
 
 			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst, uchar alpha) const
+			void Call(const View & src, View & dst, uint8_t alpha) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride, alpha);

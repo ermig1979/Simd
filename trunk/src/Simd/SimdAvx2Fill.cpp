@@ -31,7 +31,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align> void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+        template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
             size_t alignedWidth = AlignLo(width, 8);
@@ -46,7 +46,7 @@ namespace Simd
             }
         }
 
-        void FillBgra(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha)
+        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             if(Aligned(dst) && Aligned(stride))
                 FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);

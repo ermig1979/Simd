@@ -28,11 +28,11 @@ namespace Simd
     namespace Base
     {
         void InterleaveBgra(
-            uchar *bgra, size_t size, 
+            uint8_t *bgra, size_t size, 
             const int *blue, int bluePrecision, bool blueSigned, 
             const int *green, int greenPrecision, bool greenSigned,
             const int *red, int redPrecision, bool redSigned,
-            uchar alpha)
+            uint8_t alpha)
         {
             assert(bluePrecision > 0 && greenPrecision > 0 && redPrecision > 0 && 
 				bluePrecision < 32 && greenPrecision < 32 && redPrecision < 32);
@@ -70,9 +70,9 @@ namespace Simd
             }
         }
 
-        void InterleaveBgra(uchar *bgra, size_t size, 
+        void InterleaveBgra(uint8_t *bgra, size_t size, 
             const int *gray, int grayPrecision, bool graySigned, 
-            uchar alpha)
+            uint8_t alpha)
         {
             assert(grayPrecision > 0 && grayPrecision < 32);
 

@@ -31,15 +31,15 @@ namespace Test
     {
         struct Func1
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                uchar saturation, uchar boost, uchar * dx, size_t dxStride, uchar * dy, size_t dyStride);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
             FuncPtr func;
             std::string description;
 
             Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar saturation, uchar boost, View &  dx, View & dy) const
+            void Call(const View & src, uint8_t saturation, uint8_t boost, View &  dx, View & dy) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
@@ -108,15 +108,15 @@ namespace Test
     {
         struct Func2
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                uchar boost, uchar * dst, size_t dstStride);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                uint8_t boost, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
             std::string description;
 
             Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar boost, View &  dst) const
+            void Call(const View & src, uint8_t boost, View &  dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
@@ -182,8 +182,8 @@ namespace Test
     {
         struct Func3
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride, int64_t * sum);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
             FuncPtr func;
             std::string description;
@@ -251,8 +251,8 @@ namespace Test
     {
         struct Func4
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                int shift, uchar * dst, size_t dstStride);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                int shift, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
             std::string description;

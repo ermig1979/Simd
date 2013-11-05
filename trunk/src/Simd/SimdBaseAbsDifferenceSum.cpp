@@ -32,7 +32,7 @@ namespace Simd
 {
 	namespace Base
 	{
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			*sum = 0;
@@ -49,8 +49,8 @@ namespace Simd
 			}
 		}
 
-		void AbsDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			*sum = 0;
 			for(size_t row = 0; row < height; ++row)
@@ -68,7 +68,7 @@ namespace Simd
 			}
 		}
 
-        void AbsDifferenceSums3x3(const uchar * current, size_t currentStride, const uchar * background, size_t backgroundStride,
+        void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
             size_t width, size_t height, uint64_t * sums)
         {
             assert(width > 2 && height > 2);
@@ -108,8 +108,8 @@ namespace Simd
             }
         }
 
-        void AbsDifferenceSums3x3(const uchar *current, size_t currentStride, const uchar *background, size_t backgroundStride,
-            const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sums)
+        void AbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
         {
             assert(width > 2 && height > 2);
 

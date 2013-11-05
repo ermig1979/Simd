@@ -65,14 +65,14 @@ namespace Simd
 			return _mm_packus_epi16(Interpolate(s[0], k), Interpolate(s[1], k));
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, __m128i &lo, __m128i &hi)
+		SIMD_INLINE void LoadBlock(const uint8_t *src, __m128i &lo, __m128i &hi)
 		{
 			const __m128i t = _mm_loadu_si128((__m128i*)(src));
 			lo = _mm_unpacklo_epi8(t, K_ZERO);
 			hi = _mm_unpackhi_epi8(t, K_ZERO);
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, size_t dx, size_t dy, __m128i s[2][2][2])
+		SIMD_INLINE void LoadBlock(const uint8_t *src, size_t dx, size_t dy, __m128i s[2][2][2])
 		{
 			LoadBlock(src, s[0][0][0], s[1][0][0]);
 			LoadBlock(src + dx, s[0][0][1], s[1][0][1]);
@@ -80,14 +80,14 @@ namespace Simd
 			LoadBlock(src + dy + dx, s[0][1][1], s[1][1][1]);
 		}
 
-		SIMD_INLINE void LoadBlock(const uchar *src, size_t dr, __m128i s[2][2])
+		SIMD_INLINE void LoadBlock(const uint8_t *src, size_t dr, __m128i s[2][2])
 		{
 			LoadBlock(src, s[0][0], s[1][0]);
 			LoadBlock(src + dr, s[0][1], s[1][1]);
 		}
 
-		void ShiftBilinear(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			int fDx, int fDy, uchar *dst, size_t dstStride)
+		void ShiftBilinear(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+			int fDx, int fDy, uint8_t *dst, size_t dstStride)
 		{
 			size_t size = width*channelCount; 
 			size_t alignedSize = AlignLo(size, A);
@@ -175,9 +175,9 @@ namespace Simd
 		}
 
 		void ShiftBilinear(
-			const uchar * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			const uchar * bkg, size_t bkgStride, double shiftX, double shiftY, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uchar * dst, size_t dstStride)
+			const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+			const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 		{
 			assert(shiftX + A < cropRight - cropLeft);
 

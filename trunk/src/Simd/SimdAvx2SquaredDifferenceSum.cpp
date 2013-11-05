@@ -50,7 +50,7 @@ namespace Simd
         }
 
 		template <bool align> void SquaredDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			assert(width < 0x10000);
@@ -60,7 +60,7 @@ namespace Simd
 			}
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+			__m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
 			__m256i fullSum = _mm256_setzero_si256();
 			for(size_t row = 0; row < height; ++row)
 			{
@@ -85,8 +85,8 @@ namespace Simd
 		}
 
 		template <bool align> void SquaredDifferenceSum(
-			const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+			const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			assert(width < 0x10000);
 			if(align)
@@ -96,7 +96,7 @@ namespace Simd
 			}
 
 			size_t bodyWidth = AlignLo(width, A);
-			__m256i tailMask = SetMask<uchar>(0, A - width + bodyWidth, 0xFF);
+			__m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
 			__m256i fullSum = _mm256_setzero_si256();
 			__m256i index_= _mm256_set1_epi8(index);
 			for(size_t row = 0; row < height; ++row)
@@ -124,7 +124,7 @@ namespace Simd
 			*sum = ExtractSum<uint64_t>(fullSum);
 		}
 
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
+		void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
@@ -133,8 +133,8 @@ namespace Simd
 				SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
 		}
 
-		void SquaredDifferenceSum(const uchar *a, size_t aStride, const uchar *b, size_t bStride, 
-			const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum)
+		void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
 				SquaredDifferenceSum<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
