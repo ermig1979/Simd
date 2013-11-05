@@ -95,7 +95,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AlphaBlendingTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(Simd::AlphaBlending));
+        result = result && AlphaBlendingTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

@@ -88,9 +88,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && TextureBoostedSaturatedGradientTest(W, H, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(Simd::TextureBoostedSaturatedGradient));
-        result = result && TextureBoostedSaturatedGradientTest(W + 1, H - 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(Simd::TextureBoostedSaturatedGradient));
-        result = result && TextureBoostedSaturatedGradientTest(W - 1, H + 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(Simd::TextureBoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientTest(W, H, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientTest(W + 1, H - 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientTest(W - 1, H + 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -162,9 +162,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && TextureBoostedUvTest(W, H, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(Simd::TextureBoostedUv));
-        result = result && TextureBoostedUvTest(W + 1, H - 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(Simd::TextureBoostedUv));
-        result = result && TextureBoostedUvTest(W - 1, H + 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(Simd::TextureBoostedUv));
+        result = result && TextureBoostedUvTest(W, H, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+        result = result && TextureBoostedUvTest(W + 1, H - 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+        result = result && TextureBoostedUvTest(W - 1, H + 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -231,9 +231,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && TextureGetDifferenceSumTest(W, H, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(Simd::TextureGetDifferenceSum));
-        result = result && TextureGetDifferenceSumTest(W + 1, H - 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(Simd::TextureGetDifferenceSum));
-        result = result && TextureGetDifferenceSumTest(W - 1, H + 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(Simd::TextureGetDifferenceSum));
+        result = result && TextureGetDifferenceSumTest(W, H, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+        result = result && TextureGetDifferenceSumTest(W + 1, H - 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+        result = result && TextureGetDifferenceSumTest(W - 1, H + 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -307,9 +307,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && TexturePerformCompensationTest(W, H, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(Simd::TexturePerformCompensation));
-        result = result && TexturePerformCompensationTest(W + 1, H - 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(Simd::TexturePerformCompensation));
-        result = result && TexturePerformCompensationTest(W - 1, H + 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(Simd::TexturePerformCompensation));
+        result = result && TexturePerformCompensationTest(W, H, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+        result = result && TexturePerformCompensationTest(W + 1, H - 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+        result = result && TexturePerformCompensationTest(W - 1, H + 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

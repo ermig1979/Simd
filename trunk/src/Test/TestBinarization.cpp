@@ -98,7 +98,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BinarizationTest(ARGS12(Simd::Base::Binarization, Simd::Binarization));
+		result = result && BinarizationTest(ARGS12(Simd::Base::Binarization, SimdBinarization));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -182,7 +182,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AveragingBinarizationTest(ARGS22(Simd::Base::AveragingBinarization, Simd::AveragingBinarization));
+        result = result && AveragingBinarizationTest(ARGS22(Simd::Base::AveragingBinarization, SimdAveragingBinarization));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

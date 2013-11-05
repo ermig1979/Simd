@@ -112,7 +112,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && ShiftBilinearTest(ARGS2(Simd::Base::ShiftBilinear, Simd::ShiftBilinear));
+		result = result && ShiftBilinearTest(ARGS2(Simd::Base::ShiftBilinear, SimdShiftBilinear));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

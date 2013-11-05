@@ -76,9 +76,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && GetStatisticTest(W, H, FUNC1(Simd::Base::GetStatistic), FUNC1(Simd::GetStatistic));
-		result = result && GetStatisticTest(W + 1, H - 1, FUNC1(Simd::Base::GetStatistic), FUNC1(Simd::GetStatistic));
-        result = result && GetStatisticTest(W - 1, H + 1, FUNC1(Simd::Base::GetStatistic), FUNC1(Simd::GetStatistic));
+		result = result && GetStatisticTest(W, H, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+		result = result && GetStatisticTest(W + 1, H - 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+        result = result && GetStatisticTest(W - 1, H + 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -145,9 +145,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetMomentsTest(W, H, FUNC2(Simd::Base::GetMoments), FUNC2(Simd::GetMoments));
-        result = result && GetMomentsTest(W + 1, H - 1, FUNC2(Simd::Base::GetMoments), FUNC2(Simd::GetMoments));
-        result = result && GetMomentsTest(W - 1, H + 1, FUNC2(Simd::Base::GetMoments), FUNC2(Simd::GetMoments));
+        result = result && GetMomentsTest(W, H, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
+        result = result && GetMomentsTest(W + 1, H - 1, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
+        result = result && GetMomentsTest(W - 1, H + 1, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -208,9 +208,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(Simd::GetRowSums), true);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(Simd::GetRowSums), true);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetRowSums), FUNC3(Simd::GetRowSums), true);
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -228,9 +228,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetColSums), FUNC3(Simd::GetColSums), false);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetColSums), FUNC3(Simd::GetColSums), false);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetColSums), FUNC3(Simd::GetColSums), false);
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
+        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -248,9 +248,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(Simd::GetAbsDyRowSums), true);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(Simd::GetAbsDyRowSums), true);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(Simd::GetAbsDyRowSums), true);
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -268,9 +268,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(Simd::GetAbsDxColSums), false);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(Simd::GetAbsDxColSums), false);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(Simd::GetAbsDxColSums), false);
+        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

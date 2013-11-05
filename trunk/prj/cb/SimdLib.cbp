@@ -108,9 +108,6 @@
 			<Add option="-march=core2" />
 			<Add option="-DSIMD_STATIC" />
 		</Compiler>
-		<Unit filename="../../src/Simd/SimdAlg.h">
-			<Option virtualFolder="Lib/" />
-		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2.h">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
