@@ -357,9 +357,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
       <Filter>Avx2</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAlg.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdLib.h">
       <Filter>Lib</Filter>
     </ClInclude>

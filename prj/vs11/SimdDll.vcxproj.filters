@@ -360,9 +360,6 @@
     <ClInclude Include="..\..\src\Simd\SimdLib.h">
       <Filter>Lib</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAlg.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse42.h">
       <Filter>Sse42</Filter>
     </ClInclude>

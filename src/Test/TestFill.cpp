@@ -77,9 +77,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && FillBgraTest(ARGS_BGRA(W, H, Simd::Base::FillBgra, Simd::FillBgra));
-        result = result && FillBgraTest(ARGS_BGRA(W + 1, H - 1, Simd::Base::FillBgra, Simd::FillBgra));
-        result = result && FillBgraTest(ARGS_BGRA(W - 1, H + 1, Simd::Base::FillBgra, Simd::FillBgra));
+		result = result && FillBgraTest(ARGS_BGRA(W, H, Simd::Base::FillBgra, SimdFillBgra));
+        result = result && FillBgraTest(ARGS_BGRA(W + 1, H - 1, Simd::Base::FillBgra, SimdFillBgra));
+        result = result && FillBgraTest(ARGS_BGRA(W - 1, H + 1, Simd::Base::FillBgra, SimdFillBgra));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

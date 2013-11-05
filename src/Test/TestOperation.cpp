@@ -135,7 +135,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && OperationTest(ARGS_O2(Simd::Base::Operation, Simd::Operation));
+		result = result && OperationTest(ARGS_O2(Simd::Base::Operation, SimdOperation));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
 		if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -172,9 +172,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && VectorProductTest(W, H, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(Simd::VectorProduct));
-        result = result && VectorProductTest(W - 1, H + 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(Simd::VectorProduct));
-        result = result && VectorProductTest(W + 1, H - 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(Simd::VectorProduct));
+        result = result && VectorProductTest(W, H, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductTest(W - 1, H + 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductTest(W + 1, H - 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

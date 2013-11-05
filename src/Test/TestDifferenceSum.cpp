@@ -135,9 +135,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(Simd::SquaredDifferenceSum));
-		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(Simd::SquaredDifferenceSum));
-        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(Simd::SquaredDifferenceSum));
+		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
+		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
+        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -155,9 +155,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(Simd::SquaredDifferenceSum));
-		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(Simd::SquaredDifferenceSum));
-        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(Simd::SquaredDifferenceSum));
+		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(SimdSquaredDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(SimdSquaredDifferenceSumMasked));
+        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::SquaredDifferenceSum), FUNC_M(SimdSquaredDifferenceSumMasked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -175,9 +175,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(Simd::AbsDifferenceSum));
-		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(Simd::AbsDifferenceSum));
-        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(Simd::AbsDifferenceSum));
+		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
+		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
+        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -195,9 +195,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(Simd::AbsDifferenceSum));
-		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(Simd::AbsDifferenceSum));
-        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(Simd::AbsDifferenceSum));
+		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(SimdAbsDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(SimdAbsDifferenceSumMasked));
+        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSum), FUNC_M(SimdAbsDifferenceSumMasked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -215,9 +215,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSumsTest<9>(W, H, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(Simd::AbsDifferenceSums3x3));
-        result = result && DifferenceSumsTest<9>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(Simd::AbsDifferenceSums3x3));
-        result = result && DifferenceSumsTest<9>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(Simd::AbsDifferenceSums3x3));
+        result = result && DifferenceSumsTest<9>(W, H, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
+        result = result && DifferenceSumsTest<9>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
+        result = result && DifferenceSumsTest<9>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -235,9 +235,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSumsMaskedTest<9>(W, H, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(Simd::AbsDifferenceSums3x3));
-        result = result && DifferenceSumsMaskedTest<9>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(Simd::AbsDifferenceSums3x3));
-        result = result && DifferenceSumsMaskedTest<9>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(Simd::AbsDifferenceSums3x3));
+        result = result && DifferenceSumsMaskedTest<9>(W, H, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(SimdAbsDifferenceSums3x3Masked));
+        result = result && DifferenceSumsMaskedTest<9>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(SimdAbsDifferenceSums3x3Masked));
+        result = result && DifferenceSumsMaskedTest<9>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3), FUNC_M(SimdAbsDifferenceSums3x3Masked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

@@ -72,9 +72,9 @@ namespace Test
     {
         bool result = true;
 	
-        result = result && BgrToGrayTest(W, H, FUNC(Simd::Base::BgrToGray), FUNC(Simd::BgrToGray));
-        result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Base::BgrToGray), FUNC(Simd::BgrToGray));
-        result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Base::BgrToGray), FUNC(Simd::BgrToGray));
+        result = result && BgrToGrayTest(W, H, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
+        result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
+        result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

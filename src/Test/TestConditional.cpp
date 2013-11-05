@@ -95,7 +95,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalCountTest(ARGS_C2(Simd::Base::ConditionalCount, Simd::ConditionalCount));
+        result = result && ConditionalCountTest(ARGS_C2(Simd::Base::ConditionalCount, SimdConditionalCount));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -174,7 +174,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSum, Simd::ConditionalSum));
+        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSum, SimdConditionalSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -188,7 +188,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareSum, Simd::ConditionalSquareSum));
+        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareSum, SimdConditionalSquareSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -202,7 +202,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareGradientSum, Simd::ConditionalSquareGradientSum));
+        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareGradientSum, SimdConditionalSquareGradientSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

@@ -44,7 +44,6 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx2.h"
-#include "Simd/SimdAlg.h"
 #include "Simd/SimdUtils.h"
 
 namespace Test

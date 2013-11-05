@@ -102,7 +102,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeBilinearTest(ARGS2(Simd::Base::ResizeBilinear, Simd::ResizeBilinear));
+        result = result && ResizeBilinearTest(ARGS2(Simd::Base::ResizeBilinear, SimdResizeBilinear));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

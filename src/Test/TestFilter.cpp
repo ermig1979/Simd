@@ -133,7 +133,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, Simd::MedianFilterRhomb3x3));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -147,7 +147,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, Simd::MedianFilterRhomb5x5));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -161,7 +161,7 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, Simd::MedianFilterSquare3x3));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -175,7 +175,7 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, Simd::MedianFilterSquare5x5));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -189,7 +189,7 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::GaussianBlur3x3, Simd::GaussianBlur3x3));
+        result = result && ColorFilterTest(ARGS_C2(Simd::Base::GaussianBlur3x3, SimdGaussianBlur3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -203,9 +203,9 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
-		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
-        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, Simd::AbsGradientSaturatedSum));
+		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
@@ -223,9 +223,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
-        result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
-        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, Simd::LbpEstimate));
+        result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)

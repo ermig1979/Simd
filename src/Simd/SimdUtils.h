@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 
-#include "Simd/SimdAlg.h"
+#include "Simd/SimdLib.h"
 #include "Simd/SimdView.h"
 
 #ifndef __SimdUtils_h__
@@ -34,28 +34,28 @@ namespace Simd
     {
         assert(Compatible(a, b) && a.format == View::Gray8);
 
-        AbsDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
+        SimdAbsDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
     }
 
-    SIMD_INLINE void AbsDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum)
+    SIMD_INLINE void AbsDifferenceSum(const View & a, const View & b, const View & mask, uint8_t index, uint64_t & sum)
     {
         assert(Compatible(a, b, mask) && a.format == View::Gray8);
 
-        AbsDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
+        SimdAbsDifferenceSumMasked(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
     }
 
     SIMD_INLINE void AbsDifferenceSums3x3(const View & current, const View & background, uint64_t * sums)
     {
         assert(Compatible(current, background) && current.format == View::Gray8 && current.width > 2 && current.height > 2);
 
-        AbsDifferenceSums3x3(current.data, current.stride, background.data, background.stride, current.width, current.height, sums);
+        SimdAbsDifferenceSums3x3(current.data, current.stride, background.data, background.stride, current.width, current.height, sums);
     }
 
-    SIMD_INLINE void AbsDifferenceSums3x3(const View & current, const View & background, const View & mask, uchar index, uint64_t * sums)
+    SIMD_INLINE void AbsDifferenceSums3x3(const View & current, const View & background, const View & mask, uint8_t index, uint64_t * sums)
     {
         assert(Compatible(current, background, mask) && current.format == View::Gray8 && current.width > 2 && current.height > 2);
 
-        AbsDifferenceSums3x3(current.data, current.stride, background.data, background.stride, 
+        SimdAbsDifferenceSums3x3Masked(current.data, current.stride, background.data, background.stride, 
             mask.data, mask.stride, index, current.width, current.height, sums);
     }
 
@@ -63,14 +63,14 @@ namespace Simd
     {
         assert(Compatible(src, dst) && src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
 
-        AbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+        SimdAbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
     SIMD_INLINE void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference)
     {
         assert(Compatible(value, lo, hi, difference) && value.format == View::Gray8);
 
-        AddFeatureDifference(value.data, value.stride, value.width, value.height,
+        SimdAddFeatureDifference(value.data, value.stride, value.width, value.height,
             lo.data, lo.stride, hi.data, hi.stride, weight, difference.data, difference.stride);
     }
 
@@ -78,38 +78,38 @@ namespace Simd
     {
         assert(Compatible(value, lo, hi) && value.format == View::Gray8);
 
-        BackgroundGrowRangeSlow(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+        SimdBackgroundGrowRangeSlow(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
     }
 
     SIMD_INLINE void BackgroundGrowRangeFast(const View & value, View & lo, View & hi)
     {
         assert(Compatible(value, lo, hi) && value.format == View::Gray8);
 
-        BackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+        SimdBackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
     }
 
     SIMD_INLINE void BackgroundIncrementCount(const View & value, const View & loValue, const View & hiValue, View & loCount, View & hiCount)
     {
         assert(Compatible(value, loValue, hiValue, loCount, hiCount) && value.format == View::Gray8);
 
-        BackgroundIncrementCount(value.data, value.stride, value.width, value.height,
+        SimdBackgroundIncrementCount(value.data, value.stride, value.width, value.height,
             loValue.data, loValue.stride, hiValue.data, hiValue.stride,
             loCount.data, loCount.stride, hiCount.data, hiCount.stride);
     }
 
-    SIMD_INLINE void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, uchar threshold)
+    SIMD_INLINE void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, uint8_t threshold)
     {
         assert(Compatible(loValue, hiValue, loCount, hiCount) && loValue.format == View::Gray8);
 
-        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height,
+        SimdBackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height,
             loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride, threshold);
     }
 
-    SIMD_INLINE void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, uchar threshold, const View & mask)
+    SIMD_INLINE void BackgroundAdjustRange(View & loCount, View & loValue, View & hiCount, View & hiValue, uint8_t threshold, const View & mask)
     {
         assert(Compatible(loValue, hiValue, loCount, hiCount, mask) && loValue.format == View::Gray8);
 
-        BackgroundAdjustRange(loCount.data, loCount.stride, loCount.width, loCount.height,
+        SimdBackgroundAdjustRangeMasked(loCount.data, loCount.stride, loCount.width, loCount.height,
             loValue.data, loValue.stride, hiCount.data, hiCount.stride, hiValue.data, hiValue.stride,
             threshold, mask.data, mask.stride);
     }
@@ -118,107 +118,107 @@ namespace Simd
     {
         assert(Compatible(value, lo, hi) && value.format == View::Gray8);
 
-        BackgroundShiftRange(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
+        SimdBackgroundShiftRange(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride);
     }
 
     SIMD_INLINE void BackgroundShiftRange(const View & value, View & lo, View & hi, const View & mask)
     {
         assert(Compatible(value, lo, hi, mask) && value.format == View::Gray8);
 
-        BackgroundShiftRange(value.data, value.stride, value.width, value.height,
+        SimdBackgroundShiftRangeMasked(value.data, value.stride, value.width, value.height,
             lo.data, lo.stride, hi.data, hi.stride, mask.data, mask.stride);
     }
 
-    SIMD_INLINE void BackgroundInitMask(const View & src, uchar index, uchar value, View & dst)
+    SIMD_INLINE void BackgroundInitMask(const View & src, uint8_t index, uint8_t value, View & dst)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
-        BackgroundInitMask(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
+        SimdBackgroundInitMask(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
     }
 
     SIMD_INLINE void BgraToBgr(const View & bgra, View & bgr)
     {
         assert(EqualSize(bgra, bgr) && bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
 
-        BgraToBgr(bgra.data, bgra.width, bgra.height, bgra.stride, bgr.data, bgr.stride);
+        SimdBgraToBgr(bgra.data, bgra.width, bgra.height, bgra.stride, bgr.data, bgr.stride);
     }
 
     SIMD_INLINE void BgraToGray(const View & bgra, View & gray)
     {
         assert(EqualSize(bgra, gray) && bgra.format == View::Bgra32 && gray.format == View::Gray8);
 
-        BgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
+        SimdBgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
     }
 
-    SIMD_INLINE void BgrToBgra(const View & bgr, View & bgra, uchar alpha = 0xFF)
+    SIMD_INLINE void BgrToBgra(const View & bgr, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(EqualSize(bgr, bgra) && bgra.format == View::Bgra32 && bgr.format == View::Bgr24);
 
-        BgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride, alpha);
+        SimdBgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride, alpha);
     }
 
     SIMD_INLINE void BgrToGray(const View & bgr, View & gray)
     {
         assert(EqualSize(bgr, gray) && bgr.format == View::Bgr24 && gray.format == View::Gray8);
 
-        BgrToGray(bgr.data, bgr.width, bgr.height, bgr.stride, gray.data, gray.stride);
+        SimdBgrToGray(bgr.data, bgr.width, bgr.height, bgr.stride, gray.data, gray.stride);
     }
 
-    SIMD_INLINE void Binarization(const View & src, uchar value, uchar positive, uchar negative, View & dst, SimdCompareType compareType)
+    SIMD_INLINE void Binarization(const View & src, uint8_t value, uint8_t positive, uint8_t negative, View & dst, SimdCompareType compareType)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
-        Binarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, compareType);
+        SimdBinarization(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, compareType);
     }
 
-    SIMD_INLINE void AveragingBinarization(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, SimdCompareType compareType)
+    SIMD_INLINE void AveragingBinarization(const View & src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View & dst, SimdCompareType compareType)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
-        AveragingBinarization(src.data, src.stride, src.width, src.height, value,
+        SimdAveragingBinarization(src.data, src.stride, src.width, src.height, value,
             neighborhood, threshold, positive, negative, dst.data, dst.stride, compareType);
     }
 
-    SIMD_INLINE void ConditionalCount(const View & src, uchar value, SimdCompareType compareType, uint & count)
+    SIMD_INLINE void ConditionalCount(const View & src, uint8_t value, SimdCompareType compareType, uint32_t & count)
     {
         assert(src.format == View::Gray8);
 
-        ConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
+        SimdConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
     }
 
-    SIMD_INLINE void ConditionalSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    SIMD_INLINE void ConditionalSum(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
         assert(Compatible(src, mask) && src.format == View::Gray8);
 
-        ConditionalSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+        SimdConditionalSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
-    SIMD_INLINE void ConditionalSquareSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    SIMD_INLINE void ConditionalSquareSum(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
         assert(Compatible(src, mask) && src.format == View::Gray8);
 
-        ConditionalSquareSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+        SimdConditionalSquareSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
-    SIMD_INLINE void ConditionalSquareGradientSum(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum)
+    SIMD_INLINE void ConditionalSquareGradientSum(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
         assert(Compatible(src, mask) && src.format == View::Gray8 && src.width >= 3 && src.height >= 3);
 
-        ConditionalSquareGradientSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
+        SimdConditionalSquareGradientSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
     SIMD_INLINE void Copy(const View & src, View & dst)
     {
         assert(Compatible(src, dst));
 
-        Copy(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
+        SimdCopy(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
     }
 
     SIMD_INLINE void CopyFrame(const View & src, const Rectangle<ptrdiff_t> & frame, View & dst)
     {
         assert(Compatible(src, dst));
 
-        CopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
+        SimdCopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
             frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
     }
 
@@ -226,51 +226,51 @@ namespace Simd
     {
         assert(EqualSize(uv, u, v) && uv.format == View::Uv16 && u.format == View::Gray8 && v.format == View::Gray8);
 
-        DeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
+        SimdDeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
     }
 
     SIMD_INLINE void AlphaBlending(const View & src, const View & alpha, View & dst)
     {
         assert(Compatible(src, dst) && EqualSize(src, alpha) && alpha.format == View::Gray8 && src.ChannelSize() == 1);
 
-        AlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
+        SimdAlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
     }
 
     SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const View & value, View & background)
     {
         assert(Compatible(value, background) && value.format == View::Gray8);
 
-        EdgeBackgroundGrowRangeSlow(value.data, value.stride, value.width, value.height, background.data, background.stride);
+        SimdEdgeBackgroundGrowRangeSlow(value.data, value.stride, value.width, value.height, background.data, background.stride);
     }
 
     SIMD_INLINE void EdgeBackgroundGrowRangeFast(const View & value, View & background)
     {
         assert(Compatible(value, background) && value.format == View::Gray8);
 
-        EdgeBackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, background.data, background.stride);
+        SimdEdgeBackgroundGrowRangeFast(value.data, value.stride, value.width, value.height, background.data, background.stride);
     }
 
     SIMD_INLINE void EdgeBackgroundIncrementCount(const View & value, const View & backgroundValue, View & backgroundCount)
     {
         assert(Compatible(value, backgroundValue, backgroundCount) && value.format == View::Gray8);
 
-        EdgeBackgroundIncrementCount(value.data, value.stride, value.width, value.height,
+        SimdEdgeBackgroundIncrementCount(value.data, value.stride, value.width, value.height,
             backgroundValue.data, backgroundValue.stride, backgroundCount.data, backgroundCount.stride);
     }
 
-    SIMD_INLINE void EdgeBackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uchar threshold)
+    SIMD_INLINE void EdgeBackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uint8_t threshold)
     {
         assert(Compatible(backgroundCount, backgroundValue) && backgroundCount.format == View::Gray8);
 
-        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
+        SimdEdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
             backgroundValue.data, backgroundValue.stride, threshold);
     }
 
-    SIMD_INLINE void EdgeBackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uchar threshold, const View & mask)
+    SIMD_INLINE void EdgeBackgroundAdjustRange(View & backgroundCount, View & backgroundValue, uint8_t threshold, const View & mask)
     {
         assert(Compatible(backgroundCount, backgroundValue, mask) && backgroundCount.format == View::Gray8);
 
-        EdgeBackgroundAdjustRange(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
+        SimdEdgeBackgroundAdjustRangeMasked(backgroundCount.data, backgroundCount.stride, backgroundCount.width, backgroundCount.height,
             backgroundValue.data, backgroundValue.stride, threshold, mask.data, mask.stride);
     }
 
@@ -278,131 +278,131 @@ namespace Simd
     {
         assert(Compatible(value, background) && value.format == View::Gray8);
 
-        EdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height, background.data, background.stride);
+        SimdEdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height, background.data, background.stride);
     }
 
     SIMD_INLINE void EdgeBackgroundShiftRange(const View & value, View & background, const View & mask)
     {
         assert(Compatible(value, background, mask) && value.format == View::Gray8);
 
-        EdgeBackgroundShiftRange(value.data, value.stride, value.width, value.height,
+        SimdEdgeBackgroundShiftRangeMasked(value.data, value.stride, value.width, value.height,
             background.data, background.stride, mask.data, mask.stride);
     }
 
-    SIMD_INLINE void Fill(View & dst, uchar value)
+    SIMD_INLINE void Fill(View & dst, uint8_t value)
     {
-        Fill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
+        SimdFill(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
     }
 
-    SIMD_INLINE void FillFrame(View & dst, const Rectangle<ptrdiff_t> & frame, uchar value)
+    SIMD_INLINE void FillFrame(View & dst, const Rectangle<ptrdiff_t> & frame, uint8_t value)
     {
-        FillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
+        SimdFillFrame(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
             frame.left, frame.top, frame.right, frame.bottom, value);
     }
 
-    SIMD_INLINE void FillBgra(View & dst, uchar blue, uchar green, uchar red, uchar alpha = 0xFF)
+    SIMD_INLINE void FillBgra(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
     {
         assert(dst.format == View::Bgra32);
 
-        FillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
+        SimdFillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
     }
 
     SIMD_INLINE void GaussianBlur3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
-        GaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+        SimdGaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
-    SIMD_INLINE void GrayToBgra(const View & gray, View & bgra, uchar alpha = 0xFF)
+    SIMD_INLINE void GrayToBgra(const View & gray, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(EqualSize(gray, bgra) && bgra.format == View::Bgra32 && gray.format == View::Gray8);
 
-        GrayToBgra(gray.data, gray.width, gray.height, gray.stride, bgra.data, bgra.stride, alpha);
+        SimdGrayToBgra(gray.data, gray.width, gray.height, gray.stride, bgra.data, bgra.stride, alpha);
     }
 
-    SIMD_INLINE void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint * histogram)
+    SIMD_INLINE void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint32_t * histogram)
     {
         assert(src.format == View::Gray8);
 
-        AbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
+        SimdAbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
     }
 
-    SIMD_INLINE void Histogram(const View & src, uint * histogram)
+    SIMD_INLINE void Histogram(const View & src, uint32_t * histogram)
     {
         assert(src.format == View::Gray8);
 
-        Histogram(src.data, src.width, src.height, src.stride, histogram);
+        SimdHistogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
     SIMD_INLINE void MedianFilterRhomb3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
-        MedianFilterRhomb3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+        SimdMedianFilterRhomb3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
     SIMD_INLINE void MedianFilterRhomb5x5(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
-        MedianFilterRhomb5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+        SimdMedianFilterRhomb5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
     SIMD_INLINE void MedianFilterSquare3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
-        MedianFilterSquare3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+        SimdMedianFilterSquare3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
     SIMD_INLINE void MedianFilterSquare5x5(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);
 
-        MedianFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+        SimdMedianFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
     SIMD_INLINE void Operation(const View & a, const View & b, View & dst, SimdOperationType type)
     {
         assert(Compatible(a, b, dst) && a.ChannelSize() == 1);
 
-        Operation(a.data, a.stride, b.data, b.stride, a.width, a.height, a.ChannelCount(), dst.data, dst.stride, type);
+        SimdOperation(a.data, a.stride, b.data, b.stride, a.width, a.height, a.ChannelCount(), dst.data, dst.stride, type);
     }
 
-    SIMD_INLINE void VectorProduct(const uchar * vertical, const uchar * horizontal, View & dst)
+    SIMD_INLINE void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View & dst)
     {
         assert(dst.format == View::Gray8);
 
-        VectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
+        SimdVectorProduct(vertical, horizontal, dst.data, dst.stride, dst.width, dst.height);
     }
 
     SIMD_INLINE void ReduceGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
-        ReduceGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
+        SimdReduceGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
     SIMD_INLINE void ReduceGray3x3(const View & src, View & dst, bool compensation = true)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
-        ReduceGray3x3(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
+        SimdReduceGray3x3(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
     }
 
     SIMD_INLINE void ReduceGray4x4(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
-        ReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
+        SimdReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
     SIMD_INLINE void ReduceGray5x5(const View & src, View & dst, bool compensation = true)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
-        ReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
+        SimdReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
     }
 
     SIMD_INLINE void ResizeBilinear(const View & src, View & dst)
@@ -415,7 +415,7 @@ namespace Simd
         }
         else
         {
-            ResizeBilinear(src.data, src.width, src.height, src.stride,
+            SimdResizeBilinear(src.data, src.width, src.height, src.stride,
                 dst.data, dst.width, dst.height, dst.stride, src.ChannelCount());
         }
     }
@@ -424,7 +424,7 @@ namespace Simd
     {
         assert(Compatible(src, bkg, dst) && src.ChannelSize() == 1);
 
-        ShiftBilinear(src.data, src.stride, src.width, src.height, src.ChannelCount(), bkg.data, bkg.stride,
+        SimdShiftBilinear(src.data, src.stride, src.width, src.height, src.ChannelCount(), bkg.data, bkg.stride,
             shift.x, shift.y, crop.left, crop.top, crop.right, crop.bottom, dst.data, dst.stride);
     }
 
@@ -432,98 +432,98 @@ namespace Simd
     {
         assert(Compatible(a, b) && a.format == View::Gray8);
 
-        SquaredDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
+        SimdSquaredDifferenceSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
     }
 
-    SIMD_INLINE void SquaredDifferenceSum(const View & a, const View & b, const View & mask, uchar index, uint64_t & sum)
+    SIMD_INLINE void SquaredDifferenceSum(const View & a, const View & b, const View & mask, uint8_t index, uint64_t & sum)
     {
         assert(Compatible(a, b, mask) && a.format == View::Gray8);
 
-        SquaredDifferenceSum(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
+        SimdSquaredDifferenceSumMasked(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, &sum);
     }
 
-    SIMD_INLINE void GetStatistic(const View & src, uchar & min, uchar & max, uchar & average)
+    SIMD_INLINE void GetStatistic(const View & src, uint8_t & min, uint8_t & max, uint8_t & average)
     {
         assert(src.format == View::Gray8);
 
-        GetStatistic(src.data, src.stride, src.width, src.height, &min, &max, &average);
+        SimdGetStatistic(src.data, src.stride, src.width, src.height, &min, &max, &average);
     }
 
-    SIMD_INLINE void GetMoments(const View & mask, uchar index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy)
+    SIMD_INLINE void GetMoments(const View & mask, uint8_t index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy)
     {
         assert(mask.format == View::Gray8);
 
-        GetMoments(mask.data, mask.stride, mask.width, mask.height, index, &area, &x, &y, &xx, &xy, &yy);
+        SimdGetMoments(mask.data, mask.stride, mask.width, mask.height, index, &area, &x, &y, &xx, &xy, &yy);
     }
 
-    SIMD_INLINE void GetRowSums(const View & src, uint * sums)
+    SIMD_INLINE void GetRowSums(const View & src, uint32_t * sums)
     {
         assert(src.format == View::Gray8);
 
-        GetRowSums(src.data, src.stride, src.width, src.height, sums);
+        SimdGetRowSums(src.data, src.stride, src.width, src.height, sums);
     }
 
-    SIMD_INLINE void GetColSums(const View & src, uint * sums)
+    SIMD_INLINE void GetColSums(const View & src, uint32_t * sums)
     {
         assert(src.format == View::Gray8);
 
-        GetColSums(src.data, src.stride, src.width, src.height, sums);
+        SimdGetColSums(src.data, src.stride, src.width, src.height, sums);
     }
 
-    SIMD_INLINE void GetAbsDyRowSums(const View & src, uint * sums)
+    SIMD_INLINE void GetAbsDyRowSums(const View & src, uint32_t * sums)
     {
         assert(src.format == View::Gray8);
 
-        GetAbsDyRowSums(src.data, src.stride, src.width, src.height, sums);
+        SimdGetAbsDyRowSums(src.data, src.stride, src.width, src.height, sums);
     }
 
-    SIMD_INLINE void GetAbsDxColSums(const View & src, uint * sums)
+    SIMD_INLINE void GetAbsDxColSums(const View & src, uint32_t * sums)
     {
         assert(src.format == View::Gray8);
 
-        GetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
+        SimdGetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
     }
 
     SIMD_INLINE void StretchGray2x2(const View & src, View & dst)
     {
         assert(src.format == View::Gray8 && dst.format == View::Gray8);
 
-        StretchGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
+        SimdStretchGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
-    SIMD_INLINE void TextureBoostedSaturatedGradient(const View & src, uchar saturation, uchar boost, View & dx, View & dy)
+    SIMD_INLINE void TextureBoostedSaturatedGradient(const View & src, uint8_t saturation, uint8_t boost, View & dx, View & dy)
     {
         assert(Compatible(src, dx, dy) && src.format == View::Gray8 && src.height >= 3 && src.width >= 3);
 
-        TextureBoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
+        SimdTextureBoostedSaturatedGradient(src.data, src.stride, src.width, src.height, saturation, boost, dx.data, dx.stride, dy.data, dy.stride);
     }
 
-    SIMD_INLINE void TextureBoostedUv(const View & src, uchar boost, View & dst)
+    SIMD_INLINE void TextureBoostedUv(const View & src, uint8_t boost, View & dst)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8);
 
-        TextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
+        SimdTextureBoostedUv(src.data, src.stride, src.width, src.height, boost, dst.data, dst.stride);
     }
 
     SIMD_INLINE void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t & sum)
     {
         assert(Compatible(src, lo, hi) && src.format == View::Gray8 && sum != NULL);
 
-        TextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, &sum);
+        SimdTextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, &sum);
     }
 
     SIMD_INLINE void TexturePerformCompensation(const View & src, int shift, View & dst)
     {
         assert(Compatible(src, dst) && src.format == View::Gray8 && shift > -0xFF && shift < 0xFF);
 
-        TexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
+        SimdTexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
     }
 
     SIMD_INLINE void Yuv444ToBgr(const View & y, const View & u, const View & v, View & bgr)
     {
         assert(Compatible(y, u, v) && EqualSize(y, bgr) && y.format == View::Gray8 && bgr.format == View::Bgr24);
 
-        Yuv444ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
+        SimdYuv444ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
     }
 
     SIMD_INLINE void Yuv420ToBgr(const View & y, const View & u, const View & v, View & bgr)
@@ -533,31 +533,31 @@ namespace Simd
         assert(y.width == bgr.width && y.height == bgr.height);
         assert(y.format == View::Gray8 && bgr.format == View::Bgr24);
 
-        Yuv420ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
+        SimdYuv420ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
     }
 
-    SIMD_INLINE void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha = 0xFF)
+    SIMD_INLINE void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(Compatible(y, u, v) && EqualSize(y, bgra) && y.format == View::Gray8 && bgra.format == View::Bgra32);
 
-        Yuv444ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
+        SimdYuv444ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
-    SIMD_INLINE void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uchar alpha = 0xFF)
+    SIMD_INLINE void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
         assert(y.width == bgra.width && y.height == bgra.height);
         assert(y.format == View::Gray8 && bgra.format == View::Bgra32);
 
-        Yuv420ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
+        SimdYuv420ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
     SIMD_INLINE void Yuv444ToHue(const View & y, const View & u, const View & v, View & hue)
     {
         assert(Compatible(y, u, v, hue) && y.format == View::Gray8);
 
-        Yuv444ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
+        SimdYuv444ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
     }
 
     SIMD_INLINE void Yuv420ToHue(const View & y, const View & u, const View & v, View & hue)
@@ -566,7 +566,7 @@ namespace Simd
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
         assert(Compatible(y, hue) && y.format == View::Gray8);
 
-        Yuv420ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
+        SimdYuv420ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
     }
 }
 
