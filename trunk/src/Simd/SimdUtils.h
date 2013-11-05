@@ -157,6 +157,13 @@ namespace Simd
         SimdBgrToBgra(bgr.data, bgr.width, bgr.height, bgr.stride, bgra.data, bgra.stride, alpha);
     }
 
+    SIMD_INLINE void Bgr48pToBgra32(const View & blue, const View & green, const View & red, View & bgra, uint8_t alpha = 0xFF)
+    {
+        assert(Compatible(blue, green, red) && EqualSize(blue, bgra) && blue.format == View::Int16 && bgra.format == View::Bgra32);
+
+        SimdBgr48pToBgra32(blue.data, blue.stride, blue.width, blue.height, green.data, green.stride, red.data, red.stride, bgra.data, bgra.stride, alpha);
+    }
+
     SIMD_INLINE void BgrToGray(const View & bgr, View & gray)
     {
         assert(EqualSize(bgr, gray) && bgr.format == View::Bgr24 && gray.format == View::Gray8);

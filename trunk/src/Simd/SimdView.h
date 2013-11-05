@@ -38,6 +38,7 @@ namespace Simd
             Uv16,
             Bgr24,
             Bgra32,
+            Int16,
             Int32,
             Int64,
             Float,
@@ -349,6 +350,7 @@ namespace Simd
         case Uv16:   return 2;
         case Bgr24:  return 3;
         case Bgra32: return 4;
+        case Int16:  return 2;
         case Int32:  return 4;
         case Int64:  return 8;
         case Float:  return 4;
@@ -371,6 +373,7 @@ namespace Simd
         case Uv16:   return 1;
         case Bgr24:  return 1;
         case Bgra32: return 1;
+        case Int16:  return 2;
         case Int32:  return 4;
         case Int64:  return 8;
         case Float:  return 4;
@@ -393,6 +396,7 @@ namespace Simd
         case Uv16:   return 2;
         case Bgr24:  return 3;
         case Bgra32: return 4;
+        case Int16:  return 1;
         case Int32:  return 1;
         case Int64:  return 1;
         case Float:  return 1;

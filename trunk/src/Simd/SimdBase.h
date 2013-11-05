@@ -89,6 +89,9 @@ namespace Simd
 
         void BgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha = 0xFF);
 
+        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
+
         void BgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
@@ -156,11 +159,6 @@ namespace Simd
             size_t step, size_t indent, uint32_t * histogram);
 
         void Histogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
-
-        void InterleaveBgra(uint8_t *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
-            const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, uint8_t alpha = 0xFF);
-
-        void InterleaveBgra(uint8_t *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, uint8_t alpha = 0xFF);
 
         void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -246,9 +244,6 @@ namespace Simd
 
         void Yuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
             size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
-
-        void YuvToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
-            const int *y, const int *u, const int *v, int dx, int dy, int precision, uint8_t alpha = 0xFF);
 
         void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
             size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);

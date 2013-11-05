@@ -35,6 +35,8 @@ namespace Test
 
     bool BgraToGrayTest();
 
+    bool Bgr48pToBgra32Test();
+
     bool BgrToGrayTest();
 
     bool Yuv444ToHueTest();

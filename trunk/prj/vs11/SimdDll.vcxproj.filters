@@ -139,9 +139,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseInterleaveBgra.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp">
       <Filter>Base</Filter>
     </ClCompile>
@@ -293,6 +290,12 @@
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Conditional.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgrToBgra.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
   </ItemGroup>

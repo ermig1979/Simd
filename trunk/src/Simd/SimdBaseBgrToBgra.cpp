@@ -69,5 +69,32 @@ namespace Simd
             }
             BgrToBgra(bgr, width, bgra, true, true, alpha);
         }
+
+        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                const uint8_t * pBlue = blue;
+                const uint8_t * pGreen = green;
+                const uint8_t * pRed = red;
+                uint8_t * pBgra = bgra;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    pBgra[0] = *pBlue;
+                    pBgra[1] = *pGreen;
+                    pBgra[2] = *pRed;
+                    pBgra[3] = alpha;
+                    pBlue += 2;
+                    pGreen += 2;
+                    pRed += 2;
+                    pBgra += 4;
+                }
+                blue += blueStride;
+                green += greenStride;
+                red += redStride;
+                bgra += bgraStride;
+            }
+        }
     }
 }

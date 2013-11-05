@@ -12,6 +12,10 @@
 <h3>Future release</h3>
 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Base implementation, SSE2 and AVX2 optimization of function Bgr48pToBgra32.</li>
+ </ul>
 <h5>Changes</h5>
 <ul>
  <li>Using references instead of pointers in SimdUtils.</li>
@@ -20,10 +24,17 @@
 <ul>
  <li>Removed all functions from SimdAlg.h.</li>
  <li>Stopped using of types uchar, ushort and uint.</li>
+ <li>Removed functions InterleaveBgra and YuvToBgra.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Wrong assert condition in function ConditionalSquareGradientSum.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function Bgr48pToBgra32.</li>
 </ul>
 
 <h3>November 1, 2013 (version 1.0.11.152)</h3>

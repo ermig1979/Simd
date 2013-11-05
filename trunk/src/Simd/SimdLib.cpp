@@ -342,6 +342,22 @@ SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, siz
     Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
 }
 
+SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+    const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::HA)
+        Avx2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::HA)
+        Sse2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+    else
+#endif//SIMD_SSE2_ENABLE       
+        Base::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+}
+
 SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -687,17 +703,6 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
 SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram)
 {
     Base::Histogram(src, width, height, stride, histogram);
-}
-
-SIMD_API void SimdInterleaveBgra(uint8_t *bgra, size_t size, const int *blue, int bluePrecision, bool blueSigned, 
-    const int *green, int greenPrecision, bool greenSigned, const int *red, int redPrecision, bool redSigned, uint8_t alpha)
-{
-    Base::InterleaveBgra(bgra, size, blue, bluePrecision, blueSigned, green, greenPrecision, greenSigned, red, redPrecision, redSigned, alpha);
-}
-
-SIMD_API void SimdInterleaveBgra(uint8_t *bgra, size_t size, const int *gray, int grayPrecision, bool graySigned, uint8_t alpha)
-{
-    Base::InterleaveBgra(bgra, size, gray, grayPrecision, graySigned, alpha);
 }
 
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
@@ -1120,12 +1125,6 @@ SIMD_API void SimdYuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t *
                  size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
 {
     Base::Yuv444ToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-}
-
-SIMD_API void SimdYuvToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
-               const int *y, const int *u, const int *v, int dx, int dy, int precision, uint8_t alpha)
-{
-    Base::YuvToBgra(bgra, width, height, stride, y, u, v, dx, dy, precision, alpha);
 }
 
 SIMD_API void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
