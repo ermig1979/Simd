@@ -31,16 +31,16 @@ namespace Test
 	{
 		struct Func
 		{
-            typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height, 
-                const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-                ushort weight, uchar * difference, size_t differenceStride);
+            typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+                const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+                uint16_t weight, uint8_t * difference, size_t differenceStride);
 
 			FuncPtr func;
 			std::string description;
 
 			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & value, const View & lo, const View & hi, ushort weight, const View & differenceSrc, View & differenceDst) const
+			void Call(const View & value, const View & lo, const View & hi, uint16_t weight, const View & differenceSrc, View & differenceDst) const
 			{
 				Simd::Copy(differenceSrc, differenceDst);
 				TEST_PERFORMANCE_TEST(description);
@@ -52,7 +52,7 @@ namespace Test
 
 #define FUNC(function) Func(function, std::string(#function))
 
-	bool AddFeatureDifferenceTest(int width, int height, ushort weight, const Func & f1, const Func & f2)
+	bool AddFeatureDifferenceTest(int width, int height, uint16_t weight, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -83,8 +83,8 @@ namespace Test
     {
         bool result = true;
 
-        const ushort delta = 256*7;
-        for(ushort weight = 0; weight < 4 && result; ++weight)
+        const uint16_t delta = 256*7;
+        for(uint16_t weight = 0; weight < 4 && result; ++weight)
             result = result &&  AddFeatureDifferenceTest(width, height, weight*delta, f1, f2);
 
         return result;

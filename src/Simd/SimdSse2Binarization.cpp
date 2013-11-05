@@ -41,8 +41,8 @@ namespace Simd
         }
 
         template <bool align, SimdCompareType compareType> 
-        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A);
             if(align)
@@ -71,8 +71,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 Binarization<true, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
@@ -80,8 +80,8 @@ namespace Simd
                 Binarization<false, compareType>(src, srcStride, width, height, value, positive, negative, dst, dstStride);
         }
 
-        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
@@ -108,12 +108,12 @@ namespace Simd
             {
                 Buffer(size_t width, size_t edge)
                 {
-                    size_t size = sizeof(ushort)*(width + 2*edge) + sizeof(uint)*(2*width + 2*edge);
+                    size_t size = sizeof(uint16_t)*(width + 2*edge) + sizeof(uint32_t)*(2*width + 2*edge);
                     _p = Allocate(size);
                     memset(_p, 0, size);
-                    sa = (ushort*)_p + edge;
-                    s0a0 = (uint*)(sa + width + edge) + edge;
-                    sum = (uint*)(s0a0 + width + edge);
+                    sa = (uint16_t*)_p + edge;
+                    s0a0 = (uint32_t*)(sa + width + edge) + edge;
+                    sum = (uint32_t*)(s0a0 + width + edge);
                 }
 
                 ~Buffer()
@@ -121,16 +121,16 @@ namespace Simd
                     Free(_p);
                 }
 
-                ushort * sa;
-                uint * s0a0;
-                uint * sum;
+                uint16_t * sa;
+                uint32_t * s0a0;
+                uint32_t * sum;
             private:
                 void *_p;
             };
         }
 
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
-        SIMD_INLINE void AddRows(const uchar * src, ushort * sa, const __m128i & value, const __m128i & mask)
+        SIMD_INLINE void AddRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
             const __m128i inc = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
             Store<dstAlign>((__m128i*)sa + 0, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(inc, mask)));
@@ -138,7 +138,7 @@ namespace Simd
         }
 
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
-        SIMD_INLINE void SubRows(const uchar * src, ushort * sa, const __m128i & value, const __m128i & mask)
+        SIMD_INLINE void SubRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
             const __m128i dec = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
             Store<dstAlign>((__m128i*)sa + 0, _mm_sub_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(dec, mask)));
@@ -146,7 +146,7 @@ namespace Simd
         }
 
         template <bool align>
-        SIMD_INLINE __m128i CompareSum(const uint * sum, const __m128i & ff_threshold)
+        SIMD_INLINE __m128i CompareSum(const uint32_t * sum, const __m128i & ff_threshold)
         {
             const __m128i mask0 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 0), ff_threshold), K_ZERO);
             const __m128i mask1 = _mm_cmpgt_epi32(_mm_madd_epi16(Load<align>((__m128i*)sum + 1), ff_threshold), K_ZERO);
@@ -156,8 +156,8 @@ namespace Simd
         }
 
         template <bool align, SimdCompareType compareType>
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
+        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             assert(width > neighborhood && height > neighborhood && neighborhood < 0x7F);
 
@@ -173,7 +173,7 @@ namespace Simd
 
             for(size_t row = 0; row < neighborhood; ++row)
             {
-                const uchar * s = src + row*srcStride;
+                const uint8_t * s = src + row*srcStride;
                 for(size_t col = 0; col < alignedWidth; col += A)
                     AddRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
                 if(alignedWidth != width)
@@ -184,7 +184,7 @@ namespace Simd
             {
                 if(row < height - neighborhood)
                 {
-                    const uchar * s = src +  (row + neighborhood)*srcStride;
+                    const uint8_t * s = src +  (row + neighborhood)*srcStride;
                     for(size_t col = 0; col < alignedWidth; col += A)
                         AddRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
                     if(alignedWidth != width)
@@ -192,7 +192,7 @@ namespace Simd
                 }
                 if(row > neighborhood)
                 {
-                    const uchar * s = src + (row - neighborhood - 1)*srcStride;
+                    const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
                     for(size_t col = 0; col < alignedWidth; col += A)
                         SubRows<align, true, compareType>(s + col, buffer.sa + col, _value, K8_01);
                     if(alignedWidth != width)
@@ -206,7 +206,7 @@ namespace Simd
                     Store<true>((__m128i*)(buffer.s0a0 + col) + 1, _mm_unpackhi_epi8(sa, K_ZERO));
                 }
 
-                uint sum = 0;
+                uint32_t sum = 0;
                 for(size_t col = 0; col < neighborhood; ++col)
                 {
                     sum += buffer.s0a0[col];
@@ -233,8 +233,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
+        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 AveragingBinarization<true, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
@@ -242,9 +242,9 @@ namespace Simd
                 AveragingBinarization<false, compareType>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
         }
 
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-            uchar * dst, size_t dstStride, SimdCompareType compareType)
+        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, 
+            uint8_t * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {

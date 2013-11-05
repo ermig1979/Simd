@@ -29,7 +29,7 @@ namespace Simd
 {
 	namespace Base
 	{
-		void BgraToBgr(const uchar *bgra, size_t size, uchar *bgr, bool lastRow)
+		void BgraToBgr(const uint8_t *bgra, size_t size, uint8_t *bgr, bool lastRow)
 		{
 			for(size_t i = (lastRow ? 1 : 0); i < size; ++i, bgr += 3, bgra += 4)
 			{
@@ -43,7 +43,7 @@ namespace Simd
 			}
 		}
 
-		void BgraToBgr(const uchar *bgra, size_t width, size_t height, size_t bgraStride, uchar *bgr, size_t bgrStride)
+		void BgraToBgr(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride)
 		{
 			for(size_t row = 1; row < height; ++row)
 			{

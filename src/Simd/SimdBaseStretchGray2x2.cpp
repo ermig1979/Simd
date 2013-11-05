@@ -27,26 +27,26 @@ namespace Simd
 {
     namespace Base
     {
-        void StretchGray2x2(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert(srcWidth*2 == dstWidth && srcHeight*2 == dstHeight);
 
-			for(size_t row = 0; row < srcHeight; ++row)
-			{
-				uchar * dstEven = dst;
-				uchar * dstOdd = dst + dstStride;
-				for(size_t srcCol = 0; srcCol < srcWidth; srcCol += 1, dstEven += 2, dstOdd += 2)
-				{
-					uchar value = src[srcCol];
-					dstEven[0] = value;
-					dstEven[1] = value;
-					dstOdd[0] = value;
-					dstOdd[1] = value;
-				}
-				src += srcStride;
-				dst += 2*dstStride;
-			}
+            for(size_t row = 0; row < srcHeight; ++row)
+            {
+                uint8_t * dstEven = dst;
+                uint8_t * dstOdd = dst + dstStride;
+                for(size_t srcCol = 0; srcCol < srcWidth; srcCol += 1, dstEven += 2, dstOdd += 2)
+                {
+                    uint8_t value = src[srcCol];
+                    dstEven[0] = value;
+                    dstEven[1] = value;
+                    dstOdd[0] = value;
+                    dstOdd[1] = value;
+                }
+                src += srcStride;
+                dst += 2*dstStride;
+            }
         }
     }
 }

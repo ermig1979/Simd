@@ -24,7 +24,7 @@
 #ifndef __SimdSet_h__
 #define __SimdSet_h__
 
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
 #include "Simd/SimdConst.h"
 
 namespace Simd

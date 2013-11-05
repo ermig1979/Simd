@@ -30,196 +30,196 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-		void BackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(value[col] < lo[col])
-						lo[col]--;
-					if(value[col] > hi[col])
-						hi[col]++;
-				}
-				value += valueStride;
-				lo += loStride;
-				hi += hiStride;
-			}
-		}
+    namespace Base
+    {
+        void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(value[col] < lo[col])
+                        lo[col]--;
+                    if(value[col] > hi[col])
+                        hi[col]++;
+                }
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
 
-		void BackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(value[col] < lo[col])
-						lo[col] = value[col];
-					if(value[col] > hi[col])
-						hi[col] = value[col];
-				}
-				value += valueStride;
-				lo += loStride;
-				hi += hiStride;
-			}
-		}
+        void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(value[col] < lo[col])
+                        lo[col] = value[col];
+                    if(value[col] > hi[col])
+                        hi[col] = value[col];
+                }
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
 
-		void BackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
-			const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
-			uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(value[col] < loValue[col] && loCount[col] < 0xFF)
-						loCount[col]++;
-					if(value[col] > hiValue[col] && hiCount[col] < 0xFF)
-						hiCount[col]++;
-				}
-				value += valueStride;
-				loValue += loValueStride;
-				hiValue += hiValueStride;
-				loCount += loCountStride;
-				hiCount += hiCountStride;
-			}
-		}
+        void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+            uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(value[col] < loValue[col] && loCount[col] < 0xFF)
+                        loCount[col]++;
+                    if(value[col] > hiValue[col] && hiCount[col] < 0xFF)
+                        hiCount[col]++;
+                }
+                value += valueStride;
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+            }
+        }
 
-		SIMD_INLINE void AdjustLo(const uchar & count, uchar & value, int threshold)
-		{
-			if(count > threshold)
-			{
-				if(value > 0)
-					value--;
-			}
-			else if(count < threshold)
-			{
-				if(value < 0xFF)
-					value++;
-			}
-		}
+        SIMD_INLINE void AdjustLo(const uint8_t & count, uint8_t & value, int threshold)
+        {
+            if(count > threshold)
+            {
+                if(value > 0)
+                    value--;
+            }
+            else if(count < threshold)
+            {
+                if(value < 0xFF)
+                    value++;
+            }
+        }
 
-		SIMD_INLINE void AdjustHi(const uchar & count, uchar & value, int threshold)
-		{
-			if(count > threshold)
-			{
-				if(value < 0xFF)
-					value++;
-			}
-			else if(count < threshold)
-			{
-				if(value > 0)
-					value--;
-			}
-		}
+        SIMD_INLINE void AdjustHi(const uint8_t & count, uint8_t & value, int threshold)
+        {
+            if(count > threshold)
+            {
+                if(value < 0xFF)
+                    value++;
+            }
+            else if(count < threshold)
+            {
+                if(value > 0)
+                    value--;
+            }
+        }
 
-		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
-			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
-			uchar * hiValue, size_t hiValueStride, uchar threshold)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					AdjustLo(loCount[col], loValue[col], threshold);
-					AdjustHi(hiCount[col], hiValue[col], threshold);
-					loCount[col] = 0;
-					hiCount[col] = 0;
-				}
-				loValue += loValueStride;
-				hiValue += hiValueStride;
-				loCount += loCountStride;
-				hiCount += hiCountStride;
-			}
-		}
+        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    AdjustLo(loCount[col], loValue[col], threshold);
+                    AdjustHi(hiCount[col], hiValue[col], threshold);
+                    loCount[col] = 0;
+                    hiCount[col] = 0;
+                }
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+            }
+        }
 
-		void BackgroundAdjustRange(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
-			uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
-			uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(mask[col])
-					{
-						AdjustLo(loCount[col], loValue[col], threshold);
-						AdjustHi(hiCount[col], hiValue[col], threshold);
-					}
-					loCount[col] = 0;
-					hiCount[col] = 0;
-				}
-				loValue += loValueStride;
-				hiValue += hiValueStride;
-				loCount += loCountStride;
-				hiCount += hiCountStride;
-				mask += maskStride;
-			}
-		}
+        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col])
+                    {
+                        AdjustLo(loCount[col], loValue[col], threshold);
+                        AdjustHi(hiCount[col], hiValue[col], threshold);
+                    }
+                    loCount[col] = 0;
+                    hiCount[col] = 0;
+                }
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+                mask += maskStride;
+            }
+        }
 
-		SIMD_INLINE void BackgroundShiftRange(const uchar & value, uchar & lo, uchar & hi)
-		{
-			int add = int(value) - int(hi);
-			int sub = int(lo) - int(value);
-			if(add > 0)
-			{
-				lo = Min(lo + add, 0xFF);
-				hi = Min(hi + add, 0xFF);
-			}
-			if(sub > 0)
-			{
-				lo = Max(lo - sub, 0);
-				hi = Max(hi - sub, 0);
-			}
-		}
+        SIMD_INLINE void BackgroundShiftRange(const uint8_t & value, uint8_t & lo, uint8_t & hi)
+        {
+            int add = int(value) - int(hi);
+            int sub = int(lo) - int(value);
+            if(add > 0)
+            {
+                lo = Min(lo + add, 0xFF);
+                hi = Min(hi + add, 0xFF);
+            }
+            if(sub > 0)
+            {
+                lo = Max(lo - sub, 0);
+                hi = Max(hi - sub, 0);
+            }
+        }
 
-		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * lo, size_t loStride, uchar * hi, size_t hiStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-					BackgroundShiftRange(value[col], lo[col], hi[col]);
-				value += valueStride;
-				lo += loStride;
-				hi += hiStride;
-			}
-		}
+        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    BackgroundShiftRange(value[col], lo[col], hi[col]);
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
 
-		void BackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(mask[col])
-						BackgroundShiftRange(value[col], lo[col], hi[col]);
-				}
-				value += valueStride;
-				lo += loStride;
-				hi += hiStride;
-				mask += maskStride;
-			}
-		}
+        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col])
+                        BackgroundShiftRange(value[col], lo[col], hi[col]);
+                }
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+                mask += maskStride;
+            }
+        }
 
-		void BackgroundInitMask(const uchar * src, size_t srcStride, size_t width, size_t height,
-			uchar index, uchar value, uchar * dst, size_t dstStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					if(src[col] == index)
-						dst[col] = value;
-				}
-				src += srcStride;
-				dst += dstStride;
-			}
-		}
-	}
+        void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(src[col] == index)
+                        dst[col] = value;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+    }
 }

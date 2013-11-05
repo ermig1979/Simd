@@ -66,7 +66,7 @@ namespace Simd
 
         uint32_t Crc32(const void *src, size_t size)
         {
-            uchar *p = (uchar*)src;
+            uint8_t *p = (uint8_t*)src;
             uint32_t crc = 0;
             while (size--)
                 crc = (crc >> 8) ^ Crc32cTable[(crc ^ *p++) & 0xFF];

@@ -31,15 +31,15 @@ namespace Test
 	{
 		struct Func1
 		{
-			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-				uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType type);
+			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+				 uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType type);
 
 			FuncPtr func;
 			std::string description;
 
 			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uchar value, uchar positive, uchar negative, View & dst, SimdCompareType type) const
+			void Call(const View & src, uint8_t value, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, type);
@@ -64,9 +64,9 @@ namespace Test
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(src);
 
-		uchar value = Random(256);
-		uchar positive = Random(256);
-		uchar negative = Random(256);
+		 uint8_t value = Random(256);
+		 uint8_t positive = Random(256);
+		 uint8_t negative = Random(256);
 
 		View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -112,16 +112,16 @@ namespace Test
     {
         struct Func2
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-                uchar * dst, size_t dstStride, SimdCompareType type);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, 
+                uint8_t * dst, size_t dstStride, SimdCompareType type);
 
             FuncPtr func;
             std::string description;
 
             Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, View & dst, SimdCompareType type) const
+            void Call(const View & src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, value, neighborhood, threshold, positive, negative, dst.data, dst.stride, type);
@@ -146,11 +146,11 @@ namespace Test
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
 
-        uchar value = 127;
+        uint8_t value = 127;
         size_t neighborhood = 17;
-        uchar threshold = 128;
-        uchar positive = 7;
-        uchar negative = 3;
+        uint8_t threshold = 128;
+        uint8_t positive = 7;
+        uint8_t negative = 3;
 
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));

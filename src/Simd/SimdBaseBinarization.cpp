@@ -27,23 +27,23 @@
 
 namespace Simd
 {
-	namespace Base
-	{
+    namespace Base
+    {
         template <SimdCompareType compareType> 
-		void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride)
-		{
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-					dst[col] = Compare<compareType>(src[col], value) ? positive : negative;
-				src += srcStride;
-				dst += dstStride;
-			}
-		}
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    dst[col] = Compare<compareType>(src[col], value) ? positive : negative;
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
 
-        void Binarization(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            uchar value, uchar positive, uchar negative, uchar * dst, size_t dstStride, SimdCompareType compareType)
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
@@ -70,10 +70,10 @@ namespace Simd
             {
                 Buffer(size_t width, size_t edge)
                 {
-                    size_t size = sizeof(uint)*(width + 2*edge);
+                    size_t size = sizeof(uint32_t)*(width + 2*edge);
                     _p = Allocate(size);
                     memset(_p, 0, size);
-                    sa = (uint*)_p + edge;
+                    sa = (uint32_t*)_p + edge;
                 }
 
                 ~Buffer()
@@ -81,15 +81,15 @@ namespace Simd
                     Free(_p);
                 }
 
-                uint * sa;
+                uint32_t * sa;
             private:
                 void *_p;
             };
         }
 
         template <SimdCompareType compareType>
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, uchar * dst, size_t dstStride)
+        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)
         {
             assert(width > neighborhood && height > neighborhood && neighborhood < 0x80);
 
@@ -97,13 +97,13 @@ namespace Simd
 
             union SaSum
             {
-                uint sum;
-                ushort sa[2];
+                uint32_t sum;
+                uint16_t sa[2];
             };
 
             for(size_t row = 0; row < neighborhood; ++row)
             {
-                const uchar * s = src + row*srcStride;
+                const uint8_t * s = src + row*srcStride;
                 for(size_t col = 0; col < width; ++col)
                 { 
                     buffer.sa[col] += Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
@@ -114,7 +114,7 @@ namespace Simd
             {
                 if(row < height - neighborhood)
                 {
-                    const uchar * s = src + (row + neighborhood)*srcStride;
+                    const uint8_t * s = src + (row + neighborhood)*srcStride;
                     for(size_t col = 0; col < width; ++col)
                     {
                         buffer.sa[col] += Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
@@ -123,7 +123,7 @@ namespace Simd
 
                 if(row > neighborhood)
                 {
-                    const uchar * s = src + (row - neighborhood - 1)*srcStride;
+                    const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
                     for(size_t col = 0; col < width; ++col)
                     {
                         buffer.sa[col] -= Compare<compareType>(s[col], value) ? 0x10001 : 0x10000;
@@ -143,9 +143,9 @@ namespace Simd
             }
         }
 
-        void AveragingBinarization(const uchar * src, size_t srcStride, size_t width, size_t height,
-            uchar value, size_t neighborhood, uchar threshold, uchar positive, uchar negative, 
-            uchar * dst, size_t dstStride, SimdCompareType compareType)
+        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, 
+            uint8_t * dst, size_t dstStride, SimdCompareType compareType)
         {
             switch(compareType)
             {
@@ -165,5 +165,5 @@ namespace Simd
                 assert(0);
             }
         }
-	}
+    }
 }

@@ -32,310 +32,310 @@
 namespace Simd
 {
 #ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
-		template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const uchar * value, uchar * background, __m128i tailMask)
-		{
-			const __m128i _value = Load<align>((__m128i*)value);
-			const __m128i _background = Load<align>((__m128i*)background);
-			const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _background));
-			Store<align>((__m128i*)background, _mm_adds_epu8(_background, inc));
-		}
+    namespace Sse2
+    {
+        template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const uint8_t * value, uint8_t * background, __m128i tailMask)
+        {
+            const __m128i _value = Load<align>((__m128i*)value);
+            const __m128i _background = Load<align>((__m128i*)background);
+            const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _background));
+            Store<align>((__m128i*)background, _mm_adds_epu8(_background, inc));
+        }
 
-		template <bool align> void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(value) && Aligned(valueStride));
-				assert(Aligned(background) && Aligned(backgroundStride));
-			}
+        template <bool align> void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(background) && Aligned(backgroundStride));
+            }
 
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundGrowRangeSlow<align>(value + col, background + col, K8_01);
-				if(alignedWidth != width)
-					EdgeBackgroundGrowRangeSlow<false>(value + width - A, background + width - A, tailMask);
-				value += valueStride;
-				background += backgroundStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundGrowRangeSlow<align>(value + col, background + col, K8_01);
+                if(alignedWidth != width)
+                    EdgeBackgroundGrowRangeSlow<false>(value + width - A, background + width - A, tailMask);
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
 
-		void EdgeBackgroundGrowRangeSlow(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
-				EdgeBackgroundGrowRangeSlow<true>(value, valueStride, width, height, background, backgroundStride);
-			else
-				EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
-		}
+        void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+                EdgeBackgroundGrowRangeSlow<true>(value, valueStride, width, height, background, backgroundStride);
+            else
+                EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uchar * value, uchar * background)
-		{
-			const __m128i _value = Load<align>((__m128i*)value);
-			const __m128i _background = Load<align>((__m128i*)background);
-			Store<align>((__m128i*)background, _mm_max_epu8(_background, _value));
-		}
+        template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uint8_t * value, uint8_t * background)
+        {
+            const __m128i _value = Load<align>((__m128i*)value);
+            const __m128i _background = Load<align>((__m128i*)background);
+            Store<align>((__m128i*)background, _mm_max_epu8(_background, _value));
+        }
 
-		template <bool align> void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(value) && Aligned(valueStride));
-				assert(Aligned(background) && Aligned(backgroundStride));
-			}
+        template <bool align> void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(background) && Aligned(backgroundStride));
+            }
 
-			size_t alignedWidth = AlignLo(width, A);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundGrowRangeFast<align>(value + col, background + col);
-				if(alignedWidth != width)
-					EdgeBackgroundGrowRangeFast<false>(value + width - A, background + width - A);
-				value += valueStride;
-				background += backgroundStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(width, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundGrowRangeFast<align>(value + col, background + col);
+                if(alignedWidth != width)
+                    EdgeBackgroundGrowRangeFast<false>(value + width - A, background + width - A);
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
 
-		void EdgeBackgroundGrowRangeFast(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
-				EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
-			else
-				EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
-		}
+        void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+                EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
+            else
+                EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundIncrementCount(const uchar * value, 
-			const uchar * backgroundValue, uchar * backgroundCount, size_t offset, __m128i tailMask)
-		{
-			const __m128i _value = Load<align>((__m128i*)(value + offset));
-			const __m128i _backgroundValue = Load<align>((__m128i*)(backgroundValue + offset));
-			const __m128i _backgroundCount = Load<align>((__m128i*)(backgroundCount + offset));
+        template <bool align> SIMD_INLINE void EdgeBackgroundIncrementCount(const uint8_t * value, 
+            const uint8_t * backgroundValue, uint8_t * backgroundCount, size_t offset, __m128i tailMask)
+        {
+            const __m128i _value = Load<align>((__m128i*)(value + offset));
+            const __m128i _backgroundValue = Load<align>((__m128i*)(backgroundValue + offset));
+            const __m128i _backgroundCount = Load<align>((__m128i*)(backgroundCount + offset));
 
-			const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _backgroundValue));
+            const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _backgroundValue));
 
-			Store<align>((__m128i*)(backgroundCount + offset), _mm_adds_epu8(_backgroundCount, inc));
-		}
+            Store<align>((__m128i*)(backgroundCount + offset), _mm_adds_epu8(_backgroundCount, inc));
+        }
 
-		template <bool align> void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
-			const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(value) && Aligned(valueStride));
+        template <bool align> void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
                 assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
-			}
+            }
 
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundIncrementCount<align>(value, backgroundValue, backgroundCount, col, K8_01);
-				if(alignedWidth != width)
-					EdgeBackgroundIncrementCount<false>(value, backgroundValue, backgroundCount, width - A, tailMask);
-				value += valueStride;
-				backgroundValue += backgroundValueStride;
-				backgroundCount += backgroundCountStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundIncrementCount<align>(value, backgroundValue, backgroundCount, col, K8_01);
+                if(alignedWidth != width)
+                    EdgeBackgroundIncrementCount<false>(value, backgroundValue, backgroundCount, width - A, tailMask);
+                value += valueStride;
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
 
-		void EdgeBackgroundIncrementCount(const uchar * value, size_t valueStride, size_t width, size_t height,
-			const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride)
-		{
-			if(Aligned(value) && Aligned(valueStride) && 
-				Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride))
-				EdgeBackgroundIncrementCount<true>(value, valueStride, width, height,
-				backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
-			else
-				EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
-				backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
-		}
+        void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && 
+                Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride))
+                EdgeBackgroundIncrementCount<true>(value, valueStride, width, height,
+                backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+            else
+                EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
+                backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        }
 
-		SIMD_INLINE __m128i AdjustEdge(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
-		{
+        SIMD_INLINE __m128i AdjustEdge(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
+        {
             const __m128i inc = _mm_and_si128(mask, GreaterU8(count, threshold));
             const __m128i dec = _mm_and_si128(mask, LesserU8(count, threshold));
             return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
-		}
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uchar * backgroundCount, uchar * backgroundValue, 
-			size_t offset, const __m128i & threshold, const __m128i & mask)
-		{
-			const __m128i _backgroundCount = Load<align>((__m128i*)(backgroundCount + offset));
-			const __m128i _backgroundValue = Load<align>((__m128i*)(backgroundValue + offset));
+        template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, uint8_t * backgroundValue, 
+            size_t offset, const __m128i & threshold, const __m128i & mask)
+        {
+            const __m128i _backgroundCount = Load<align>((__m128i*)(backgroundCount + offset));
+            const __m128i _backgroundValue = Load<align>((__m128i*)(backgroundValue + offset));
 
-			Store<align>((__m128i*)(backgroundValue + offset), AdjustEdge(_backgroundCount, _backgroundValue, mask, threshold));
-			Store<align>((__m128i*)(backgroundCount + offset), K_ZERO);
-		}
+            Store<align>((__m128i*)(backgroundValue + offset), AdjustEdge(_backgroundCount, _backgroundValue, mask, threshold));
+            Store<align>((__m128i*)(backgroundCount + offset), K_ZERO);
+        }
 
-		template <bool align> void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-			uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
-			}
+        template <bool align> void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
+            }
 
-			const __m128i _threshold = _mm_set1_epi8((char)threshold);
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, col, _threshold, K8_01);
-				if(alignedWidth != width)
-					EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, width - A, _threshold, tailMask);
-				backgroundValue += backgroundValueStride;
-				backgroundCount += backgroundCountStride;
-			}
-		}
+            const __m128i _threshold = _mm_set1_epi8((char)threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, col, _threshold, K8_01);
+                if(alignedWidth != width)
+                    EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, width - A, _threshold, tailMask);
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
 
-		void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-			uchar * backgroundValue, size_t backgroundValueStride, uchar threshold)
-		{
-			if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && 
-				Aligned(backgroundCount) && Aligned(backgroundCountStride))
-				EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, 
+        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+        {
+            if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && 
+                Aligned(backgroundCount) && Aligned(backgroundCountStride))
+                EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, 
                 backgroundValue, backgroundValueStride, threshold);
-			else
+            else
                 EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, 
                 backgroundValue, backgroundValueStride, threshold);
-		}
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uchar * backgroundCount, uchar * backgroundValue, 
-			const uchar * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
-		{
-			const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
-			EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, offset, threshold, _mm_and_si128(_mask, tailMask));
-		}
+        template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, uint8_t * backgroundValue, 
+            const uint8_t * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
+        {
+            const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
+            EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, offset, threshold, _mm_and_si128(_mask, tailMask));
+        }
 
-		template <bool align> void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-			uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
-				assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
-				assert(Aligned(mask) && Aligned(maskStride));
-			}
+        template <bool align> void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+                assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+                assert(Aligned(mask) && Aligned(maskStride));
+            }
 
-			const __m128i _threshold = _mm_set1_epi8((char)threshold);
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, mask, col, _threshold, K8_01);
-				if(alignedWidth != width)
-					EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, mask, width - A, _threshold, tailMask);
-				backgroundValue += backgroundValueStride;
-				backgroundCount += backgroundCountStride;
-				mask += maskStride;
-			}		
-		}
+            const __m128i _threshold = _mm_set1_epi8((char)threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, mask, col, _threshold, K8_01);
+                if(alignedWidth != width)
+                    EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, mask, width - A, _threshold, tailMask);
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+                mask += maskStride;
+            }		
+        }
 
-		void EdgeBackgroundAdjustRange(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-			uchar * backgroundValue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride)
-		{
-			if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride) && 
+        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride) && 
                 Aligned(mask) && Aligned(maskStride))
-				EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, 
-				threshold, mask, maskStride);
-			else
+                EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, 
+                threshold, mask, maskStride);
+            else
                 EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, 
                 threshold, mask, maskStride);
-		}
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uchar * value, uchar * background, size_t offset, __m128i mask)
-		{
-			const __m128i _value = Load<align>((__m128i*)(value + offset));
-			const __m128i _background = Load<align>((__m128i*)(background + offset));
-			Store<align>((__m128i*)(background + offset), _mm_or_si128(_mm_and_si128(mask, _value), _mm_andnot_si128(mask, _background)));
-		}
+        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uint8_t * value, uint8_t * background, size_t offset, __m128i mask)
+        {
+            const __m128i _value = Load<align>((__m128i*)(value + offset));
+            const __m128i _background = Load<align>((__m128i*)(background + offset));
+            Store<align>((__m128i*)(background + offset), _mm_or_si128(_mm_and_si128(mask, _value), _mm_andnot_si128(mask, _background)));
+        }
 
-		template <bool align> void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(value) && Aligned(valueStride));
-				assert(Aligned(background) && Aligned(backgroundStride));
-			}
+        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(background) && Aligned(backgroundStride));
+            }
 
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundShiftRange<align>(value, background, col, K_INV_ZERO);
-				if(alignedWidth != width)
-					EdgeBackgroundShiftRange<false>(value, background, width - A, tailMask);
-				value += valueStride;
-				background += backgroundStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundShiftRange<align>(value, background, col, K_INV_ZERO);
+                if(alignedWidth != width)
+                    EdgeBackgroundShiftRange<false>(value, background, width - A, tailMask);
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
 
-		void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride)
-		{
-			if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
-				EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride);
-			else
-				EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
-		}
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride);
+            else
+                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
+        }
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uchar * value, uchar * background, const uchar * mask, 
-			size_t offset, __m128i tailMask)
-		{
-			const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
-			EdgeBackgroundShiftRange<align>(value, background, offset, _mm_and_si128(_mask, tailMask));
-		}
+        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uint8_t * value, uint8_t * background, const uint8_t * mask, 
+            size_t offset, __m128i tailMask)
+        {
+            const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
+            EdgeBackgroundShiftRange<align>(value, background, offset, _mm_and_si128(_mask, tailMask));
+        }
 
-		template <bool align> void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
-		{
-			assert(width >= A);
-			if(align)
-			{
-				assert(Aligned(value) && Aligned(valueStride));
-				assert(Aligned(background) && Aligned(backgroundStride));
-				assert(Aligned(mask) && Aligned(maskStride));
-			}
+        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(background) && Aligned(backgroundStride));
+                assert(Aligned(mask) && Aligned(maskStride));
+            }
 
-			size_t alignedWidth = AlignLo(width, A);
-			__m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < alignedWidth; col += A)
-					EdgeBackgroundShiftRange<align>(value, background, mask, col, K_INV_ZERO);
-				if(alignedWidth != width)
-					EdgeBackgroundShiftRange<false>(value, background, mask, width - A, tailMask);
-				value += valueStride;
-				background += backgroundStride;
-				mask += maskStride;
-			}
-		}
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    EdgeBackgroundShiftRange<align>(value, background, mask, col, K_INV_ZERO);
+                if(alignedWidth != width)
+                    EdgeBackgroundShiftRange<false>(value, background, mask, width - A, tailMask);
+                value += valueStride;
+                background += backgroundStride;
+                mask += maskStride;
+            }
+        }
 
-		void EdgeBackgroundShiftRange(const uchar * value, size_t valueStride, size_t width, size_t height,
-			uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride)
-		{
-			if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && Aligned(mask) && Aligned(maskStride))
-				EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
-			else
-				EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
-		}
-	}
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && Aligned(mask) && Aligned(maskStride))
+                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+            else
+                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+        }
+    }
 #endif// SIMD_SSE2_ENABLE
 }

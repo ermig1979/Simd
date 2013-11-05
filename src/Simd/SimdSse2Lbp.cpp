@@ -33,7 +33,7 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-        template <bool align> void LbpEstimate(const uchar * src, ptrdiff_t stride, uchar * dst)
+        template <bool align> void LbpEstimate(const uint8_t * src, ptrdiff_t stride, uint8_t * dst)
         {
             __m128i threshold = Load<false>((__m128i*)src);
             __m128i lbp = _mm_setzero_si128();
@@ -49,7 +49,7 @@ namespace Simd
         }
 
 		template <bool align> void LbpEstimate(
-			const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+			const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
 			assert(width >= A + 2);
 			if(align)
@@ -75,7 +75,7 @@ namespace Simd
             memset(dst, 0, width);
 		}
 
-		void LbpEstimate(const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+		void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
 			if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
 				LbpEstimate<true>(src, srcStride, width, height, dst, dstStride);

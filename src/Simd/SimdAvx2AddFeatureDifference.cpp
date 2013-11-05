@@ -51,8 +51,8 @@ namespace Simd
             return _mm256_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void AddFeatureDifference(const uchar * value, const uchar * lo, const uchar * hi, 
-            uchar * difference, size_t offset, __m256i weight, __m256i mask)
+        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, 
+            uint8_t * difference, size_t offset, __m256i weight, __m256i mask)
         {
             const __m256i _value = Load<align>((__m256i*)(value + offset));
             const __m256i _lo = Load<align>((__m256i*)(lo + offset));
@@ -64,9 +64,9 @@ namespace Simd
             Store<align>((__m256i*)(difference + offset), _mm256_adds_epu8(_difference, inc));
         }
 
-        template <bool align> void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride)
+        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+            uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             assert(width >= A);
             if(align)
@@ -78,7 +78,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
             __m256i _weight = _mm256_set1_epi16((short)weight);
 
             for(size_t row = 0; row < height; ++row)
@@ -94,9 +94,9 @@ namespace Simd
             }
         }
 
-        void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride)
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+            uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
                 Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))

@@ -31,8 +31,8 @@ namespace Test
 	{
 		struct Func1
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				uchar * background, size_t backgroundStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				 uint8_t * background, size_t backgroundStride);
 
 			FuncPtr func;
 			std::string description;
@@ -78,8 +78,8 @@ namespace Test
 	{
 		struct Func2
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				const uchar * backgroundValue, size_t backgroundValueStride, uchar * backgroundCount, size_t backgroundCountStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
 			FuncPtr func;
 			std::string description;
@@ -128,8 +128,8 @@ namespace Test
 	{
 		struct Func3
 		{
-			typedef void (*FuncPtr)(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-				uchar * backgroundalue, size_t backgroundValueStride, uchar threshold);
+			typedef void (*FuncPtr)(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+				 uint8_t * backgroundalue, size_t backgroundValueStride, uint8_t threshold);
 
 			FuncPtr func;
 			std::string description;
@@ -137,7 +137,7 @@ namespace Test
 			Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
 			void Call(const View & backgroundCountSrc, const View & backgroundValueSrc,  
-				View & backgroundCountDst, View & backgroundValueDst, uchar threshold) const
+				View & backgroundCountDst, View & backgroundValueDst, uint8_t threshold) const
 			{
 				Simd::Copy(backgroundCountSrc, backgroundCountDst);
 				Simd::Copy(backgroundValueSrc, backgroundValueDst);
@@ -180,8 +180,8 @@ namespace Test
 	{
 		struct Func4
 		{
-            typedef void (*FuncPtr)(uchar * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
-                uchar * backgroundalue, size_t backgroundValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+            typedef void (*FuncPtr)(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+                uint8_t * backgroundalue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
 			std::string description;
@@ -189,7 +189,7 @@ namespace Test
 			Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
             void Call(const View & backgroundCountSrc, const View & backgroundValueSrc,  
-                View & backgroundCountDst, View & backgroundValueDst, uchar threshold, const View & mask) const
+                View & backgroundCountDst, View & backgroundValueDst, uint8_t threshold, const View & mask) const
 			{
                 Simd::Copy(backgroundCountSrc, backgroundCountDst);
                 Simd::Copy(backgroundValueSrc, backgroundValueDst);
@@ -234,8 +234,8 @@ namespace Test
 	{
 		struct Func5
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				uchar * background, size_t backgroundStride, const uchar * mask, size_t maskStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				 uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
 			std::string description;

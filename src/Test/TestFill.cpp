@@ -31,14 +31,14 @@ namespace Test
 	{
 		struct FuncBgra
 		{
-			typedef void (*FuncPtr)(uchar * dst, size_t stride, size_t width, size_t height, uchar blue, uchar green, uchar red, uchar alpha);
+			typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
 			FuncPtr func;
 			std::string description;
 
 			FuncBgra(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(View & dst, uchar blue, uchar green, uchar red, uchar alpha) const
+			void Call(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
@@ -56,10 +56,10 @@ namespace Test
         std::cout << "Test " << f1.description << " & " << f2.description
             << " [" << width << ", " << height << "]." << std::endl;
 
-        uchar blue = Random(256);
-        uchar green = Random(256);
-        uchar red = Random(256);
-        uchar alpha = Random(256);
+        uint8_t blue = Random(256);
+        uint8_t green = Random(256);
+        uint8_t red = Random(256);
+        uint8_t alpha = Random(256);
 
 		View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
 		View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));

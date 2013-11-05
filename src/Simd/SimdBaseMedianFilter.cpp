@@ -28,7 +28,7 @@ namespace Simd
 {
 	namespace Base
 	{
-        SIMD_INLINE void LoadRhomb3x3(const uchar * y[3], size_t x[3], int a[5])
+        SIMD_INLINE void LoadRhomb3x3(const uint8_t * y[3], size_t x[3], int a[5])
         {
             a[0] = y[0][x[1]];
             a[1] = y[1][x[0]]; a[2] = y[1][x[1]]; a[3] = y[1][x[2]];
@@ -43,11 +43,11 @@ namespace Simd
             SortU8(a[4], a[2]); SortU8(a[2], a[0]);
         }
 
-        void MedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             int a[5];
-            const uchar * y[3];
+            const uint8_t * y[3];
             size_t x[3];
 
             size_t size = channelCount*width;
@@ -69,7 +69,7 @@ namespace Simd
 
                     LoadRhomb3x3(y, x, a);
                     PartialSort5(a);
-                    dst[x[1]] = (uchar)a[2];
+                    dst[x[1]] = (uint8_t)a[2];
                 }
 
                 for(size_t col = channelCount; col < size - channelCount; ++col)
@@ -80,12 +80,12 @@ namespace Simd
 
                     LoadRhomb3x3(y, x, a);
                     PartialSort5(a);
-                    dst[col] = (uchar)a[2];
+                    dst[col] = (uint8_t)a[2];
                 }
             }
         }
 
-		SIMD_INLINE void LoadSquare3x3(const uchar * y[3], size_t x[3], int a[9])
+		SIMD_INLINE void LoadSquare3x3(const uint8_t * y[3], size_t x[3], int a[9])
 		{
 			a[0] = y[0][x[0]]; a[1] = y[0][x[1]]; a[2] = y[0][x[2]];
 			a[3] = y[1][x[0]]; a[4] = y[1][x[1]]; a[5] = y[1][x[2]];
@@ -103,11 +103,11 @@ namespace Simd
 			SortU8(a[4], a[2]);
 		}
 
-		void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride)
+		void MedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+			size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
 			int a[9];
-			const uchar * y[3];
+			const uint8_t * y[3];
 			size_t x[3];
 
 			size_t size = channelCount*width;
@@ -129,7 +129,7 @@ namespace Simd
 
 					LoadSquare3x3(y, x, a);
 					PartialSort9(a);
-					dst[x[1]] = (uchar)a[4];
+					dst[x[1]] = (uint8_t)a[4];
 				}
 
 				for(size_t col = channelCount; col < size - channelCount; ++col)
@@ -140,12 +140,12 @@ namespace Simd
 
 					LoadSquare3x3(y, x, a);
 					PartialSort9(a);
-					dst[col] = (uchar)a[4];
+					dst[col] = (uint8_t)a[4];
 				}
 			}
 		}
 
-        SIMD_INLINE void LoadRhomb5x5(const uchar * y[5], size_t x[5], int a[13])
+        SIMD_INLINE void LoadRhomb5x5(const uint8_t * y[5], size_t x[5], int a[13])
         {
             a[0]  = y[0][x[2]];
             a[1]  = y[1][x[1]]; a[2]  = y[1][x[2]]; a[3]  = y[1][x[3]];
@@ -173,11 +173,11 @@ namespace Simd
             SortU8(a[4] , a[6] );
         }
 
-        void MedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             int a[13];
-            const uchar * y[5];
+            const uint8_t * y[5];
             size_t x[5];
 
             size_t size = channelCount*width;
@@ -222,7 +222,7 @@ namespace Simd
 
                     LoadRhomb5x5(y, x, a);
                     PartialSort13(a);
-                    dst[x[2]] = (uchar)a[6];
+                    dst[x[2]] = (uint8_t)a[6];
                 }
 
                 for(size_t col = 2*channelCount; col < size - 2*channelCount; ++col)
@@ -235,12 +235,12 @@ namespace Simd
 
                     LoadRhomb5x5(y, x, a);
                     PartialSort13(a);
-                    dst[col] = (uchar)a[6];
+                    dst[col] = (uint8_t)a[6];
                 }
             }
         }
 
-        SIMD_INLINE void LoadSquare5x5(const uchar * y[5], size_t x[5], int a[25])
+        SIMD_INLINE void LoadSquare5x5(const uint8_t * y[5], size_t x[5], int a[25])
         {
             a[0]  = y[0][x[0]]; a[1]  = y[0][x[1]]; a[2]  = y[0][x[2]]; a[3]  = y[0][x[3]];	a[4]  = y[0][x[4]]; 
             a[5]  = y[1][x[0]]; a[6]  = y[1][x[1]]; a[7]  = y[1][x[2]]; a[8]  = y[1][x[3]];	a[9]  = y[1][x[4]]; 
@@ -286,11 +286,11 @@ namespace Simd
             SortU8(a[12], a[20]); SortU8(a[10], a[20]); SortU8(a[10], a[12]);
         }
 
-        void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             int a[25];
-            const uchar * y[5];
+            const uint8_t * y[5];
             size_t x[5];
 
             size_t size = channelCount*width;
@@ -335,7 +335,7 @@ namespace Simd
 
                     LoadSquare5x5(y, x, a);
                     PartialSort25(a);
-                    dst[x[2]] = (uchar)a[12];
+                    dst[x[2]] = (uint8_t)a[12];
                 }
 
                 for(size_t col = 2*channelCount; col < size - 2*channelCount; ++col)
@@ -348,7 +348,7 @@ namespace Simd
 
                     LoadSquare5x5(y, x, a);
                     PartialSort25(a);
-                    dst[col] = (uchar)a[12];
+                    dst[col] = (uint8_t)a[12];
                 }
             }
         }

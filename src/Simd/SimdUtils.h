@@ -66,7 +66,7 @@ namespace Simd
         SimdAbsGradientSaturatedSum(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
-    SIMD_INLINE void AddFeatureDifference(const View & value, const View & lo, const View & hi, ushort weight, View & difference)
+    SIMD_INLINE void AddFeatureDifference(const View & value, const View & lo, const View & hi, uint16_t weight, View & difference)
     {
         assert(Compatible(value, lo, hi, difference) && value.format == View::Gray8);
 

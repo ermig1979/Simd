@@ -86,11 +86,11 @@ namespace Simd
             }
         };
 
-        template <bool align, size_t channelCount> void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, 
-            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+        template <bool align, size_t channelCount> void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
             size_t step = channelCount*A;
             for(size_t row = 0; row < height; ++row)
             {
@@ -110,8 +110,8 @@ namespace Simd
             }        
         }
 
-        template <bool align> void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+        template <bool align> void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
             assert(width >= A);
             if(align)
@@ -131,8 +131,8 @@ namespace Simd
             }
         }
 
-        void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+        void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
             if(channelCount == 3)
                 Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);

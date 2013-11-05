@@ -28,17 +28,17 @@ namespace Simd
 {
 	namespace Base
 	{
-		SIMD_INLINE int AbsSecondDerivative(const uchar * src, ptrdiff_t step)
+		SIMD_INLINE int AbsSecondDerivative(const uint8_t * src, ptrdiff_t step)
 		{
 			return AbsDifferenceU8(Average(src[step], src[-step]), src[0]);
 		}
 
-		void AbsSecondDerivativeHistogram(const uchar *src, size_t width, size_t height, size_t stride,
-			size_t step, size_t indent, uint * histogram)
+		void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
+			size_t step, size_t indent, uint32_t * histogram)
 		{
 			assert(width > 2*indent && 2*height > indent && indent >= step);
 
-			memset(histogram, 0, sizeof(uint)*HISTOGRAM_SIZE);
+			memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
 
 			src += indent*(stride + 1);
 			height -= 2*indent;
@@ -58,9 +58,9 @@ namespace Simd
 			}
 		}
 
-        void Histogram(const uchar * src, size_t width, size_t height, size_t stride, uint * histogram)
+        void Histogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram)
         {
-            memset(histogram, 0, sizeof(uint)*HISTOGRAM_SIZE);
+            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < width; ++col)

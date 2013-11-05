@@ -31,15 +31,15 @@ namespace Test
     {
         struct FuncC
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t stride, size_t width, size_t height, 
-                uchar value, SimdCompareType compareType, uint * count);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
+                uint8_t value, SimdCompareType compareType, uint32_t * count);
 
             FuncPtr func;
             std::string description;
 
             FuncC(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, uchar value, SimdCompareType compareType, uint & count) const
+            void Call(const View & src, uint8_t value, SimdCompareType compareType, uint32_t & count) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, value, compareType, &count);
@@ -65,8 +65,8 @@ namespace Test
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
 
-        uchar value = 127;
-        uint c1, c2;
+        uint8_t value = 127;
+        uint32_t c1, c2;
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, type, c1));
 
@@ -109,15 +109,15 @@ namespace Test
     {
         struct FuncS
         {
-            typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height, 
-                const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum);
+            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
             FuncPtr func;
             std::string description;
 
             FuncS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-            void Call(const View & src, const View & mask, uchar value, SimdCompareType compareType, uint64_t & sum) const
+            void Call(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
@@ -144,7 +144,7 @@ namespace Test
         View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(mask);
 
-        uchar value = 127;
+        uint8_t value = 127;
         uint64_t s1, s2;
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, mask, value, type, s1));

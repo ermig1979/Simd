@@ -21,7 +21,6 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdTypes.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
@@ -84,7 +83,7 @@ namespace Simd
                 permuteOffsets);		
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420ToHue(const uchar * y, __m256i u, __m256i v, uchar * hue, const __m256i & permuteOffsets, const __m256 & KF_255_DIV_6)
+		template <bool align> SIMD_INLINE void Yuv420ToHue(const uint8_t * y, __m256i u, __m256i v, uint8_t * hue, const __m256i & permuteOffsets, const __m256 & KF_255_DIV_6)
 		{
 			Store<align>((__m256i*)(hue), YuvToHue8(Load<align>((__m256i*)(y)), 
                 _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), permuteOffsets, KF_255_DIV_6));
@@ -92,8 +91,8 @@ namespace Simd
                 _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), permuteOffsets, KF_255_DIV_6));
 		}
 
-		template <bool align> void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		template <bool align> void Yuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= DA) &&  (height >= 2));
 			if(align)
@@ -131,8 +130,8 @@ namespace Simd
 			}
 		}
 
-		template <bool align> void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		template <bool align> void Yuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			assert(width >= A);
 			if(align)
@@ -166,8 +165,8 @@ namespace Simd
 			}
 		}
 
-		void Yuv420ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		void Yuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
 				Yuv420ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
@@ -175,8 +174,8 @@ namespace Simd
 				Yuv420ToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 		}
 
-		void Yuv444ToHue(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * hue, size_t hueStride)
+		void Yuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
 				Yuv444ToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);

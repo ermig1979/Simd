@@ -37,14 +37,14 @@ namespace Simd
 	namespace Avx2
 	{
         template <bool align, SimdCompareType compareType> 
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             assert(width >= A);
             if(align)
                 assert(Aligned(src) && Aligned(stride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
             __m256i _value = _mm256_set1_epi8(value);
             __m256i _count = _mm256_setzero_si256();
@@ -66,7 +66,7 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             if(Aligned(src) && Aligned(stride))
                 ConditionalCount<true, compareType>(src, stride, width, height, value, count);
@@ -74,8 +74,8 @@ namespace Simd
                 ConditionalCount<false, compareType>(src, stride, width, height, value, count);
         }
 
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
-            uchar value, SimdCompareType compareType, uint * count)
+        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t value, SimdCompareType compareType, uint32_t * count)
         {
             switch(compareType)
             {
@@ -97,15 +97,15 @@ namespace Simd
         }
 
         template <bool align, SimdCompareType compareType> 
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             assert(width >= A);
             if(align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
             __m256i _value = _mm256_set1_epi8(value);
             __m256i _sum = _mm256_setzero_si256();
@@ -130,8 +130,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
                 ConditionalSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
@@ -139,8 +139,8 @@ namespace Simd
                 ConditionalSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
         }
 
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {
@@ -169,15 +169,15 @@ namespace Simd
         }
 
         template <bool align, SimdCompareType compareType> 
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             assert(width >= A);
             if(align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
-            __m256i tailMask = SetMask<uchar>(0, A - width + alignedWidth, 0xFF);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
 
             __m256i _value = _mm256_set1_epi8(value);
             __m256i _sum = _mm256_setzero_si256();
@@ -204,8 +204,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
                 ConditionalSquareSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
@@ -213,8 +213,8 @@ namespace Simd
                 ConditionalSquareSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
         }
 
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {
@@ -236,7 +236,7 @@ namespace Simd
         }
 
         template <bool align>
-        SIMD_INLINE __m256i SquaredDifference(const uchar * src, ptrdiff_t step, __m256i mask)
+        SIMD_INLINE __m256i SquaredDifference(const uint8_t * src, ptrdiff_t step, __m256i mask)
         {
             const __m256i a = _mm256_and_si256(Load<align>((__m256i*)(src - step)), mask);
             const __m256i b = _mm256_and_si256(Load<align>((__m256i*)(src + step)), mask);
@@ -246,8 +246,8 @@ namespace Simd
         }
 
         template <bool align, SimdCompareType compareType> 
-        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             assert(width >= A + 3 && height >= 3);
             if(align)
@@ -258,8 +258,8 @@ namespace Simd
             height -= 2;
 
             size_t alignedWidth = Simd::AlignLo(width - 1, A);
-            __m256i noseMask = SetMask<uchar>(0xFF, A - 1, 0);
-            __m256i tailMask = SetMask<uchar>(0, A - width + 1 + alignedWidth, 0xFF);
+            __m256i noseMask = SetMask<uint8_t>(0xFF, A - 1, 0);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + 1 + alignedWidth, 0xFF);
 
             __m256i _value = _mm256_set1_epi8(value);
             __m256i _sum = _mm256_setzero_si256();
@@ -292,8 +292,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
                 ConditionalSquareGradientSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
@@ -301,8 +301,8 @@ namespace Simd
                 ConditionalSquareGradientSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
         }
 
-        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {

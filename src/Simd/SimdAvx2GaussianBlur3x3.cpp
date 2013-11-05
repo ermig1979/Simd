@@ -30,137 +30,137 @@
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
-		namespace
-		{
-			struct Buffer
-			{
-				Buffer(size_t width)
-				{
-					_p = Allocate(sizeof(ushort)*3*width);
-					src0 = (ushort*)_p;
-					src1 = src0 + width;
-					src2 = src1 + width;
-				}
+    namespace Avx2
+    {
+        namespace
+        {
+            struct Buffer
+            {
+                Buffer(size_t width)
+                {
+                    _p = Allocate(sizeof(uint16_t)*3*width);
+                    src0 = (uint16_t*)_p;
+                    src1 = src0 + width;
+                    src2 = src1 + width;
+                }
 
-				~Buffer()
-				{
-					Free(_p);
-				}
+                ~Buffer()
+                {
+                    Free(_p);
+                }
 
-				ushort * src0;
-				ushort * src1;
-				ushort * src2;
-			private:
-				void * _p;
-			};	
-		}
+                uint16_t * src0;
+                uint16_t * src1;
+                uint16_t * src2;
+            private:
+                void * _p;
+            };	
+        }
 
-		SIMD_INLINE __m256i DivideBy16(__m256i value)
-		{
-			return _mm256_srli_epi16(_mm256_add_epi16(value, K16_0008), 4);
-		}
+        SIMD_INLINE __m256i DivideBy16(__m256i value)
+        {
+            return _mm256_srli_epi16(_mm256_add_epi16(value, K16_0008), 4);
+        }
 
-		SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)
-		{
-			return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
-		}
+        SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)
+        {
+            return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
+        }
 
-		template<bool align> SIMD_INLINE void BlurCol(__m256i a[3], ushort * b)
-		{
-			Store<align>((__m256i*)(b + 0), BinomialSum16(_mm256_unpacklo_epi8(a[0], K_ZERO), 
-				_mm256_unpacklo_epi8(a[1], K_ZERO), _mm256_unpacklo_epi8(a[2], K_ZERO)));
-			Store<align>((__m256i*)(b + HA), BinomialSum16(_mm256_unpackhi_epi8(a[0], K_ZERO), 
-				_mm256_unpackhi_epi8(a[1], K_ZERO), _mm256_unpackhi_epi8(a[2], K_ZERO)));
-		}
+        template<bool align> SIMD_INLINE void BlurCol(__m256i a[3], uint16_t * b)
+        {
+            Store<align>((__m256i*)(b + 0), BinomialSum16(_mm256_unpacklo_epi8(a[0], K_ZERO), 
+                _mm256_unpacklo_epi8(a[1], K_ZERO), _mm256_unpacklo_epi8(a[2], K_ZERO)));
+            Store<align>((__m256i*)(b + HA), BinomialSum16(_mm256_unpackhi_epi8(a[0], K_ZERO), 
+                _mm256_unpackhi_epi8(a[1], K_ZERO), _mm256_unpackhi_epi8(a[2], K_ZERO)));
+        }
 
-		template<bool align> SIMD_INLINE __m256i BlurRow16(const Buffer & buffer, size_t offset)
-		{
-			return DivideBy16(BinomialSum16(
-				Load<align>((__m256i*)(buffer.src0 + offset)), 
-				Load<align>((__m256i*)(buffer.src1 + offset)),
-				Load<align>((__m256i*)(buffer.src2 + offset))));
-		}
+        template<bool align> SIMD_INLINE __m256i BlurRow16(const Buffer & buffer, size_t offset)
+        {
+            return DivideBy16(BinomialSum16(
+                Load<align>((__m256i*)(buffer.src0 + offset)), 
+                Load<align>((__m256i*)(buffer.src1 + offset)),
+                Load<align>((__m256i*)(buffer.src2 + offset))));
+        }
 
-		template<bool align> SIMD_INLINE __m256i BlurRow(const Buffer & buffer, size_t offset)
-		{
-			return _mm256_packus_epi16(BlurRow16<align>(buffer, offset), BlurRow16<align>(buffer, offset + HA));
-		}
+        template<bool align> SIMD_INLINE __m256i BlurRow(const Buffer & buffer, size_t offset)
+        {
+            return _mm256_packus_epi16(BlurRow16<align>(buffer, offset), BlurRow16<align>(buffer, offset + HA));
+        }
 
-		template <bool align, size_t step> void GaussianBlur3x3(
-			const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
-		{
-			assert(step*width >= A);
-			if(align)
-				assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
+        template <bool align, size_t step> void GaussianBlur3x3(
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(step*width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
 
-			__m256i a[3];
+            __m256i a[3];
 
-			size_t size = step*width;
-			size_t bodySize = Simd::AlignHi(size, A) - A;
+            size_t size = step*width;
+            size_t bodySize = Simd::AlignHi(size, A) - A;
 
-			Buffer buffer(Simd::AlignHi(size, A));
+            Buffer buffer(Simd::AlignHi(size, A));
 
-			LoadNose3<align, step>(src + 0, a);
-			BlurCol<true>(a, buffer.src0 + 0);
-			for(size_t col = A; col < bodySize; col += A)
-			{
-				LoadBody3<align, step>(src + col, a);
-				BlurCol<true>(a, buffer.src0 + col);
-			}
-			LoadTail3<align, step>(src + size - A, a);
-			BlurCol<align>(a, buffer.src0 + size - A);
+            LoadNose3<align, step>(src + 0, a);
+            BlurCol<true>(a, buffer.src0 + 0);
+            for(size_t col = A; col < bodySize; col += A)
+            {
+                LoadBody3<align, step>(src + col, a);
+                BlurCol<true>(a, buffer.src0 + col);
+            }
+            LoadTail3<align, step>(src + size - A, a);
+            BlurCol<align>(a, buffer.src0 + size - A);
 
-			memcpy(buffer.src1, buffer.src0, sizeof(ushort)*size);
+            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*size);
 
-			for(size_t row = 0; row < height; ++row, dst += dstStride)
-			{
-				const uchar *src2 = src + srcStride*(row + 1);
-				if(row >= height - 2)
-					src2 = src + srcStride*(height - 1);
+            for(size_t row = 0; row < height; ++row, dst += dstStride)
+            {
+                const uint8_t *src2 = src + srcStride*(row + 1);
+                if(row >= height - 2)
+                    src2 = src + srcStride*(height - 1);
 
-				LoadNose3<align, step>(src2 + 0, a);
-				BlurCol<true>(a, buffer.src2 + 0);
-				for(size_t col = A; col < bodySize; col += A)
-				{
-					LoadBody3<align, step>(src2 + col, a);
-					BlurCol<true>(a, buffer.src2 + col);
-				}
-				LoadTail3<align, step>(src2 + size - A, a);
-				BlurCol<align>(a, buffer.src2 + size - A);
+                LoadNose3<align, step>(src2 + 0, a);
+                BlurCol<true>(a, buffer.src2 + 0);
+                for(size_t col = A; col < bodySize; col += A)
+                {
+                    LoadBody3<align, step>(src2 + col, a);
+                    BlurCol<true>(a, buffer.src2 + col);
+                }
+                LoadTail3<align, step>(src2 + size - A, a);
+                BlurCol<align>(a, buffer.src2 + size - A);
 
-				for(size_t col = 0; col < bodySize; col += A)
-					Store<align>((__m256i*)(dst + col), BlurRow<true>(buffer, col));
-				Store<align>((__m256i*)(dst + size - A), BlurRow<align>(buffer, size - A));
+                for(size_t col = 0; col < bodySize; col += A)
+                    Store<align>((__m256i*)(dst + col), BlurRow<true>(buffer, col));
+                Store<align>((__m256i*)(dst + size - A), BlurRow<align>(buffer, size - A));
 
-				Swap(buffer.src0, buffer.src2);
-				Swap(buffer.src0, buffer.src1);
-			}
-		}
+                Swap(buffer.src0, buffer.src2);
+                Swap(buffer.src0, buffer.src1);
+            }
+        }
 
-		template <bool align> void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride)
-		{
-			assert(channelCount > 0 && channelCount <= 4);
+        template <bool align> void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
+        {
+            assert(channelCount > 0 && channelCount <= 4);
 
-			switch(channelCount)
-			{
-			case 1: GaussianBlur3x3<align, 1>(src, srcStride, width, height, dst, dstStride); break;
-			case 2: GaussianBlur3x3<align, 2>(src, srcStride, width, height, dst, dstStride); break;
-			case 3: GaussianBlur3x3<align, 3>(src, srcStride, width, height, dst, dstStride); break;
-			case 4: GaussianBlur3x3<align, 4>(src, srcStride, width, height, dst, dstStride); break;
-			}
-		}
+            switch(channelCount)
+            {
+            case 1: GaussianBlur3x3<align, 1>(src, srcStride, width, height, dst, dstStride); break;
+            case 2: GaussianBlur3x3<align, 2>(src, srcStride, width, height, dst, dstStride); break;
+            case 3: GaussianBlur3x3<align, 3>(src, srcStride, width, height, dst, dstStride); break;
+            case 4: GaussianBlur3x3<align, 4>(src, srcStride, width, height, dst, dstStride); break;
+            }
+        }
 
-		void GaussianBlur3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-			size_t channelCount, uchar * dst, size_t dstStride)
-		{
-			if(Aligned(src) && Aligned(srcStride) && Aligned(channelCount*width) && Aligned(dst) && Aligned(dstStride))
-				GaussianBlur3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
-			else
-				GaussianBlur3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-		}
-	}
+        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(channelCount*width) && Aligned(dst) && Aligned(dstStride))
+                GaussianBlur3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
+            else
+                GaussianBlur3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+        }
+    }
 #endif// SIMD_AVX2_ENABLE
 }

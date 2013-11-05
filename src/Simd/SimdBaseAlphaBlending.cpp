@@ -33,27 +33,27 @@ namespace Simd
             return DivideBy255(src*alpha + dst*(0xFF - alpha));
         }
 
-        template <size_t channelCount> void AlphaBlending(const uchar *src, int alpha, uchar *dst);
+        template <size_t channelCount> void AlphaBlending(const uint8_t *src, int alpha, uint8_t *dst);
 
-        template <> SIMD_INLINE void AlphaBlending<1>(const uchar *src, int alpha, uchar *dst)
+        template <> SIMD_INLINE void AlphaBlending<1>(const uint8_t *src, int alpha, uint8_t *dst)
         {
             dst[0] = AlphaBlending(src[0], dst[0], alpha);
         }
 
-        template <> SIMD_INLINE void AlphaBlending<2>(const uchar *src, int alpha, uchar *dst)
+        template <> SIMD_INLINE void AlphaBlending<2>(const uint8_t *src, int alpha, uint8_t *dst)
         {
             dst[0] = AlphaBlending(src[0], dst[0], alpha);
             dst[1] = AlphaBlending(src[1], dst[1], alpha);
         }
 
-        template <> SIMD_INLINE void AlphaBlending<3>(const uchar *src, int alpha, uchar *dst)
+        template <> SIMD_INLINE void AlphaBlending<3>(const uint8_t *src, int alpha, uint8_t *dst)
         {
             dst[0] = AlphaBlending(src[0], dst[0], alpha);
             dst[1] = AlphaBlending(src[1], dst[1], alpha);
             dst[2] = AlphaBlending(src[2], dst[2], alpha);
         }
 
-        template <> SIMD_INLINE void AlphaBlending<4>(const uchar *src, int alpha, uchar *dst)
+        template <> SIMD_INLINE void AlphaBlending<4>(const uint8_t *src, int alpha, uint8_t *dst)
         {
             dst[0] = AlphaBlending(src[0], dst[0], alpha);
             dst[1] = AlphaBlending(src[1], dst[1], alpha);
@@ -61,8 +61,8 @@ namespace Simd
             dst[3] = AlphaBlending(src[3], dst[3], alpha);
         }
 
-        template <size_t channelCount> void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, 
-            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+        template <size_t channelCount> void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
@@ -74,8 +74,8 @@ namespace Simd
             }
         }
 
-        void AlphaBlending(const uchar *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-            const uchar *alpha, size_t alphaStride, uchar *dst, size_t dstStride)
+        void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
             assert(channelCount >= 1 && channelCount <= 4);
 

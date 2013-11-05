@@ -30,7 +30,7 @@ namespace Simd
 	namespace Base
 	{
         template <SimdCompareType compareType> 
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, uchar value, uint * count)
+        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             *count = 0;
             for(size_t row = 0; row < height; ++row)
@@ -44,8 +44,8 @@ namespace Simd
             }
         }
 
-        void ConditionalCount(const uchar * src, size_t stride, size_t width, size_t height, 
-            uchar value, SimdCompareType compareType, uint * count)
+        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t value, SimdCompareType compareType, uint32_t * count)
         {
             switch(compareType)
             {
@@ -67,13 +67,13 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                uint rowSum = 0;
+                uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
                     if(Compare<compareType>(mask[col], value))
@@ -85,8 +85,8 @@ namespace Simd
             }
         }
 
-        void ConditionalSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {
@@ -108,13 +108,13 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                uint rowSum = 0;
+                uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
                     if(Compare<compareType>(mask[col], value))
@@ -126,8 +126,8 @@ namespace Simd
             }
         }
 
-        void ConditionalSquareSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {
@@ -149,8 +149,8 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, uint64_t * sum)
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
             src += srcStride + 1;
             mask += maskStride + 1;
@@ -160,7 +160,7 @@ namespace Simd
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                uint rowSum = 0;
+                uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
                     if(Compare<compareType>(mask[col], value))
@@ -175,8 +175,8 @@ namespace Simd
             }
         }
 
-        void ConditionalSquareGradientSum(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            const uchar * mask, size_t maskStride, uchar value, SimdCompareType compareType, uint64_t * sum)
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
         {
             switch(compareType)
             {

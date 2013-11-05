@@ -39,7 +39,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
-    <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
     <ClInclude Include="..\..\src\Simd\SimdUtils.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.h" />

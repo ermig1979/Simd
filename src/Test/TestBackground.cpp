@@ -31,8 +31,8 @@ namespace Test
 	{
 		struct Func1
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				uchar * lo, size_t loStride, uchar * hi, size_t hiStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				 uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
 			FuncPtr func;
 			std::string description;
@@ -83,9 +83,9 @@ namespace Test
 	{
 		struct Func2
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				const uchar * loValue, size_t loValueStride, const uchar * hiValue, size_t hiValueStride,
-				uchar * loCount, size_t loCountStride, uchar * hiCount, size_t hiCountStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+				 uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
 			FuncPtr func;
 			std::string description;
@@ -143,9 +143,9 @@ namespace Test
 	{
 		struct Func3
 		{
-			typedef void (*FuncPtr)(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
-				uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
-				uchar * hiValue, size_t hiValueStride, uchar threshold);
+			typedef void (*FuncPtr)(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+				 uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+				 uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
 			FuncPtr func;
 			std::string description;
@@ -153,7 +153,7 @@ namespace Test
 			Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
 			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
-				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uchar threshold) const
+				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uint8_t threshold) const
 			{
 				Simd::Copy(loCountSrc, loCountDst);
 				Simd::Copy(loValueSrc, loValueDst);
@@ -210,9 +210,9 @@ namespace Test
 	{
 		struct Func4
 		{
-			typedef void (*FuncPtr)(uchar * loCount, size_t loCountStride, size_t width, size_t height, 
-				uchar * loValue, size_t loValueStride, uchar * hiCount, size_t hiCountStride, 
-				uchar * hiValue, size_t hiValueStride, uchar threshold, const uchar * mask, size_t maskStride);
+			typedef void (*FuncPtr)(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+				 uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+				 uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
 			std::string description;
@@ -220,7 +220,7 @@ namespace Test
 			Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
 			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
-				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uchar threshold, const View & mask) const
+				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uint8_t threshold, const View & mask) const
 			{
 				Simd::Copy(loCountSrc, loCountDst);
 				Simd::Copy(loValueSrc, loValueDst);
@@ -279,8 +279,8 @@ namespace Test
 	{
 		struct Func5
 		{
-			typedef void (*FuncPtr)(const uchar * value, size_t valueStride, size_t width, size_t height,
-				uchar * lo, size_t loStride, uchar * hi, size_t hiStride, const uchar * mask, size_t maskStride);
+			typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+				 uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
 			std::string description;
@@ -334,15 +334,15 @@ namespace Test
 	{
 		struct Func6
 		{
-			typedef void (*FuncPtr)(const uchar * src, size_t srcStride, size_t width, size_t height,
-				uchar index, uchar value, uchar * dst, size_t dstStride);
+			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+				 uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
 			std::string description;
 
 			Func6(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uchar index, uchar value, View & dst) const
+			void Call(const View & src, uint8_t index, uint8_t value, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
@@ -358,7 +358,7 @@ namespace Test
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		uchar index = 1 + Random(255);
+		 uint8_t index = 1 + Random(255);
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandomMask(src, index);
 

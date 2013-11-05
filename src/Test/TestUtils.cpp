@@ -40,7 +40,7 @@ namespace Test
         }
     }
 
-	void FillRandomMask(View & view, uchar index)
+	void FillRandomMask(View & view, uint8_t index)
 	{
 		assert(view.data);
 
@@ -66,8 +66,8 @@ namespace Test
         size_t width = colors*a.width;
         for(size_t row = 0; row < a.height; ++row)
         {
-            uchar* pA = a.data + row*a.stride;
-            uchar* pB = b.data + row*b.stride;
+            uint8_t* pA = a.data + row*a.stride;
+            uint8_t* pB = b.data + row*b.stride;
             for(size_t offset = 0; offset < width; ++offset)
             {
                 if(pA[offset] != pB[offset])

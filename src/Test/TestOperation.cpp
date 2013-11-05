@@ -31,8 +31,8 @@ namespace Test
 	{
 		struct FuncO
 		{
-			typedef void (*FuncPtr)(const uchar * a, size_t aStride, const uchar * b, size_t bStride,
-				size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type);
+			typedef void (*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+				size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type);
 
 			FuncPtr func;
 			std::string description;
@@ -48,7 +48,7 @@ namespace Test
 
         struct FuncVP
         {
-            typedef void (*FuncPtr)(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height);
+            typedef void (*FuncPtr)(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
             FuncPtr func;
             std::string description;

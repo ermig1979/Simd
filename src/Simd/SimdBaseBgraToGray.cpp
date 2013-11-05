@@ -32,16 +32,16 @@ namespace Simd
 {
     namespace Base
     {
-        void BgraToGray(const uchar * bgra, size_t width, size_t height, size_t bgraStride, uchar * gray, size_t grayStride)
+        void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride)
         {
             for(size_t row = 0; row < height; ++row)
             {
-				const uchar * pBgra = bgra + row*bgraStride;
-				uchar * pGray = gray + row*grayStride;
-				for(const uchar *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgra += 4)
-				{
-					*pGray = BgrToGray(pBgra[0], pBgra[1], pBgra[2]);
-				}
+                const uint8_t * pBgra = bgra + row*bgraStride;
+                uint8_t * pGray = gray + row*grayStride;
+                for(const uint8_t *pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pBgra += 4)
+                {
+                    *pGray = BgrToGray(pBgra[0], pBgra[1], pBgra[2]);
+                }
             }
         }
     }

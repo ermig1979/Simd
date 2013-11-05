@@ -33,24 +33,24 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-		template <bool compensation> SIMD_INLINE __m128i DivideBy16(__m128i value);
+        template <bool compensation> SIMD_INLINE __m128i DivideBy16(__m128i value);
 
-		template <> SIMD_INLINE __m128i DivideBy16<true>(__m128i value)
-		{
-			return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
-		}
+        template <> SIMD_INLINE __m128i DivideBy16<true>(__m128i value)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
+        }
 
-		template <> SIMD_INLINE __m128i DivideBy16<false>(__m128i value)
-		{
-			return _mm_srli_epi16(value, 4);
-		}
+        template <> SIMD_INLINE __m128i DivideBy16<false>(__m128i value)
+        {
+            return _mm_srli_epi16(value, 4);
+        }
 
         SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c)
         {
             return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
         }
 
-        template<bool align> SIMD_INLINE __m128i ReduceColNose(const uchar * p) 
+        template<bool align> SIMD_INLINE __m128i ReduceColNose(const uint8_t * p) 
         {
             const __m128i t = Load<align>((__m128i*)p);
             return BinomialSum16(
@@ -59,7 +59,7 @@ namespace Simd
                 _mm_and_si128(_mm_srli_si128(t, 1), K16_00FF));
         }
 
-        template<bool align> SIMD_INLINE __m128i ReduceColBody(const uchar * p) 
+        template<bool align> SIMD_INLINE __m128i ReduceColBody(const uint8_t * p) 
         {
             const __m128i t = Load<align>((__m128i*)p);
             return BinomialSum16(
@@ -72,30 +72,30 @@ namespace Simd
         {
             return _mm_packus_epi16(DivideBy16<compensation>(BinomialSum16(r0, r1, r2)), K_ZERO);
         }
-        
+
         template<bool align, bool compensation> void ReduceGray3x3(
-            const uchar* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uchar* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)	
+            const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)	
         {
             assert(srcWidth >= A && (srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
-			if(align)
-				assert(Aligned(src) && Aligned(srcStride));
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride));
 
             size_t lastOddCol = srcWidth - AlignLo(srcWidth, 2);
             size_t bodyWidth = AlignLo(srcWidth, A);
             for(size_t row = 0; row < srcHeight; row += 2, dst += dstStride, src += 2*srcStride)
             {
-                const uchar * s1 = src;
-                const uchar * s0 = s1 - (row ? srcStride : 0);
-                const uchar * s2 = s1 + (row != srcHeight - 1 ? srcStride : 0);
+                const uint8_t * s1 = src;
+                const uint8_t * s0 = s1 - (row ? srcStride : 0);
+                const uint8_t * s2 = s1 + (row != srcHeight - 1 ? srcStride : 0);
 
                 _mm_storel_epi64((__m128i*)dst, ReduceRow<compensation>(ReduceColNose<align>(s0), 
                     ReduceColNose<align>(s1), ReduceColNose<align>(s2)));
 
                 for(size_t srcCol = A, dstCol = HA; srcCol < bodyWidth; srcCol += A, dstCol += HA)
                     _mm_storel_epi64((__m128i*)(dst + dstCol), ReduceRow<compensation>(ReduceColBody<align>(s0 + srcCol), 
-                        ReduceColBody<align>(s1 + srcCol), ReduceColBody<align>(s2 + srcCol)));
-                
+                    ReduceColBody<align>(s1 + srcCol), ReduceColBody<align>(s2 + srcCol)));
+
                 if(bodyWidth != srcWidth)
                 {
                     size_t srcCol = srcWidth - A - lastOddCol;
@@ -108,24 +108,24 @@ namespace Simd
             }
         }
 
-		template<bool align> void ReduceGray3x3(
-			const uchar* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uchar* dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)	
-		{
-			if(compensation)
-				ReduceGray3x3<align, true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				ReduceGray3x3<align, false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
+        template<bool align> void ReduceGray3x3(
+            const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)	
+        {
+            if(compensation)
+                ReduceGray3x3<align, true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            else
+                ReduceGray3x3<align, false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        }
 
-		void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
-		{
-			if(Aligned(src) && Aligned(srcStride))
-				ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-			else
-				ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
-		}
+        void ReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+        {
+            if(Aligned(src) && Aligned(srcStride))
+                ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+            else
+                ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }

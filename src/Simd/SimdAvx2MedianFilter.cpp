@@ -32,21 +32,21 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb3x3(const uchar* y[3], size_t offset, __m256i a[5])
+        template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb3x3(const uint8_t* y[3], size_t offset, __m256i a[5])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadNose3<align, step>(y[1] + offset, a + 1);
             a[4] = Load<align>((__m256i*)(y[2] + offset));
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodyRhomb3x3(const uchar* y[3], size_t offset, __m256i a[5])
+        template <bool align, size_t step> SIMD_INLINE void LoadBodyRhomb3x3(const uint8_t* y[3], size_t offset, __m256i a[5])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadBody3<align, step>(y[1] + offset, a + 1);
             a[4] = Load<align>((__m256i*)(y[2] + offset));
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailRhomb3x3(const uchar* y[3], size_t offset, __m256i a[5])
+        template <bool align, size_t step> SIMD_INLINE void LoadTailRhomb3x3(const uint8_t* y[3], size_t offset, __m256i a[5])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadTail3<align, step>(y[1] + offset, a + 1);
@@ -62,11 +62,11 @@ namespace Simd
         }
 
         template <bool align, size_t step> void MedianFilterRhomb3x3(
-            const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*width >= A);
 
-            const uchar * y[3];
+            const uint8_t * y[3];
             __m256i a[5];
 
             size_t size = step*width;
@@ -100,8 +100,8 @@ namespace Simd
             }
         }
 
-        template <bool align> void MedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        template <bool align> void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
@@ -114,8 +114,8 @@ namespace Simd
             }
         }
 
-        void MedianFilterRhomb3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
                 MedianFilterRhomb3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -123,21 +123,21 @@ namespace Simd
                 MedianFilterRhomb3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare3x3(const uchar* y[3], size_t offset, __m256i a[9])
+        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
             LoadNose3<align, step>(y[0] + offset, a + 0);
             LoadNose3<align, step>(y[1] + offset, a + 3);
             LoadNose3<align, step>(y[2] + offset, a + 6);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare3x3(const uchar* y[3], size_t offset, __m256i a[9])
+        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
             LoadBody3<align, step>(y[0] + offset, a + 0);
             LoadBody3<align, step>(y[1] + offset, a + 3);
             LoadBody3<align, step>(y[2] + offset, a + 6);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare3x3(const uchar* y[3], size_t offset, __m256i a[9])
+        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare3x3(const uint8_t* y[3], size_t offset, __m256i a[9])
         {
             LoadTail3<align, step>(y[0] + offset, a + 0);
             LoadTail3<align, step>(y[1] + offset, a + 3);
@@ -156,11 +156,11 @@ namespace Simd
         }
 
         template <bool align, size_t step> void MedianFilterSquare3x3(
-            const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*width >= A);
 
-            const uchar * y[3];
+            const uint8_t * y[3];
             __m256i a[9];
 
             size_t size = step*width;
@@ -194,8 +194,8 @@ namespace Simd
             }
         }
 
-        template <bool align> void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        template <bool align> void MedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
@@ -208,8 +208,8 @@ namespace Simd
             }
         }
 
-        void MedianFilterSquare3x3(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
                 MedianFilterSquare3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -217,7 +217,7 @@ namespace Simd
                 MedianFilterSquare3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb5x5(const uchar* y[5], size_t offset, __m256i a[13])
+        template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb5x5(const uint8_t* y[5], size_t offset, __m256i a[13])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadNose3<align, step>(y[1] + offset, a + 1);
@@ -226,7 +226,7 @@ namespace Simd
             a[12] = Load<align>((__m256i*)(y[4] + offset));
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodyRhomb5x5(const uchar* y[5], size_t offset, __m256i a[13])
+        template <bool align, size_t step> SIMD_INLINE void LoadBodyRhomb5x5(const uint8_t* y[5], size_t offset, __m256i a[13])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadBody3<align, step>(y[1] + offset, a + 1);
@@ -235,7 +235,7 @@ namespace Simd
             a[12] = Load<align>((__m256i*)(y[4] + offset));
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailRhomb5x5(const uchar* y[5], size_t offset, __m256i a[13])
+        template <bool align, size_t step> SIMD_INLINE void LoadTailRhomb5x5(const uint8_t* y[5], size_t offset, __m256i a[13])
         {
             a[0] = Load<align>((__m256i*)(y[0] + offset));
             LoadTail3<align, step>(y[1] + offset, a + 1);
@@ -264,11 +264,11 @@ namespace Simd
         }
 
         template <bool align, size_t step> void MedianFilterRhomb5x5(
-            const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*width >= A);
 
-            const uchar * y[5];
+            const uint8_t * y[5];
             __m256i a[13];
 
             size_t size = step*width;
@@ -312,8 +312,8 @@ namespace Simd
             }
         }
 
-        template <bool align> void MedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        template <bool align> void MedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
@@ -326,8 +326,8 @@ namespace Simd
             }
         }
 
-        void MedianFilterRhomb5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
                 MedianFilterRhomb5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);
@@ -335,7 +335,7 @@ namespace Simd
                 MedianFilterRhomb5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare5x5(const uchar* y[5], size_t offset, __m256i a[25])
+        template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
             LoadNose5<align, step>(y[0] + offset, a + 0 );
             LoadNose5<align, step>(y[1] + offset, a + 5 );
@@ -344,7 +344,7 @@ namespace Simd
             LoadNose5<align, step>(y[4] + offset, a + 20);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare5x5(const uchar* y[5], size_t offset, __m256i a[25])
+        template <bool align, size_t step> SIMD_INLINE void LoadBodySquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
             LoadBody5<align, step>(y[0] + offset, a + 0 );
             LoadBody5<align, step>(y[1] + offset, a + 5 );
@@ -353,7 +353,7 @@ namespace Simd
             LoadBody5<align, step>(y[4] + offset, a + 20);
         }
 
-        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare5x5(const uchar* y[5], size_t offset, __m256i a[25])
+        template <bool align, size_t step> SIMD_INLINE void LoadTailSquare5x5(const uint8_t* y[5], size_t offset, __m256i a[25])
         {
             LoadTail5<align, step>(y[0] + offset, a + 0 );
             LoadTail5<align, step>(y[1] + offset, a + 5 );
@@ -400,11 +400,11 @@ namespace Simd
         }
 
         template <bool align, size_t step> void MedianFilterSquare5x5(
-            const uchar * src, size_t srcStride, size_t width, size_t height, uchar * dst, size_t dstStride)
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(step*width >= A);
 
-            const uchar * y[5];
+            const uint8_t * y[5];
             __m256i a[25];
 
             size_t size = step*width;
@@ -448,8 +448,8 @@ namespace Simd
             }
         }
 
-        template <bool align> void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        template <bool align> void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             assert(channelCount > 0 && channelCount <= 4);
 
@@ -462,8 +462,8 @@ namespace Simd
             }
         }
 
-        void MedianFilterSquare5x5(const uchar * src, size_t srcStride, size_t width, size_t height, 
-            size_t channelCount, uchar * dst, size_t dstStride)
+        void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcStride) && Aligned(width) && Aligned(dst) && Aligned(dstStride))
                 MedianFilterSquare5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);

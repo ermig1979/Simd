@@ -34,7 +34,7 @@ namespace Simd
 	{
         const int SHIFT = 16;
 
-        SIMD_INLINE uint ShiftedWeightedSquare(int difference, int weight)
+        SIMD_INLINE uint32_t ShiftedWeightedSquare(int difference, int weight)
         {
             return difference*difference*weight >> SHIFT;
         }
@@ -44,9 +44,9 @@ namespace Simd
             return Max(0, Max(value - hi, lo - value));
         }
 
-        void AddFeatureDifference(const uchar * value, size_t valueStride, size_t width, size_t height, 
-            const uchar * lo, size_t loStride, const uchar * hi, size_t hiStride,
-            ushort weight, uchar * difference, size_t differenceStride)
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
+            uint16_t weight, uint8_t * difference, size_t differenceStride)
 		{
             for(size_t row = 0; row < height; ++row)
             {

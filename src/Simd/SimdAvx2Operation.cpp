@@ -55,8 +55,8 @@ namespace Simd
             return _mm256_subs_epu8(a, b);
         }
 
-		template <bool align, SimdOperationType type> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride)
+		template <bool align, SimdOperationType type> void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
 			assert(width*channelCount >= A);
 			if(align)
@@ -84,8 +84,8 @@ namespace Simd
 			}
 		}
 
-		template <bool align> void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
+		template <bool align> void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
 		{
 			switch(type)
 			{
@@ -102,8 +102,8 @@ namespace Simd
 			}
 		}
 
-		void Operation(const uchar * a, size_t aStride, const uchar * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uchar * dst, size_t dstStride, SimdOperationType type)
+		void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
 				Operation<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
@@ -111,7 +111,7 @@ namespace Simd
 				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
 
-        template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uchar * horizontal, uchar * dst)
+        template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uint8_t * horizontal, uint8_t * dst)
         {
             __m256i _horizontal = Load<align>((__m256i*)horizontal);
             __m256i lo = DivideI16By255(_mm256_mullo_epi16(vertical, _mm256_unpacklo_epi8(_horizontal, K_ZERO)));
@@ -119,7 +119,7 @@ namespace Simd
             Store<align>((__m256i*)dst, _mm256_packus_epi16(lo, hi));
         } 
 
-        template <bool align> void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+        template <bool align> void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
             assert(width >= A);
             if(align)
@@ -137,7 +137,7 @@ namespace Simd
             }
         }
 
-        void VectorProduct(const uchar * vertical, const uchar * horizontal, uchar * dst, size_t stride, size_t width, size_t height)
+        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
             if(Aligned(horizontal) && Aligned(dst) && Aligned(stride))
                 VectorProduct<true>(vertical, horizontal, dst, stride, width, height);

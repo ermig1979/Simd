@@ -28,22 +28,22 @@ namespace Simd
 {
     namespace Base
     {
-        template <bool compensation> void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-            uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        template <bool compensation> void ReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight);
 
             for(size_t col = 0; col < srcHeight; col += 2, dst += dstStride)
             {
-                const uchar *src0 = src + srcStride*(col - 1);
-                const uchar *src1 = src0 + srcStride;
-                const uchar *src2 = src1 + srcStride;
+                const uint8_t *src0 = src + srcStride*(col - 1);
+                const uint8_t *src1 = src0 + srcStride;
+                const uint8_t *src2 = src1 + srcStride;
                 if(col == 0)
                     src0 = src1;
                 if(col == srcHeight - 1)
                     src2 = src1;
 
-                uchar *pDst = dst;
+                uint8_t *pDst = dst;
                 size_t row;
 
                 *pDst++ = GaussianBlur3x3<compensation>(src0, src1, src2, 0, 0, 1);
@@ -56,13 +56,13 @@ namespace Simd
             }
         }
 
-		void ReduceGray3x3(const uchar *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-			uchar *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
-		{
-			if(compensation)
-				ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-			else
-				ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-		}
+        void ReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+        {
+            if(compensation)
+                ReduceGray3x3<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+            else
+                ReduceGray3x3<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+        }
     }
 }

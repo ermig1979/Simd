@@ -43,22 +43,22 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void Crc32(size_t & crc, const uchar * p, const uchar * end)
+        SIMD_INLINE void Crc32(size_t & crc, const uint8_t * p, const uint8_t * end)
         {
             while(p < end)
-                crc = _mm_crc32_u8((uint)crc, *p++);
+                crc = _mm_crc32_u8((uint32_t)crc, *p++);
         }
 
         uint32_t Crc32(const void *src, size_t size)
         {
-            uchar * nose = (uchar*)src;
+            uint8_t * nose = (uint8_t*)src;
             size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
             size_t * tail = (size_t*)AlignLo(nose + size, sizeof(size_t));
 
             size_t crc = 0;
-            Crc32(crc, nose, (uchar*)body);
+            Crc32(crc, nose, (uint8_t*)body);
             Crc32(crc, body, tail);
-            Crc32(crc, (uchar*)tail, nose + size);
+            Crc32(crc, (uint8_t*)tail, nose + size);
             return (uint32_t)crc;
         }
     }

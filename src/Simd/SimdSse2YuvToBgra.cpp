@@ -59,14 +59,14 @@ namespace Simd
 				_mm_unpackhi_epi8(v8, K_ZERO), a_0, bgra + 2);
 		}
 
-		template <bool align> SIMD_INLINE void Yuv444ToBgra(const uchar * y, const uchar * u, 
-			const uchar * v, const __m128i & a_0, uchar * bgra)
+		template <bool align> SIMD_INLINE void Yuv444ToBgra(const uint8_t * y, const uint8_t * u, 
+			const uint8_t * v, const __m128i & a_0, uint8_t * bgra)
 		{
 			Yuv8ToBgra<align>(Load<align>((__m128i*)y), Load<align>((__m128i*)u), Load<align>((__m128i*)v), a_0, (__m128i*)bgra);
 		}
 
-		template <bool align> void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		template <bool align> void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert(width >= A);
 			if(align)
@@ -96,15 +96,15 @@ namespace Simd
 			}
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420ToBgra(const uchar * y, const __m128i & u, const __m128i & v, 
-			const __m128i & a_0, uchar * bgra)
+		template <bool align> SIMD_INLINE void Yuv420ToBgra(const uint8_t * y, const __m128i & u, const __m128i & v, 
+			const __m128i & a_0, uint8_t * bgra)
 		{
 			Yuv8ToBgra<align>(Load<align>((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), a_0, (__m128i*)bgra + 0);
 			Yuv8ToBgra<align>(Load<align>((__m128i*)y + 1), _mm_unpackhi_epi8(u, u), _mm_unpackhi_epi8(v, v), a_0, (__m128i*)bgra + 4);
 		}
 
-		template <bool align> void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		template <bool align> void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
 			if(align)
@@ -140,8 +140,8 @@ namespace Simd
 			}
 		}
 
-		void Yuv420ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
@@ -150,8 +150,8 @@ namespace Simd
 				Yuv420ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
 
-		void Yuv444ToBgra(const uchar * y, size_t yStride, const uchar * u, size_t uStride, const uchar * v, size_t vStride, 
-			size_t width, size_t height, uchar * bgra, size_t bgraStride, uchar alpha)
+		void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))

@@ -31,7 +31,7 @@ namespace Test
 	{
 		struct FuncS
 		{
-			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride,
+			typedef void (*FuncPtr)(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
 				size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
@@ -48,15 +48,15 @@ namespace Test
 
 		struct FuncM
 		{
-			typedef void (*FuncPtr)(const uchar *a, size_t aStride, const uchar *b, size_t bStride,
-				const uchar *mask, size_t maskStride, uchar index, size_t width, size_t height, uint64_t * sum);
+			typedef void (*FuncPtr)(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+				const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
 			std::string description;
 
 			FuncM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & a, const View & b, const View & mask, uchar index, uint64_t * sum) const
+			void Call(const View & a, const View & b, const View & mask, uint8_t index, uint64_t * sum) const
 			{
 				TEST_PERFORMANCE_TEST(description + "<m>");
 				func(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, sum);
@@ -110,7 +110,7 @@ namespace Test
 		FillRandom(b);
 
 		View m(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		uchar index = Random(256);
+		 uint8_t index = Random(256);
 		FillRandomMask(m, index);
 
         uint64_t s1[count], s2[count];
