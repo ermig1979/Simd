@@ -82,6 +82,9 @@ namespace Simd
 
         void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride);
 
+        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
+
         void BgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 

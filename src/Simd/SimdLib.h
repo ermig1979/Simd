@@ -138,6 +138,9 @@ extern "C"
 
     SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
+    SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+        const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+
     SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
 
     SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -208,11 +211,6 @@ extern "C"
         size_t step, size_t indent, uint32_t * histogram);
 
     SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
-
-    SIMD_API void SimdInterleaveBgrToBgra(uint8_t *bgra, size_t size, const int32_t *blue, int32_t bluePrecision, bool blueSigned,
-        const int32_t *green, int32_t greenPrecision, bool greenSigned, const int32_t *red, int32_t redPrecision, bool redSigned, uint8_t alpha);
-
-    SIMD_API void SimdInterleaveGrayToBgra(uint8_t *bgra, size_t size, const int32_t *gray, int32_t grayPrecision, bool graySigned, uint8_t alpha);
 
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -293,9 +291,6 @@ extern "C"
 
     SIMD_API void SimdYuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
-
-    SIMD_API void SimdYuvToBgra(uint8_t *bgra, size_t width, size_t height, size_t stride,
-        const int32_t *y, const int32_t *u, const int32_t *v, int32_t dx, int32_t dy, int32_t precision, uint8_t alpha);
 
     SIMD_API void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
