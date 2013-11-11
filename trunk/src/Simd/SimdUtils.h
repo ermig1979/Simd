@@ -514,7 +514,7 @@ namespace Simd
 
     SIMD_INLINE void TextureGetDifferenceSum(const View & src, const View & lo, const View & hi, int64_t & sum)
     {
-        assert(Compatible(src, lo, hi) && src.format == View::Gray8 && sum != NULL);
+        assert(Compatible(src, lo, hi) && src.format == View::Gray8);
 
         SimdTextureGetDifferenceSum(src.data, src.stride, src.width, src.height, lo.data, lo.stride, hi.data, hi.stride, &sum);
     }
