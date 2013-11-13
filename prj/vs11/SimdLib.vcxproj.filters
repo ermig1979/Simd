@@ -369,6 +369,9 @@
     <ClInclude Include="..\..\src\Simd\SimdCompare.h">
       <Filter>Sys</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTypes.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">

@@ -24,7 +24,7 @@
 #ifndef __SimdBase_h__
 #define __SimdBase_h__
 
-#include "Simd/SimdLib.h"
+#include "Simd/SimdTypes.h"
 #include "Simd/SimdDefs.h"
 
 namespace Simd

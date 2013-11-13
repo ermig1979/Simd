@@ -35,6 +35,8 @@ erase %TMP_DIR%\prj\*.ncb /q /s /f
 erase %TMP_DIR%\prj\*.depend /q /s /f
 erase %TMP_DIR%\prj\*.layout /q /s /f
 erase %TMP_DIR%\prj\*.cbTemp /q /s /f
+erase %TMP_DIR%\prj\cmd\*.txt /q /s /f
+::erase %TMP_DIR%\doc\help /q /s /f
 
 %RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%VERSION%.zip %TMP_DIR%
 
