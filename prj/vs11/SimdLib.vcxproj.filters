@@ -298,6 +298,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2BgrToBgra.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">

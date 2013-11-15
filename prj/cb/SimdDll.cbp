@@ -263,6 +263,9 @@
 		<Unit filename="../../src/Simd/SimdBaseHistogram.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseIntegral.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseLbp.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
