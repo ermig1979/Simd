@@ -342,6 +342,21 @@ namespace Simd
         SimdHistogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
+    SIMD_INLINE void IntegralSum(const View & src, View & sum)
+    {
+        assert(src.width + 1 == sum.width && src.height + 1 == sum.height);
+        assert(src.format == View::Gray8 && dst.format == View::Int32);
+
+        SimdIntegralSum(src.data, src.stride, src.width, src.height, sum.data, sum.stride);
+    }
+
+    SIMD_INLINE void LbpEstimate(const View & src, View & dst)
+    {
+        assert(Compatible(src, dst) && src.format == View::Gray8);
+
+        SimdLbpEstimate(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
     SIMD_INLINE void MedianFilterRhomb3x3(const View & src, View & dst)
     {
         assert(Compatible(src, dst) && src.ChannelSize() == 1);

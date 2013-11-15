@@ -172,6 +172,8 @@ extern "C"
 
     SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
+    SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,

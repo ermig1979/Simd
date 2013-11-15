@@ -160,6 +160,8 @@ namespace Simd
 
         void Histogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
+        void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+
         void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 

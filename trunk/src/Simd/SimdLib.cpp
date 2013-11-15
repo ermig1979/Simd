@@ -705,6 +705,11 @@ SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, siz
     Base::Histogram(src, width, height, stride, histogram);
 }
 
+SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride)
+{
+    Base::IntegralSum(src, srcStride, width, height, sum, sumStride);
+}
+
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
