@@ -250,14 +250,14 @@ namespace Simd
                 hiCount, hiCountStride, hiValue, hiValueStride, threshold);
         }
 
-        template <bool align> SIMD_INLINE void BackgroundAdjustRange(uint8_t * loCount, uint8_t * loValue, uint8_t * hiCount, uint8_t * hiValue, 
+        template <bool align> SIMD_INLINE void BackgroundAdjustRangeMasked(uint8_t * loCount, uint8_t * loValue, uint8_t * hiCount, uint8_t * hiValue, 
             const uint8_t * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
         {
             const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
             BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, offset, threshold, _mm_and_si128(_mask, tailMask));
         }
 
-        template <bool align> void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+        template <bool align> void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
              uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
              uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
@@ -275,9 +275,9 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, mask, col, _threshold, K8_01);
+                    BackgroundAdjustRangeMasked<align>(loCount, loValue, hiCount, hiValue, mask, col, _threshold, K8_01);
                 if(alignedWidth != width)
-                    BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, mask, width - A, _threshold, tailMask);
+                    BackgroundAdjustRangeMasked<false>(loCount, loValue, hiCount, hiValue, mask, width - A, _threshold, tailMask);
                 loValue += loValueStride;
                 hiValue += hiValueStride;
                 loCount += loCountStride;
@@ -286,17 +286,17 @@ namespace Simd
             }		
         }
 
-        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
              uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
              uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
             if(	Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
                 Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride) &&
                 Aligned(mask) && Aligned(maskStride))
-                BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                BackgroundAdjustRangeMasked<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
                 hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
             else
-                BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
                 hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
         }
 
@@ -347,14 +347,14 @@ namespace Simd
                 BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
         }
 
-        template <bool align> SIMD_INLINE void BackgroundShiftRange(const uint8_t * value, uint8_t * lo, uint8_t * hi, const uint8_t * mask, 
+        template <bool align> SIMD_INLINE void BackgroundShiftRangeMasked(const uint8_t * value, uint8_t * lo, uint8_t * hi, const uint8_t * mask, 
             size_t offset, __m128i tailMask)
         {
             const __m128i _mask = Load<align>((const __m128i*)(mask + offset));
             BackgroundShiftRange<align>(value, lo, hi, offset, _mm_and_si128(_mask, tailMask));
         }
 
-        template <bool align> void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        template <bool align> void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
              uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
         {
             assert(width >= A);
@@ -371,9 +371,9 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundShiftRange<align>(value, lo, hi, mask, col, K_INV_ZERO);
+                    BackgroundShiftRangeMasked<align>(value, lo, hi, mask, col, K_INV_ZERO);
                 if(alignedWidth != width)
-                    BackgroundShiftRange<false>(value, lo, hi, mask, width - A, tailMask);
+                    BackgroundShiftRangeMasked<false>(value, lo, hi, mask, width - A, tailMask);
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
@@ -381,14 +381,14 @@ namespace Simd
             }
         }
 
-        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
              uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
         {
             if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
                 Aligned(hi) && Aligned(hiStride) &&  Aligned(mask) && Aligned(maskStride))
-                BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+                BackgroundShiftRangeMasked<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
             else
-                BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+                BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
         }
 
         template <bool align> SIMD_INLINE void BackgroundInitMask(const uint8_t * src, uint8_t * dst, const __m128i & index, const __m128i & value)

@@ -214,14 +214,14 @@ namespace Simd
                 backgroundValue, backgroundValueStride, threshold);
         }
 
-        template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, uint8_t * backgroundValue,  
+        template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, uint8_t * backgroundValue,  
             const uint8_t * mask, size_t offset, const __m256i & threshold, const __m256i & tailMask)
         {
             const __m256i _mask = Load<align>((const __m256i*)(mask + offset));
             EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, offset, threshold, _mm256_and_si256(_mask, tailMask));
         }
 
-        template <bool align> void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        template <bool align> void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
             assert(width >= A);
@@ -238,25 +238,25 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, mask, col, _threshold, K8_01);
+                    EdgeBackgroundAdjustRangeMasked<align>(backgroundCount, backgroundValue, mask, col, _threshold, K8_01);
                 if(alignedWidth != width)
-                    EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, mask, width - A, _threshold, tailMask);
+                    EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundValue, mask, width - A, _threshold, tailMask);
                 backgroundValue += backgroundValueStride;
                 backgroundCount += backgroundCountStride;
                 mask += maskStride;
             }		
         }
 
-        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
             if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && 
                 Aligned(backgroundCount) && Aligned(backgroundCountStride) &&
                 Aligned(mask) && Aligned(maskStride))
-                EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, 
+                EdgeBackgroundAdjustRangeMasked<true>(backgroundCount, backgroundCountStride, width, height, 
                 backgroundValue, backgroundValueStride, threshold, mask, maskStride);
             else
-                EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, 
+                EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height, 
                 backgroundValue, backgroundValueStride, threshold, mask, maskStride);
         }
 
@@ -299,14 +299,14 @@ namespace Simd
                 EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
         }
 
-        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uint8_t * value, uint8_t * background, const uint8_t * mask, 
+        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, 
             size_t offset, __m256i tailMask)
         {
             const __m256i _mask = Load<align>((const __m256i*)(mask + offset));
             EdgeBackgroundShiftRange<align>(value, background, offset, _mm256_and_si256(_mask, tailMask));
         }
 
-        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        template <bool align> void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
         {
             assert(width >= A);
@@ -322,23 +322,23 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    EdgeBackgroundShiftRange<align>(value, background, mask, col, K_INV_ZERO);
+                    EdgeBackgroundShiftRangeMasked<align>(value, background, mask, col, K_INV_ZERO);
                 if(alignedWidth != width)
-                    EdgeBackgroundShiftRange<false>(value, background, mask, width - A, tailMask);
+                    EdgeBackgroundShiftRangeMasked<false>(value, background, mask, width - A, tailMask);
                 value += valueStride;
                 background += backgroundStride;
                 mask += maskStride;
             }
         }
 
-        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
         {
             if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && 
                 Aligned(mask) && Aligned(maskStride))
-                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+                EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
             else
-                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+                EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
