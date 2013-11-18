@@ -35,13 +35,13 @@ namespace Simd
         void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             size_t width, size_t height, uint64_t * sum);
 
-        void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+        void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
         void AbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
             size_t width, size_t height, uint64_t * sums);
 
-        void AbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
+        void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
         void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
@@ -67,14 +67,14 @@ namespace Simd
             uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
             uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
             uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
             uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
         void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
         void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -120,13 +120,13 @@ namespace Simd
         void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
-        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
         void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride);
 
-        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF);
@@ -180,7 +180,7 @@ namespace Simd
         void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             size_t width, size_t height, uint64_t * sum);
 
-        void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+        void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 

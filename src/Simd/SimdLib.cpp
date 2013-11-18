@@ -82,15 +82,15 @@ SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::AbsDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Avx2::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Sse2::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
-        Base::AbsDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Base::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 }
 
 SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
@@ -114,15 +114,15 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A + 2)
-        Avx2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+        Avx2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A + 2)
-        Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+        Sse2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
-        Base::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+        Base::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
 }
 
 SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
@@ -252,17 +252,17 @@ SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountS
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Avx2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Sse2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Base::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
         hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 }
 
@@ -287,17 +287,17 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+        Avx2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, 
         mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+        Sse2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, 
         mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, 
+        Base::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, 
         maskStride);
 }
 
@@ -582,17 +582,17 @@ SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, siz
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Avx2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Sse2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Base::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
 }
 
@@ -617,15 +617,15 @@ SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t v
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+        Avx2::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+        Sse2::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+        Base::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
 }
 
 SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)
@@ -937,15 +937,15 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Avx2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Sse2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif//SIMD_SSE2_ENABLE
-        Base::SquaredDifferenceSum(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+        Base::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 }
 
 SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 

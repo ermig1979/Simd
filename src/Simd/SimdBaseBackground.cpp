@@ -137,7 +137,7 @@ namespace Simd
             }
         }
 
-        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
             uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
             uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
@@ -190,7 +190,7 @@ namespace Simd
             }
         }
 
-        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
         {
             for(size_t row = 0; row < height; ++row)

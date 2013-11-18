@@ -102,7 +102,7 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+        void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
             uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
         {
             for(size_t row = 0; row < height; ++row)
@@ -131,7 +131,7 @@ namespace Simd
             }
         }
 
-        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+        void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
         {
             for(size_t row = 0; row < height; ++row)
