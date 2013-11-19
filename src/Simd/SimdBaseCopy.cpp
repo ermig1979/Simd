@@ -41,7 +41,10 @@ namespace Simd
         void CopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
             size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride)
         {
-            if(frameTop)
+            if(frameTop > frameBottom || frameBottom > height || frameLeft > frameRight || frameRight > width)
+                return;
+
+            if(frameTop > 0)
             {
                 size_t srcOffset = 0;
                 size_t dstOffset = 0;
@@ -53,7 +56,7 @@ namespace Simd
                     dstOffset += dstStride;
                 }
             }
-            if(height - frameBottom)
+            if(frameBottom < height)
             {
                 size_t srcOffset = frameBottom*srcStride;
                 size_t dstOffset = frameBottom*dstStride;
@@ -65,7 +68,7 @@ namespace Simd
                     dstOffset += dstStride;
                 }
             }
-            if(frameLeft)
+            if(frameLeft > 0)
             {
                 size_t srcOffset = frameTop*srcStride;
                 size_t dstOffset = frameTop*dstStride;
@@ -77,7 +80,7 @@ namespace Simd
                     dstOffset += dstStride;
                 }
             }
-            if(width - frameRight)
+            if(frameRight < width)
             {
                 size_t srcOffset = frameTop*srcStride + frameRight*pixelSize;
                 size_t dstOffset = frameTop*dstStride + frameRight*pixelSize;
@@ -88,7 +91,7 @@ namespace Simd
                     srcOffset += srcStride;
                     dstOffset += dstStride;
                 }
-            }
+            }            
         }
     }
 }
