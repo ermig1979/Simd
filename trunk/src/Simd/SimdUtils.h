@@ -223,7 +223,8 @@ namespace Simd
 
     SIMD_INLINE void CopyFrame(const View & src, const Rectangle<ptrdiff_t> & frame, View & dst)
     {
-        assert(Compatible(src, dst));
+        assert(Compatible(src, dst) && frame.Width() >= 0 && frame.Height() >= 0);
+        assert(frame.left >= 0 && frame.top >= 0 && frame.right <= ptrdiff_t(src.width) && frame.bottom <= ptrdiff_t(src.height));
 
         SimdCopyFrame(src.data, src.stride, src.width, src.height, src.PixelSize(),
             frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
@@ -345,7 +346,7 @@ namespace Simd
     SIMD_INLINE void IntegralSum(const View & src, View & sum)
     {
         assert(src.width + 1 == sum.width && src.height + 1 == sum.height);
-        assert(src.format == View::Gray8 && dst.format == View::Int32);
+        assert(src.format == View::Gray8 && sum.format == View::Int32);
 
         SimdIntegralSum(src.data, src.stride, src.width, src.height, sum.data, sum.stride);
     }
