@@ -50,6 +50,18 @@ namespace Test
 	std::string ColorDescription(View::Format format);
 
     std::string CompareTypeDescription(SimdCompareType type);
+
+    std::string ExpandToLeft(std::string value, size_t count);
+    std::string ExpandToRight(std::string value, size_t count);
+
+    std::string ToString(double value, size_t iCount, size_t fCount);
 }
+
+#define TEST_CHECK_VALUE(name) \
+    if(name##1 != name##2) \
+    { \
+        std::cout << "Error " << #name << ": (" << name##1  << " != " << name##2 << ")! " << std::endl; \
+        return false; \
+    } 
 
 #endif//__TestUtils_h__

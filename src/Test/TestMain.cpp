@@ -135,8 +135,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(ConditionalSquareGradientSumTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-	std::cout << "Function execution times:" << std::endl;
-	std::cout << Test::PerformanceMeasurerStorage::s_storage.Statistic() << std::endl;
+    std::cout << "Performance report:" << std::endl;
+    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report() << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
 	return 0;
