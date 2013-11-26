@@ -175,4 +175,32 @@ namespace Test
         assert(0);
         return "(Unknown)";
     }
+
+    std::string ExpandToLeft(std::string value, size_t count)
+    {
+        assert(count <= value.size());
+        std::stringstream ss;
+        for(size_t i = value.size(); i < count; i++)
+            ss << " ";
+        ss << value;
+        return ss.str();
+    }
+
+    std::string ExpandToRight(std::string value, size_t count)
+    {
+        assert(count <= value.size());
+        std::stringstream ss;
+        ss << value;
+        for(size_t i = value.size(); i < count; i++)
+            ss << " ";
+        return ss.str();
+    }
+
+    std::string ToString(double value, size_t iCount, size_t fCount)
+    {
+        assert(iCount > 0);
+        std::stringstream ss;
+        ss << std::setprecision(fCount) << std::fixed << value;
+        return ExpandToLeft(ss.str(), iCount + fCount + (fCount > 0 ? 1 : 0));
+    }
 }

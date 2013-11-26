@@ -46,6 +46,7 @@ namespace Test
 
     public:
         PerformanceMeasurer(const std::string & decription = "Unnamed");
+        PerformanceMeasurer(const PerformanceMeasurer & pm);
 
         void Enter();
         void Leave(size_t size = 1);
@@ -91,17 +92,22 @@ namespace Test
 
     class PerformanceMeasurerStorage
     {
-        typedef std::map<std::string, PerformanceMeasurer*> Map;
+        typedef PerformanceMeasurer Pm;
+        typedef std::shared_ptr<Pm> PmPtr;
+        typedef std::map<std::string, PmPtr> Map;
         Map _map;
+        bool _align;
 
     public:
+        static PerformanceMeasurerStorage s_storage;
+
         ~PerformanceMeasurerStorage();
 
-        PerformanceMeasurer* Get(const std::string & name);
+        PerformanceMeasurer* Get(std::string name);
 
-		std::string Statistic() const;
+        static size_t Align(size_t size);
 
-        static PerformanceMeasurerStorage s_storage;
+        std::string Report() const;
     };
 }
 
@@ -133,5 +139,8 @@ namespace Test
 	while(Test::GetTime() - startTime < Test::MINIMAL_TEST_EXECUTION_TIME); \
 }
 #endif
+
+#define TEST_ALIGN(size) \
+    Test::PerformanceMeasurerStorage::Align(size)
 
 #endif//__TestPerformance_h__

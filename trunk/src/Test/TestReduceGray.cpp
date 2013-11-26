@@ -60,7 +60,7 @@ namespace Test
 			std::string description;
 			bool correction;
 
-			Func2(const FuncPtr & f, const std::string & d, bool c) : func(f), description(d + (c ? "<1>" : "<0>")), correction(c) {}
+			Func2(const FuncPtr & f, const std::string & d, bool c) : func(f), description(d + (c ? "[1]" : "[0]")), correction(c) {}
 
 			void Call(const View & src, View & dst) const
 			{

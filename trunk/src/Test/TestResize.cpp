@@ -62,9 +62,9 @@ namespace Test
 		bool result = true;
 
 		std::cout << "Test " << f1.description << " & " << f2.description
-			<< " [" << int(width*k) << ", " << int(height*k) << "] -> [" << width << ", " << height << "]." << std::endl;
+			<< " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "]." << std::endl;
 
-		View s(int(width*k), int(height*k), format, NULL, TEST_ALIGN(k*width));
+		View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
 		FillRandom(s);
 
 		View d1(width, height, format, NULL, TEST_ALIGN(width));
