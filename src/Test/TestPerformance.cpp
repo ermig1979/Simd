@@ -172,7 +172,7 @@ namespace Test
     std::string PerformanceMeasurerStorage::Report() const
     {
         Map filtered;
-        size_t sizeMax = 0;
+        size_t sizeMax = 23;
         for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
             const std::string & desc = it->second->Description();
@@ -213,7 +213,7 @@ namespace Test
             timeMax = std::max(timeMax, it->second->Average());
         }
 
-        const size_t ic = std::max<size_t>(1, (size_t)::log10(timeMax) + 3);
+        const size_t ic = std::max<size_t>(2, (size_t)::log10(std::max(timeMax, 0.001)) + 3);
         const size_t fc = 3;
 
         std::vector<std::string> statistics;

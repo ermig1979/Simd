@@ -117,5 +117,8 @@ namespace Test
     bool ConditionalSumTest();
     bool ConditionalSquareSumTest();
     bool ConditionalSquareGradientSumTest();
+
+    bool SobelDxTest();
+    bool SobelDyTest();
 }
 #endif//__Test_h__

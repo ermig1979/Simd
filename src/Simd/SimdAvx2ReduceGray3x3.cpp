@@ -45,11 +45,6 @@ namespace Simd
             return _mm256_srli_epi16(value, 4);
         }
 
-        SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)
-        {
-            return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
-        }
-
         template<bool align> SIMD_INLINE __m256i ReduceColNose(const uint8_t * p) 
         {
             const __m256i t = Load<align>((__m256i*)p);

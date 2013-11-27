@@ -177,6 +177,9 @@
 		<Unit filename="../../src/Test/TestShift.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestSobel.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestStatistic.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
