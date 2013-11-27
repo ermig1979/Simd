@@ -916,6 +916,36 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }
 
+SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SobelDx(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::SobelDx(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SobelDy(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::SobelDy(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::SobelDy(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
                           size_t width, size_t height, uint64_t * sum)
 {

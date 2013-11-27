@@ -185,6 +185,9 @@
 		<Unit filename="../../src/Simd/SimdAvx2ShiftBilinear.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Sobel.cpp">
+			<Option virtualFolder="Avx2/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2SquaredDifferenceSum.cpp">
 			<Option virtualFolder="Avx2/" />
 		</Unit>
@@ -291,6 +294,9 @@
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseShiftBilinear.cpp">
+			<Option virtualFolder="Base/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseSobel.cpp">
 			<Option virtualFolder="Base/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseSquaredDifferenceSum.cpp">
@@ -438,6 +444,9 @@
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2ShiftBilinear.cpp">
+			<Option virtualFolder="Sse2/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Sobel.cpp">
 			<Option virtualFolder="Sse2/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2SquaredDifferenceSum.cpp">

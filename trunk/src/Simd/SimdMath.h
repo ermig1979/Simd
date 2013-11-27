@@ -248,6 +248,11 @@ namespace Simd
         {
             return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(value, K16_0001), _mm_srli_epi16(value, 8)), 8);
         }
+
+        SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c)
+        {
+            return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -296,6 +301,11 @@ namespace Simd
         SIMD_INLINE __m256i DivideI16By255(__m256i value)
         {
             return _mm256_srli_epi16(_mm256_add_epi16(_mm256_add_epi16(value, K16_0001), _mm256_srli_epi16(value, 8)), 8);
+        }
+
+        SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)
+        {
+            return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
         }
     }
 #endif// SIMD_AVX2_ENABLE

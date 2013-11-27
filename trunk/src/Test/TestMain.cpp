@@ -134,6 +134,9 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(ConditionalSquareSumTest);
     EXECUTE_TEST(ConditionalSquareGradientSumTest);
 
+    EXECUTE_TEST(SobelDxTest);
+    EXECUTE_TEST(SobelDyTest);
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << "Performance report:" << std::endl;
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report() << std::endl;
