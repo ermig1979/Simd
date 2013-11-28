@@ -171,20 +171,9 @@ namespace Test
 
     std::string PerformanceMeasurerStorage::Report() const
     {
-        Map filtered;
-        size_t sizeMax = 23;
-        for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
-        {
-            const std::string & desc = it->second->Description();
-            if(desc[5] == ':' && desc[11] == ':' && desc.find("Crc32") == std::string::npos)
-            {
-                filtered[desc].reset(new Pm(*it->second));
-                sizeMax = std::max(desc.size(), sizeMax);
-            }
-        }
-
         struct Statistic
         {
+            PmPtr simd;
             PmPtr base;
             PmPtr sse2A;
             PmPtr sse2U;
@@ -195,11 +184,16 @@ namespace Test
 
         StatisticMap statistic;
         double timeMax = 0;
-        for(Map::const_iterator it = filtered.begin(); it != filtered.end(); ++it)
+        size_t sizeMax = 8;
+        for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
             const std::string & desc = it->second->Description();
-            std::string name = desc.substr(12, desc.size() - 15);
+            if(desc.find("Crc32") != std::string::npos)
+                continue;
+            std::string name = desc[5] == ':' ? desc.substr(12, desc.size() - 15) : desc.substr(4, desc.size() - 7);
             Statistic & s = statistic[name];
+            if(desc[5] != ':')
+                s.simd.reset(new Pm(*it->second));
             if(desc[6] == 'B')
                 s.base.reset(new Pm(*it->second));
             if(desc[6] == 'S' && desc[desc.size() - 2] == 'a')
@@ -211,6 +205,7 @@ namespace Test
             if(desc[6] == 'A' && desc[desc.size() - 2] == 'u')
                 s.avx2U.reset(new Pm(*it->second));
             timeMax = std::max(timeMax, it->second->Average());
+            sizeMax = std::max(name.size(), sizeMax);
         }
 
         const size_t ic = std::max<size_t>(2, (size_t)::log10(std::max(timeMax, 0.001)) + 3);
@@ -221,15 +216,21 @@ namespace Test
         {
             const Statistic & s = it->second;
             std::stringstream ss;
-            ss << ExpandToRight(it->first, sizeMax - 15) << " | ";
+            ss << ExpandToRight(it->first, sizeMax) << " | ";
+            ss << ToString(s.simd->Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.base->Average()*1000.0, ic, fc) << " ";
-            ss << ToString(s.sse2A->Average()*1000.0, ic, fc) << " ";
-            ss << ToString(s.avx2A->Average()*1000.0, ic, fc) << " | ";
-            ss << ToString(s.base->Average()/s.sse2A->Average(), ic, fc) << " ";
-            ss << ToString(s.base->Average()/s.avx2A->Average(), ic, fc) << " ";
-            ss << ToString(s.sse2A->Average()/s.avx2A->Average(), ic, fc) << " | ";
-            ss << ToString(s.sse2U->Average()/s.sse2A->Average(), ic, fc) << " ";
-            ss << ToString(s.avx2U->Average()/s.avx2A->Average(), ic, fc) << " ";
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+            if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            {
+                ss << ToString(s.sse2A->Average()*1000.0, ic, fc) << " ";
+                ss << ToString(s.avx2A->Average()*1000.0, ic, fc) << " | ";
+                ss << ToString(s.base->Average()/s.sse2A->Average(), ic, fc) << " ";
+                ss << ToString(s.base->Average()/s.avx2A->Average(), ic, fc) << " ";
+                ss << ToString(s.sse2A->Average()/s.avx2A->Average(), ic, fc) << " | ";
+                ss << ToString(s.sse2U->Average()/s.sse2A->Average(), ic, fc) << " ";
+                ss << ToString(s.avx2U->Average()/s.avx2A->Average(), ic, fc) << " ";
+            }
+#endif
             statistics.push_back(ss.str());
         }
 
@@ -237,17 +238,23 @@ namespace Test
 
         std::stringstream report;
         report << std::endl;
-        report << ExpandToRight("Function", sizeMax - 15) << " | ";
+        report << ExpandToRight("Function", sizeMax) << " | ";
+        report << ExpandToLeft("Simd", ic + fc + 1) << " ";
         report << ExpandToLeft("Base", ic + fc + 1) << " ";
-        report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
-        report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
-        report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
-        report << ExpandToLeft("B/A2", ic + fc + 1) << " ";
-        report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
-        report << ExpandToLeft("S2:U/A", ic + fc + 1) << " ";
-        report << ExpandToLeft("A2:U/A", ic + fc + 1) << " ";
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
+            report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
+            report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
+            report << ExpandToLeft("B/A2", ic + fc + 1) << " ";
+            report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
+            report << ExpandToLeft("S2:U/A", ic + fc + 1) << " ";
+            report << ExpandToLeft("A2:U/A", ic + fc + 1) << " ";
+        }
+#endif
         report << std::endl;
-        for(ptrdiff_t i = sizeMax - 15 + 3*2 + 8*(ic + fc + 1 + 1); i >= 0; --i)
+        for(ptrdiff_t i = report.str().size() - 3; i >= 0; --i)
             report << "-";
         report << std::endl;
 

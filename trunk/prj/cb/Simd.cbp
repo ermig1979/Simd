@@ -18,10 +18,10 @@
 				<Option createDefFile="1" />
 				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-march=core2" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
+					<Add option="-march=core-avx2" />
 					<Add option="-DWIN32" />
 					<Add option="-D_DEBUG" />
 					<Add option="-D_LIB" />
@@ -49,10 +49,10 @@
 				<Option createDefFile="1" />
 				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-march=core2" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
+					<Add option="-march=core-avx2" />
 					<Add option="-D_WIN64" />
 					<Add option="-D_DEBUG" />
 					<Add option="-D_LIB" />
@@ -80,9 +80,9 @@
 				<Option createDefFile="1" />
 				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-march=core2" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-W" />
+					<Add option="-march=core-avx2" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_LIB" />
@@ -110,9 +110,9 @@
 				<Option createDefFile="1" />
 				<Option createStaticLib="1" />
 				<Compiler>
-					<Add option="-march=core2" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-W" />
+					<Add option="-march=core-avx2" />
 					<Add option="-D_WIN64" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_LIB" />
@@ -132,9 +132,6 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
-		<Compiler>
-			<Add option="-march=core2" />
-		</Compiler>
 		<Unit filename="../../src/Simd/SimdAvx2.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
