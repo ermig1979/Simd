@@ -18,33 +18,85 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdBaseAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseAbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseAlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseCopy.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseCrc32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleaveUv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseOperation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseShiftBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseStatistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHue.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{423128F2-9D4E-408D-9123-49CE57A32B0A}</ProjectGuid>
+    <ProjectGuid>{1CA0C5B9-6A60-4DF5-96EA-BA70A0BD0CC6}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Test</RootNamespace>
+    <RootNamespace>SimdBase</RootNamespace>
+    <ProjectName>SimdBase</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -67,22 +119,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\..\..\bin\vs11\$(PlatformName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)\..\..\bin\vs11\$(PlatformName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\..\..\bin\vs11\$(PlatformName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)\..\..\bin\vs11\$(PlatformName)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
@@ -92,17 +140,19 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -110,17 +160,18 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -130,12 +181,13 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableEnhancedInstructionSet>NoExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -143,6 +195,7 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -152,12 +205,12 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
@@ -165,61 +218,8 @@
     <BuildLog>
       <Path>$(SolutionDir)\..\..\..\obj\vs11\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
     </BuildLog>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
-    <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
-    <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
-    <ClCompile Include="..\..\src\Test\TestFill.cpp" />
-    <ClCompile Include="..\..\src\Test\TestGrayToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestSobel.cpp" />
-    <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
-    <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
-    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
-    <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
-    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
-    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp" />
-    <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
-    <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
-    <ClCompile Include="..\..\src\Test\TestMain.cpp" />
-    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
-    <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
-    <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestResize.cpp" />
-    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
-    <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
-    <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
-    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\src\Test\Test.h" />
-    <ClInclude Include="..\..\src\Test\TestConfig.h" />
-    <ClInclude Include="..\..\src\Test\TestPerformance.h" />
-    <ClInclude Include="..\..\src\Test\TestUtils.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="Simd.vcxproj">
-      <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="SimdAvx2.vcxproj">
-      <Project>{9b30a102-f407-44ec-987f-209c7b65c836}</Project>
-    </ProjectReference>
-    <ProjectReference Include="SimdBase.vcxproj">
-      <Project>{1ca0c5b9-6a60-4df5-96ea-ba70a0bd0cc6}</Project>
-    </ProjectReference>
-    <ProjectReference Include="SimdSse2.vcxproj">
-      <Project>{91831958-6ad7-4126-8056-e2dd3e12a887}</Project>
-    </ProjectReference>
-    <ProjectReference Include="SimdSse42.vcxproj">
-      <Project>{ca3044c1-147b-4884-b3fd-15ece7a24337}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
