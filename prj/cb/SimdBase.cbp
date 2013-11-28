@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="SimdBase" />
+		<Option platforms="Windows;" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Option virtualFolders="Sys\;Alg\;" />
+		<Build>
+			<Target title="Debug Win32">
+				<Option platforms="Windows;" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/SimdBase" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/SimdBase" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-DWIN32" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+			</Target>
+			<Target title="Debug x64">
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Debug/SimdBase" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Debug/SimdBase" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-g" />
+					<Add option="-W" />
+					<Add option="-O0" />
+					<Add option="-D_WIN64" />
+					<Add option="-D_DEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+			</Target>
+			<Target title="Release Win32">
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/SimdBase" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/SimdBase" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-DWIN32" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+			</Target>
+			<Target title="Release x64">
+				<Option output="$(ProjectDir)/../../bin/cb/x64/Release/SimdBase" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/x64/Release/SimdBase" />
+				<Option type="2" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-march=core2" />
+					<Add option="-O2" />
+					<Add option="-W" />
+					<Add option="-D_WIN64" />
+					<Add option="-DNDEBUG" />
+					<Add option="-D_LIB" />
+					<Add directory="$(ProjectDir)/../../src" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="$(ProjectDir)/../../src" />
+				</ResourceCompiler>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-march=core2" />
+			<Add option="-DSIMD_STATIC" />
+		</Compiler>
+		<Unit filename="../../src/Simd/SimdBase.h">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAbsDifferenceSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAbsGradientSaturatedSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAddFeatureDifference.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseAlphaBlending.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBackground.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBgrToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBgrToGray.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBgraToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBgraToGray.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBinarization.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseConditional.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseCopy.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseCrc32.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseDeinterleaveUv.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseEdgeBackground.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseFill.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseGaussianBlur3x3.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseGrayToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseHistogram.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseIntegral.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseLbp.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseMedianFilter.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseOperation.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseReduceGray2x2.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseReduceGray3x3.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseReduceGray4x4.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseReduceGray5x5.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseResizeBilinear.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseShiftBilinear.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseSobel.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseSquaredDifferenceSum.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseStatistic.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseStretchGray2x2.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseTexture.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToBgra.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseYuvToHue.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdCompare.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdConfig.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdConst.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdConversion.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdDefs.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMath.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdMemory.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Simd/SimdTypes.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

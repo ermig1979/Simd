@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_workspace_file>
 	<Workspace title="Simd workspace">
-		<Project filename="SimdLib.cbp" />
-		<Project filename="SimdDll.cbp" />
+		<Project filename="SimdBase.cbp" />
+		<Project filename="SimdSse2.cbp" />
+		<Project filename="SimdSse42.cbp" />
+		<Project filename="SimdAvx2.cbp" />
+		<Project filename="Simd.cbp">
+			<Depends filename="SimdBase.cbp" />
+			<Depends filename="SimdSse2.cbp" />
+			<Depends filename="SimdSse42.cbp" />
+			<Depends filename="SimdAvx2.cbp" />
+		</Project>
 		<Project filename="Test.cbp">
-			<Depends filename="SimdLib.cbp" />
-			<Depends filename="SimdDll.cbp" />
+			<Depends filename="SimdBase.cbp" />
+			<Depends filename="SimdSse2.cbp" />
+			<Depends filename="SimdSse42.cbp" />
+			<Depends filename="SimdAvx2.cbp" />
+			<Depends filename="Simd.cbp" />
 		</Project>
 	</Workspace>
 </CodeBlocks_workspace_file>

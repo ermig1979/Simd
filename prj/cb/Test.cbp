@@ -16,6 +16,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-march=core2" />
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
@@ -28,7 +29,11 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\Win32\Debug\libSimdLib.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdBase.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdSse42.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdAvx2.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimd.a" />
 				</Linker>
 			</Target>
 			<Target title="Debug x64">
@@ -39,6 +44,7 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-march=core2" />
+					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
@@ -51,7 +57,11 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\x64\Debug\libSimdLib.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimdBase.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimdSse42.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimdAvx2.a" />
+					<Add library="..\..\bin\cb\x64\Debug\libSimd.a" />
 				</Linker>
 			</Target>
 			<Target title="Release Win32">
@@ -63,6 +73,7 @@
 				<Compiler>
 					<Add option="-march=core2" />
 					<Add option="-O2" />
+					<Add option="-std=c++11" />
 					<Add option="-W" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
@@ -73,7 +84,11 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\Win32\Release\libSimdLib.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdBase.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdSse42.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdAvx2.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimd.a" />
 				</Linker>
 			</Target>
 			<Target title="Release x64">
@@ -85,6 +100,7 @@
 				<Compiler>
 					<Add option="-march=core2" />
 					<Add option="-O2" />
+					<Add option="-std=c++11" />
 					<Add option="-W" />
 					<Add option="-D_WIN64" />
 					<Add option="-DNDEBUG" />
@@ -95,7 +111,11 @@
 					<Add directory="$(ProjectDir)/../../src" />
 				</ResourceCompiler>
 				<Linker>
-					<Add library="..\..\bin\cb\x64\Release\libSimdLib.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimdBase.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimdSse42.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimdAvx2.a" />
+					<Add library="..\..\bin\cb\x64\Release\libSimd.a" />
 				</Linker>
 			</Target>
 		</Build>
