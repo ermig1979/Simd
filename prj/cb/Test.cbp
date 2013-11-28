@@ -15,11 +15,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=core2" />
 					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
+					<Add option="-march=core-avx2" />
 					<Add option="-DWIN32" />
 					<Add option="-D_DEBUG" />
 					<Add option="-D_CONSOLE" />
@@ -43,11 +43,11 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=core2" />
 					<Add option="-std=c++11" />
 					<Add option="-g" />
 					<Add option="-W" />
 					<Add option="-O0" />
+					<Add option="-march=core-avx2" />
 					<Add option="-D_WIN64" />
 					<Add option="-D_DEBUG" />
 					<Add option="-D_CONSOLE" />
@@ -71,10 +71,10 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=core2" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-std=c++11" />
 					<Add option="-W" />
+					<Add option="-march=core-avx2" />
 					<Add option="-DWIN32" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
@@ -98,10 +98,10 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
-					<Add option="-march=core2" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-std=c++11" />
 					<Add option="-W" />
+					<Add option="-march=core-avx2" />
 					<Add option="-D_WIN64" />
 					<Add option="-DNDEBUG" />
 					<Add option="-D_CONSOLE" />
@@ -119,9 +119,6 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Compiler>
-			<Add option="-march=core2" />
-		</Compiler>
 		<Unit filename="../../src/Test/Test.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
