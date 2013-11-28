@@ -55,45 +55,42 @@ namespace Test
 		}
 	}
 
-    bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
-		const std::string & description)
+    template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
+        const std::string & description)
     {
-        assert(a.data && b.data && a.height == b.height && a.width == b.width && a.format == b.format);
-        assert(a.format == View::Gray8 || a.format == View::Uv16 || a.format == View::Bgr24 || a.format == View::Bgra32);
-
         int errorCount = 0;
-        size_t colors = Simd::View::PixelSize(a.format);
-        size_t width = colors*a.width;
+        size_t channelCount = a.ChannelCount();
+        size_t width = channelCount*a.width;
         for(size_t row = 0; row < a.height; ++row)
         {
-            uint8_t* pA = a.data + row*a.stride;
-            uint8_t* pB = b.data + row*b.stride;
+            const Channel * pA = (const Channel*)(a.data + row*a.stride);
+            const Channel * pB = (const Channel*)(b.data + row*b.stride);
             for(size_t offset = 0; offset < width; ++offset)
             {
                 if(pA[offset] != pB[offset])
                 {
                     if(differenceMax > 0)
                     {
-                        int difference = Simd::Base::Max(pA[offset], pB[offset]) - Simd::Base::Min(pA[offset], pB[offset]);
+                        Channel difference = Simd::Max(pA[offset], pB[offset]) - Simd::Min(pA[offset], pB[offset]);
                         if(valueCycle > 0)
-                            difference = Simd::Base::Min(difference, valueCycle - difference);
+                            difference = Simd::Min<Channel>(difference, valueCycle - difference);
                         if(difference <= differenceMax)
                             continue;
                     }
                     errorCount++;
                     if(printError)
                     {
-						if(errorCount == 1 && description.length() > 0)
-						{
-							std::cout << "Fail comparison: " << description << std::endl;
-						}
-                        size_t col = offset/colors;
-                        std::cout << "Error at [" << col << "," << row << "] : (" << (int)pA[col*colors];
-                        for(size_t color = 1; color < colors; ++color)
-                            std::cout << "," << (int)pA[col*colors + color]; 
-                        std::cout << ") != (" << (int)pB[col*colors];
-                        for(size_t color = 1; color < colors; ++color)
-                            std::cout << "," << (int)pB[col*colors + color]; 
+                        if(errorCount == 1 && description.length() > 0)
+                        {
+                            std::cout << "Fail comparison: " << description << std::endl;
+                        }
+                        size_t col = offset/channelCount;
+                        std::cout << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];
+                        for(size_t channel = 1; channel < channelCount; ++channel)
+                            std::cout << "," << (int)pA[col*channelCount + channel]; 
+                        std::cout << ") != (" << (int)pB[col*channelCount];
+                        for(size_t channel = 1; channel < channelCount; ++channel)
+                            std::cout << "," << (int)pB[col*channelCount + channel]; 
                         std::cout << ")." << std::endl;
                     }
                     if(errorCount >= errorCountMax)
@@ -106,6 +103,28 @@ namespace Test
             }
         }
         return errorCount == 0;
+    }
+
+    bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
+		const std::string & description)
+    {
+        assert(Simd::Compatible(a, b) && a.format != View::Float && a.format != View::Double);
+
+        switch(a.ChannelSize())
+        {
+        case 1:
+            return Compare<uint8_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        case 2:
+            return Compare<int16_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        case 4:
+            return Compare<int32_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        case 8:
+            return Compare<int64_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        default:
+            assert(0);
+        }
+
+        return false;
     }
 
     template <class T> bool Compare(const T * a, const T * b, size_t size, int differenceMax, bool printError, int errorCountMax)
