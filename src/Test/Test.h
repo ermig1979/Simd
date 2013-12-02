@@ -120,5 +120,7 @@ namespace Test
 
     bool SobelDxTest();
     bool SobelDyTest();
+
+    bool BgraToBgrTest();
 }
 #endif//__Test_h__

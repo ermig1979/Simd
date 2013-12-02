@@ -3,17 +3,20 @@
 	<Workspace title="Simd workspace">
 		<Project filename="SimdBase.cbp" />
 		<Project filename="SimdSse2.cbp" />
+		<Project filename="SimdSsse3.cbp" />
 		<Project filename="SimdSse42.cbp" />
 		<Project filename="SimdAvx2.cbp" />
 		<Project filename="Simd.cbp">
 			<Depends filename="SimdBase.cbp" />
 			<Depends filename="SimdSse2.cbp" />
+			<Depends filename="SimdSsse3.cbp" />
 			<Depends filename="SimdSse42.cbp" />
 			<Depends filename="SimdAvx2.cbp" />
 		</Project>
 		<Project filename="Test.cbp">
 			<Depends filename="SimdBase.cbp" />
 			<Depends filename="SimdSse2.cbp" />
+			<Depends filename="SimdSsse3.cbp" />
 			<Depends filename="SimdSse42.cbp" />
 			<Depends filename="SimdAvx2.cbp" />
 			<Depends filename="Simd.cbp" />

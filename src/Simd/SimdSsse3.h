@@ -21,21 +21,19 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdSsse3_h__
+#define __SimdSsse3_h__
 
-//#define SIMD_SSE2_DEPRECATE
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
 
-//#define SIMD_SSSE3_DEPRECATE
-
-//#define SIMD_SSE42_DEPRECATE
-
-//#define SIMD_AVX_DEPRECATE
-
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_STATIC
-
-#endif//__SimdConfig_h__
+namespace Simd
+{
+#ifdef SIMD_SSSE3_ENABLE
+    namespace Ssse3
+    {
+        void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
+    }
+#endif// SIMD_SSSE3_ENABLE
+}
+#endif//__SimdSsse3_h__

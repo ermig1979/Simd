@@ -218,8 +218,15 @@ namespace Test
     std::string ToString(double value, size_t iCount, size_t fCount)
     {
         assert(iCount > 0);
-        std::stringstream ss;
-        ss << std::setprecision(fCount) << std::fixed << value;
-        return ExpandToLeft(ss.str(), iCount + fCount + (fCount > 0 ? 1 : 0));
+        if(value > 0)
+        {
+            std::stringstream ss;
+            ss << std::setprecision(fCount) << std::fixed << value;
+            return ExpandToLeft(ss.str(), iCount + fCount + (fCount > 0 ? 1 : 0));
+        }
+        else
+        {
+            return ExpandToLeft("", iCount + fCount + 1);
+        }
     }
 }

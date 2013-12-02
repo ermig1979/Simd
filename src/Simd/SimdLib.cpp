@@ -51,6 +51,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
 
@@ -319,7 +320,12 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBgraToBgr(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride)
 {
-    Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+    else
+#endif// SIMD_SSSE3_ENABLE
+        Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
 }
 
 SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)

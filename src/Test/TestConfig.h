@@ -44,6 +44,8 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSsse3.h"
+#include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdUtils.h"
 

@@ -41,6 +41,10 @@
 #define SIMD_SSE2_ENABLE
 #endif
 
+#if !defined(SIMD_SSSE3_DEPRECATE) && _MSC_VER >= 1500
+#define SIMD_SSSE3_ENABLE
+#endif
+
 #if !defined(SIMD_SSE42_DEPRECATE) && _MSC_VER >= 1500
 #define SIMD_SSE42_ENABLE
 #endif
@@ -59,6 +63,10 @@
 
 #if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
 #define SIMD_SSE2_ENABLE
+#endif
+
+#if !defined(SIMD_SSSE3_DEPRECATE) && defined(__SSSE3__)
+#define SIMD_SSSE3_ENABLE
 #endif
 
 #if !defined(SIMD_SSE42_DEPRECATE) && defined(__SSE4_2__)
@@ -81,6 +89,10 @@
 
 #ifdef SIMD_SSE2_ENABLE
 #include <emmintrin.h>
+#endif
+
+#ifdef SIMD_SSSE3_ENABLE
+#include <tmmintrin.h>
 #endif
 
 #ifdef SIMD_SSE42_ENABLE
