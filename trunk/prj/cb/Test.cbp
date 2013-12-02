@@ -31,6 +31,7 @@
 				<Linker>
 					<Add library="..\..\bin\cb\Win32\Debug\libSimdBase.a" />
 					<Add library="..\..\bin\cb\Win32\Debug\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\Win32\Debug\libSimdSsse3.a" />
 					<Add library="..\..\bin\cb\Win32\Debug\libSimdSse42.a" />
 					<Add library="..\..\bin\cb\Win32\Debug\libSimdAvx2.a" />
 					<Add library="..\..\bin\cb\Win32\Debug\libSimd.a" />
@@ -58,6 +59,7 @@
 				<Linker>
 					<Add library="..\..\bin\cb\Win32\Release\libSimdBase.a" />
 					<Add library="..\..\bin\cb\Win32\Release\libSimdSse2.a" />
+					<Add library="..\..\bin\cb\Win32\Release\libSimdSsse3.a" />
 					<Add library="..\..\bin\cb\Win32\Release\libSimdSse42.a" />
 					<Add library="..\..\bin\cb\Win32\Release\libSimdAvx2.a" />
 					<Add library="..\..\bin\cb\Win32\Release\libSimd.a" />
@@ -77,6 +79,9 @@
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBgrToGray.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBgraToBgr.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBgraToGray.cpp">

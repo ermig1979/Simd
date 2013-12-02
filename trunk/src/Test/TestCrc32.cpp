@@ -83,6 +83,13 @@ namespace Test
 
         result = result && Crc32Test(data, FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
 
+#if defined(SIMD_SSE42_ENABLE)
+        if(Simd::Sse42::Enable)
+        {
+            result = result && Crc32Test(data, FUNC(Simd::Sse42::Crc32), FUNC(SimdCrc32));
+        }
+#endif 
+
         return result;
     }
 }

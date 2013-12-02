@@ -167,18 +167,42 @@ namespace Test
     {
         s_storage._align = size%Simd::DEFAULT_MEMORY_ALIGN == 0;
         return s_storage._align ? Simd::DEFAULT_MEMORY_ALIGN : 1;
-    }    
+    }
 
-    std::string PerformanceMeasurerStorage::Report() const
+    static std::string FunctionShortName(const std::string description)
+    {
+        bool isApi = description.find("Simd::") == std::string::npos;
+        if(isApi)
+        {
+            return description.substr(4, description.size() - 7);
+        }
+        else
+        {
+            size_t pos = description.rfind("::");
+            return description.substr(pos + 2, description.size() - pos - 5);
+        }
+    }
+
+    static bool Aligned(const std::string description)
+    {
+        return description[description.size() - 2] == 'a';
+    }
+
+    static double Relation(const PerformanceMeasurer & a, const PerformanceMeasurer & b)
+    {
+        return b.Average() > 0 ? a.Average()/b.Average() : 0;
+    }
+
+    std::string PerformanceMeasurerStorage::Report(bool align, bool sse42) const
     {
         struct Statistic
         {
-            PmPtr simd;
-            PmPtr base;
-            PmPtr sse2A;
-            PmPtr sse2U;
-            PmPtr avx2A;
-            PmPtr avx2U;
+            Pm simd;
+            Pm base;
+            Pm sse42;
+            std::pair<Pm, Pm> sse2;
+            std::pair<Pm, Pm> ssse3;
+            std::pair<Pm, Pm> avx2;
         };
         typedef std::map<std::string, Statistic> StatisticMap;
 
@@ -188,22 +212,35 @@ namespace Test
         for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
             const std::string & desc = it->second->Description();
-            if(desc.find("Crc32") != std::string::npos)
-                continue;
-            std::string name = desc[5] == ':' ? desc.substr(12, desc.size() - 15) : desc.substr(4, desc.size() - 7);
+            std::string name = FunctionShortName(desc);
             Statistic & s = statistic[name];
-            if(desc[5] != ':')
-                s.simd.reset(new Pm(*it->second));
-            if(desc[6] == 'B')
-                s.base.reset(new Pm(*it->second));
-            if(desc[6] == 'S' && desc[desc.size() - 2] == 'a')
-                s.sse2A.reset(new Pm(*it->second));
-            if(desc[6] == 'S' && desc[desc.size() - 2] == 'u')
-                s.sse2U.reset(new Pm(*it->second));
-            if(desc[6] == 'A' && desc[desc.size() - 2] == 'a')
-                s.avx2A.reset(new Pm(*it->second));
-            if(desc[6] == 'A' && desc[desc.size() - 2] == 'u')
-                s.avx2U.reset(new Pm(*it->second));
+            if(desc.find("Simd::") == std::string::npos)
+                s.simd = *it->second;
+            if(desc.find("Simd::Base::") != std::string::npos)
+                s.base = *it->second;
+            if(desc.find("Simd::Sse2::") != std::string::npos)
+            {
+                if(Aligned(desc))
+                    s.sse2.first = *it->second;
+                else
+                    s.sse2.second = *it->second;
+            }
+            if(desc.find("Simd::Ssse3::") != std::string::npos)
+            {
+                if(Aligned(desc))
+                    s.ssse3.first = *it->second;
+                else
+                    s.ssse3.second = *it->second;
+            }
+            if(desc.find("Simd::Sse42::") != std::string::npos)
+                s.sse42 = *it->second;
+            if(desc.find("Simd::Avx2::") != std::string::npos)
+            {
+                if(Aligned(desc))
+                    s.avx2.first = *it->second;
+                else
+                    s.avx2.second = *it->second;
+            }
             timeMax = std::max(timeMax, it->second->Average());
             sizeMax = std::max(name.size(), sizeMax);
         }
@@ -217,20 +254,26 @@ namespace Test
             const Statistic & s = it->second;
             std::stringstream ss;
             ss << ExpandToRight(it->first, sizeMax) << " | ";
-            ss << ToString(s.simd->Average()*1000.0, ic, fc) << " ";
-            ss << ToString(s.base->Average()*1000.0, ic, fc) << " ";
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-            if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+            ss << ToString(s.simd.Average()*1000.0, ic, fc) << " ";
+            ss << ToString(s.base.Average()*1000.0, ic, fc) << " ";
+            ss << ToString(s.sse2.first.Average()*1000.0, ic, fc) << " ";
+            ss << ToString(s.ssse3.first.Average()*1000.0, ic, fc) << " ";
+            if(sse42)
+                ss << ToString(s.sse42.Average()*1000.0, ic, fc) << " ";
+            ss << ToString(s.avx2.first.Average()*1000.0, ic, fc) << " | ";
+            ss << ToString(Relation(s.base, s.sse2.first), ic, fc) << " ";
+            ss << ToString(Relation(s.base, s.ssse3.first), ic, fc) << " ";
+            if(sse42)
+                ss << ToString(Relation(s.base, s.sse42), ic, fc) << " ";
+            ss << ToString(Relation(s.base, s.avx2.first), ic, fc) << " | ";
+            ss << ToString(Relation(s.ssse3.first, s.avx2.first), ic, fc) << " ";
+            ss << ToString(Relation(s.sse2.first, s.avx2.first), ic, fc) << " | ";
+            if(align)
             {
-                ss << ToString(s.sse2A->Average()*1000.0, ic, fc) << " ";
-                ss << ToString(s.avx2A->Average()*1000.0, ic, fc) << " | ";
-                ss << ToString(s.base->Average()/s.sse2A->Average(), ic, fc) << " ";
-                ss << ToString(s.base->Average()/s.avx2A->Average(), ic, fc) << " ";
-                ss << ToString(s.sse2A->Average()/s.avx2A->Average(), ic, fc) << " | ";
-                ss << ToString(s.sse2U->Average()/s.sse2A->Average(), ic, fc) << " ";
-                ss << ToString(s.avx2U->Average()/s.avx2A->Average(), ic, fc) << " ";
+                ss << ToString(Relation(s.sse2.second, s.sse2.first), ic, fc) << " ";
+                ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ic, fc) << " ";
+                ss << ToString(Relation(s.avx2.second, s.avx2.first), ic, fc) << " | ";
             }
-#endif
             statistics.push_back(ss.str());
         }
 
@@ -241,18 +284,25 @@ namespace Test
         report << ExpandToRight("Function", sizeMax) << " | ";
         report << ExpandToLeft("Simd", ic + fc + 1) << " ";
         report << ExpandToLeft("Base", ic + fc + 1) << " ";
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
+        if(sse42)
+            report << ExpandToLeft("Sse42", ic + fc + 1) << " ";
+        report << ExpandToLeft("Ssse3", ic + fc + 1) << " ";
+        report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
+        report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
+        report << ExpandToLeft("B/S3", ic + fc + 1) << " ";
+        if(sse42)
+            report << ExpandToLeft("B/S4", ic + fc + 1) << " ";
+        report << ExpandToLeft("B/A2", ic + fc + 1) << " | ";
+        report << ExpandToLeft("S3/A2", ic + fc + 1) << " ";
+        report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
+        if(align)
         {
-            report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
-            report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
-            report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
-            report << ExpandToLeft("B/A2", ic + fc + 1) << " ";
-            report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
             report << ExpandToLeft("S2:U/A", ic + fc + 1) << " ";
-            report << ExpandToLeft("A2:U/A", ic + fc + 1) << " ";
+            report << ExpandToLeft("S3:U/A", ic + fc + 1) << " ";
+            report << ExpandToLeft("A2:U/A", ic + fc + 1) << " | ";
         }
-#endif
+
         report << std::endl;
         for(ptrdiff_t i = report.str().size() - 3; i >= 0; --i)
             report << "-";

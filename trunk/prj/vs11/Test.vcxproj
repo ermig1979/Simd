@@ -168,6 +168,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
@@ -218,6 +219,9 @@
     </ProjectReference>
     <ProjectReference Include="SimdSse42.vcxproj">
       <Project>{ca3044c1-147b-4884-b3fd-15ece7a24337}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSsse3.vcxproj">
+      <Project>{2ca34bf2-043b-40fd-b58c-ec2e29fac263}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
