@@ -33,12 +33,12 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        SIMD_INLINE __m128i Average16(const __m128i &s00, const __m128i &s01, const __m128i &s10, const __m128i &s11)
+        SIMD_INLINE __m128i Average16(const __m128i & s00, const __m128i & s01, const __m128i & s10, const __m128i & s11)
         {
             return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(s00, s01), _mm_add_epi16(s10, s11)), K16_0002), 2); 
         }
 
-        SIMD_INLINE __m128i Average8(const __m128i &s00, const __m128i &s01, const __m128i &s10, const __m128i &s11)
+        SIMD_INLINE __m128i Average8(const __m128i & s00, const __m128i & s01, const __m128i & s10, const __m128i & s11)
         {
             __m128i lo = Average16(
                 _mm_and_si128(s00, K16_00FF), 
@@ -54,14 +54,14 @@ namespace Simd
         }
 
         template <bool align> void ReduceGray2x2(
-            const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+            const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= DA);
             if(align)
             {
                 assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride) && Aligned(dstWidth));
             }
 
             size_t alignedWidth = AlignLo(srcWidth, DA);
@@ -94,8 +94,8 @@ namespace Simd
             }
         }
 
-        void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
-             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
                 ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);

@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << "Performance report:" << std::endl;
-    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true) << std::endl;
+    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, false) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
 	return 0;

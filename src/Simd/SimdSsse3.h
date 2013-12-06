@@ -33,6 +33,9 @@ namespace Simd
     namespace Ssse3
     {
         void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
+
+        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
     }
 #endif// SIMD_SSSE3_ENABLE
 }

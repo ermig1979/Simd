@@ -107,7 +107,7 @@ namespace Test
 
         static size_t Align(size_t size);
 
-        std::string Report(bool align = false, bool sse42 = false) const;
+        std::string Report(bool align = false, bool ssse3 = false, bool sse42 = false) const;
     };
 }
 

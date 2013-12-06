@@ -103,14 +103,23 @@ namespace Test
 
         result = result && ReduceGrayTest(W, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
 		result = result && ReduceGrayTest(W + 2, H, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
-		result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
+		result = result && ReduceGrayTest(W - 3, H + 3, FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SSSE3_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Ssse3::Enable)
+        {
+            result = result && ReduceGrayTest(W, H, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Ssse3::ReduceGray2x2));
+            result = result && ReduceGrayTest(W + 2, H, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Ssse3::ReduceGray2x2));
+            result = result && ReduceGrayTest(W - 3, H + 3, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Ssse3::ReduceGray2x2));
+        }
+#endif 
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
             result = result && ReduceGrayTest(W, H, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
             result = result && ReduceGrayTest(W + 2, H, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
-            result = result && ReduceGrayTest(W - 1, H + 1, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
+            result = result && ReduceGrayTest(W - 3, H + 3, FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
         }
 #endif 
 
