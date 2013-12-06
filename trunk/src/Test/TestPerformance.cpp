@@ -193,7 +193,7 @@ namespace Test
         return b.Average() > 0 ? a.Average()/b.Average() : 0;
     }
 
-    std::string PerformanceMeasurerStorage::Report(bool align, bool sse42) const
+    std::string PerformanceMeasurerStorage::Report(bool align, bool ssse3, bool sse42) const
     {
         struct Statistic
         {
@@ -257,21 +257,25 @@ namespace Test
             ss << ToString(s.simd.Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.base.Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.sse2.first.Average()*1000.0, ic, fc) << " ";
-            ss << ToString(s.ssse3.first.Average()*1000.0, ic, fc) << " ";
+            if(ssse3)
+                ss << ToString(s.ssse3.first.Average()*1000.0, ic, fc) << " ";
             if(sse42)
                 ss << ToString(s.sse42.Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.avx2.first.Average()*1000.0, ic, fc) << " | ";
             ss << ToString(Relation(s.base, s.sse2.first), ic, fc) << " ";
-            ss << ToString(Relation(s.base, s.ssse3.first), ic, fc) << " ";
+            if(ssse3)
+                ss << ToString(Relation(s.base, s.ssse3.first), ic, fc) << " ";
             if(sse42)
                 ss << ToString(Relation(s.base, s.sse42), ic, fc) << " ";
             ss << ToString(Relation(s.base, s.avx2.first), ic, fc) << " | ";
-            ss << ToString(Relation(s.ssse3.first, s.avx2.first), ic, fc) << " ";
+            if(ssse3)
+                ss << ToString(Relation(s.ssse3.first, s.avx2.first), ic, fc) << " ";
             ss << ToString(Relation(s.sse2.first, s.avx2.first), ic, fc) << " | ";
             if(align)
             {
                 ss << ToString(Relation(s.sse2.second, s.sse2.first), ic, fc) << " ";
-                ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ic, fc) << " ";
+                if(ssse3)
+                    ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ic, fc) << " ";
                 ss << ToString(Relation(s.avx2.second, s.avx2.first), ic, fc) << " | ";
             }
             statistics.push_back(ss.str());
@@ -285,21 +289,25 @@ namespace Test
         report << ExpandToLeft("Simd", ic + fc + 1) << " ";
         report << ExpandToLeft("Base", ic + fc + 1) << " ";
         report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
+        if(ssse3)
+            report << ExpandToLeft("Ssse3", ic + fc + 1) << " ";
         if(sse42)
             report << ExpandToLeft("Sse42", ic + fc + 1) << " ";
-        report << ExpandToLeft("Ssse3", ic + fc + 1) << " ";
         report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
         report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
-        report << ExpandToLeft("B/S3", ic + fc + 1) << " ";
+        if(ssse3)
+            report << ExpandToLeft("B/S3", ic + fc + 1) << " ";
         if(sse42)
             report << ExpandToLeft("B/S4", ic + fc + 1) << " ";
         report << ExpandToLeft("B/A2", ic + fc + 1) << " | ";
-        report << ExpandToLeft("S3/A2", ic + fc + 1) << " ";
+        if(ssse3)
+            report << ExpandToLeft("S3/A2", ic + fc + 1) << " ";
         report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
         if(align)
         {
             report << ExpandToLeft("S2:U/A", ic + fc + 1) << " ";
-            report << ExpandToLeft("S3:U/A", ic + fc + 1) << " ";
+            if(ssse3)
+                report << ExpandToLeft("S3:U/A", ic + fc + 1) << " ";
             report << ExpandToLeft("A2:U/A", ic + fc + 1) << " | ";
         }
 
