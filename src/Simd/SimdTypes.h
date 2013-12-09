@@ -21,6 +21,11 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+
+/** \file SimdTypes.h
+* This file contains description of basic types of Simd Library.
+*/
+
 #ifndef __SimdTypes_h__
 #define __SimdTypes_h__
 

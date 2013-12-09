@@ -38,7 +38,6 @@ erase %TMP_DIR%\prj\*.cbTemp /q /s /f
 
 erase %TMP_DIR%\prj\cmd\*.txt /q /s /f
 erase %TMP_DIR%\prj\cmd\*.lnk /q /s /f
-erase %TMP_DIR%\prj\cmd\BuildHelp.cmd /q /s /f
 erase %TMP_DIR%\doc\help /q /s /f
 rmdir %TMP_DIR%\doc\help /q /s
 
