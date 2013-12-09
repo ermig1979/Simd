@@ -31,6 +31,8 @@ namespace Simd
 {
 	namespace Base
 	{
+        uint32_t Crc32(const void * src, size_t size);
+
 		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum);
 
@@ -117,8 +119,6 @@ namespace Simd
 
         void CopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
             size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
-        uint32_t Crc32(const void * src, size_t size);
 
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 

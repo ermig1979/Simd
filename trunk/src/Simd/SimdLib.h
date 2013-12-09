@@ -21,6 +21,11 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+
+/** \file SimdLib.h
+* This file contains a Simd Library API functions.
+*/
+
 #ifndef __SimdLib_h__
 #define __SimdLib_h__
 
@@ -41,13 +46,56 @@ extern "C"
 {
 #endif//__cplusplus
 
+    /*!
+    * \fn const char * SimdVersion();
+    *
+    * \short Get version of Simd Library.
+    *
+    * \return string with version of Simd Library (major version number, minor version number, release number, number of SVN's commits).
+    */
     SIMD_API const char * SimdVersion();
 
-    SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride,
+    SIMD_API uint32_t SimdCrc32(const void * src, size_t size);
+
+    /*!
+    * \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+    *
+    * \short Get sum of absolute difference of two images. 
+    *
+    * Both images must have the same width and height.
+    *
+    * \param [in] a - a pointer to pixels data of first image.
+    * \param [in] aStride - a row size of first image.
+    * \param [in] b - a pointer to pixels data of second image.
+    * \param [in] bStride - a row size of second image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - the result sum of absolute difference of two images.
+    */
+    SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-        const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
+    /*!
+    * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
+    *
+    * \short Get sum of absolute difference of two images based on mask. 
+    *
+    * Get the absolute difference sum for all points where mask[i] == index.
+    * Both images and mask must have the same width and height.
+    *
+    * \param [in] a - a pointer to pixels data of first image.
+    * \param [in] aStride - a row size of first image.
+    * \param [in] b - a pointer to pixels data of second image.
+    * \param [in] bStride - a row size of second image.
+    * \param [in] mask - a pointer to pixels data of mask image.
+    * \param [in] maskStride - a row size of mask image.
+    * \param [in] index - a mask index.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - the result sum of absolute difference of two images.
+    */
+    SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
     SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
         size_t width, size_t height, uint64_t * sums);
@@ -126,8 +174,6 @@ extern "C"
 
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
-    SIMD_API uint32_t SimdCrc32(const void * src, size_t size);
 
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);

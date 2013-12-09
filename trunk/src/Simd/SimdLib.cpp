@@ -62,6 +62,16 @@ SIMD_API const char * SimdVersion()
     return SIMD_VERSION;
 }
 
+SIMD_API uint32_t SimdCrc32(const void * src, size_t size)
+{
+#ifdef SIMD_SSE42_ENABLE
+    if(Sse42::Enable)
+        return Sse42::Crc32(src, size);
+    else
+#endif//SIMD_SSE42_ENABLE
+        return Base::Crc32(src, size);
+}
+
 SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride, 
                                    size_t width, size_t height, uint64_t * sum)
 {
@@ -485,16 +495,6 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
                            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride)
 {
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
-}
-
-SIMD_API uint32_t SimdCrc32(const void * src, size_t size)
-{
-#ifdef SIMD_SSE42_ENABLE
-    if(Sse42::Enable)
-        return Sse42::Crc32(src, size);
-    else
-#endif//SIMD_SSE42_ENABLE
-        return Base::Crc32(src, size);
 }
 
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, 
