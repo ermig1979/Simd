@@ -31,7 +31,7 @@ namespace Simd
 {
 	namespace Base
 	{
-        uint32_t Crc32(const void * src, size_t size);
+        uint32_t Crc32c(const void * src, size_t size);
 
 		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
 			size_t width, size_t height, uint64_t * sum);

@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(ReduceGray4x4Test);
     EXECUTE_TEST(ReduceGray5x5Test);
 
-    EXECUTE_TEST(Crc32Test);
+    EXECUTE_TEST(Crc32cTest);
 
     EXECUTE_TEST(BgraToGrayTest);
 
