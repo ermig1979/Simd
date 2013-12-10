@@ -55,12 +55,23 @@ extern "C"
     */
     SIMD_API const char * SimdVersion();
 
-    SIMD_API uint32_t SimdCrc32(const void * src, size_t size);
+    /*!
+    * \fn uint32_t SimdCrc32c(const void * src, size_t size);
+    *
+    * \short Get 32-bit cyclic redundancy check (CRC32c) for current data.
+    *
+    * Calculation is performed for for polynomial 0x1EDC6F41 (Castagnoli-crc).
+    *
+    * \param [in] src - a pointer to data.
+    * \param [in] size - a size of the data.
+    * \return 32-bit cyclic redundancy check (CRC32c).
+    */
+    SIMD_API uint32_t SimdCrc32c(const void * src, size_t size);
 
     /*!
     * \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
-    * \short Get sum of absolute difference of two images. 
+    * \short Get sum of absolute difference of two gray 8-bit images. 
     *
     * Both images must have the same width and height.
     *
@@ -76,9 +87,9 @@ extern "C"
         size_t width, size_t height, uint64_t * sum);
 
     /*!
-    * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
+    * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
-    * \short Get sum of absolute difference of two images based on mask. 
+    * \short Get sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
     *
     * Get the absolute difference sum for all points where mask[i] == index.
     * Both images and mask must have the same width and height.
@@ -97,9 +108,47 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+    /*!
+    * \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
+    *
+    * \short Get 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. 
+    *
+    * Both images must have the same width and height. The image height and width must be equal or greater 3.
+    * The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
+    * The shifts are lain in the range [-1, 1] for axis x and y.
+    *
+    * \param [in] current - a pointer to pixels data of current image.
+    * \param [in] currentStride - a row size of the current image.
+    * \param [in] background - a pointer to pixels data of the background image.
+    * \param [in] backgroundStride - a row size of the background image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - the pointer to buffer with result sums. Buffer size must be equal or greater 9.
+    */
+    SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
         size_t width, size_t height, uint64_t * sums);
 
+    /*!
+    * \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
+    *
+    * \short Get 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
+    *
+    * Get the absolute difference sums for all points where mask[i] == index.
+    * Both images and mask must have the same width and height. The image height and width must be equal or greater 3.
+    * The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
+    * The shifts are lain in the range [-1, 1] for axis x and y.
+    *
+    * \param [in] current - a pointer to pixels data of current image.
+    * \param [in] currentStride - a row size of the current image.
+    * \param [in] background - a pointer to pixels data of the background image.
+    * \param [in] backgroundStride - a row size of the background image.
+    * \param [in] mask - a pointer to pixels data of mask image.
+    * \param [in] maskStride - a row size of mask image.
+    * \param [in] index - a mask index.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - the pointer to buffer with result sums. Buffer size must be equal or greater 9.
+    */
     SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
         const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 

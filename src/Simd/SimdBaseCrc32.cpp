@@ -64,7 +64,7 @@ namespace Simd
             0x79B737BAL, 0x8BDCB4B9L, 0x988C474DL, 0x6AE7C44EL, 0xBE2DA0A5L, 0x4C4623A6L, 0x5F16D052L, 0xAD7D5351L
         };
 
-        uint32_t Crc32(const void *src, size_t size)
+        uint32_t Crc32c(const void *src, size_t size)
         {
             uint8_t *p = (uint8_t*)src;
             uint32_t crc = 0;

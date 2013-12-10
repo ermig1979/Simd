@@ -31,7 +31,7 @@ namespace Test
     bool ReduceGray4x4Test();
     bool ReduceGray5x5Test();
 
-    bool Crc32Test();
+    bool Crc32cTest();
 
     bool BgraToGrayTest();
 

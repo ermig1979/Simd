@@ -29,7 +29,7 @@ namespace Simd
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        SIMD_INLINE void Crc32(size_t & crc, const size_t * p, const size_t * end)
+        SIMD_INLINE void Crc32c(size_t & crc, const size_t * p, const size_t * end)
         {
             while(p < end)
             {
@@ -41,22 +41,22 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void Crc32(size_t & crc, const uint8_t * p, const uint8_t * end)
+        SIMD_INLINE void Crc32c(size_t & crc, const uint8_t * p, const uint8_t * end)
         {
             while(p < end)
                 crc = _mm_crc32_u8((uint32_t)crc, *p++);
         }
 
-        uint32_t Crc32(const void *src, size_t size)
+        uint32_t Crc32c(const void *src, size_t size)
         {
             uint8_t * nose = (uint8_t*)src;
             size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
             size_t * tail = (size_t*)AlignLo(nose + size, sizeof(size_t));
 
             size_t crc = 0;
-            Crc32(crc, nose, (uint8_t*)body);
-            Crc32(crc, body, tail);
-            Crc32(crc, (uint8_t*)tail, nose + size);
+            Crc32c(crc, nose, (uint8_t*)body);
+            Crc32c(crc, body, tail);
+            Crc32c(crc, (uint8_t*)tail, nose + size);
             return (uint32_t)crc;
         }
     }

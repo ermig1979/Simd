@@ -74,19 +74,19 @@ namespace Test
         return result;
     }
 
-    bool Crc32Test()
+    bool Crc32cTest()
     {
         bool result = true;
 
 		std::vector<unsigned char> data(W*H - 1);
         SetRandom(&data[0], data.size());
 
-        result = result && Crc32Test(data, FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
+        result = result && Crc32Test(data, FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
 #if defined(SIMD_SSE42_ENABLE)
         if(Simd::Sse42::Enable)
         {
-            result = result && Crc32Test(data, FUNC(Simd::Sse42::Crc32), FUNC(SimdCrc32));
+            result = result && Crc32Test(data, FUNC(Simd::Sse42::Crc32c), FUNC(SimdCrc32c));
         }
 #endif 
 

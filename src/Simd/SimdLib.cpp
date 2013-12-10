@@ -62,14 +62,14 @@ SIMD_API const char * SimdVersion()
     return SIMD_VERSION;
 }
 
-SIMD_API uint32_t SimdCrc32(const void * src, size_t size)
+SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 {
 #ifdef SIMD_SSE42_ENABLE
     if(Sse42::Enable)
-        return Sse42::Crc32(src, size);
+        return Sse42::Crc32c(src, size);
     else
 #endif//SIMD_SSE42_ENABLE
-        return Base::Crc32(src, size);
+        return Base::Crc32c(src, size);
 }
 
 SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride, 

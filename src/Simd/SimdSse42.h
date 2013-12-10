@@ -32,7 +32,7 @@ namespace Simd
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        uint32_t Crc32(const void * src, size_t size);
+        uint32_t Crc32c(const void * src, size_t size);
     }
 #endif// SIMD_SSE42_ENABLE
 }
