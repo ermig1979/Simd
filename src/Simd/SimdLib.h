@@ -49,7 +49,7 @@ extern "C"
     /*!
     * \fn const char * SimdVersion();
     *
-    * \short Get version of Simd Library.
+    * \short Gets version of Simd Library.
     *
     * \return string with version of Simd Library (major version number, minor version number, release number, number of SVN's commits).
     */
@@ -58,7 +58,7 @@ extern "C"
     /*!
     * \fn uint32_t SimdCrc32c(const void * src, size_t size);
     *
-    * \short Get 32-bit cyclic redundancy check (CRC32c) for current data.
+    * \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.
     *
     * Calculation is performed for for polynomial 0x1EDC6F41 (Castagnoli-crc).
     *
@@ -71,7 +71,7 @@ extern "C"
     /*!
     * \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
-    * \short Get sum of absolute difference of two gray 8-bit images. 
+    * \short Gets sum of absolute difference of two gray 8-bit images. 
     *
     * Both images must have the same width and height.
     *
@@ -89,9 +89,9 @@ extern "C"
     /*!
     * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
-    * \short Get sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
+    * \short Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
     *
-    * Get the absolute difference sum for all points where mask[i] == index.
+    * Gets the absolute difference sum for all points where mask[i] == index.
     * Both images and mask must have the same width and height.
     *
     * \param [in] a - a pointer to pixels data of first image.
@@ -111,7 +111,7 @@ extern "C"
     /*!
     * \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
     *
-    * \short Get 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. 
+    * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. 
     *
     * Both images must have the same width and height. The image height and width must be equal or greater 3.
     * The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
@@ -131,9 +131,9 @@ extern "C"
     /*!
     * \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
     *
-    * \short Get 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
+    * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
     *
-    * Get the absolute difference sums for all points where mask[i] == index.
+    * Gets the absolute difference sums for all points where mask[i] == index.
     * Both images and mask must have the same width and height. The image height and width must be equal or greater 3.
     * The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
     * The shifts are lain in the range [-1, 1] for axis x and y.
@@ -152,9 +152,51 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
         const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
+    /*!
+    * \fn void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. 
+    *
+    * Both images must have the same width and height.
+    *
+    * For border pixels dst[x, y] = 0, for other pixels: 
+    * dst[x, y] = min(dx[x, y] + dy[x, y], 255), where 
+    * dx[x, y] = abs(src[x + 1, y] - src[x - 1, y]), 
+    * dy[x, y] = abs(src[x, y + 1] - src[x, y - 1]).
+    *
+    * \param [in] src - a pointer to pixels data of source 8-bit gray image.
+    * \param [in] srcStride - a row size of source image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of destination 8-bit gray image.
+    * \param [in] dstStride - a row size of destination image.
+    */
     SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t * dst, size_t dstStride);
 
+    /*!
+    * \fn void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, uint16_t weight, uint8_t * difference, size_t differenceStride);
+    *
+    * \short Adds feature difference to common difference sum. 
+    *
+    * All images must have the same width, height and format (8-bit gray).
+    *
+    * For every point: difference[i] += (weight * excess[i]*excess[i]) >> 16, where excess[i] = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0).
+    *
+    * This function is used for difference estimation in algorithm of motion detection.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] lo - a pointer to pixels data of feature lower bound of dynamic background.
+    * \param [in] loStride - a row size of the lo image.
+    * \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
+    * \param [in] hiStride - a row size of the hi image.
+    * \param [in] weight - a current feature weight (unsigned 16-bit value).
+    * \param [in, out] difference- a pointer to pixels data of image with total difference.
+    * \param [in] differenceStride - a row size of difference image.
+    */
     SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
         uint16_t weight, uint8_t * difference, size_t differenceStride);
