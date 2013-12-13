@@ -46,7 +46,7 @@ extern "C"
 {
 #endif//__cplusplus
 
-    /*!
+    /**
     * \fn const char * SimdVersion();
     *
     * \short Gets version of Simd Library.
@@ -55,7 +55,7 @@ extern "C"
     */
     SIMD_API const char * SimdVersion();
 
-    /*!
+    /**
     * \fn uint32_t SimdCrc32c(const void * src, size_t size);
     *
     * \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.
@@ -68,7 +68,7 @@ extern "C"
     */
     SIMD_API uint32_t SimdCrc32c(const void * src, size_t size);
 
-    /*!
+    /**
     * \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of absolute difference of two gray 8-bit images. 
@@ -86,7 +86,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    /*!
+    /**
     * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
@@ -108,7 +108,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    /*!
+    /**
     * \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
     *
     * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. 
@@ -128,7 +128,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
         size_t width, size_t height, uint64_t * sums);
 
-    /*!
+    /**
     * \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
     *
     * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
@@ -152,7 +152,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
         const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-    /*!
+    /**
     * \fn void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. 
@@ -174,7 +174,7 @@ extern "C"
     SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t * dst, size_t dstStride);
 
-    /*!
+    /**
     * \fn void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, uint16_t weight, uint8_t * difference, size_t differenceStride);
     *
     * \short Adds feature difference to common difference sum. 
@@ -194,19 +194,80 @@ extern "C"
     * \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
     * \param [in] hiStride - a row size of the hi image.
     * \param [in] weight - a current feature weight (unsigned 16-bit value).
-    * \param [in, out] difference- a pointer to pixels data of image with total difference.
+    * \param [in, out] difference - a pointer to pixels data of image with total difference.
     * \param [in] differenceStride - a row size of difference image.
     */
     SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
         uint16_t weight, uint8_t * difference, size_t differenceStride);
 
-    SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-        const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
+    /**
+    * \fn void void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs alpha blending operation. 
+    *
+    * All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
+    *
+    * For every point: dst[i] = (src[i]*alpha[i] + dst[i]*(255 - alpha[i]))/255.
+    *
+    * This function is used for image drawing.
+    *
+    * \param [in] src - a pointer to pixels data of foreground image.
+    * \param [in] srcStride - a row size of the foreground image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count for foreground and background images (1 <= channelCount <= 4).
+    * \param [in] alpha - a pointer to pixels data of image with alpha channel.
+    * \param [in] alphaStride - a row size of the alpha image.
+    * \param [in, out] dst - a pointer to pixels data of background image.
+    * \param [in] dstStride - a row size of the background image.
+    */
+    SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+        const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
+    *
+    * \short Performs background update (initial grow, slow mode). 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point: lo[i] -= value[col] < lo[col] ? 1 : 0; hi[i] += value[col] > hi[col] ? 1 : 0.
+    *
+    * This function is used for background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
+    * \param [in] loStride - a row size of the lo image.
+    * \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
+    * \param [in, out] hiStride - a row size of the hi image.
+    */
     SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
+    /**
+    * \fn void void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
+    *
+    * \short Performs background update (initial grow, fast mode). 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point: lo[i] = value[col] < lo[col] ? value[col] : lo[col]; hi[i] = value[col] > hi[col] ? value[col] : hi[col].
+    *
+    * This function is used for background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
+    * \param [in] loStride - a row size of the lo image.
+    * \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
+    * \param [in, out] hiStride - a row size of the hi image.
+    */
     SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
