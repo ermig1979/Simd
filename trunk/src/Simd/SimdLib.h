@@ -452,16 +452,92 @@ extern "C"
     SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdBgraToBgr(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride);
+    /**
+    * \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
+    *
+    * \short Converts 32-bit BGRA image to 24-bit BGR image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in, out] bgr - a pointer to pixels data of output 24-bit BGR image.
+    * \param [in] bgrStride - a row size of the bgr image.
+    */
+    SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
-    SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride);
+    /**
+    * \fn void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
+    *
+    * \short Converts 32-bit BGRA image to 8-bit gray image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in, out] gray - a pointer to pixels data of output 8-bit gray image.
+    * \param [in] grayStride - a row size of the gray image.
+    */
+    SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
-    SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
+    /**
+    * \fn void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+    *
+    * \short Converts 24-bit BGR image to 32-bit BGRA image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgrStride - a row size of the bgr image.
+    * \param [in, out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in] alpha - a value of alpha channel.
+    */
+    SIMD_API void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
+    /**
+    * \fn void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height, const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+    *
+    * \short Converts 48-bit planar BGR image to 32-bit BGRA image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] blue - a pointer to pixels data of input 16-bit image with blue color plane.
+    * \param [in] blueStride - a row size of the blue image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] green - a pointer to pixels data of input 16-bit image with green color plane.
+    * \param [in] greenStride - a row size of the blue image.
+    * \param [in] red - a pointer to pixels data of input 16-bit image with red color plane.
+    * \param [in] redStride - a row size of the red image.
+    * \param [in, out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in] alpha - a value of alpha channel.
+    */
     SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
         const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
+    /**
+    * \fn void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
+    *
+    * \short Converts 24-bit BGR image to 8-bit gray image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgrStride - a row size of the bgr image.
+    * \param [in, out] gray - a pointer to pixels data of output 8-bit gray image.
+    * \param [in] grayStride - a row size of the gray image.
+    */
+    SIMD_API void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
     SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
