@@ -91,7 +91,7 @@ extern "C"
     *
     * \short Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
     *
-    * Gets the absolute difference sum for all points where mask[i] == index.
+    * Gets the absolute difference sum for all points when mask[i] == index.
     * Both images and mask must have the same width and height.
     *
     * \param [in] a - a pointer to pixels data of first image.
@@ -133,7 +133,7 @@ extern "C"
     *
     * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
     *
-    * Gets the absolute difference sums for all points where mask[i] == index.
+    * Gets the absolute difference sums for all points when mask[i] == index.
     * Both images and mask must have the same width and height. The image height and width must be equal or greater 3.
     * The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
     * The shifts are lain in the range [-1, 1] for axis x and y.
@@ -326,11 +326,11 @@ extern "C"
     *
     * This function is used for background updating in motion detection algorithm.
     *
-    * \param [in] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
+    * \param [in, out] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
     * \param [in] loCountStride - a row size of the lo count image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [in] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
+    * \param [in, out] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
     * \param [in] hiCountStride - a row size of the hi value image.
     * \param [in, out] loValue - a pointer to pixels data of value of feature lower bound of dynamic background.
     * \param [in] loValueStride - a row size of the lo value image.
@@ -360,10 +360,10 @@ extern "C"
     * This function is used for background updating in motion detection algorithm.
     *
     * \param [in] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
-    * \param [in] loCountStride - a row size of the lo count image.
+    * \param [in, out] loCountStride - a row size of the lo count image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [in] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
+    * \param [in, out] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
     * \param [in] hiCountStride - a row size of the hi value image.
     * \param [in, out] loValue - a pointer to pixels data of value of feature lower bound of dynamic background.
     * \param [in] loValueStride - a row size of the lo value image.
@@ -463,7 +463,7 @@ extern "C"
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] bgraStride - a row size of the bgra image.
-    * \param [in, out] bgr - a pointer to pixels data of output 24-bit BGR image.
+    * \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
     * \param [in] bgrStride - a row size of the bgr image.
     */
     SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
@@ -479,7 +479,7 @@ extern "C"
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] bgraStride - a row size of the bgra image.
-    * \param [in, out] gray - a pointer to pixels data of output 8-bit gray image.
+    * \param [out] gray - a pointer to pixels data of output 8-bit gray image.
     * \param [in] grayStride - a row size of the gray image.
     */
     SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
@@ -495,7 +495,7 @@ extern "C"
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] bgrStride - a row size of the bgr image.
-    * \param [in, out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
     * \param [in] bgraStride - a row size of the bgra image.
     * \param [in] alpha - a value of alpha channel.
     */
@@ -516,7 +516,7 @@ extern "C"
     * \param [in] greenStride - a row size of the blue image.
     * \param [in] red - a pointer to pixels data of input 16-bit image with red color plane.
     * \param [in] redStride - a row size of the red image.
-    * \param [in, out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
     * \param [in] bgraStride - a row size of the bgra image.
     * \param [in] alpha - a value of alpha channel.
     */
@@ -534,27 +534,157 @@ extern "C"
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] bgrStride - a row size of the bgr image.
-    * \param [in, out] gray - a pointer to pixels data of output 8-bit gray image.
+    * \param [out] gray - a pointer to pixels data of output 8-bit gray image.
     * \param [in] grayStride - a row size of the gray image.
     */
     SIMD_API void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
+    /**
+    * \fn void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
+    *
+    * \short Performs binarization of 8-bit gray image. 
+    *
+    * All images must have 8-bit gray format and must have the same width and height.
+    *
+    * For every point:
+    * \n dst[i] = compare(src[i], value) ? positive : negative,
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] positive - a destination value if comparison operation has a positive result.
+    * \param [in] negative - a destination value if comparison operation has a negative result.
+    * \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
+    * \param [in] dstStride - a row size of the dst image.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    */
     SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
+    /**
+    * \fn void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
+    *
+    * \short Performs averaging binarization of 8-bit gray image. 
+    *
+    * All images must have 8-bit gray format and must have the same width and height.
+    *
+    * For every point:
+    * \n dst[i] = sum[i]*255 > area[i]*threshold ? positive : negative,
+    * \n where sum[i] is a sum of positive compare(src[i], value) operation (see ::SimdCompareType) in the point neighborhood (from -neighborhood to neighborhood for x and y),
+    * \n area[i] - an area of the point neighborhood ( (2*neighborhood + 1)^2 for central part of the image).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] neighborhood - an averaging neighborhood.
+    * \param [in] threshold - a threshold value for binarization. It can range from 0 to 255.
+    * \param [in] positive - a destination value if for neighborhood of this point number of positive comparison is greater then threshold.
+    * \param [in] negative - a destination value if for neighborhood of this point number of positive comparison is lesser or equal then threshold.
+    * \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
+    * \param [in] dstStride - a row size of the dst image.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    */
     SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
         uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
+    /**
+    * \fn void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
+    *
+    * \short Calculates number of points satisfying certain condition for 8-bit gray image. 
+    *
+    * For every point:
+    * \n count += compare(src[i], value) ? 1 : 0,
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
+    * \param [in] stride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    * \param [out] count - a pointer to result unsigned 32-bit value.
+    */
     SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
         uint8_t value, SimdCompareType compareType, uint32_t * count);
 
+    /**
+    * \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
+    *
+    * \short Calculates sum of image points when mask points satisfying certain condition. 
+    *
+    * All images must have 8-bit gray format and must have the same width and height.
+    *
+    * For every point:
+    * \n sum += compare(mask[i], value) ? src[i] : 0,
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    * \param [out] sum - a pointer to result unsigned 64-bit value.
+    */
     SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+    /**
+    * \fn void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
+    *
+    * \short Calculates sum of squared image points when mask points satisfying certain condition. 
+    *
+    * All images must have 8-bit gray format and must have the same width and height.
+    *
+    * For every point:
+    * \n sum += compare(mask[i], value) ? src[i]*src[i] : 0,
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    * \param [out] sum - a pointer to result unsigned 64-bit value.
+    */
     SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+    /**
+    * \fn void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
+    *
+    * \short Calculates sum of squared gradient of image points when mask points satisfying certain condition. 
+    *
+    * All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
+    *
+    * For every point:
+    * \n sum += compare(mask[x, y], value) ? dx[x, y]*dx[x, y] + dy[x, y]*dy[x, y] : 0, 
+    * \n where for border pixels dx[x, y] = 0 and dy[x, y] = 0, for other pixels: 
+    * \n dx[x, y] = src[x + 1, y] - src[x - 1, y], 
+    * \n dy[x, y] = src[x, y + 1] - src[x, y - 1];
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] mask - a pointer to pixels data of 8-bit gray mask (first value for compare operation).
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    * \param [out] sum - a pointer to result unsigned 64-bit value.
+    */
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
