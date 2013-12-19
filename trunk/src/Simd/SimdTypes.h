@@ -53,14 +53,26 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
+ /**
+ * \enum SimdCompareType
+ *
+ * Describes types of compare operation.
+ * Operation compare(a, b) is 
+ */
 typedef enum SimdCompareType
 {
-    SimdCompareEqual,
-    SimdCompareNotEqual,
-    SimdCompareGreater,
-    SimdCompareGreaterOrEqual,
-    SimdCompareLesser,
-    SimdCompareLesserOrEqual,
+    /// equal to: a == b
+    SimdCompareEqual, 
+    /// equal to: a != b          
+    SimdCompareNotEqual,   
+    /// equal to: a > b     
+    SimdCompareGreater,        
+    /// equal to: a >= b 
+    SimdCompareGreaterOrEqual,  
+    /// equal to: a < b
+    SimdCompareLesser,       
+    /// equal to: a <= b   
+    SimdCompareLesserOrEqual,   
 } SimdCompareType;
 
 typedef enum SimdOperationType
