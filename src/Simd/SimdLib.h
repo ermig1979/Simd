@@ -297,13 +297,13 @@ extern "C"
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] loValue - a pointer to pixels data of value of feature lower bound of dynamic background.
-    * \param [in] loValueStride - a row size of the lo value image.
+    * \param [in] loValueStride - a row size of the loValue image.
     * \param [in] hiValue - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiValueStride - a row size of the hi value image.
+    * \param [in] hiValueStride - a row size of the hiValue image.
     * \param [in, out] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
-    * \param [in] loCountStride - a row size of the lo count image.
-    * \param [in, out] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiCountStride - a row size of the hi value image.
+    * \param [in] loCountStride - a row size of the loCount image.
+    * \param [in, out] hiCount - a pointer to pixels data of count of feature upper bound of dynamic background.
+    * \param [in] hiCountStride - a row size of the hiCount image.
     */
     SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
@@ -327,15 +327,15 @@ extern "C"
     * This function is used for background updating in motion detection algorithm.
     *
     * \param [in, out] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
-    * \param [in] loCountStride - a row size of the lo count image.
+    * \param [in] loCountStride - a row size of the loCount image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [in, out] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiCountStride - a row size of the hi value image.
+    * \param [in, out] hiCount - a pointer to pixels data of count of feature upper bound of dynamic background.
+    * \param [in] hiCountStride - a row size of the hiCount image.
     * \param [in, out] loValue - a pointer to pixels data of value of feature lower bound of dynamic background.
-    * \param [in] loValueStride - a row size of the lo value image.
+    * \param [in] loValueStride - a row size of the loValue image.
     * \param [in, out] hiValue - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiValueStride - a row size of the hi value image.
+    * \param [in] hiValueStride - a row size of the hiValue image.
     * \param [in] threshold - a count threshold.
     */
     SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
@@ -360,15 +360,15 @@ extern "C"
     * This function is used for background updating in motion detection algorithm.
     *
     * \param [in] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
-    * \param [in, out] loCountStride - a row size of the lo count image.
+    * \param [in, out] loCountStride - a row size of the loCount image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [in, out] hiCount - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiCountStride - a row size of the hi value image.
+    * \param [in, out] hiCount - a pointer to pixels data of count of feature upper bound of dynamic background.
+    * \param [in] hiCountStride - a row size of the hiCount image.
     * \param [in, out] loValue - a pointer to pixels data of value of feature lower bound of dynamic background.
-    * \param [in] loValueStride - a row size of the lo value image.
+    * \param [in] loValueStride - a row size of the loValue image.
     * \param [in, out] hiValue - a pointer to pixels data of value of feature upper bound of dynamic background.
-    * \param [in] hiValueStride - a row size of the hi value image.
+    * \param [in] hiValueStride - a row size of the hiValue image.
     * \param [in] threshold - a count threshold.
     * \param [in] mask - a pointer to pixels data of adjust range mask.
     * \param [in] maskStride - a row size of the mask image.
@@ -688,32 +688,228 @@ extern "C"
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+    /**
+    * \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
+    *
+    * \short Copy pixels data of image from source to destination. 
+    *
+    * All images must have the same width, height and format.
+    *
+    * \param [in] src - a pointer to pixels data of source image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] pixelSize - a size of the image pixel.
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
+    *
+    * \short Copy pixels data of image from source to destination except for the portion bounded frame. 
+    *
+    * All images must have the same width, height and format.
+    *
+    * \param [in] src - a pointer to pixels data of source image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] pixelSize - a size of the image pixel.
+    * \param [in] frameLeft - a frame left side.
+    * \param [in] frameTop - a frame top side.
+    * \param [in] frameRight - a frame right side.
+    * \param [in] frameBottom - a frame bottom side.
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    *
+    * \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images. 
+    *
+    * All images must have the same width and height.
+    * This function used for NV12 to YUV420P conversion.
+    *
+    * \param [in] uv - a pointer to pixels data of input 16-bit UV interleaved image.
+    * \param [in] uvStride - a row size of the uv image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] u - a pointer to pixels data of 8-bit U planar image.
+    * \param [in] uStride - a row size of the u image.
+    * \param [out] v - a pointer to pixels data of 8-bit V planar image.
+    * \param [in] uStride - a row size of the v image.
+    */
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
+    *
+    * \short Performs edge background update (initial grow, slow mode). 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point: 
+    * \n background[i] += value[i] > background[i] ? 1 : 0; 
+    *
+    * This function is used for edge background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] background - a pointer to pixels data of feature value of edge dynamic background.
+    * \param [in] backgroundStride - a row size of the background image.
+    */
     SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
+    *
+    * \short Performs edge background update (initial grow, fast mode). 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point: 
+    * \n background[i] = value[i] > background[i] ? value[i] : background[i]; 
+    *
+    * This function is used for edge background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] background - a pointer to pixels data of feature value of edge dynamic background.
+    * \param [in] backgroundStride - a row size of the background image.
+    */
     SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
+    *
+    * \short Performs collection of edge background statistic. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * Updates background statistic counters for every point: 
+    * \n backgroundCount[i] += (value[i] > backgroundValue[i] && backgroundCount[i] < 255) ? 1 : 0;
+    *
+    * This function is used for edge background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] backgroundValue - a pointer to pixels data of value of feature of edge dynamic background.
+    * \param [in] backgroundValueStride - a row size of the backgroundValue image.
+    * \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
+    * \param [in] backgroundCountStride - a row size of the backgroundCount image.
+    */
     SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
+    *
+    * \short Performs adjustment of edge background range. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * Adjusts edge background range for every point: 
+    * \n backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
+    * \n backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
+    * \n backgroundCount[i] = 0;
+    *
+    * This function is used for edge background updating in motion detection algorithm.
+    *
+    * \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
+    * \param [in] backgroundCountStride - a row size of the backgroundCount image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] backgroundValue - a pointer to pixels data of value of feature of edge dynamic background.
+    * \param [in] backgroundValueStride - a row size of the backgroundValue image.
+    * \param [in] threshold - a count threshold.
+    */
     SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
+    /**
+    * \fn void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
+    *
+    * \short Performs adjustment of edge background range with using adjust range mask. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * Adjusts edge background range for every point when mask[i] != 0: 
+    * \n backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
+    * \n backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
+    * \n backgroundCount[i] = 0;
+    *
+    * This function is used for edge background updating in motion detection algorithm.
+    *
+    * \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
+    * \param [in] backgroundCountStride - a row size of the backgroundCount image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] backgroundValue - a pointer to pixels data of value of feature of edge dynamic background.
+    * \param [in] backgroundValueStride - a row size of the backgroundValue image.
+    * \param [in] threshold - a count threshold.
+    * \param [in] mask - a pointer to pixels data of adjust range mask.
+    * \param [in] maskStride - a row size of the mask image.
+    */
     SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
+    *
+    * \short Shifts edge background range. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point: 
+    * \n background[i] = value[i];
+    *
+    * This function is used for fast edge background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] background - a pointer to pixels data of feature of edge dynamic background.
+    * \param [in] backgroundStride - a row size of the background image.
+    */
     SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
+    /**
+    * \fn void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
+    *
+    * \short Shifts edge background range with using shift range mask. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point when mask[i] != 0 : 
+    * \n background[i] = value[i];
+    *
+    * This function is used for fast edge background updating in motion detection algorithm.
+    *
+    * \param [in] value - a pointer to pixels data of current feature value.
+    * \param [in] valueStride - a row size of the value image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in, out] background - a pointer to pixels data of feature of edge dynamic background.
+    * \param [in] backgroundStride - a row size of the background image.
+    * \param [in] mask - a pointer to pixels data of shift range mask.
+    * \param [in] maskStride - a row size of the mask image.
+    */
     SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
@@ -823,10 +1019,10 @@ extern "C"
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
     SIMD_API void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
+        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
     SIMD_API void SimdYuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha = 0xFF);
+        size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
     SIMD_API void SimdYuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
