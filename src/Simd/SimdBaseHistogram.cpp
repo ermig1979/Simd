@@ -36,7 +36,7 @@ namespace Simd
 		void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
 			size_t step, size_t indent, uint32_t * histogram)
 		{
-			assert(width > 2*indent && 2*height > indent && indent >= step);
+			assert(width > 2*indent && height > 2*indent && indent >= step);
 
 			memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
 

@@ -331,7 +331,7 @@ namespace Simd
 
     SIMD_INLINE void AbsSecondDerivativeHistogram(const View & src, size_t step, size_t indent, uint32_t * histogram)
     {
-        assert(src.format == View::Gray8);
+        assert(src.format == View::Gray8 && indent >= step && width > 2*indent && height > 2*indent);
 
         SimdAbsSecondDerivativeHistogram(src.data, src.width, src.height, src.stride, step, indent, histogram);
     }

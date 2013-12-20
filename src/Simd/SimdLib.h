@@ -691,7 +691,7 @@ extern "C"
     /**
     * \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
     *
-    * \short Copy pixels data of image from source to destination. 
+    * \short Copies pixels data of image from source to destination. 
     *
     * All images must have the same width, height and format.
     *
@@ -708,7 +708,7 @@ extern "C"
     /**
     * \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
     *
-    * \short Copy pixels data of image from source to destination except for the portion bounded frame. 
+    * \short Copies pixels data of image from source to destination except for the portion bounded frame. 
     *
     * All images must have the same width, height and format.
     *
@@ -913,25 +913,147 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
+    /**
+    * \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
+    *
+    * \short Fills pixels data of image by given value. 
+    *
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] stride - a row size of the dst image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] pixelSize - a size of the image pixel.
+    * \param [in] value - a value to fill image.
+    */
     SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
+    /**
+    * \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
+    *
+    * \short Fills pixels data of image except for the portion bounded frame by given value. 
+    *
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] stride - a row size of the dst image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] pixelSize - a size of the image pixel.
+    * \param [in] frameLeft - a frame left side.
+    * \param [in] frameTop - a frame top side.
+    * \param [in] frameRight - a frame right side.
+    * \param [in] frameBottom - a frame bottom side.
+    * \param [in] value - a value to fill image.
+    */
     SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
+    /**
+    * \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
+    *
+    * \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha). 
+    *
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] stride - a row size of the dst image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] blue - a blue channel of BGRA to fill image.
+    * \param [in] green - a green channel of BGRA to fill image.
+    * \param [in] red - a red channel of BGRA to fill image.
+    * \param [in] alpha - a alpha channel of BGRA to fill image.
+    */
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+    /**
+    * \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs Gaussian blur filtration with window 3x3. 
+    *
+    * For every point:
+    * \n dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] + 
+    * \n 2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
+    * \n src[x-1, y-1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+    *
+    * \param [in] src - a pointer to pixels data of source image.
+    * \param [in] srcStride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride);
+    *
+    * \short Converts 8-bit gray image to 32-bit BGRA image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] gray - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] grayStride - a row size of the gray image.
+    * \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [in] bgraStride - a row size of the bgra image.
+    */
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
-    SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
+    /**
+    * \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);
+    *
+    * \short Calculates histogram of second derivative for 8-bit gray image. 
+    *
+    * For all points except the boundary (defined by parameter indent): 
+    * \n histogram[max(dx, dy)]++, where
+    * \n dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y])),
+    * \n dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step])).
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] stride - a row size of the image.
+    * \param [in] step - a step for second derivative calculation.
+    * \param [in] indent - a indent from image boundary.
+    * \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+    */
+    SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
         size_t step, size_t indent, uint32_t * histogram);
 
-    SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
+    /**
+    * \fn void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
+    *
+    * \short Calculates histogram for 8-bit gray image. 
+    *
+    * For all points: 
+    * \n histogram[src(i)]++.
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] stride - a row size of the image.
+    * \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+    */
+    SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
+    /**
+    * \fn SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+    *
+    * \short Calculates integral sum image for 8-bit gray image. 
+    *
+    * A sum image must has width and height per unit greater than that of the input image. 
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - a pointer to pixels data of sum 32-bit unsigned int image.
+    * \param [in] sumStride - a row size of sum image (in bytes).
+    */
     SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
 
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
