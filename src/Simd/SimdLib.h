@@ -1041,7 +1041,7 @@ extern "C"
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
     /**
-    * \fn SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+    * \fn void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
     *
     * \short Calculates integral sum image for 8-bit gray image. 
     *
@@ -1056,17 +1056,91 @@ extern "C"
     */
     SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
 
+    /**
+    * \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates LBP (Local Binary Patterns) for 8-bit gray image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of output 8-bit gray image with LBP.
+    * \param [in] dstStride - a row size of dst image.
+    */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs median filtration of input image (filter window is a rhomb 3x3). 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    *
+    * \param [in] src - a pointer to pixels data of original input image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of filtered output image.
+    * \param [in] dstStride - a row size of dst image.
+    */
     SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs median filtration of input image (filter window is a rhomb 5x5). 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    *
+    * \param [in] src - a pointer to pixels data of original input image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of filtered output image.
+    * \param [in] dstStride - a row size of dst image.
+    */
     SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs median filtration of input image (filter window is a square 3x3). 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    *
+    * \param [in] src - a pointer to pixels data of original input image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of filtered output image.
+    * \param [in] dstStride - a row size of dst image.
+    */
     SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs median filtration of input image (filter window is a square 5x5). 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    *
+    * \param [in] src - a pointer to pixels data of original input image.
+    * \param [in] srcStride - a row size of src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of filtered output image.
+    * \param [in] dstStride - a row size of dst image.
+    */
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
