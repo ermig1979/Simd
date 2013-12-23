@@ -75,11 +75,21 @@ typedef enum SimdCompareType
     SimdCompareLesserOrEqual,   
 } SimdCompareType;
 
+ /**
+ * \enum SimdOperationType
+ *
+ * Describes types of operation between two images performed by function ::SimdOperation.
+ * Images must have the same format (8-bit per channel).
+ */
 typedef enum SimdOperationType
 {
+    /// Computes the average value for every channel of every point of two images. Average(a, b) = (a + b + 1)/2.
     SimdOperationAverage,
+    /// Computes the bitwise AND between two images.
     SimdOperationAnd,
+    /// Computes maximal value for every channel of every point of two images.
     SimdOperationMaximum,
+    ///Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
     SimdOperationSaturatedSubtraction,
 } SimdOperationType;
 
