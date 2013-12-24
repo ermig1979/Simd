@@ -1300,23 +1300,161 @@ extern "C"
     SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
+    /**
+    * \fn void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs shifting of input image with using bilinear interpolation. 
+    *
+    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    *
+    * \param [in] src - a pointer to pixels data of the foreground input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [in] bkg - a pointer to pixels data of the background input image.
+    * \param [in] bkgStride - a row size of the background image.
+    * \param [in] shiftX - an image shift along x axis.
+    * \param [in] shiftY - an image shift along y axis.
+    * \param [in] cropLeft - a crop left side.
+    * \param [in] cropTop - a crop top side.
+    * \param [in] cropRight - a crop right side.
+    * \param [in] cropBottom - a crop bottom side.
+    * \param [out] dst - a pointer to pixels data of the output image.
+    * \param [in] dstStride - a row size of the output image.
+    */
     SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY,
         size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates Sobel's filter along x axis. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    *
+    * For every point: 
+    * \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+    *
+    * \param [in] src - a pointer to pixels data of the foreground input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of the output image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
     SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates Sobel's filter along y axis. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    *
+    * For every point: 
+    * \n dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]).
+    *
+    * \param [in] src - a pointer to pixels data of the foreground input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of the output image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
     SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+    /**
+    * \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+    *
+    * \short Calculates sum of squared differences for two 8-bit gray images. 
+    *
+    * All images must have the same width and height. 
+    *
+    * For every point: 
+    * \n sum += (a[i] - b[i])*(a[i] - b[i]).
+    *
+    * \param [in] a - a pointer to pixels data of the first image.
+    * \param [in] aStride - a row size of the first image.
+    * \param [in] b - a pointer to pixels data of the second image.
+    * \param [in] bStride - a row size of the second image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
+    */
+    SIMD_API void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-        const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
+    /**
+    * \fn void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
+    *
+    * \short Calculates sum of squared differences for two  images with using mask. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point where mask[i] == index: 
+    * \n sum += (a[i] - b[i])*(a[i] - b[i]).
+    *
+    * \param [in] a - a pointer to pixels data of the first image.
+    * \param [in] aStride - a row size of the first image.
+    * \param [in] b - a pointer to pixels data of the second image.
+    * \param [in] bStride - a row size of the second image.
+    * \param [in] mask - a pointer to pixels data of the mask image.
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] index - a mask index.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
+    */
+    SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
+    /**
+    * \fn void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t * min, uint8_t * max, uint8_t * average);
+    *
+    * \short Finds minimal, maximal and average pixel values for given image. 
+    *
+    * The image must has 8-bit gray format. 
+    *
+    * \param [in] src - a pointer to pixels data of the input image.
+    * \param [in] stride - a row size of the image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] min - a pointer to unsigned 8-bit integer value with found minimal pixel value.
+    * \param [out] max - a pointer to unsigned 8-bit integer value with found maximal pixel value.
+    * \param [out] average - a pointer to unsigned 8-bit integer value with found average pixel value.
+    */
     SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t * min, uint8_t * max, uint8_t * average);
 
+    /**
+    * \fn void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+    *
+    * \short Calculate statistical characteristics (moments) of pixels with given index. 
+    *
+    * The image must has 8-bit gray format.
+    *
+    * For every point where mask[X, Y] == index: 
+    * \n area += 1.
+    * \n x += X.
+    * \n y += Y.
+    * \n xx += X*X.
+    * \n xy += X*Y.
+    * \n yy += Y*Y.
+    *
+    * \param [in] mask - a pointer to pixels data of the mask image.
+    * \param [in] stride - a row size of the mask image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] index - an mask index.
+    * \param [out] area - a pointer to unsigned 64-bit integer value with found area (number of pixels with given index).
+    * \param [out] x - a pointer to unsigned 64-bit integer value with found first-order moment x.
+    * \param [out] y - a pointer to unsigned 64-bit integer value with found first-order moment y.
+    * \param [out] xx - a pointer to unsigned 64-bit integer value with found second-order moment xx.
+    * \param [out] xy - a pointer to unsigned 64-bit integer value with found second-order moment xy.
+    * \param [out] yy - a pointer to unsigned 64-bit integer value with found second-order moment yy.
+    */
     SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
