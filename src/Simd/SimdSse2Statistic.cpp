@@ -76,7 +76,7 @@ namespace Simd
                 *min = Base::MinU8(min_buffer[i], *min);
                 *max = Base::MaxU8(max_buffer[i], *max);
             }
-            *average = (uint8_t)((ExtractInt64Sum(sum) + UCHAR_MAX/2)/(width*height));
+            *average = (uint8_t)((ExtractInt64Sum(sum) + width*height/2)/(width*height));
         }
 
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 

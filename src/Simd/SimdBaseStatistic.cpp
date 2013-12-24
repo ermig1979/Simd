@@ -50,7 +50,7 @@ namespace Simd
                 sum += rowSum;
                 src += stride;
             }
-            *average = (uint8_t)((sum + UCHAR_MAX/2)/(width*height));
+            *average = (uint8_t)((sum + width*height/2)/(width*height));
             *min = min_;
             *max = max_;
         }
