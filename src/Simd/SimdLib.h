@@ -742,7 +742,7 @@ extern "C"
     * \param [out] u - a pointer to pixels data of 8-bit U planar image.
     * \param [in] uStride - a row size of the u image.
     * \param [out] v - a pointer to pixels data of 8-bit V planar image.
-    * \param [in] uStride - a row size of the v image.
+    * \param [in] vStride - a row size of the v image.
     */
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
@@ -1151,8 +1151,10 @@ extern "C"
     *
     * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
     *
-    * \param [in] src - a pointer to pixels data of original input image.
-    * \param [in] srcStride - a row size of src image.
+    * \param [in] a - a pointer to pixels data of the first input image.
+    * \param [in] aStride - a row size of the first image.
+    * \param [in] b - a pointer to pixels data of the second input image.
+    * \param [in] bStride - a row size of the second image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
     * \param [in] channelCount - a channel count.
@@ -1458,26 +1460,181 @@ extern "C"
     SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
+    /**
+    * \fn void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+    *
+    * \short Calculate sums of rows for given 8-bit gray image. 
+    *
+    * For all rows: 
+    * \n sums[y] += src[x, y]; 
+    * \n where x changes from 0 to width.
+    *
+    * \param [in] src - a pointer to pixels data of the input image.
+    * \param [in] stride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of rows. It length must be equal to image height.
+    */
     SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
+    /**
+    * \fn void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+    *
+    * \short Calculate sums of columns for given 8-bit gray image. 
+    *
+    * For all columns: 
+    * \n sums[x] += src[x, y]; 
+    * \n where y changes from 0 to height.
+    *
+    * \param [in] src - a pointer to pixels data of the input image.
+    * \param [in] stride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - a pointer to array of unsigned 32-bit integers result sums of columns. It length must be equal to image width.
+    */
     SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
+    /**
+    * \fn void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+    *
+    * \short Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. 
+    *
+    * For all rows except the last: 
+    * \n sums[y] += abs::(src[x, y+1] - src[x, y]); 
+    * \n where x changes from 0 to width.
+    * \n For the last row sums[height-1] = 0; 
+    *
+    * \param [in] src - a pointer to pixels data of the input image.
+    * \param [in] stride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - a pointer to array of unsigned 32-bit integers result sums. It length must be equal to image height.
+    */
     SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
+    /**
+    * \fn void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+    *
+    * \short Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image. 
+    *
+    * For all columns except the last: 
+    * \n sums[x] += abs::(src[x+1, y] - src[x, y]); 
+    * \n where y changes from 0 to height.
+    * \n For the last column sums[width-1] = 0; 
+    *
+    * \param [in] src - a pointer to pixels data of the input image.
+    * \param [in] stride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sums - a pointer to array of unsigned 32-bit integers result columns. It length must be equal to image width.
+    */
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    /**
+    * \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    *
+    * \short Stretches input 8-bit gray image in two times. 
+    *
+    * \param [in] src - a pointer to pixels data of the original input image.
+    * \param [in] srcWidth - a width of the input image.
+    * \param [in] srcHeight - a height of the input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [out] dst - a pointer to pixels data of the stretched output image.
+    * \param [in] dstWidth - a width of the output image.
+    * \param [in] dstHeight - a height of the output image.
+    * \param [in] dstStride - a row size of the output image.
+    */
+    SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+    /**
+    * \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
+    *
+    * \short Calculates boosted saturated gradients for given input image. 
+    *
+    * All images must have the same width, height and format (8-bit gray).
+    *
+    * For border pixels dx[x, y] = 0 and dy[x, y] = 0, for other pixels: 
+    * \n dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost, 
+    * \n dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost.
+    *
+    * \param [in] src - a pointer to pixels data of source 8-bit gray image.
+    * \param [in] srcStride - a row size of source image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] saturation - a saturation of gradient.
+    * \param [in] boost - a boost coefficient.
+    * \param [out] dx - a pointer to pixels data of image with boosted saturated gradient along x axis.
+    * \param [in] dxStride - a row size of dx image.
+    * \param [out] dy - a pointer to pixels data of image with boosted saturated gradient along y axis.
+    * \param [in] dyStride - a row size of dy image.
+    */
     SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
+    /**
+    * \fn void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t boost, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format). 
+    *
+    * All images must have the same width, height and format (8-bit gray).
+    *
+    * For every pixel: 
+    * \n dst[x, y] = max(lo, min(hi, src[i]))*boost, 
+    * \n where lo = 128 - (128/boost), hi = 255 - lo. 
+    *
+    * \param [in] src - a pointer to pixels data of source 8-bit gray image.
+    * \param [in] srcStride - a row size of source image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] boost - a boost coefficient.
+    * \param [out] dst - a pointer to pixels data of result image.
+    * \param [in] dstStride - a row size of destination image.
+    */
     SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t boost, uint8_t * dst, size_t dstStride);
 
+    /**
+    * \fn void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
+    *
+    * \short Calculates difference between current image and background. 
+    *
+    * All images must have the same width, height and format (8-bit gray).
+    *
+    * For every pixel: 
+    * \n sum += current - average(lo[i], hi[i]);
+    *
+    * \param [in] src - a pointer to pixels data of current image.
+    * \param [in] srcStride - a row size of current image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] lo - a pointer to pixels data of image with lower bound of background feature.
+    * \param [in] loStride - a row size of lo image.
+    * \param [in] hi - a pointer to pixels data of image with upper bound of background feature.
+    * \param [in] hiStride - a row size of hi image.
+    * \param [out] sum - a pointer to 64-bit integer with result sum.
+    */
     SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
+    /**
+    * \fn void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int32_t shift, uint8_t * dst, size_t dstStride);
+    *
+    * \short Performs brightness compensation of input image. 
+    *
+    * All images must have the same width, height and format (8-bit gray).
+    *
+    * For every pixel: 
+    * \n dst[i] = max(0, min(255, src[i] + shift));
+    *
+    * \param [in] src - a pointer to pixels data of input image.
+    * \param [in] srcStride - a row size of input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] shift - a compensation shift.
+    * \param [out] dst - a pointer to pixels data of output image.
+    * \param [in] dstStride - a row size of output image.
+    */
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
 
