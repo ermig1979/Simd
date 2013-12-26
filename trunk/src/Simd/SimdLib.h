@@ -449,6 +449,27 @@ extern "C"
     SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
+    /**
+    * \fn void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
+    *
+    * \short Creates background update mask. 
+    *
+    * All images must have the same width, height and format (8-bit gray). 
+    *
+    * For every point when mask[i] == index: 
+    * \n dst[i] = value; 
+    *
+    * This function is used for background updating in motion detection algorithm.
+    *
+    * \param [in] src - a pointer to pixels data of input mask image.
+    * \param [in] srcStride - a row size of input mask image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] index - a mask index into input mask.
+    * \param [in] value - a value to fill the output mask.
+    * \param [out] dst - a pointer to pixels data of output mask image.
+    * \param [in] dstStride - a row size of output mask image.
+    */
     SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
