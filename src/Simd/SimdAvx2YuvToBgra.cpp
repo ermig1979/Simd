@@ -59,13 +59,13 @@ namespace Simd
 				_mm256_unpackhi_epi8(v8, K_ZERO), a_0, bgra + 2);
 		}
 
-		template <bool align> SIMD_INLINE void Yuv444ToBgra(const uint8_t * y, const uint8_t * u, 
+		template <bool align> SIMD_INLINE void Yuv444pToBgra(const uint8_t * y, const uint8_t * u, 
 			const uint8_t * v, const __m256i & a_0, uint8_t * bgra)
 		{
 			Yuv8ToBgra<align>(LoadPermuted<align>((__m256i*)y), LoadPermuted<align>((__m256i*)u), LoadPermuted<align>((__m256i*)v), a_0, (__m256i*)bgra);
 		}
 
-		template <bool align> void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		template <bool align> void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert(width >= A);
@@ -82,12 +82,12 @@ namespace Simd
 			{
 				for(size_t colYuv = 0, colBgra = 0; colYuv < bodyWidth; colYuv += A, colBgra += QA)
 				{
-					Yuv444ToBgra<align>(y + colYuv, u + colYuv, v + colYuv, a_0, bgra + colBgra);
+					Yuv444pToBgra<align>(y + colYuv, u + colYuv, v + colYuv, a_0, bgra + colBgra);
 				}
 				if(tail)
 				{
 					size_t col = width - A;
-					Yuv444ToBgra<false>(y + col, u + col, v + col, a_0, bgra + 4*col);
+					Yuv444pToBgra<false>(y + col, u + col, v + col, a_0, bgra + 4*col);
 				}
 				y += yStride;
 				u += uStride;
@@ -96,7 +96,7 @@ namespace Simd
 			}
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420ToBgra(const uint8_t * y, const __m256i & u, const __m256i & v, 
+		template <bool align> SIMD_INLINE void Yuv420pToBgra(const uint8_t * y, const __m256i & u, const __m256i & v, 
 			const __m256i & a_0, uint8_t * bgra)
 		{
 			Yuv8ToBgra<align>(LoadPermuted<align>((__m256i*)y + 0), 
@@ -107,7 +107,7 @@ namespace Simd
                 _mm256_permute4x64_epi64(_mm256_unpackhi_epi8(v, v), 0xD8), a_0, (__m256i*)bgra + 4);
 		}
 
-		template <bool align> void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		template <bool align> void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
@@ -126,16 +126,16 @@ namespace Simd
 				{
 					__m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
 					__m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
-					Yuv420ToBgra<align>(y + colY, u_, v_, a_0, bgra + colBgra);
-					Yuv420ToBgra<align>(y + colY + yStride, u_, v_, a_0, bgra + colBgra + bgraStride);
+					Yuv420pToBgra<align>(y + colY, u_, v_, a_0, bgra + colBgra);
+					Yuv420pToBgra<align>(y + colY + yStride, u_, v_, a_0, bgra + colBgra + bgraStride);
 				}
 				if(tail)
 				{
 					size_t offset = width - DA;
 					__m256i u_ = LoadPermuted<false>((__m256i*)(u + offset/2));
 					__m256i v_ = LoadPermuted<false>((__m256i*)(v + offset/2));
-					Yuv420ToBgra<false>(y + offset, u_, v_, a_0, bgra + 4*offset);
-					Yuv420ToBgra<false>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
+					Yuv420pToBgra<false>(y + offset, u_, v_, a_0, bgra + 4*offset);
+					Yuv420pToBgra<false>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
 				}
 				y += 2*yStride;
 				u += uStride;
@@ -144,24 +144,24 @@ namespace Simd
 			}
 		}
 
-		void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
-				Yuv420ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+				Yuv420pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 			else
-				Yuv420ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+				Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
 
-		void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
 				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
-				Yuv444ToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+				Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 			else
-				Yuv444ToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+				Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
     }
 #endif// SIMD_AVX2_ENABLE

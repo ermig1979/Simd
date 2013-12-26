@@ -77,40 +77,40 @@ namespace Test
 		return result;
 	}
 
-	bool Yuv444ToHueTest()
+	bool Yuv444pToHueTest()
 	{
 		bool result = true;
 
-		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv444ToHue), FUNC(SimdYuv444ToHue), false);
-		result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444ToHue), FUNC(SimdYuv444ToHue), false);
-        result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444ToHue), FUNC(SimdYuv444ToHue), false);
+		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+		result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+        result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
-            result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
-            result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444ToHue), FUNC(Simd::Avx2::Yuv444ToHue), false);
+            result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
+            result = result && YuvToHueTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
+            result = result && YuvToHueTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
         }
 #endif 
 
 		return result;
 	}
 
-	bool Yuv420ToHueTest()
+	bool Yuv420pToHueTest()
 	{
 		bool result = true;
 
-		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv420ToHue), FUNC(SimdYuv420ToHue), true);
-		result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420ToHue), FUNC(SimdYuv420ToHue), true);
-        result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420ToHue), FUNC(SimdYuv420ToHue), true);
+		result = result && YuvToHueTest(W, H, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
+		result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
+        result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
-            result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
-            result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420ToHue), FUNC(Simd::Avx2::Yuv420ToHue), true);
+            result = result && YuvToHueTest(W, H, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
+            result = result && YuvToHueTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
+            result = result && YuvToHueTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
         }
 #endif 
 

@@ -556,54 +556,54 @@ namespace Simd
         SimdTexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
     }
 
-    SIMD_INLINE void Yuv444ToBgr(const View & y, const View & u, const View & v, View & bgr)
+    SIMD_INLINE void Yuv444pToBgr(const View & y, const View & u, const View & v, View & bgr)
     {
         assert(Compatible(y, u, v) && EqualSize(y, bgr) && y.format == View::Gray8 && bgr.format == View::Bgr24);
 
-        SimdYuv444ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
+        SimdYuv444pToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
     }
 
-    SIMD_INLINE void Yuv420ToBgr(const View & y, const View & u, const View & v, View & bgr)
+    SIMD_INLINE void Yuv420pToBgr(const View & y, const View & u, const View & v, View & bgr)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
         assert(y.width == bgr.width && y.height == bgr.height);
         assert(y.format == View::Gray8 && bgr.format == View::Bgr24);
 
-        SimdYuv420ToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
+        SimdYuv420pToBgr(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgr.data, bgr.stride);
     }
 
-    SIMD_INLINE void Yuv444ToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
+    SIMD_INLINE void Yuv444pToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(Compatible(y, u, v) && EqualSize(y, bgra) && y.format == View::Gray8 && bgra.format == View::Bgra32);
 
-        SimdYuv444ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
+        SimdYuv444pToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
-    SIMD_INLINE void Yuv420ToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
+    SIMD_INLINE void Yuv420pToBgra(const View & y, const View & u, const View & v, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
         assert(y.width == bgra.width && y.height == bgra.height);
         assert(y.format == View::Gray8 && bgra.format == View::Bgra32);
 
-        SimdYuv420ToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
+        SimdYuv420pToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
-    SIMD_INLINE void Yuv444ToHue(const View & y, const View & u, const View & v, View & hue)
+    SIMD_INLINE void Yuv444pToHue(const View & y, const View & u, const View & v, View & hue)
     {
         assert(Compatible(y, u, v, hue) && y.format == View::Gray8);
 
-        SimdYuv444ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
+        SimdYuv444pToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
     }
 
-    SIMD_INLINE void Yuv420ToHue(const View & y, const View & u, const View & v, View & hue)
+    SIMD_INLINE void Yuv420pToHue(const View & y, const View & u, const View & v, View & hue)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
         assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
         assert(Compatible(y, hue) && y.format == View::Gray8);
 
-        SimdYuv420ToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
+        SimdYuv420pToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
     }
 }
 

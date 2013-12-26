@@ -39,11 +39,11 @@ namespace Test
 
     bool BgrToGrayTest();
 
-    bool Yuv444ToHueTest();
-    bool Yuv420ToHueTest();
+    bool Yuv444pToHueTest();
+    bool Yuv420pToHueTest();
 
-    bool Yuv444ToBgraTest();
-    bool Yuv420ToBgraTest();
+    bool Yuv444pToBgraTest();
+    bool Yuv420pToBgraTest();
 
     bool MedianFilterRhomb3x3Test();
     bool MedianFilterRhomb5x5Test();
