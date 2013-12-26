@@ -55,11 +55,11 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(BgrToGrayTest);
 
-    EXECUTE_TEST(Yuv444ToHueTest);
-    EXECUTE_TEST(Yuv420ToHueTest);
+    EXECUTE_TEST(Yuv444pToHueTest);
+    EXECUTE_TEST(Yuv420pToHueTest);
 
-    EXECUTE_TEST(Yuv444ToBgraTest);
-    EXECUTE_TEST(Yuv420ToBgraTest);
+    EXECUTE_TEST(Yuv444pToBgraTest);
+    EXECUTE_TEST(Yuv420pToBgraTest);
 
     EXECUTE_TEST(MedianFilterRhomb3x3Test);
     EXECUTE_TEST(MedianFilterRhomb5x5Test);

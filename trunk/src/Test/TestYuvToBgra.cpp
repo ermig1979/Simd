@@ -77,40 +77,40 @@ namespace Test
 		return result;
 	}
 
-	bool Yuv444ToBgraTest()
+	bool Yuv444pToBgraTest()
 	{
 		bool result = true;
 
-		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv444ToBgra), FUNC(SimdYuv444ToBgra), false);
-		result = result && YuvToBgraTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444ToBgra), FUNC(SimdYuv444ToBgra), false);
-        result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444ToBgra), FUNC(SimdYuv444ToBgra), false);
+		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+		result = result && YuvToBgraTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+        result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv444ToBgra), FUNC(Simd::Avx2::Yuv444ToBgra), false);
-            result = result && YuvToBgraTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444ToBgra), FUNC(Simd::Avx2::Yuv444ToBgra), false);
-            result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444ToBgra), FUNC(Simd::Avx2::Yuv444ToBgra), false);
+            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv444pToBgra), FUNC(Simd::Avx2::Yuv444pToBgra), false);
+            result = result && YuvToBgraTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444pToBgra), FUNC(Simd::Avx2::Yuv444pToBgra), false);
+            result = result && YuvToBgraTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444pToBgra), FUNC(Simd::Avx2::Yuv444pToBgra), false);
         }
 #endif 
 
 		return result;
 	}
 
-	bool Yuv420ToBgraTest()
+	bool Yuv420pToBgraTest()
 	{
 		bool result = true;
 
-		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv420ToBgra), FUNC(SimdYuv420ToBgra), true);
-        result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420ToBgra), FUNC(SimdYuv420ToBgra), true);
-		result = result && YuvToBgraTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420ToBgra), FUNC(SimdYuv420ToBgra), true);
+		result = result && YuvToBgraTest(W, H, FUNC(Simd::Base::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+        result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+		result = result && YuvToBgraTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv420ToBgra), FUNC(Simd::Avx2::Yuv420ToBgra), true);
-            result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420ToBgra), FUNC(Simd::Avx2::Yuv420ToBgra), true);
-            result = result && YuvToBgraTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420ToBgra), FUNC(Simd::Avx2::Yuv420ToBgra), true);
+            result = result && YuvToBgraTest(W, H, FUNC(Simd::Sse2::Yuv420pToBgra), FUNC(Simd::Avx2::Yuv420pToBgra), true);
+            result = result && YuvToBgraTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420pToBgra), FUNC(Simd::Avx2::Yuv420pToBgra), true);
+            result = result && YuvToBgraTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420pToBgra), FUNC(Simd::Avx2::Yuv420pToBgra), true);
         }
 #endif 
 

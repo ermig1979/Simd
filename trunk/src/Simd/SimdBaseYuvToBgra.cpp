@@ -28,13 +28,13 @@ namespace Simd
 {
     namespace Base
     {
-		SIMD_INLINE void Yuv420ToBgra(const uint8_t *y, int u, int v, int alpha, uint8_t * bgra)
+		SIMD_INLINE void Yuv420pToBgra(const uint8_t *y, int u, int v, int alpha, uint8_t * bgra)
 		{
 			YuvToBgra(y[0], u, v, alpha, bgra);
 			YuvToBgra(y[1], u, v, alpha, bgra + 4);
 		}
 
-		void Yuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			assert((width%2 == 0) && (height%2 == 0) && (width >= 2) && (height >= 2));
@@ -45,8 +45,8 @@ namespace Simd
 				{
 					int u_ = u[colUV];
 					int v_ = v[colUV];
-					Yuv420ToBgra(y + colY, u_, v_, alpha, bgra + colBgra);
-					Yuv420ToBgra(y + yStride + colY, u_, v_, alpha, bgra + bgraStride + colBgra);
+					Yuv420pToBgra(y + colY, u_, v_, alpha, bgra + colBgra);
+					Yuv420pToBgra(y + yStride + colY, u_, v_, alpha, bgra + bgraStride + colBgra);
 				}
 				y += 2*yStride;
 				u += uStride;
@@ -55,7 +55,7 @@ namespace Simd
 			}
 		}
 
-		void Yuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+		void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
 			for(size_t row = 0; row < height; ++row)

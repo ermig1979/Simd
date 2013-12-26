@@ -1639,7 +1639,7 @@ extern "C"
         int32_t shift, uint8_t * dst, size_t dstStride);
 
     /**
-    * \fn void SimdYuv420ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
+    * \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts YUV420P image to 24-bit BGR image. 
     *
@@ -1657,11 +1657,11 @@ extern "C"
     * \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
     * \param [in] bgrStride - a row size of the bgr image.
     */
-    SIMD_API void SimdYuv420ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
     /**
-    * \fn void SimdYuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
+    * \fn void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts YUV444P image to 24-bit BGR image. 
     *
@@ -1678,11 +1678,11 @@ extern "C"
     * \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
     * \param [in] bgrStride - a row size of the bgr image.
     */
-    SIMD_API void SimdYuv444ToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
     /**
-    * \fn void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+    * \fn void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts YUV420P image to 32-bit BGRA image. 
     *
@@ -1701,11 +1701,11 @@ extern "C"
     * \param [in] bgraStride - a row size of the bgra image.
     * \param [in] alpha - a value of alpha channel.
     */
-    SIMD_API void SimdYuv420ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
     /**
-    * \fn void SimdYuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+    * \fn void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts YUV444P image to 32-bit BGRA image. 
     *
@@ -1723,11 +1723,11 @@ extern "C"
     * \param [in] bgraStride - a row size of the bgra image.
     * \param [in] alpha - a value of alpha channel.
     */
-    SIMD_API void SimdYuv444ToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
     /**
-    * \fn void SimdYuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
+    * \fn void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
     * \short Converts YUV420P image to 8-bit image with Hue component of HSV color space. 
     *
@@ -1745,11 +1745,11 @@ extern "C"
     * \param [out] hue - a pointer to pixels data of output 8-bit Hue image.
     * \param [in] hueStride - a row size of the hue image.
     */
-    SIMD_API void SimdYuv420ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
     /**
-    * \fn void SimdYuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
+    * \fn void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
     * \short Converts YUV444P image to 8-bit image with Hue component of HSV color space. 
     *
@@ -1766,7 +1766,7 @@ extern "C"
     * \param [out] hue - a pointer to pixels data of output 8-bit Hue image.
     * \param [in] hueStride - a row size of the hue image.
     */
-    SIMD_API void SimdYuv444ToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+    SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
 #ifdef __cplusplus
