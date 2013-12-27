@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(BgraToGrayTest);
 
+    EXECUTE_TEST(BgrToBgraTest);
     EXECUTE_TEST(Bgr48pToBgra32Test);
 
     EXECUTE_TEST(BgrToGrayTest);
