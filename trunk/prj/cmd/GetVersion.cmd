@@ -41,7 +41,7 @@ echo Create or update file "%SIMD_VERSION_FILE%".
 echo /*>%SIMD_VERSION_FILE%
 echo * Simd Library.>>%SIMD_VERSION_FILE%
 echo *>>%SIMD_VERSION_FILE%
-echo * Copyright (c) 2011-2013 Yermalayeu Ihar.>>%SIMD_VERSION_FILE%
+echo * Copyright (c) 2011-2014 Yermalayeu Ihar.>>%SIMD_VERSION_FILE%
 echo *>>%SIMD_VERSION_FILE%
 echo * Permission is hereby granted, free of charge, to any person obtaining a copy>>%SIMD_VERSION_FILE% 
 echo * of this software and associated documentation files (the "Software"), to deal>>%SIMD_VERSION_FILE%
