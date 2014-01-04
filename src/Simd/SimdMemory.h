@@ -28,16 +28,6 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
-	const size_t DEFAULT_MEMORY_ALIGN = sizeof(__m256i);
-#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE42_ENABLE)
-    const size_t DEFAULT_MEMORY_ALIGN = sizeof(__m128i);
-#else
-    const size_t DEFAULT_MEMORY_ALIGN = sizeof(void*);
-#endif
-
-    //-------------------------------------------------------------------------
-
     SIMD_INLINE size_t AlignHi(size_t size, size_t align)
     {
         return (size + align - 1) & ~(align - 1);
@@ -68,7 +58,7 @@ namespace Simd
         return ((size_t)p)%align == 0;
     }
 
-	SIMD_INLINE void* Allocate(size_t size, size_t align = DEFAULT_MEMORY_ALIGN)
+	SIMD_INLINE void* Allocate(size_t size, size_t align = SIMD_ALIGN)
 	{
 #if defined(SIMD_SSE2_ENABLE) || defined(SIMD_AVX2_ENABLE)
         return _mm_malloc(size, align);
