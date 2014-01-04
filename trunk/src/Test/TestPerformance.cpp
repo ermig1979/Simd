@@ -165,8 +165,8 @@ namespace Test
 
     size_t PerformanceMeasurerStorage::Align(size_t size)
     {
-        s_storage._align = size%Simd::DEFAULT_MEMORY_ALIGN == 0;
-        return s_storage._align ? Simd::DEFAULT_MEMORY_ALIGN : 1;
+        s_storage._align = size%SIMD_ALIGN == 0;
+        return s_storage._align ? SIMD_ALIGN : 1;
     }
 
     static std::string FunctionShortName(const std::string description)

@@ -67,7 +67,7 @@ namespace Simd
         View();
         View(const View & view);
         View(size_t w, size_t h, ptrdiff_t s, Format f, void * d);
-        View(size_t w, size_t h, Format f, void * d = NULL, size_t align = Simd::DEFAULT_MEMORY_ALIGN);
+        View(size_t w, size_t h, Format f, void * d = NULL, size_t align = SIMD_ALIGN);
         View(const Point<ptrdiff_t> size, Format f);
 
         ~View();
@@ -78,7 +78,7 @@ namespace Simd
 
         View & Ref();
 
-        void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = Simd::DEFAULT_MEMORY_ALIGN);
+        void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = SIMD_ALIGN);
         void Recreate(Point<ptrdiff_t> size, Format f);
 
         View Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const;

@@ -37,6 +37,8 @@
 
 #define SIMD_INLINE __forceinline
 
+#define SIMD_ALIGNED(x) __declspec(align(x))
+
 #if !defined(SIMD_SSE2_DEPRECATE) && _MSC_VER >= 1300
 #define SIMD_SSE2_ENABLE
 #endif
@@ -60,6 +62,8 @@
 #elif defined(__GNUC__)
 
 #define SIMD_INLINE inline __attribute__ ((always_inline))
+
+#define SIMD_ALIGNED(x) __attribute__ ((aligned(x)))
 
 #if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
 #define SIMD_SSE2_ENABLE
@@ -101,6 +105,14 @@
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #include <immintrin.h>
+#endif
+
+#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
+#define SIMD_ALIGN sizeof(__m256i)
+#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE42_ENABLE)
+#define SIMD_ALIGN sizeof(__m128i)
+#else
+#define SIMD_ALIGN sizeof(void*)
 #endif
 
 #endif//__SimdDefs_h__

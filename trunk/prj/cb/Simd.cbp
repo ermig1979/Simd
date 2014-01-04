@@ -100,6 +100,9 @@
 		<Unit filename="../../src/Simd/SimdLib.h">
 			<Option virtualFolder="Lib/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdMemory.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdPoint.h">
 			<Option virtualFolder="Utils/" />
 		</Unit>
