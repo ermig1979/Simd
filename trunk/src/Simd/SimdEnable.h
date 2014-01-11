@@ -63,6 +63,7 @@ namespace Simd
 
             //Ecx:
             SSSE3 =	1 << 9,
+            SSE41 = 1 << 19,
             SSE42 = 1 << 20,
             OSXSAVE = 1 << 27,
             AVX = 1 << 28,
@@ -145,6 +146,35 @@ namespace Simd
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
 #endif// SIMD_SSSE3_ENABLE
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                int value = _mm_testz_si128(_mm_set1_epi8(0), _mm_set1_epi8(-1)); // try to execute of SSE41 instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif// SIMD_SSE41_ENABLE
 
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42

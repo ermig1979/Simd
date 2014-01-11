@@ -12,6 +12,7 @@
 			<Depends filename="SimdSsse3.cbp" />
 			<Depends filename="SimdSse42.cbp" />
 			<Depends filename="SimdAvx2.cbp" />
+			<Depends filename="SimdSse41.cbp" />
 		</Project>
 		<Project filename="Test.cbp">
 			<Depends filename="SimdBase.cbp" />
@@ -20,6 +21,8 @@
 			<Depends filename="SimdSse42.cbp" />
 			<Depends filename="SimdAvx2.cbp" />
 			<Depends filename="Simd.cbp" />
+			<Depends filename="SimdSse41.cbp" />
 		</Project>
+		<Project filename="SimdSse41.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

@@ -217,6 +217,9 @@
     <ProjectReference Include="SimdSse2.vcxproj">
       <Project>{91831958-6ad7-4126-8056-e2dd3e12a887}</Project>
     </ProjectReference>
+    <ProjectReference Include="SimdSse41.vcxproj">
+      <Project>{2397c4ee-3030-42e9-b16b-eb074d491887}</Project>
+    </ProjectReference>
     <ProjectReference Include="SimdSse42.vcxproj">
       <Project>{ca3044c1-147b-4884-b3fd-15ece7a24337}</Project>
     </ProjectReference>

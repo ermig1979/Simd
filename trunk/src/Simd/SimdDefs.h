@@ -47,6 +47,10 @@
 #define SIMD_SSSE3_ENABLE
 #endif
 
+#if !defined(SIMD_SSE41_DEPRECATE) && _MSC_VER >= 1500
+#define SIMD_SSE41_ENABLE
+#endif
+
 #if !defined(SIMD_SSE42_DEPRECATE) && _MSC_VER >= 1500
 #define SIMD_SSE42_ENABLE
 #endif
@@ -71,6 +75,10 @@
 
 #if !defined(SIMD_SSSE3_DEPRECATE) && defined(__SSSE3__)
 #define SIMD_SSSE3_ENABLE
+#endif
+
+#if !defined(SIMD_SSE41_DEPRECATE) && defined(__SSE4_1__)
+#define SIMD_SSE41_ENABLE
 #endif
 
 #if !defined(SIMD_SSE42_DEPRECATE) && defined(__SSE4_2__)
@@ -99,6 +107,10 @@
 #include <tmmintrin.h>
 #endif
 
+#ifdef SIMD_SSE41_ENABLE
+#include <smmintrin.h>
+#endif
+
 #ifdef SIMD_SSE42_ENABLE
 #include <nmmintrin.h>
 #endif
@@ -108,11 +120,13 @@
 #endif
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
-#define SIMD_ALIGN sizeof(__m256i)
-#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE42_ENABLE)
-#define SIMD_ALIGN sizeof(__m128i)
+#define SIMD_ALIGN 32
+#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE)
+#define SIMD_ALIGN 16
+#elif (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__)
+#define SIMD_ALIGN 8 
 #else
-#define SIMD_ALIGN sizeof(void*)
+#define SIMD_ALIGN 4 
 #endif
 
 #endif//__SimdDefs_h__
