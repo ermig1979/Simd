@@ -109,6 +109,7 @@ namespace Test
     bool TexturePerformCompensationTest();
 
     bool FillBgraTest();
+    bool FillBgrTest();
 
     bool GrayToBgraTest();
 

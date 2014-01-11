@@ -83,11 +83,48 @@ namespace Simd
             }
         }
 
+        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
+        {
+            size_t size = width*3;
+            size_t step = sizeof(size_t)*3;
+            size_t alignedSize = AlignLo(width, sizeof(size_t))*3;
+            size_t bgrs[3];
+#ifdef SIMD_X64_ENABLE
+            bgrs[0] = size_t(blue) | (size_t(green) << 8) | (size_t(red) << 16) | (size_t(blue) << 24) |
+                (size_t(green) << 32) | (size_t(red) << 40) | (size_t(blue) << 48) | (size_t(green) << 56);
+            bgrs[1] = size_t(red) | (size_t(blue) << 8) | (size_t(green) << 16) | (size_t(red) << 24) |
+                (size_t(blue) << 32) | (size_t(green) << 40) | (size_t(red) << 48) | (size_t(blue) << 56);
+            bgrs[2] = size_t(green) | (size_t(red) << 8) | (size_t(blue) << 16) | (size_t(green) << 24) |
+                (size_t(red) << 32) | (size_t(blue) << 40) | (size_t(green) << 48) | (size_t(red) << 56);
+#else
+            bgrs[0] = size_t(blue) | (size_t(green) << 8) | (size_t(red) << 16) | (size_t(blue) << 24);
+            bgrs[1] = size_t(green) | (size_t(red) << 8) | (size_t(blue) << 16) | (size_t(green) << 24);
+            bgrs[2] = size_t(red) | (size_t(blue) << 8) | (size_t(green) << 16) | (size_t(red) << 24);
+#endif
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t offset = 0;
+                for(; offset < alignedSize; offset += step)
+                {
+                    ((size_t*)(dst + offset))[0] = bgrs[0];
+                    ((size_t*)(dst + offset))[1] = bgrs[1];
+                    ((size_t*)(dst + offset))[2] = bgrs[2];
+                }
+                for(; offset < size; offset += 3)
+                {
+                    (dst + offset)[0] = blue;
+                    (dst + offset)[1] = green;
+                    (dst + offset)[2] = red;
+                }
+                dst += stride;
+            }
+        }
+
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
 
-#if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__)
+#ifdef SIMD_X64_ENABLE
             uint64_t bgra64 = uint64_t(bgra32) | (uint64_t(bgra32) << 32);
             size_t alignedWidth = AlignLo(width, 2);
             for(size_t row = 0; row < height; ++row)

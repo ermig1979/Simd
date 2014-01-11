@@ -1,18 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdBase.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse42.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTypes.h">
       <Filter>Lib</Filter>
     </ClInclude>
@@ -49,11 +37,26 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdMemory.h">
       <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse41.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse42.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
+      <Filter>Alg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +68,9 @@
     </Filter>
     <Filter Include="Utils">
       <UniqueIdentifier>{29109b88-c5f4-48f3-9711-c1e1555556e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg">
+      <UniqueIdentifier>{1bbfb193-0295-4bbf-aa79-9ce0a3706a18}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

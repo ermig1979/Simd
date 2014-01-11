@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(TexturePerformCompensationTest);
 
     EXECUTE_TEST(FillBgraTest);
+    EXECUTE_TEST(FillBgrTest);
 
     EXECUTE_TEST(GrayToBgraTest);
 

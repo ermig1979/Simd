@@ -33,7 +33,7 @@ namespace Simd
         {
             while(p < end)
             {
-#if (defined _MSC_VER && defined _M_X64) || (defined __GNUC__ && defined __x86_64__)
+#ifdef SIMD_X64_ENABLE
                 crc = _mm_crc32_u64(crc, *p++);
 #else
                 crc = _mm_crc32_u32(crc, *p++);
