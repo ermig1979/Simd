@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="SimdSse42" />
+		<Option title="SimdSse41" />
 		<Option platforms="Windows;" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
@@ -10,9 +10,9 @@
 		<Build>
 			<Target title="Debug Win32">
 				<Option platforms="Windows;" />
-				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/SimdSse42" prefix_auto="1" extension_auto="1" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Debug/SimdSse41" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/SimdSse42" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Debug/SimdSse41" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -31,9 +31,9 @@
 				</ResourceCompiler>
 			</Target>
 			<Target title="Release Win32">
-				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/SimdSse42" prefix_auto="1" extension_auto="1" />
+				<Option output="$(ProjectDir)/../../bin/cb/Win32/Release/SimdSse41" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/SimdSse42" />
+				<Option object_output="$(ProjectDir)/../../obj/cb/Win32/Release/SimdSse41" />
 				<Option type="2" />
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
@@ -63,10 +63,10 @@
 		<Unit filename="../../src/Simd/SimdMemory.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdSse42.h">
+		<Unit filename="../../src/Simd/SimdSse41.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdSse42Crc32.cpp">
+		<Unit filename="../../src/Simd/SimdSse41Empty.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdTypes.h">

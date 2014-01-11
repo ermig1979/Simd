@@ -21,23 +21,18 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdSse41_h__
+#define __SimdSse41_h__
 
-//#define SIMD_SSE2_DEPRECATE
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
 
-//#define SIMD_SSSE3_DEPRECATE
-
-//#define SIMD_SSE41_DEPRECATE
-
-//#define SIMD_SSE42_DEPRECATE
-
-//#define SIMD_AVX_DEPRECATE
-
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_STATIC
-
-#endif//__SimdConfig_h__
+namespace Simd
+{
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+    }
+#endif// SIMD_SSE41_ENABLE
+}
+#endif//__SimdSse41_h__
