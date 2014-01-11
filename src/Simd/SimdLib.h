@@ -968,6 +968,21 @@ extern "C"
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
     /**
+    * \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
+    *
+    * \short Fills pixels data of 24-bit BGR image by given color(blue, green, red). 
+    *
+    * \param [out] dst - a pointer to pixels data of destination image.
+    * \param [in] stride - a row size of the dst image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] blue - a blue channel of BGR to fill image.
+    * \param [in] green - a green channel of BGR to fill image.
+    * \param [in] red - a red channel of BGR to fill image.
+    */
+    SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
+
+    /**
     * \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
     *
     * \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha). 

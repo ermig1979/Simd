@@ -308,6 +308,13 @@ namespace Simd
             frame.left, frame.top, frame.right, frame.bottom, value);
     }
 
+    SIMD_INLINE void FillBgr(View & dst, uint8_t blue, uint8_t green, uint8_t red)
+    {
+        assert(dst.format == View::Bgr24);
+
+        SimdFillBgr(dst.data, dst.stride, dst.width, dst.height, blue, green, red);
+    }
+
     SIMD_INLINE void FillBgra(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha = 0xFF)
     {
         assert(dst.format == View::Bgra32);

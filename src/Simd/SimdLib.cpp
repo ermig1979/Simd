@@ -52,6 +52,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSsse3.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
 
@@ -648,6 +649,21 @@ SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t h
                            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
 {
     Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
+}
+
+SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::FillBgr(dst, stride, width, height, blue, green, red);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::FillBgr(dst, stride, width, height, blue, green, red);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::FillBgr(dst, stride, width, height, blue, green, red);
 }
 
 SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
