@@ -22,20 +22,21 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
+#include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-        void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint32_t * sum, size_t sumStride)
+        template <class TSum> void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, TSum * sum, size_t sumStride)
         {
-            memset(sum, 0, sumStride*sizeof(uint32_t));
+            memset(sum, 0, (width + 1)*sizeof(TSum));
             sum += sumStride + 1;
 
             for(size_t row = 0; row < height; row++)
             {
-                uint32_t rowSum = 0;
+                TSum rowSum = 0;
                 sum[-1] = 0;
                 for(size_t col = 0; col < width; col++)
                 {
@@ -47,11 +48,288 @@ namespace Simd
             }
         }
 
-        void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride)
+        template <class TSum, class TSqsum> void IntegralSumSqsum(const uint8_t * src, size_t srcStride, size_t width, size_t height,  
+            TSum * sum, size_t sumStride, TSqsum * sqsum, size_t sqsumStride)
         {
-            assert(sumStride%sizeof(uint32_t) == 0);
+            memset(sum, 0, (width + 1)*sizeof(TSum));
+            sum += sumStride + 1;
 
-            IntegralSum(src, srcStride, width, height, (uint32_t*)sum, sumStride/sizeof(uint32_t));
+            memset(sqsum, 0, (width + 1)*sizeof(TSqsum));
+            sqsum += sqsumStride + 1;
+
+            for(size_t row = 0; row < height; row++)
+            {
+                TSum row_sum = 0;
+                TSqsum row_sqsum = 0;
+                sum[-1] = 0;
+                sqsum[-1] = 0;
+                for(size_t col = 0; col < width; col++)
+                {
+                    TSum value = src[col];
+                    row_sum += value;
+                    row_sqsum += value*value;
+                    sum[col] = row_sum + sum[col - sumStride];
+                    sqsum[col] = row_sqsum + sqsum[col - sqsumStride];
+                }
+                src += srcStride;
+                sum += sumStride;
+                sqsum += sqsumStride;
+            }
+        }
+
+        namespace
+        {
+            template <class T> struct Buffer
+            {
+                Buffer(size_t size)
+                {
+                    _p = Allocate(sizeof(T)*size);
+                    p = (T*)_p;
+                }
+
+                ~Buffer()
+                {
+                    Free(_p);
+                }
+
+                T * p;
+            private:
+                void *_p;
+            };
+        }
+
+        template <class TSum, class TSqsum> void IntegralSumSqsumTilted(const uint8_t * src, ptrdiff_t srcStride, size_t width, size_t height, 
+            TSum * sum, ptrdiff_t sumStride, TSqsum * sqsum, ptrdiff_t sqsumStride, TSum * tilted, ptrdiff_t tiltedStride)
+        {
+            memset(sum, 0, (width + 1)*sizeof(TSum));
+            sum += sumStride + 1;
+
+            memset(sqsum, 0, (width + 1)*sizeof(TSqsum));
+            sqsum += sqsumStride + 1;
+
+            memset(tilted, 0, (width + 1)*sizeof(TSum));
+            tilted += tiltedStride + 1;
+
+            Buffer<TSum> _buffer(width + 1);
+            TSum * buffer = _buffer.p;
+            TSum s = 0;
+            TSqsum sq = 0;
+
+            sum[-1] = 0;
+            tilted[-1] = 0;
+            sqsum[-1] = 0;
+
+            for(size_t col = 0; col < width; col++)
+            {
+                TSum value = src[col];
+                buffer[col] = value;
+                tilted[col] = value;
+                s += value;
+                sq += value*value;
+                sum[col] = s;
+                sqsum[col] = sq;
+            }
+
+            if(width == 1)
+                buffer[0] = 0;
+
+            src++;
+            sum++;
+            sqsum++;
+            tilted++; 
+            buffer++;
+
+            for(size_t row = 1; row < height; ++row)
+            {
+                src += srcStride - 1;
+                sum += sumStride - 1;
+                tilted += tiltedStride - 1;
+                buffer += -1;
+                sqsum += sqsumStride - 1;
+
+                TSum value = src[0];
+                TSum t0 = s = value;
+                TSqsum tq0 = sq = value*value;
+
+                sum[-1] = 0;
+                sqsum[-1] = 0;
+                tilted[-1] = tilted[-tiltedStride];
+
+                sum[0] = sum[-sumStride] + t0;
+                sqsum[0] = sqsum[-sqsumStride] + tq0;
+                tilted[0] = tilted[-tiltedStride] + t0 + buffer[1];
+
+                size_t col;
+                for(col = 1; col < width - 1; ++col)
+                {
+                    TSum t1 = buffer[col];
+                    buffer[col - 1] = t1 + t0;
+                    t0 = value = src[col];
+                    tq0 = value*value;
+                    s += t0;
+                    sq += tq0;
+                    sum[col] = sum[col - sumStride] + s;
+                    sqsum[col] = sqsum[col - sqsumStride] + sq;
+                    t1 += buffer[col + 1] + t0 + tilted[col - tiltedStride - 1];
+                    tilted[col] = t1;
+                }
+
+                if(width > 1)
+                {
+                    TSum t1 = buffer[col];
+                    buffer[col - 1] = t1 + t0;
+                    t0 = value = src[col];
+                    tq0 = value*value;
+                    s += t0;
+                    sq += tq0;
+                    sum[col] = sum[col - sumStride] + s;
+                    sqsum[col] = sqsum[col - sqsumStride] + sq;
+                    tilted[col] = t0 + t1 + tilted[col - tiltedStride - 1];
+                    buffer[col] = t0;
+                }
+
+                src++;
+                sum++;
+                tilted++; 
+                buffer++;
+                sqsum++;
+            }
+        }
+
+        template <class TSum> void IntegralSumTilted(const uint8_t * src, ptrdiff_t srcStride, size_t width, size_t height, 
+            TSum * sum, ptrdiff_t sumStride, TSum * tilted, ptrdiff_t tiltedStride)
+        {
+            memset(sum, 0, (width + 1)*sizeof(TSum));
+            sum += sumStride + 1;
+
+            memset(tilted, 0, (width + 1)*sizeof(TSum));
+            tilted += tiltedStride + 1;
+
+            Buffer<TSum> _buffer(width + 1);
+            TSum * buffer = _buffer.p;
+            TSum s = 0;
+
+            sum[-1] = 0;
+            tilted[-1] = 0;
+
+            for(size_t col = 0; col < width; col++)
+            {
+                TSum value = src[col];
+                buffer[col] = value;
+                tilted[col] = value;
+                s += value;
+                sum[col] = s;
+            }
+
+            if(width == 1)
+                buffer[0] = 0;
+
+            src++;
+            sum++;
+            tilted++; 
+            buffer++;
+
+            for(size_t row = 1; row < height; ++row)
+            {
+                src += srcStride - 1;
+                sum += sumStride - 1;
+                tilted += tiltedStride - 1;
+                buffer += -1;
+
+                TSum value = src[0];
+                TSum t0 = s = value;
+
+                sum[-1] = 0;
+                tilted[-1] = tilted[-tiltedStride];
+
+                sum[0] = sum[-sumStride] + t0;
+                tilted[0] = tilted[-tiltedStride] + t0 + buffer[1];
+
+                size_t col;
+                for(col = 1; col < width - 1; ++col)
+                {
+                    TSum t1 = buffer[col];
+                    buffer[col - 1] = t1 + t0;
+                    t0 = value = src[col];
+                    s += t0;
+                    sum[col] = sum[col - sumStride] + s;
+                    t1 += buffer[col + 1] + t0 + tilted[col - tiltedStride - 1];
+                    tilted[col] = t1;
+                }
+
+                if(width > 1)
+                {
+                    TSum t1 = buffer[col];
+                    buffer[col - 1] = t1 + t0;
+                    t0 = value = src[col];
+                    s += t0;
+                    sum[col] = sum[col - sumStride] + s;
+                    tilted[col] = t0 + t1 + tilted[col - tiltedStride - 1];
+                    buffer[col] = t0;
+                }
+
+                src++;
+                sum++;
+                tilted++; 
+                buffer++;
+            }
+        }
+
+        void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+            SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat)
+        {
+            assert(sumFormat == SimdPixelFormatInt32 && sumStride%sizeof(uint32_t) == 0);
+            if(tilted)
+                assert(tiltedStride%sizeof(uint32_t) == 0);
+
+            if(sqsum)
+            {
+                if(tilted)
+                {
+                    switch(sqsumFormat)
+                    {
+                    case SimdPixelFormatInt32:
+                        IntegralSumSqsumTilted<uint32_t, uint32_t>(src, srcStride, width, height, 
+                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride/sizeof(uint32_t), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                        break;
+                    case SimdPixelFormatDouble:
+                        IntegralSumSqsumTilted<uint32_t, double>(src, srcStride, width, height, 
+                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (double*)sqsum, sqsumStride/sizeof(double), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                        break;
+                    default:
+                        assert(0);
+                    }
+                }
+                else
+                {
+                    switch(sqsumFormat)
+                    {
+                    case SimdPixelFormatInt32:
+                        IntegralSumSqsum<uint32_t, uint32_t>(src, srcStride, width, height, 
+                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride/sizeof(uint32_t));
+                        break;
+                    case SimdPixelFormatDouble:
+                        IntegralSumSqsum<uint32_t, double>(src, srcStride, width, height, 
+                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (double*)sqsum, sqsumStride/sizeof(double));
+                        break;
+                    default:
+                        assert(0);
+                    }
+                }
+            }
+            else
+            {
+                if(tilted)
+                {
+                    IntegralSumTilted<uint32_t>(src, srcStride, width, height, 
+                        (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                }
+                else
+                {
+                    IntegralSum<uint32_t>(src, srcStride, width, height, (uint32_t*)sum, sumStride/sizeof(uint32_t));
+                }
+            }
         }
 	}
 }

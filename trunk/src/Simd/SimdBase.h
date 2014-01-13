@@ -162,7 +162,9 @@ namespace Simd
 
         void Histogram(const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
-        void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+        void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+            SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
         void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
