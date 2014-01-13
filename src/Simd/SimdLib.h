@@ -1077,20 +1077,29 @@ extern "C"
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
     /**
-    * \fn void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+    * \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
     *
-    * \short Calculates integral sum image for 8-bit gray image. 
+    * \short Calculates integral images for input 8-bit gray image. 
     *
-    * A sum image must has width and height per unit greater than that of the input image. 
+    * The function can calculates sum integral image, square sum integral image (optionally) and tilted sum integral image (optionally). 
+    * A integral images must have width and height per unit greater than that of the input image. 
     *
     * \param [in] src - a pointer to pixels data of input 8-bit gray image.
     * \param [in] srcStride - a row size of src image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [out] sum - a pointer to pixels data of sum 32-bit unsigned int image.
+    * \param [out] sum - a pointer to pixels data of sum image. 
     * \param [in] sumStride - a row size of sum image (in bytes).
+    * \param [out] sqsum - a pointer to pixels data of square sum image. It can be NULL.
+    * \param [in] sqsumStride - a row size of sqsum image (in bytes).
+    * \param [out] tilted - a pointer to pixels data of tilted sum image.
+    * \param [in] tiltedStride - a row size of tilted image (in bytes). It can be NULL.
+    * \param [in] sumFormat - a format of sum image and tilted image. It can be equal to ::SimdPixelFormatInt32.
+    * \param [in] sqsumFormat - a format of sqsum image. It can be equal to ::SimdPixelFormatInt32 or ::SimdPixelFormatDouble.
     */
-    SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride);
+    SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+        SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
     /**
     * \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

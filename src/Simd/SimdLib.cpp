@@ -732,9 +732,11 @@ SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, siz
     Base::Histogram(src, width, height, stride, histogram);
 }
 
-SIMD_API void SimdIntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride)
+SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                      uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+                      SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat)
 {
-    Base::IntegralSum(src, srcStride, width, height, sum, sumStride);
+    Base::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
 }
 
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)

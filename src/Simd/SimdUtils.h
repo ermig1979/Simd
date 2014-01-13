@@ -350,12 +350,31 @@ namespace Simd
         SimdHistogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
-    SIMD_INLINE void IntegralSum(const View & src, View & sum)
+    SIMD_INLINE void Integral(const View & src, View & sum)
     {
         assert(src.width + 1 == sum.width && src.height + 1 == sum.height);
         assert(src.format == View::Gray8 && sum.format == View::Int32);
 
-        SimdIntegralSum(src.data, src.stride, src.width, src.height, sum.data, sum.stride);
+        SimdIntegral(src.data, src.stride, src.width, src.height, sum.data, sum.stride, NULL, 0, NULL, 0, 
+            (SimdPixelFormatType)sum.format, SimdPixelFormatNone);
+    }
+
+    SIMD_INLINE void Integral(const View & src, View & sum, View & sqsum)
+    {
+        assert(src.width + 1 == sum.width && src.height + 1 == sum.height && EqualSize(sum, sqsum));
+        assert(src.format == View::Gray8 && sum.format == View::Int32 && (sqsum.format == View::Int32 || sqsum.format == View::Double));
+
+        SimdIntegral(src.data, src.stride, src.width, src.height, sum.data, sum.stride, sqsum.data, sqsum.stride, NULL, 0, 
+            (SimdPixelFormatType)sum.format, (SimdPixelFormatType)sqsum.format);
+    }
+
+    SIMD_INLINE void Integral(const View & src, View & sum, View & sqsum, View & tilted)
+    {
+        assert(src.width + 1 == sum.width && src.height + 1 == sum.height && EqualSize(sum, sqsum) && Compatible(sum, tilted));
+        assert(src.format == View::Gray8 && sum.format == View::Int32 && (sqsum.format == View::Int32 || sqsum.format == View::Double));
+
+        SimdIntegral(src.data, src.stride, src.width, src.height, sum.data, sum.stride, sqsum.data, sqsum.stride, tilted.data, tilted.stride, 
+            (SimdPixelFormatType)sum.format, (SimdPixelFormatType)sqsum.format);
     }
 
     SIMD_INLINE void LbpEstimate(const View & src, View & dst)

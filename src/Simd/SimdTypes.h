@@ -93,4 +93,33 @@ typedef enum SimdOperationType
     SimdOperationSaturatedSubtraction,
 } SimdOperationType;
 
+ /**
+ * \enum SimdPixelFormatType
+ *
+ * Describes pixel format types of an image.
+ */
+typedef enum SimdPixelFormatType
+{
+    /// An undefined pixel format.
+    SimdPixelFormatNone = 0,
+    /// A 8-bit gray pixel format.
+    SimdPixelFormatGray8,
+    /// A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format).
+    SimdPixelFormatUv16,
+    /// A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.
+    SimdPixelFormatBgr24,
+    /// A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.
+    SimdPixelFormatBgra32,
+    /// A single channel 16-bit integer pixel format.
+    SimdPixelFormatInt16,
+    /// A single channel 32-bit integer pixel format.
+    SimdPixelFormatInt32,
+    /// A single channel 64-bit integer pixel format.
+    SimdPixelFormatInt64,
+    /// A single channel 32-bit float point pixel format.
+    SimdPixelFormatFloat,
+    /// A single channel 64-bit float point pixel format.
+    SimdPixelFormatDouble,
+} SimdPixelFormatType;
+
 #endif//__SimdTypes_h__
