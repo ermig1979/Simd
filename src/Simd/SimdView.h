@@ -148,9 +148,14 @@ namespace Simd
         , height(h)
         , stride(s)
         , format(f)
-        , data(d ? (unsigned char*)d : (unsigned char*)Simd::Allocate(height*stride))
-        , _owner(data == NULL)
+        , data((uint8_t*)d)
+        , _owner(false)
     {
+        if(data == NULL && height && width && stride && format != None)
+        {
+            *(void**)&data = Simd::Allocate(height*stride);
+            _owner = true;
+        }
     }
 
     SIMD_INLINE View::View(size_t w, size_t h, Format f, void * d, size_t align)
