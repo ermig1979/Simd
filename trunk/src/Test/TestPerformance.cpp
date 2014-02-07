@@ -169,7 +169,7 @@ namespace Test
         return s_storage._align ? SIMD_ALIGN : 1;
     }
 
-    static std::string FunctionShortName(const std::string description)
+    static std::string FunctionShortName(const std::string & description)
     {
         bool isApi = description.find("Simd::") == std::string::npos;
         if(isApi)
@@ -183,7 +183,7 @@ namespace Test
         }
     }
 
-    static bool Aligned(const std::string description)
+    static bool Aligned(const std::string & description)
     {
         return description[description.size() - 2] == 'a';
     }
