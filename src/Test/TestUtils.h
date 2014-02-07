@@ -44,15 +44,15 @@ namespace Test
 	bool Compare(const Histogram a, const Histogram b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
-    bool Compare(const Sums & a, const Sums b, 
+    bool Compare(const Sums & a, const Sums & b, 
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
 	std::string ColorDescription(View::Format format);
 
     std::string CompareTypeDescription(SimdCompareType type);
 
-    std::string ExpandToLeft(std::string value, size_t count);
-    std::string ExpandToRight(std::string value, size_t count);
+    std::string ExpandToLeft(const std::string & value, size_t count);
+    std::string ExpandToRight(const std::string & value, size_t count);
 
     std::string ToString(double value, size_t iCount, size_t fCount);
 }

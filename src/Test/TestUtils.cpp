@@ -161,7 +161,7 @@ namespace Test
         return Compare(a, b, Simd::HISTOGRAM_SIZE, differenceMax, printError, errorCountMax);
 	}
 
-    bool Compare(const Sums & a, const Sums b, int differenceMax, bool printError, int errorCountMax)
+    bool Compare(const Sums & a, const Sums & b, int differenceMax, bool printError, int errorCountMax)
     {
         assert(a.size() == b.size());
         return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
@@ -195,7 +195,7 @@ namespace Test
         return "(Unknown)";
     }
 
-    std::string ExpandToLeft(std::string value, size_t count)
+    std::string ExpandToLeft(const std::string & value, size_t count)
     {
         assert(count <= value.size());
         std::stringstream ss;
@@ -205,7 +205,7 @@ namespace Test
         return ss.str();
     }
 
-    std::string ExpandToRight(std::string value, size_t count)
+    std::string ExpandToRight(const std::string & value, size_t count)
     {
         assert(count <= value.size());
         std::stringstream ss;
