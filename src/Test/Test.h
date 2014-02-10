@@ -33,6 +33,8 @@ namespace Test
 
     bool Crc32cTest();
 
+    bool BgraToBayerTest();
+
     bool BgraToGrayTest();
 
     bool BgrToBgraTest();

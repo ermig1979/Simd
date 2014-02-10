@@ -474,6 +474,22 @@ extern "C"
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
     /**
+    * \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride);
+    *
+    * \short Converts 32-bit BGRA image to 8-bit Bayer (GRBG) image. 
+    *
+    * All images must have the same width and height. The width and the height must be even.
+    *
+    * \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [out] bayer - a pointer to pixels data of output 8-bit Bayer (GRBG) image.
+    * \param [in] bayerStride - a row size of the bayer image.
+    */
+    SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride);
+
+    /**
     * \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts 32-bit BGRA image to 24-bit BGR image. 

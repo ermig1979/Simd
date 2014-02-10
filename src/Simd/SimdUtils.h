@@ -136,6 +136,14 @@ namespace Simd
         SimdBackgroundInitMask(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
     }
 
+    SIMD_INLINE void BgraToBayer(const View & bgra, View & bayer)
+    {
+        assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32 && bayer.format == View::Bayer);
+        assert((bayer.width%2 == 0) && (bayer.height%2 == 0));
+
+        SimdBgraToBgr(bgra.data, bgra.width, bgra.height, bgra.stride, bayer.data, bayer.stride);
+    }
+
     SIMD_INLINE void BgraToBgr(const View & bgra, View & bgr)
     {
         assert(EqualSize(bgra, bgr) && bgra.format == View::Bgra32 && bgr.format == View::Bgr24);

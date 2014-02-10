@@ -329,7 +329,12 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 
-SIMD_API void SimdBgraToBgr(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *bgr, size_t bgrStride)
+SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride)
+{
+    Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride);
+}
+
+SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
 {
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
