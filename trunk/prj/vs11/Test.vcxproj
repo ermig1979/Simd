@@ -168,6 +168,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgrToBgra.cpp" />

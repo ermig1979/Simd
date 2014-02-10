@@ -43,6 +43,7 @@ namespace Simd
             Int64,
             Float,
             Double,
+            Bayer,
         };
 
         enum Position
@@ -360,6 +361,7 @@ namespace Simd
         case Int64:  return 8;
         case Float:  return 4;
         case Double: return 8;
+        case Bayer:  return 1;
         default: assert(0); return 0;
         }
     }
@@ -383,6 +385,7 @@ namespace Simd
         case Int64:  return 8;
         case Float:  return 4;
         case Double: return 8;
+        case Bayer:  return 1;
         default: assert(0); return 0;
         }
     }
@@ -406,6 +409,7 @@ namespace Simd
         case Int64:  return 1;
         case Float:  return 1;
         case Double: return 1;
+        case Bayer:  return 1;
         default: assert(0); return 0;
         }
     }
