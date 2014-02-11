@@ -138,10 +138,11 @@ namespace Simd
 
     SIMD_INLINE void BgraToBayer(const View & bgra, View & bayer)
     {
-        assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32 && bayer.format == View::Bayer);
+        assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32);
+        assert(bayer.format >= View::BayerGrbg && bayer.format <= View::BayerBggr);
         assert((bayer.width%2 == 0) && (bayer.height%2 == 0));
 
-        SimdBgraToBgr(bgra.data, bgra.width, bgra.height, bgra.stride, bayer.data, bayer.stride);
+        SimdBgraToBayer(bgra.data, bgra.width, bgra.height, bgra.stride, bayer.data, bayer.stride, (SimdPixelFormatType)bayer.format);
     }
 
     SIMD_INLINE void BgraToBgr(const View & bgra, View & bgr)

@@ -27,26 +27,54 @@ namespace Simd
 {
     namespace Base
     {
-        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride)
+        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
         {
             assert((width%2 == 0) && (height%2 == 0));
+            assert(bayerFormat >= SimdPixelFormatBayerGrbg && bayerFormat <= SimdPixelFormatBayerBggr);
 
-            // bgra bgra -> G R 
-            // bgra bgra -> B G 
+            size_t offsets[2][2];
+            switch(bayerFormat)
+            {
+            case SimdPixelFormatBayerGrbg:
+                offsets[0][0] = 1;
+                offsets[0][1] = 6;
+                offsets[1][0] = 0;
+                offsets[1][1] = 5;
+                break;
+            case SimdPixelFormatBayerGbrg:
+                offsets[0][0] = 1;
+                offsets[0][1] = 4;
+                offsets[1][0] = 2;
+                offsets[1][1] = 5;
+                break;
+            case SimdPixelFormatBayerRggb:
+                offsets[0][0] = 2;
+                offsets[0][1] = 5;
+                offsets[1][0] = 1;
+                offsets[1][1] = 4;
+                break;
+            case SimdPixelFormatBayerBggr:
+                offsets[0][0] = 0;
+                offsets[0][1] = 5;
+                offsets[1][0] = 1;
+                offsets[1][1] = 6;
+                break;
+            }
+
             for(size_t row = 0; row < height; row += 2)
             {
                 for(size_t col = 0, offset = 0; col < width; col += 2, offset += 8)
                 {
-                    bayer[col + 0] = bgra[offset + 1];
-                    bayer[col + 1] = bgra[offset + 6];
+                    bayer[col + 0] = bgra[offset + offsets[0][0]];
+                    bayer[col + 1] = bgra[offset + offsets[0][1]];
                 }
                 bgra += bgraStride;
                 bayer += bayerStride;
 
                 for(size_t col = 0, offset = 0; col < width; col += 2, offset += 8)
                 {
-                    bayer[col + 0] = bgra[offset + 0];
-                    bayer[col + 1] = bgra[offset + 5];
+                    bayer[col + 0] = bgra[offset + offsets[1][0]];
+                    bayer[col + 1] = bgra[offset + offsets[1][1]];
                 }
                 bgra += bgraStride;
                 bayer += bayerStride;

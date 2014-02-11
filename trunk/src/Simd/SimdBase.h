@@ -81,7 +81,7 @@ namespace Simd
         void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride);
+        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
         void BgraToBgr(const uint8_t * bgra, size_t size, uint8_t * bgr, bool lastRow);
 

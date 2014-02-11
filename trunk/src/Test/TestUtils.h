@@ -49,6 +49,8 @@ namespace Test
 
 	std::string ColorDescription(View::Format format);
 
+    std::string FormatDescription(View::Format format);
+
     std::string CompareTypeDescription(SimdCompareType type);
 
     std::string ExpandToLeft(const std::string & value, size_t count);

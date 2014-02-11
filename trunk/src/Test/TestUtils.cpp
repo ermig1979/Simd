@@ -174,6 +174,28 @@ namespace Test
 		return ss.str();
 	}
 
+    std::string FormatDescription(View::Format format)
+    {
+        switch(format)
+        {
+        case View::None:      return "None";
+        case View::Gray8:     return "8-bit Gray";
+        case View::Uv16:      return "16-bit UV";
+        case View::Bgr24:     return "24-bit BGR";
+        case View::Bgra32:    return "32-bit BGRA";
+        case View::Int16:     return "16-bit int";
+        case View::Int32:     return "32-bit int";
+        case View::Int64:     return "64-bit int";
+        case View::Float:     return "32-bit float";
+        case View::Double:    return "64-bit float";
+        case View::BayerGrbg: return "Bayer GRBG";
+        case View::BayerGbrg: return "Bayer GBRG";
+        case View::BayerRggb: return "Bayer RGGB";
+        case View::BayerBggr: return "Bayer BGGR";
+        default: assert(0); return "";
+        }
+    }
+
     std::string CompareTypeDescription(SimdCompareType type)
     {
         switch(type)
