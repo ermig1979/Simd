@@ -31,7 +31,7 @@ namespace Test
 	{
 		struct Func
 		{
-			typedef void(*FuncPtr)(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride);
+			typedef void(*FuncPtr)(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 			FuncPtr func;
 			std::string description;
 
@@ -40,30 +40,42 @@ namespace Test
 			void Call(const View & src, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
+				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride, (SimdPixelFormatType)dst.format);
 			}
 		};	
 	}
 
 #define FUNC(func) Func(func, #func)
 
-    bool BgraToBayerTest(int width, int height, const Func & f1, const Func & f2)
+    bool BgraToBayerTest(int width, int height, View::Format format, const Func & f1, const Func & f2)
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "] of " << FormatDescription(format) << "." << std::endl;
 
         View s(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        View d1(width, height, View::Bayer, NULL, TEST_ALIGN(width));
-        View d2(width, height, View::Bayer, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
         result = result && Compare(d1, d2, 0, true, 10);
+
+        return result;
+    }
+
+    bool BgraToBayerTest(int width, int height, const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        for(View::Format format = View::BayerGrbg; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            result = result && BgraToBayerTest(width, height, format, f1, f2);
+        }
 
         return result;
     }

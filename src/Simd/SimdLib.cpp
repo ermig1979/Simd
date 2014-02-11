@@ -329,9 +329,9 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 
-SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride)
+SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
 {
-    Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride);
+    Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
 }
 
 SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)

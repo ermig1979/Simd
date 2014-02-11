@@ -120,8 +120,14 @@ typedef enum SimdPixelFormatType
     SimdPixelFormatFloat,
     /// A single channel 64-bit float point pixel format.
     SimdPixelFormatDouble,
-    /// Bayer pixel format (GRBG).
-    SimdPixelFormatBayer,
+    /// A 8-bit Bayer pixel format (GRBG).
+    SimdPixelFormatBayerGrbg,
+    /// A 8-bit Bayer pixel format (GBRG).
+    SimdPixelFormatBayerGbrg,
+    /// A 8-bit Bayer pixel format (RGGB).
+    SimdPixelFormatBayerRggb,
+    /// A 8-bit Bayer pixel format (BGGR).
+    SimdPixelFormatBayerBggr,
 } SimdPixelFormatType;
 
 #endif//__SimdTypes_h__
