@@ -245,7 +245,7 @@ namespace Test
             sizeMax = std::max(name.size(), sizeMax);
         }
 
-        const size_t ic = std::max<size_t>(2, (size_t)::log10(std::max(timeMax, 0.001)) + 3);
+        const size_t ic = std::max<size_t>(3, (size_t)::log10(std::max(timeMax, 0.001)) + 3);
         const size_t fc = 3;
 
         std::vector<std::string> statistics;

@@ -37,9 +37,12 @@ namespace Simd
 
         SIMD_INLINE void PartialSort5(int a[5])
         {
-            SortU8(a[2], a[3]); SortU8(a[1], a[2]);
-            SortU8(a[2], a[3]); SortU8(a[1], a[4]); 
-            SortU8(a[0], a[3]); SortU8(a[2], a[0]); 
+            SortU8(a[2], a[3]); 
+            SortU8(a[1], a[2]);
+            SortU8(a[2], a[3]); 
+            a[4] = MaxU8(a[1], a[4]); 
+            a[0] = MinU8(a[0], a[3]); 
+            SortU8(a[2], a[0]); 
             a[2] = MaxU8(a[4], a[2]); 
             a[2] = MinU8(a[2], a[0]);
         }
@@ -98,10 +101,16 @@ namespace Simd
 			SortU8(a[1], a[2]); SortU8(a[4], a[5]); SortU8(a[7], a[8]); 
 			SortU8(a[0], a[1]); SortU8(a[3], a[4]); SortU8(a[6], a[7]);
 			SortU8(a[1], a[2]); SortU8(a[4], a[5]); SortU8(a[7], a[8]); 
-			SortU8(a[0], a[3]); SortU8(a[5], a[8]); SortU8(a[4], a[7]);
-			SortU8(a[3], a[6]); SortU8(a[1], a[4]); SortU8(a[2], a[5]); 
-			SortU8(a[4], a[7]); SortU8(a[4], a[2]); SortU8(a[6], a[4]);
-			SortU8(a[4], a[2]);
+            a[3] = MaxU8(a[0], a[3]); 
+            a[5] = MinU8(a[5], a[8]); 
+            SortU8(a[4], a[7]);
+			a[6] = MaxU8(a[3], a[6]); 
+            a[4] = MaxU8(a[1], a[4]); 
+            a[2] = MinU8(a[2], a[5]); 
+			a[4] = MinU8(a[4], a[7]); 
+            SortU8(a[4], a[2]); 
+            a[4] = MaxU8(a[6], a[4]);
+			a[4] = MinU8(a[4], a[2]);
 		}
 
 		void MedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
