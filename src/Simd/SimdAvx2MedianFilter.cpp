@@ -55,9 +55,12 @@ namespace Simd
 
         SIMD_INLINE void PartialSort5(__m256i a[5])
         {
-            SortU8(a[2], a[3]); SortU8(a[1], a[2]);
-            SortU8(a[2], a[3]); SortU8(a[1], a[4]); 
-            SortU8(a[0], a[3]); SortU8(a[2], a[0]); 
+            SortU8(a[2], a[3]); 
+            SortU8(a[1], a[2]);
+            SortU8(a[2], a[3]); 
+            a[4] = _mm256_max_epu8(a[1], a[4]); 
+            a[0] = _mm256_min_epu8(a[0], a[3]); 
+            SortU8(a[2], a[0]); 
             a[2] = _mm256_max_epu8(a[4], a[2]); 
             a[2] = _mm256_min_epu8(a[2], a[0]);
         }
@@ -150,10 +153,16 @@ namespace Simd
             SortU8(a[1], a[2]); SortU8(a[4], a[5]); SortU8(a[7], a[8]); 
             SortU8(a[0], a[1]); SortU8(a[3], a[4]); SortU8(a[6], a[7]);
             SortU8(a[1], a[2]); SortU8(a[4], a[5]); SortU8(a[7], a[8]); 
-            SortU8(a[0], a[3]); SortU8(a[5], a[8]); SortU8(a[4], a[7]);
-            SortU8(a[3], a[6]); SortU8(a[1], a[4]); SortU8(a[2], a[5]); 
-            SortU8(a[4], a[7]); SortU8(a[4], a[2]); SortU8(a[6], a[4]);
-            SortU8(a[4], a[2]);
+            a[3] = _mm256_max_epu8(a[0], a[3]); 
+            a[5] = _mm256_min_epu8(a[5], a[8]); 
+            SortU8(a[4], a[7]);
+            a[6] = _mm256_max_epu8(a[3], a[6]); 
+            a[4] = _mm256_max_epu8(a[1], a[4]); 
+            a[2] = _mm256_min_epu8(a[2], a[5]); 
+            a[4] = _mm256_min_epu8(a[4], a[7]); 
+            SortU8(a[4], a[2]); 
+            a[4] = _mm256_max_epu8(a[6], a[4]);
+            a[4] = _mm256_min_epu8(a[4], a[2]);
         }
 
         template <bool align, size_t step> void MedianFilterSquare3x3(
