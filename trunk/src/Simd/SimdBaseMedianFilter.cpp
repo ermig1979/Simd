@@ -172,15 +172,24 @@ namespace Simd
             SortU8(a[8] , a[9] ); SortU8(a[11], a[12]); SortU8(a[5] , a[8] ); 
             SortU8(a[2] , a[8] ); SortU8(a[2] , a[5] ); SortU8(a[6] , a[9] ); 
             SortU8(a[3] , a[9] ); SortU8(a[3] , a[6] ); SortU8(a[7] , a[10]); 
-            SortU8(a[4] , a[10]); SortU8(a[4] , a[7] ); SortU8(a[2] , a[11]); 
-            SortU8(a[3] , a[12]); SortU8(a[0] , a[9] ); SortU8(a[1] , a[10]);
-            SortU8(a[1] , a[7] ); SortU8(a[1] , a[9] ); SortU8(a[5] , a[11]);
-            SortU8(a[3] , a[11]); SortU8(a[0] , a[6] ); SortU8(a[1] , a[8] ); 
-            SortU8(a[6] , a[8] ); SortU8(a[4] , a[8] ); SortU8(a[0] , a[1] );
-            SortU8(a[4] , a[6] ); SortU8(a[0] , a[4] ); SortU8(a[0] , a[11]);
-            SortU8(a[6] , a[11]); SortU8(a[1] , a[11]); SortU8(a[1] , a[4] );
-            SortU8(a[6] , a[12]); SortU8(a[1] , a[6] ); SortU8(a[4] , a[12]);
-            SortU8(a[4] , a[6] );
+            SortU8(a[4] , a[10]); SortU8(a[4] , a[7] ); SortU8(a[3] , a[12]); 
+            SortU8(a[0] , a[9] ); 
+            a[1] = MinU8(a[1], a[10]);
+            a[1] = MinU8(a[1], a[7]); 
+            a[1] = MinU8(a[1], a[9]); 
+            a[11] = MaxU8(a[5], a[11]);
+            a[11] = MaxU8(a[3], a[11]); 
+            a[11] = MaxU8(a[2], a[11]); 
+            SortU8(a[0] , a[6] ); SortU8(a[1] , a[8] ); SortU8(a[6] , a[8] ); 
+            a[4] = MinU8(a[4], a[8]); 
+            SortU8(a[0] , a[1] ); SortU8(a[4] , a[6] ); SortU8(a[0] , a[4] ); 
+            a[11] = MaxU8(a[0], a[11]);
+            SortU8(a[6] , a[11]); 
+            a[1] = MinU8(a[1], a[11]); 
+            SortU8(a[1] , a[4] ); SortU8(a[6] , a[12]); 
+            a[6] = MaxU8(a[1], a[6]); 
+            a[4] = MinU8(a[4], a[12]);
+            a[6] = MaxU8(a[4], a[6]);
         }
 
         void MedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
