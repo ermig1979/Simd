@@ -82,6 +82,10 @@ namespace Simd
 
 		template <typename TP> Rectangle<T> & Shift(const Point<TP> & shift);
 		template <typename TX, typename TY> Rectangle<T> & Shift(TX shiftX, TY shiftY);
+
+        template <typename TP> Rectangle<T> Shifted(const Point<TP> & shift) const;
+        template <typename TX, typename TY> Rectangle<T> Shifted(TX shiftX, TY shiftY) const;
+
         template <typename TB> Rectangle<T> & AddBorder(TB border);
 
         template <typename TR> Rectangle<T> Intersection(const Rectangle<TR> & r) const;
@@ -340,11 +344,7 @@ namespace Simd
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::Shift(const Point<TP> & shift)
 	{
-		left += (T)shift.x;
-		top += (T)shift.y;
-		right += (T)shift.x;
-		bottom += (T)shift.y;
-		return *this;
+        return Shift(shift.x, shift.y);
 	}
 
 	template <typename T> template <typename TX, typename TY> 
@@ -356,6 +356,18 @@ namespace Simd
 		bottom += (T)shiftY;
 		return *this;
 	}
+
+    template <typename T> template <typename TP> 
+    SIMD_INLINE Rectangle<T> Rectangle<T>::Shifted(const Point<TP> & shift) const
+    {
+        return Shifted(shift.x, shift.y);
+    }
+
+    template <typename T> template <typename TX, typename TY> 
+    SIMD_INLINE Rectangle<T> Rectangle<T>::Shifted(TX shiftX, TY shiftY) const
+    {
+        return Rectangle<T>(left + (T)shiftX, top + (T)shiftY, right + (T)shiftX, bottom + (T)shiftY);
+    }
 
     template <typename T> template <typename TB> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::AddBorder(TB border)
