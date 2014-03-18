@@ -35,5 +35,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToBgra.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToGray.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

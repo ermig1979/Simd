@@ -84,6 +84,16 @@ namespace Test
             result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
         }
 #endif 
+
+#if defined(SIMD_SSSE3_ENABLE)
+        if(Simd::Ssse3::Enable)
+        {
+            result = result && BgrToGrayTest(W, H, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+            result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+            result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+        }
+#endif 
+
 		return result;    
     }
 }

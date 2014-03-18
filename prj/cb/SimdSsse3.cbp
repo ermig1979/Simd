@@ -70,6 +70,9 @@
 		<Unit filename="../../src/Simd/SimdSsse3BgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSsse3BgrToGray.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSsse3BgraToBgr.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
