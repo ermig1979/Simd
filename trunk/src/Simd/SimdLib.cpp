@@ -391,7 +391,12 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+    else
+#endif//SIMD_SSSE3_ENABLE  
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
