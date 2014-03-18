@@ -63,7 +63,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-        result = result && Compare(d1, d2, 0, true, 10);
+        result = result && Compare(d1, d2, 0, true, 64);
 
         return result;
     }
