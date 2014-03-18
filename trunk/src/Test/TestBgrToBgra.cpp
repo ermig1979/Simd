@@ -78,12 +78,12 @@ namespace Test
         result = result && BgrToBgraTest(W + 1, H - 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
         result = result && BgrToBgraTest(W - 1, H + 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
 
-#if defined(SIMD_SSSE3_ENABLE)
-        if(Simd::Ssse3::Enable)
+#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
         {
-            result = result && BgrToBgraTest(W, H, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
-            result = result && BgrToBgraTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
-            result = result && BgrToBgraTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
+            result = result && BgrToBgraTest(W, H, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
+            result = result && BgrToBgraTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
+            result = result && BgrToBgraTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
         }
 #endif 
 
