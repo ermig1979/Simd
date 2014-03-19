@@ -421,11 +421,11 @@ namespace Simd
         SimdMedianFilterSquare5x5(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
-    SIMD_INLINE void Operation(const View & a, const View & b, View & dst, SimdOperationType type)
+    SIMD_INLINE void OperationBinary8u(const View & a, const View & b, View & dst, SimdOperationBinary8uType type)
     {
         assert(Compatible(a, b, dst) && a.ChannelSize() == 1);
 
-        SimdOperation(a.data, a.stride, b.data, b.stride, a.width, a.height, a.ChannelCount(), dst.data, dst.stride, type);
+        SimdOperationBinary8u(a.data, a.stride, b.data, b.stride, a.width, a.height, a.ChannelCount(), dst.data, dst.stride, type);
     }
 
     SIMD_INLINE void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View & dst)
