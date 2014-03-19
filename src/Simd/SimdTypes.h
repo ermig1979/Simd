@@ -78,8 +78,8 @@ typedef enum SimdCompareType
  /**
  * \enum SimdOperationBinary8uType
  *
- * Describes types of operation between two images performed by function ::SimdOperationBinary8u.
- * Images must have the same format (8-bit per channel).
+ * Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
+ * Images must have the same format (unsigned 8-bit integer for every channel).
  */
 typedef enum SimdOperationBinary8uType
 {
@@ -92,6 +92,18 @@ typedef enum SimdOperationBinary8uType
     ///Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
     SimdOperationBinary8uSaturatedSubtraction,
 } SimdOperationBinary8uType;
+
+ /**
+ * \enum SimdOperationBinary16iType
+ *
+ * Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
+ * Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
+ */
+typedef enum SimdOperationBinary16iType
+{
+    /// Perform addition of two images for every point. 
+    SimdOperationBinary16iAddition,
+} SimdOperationBinary16iType;
 
  /**
  * \enum SimdPixelFormatType
