@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(DeinterleaveUvTest);
 
     EXECUTE_TEST(OperationBinary8uTest);
+    EXECUTE_TEST(OperationBinary16iTest);
     EXECUTE_TEST(VectorProductTest);
 
     EXECUTE_TEST(AbsSecondDerivativeHistogramTest);

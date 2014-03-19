@@ -1211,7 +1211,7 @@ extern "C"
     *
     * \short Performs given operation between two images. 
     *
-    * All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+    * All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA). 
     *
     * \param [in] a - a pointer to pixels data of the first input image.
     * \param [in] aStride - a row size of the first image.
@@ -1226,6 +1226,27 @@ extern "C"
     */
     SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
+
+    /**
+    * \fn void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
+    *
+    * \short Performs given operation between two images. 
+    *
+    * All images must have the same width, height and ::SimdPixelFormatInt16 pixel format. 
+    *
+    * \param [in] a - a pointer to pixels data of the first input image.
+    * \param [in] aStride - a row size of the first image.
+    * \param [in] b - a pointer to pixels data of the second input image.
+    * \param [in] bStride - a row size of the second image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] channelCount - a channel count.
+    * \param [out] dst - a pointer to pixels data of filtered output image.
+    * \param [in] dstStride - a row size of dst image.
+    * \param [in] type - a type of operation (see ::SimdOperationBinary16iType).
+    */
+    SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
     /**
     * \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);

@@ -82,6 +82,41 @@ namespace Simd
 			}
 		}
 
+        template <SimdOperationBinary16iType type> SIMD_INLINE int16_t OperationBinary16i(const int16_t & a, const int16_t & b);
+
+        template <> SIMD_INLINE int16_t OperationBinary16i<SimdOperationBinary16iAddition>(const int16_t & a, const int16_t & b)
+        {
+            return a + b;
+        }
+
+        template <SimdOperationBinary16iType type> void OperationBinary16i(const int16_t * a, size_t aStride, const int16_t * b, size_t bStride, 
+            size_t width, size_t height, int16_t * dst, size_t dstStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                    dst[col] = OperationBinary16i<type>(a[col], b[col]);
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            assert(aStride%sizeof(int16_t) == 0 && bStride%sizeof(int16_t) == 0 && dstStride%sizeof(int16_t) == 0);
+
+            switch(type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<SimdOperationBinary16iAddition>(
+                    (const int16_t*)a, aStride/sizeof(int16_t), (const int16_t*)b, bStride/sizeof(int16_t), width, height, (int16_t*)dst, dstStride/sizeof(int16_t));
+            default:
+                assert(0);
+            }
+        }
+
         void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
         {
             for(size_t row = 0; row < height; ++row)

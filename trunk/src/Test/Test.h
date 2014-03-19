@@ -68,6 +68,7 @@ namespace Test
     bool DeinterleaveUvTest();
 
     bool OperationBinary8uTest();
+    bool OperationBinary16iTest();
     bool VectorProductTest();
 
     bool AbsSecondDerivativeHistogramTest();

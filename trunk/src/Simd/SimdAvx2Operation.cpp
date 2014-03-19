@@ -111,6 +111,63 @@ namespace Simd
 				OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
 
+        template <SimdOperationBinary16iType type> SIMD_INLINE __m256i OperationBinary16i(const __m256i & a, const __m256i & b);
+
+        template <> SIMD_INLINE __m256i OperationBinary16i<SimdOperationBinary16iAddition>(const __m256i & a, const __m256i & b)
+        {
+            return _mm256_add_epi16(a, b);
+        }
+
+        template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+            size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(width*sizeof(uint16_t) >= A);
+            if(align)
+                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
+
+            size_t size = width*sizeof(int16_t);
+            size_t alignedSize = Simd::AlignLo(size, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t offset = 0; offset < alignedSize; offset += A)
+                {
+                    const __m256i a_ = Load<align>((__m256i*)(a + offset));
+                    const __m256i b_ = Load<align>((__m256i*)(b + offset));
+                    Store<align>((__m256i*)(dst + offset), OperationBinary16i<type>(a_, b_));
+                }
+                if(alignedSize != size)
+                {
+                    const __m256i a_ = Load<false>((__m256i*)(a + size - A));
+                    const __m256i b_ = Load<false>((__m256i*)(b + size - A));
+                    Store<false>((__m256i*)(dst + size - A), OperationBinary16i<type>(a_, b_));
+                }
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            switch(type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+                OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+            else
+                OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+        }
+
         template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uint8_t * horizontal, uint8_t * dst)
         {
             __m256i _horizontal = Load<align>((__m256i*)horizontal);
