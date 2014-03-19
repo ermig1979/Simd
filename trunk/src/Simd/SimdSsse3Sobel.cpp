@@ -25,26 +25,26 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSsse3.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSSE3_ENABLE    
+    namespace Ssse3
     {
-        template<bool align> SIMD_INLINE void SobelDx(__m128i a[3][2], int16_t * dst)
+        template<bool align> SIMD_INLINE void SobelDxAbs(__m128i a[3][2], int16_t * dst)
         {
-            Store<align>((__m128i*)dst + 0, BinomialSum16(
+            Store<align>((__m128i*)dst + 0, _mm_abs_epi16(BinomialSum16(
                 _mm_sub_epi16(_mm_unpacklo_epi8(a[0][1], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
                 _mm_sub_epi16(_mm_unpacklo_epi8(a[1][1], K_ZERO), _mm_unpacklo_epi8(a[1][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][1], K_ZERO), _mm_unpacklo_epi8(a[2][0], K_ZERO)))); 
-            Store<align>((__m128i*)dst + 1, BinomialSum16(
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][1], K_ZERO), _mm_unpacklo_epi8(a[2][0], K_ZERO))))); 
+            Store<align>((__m128i*)dst + 1, _mm_abs_epi16(BinomialSum16(
                 _mm_sub_epi16(_mm_unpackhi_epi8(a[0][1], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
                 _mm_sub_epi16(_mm_unpackhi_epi8(a[1][1], K_ZERO), _mm_unpackhi_epi8(a[1][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][1], K_ZERO), _mm_unpackhi_epi8(a[2][0], K_ZERO)))); 
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][1], K_ZERO), _mm_unpackhi_epi8(a[2][0], K_ZERO))))); 
         }
 
-        template <bool align> void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool align> void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width >= A);
             if(align)
@@ -67,46 +67,46 @@ namespace Simd
                 LoadNoseDx(src0 + 0, a[0]);
                 LoadNoseDx(src1 + 0, a[1]);
                 LoadNoseDx(src2 + 0, a[2]);
-                SobelDx<align>(a, dst + 0);
+                SobelDxAbs<align>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBodyDx(src0 + col, a[0]);
                     LoadBodyDx(src1 + col, a[1]);
                     LoadBodyDx(src2 + col, a[2]);
-                    SobelDx<align>(a, dst + col);
+                    SobelDxAbs<align>(a, dst + col);
                 }
                 LoadTailDx(src0 + width - A, a[0]);
                 LoadTailDx(src1 + width - A, a[1]);
                 LoadTailDx(src2 + width - A, a[2]);
-                SobelDx<false>(a, dst + width - A);
+                SobelDxAbs<false>(a, dst + width - A);
 
                 dst += dstStride;
             }
         }
 
-        void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
             if(Aligned(dst) && Aligned(dstStride))
-                SobelDx<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDxAbs<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
-                SobelDx<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDxAbs<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
-        template<bool align> SIMD_INLINE void SobelDy(__m128i a[2][3], int16_t * dst)
+        template<bool align> SIMD_INLINE void SobelDyAbs(__m128i a[2][3], int16_t * dst)
         {
-            Store<align>((__m128i*)dst + 0, BinomialSum16(
+            Store<align>((__m128i*)dst + 0, _mm_abs_epi16(BinomialSum16(
                 _mm_sub_epi16(_mm_unpacklo_epi8(a[1][0], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
                 _mm_sub_epi16(_mm_unpacklo_epi8(a[1][1], K_ZERO), _mm_unpacklo_epi8(a[0][1], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][2], K_ZERO), _mm_unpacklo_epi8(a[0][2], K_ZERO)))); 
-            Store<align>((__m128i*)dst + 1, BinomialSum16(
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][2], K_ZERO), _mm_unpacklo_epi8(a[0][2], K_ZERO))))); 
+            Store<align>((__m128i*)dst + 1, _mm_abs_epi16(BinomialSum16(
                 _mm_sub_epi16(_mm_unpackhi_epi8(a[1][0], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
                 _mm_sub_epi16(_mm_unpackhi_epi8(a[1][1], K_ZERO), _mm_unpackhi_epi8(a[0][1], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][2], K_ZERO), _mm_unpackhi_epi8(a[0][2], K_ZERO)))); 
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][2], K_ZERO), _mm_unpackhi_epi8(a[0][2], K_ZERO))))); 
         }
 
-        template <bool align> void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool align> void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width >= A);
             if(align)
@@ -128,30 +128,30 @@ namespace Simd
 
                 LoadNose3<align, 1>(src0 + 0, a[0]);
                 LoadNose3<align, 1>(src2 + 0, a[1]);
-                SobelDy<align>(a, dst + 0);
+                SobelDyAbs<align>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBody3<align, 1>(src0 + col, a[0]);
                     LoadBody3<align, 1>(src2 + col, a[1]);
-                    SobelDy<align>(a, dst + col);
+                    SobelDyAbs<align>(a, dst + col);
                 }
                 LoadTail3<false, 1>(src0 + width - A, a[0]);
                 LoadTail3<false, 1>(src2 + width - A, a[1]);
-                SobelDy<false>(a, dst + width - A);
+                SobelDyAbs<false>(a, dst + width - A);
 
                 dst += dstStride;
             }
         }
 
-        void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                SobelDy<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDyAbs<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
-                SobelDy<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDyAbs<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif// SIMD_SSSE3_ENABLE
 }

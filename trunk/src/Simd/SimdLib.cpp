@@ -980,6 +980,21 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
         Base::SobelDx(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSSE3_ENABLE
+        Base::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -993,6 +1008,21 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
     else
 #endif//SIMD_SSE2_ENABLE
         Base::SobelDy(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSSE3_ENABLE
+        Base::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
 }
 
 SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 

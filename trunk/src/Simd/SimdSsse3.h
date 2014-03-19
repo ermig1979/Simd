@@ -40,6 +40,10 @@ namespace Simd
 
         void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     }
 #endif// SIMD_SSSE3_ENABLE
 }

@@ -22,17 +22,25 @@
 * SOFTWARE.
 */
 #include "Simd/SimdBase.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
 	namespace Base
 	{
-        SIMD_INLINE int SobelDx(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x2)
+        template <bool abs> int SobelDx(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x2);
+
+        template <> SIMD_INLINE int SobelDx<false>(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x2)
         {
             return (s0[x2] + 2*s1[x2] + s2[x2]) - (s0[x0] + 2*s1[x0] + s2[x0]);
         }
 
-        void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <> SIMD_INLINE int SobelDx<true>(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x2)
+        {
+            return Simd::Abs(SobelDx<false>(s0, s1, s2, x0, x2));
+        }
+
+        template <bool abs> void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             const uint8_t *src0, *src1, *src2;
 
@@ -46,12 +54,12 @@ namespace Simd
                 if(row == height - 1)
                     src2 = src1;
 
-                dst[0] = SobelDx(src0, src1, src2, 0, 1);
+                dst[0] = SobelDx<abs>(src0, src1, src2, 0, 1);
 
                 for(size_t col = 1; col < width - 1; ++col)
-                    dst[col] = SobelDx(src0, src1, src2, col - 1, col + 1);
+                    dst[col] = SobelDx<abs>(src0, src1, src2, col - 1, col + 1);
 
-                dst[width - 1] = SobelDx(src0, src1, src2, width - 2, width - 1);
+                dst[width - 1] = SobelDx<abs>(src0, src1, src2, width - 2, width - 1);
 
                 dst += dstStride;
             }
@@ -61,15 +69,29 @@ namespace Simd
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
-            SobelDx(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            SobelDx<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
-        SIMD_INLINE int SobelDy(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
+        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            SobelDx<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        template <bool abs> SIMD_INLINE int SobelDy(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2);
+
+        template <> SIMD_INLINE int SobelDy<false>(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
         {
             return (s2[x0] + 2*s2[x1] + s2[x2]) - (s0[x0] + 2*s0[x1] + s0[x2]);
         }
 
-        void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <> SIMD_INLINE int SobelDy<true>(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
+        {
+            return Simd::Abs(SobelDy<false>(s0, s2, x0, x1, x2));
+        }
+
+        template <bool abs> void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             const uint8_t *src0, *src1, *src2;
 
@@ -83,12 +105,12 @@ namespace Simd
                 if(row == height - 1)
                     src2 = src1;
 
-                dst[0] = SobelDy(src0, src2, 0, 0, 1);
+                dst[0] = SobelDy<abs>(src0, src2, 0, 0, 1);
 
                 for(size_t col = 1; col < width - 1; ++col)
-                    dst[col] = SobelDy(src0, src2, col - 1, col, col + 1);
+                    dst[col] = SobelDy<abs>(src0, src2, col - 1, col, col + 1);
 
-                dst[width - 1] = SobelDy(src0, src2, width - 2, width - 1, width - 1);
+                dst[width - 1] = SobelDy<abs>(src0, src2, width - 2, width - 1, width - 1);
 
                 dst += dstStride;
             }
@@ -98,7 +120,14 @@ namespace Simd
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
-            SobelDy(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            SobelDy<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            SobelDy<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
     }
 }
