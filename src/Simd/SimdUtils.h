@@ -493,11 +493,25 @@ namespace Simd
         SimdSobelDx(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    SIMD_INLINE void SobelDxAbs(const View & src, View & dst)
+    {
+        assert(EqualSize(src, dst) && src.format == View::Gray8 && dst.format == View::Int16);
+
+        SimdSobelDxAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
     SIMD_INLINE void SobelDy(const View & src, View & dst)
     {
         assert(EqualSize(src, dst) && src.format == View::Gray8 && dst.format == View::Int16);
 
         SimdSobelDy(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
+    SIMD_INLINE void SobelDyAbs(const View & src, View & dst)
+    {
+        assert(EqualSize(src, dst) && src.format == View::Gray8 && dst.format == View::Int16);
+
+        SimdSobelDyAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
     SIMD_INLINE void SquaredDifferenceSum(const View & a, const View & b, uint64_t & sum)

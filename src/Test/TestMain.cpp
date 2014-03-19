@@ -137,7 +137,9 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(ConditionalSquareGradientSumTest);
 
     EXECUTE_TEST(SobelDxTest);
+    EXECUTE_TEST(SobelDxAbsTest);
     EXECUTE_TEST(SobelDyTest);
+    EXECUTE_TEST(SobelDyAbsTest);
 
     EXECUTE_TEST(BgraToBgrTest);
 

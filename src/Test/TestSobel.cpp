@@ -95,6 +95,20 @@ namespace Test
         return result;
     }
 
+    bool SobelDxAbsTest()
+    {
+        bool result = true;
+
+        result = result && SobelTest(ARGS(Simd::Base::SobelDxAbs, SimdSobelDxAbs));
+
+#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
+            result = result && SobelTest(ARGS(Simd::Ssse3::SobelDxAbs, Simd::Avx2::SobelDxAbs));
+#endif 
+
+        return result;
+    }
+
     bool SobelDyTest()
     {
         bool result = true;
@@ -104,6 +118,20 @@ namespace Test
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
             result = result && SobelTest(ARGS(Simd::Sse2::SobelDy, Simd::Avx2::SobelDy));
+#endif 
+
+        return result;
+    }
+
+    bool SobelDyAbsTest()
+    {
+        bool result = true;
+
+        result = result && SobelTest(ARGS(Simd::Base::SobelDyAbs, SimdSobelDyAbs));
+
+#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
+            result = result && SobelTest(ARGS(Simd::Ssse3::SobelDyAbs, Simd::Avx2::SobelDyAbs));
 #endif 
 
         return result;

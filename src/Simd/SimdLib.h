@@ -1411,6 +1411,25 @@ extern "C"
     SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     /**
+    * \fn void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates absolute value of Sobel's filter along x axis. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    *
+    * For every point: 
+    * \n dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+    *
+    * \param [in] src - a pointer to pixels data of the foreground input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of the output image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+    /**
     * \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates Sobel's filter along y axis. 
@@ -1428,6 +1447,25 @@ extern "C"
     * \param [in] dstStride - a row size of the output image (in bytes).
     */
     SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    
+    /**
+    * \fn void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+    *
+    * \short Calculates absolute value of Sobel's filter along y axis. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    *
+    * For every point: 
+    * \n dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+    *
+    * \param [in] src - a pointer to pixels data of the foreground input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of the output image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     /**
     * \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);

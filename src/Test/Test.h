@@ -123,7 +123,9 @@ namespace Test
     bool ConditionalSquareGradientSumTest();
 
     bool SobelDxTest();
+    bool SobelDxAbsTest();
     bool SobelDyTest();
+    bool SobelDyAbsTest();
 
     bool BgraToBgrTest();
 }
