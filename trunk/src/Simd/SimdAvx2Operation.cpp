@@ -8,7 +8,7 @@
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
 * copies of the Software, and to permit persons to whom the Software is 
-* furnished to do so, subject to the following conditions:
+* furnished to do so, subject to the following conditions:SimdOperationBinary8u
 *
 * The above copyright notice and this permission notice shall be included in 
 * all copies or substantial portions of the Software.
@@ -33,29 +33,29 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-		template <SimdOperationType type> SIMD_INLINE __m256i Operation(const __m256i & a, const __m256i & b);
+		template <SimdOperationBinary8uType type> SIMD_INLINE __m256i OperationBinary8u(const __m256i & a, const __m256i & b);
 
-		template <> SIMD_INLINE __m256i Operation<SimdOperationAverage>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uAverage>(const __m256i & a, const __m256i & b)
 		{
 			return _mm256_avg_epu8(a, b);
 		}
 
-		template <> SIMD_INLINE __m256i Operation<SimdOperationAnd>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uAnd>(const __m256i & a, const __m256i & b)
 		{
 			return _mm256_and_si256(a, b);
 		}
 
-		template <> SIMD_INLINE __m256i Operation<SimdOperationMaximum>(const __m256i & a, const __m256i & b)
+		template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uMaximum>(const __m256i & a, const __m256i & b)
 		{
 			return _mm256_max_epu8(a, b);
 		}
 
-        template <> SIMD_INLINE __m256i Operation<SimdOperationSaturatedSubtraction>(const __m256i & a, const __m256i & b)
+        template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(const __m256i & a, const __m256i & b)
         {
             return _mm256_subs_epu8(a, b);
         }
 
-		template <bool align, SimdOperationType type> void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+		template <bool align, SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
 			assert(width*channelCount >= A);
@@ -70,13 +70,13 @@ namespace Simd
 				{
 					const __m256i a_ = Load<align>((__m256i*)(a + offset));
 					const __m256i b_ = Load<align>((__m256i*)(b + offset));
-					Store<align>((__m256i*)(dst + offset), Operation<type>(a_, b_));
+					Store<align>((__m256i*)(dst + offset), OperationBinary8u<type>(a_, b_));
 				}
 				if(alignedSize != size)
 				{
 					const __m256i a_ = Load<false>((__m256i*)(a + size - A));
 					const __m256i b_ = Load<false>((__m256i*)(b + size - A));
-					Store<false>((__m256i*)(dst + size - A), Operation<type>(a_, b_));
+					Store<false>((__m256i*)(dst + size - A), OperationBinary8u<type>(a_, b_));
 				}
 				a += aStride;
 				b += bStride;
@@ -84,31 +84,31 @@ namespace Simd
 			}
 		}
 
-		template <bool align> void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
+		template <bool align> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
 		{
 			switch(type)
 			{
-			case SimdOperationAverage:
-				return Operation<align, SimdOperationAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case SimdOperationAnd:
-				return Operation<align, SimdOperationAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case SimdOperationMaximum:
-				return Operation<align, SimdOperationMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-            case SimdOperationSaturatedSubtraction:
-                return Operation<align, SimdOperationSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationBinary8uAverage:
+				return OperationBinary8u<align, SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationBinary8uAnd:
+				return OperationBinary8u<align, SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+			case SimdOperationBinary8uMaximum:
+				return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedSubtraction:
+                return OperationBinary8u<align, SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}
 		}
 
-		void Operation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
-			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
+		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
 		{
 			if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-				Operation<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+				OperationBinary8u<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 			else
-				Operation<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+				OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
 
         template <bool align> SIMD_INLINE void VectorProduct(const __m256i & vertical, const uint8_t * horizontal, uint8_t * dst)

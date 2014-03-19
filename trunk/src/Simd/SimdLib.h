@@ -1207,7 +1207,7 @@ extern "C"
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
     /**
-    * \fn void SimdOperation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type);
+    * \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
     *
     * \short Performs given operation between two images. 
     *
@@ -1222,10 +1222,10 @@ extern "C"
     * \param [in] channelCount - a channel count.
     * \param [out] dst - a pointer to pixels data of filtered output image.
     * \param [in] dstStride - a row size of dst image.
-    * \param [in] type - a type of operation (see ::SimdOperationType).
+    * \param [in] type - a type of operation (see ::SimdOperationBinary8uType).
     */
-    SIMD_API void SimdOperation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-        size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type);
+    SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+        size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
     /**
     * \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);

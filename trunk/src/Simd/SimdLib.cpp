@@ -829,20 +829,20 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdOperation(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
-               size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type)
+SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+               size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width*channelCount >= Avx2::A)
-        Avx2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+        Avx2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
-        Sse2::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+        Sse2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::Operation(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+        Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }
 
 SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)

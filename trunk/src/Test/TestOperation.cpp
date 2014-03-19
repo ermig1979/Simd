@@ -32,14 +32,14 @@ namespace Test
 		struct FuncO
 		{
 			typedef void (*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-				size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationType type);
+				size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
 			FuncPtr func;
 			std::string description;
 
 			FuncO(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & a, const View & b, View & dst, SimdOperationType type) const
+			void Call(const View & a, const View & b, View & dst, SimdOperationBinary8uType type) const
 			{
 				TEST_PERFORMANCE_TEST(description);
 				func(a.data, a.stride, b.data, b.stride, a.width, a.height, View::PixelSize(a.format), dst.data, dst.stride, type);
@@ -63,17 +63,17 @@ namespace Test
         };
 	}
 
-    SIMD_INLINE std::string OperationTypeDescription(SimdOperationType type)
+    SIMD_INLINE std::string OperationBinary8uTypeDescription(SimdOperationBinary8uType type)
     {
         switch(type)
         {
-        case SimdOperationAverage:
+        case SimdOperationBinary8uAverage:
             return "<Avg>";
-        case SimdOperationAnd:
+        case SimdOperationBinary8uAnd:
             return "<And>";
-        case SimdOperationMaximum:
+        case SimdOperationBinary8uMaximum:
             return "<Max>";
-        case SimdOperationSaturatedSubtraction:
+        case SimdOperationBinary8uSaturatedSubtraction:
             return "<Subs>";
         }
 		assert(0);
@@ -82,15 +82,15 @@ namespace Test
 
 #define ARGS_O1(format, width, height, type, function1, function2) \
 	format, width, height, type, \
-	FuncO(function1.func, function1.description + OperationTypeDescription(type) + ColorDescription(format)), \
-	FuncO(function2.func, function2.description + OperationTypeDescription(type) + ColorDescription(format))
+	FuncO(function1.func, function1.description + OperationBinary8uTypeDescription(type) + ColorDescription(format)), \
+	FuncO(function2.func, function2.description + OperationBinary8uTypeDescription(type) + ColorDescription(format))
 
 #define ARGS_O2(function1, function2) \
 	FuncO(function1, std::string(#function1)), FuncO(function2, std::string(#function2))
 
 #define ARGS_VP(function) FuncVP(function, std::string(#function))
 
-	bool OperationTest(View::Format format, int width, int height, SimdOperationType type, const FuncO & f1, const FuncO & f2)
+	bool OperationBinary8uTest(View::Format format, int width, int height, SimdOperationBinary8uType type, const FuncO & f1, const FuncO & f2)
 	{
 		bool result = true;
 
@@ -114,32 +114,32 @@ namespace Test
 		return result;
 	}
 
-	bool OperationTest(const FuncO & f1, const FuncO & f2)
+	bool OperationBinary8uTest(const FuncO & f1, const FuncO & f2)
 	{
 		bool result = true;
 
-        for(SimdOperationType type = SimdOperationAverage; type <= SimdOperationSaturatedSubtraction && result; type = SimdOperationType(type + 1))
+        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedSubtraction && result; type = SimdOperationBinary8uType(type + 1))
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                result = result && OperationTest(ARGS_O1(format, W, H, type, f1, f2));
-                result = result && OperationTest(ARGS_O1(format, W + 1, H - 1, type, f1, f2));
-                result = result && OperationTest(ARGS_O1(format, W - 1, H + 1, type, f1, f2));
+                result = result && OperationBinary8uTest(ARGS_O1(format, W, H, type, f1, f2));
+                result = result && OperationBinary8uTest(ARGS_O1(format, W + 1, H - 1, type, f1, f2));
+                result = result && OperationBinary8uTest(ARGS_O1(format, W - 1, H + 1, type, f1, f2));
             }
         }
 
 		return result;
 	}
 
-	bool OperationTest()
+	bool OperationBinary8uTest()
 	{
 		bool result = true;
 
-		result = result && OperationTest(ARGS_O2(Simd::Base::Operation, SimdOperation));
+		result = result && OperationBinary8uTest(ARGS_O2(Simd::Base::OperationBinary8u, SimdOperationBinary8u));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
 		if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-			result = result && OperationTest(ARGS_O2(Simd::Avx2::Operation, Simd::Sse2::Operation));
+			result = result && OperationBinary8uTest(ARGS_O2(Simd::Avx2::OperationBinary8u, Simd::Sse2::OperationBinary8u));
 #endif 
 
 		return result;
