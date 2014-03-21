@@ -122,7 +122,68 @@ namespace Simd
             return SaturateI16ToU8(_mm_packs_epi32(
                 AdjustedYuvToBlue32(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, K_ZERO)), 
                 AdjustedYuvToBlue32(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, K_ZERO))));
-        }	
+        }
+
+        SIMD_INLINE __m128i YuvToRed(__m128i y, __m128i v)
+        {
+            __m128i lo = AdjustedYuvToRed16(
+                AdjustY16(_mm_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpacklo_epi8(v, K_ZERO)));
+            __m128i hi = AdjustedYuvToRed16(
+                AdjustY16(_mm_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpackhi_epi8(v, K_ZERO)));
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m128i YuvToGreen(__m128i y, __m128i u, __m128i v)
+        {
+            __m128i lo = AdjustedYuvToGreen16(
+                AdjustY16(_mm_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpacklo_epi8(u, K_ZERO)), 
+                AdjustUV16(_mm_unpacklo_epi8(v, K_ZERO)));
+            __m128i hi = AdjustedYuvToGreen16(
+                AdjustY16(_mm_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpackhi_epi8(u, K_ZERO)), 
+                AdjustUV16(_mm_unpackhi_epi8(v, K_ZERO)));
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m128i YuvToBlue(__m128i y, __m128i u)
+        {
+            __m128i lo = AdjustedYuvToBlue16(
+                AdjustY16(_mm_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpacklo_epi8(u, K_ZERO)));
+            __m128i hi = AdjustedYuvToBlue16(
+                AdjustY16(_mm_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm_unpackhi_epi8(u, K_ZERO)));
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        template <int index> __m128i InterleaveBgr(__m128i blue, __m128i green, __m128i red);
+
+        template<> SIMD_INLINE __m128i InterleaveBgr<0>(__m128i blue, __m128i green, __m128i red)
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR0), 
+                _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR0), 
+                _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR0)));
+        }
+
+        template<> SIMD_INLINE __m128i InterleaveBgr<1>(__m128i blue, __m128i green, __m128i red)
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR1), 
+                _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR1), 
+                _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR1)));
+        }
+
+        template<> SIMD_INLINE __m128i InterleaveBgr<2>(__m128i blue, __m128i green, __m128i red)
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR2), 
+                _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR2), 
+                _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR2)));
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -147,7 +208,7 @@ namespace Simd
 
         SIMD_INLINE __m256i AdjustedYuvToRed16(__m256i y16, __m256i v16)
         {
-            return SaturateI16ToU8(PackI32ToI16(
+            return SaturateI16ToU8(_mm256_packs_epi32(
                 AdjustedYuvToRed32(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(v16, K_ZERO)), 
                 AdjustedYuvToRed32(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(v16, K_ZERO))));
         }
@@ -160,7 +221,7 @@ namespace Simd
 
         SIMD_INLINE __m256i AdjustedYuvToGreen16(__m256i y16, __m256i u16, __m256i v16)
         {
-            return SaturateI16ToU8(PackI32ToI16(
+            return SaturateI16ToU8(_mm256_packs_epi32(
                 AdjustedYuvToGreen32(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, v16)), 
                 AdjustedYuvToGreen32(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, v16))));
         }
@@ -173,10 +234,71 @@ namespace Simd
 
         SIMD_INLINE __m256i AdjustedYuvToBlue16(__m256i y16, __m256i u16)
         {
-            return SaturateI16ToU8(PackI32ToI16(
+            return SaturateI16ToU8(_mm256_packs_epi32(
                 AdjustedYuvToBlue32(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, K_ZERO)), 
                 AdjustedYuvToBlue32(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, K_ZERO))));
-        }	
+        }
+
+        SIMD_INLINE __m256i YuvToRed(__m256i y, __m256i v)
+        {
+            __m256i lo = AdjustedYuvToRed16(
+                AdjustY16(_mm256_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpacklo_epi8(v, K_ZERO)));
+            __m256i hi = AdjustedYuvToRed16(
+                AdjustY16(_mm256_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpackhi_epi8(v, K_ZERO)));
+            return _mm256_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m256i YuvToGreen(__m256i y, __m256i u, __m256i v)
+        {
+            __m256i lo = AdjustedYuvToGreen16(
+                AdjustY16(_mm256_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpacklo_epi8(u, K_ZERO)), 
+                AdjustUV16(_mm256_unpacklo_epi8(v, K_ZERO)));
+            __m256i hi = AdjustedYuvToGreen16(
+                AdjustY16(_mm256_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpackhi_epi8(u, K_ZERO)), 
+                AdjustUV16(_mm256_unpackhi_epi8(v, K_ZERO)));
+            return _mm256_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m256i YuvToBlue(__m256i y, __m256i u)
+        {
+            __m256i lo = AdjustedYuvToBlue16(
+                AdjustY16(_mm256_unpacklo_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpacklo_epi8(u, K_ZERO)));
+            __m256i hi = AdjustedYuvToBlue16(
+                AdjustY16(_mm256_unpackhi_epi8(y, K_ZERO)), 
+                AdjustUV16(_mm256_unpackhi_epi8(u, K_ZERO)));
+            return _mm256_packus_epi16(lo, hi);
+        }
+
+        template <int index> __m256i InterleaveBgr(__m256i blue, __m256i green, __m256i red);
+
+        template<> SIMD_INLINE __m256i InterleaveBgr<0>(__m256i blue, __m256i green, __m256i red)
+        {
+            return 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0x44), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR0), 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0x44), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR0), 
+                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0x44), K8_SHUFFLE_PERMUTED_RED_TO_BGR0)));
+        }
+
+        template<> SIMD_INLINE __m256i InterleaveBgr<1>(__m256i blue, __m256i green, __m256i red)
+        {
+            return 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0x99), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR1), 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0x99), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR1), 
+                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0x99), K8_SHUFFLE_PERMUTED_RED_TO_BGR1)));
+        }
+
+        template<> SIMD_INLINE __m256i InterleaveBgr<2>(__m256i blue, __m256i green, __m256i red)
+        {
+            return 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0xEE), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR2), 
+                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0xEE), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR2), 
+                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0xEE), K8_SHUFFLE_PERMUTED_RED_TO_BGR2)));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
     <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
   </ItemGroup>

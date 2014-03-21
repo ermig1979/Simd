@@ -75,20 +75,19 @@ namespace Simd
 			return AdjustedYuvToHue16(AdjustY16(y), AdjustUV16(u), AdjustUV16(v), KF_255_DIV_6);
 		}
 
-		SIMD_INLINE __m256i YuvToHue8(__m256i y, __m256i u, __m256i v, const __m256i & permuteOffsets, const __m256 & KF_255_DIV_6)
+		SIMD_INLINE __m256i YuvToHue8(__m256i y, __m256i u, __m256i v, const __m256 & KF_255_DIV_6)
 		{
-			return _mm256_permutevar8x32_epi32(_mm256_packus_epi16(
+			return _mm256_packus_epi16(
 				YuvToHue16(_mm256_unpacklo_epi8(y, K_ZERO), _mm256_unpacklo_epi8(u, K_ZERO), _mm256_unpacklo_epi8(v, K_ZERO), KF_255_DIV_6), 
-				YuvToHue16(_mm256_unpackhi_epi8(y, K_ZERO), _mm256_unpackhi_epi8(u, K_ZERO), _mm256_unpackhi_epi8(v, K_ZERO), KF_255_DIV_6)),
-                permuteOffsets);		
+				YuvToHue16(_mm256_unpackhi_epi8(y, K_ZERO), _mm256_unpackhi_epi8(u, K_ZERO), _mm256_unpackhi_epi8(v, K_ZERO), KF_255_DIV_6));		
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420pToHue(const uint8_t * y, __m256i u, __m256i v, uint8_t * hue, const __m256i & permuteOffsets, const __m256 & KF_255_DIV_6)
+		template <bool align> SIMD_INLINE void Yuv420pToHue(const uint8_t * y, __m256i u, __m256i v, uint8_t * hue, const __m256 & KF_255_DIV_6)
 		{
 			Store<align>((__m256i*)(hue), YuvToHue8(Load<align>((__m256i*)(y)), 
-                _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), permuteOffsets, KF_255_DIV_6));
+                _mm256_unpacklo_epi8(u, u), _mm256_unpacklo_epi8(v, v), KF_255_DIV_6));
 			Store<align>((__m256i*)(hue + A), YuvToHue8(Load<align>((__m256i*)(y + A)), 
-                _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), permuteOffsets, KF_255_DIV_6));
+                _mm256_unpackhi_epi8(u, u), _mm256_unpackhi_epi8(v, v), KF_255_DIV_6));
 		}
 
 		template <bool align> void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
@@ -105,23 +104,22 @@ namespace Simd
 
 			size_t bodyWidth = AlignLo(width, DA);
 			size_t tail = width - bodyWidth;
-            __m256i permuteOffsets = _mm256_setr_epi32(0, 4, 2, 6, 1, 5, 3, 7);
 			for(size_t row = 0; row < height; row += 2)
 			{
 				for(size_t colUV = 0, colY = 0, col_hue = 0; colY < bodyWidth; colY += DA, colUV += A, col_hue += DA)
 				{
 					__m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
 					__m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
-					Yuv420pToHue<align>(y + colY, u_, v_, hue + col_hue, permuteOffsets, KF_255_DIV_6);
-					Yuv420pToHue<align>(y + yStride + colY, u_, v_, hue + hueStride + col_hue, permuteOffsets, KF_255_DIV_6);
+					Yuv420pToHue<align>(y + colY, u_, v_, hue + col_hue, KF_255_DIV_6);
+					Yuv420pToHue<align>(y + yStride + colY, u_, v_, hue + hueStride + col_hue, KF_255_DIV_6);
 				}
 				if(tail)
 				{
 					size_t offset = width - DA;
 					__m256i u_ = LoadPermuted<false>((__m256i*)(u + offset/2));
 					__m256i v_ = LoadPermuted<false>((__m256i*)(v + offset/2));
-					Yuv420pToHue<false>(y + offset, u_, v_, hue + offset, permuteOffsets, KF_255_DIV_6);
-					Yuv420pToHue<false>(y + yStride + offset, u_, v_, hue + hueStride + offset, permuteOffsets, KF_255_DIV_6);
+					Yuv420pToHue<false>(y + offset, u_, v_, hue + offset, KF_255_DIV_6);
+					Yuv420pToHue<false>(y + yStride + offset, u_, v_, hue + hueStride + offset, KF_255_DIV_6);
 				}
 				y += 2*yStride;
 				u += uStride;
@@ -144,19 +142,18 @@ namespace Simd
 
 			size_t bodyWidth = AlignLo(width, A);
 			size_t tail = width - bodyWidth;
-            __m256i permuteOffsets = _mm256_setr_epi32(0, 4, 2, 6, 1, 5, 3, 7);
 			for(size_t row = 0; row < height; row += 1)
 			{
 				for(size_t col = 0; col < bodyWidth; col += A)
 				{
 					Store<align>((__m256i*)(hue + col), YuvToHue8(Load<align>((__m256i*)(y + col)), 
-						Load<align>((__m256i*)(u + col)), Load<align>((__m256i*)(v + col)), permuteOffsets, KF_255_DIV_6));
+						Load<align>((__m256i*)(u + col)), Load<align>((__m256i*)(v + col)), KF_255_DIV_6));
 				}
 				if(tail)
 				{
 					size_t offset = width - A;
 					Store<false>((__m256i*)(hue + offset), YuvToHue8(Load<false>((__m256i*)(y + offset)), 
-						Load<false>((__m256i*)(u + offset)), Load<false>((__m256i*)(v + offset)), permuteOffsets, KF_255_DIV_6));
+						Load<false>((__m256i*)(u + offset)), Load<false>((__m256i*)(v + offset)), KF_255_DIV_6));
 				}
 				y += yStride;
 				u += uStride;

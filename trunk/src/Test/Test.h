@@ -45,6 +45,9 @@ namespace Test
     bool Yuv444pToHueTest();
     bool Yuv420pToHueTest();
 
+    bool Yuv444pToBgrTest();
+    bool Yuv420pToBgrTest();
+
     bool Yuv444pToBgraTest();
     bool Yuv420pToBgraTest();
 

@@ -1240,7 +1240,6 @@ extern "C"
     * \param [in] bStride - a row size of the second image.
     * \param [in] width - an image width.
     * \param [in] height - an image height.
-    * \param [in] channelCount - a channel count.
     * \param [out] dst - a pointer to pixels data of filtered output image.
     * \param [in] dstStride - a row size of dst image.
     * \param [in] type - a type of operation (see ::SimdOperationBinary16iType).
