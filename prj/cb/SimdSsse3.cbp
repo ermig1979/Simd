@@ -82,6 +82,9 @@
 		<Unit filename="../../src/Simd/SimdSsse3Sobel.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSsse3YuvToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdTypes.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>

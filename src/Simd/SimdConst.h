@@ -104,6 +104,18 @@ namespace Simd
         const __m128i K16_VR_0 = SIMD_MM_SET2_EPI16(Base::V_TO_RED_WEIGHT, 0);
         const __m128i K16_UG_VG = SIMD_MM_SET2_EPI16(Base::U_TO_GREEN_WEIGHT, Base::V_TO_GREEN_WEIGHT);
         const __m128i K16_UB_0 = SIMD_MM_SET2_EPI16(Base::U_TO_BLUE_WEIGHT, 0);
+
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5);
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR1 = SIMD_MM_SETR_EPI8( -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1);
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR2 = SIMD_MM_SETR_EPI8( -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1,  -1);
+
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR0 = SIMD_MM_SETR_EPI8( -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1);
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA);
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR2 = SIMD_MM_SETR_EPI8( -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1);
+
+        const __m128i K8_SHUFFLE_RED_TO_BGR0 = SIMD_MM_SETR_EPI8( -1,  -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1);
+        const __m128i K8_SHUFFLE_RED_TO_BGR1 = SIMD_MM_SETR_EPI8( -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1);
+        const __m128i K8_SHUFFLE_RED_TO_BGR2 = SIMD_MM_SETR_EPI8(0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -173,6 +185,36 @@ namespace Simd
         const __m256i K16_VR_0 = SIMD_MM256_SET2_EPI16(Base::V_TO_RED_WEIGHT, 0);
         const __m256i K16_UG_VG = SIMD_MM256_SET2_EPI16(Base::U_TO_GREEN_WEIGHT, Base::V_TO_GREEN_WEIGHT);
         const __m256i K16_UB_0 = SIMD_MM256_SET2_EPI16(Base::U_TO_BLUE_WEIGHT, 0);
+
+        const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR0 = SIMD_MM256_SETR_EPI8(
+            0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,
+             -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1);
+        const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR1 = SIMD_MM256_SETR_EPI8(
+              -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1,
+             0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD);
+        const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR2 = SIMD_MM256_SETR_EPI8(
+            -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,
+            -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1,  -1);
+
+        const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR0 = SIMD_MM256_SETR_EPI8(
+            -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1,
+            0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA);
+        const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR1 = SIMD_MM256_SETR_EPI8(
+            -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,
+            -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1);
+        const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR2 = SIMD_MM256_SETR_EPI8(
+            0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,
+             -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1);
+
+        const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR0 = SIMD_MM256_SETR_EPI8(
+            -1,  -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,
+            -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1);
+        const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR1 = SIMD_MM256_SETR_EPI8(
+            0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,
+             -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1);
+        const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR2 = SIMD_MM256_SETR_EPI8(
+             -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1,
+            0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF);
 	}
 #endif// SIMD_AVX2_ENABLE
 }

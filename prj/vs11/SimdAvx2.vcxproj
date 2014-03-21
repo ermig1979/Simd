@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2StretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHue.cpp" />
   </ItemGroup>

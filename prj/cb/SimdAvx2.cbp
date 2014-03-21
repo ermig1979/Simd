@@ -148,6 +148,9 @@
 		<Unit filename="../../src/Simd/SimdAvx2Texture.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2YuvToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2YuvToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

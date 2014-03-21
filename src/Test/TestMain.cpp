@@ -59,6 +59,9 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(Yuv444pToHueTest);
     EXECUTE_TEST(Yuv420pToHueTest);
 
+    EXECUTE_TEST(Yuv444pToBgrTest);
+    EXECUTE_TEST(Yuv420pToBgrTest);
+
     EXECUTE_TEST(Yuv444pToBgraTest);
     EXECUTE_TEST(Yuv420pToBgraTest);
 

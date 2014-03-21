@@ -41,8 +41,11 @@ namespace Simd
 			const __m256i r16 = AdjustedYuvToRed16(y16, v16);
 			const __m256i bg8 = _mm256_or_si256(b16, _mm256_slli_si256(g16, 1));
 			const __m256i ra8 = _mm256_or_si256(r16, a_0);
-			Store<align>(bgra + 0, _mm256_unpacklo_epi16(bg8, ra8));
-			Store<align>(bgra + 1, _mm256_unpackhi_epi16(bg8, ra8));
+            __m256i bgra0 = _mm256_unpacklo_epi16(bg8, ra8);
+            __m256i bgra1 = _mm256_unpackhi_epi16(bg8, ra8);
+            Permute2x128(bgra0, bgra1);
+			Store<align>(bgra + 0, bgra0);
+			Store<align>(bgra + 1, bgra1);
 		}
 
 		template <bool align> SIMD_INLINE void Yuv16ToBgra(__m256i y16, __m256i u16, __m256i v16, 

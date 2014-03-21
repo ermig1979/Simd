@@ -167,6 +167,9 @@
 		<Unit filename="../../src/Test/TestUtils.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestYuvToBgr.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestYuvToBgra.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
