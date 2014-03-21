@@ -33,17 +33,24 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        SIMD_INLINE __m256i PermuteAndShiffle(__m256i bgr, __m256i permute, __m256i shuffle)
+        const __m256i K32_BGRA_TO_BGR_PERMUTE_BODY = SIMD_MM256_SETR_EPI32(0, 1, 2, 0, 3, 4, 5, 0);
+        const __m256i K32_BGRA_TO_BGR_PERMUTE_TAIL = SIMD_MM256_SETR_EPI32(2, 3, 4, 0, 5, 6, 7, 0);
+
+        const __m256i K8_BGRA_TO_BGR_SHUFFLE = SIMD_MM256_SETR_EPI8(
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
+
+        SIMD_INLINE __m256i PermuteAndShiffle(__m256i bgr, __m256i permute)
         {
-            return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), shuffle);
+            return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), K8_BGRA_TO_BGR_SHUFFLE);
         }
 
-        template <bool align> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, __m256i permuteBody, __m256i permuteTail, __m256i shuffle, __m256i alpha)
+        template <bool align> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, __m256i alpha)
         {
-            Store<align>((__m256i*)bgra + 0, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr +  0)), permuteBody, shuffle)));
-            Store<align>((__m256i*)bgra + 1, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 24)), permuteBody, shuffle)));
-            Store<align>((__m256i*)bgra + 2, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 48)), permuteBody, shuffle)));
-            Store<align>((__m256i*)bgra + 3, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr + 64)), permuteTail, shuffle)));
+            Store<align>((__m256i*)bgra + 0, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr +  0)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 1, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 24)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 2, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 48)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 3, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr + 64)), K32_BGRA_TO_BGR_PERMUTE_TAIL)));
         }
 
         template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
@@ -56,19 +63,12 @@ namespace Simd
 
             __m256i _alpha = _mm256_slli_si256(_mm256_set1_epi32(alpha), 3);
 
-            __m256i _permuteBody = _mm256_setr_epi32(0, 1, 2, 0, 3, 4, 5, 0);
-            __m256i _permuteTail = _mm256_setr_epi32(2, 3, 4, 0, 5, 6, 7, 0);
-
-            __m256i _shuffle = _mm256_setr_epi8(
-                0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
-                0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
-
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    BgrToBgra<align>(bgr + 3*col, bgra + 4*col, _permuteBody, _permuteTail, _shuffle, _alpha);
+                    BgrToBgra<align>(bgr + 3*col, bgra + 4*col, _alpha);
                 if(width != alignedWidth)
-                    BgrToBgra<false>(bgr + 3*(width - A), bgra + 4*(width - A), _permuteBody, _permuteTail, _shuffle, _alpha);
+                    BgrToBgra<false>(bgr + 3*(width - A), bgra + 4*(width - A), _alpha);
                 bgr += bgrStride;
                 bgra += bgraStride;
             }
