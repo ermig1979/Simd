@@ -159,6 +159,12 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
+    }
+#endif// SIMD_SSE2_ENABLE
+
+#ifdef SIMD_SSSE3_ENABLE    
+	namespace Ssse3
+	{
         template <int index> __m128i InterleaveBgr(__m128i blue, __m128i green, __m128i red);
 
         template<> SIMD_INLINE __m128i InterleaveBgr<0>(__m128i blue, __m128i green, __m128i red)
@@ -183,9 +189,9 @@ namespace Simd
                 _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR2), 
                 _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR2), 
                 _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR2)));
-        }
-    }
-#endif// SIMD_SSE2_ENABLE
+        }	
+	}
+#endif//SIMD_SSSE3_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
