@@ -54,7 +54,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Test\Test.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
@@ -74,7 +76,6 @@
     <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
-    <ClCompile Include="..\..\src\Test\TestMain.cpp" />
     <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />

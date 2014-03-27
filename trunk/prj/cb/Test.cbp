@@ -68,6 +68,9 @@
 				</Linker>
 			</Target>
 		</Build>
+		<Unit filename="../../src/Test/Test.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/Test.h">
 			<Option virtualFolder="Test/" />
 		</Unit>
@@ -75,6 +78,9 @@
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBackground.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestBayerToBgr.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestBgrToBgra.cpp">
@@ -127,9 +133,6 @@
 		</Unit>
 		<Unit filename="../../src/Test/TestHistogram.cpp">
 			<Option virtualFolder="Test/" />
-		</Unit>
-		<Unit filename="../../src/Test/TestMain.cpp">
-			<Option virtualFolder="Sys/" />
 		</Unit>
 		<Unit filename="../../src/Test/TestOperation.cpp">
 			<Option virtualFolder="Test/" />

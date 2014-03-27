@@ -16,6 +16,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">
