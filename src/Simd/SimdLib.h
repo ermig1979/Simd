@@ -474,6 +474,23 @@ extern "C"
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
     /**
+    * \fn void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
+    *
+    * \short Converts 8-bit Bayer image to 24-bit BGR. 
+    *
+    * All images must have the same width and height. The width and the height must be even.
+    *
+    * \param [in] bayer - a pointer to pixels data of output 8-bit Bayer image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bayerStride - a row size of the bayer image.
+    * \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
+    * \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
+    * \param [in] bgrStride - a row size of the bgr image.
+    */
+    SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
+
+    /**
     * \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
     *
     * \short Converts 32-bit BGRA image to 8-bit Bayer image. 

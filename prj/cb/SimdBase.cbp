@@ -73,6 +73,9 @@
 		<Unit filename="../../src/Simd/SimdBaseBackground.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseBayerToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseBgrToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

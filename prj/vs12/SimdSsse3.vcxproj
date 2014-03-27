@@ -58,6 +58,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
