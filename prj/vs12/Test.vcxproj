@@ -57,6 +57,7 @@
     <ClCompile Include="..\..\src\Test\Test.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />

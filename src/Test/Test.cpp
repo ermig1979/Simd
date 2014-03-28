@@ -151,6 +151,8 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(BayerToBgrTest);
 
+    EXECUTE_TEST(BayerToBgraTest);
+
     EXECUTE_TEST(BgrToBayerTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
