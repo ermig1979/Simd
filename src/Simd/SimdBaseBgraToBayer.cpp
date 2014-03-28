@@ -27,57 +27,76 @@ namespace Simd
 {
     namespace Base
     {
-        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
+        template <SimdPixelFormatType bayerFormat> void BgraToBayer(const uint8_t * bgra0, const uint8_t * bgra1, uint8_t * bayer0, uint8_t * bayer1);
+
+        template <> SIMD_INLINE void BgraToBayer<SimdPixelFormatBayerGrbg>(const uint8_t * bgra0, const uint8_t * bgra1, uint8_t * bayer0, uint8_t * bayer1)
         {
-            assert((width%2 == 0) && (height%2 == 0));
-            assert(bayerFormat >= SimdPixelFormatBayerGrbg && bayerFormat <= SimdPixelFormatBayerBggr);
+            bayer0[0] = bgra0[1];
+            bayer0[1] = bgra0[6];
+            bayer1[0] = bgra1[0];
+            bayer1[1] = bgra1[5];
+        }
 
-            size_t offsets[2][2];
-            switch(bayerFormat)
-            {
-            case SimdPixelFormatBayerGrbg:
-                offsets[0][0] = 1;
-                offsets[0][1] = 6;
-                offsets[1][0] = 0;
-                offsets[1][1] = 5;
-                break;
-            case SimdPixelFormatBayerGbrg:
-                offsets[0][0] = 1;
-                offsets[0][1] = 4;
-                offsets[1][0] = 2;
-                offsets[1][1] = 5;
-                break;
-            case SimdPixelFormatBayerRggb:
-                offsets[0][0] = 2;
-                offsets[0][1] = 5;
-                offsets[1][0] = 1;
-                offsets[1][1] = 4;
-                break;
-            case SimdPixelFormatBayerBggr:
-                offsets[0][0] = 0;
-                offsets[0][1] = 5;
-                offsets[1][0] = 1;
-                offsets[1][1] = 6;
-                break;
-            }
+        template <> SIMD_INLINE void BgraToBayer<SimdPixelFormatBayerGbrg>(const uint8_t * bgra0, const uint8_t * bgra1, uint8_t * bayer0, uint8_t * bayer1)
+        {
+            bayer0[0] = bgra0[1];
+            bayer0[1] = bgra0[4];
+            bayer1[0] = bgra1[2];
+            bayer1[1] = bgra1[5];
+        }
 
+        template <> SIMD_INLINE void BgraToBayer<SimdPixelFormatBayerRggb>(const uint8_t * bgra0, const uint8_t * bgra1, uint8_t * bayer0, uint8_t * bayer1)
+        {
+            bayer0[0] = bgra0[2];
+            bayer0[1] = bgra0[5];
+            bayer1[0] = bgra1[1];
+            bayer1[1] = bgra1[4];
+        }
+
+        template <> SIMD_INLINE void BgraToBayer<SimdPixelFormatBayerBggr>(const uint8_t * bgra0, const uint8_t * bgra1, uint8_t * bayer0, uint8_t * bayer1)
+        {
+            bayer0[0] = bgra0[0];
+            bayer0[1] = bgra0[5];
+            bayer1[0] = bgra1[1];
+            bayer1[1] = bgra1[6];
+        }
+
+        template <SimdPixelFormatType bayerFormat> SIMD_INLINE void BgraToBayer(const uint8_t * bgra, size_t bgraStride, uint8_t * bayer, size_t bayerStride)
+        {
+            BgraToBayer<bayerFormat>(bgra, bgra + bgraStride, bayer, bayer + bayerStride);
+        }
+
+        template <SimdPixelFormatType bayerFormat> void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride)
+        {
             for(size_t row = 0; row < height; row += 2)
             {
                 for(size_t col = 0, offset = 0; col < width; col += 2, offset += 8)
-                {
-                    bayer[col + 0] = bgra[offset + offsets[0][0]];
-                    bayer[col + 1] = bgra[offset + offsets[0][1]];
-                }
-                bgra += bgraStride;
-                bayer += bayerStride;
+                    BgraToBayer<bayerFormat>(bgra + offset, bgraStride, bayer + col, bayerStride);
+                bgra += 2*bgraStride;
+                bayer += 2*bayerStride;
+            }        
+        }
 
-                for(size_t col = 0, offset = 0; col < width; col += 2, offset += 8)
-                {
-                    bayer[col + 0] = bgra[offset + offsets[1][0]];
-                    bayer[col + 1] = bgra[offset + offsets[1][1]];
-                }
-                bgra += bgraStride;
-                bayer += bayerStride;
+        void BgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
+        {
+            assert((width%2 == 0) && (height%2 == 0));
+
+            switch(bayerFormat)
+            {
+            case SimdPixelFormatBayerGrbg: 
+                BgraToBayer<SimdPixelFormatBayerGrbg>(bgra, width, height, bgraStride, bayer, bayerStride);
+                break;
+            case SimdPixelFormatBayerGbrg:
+                BgraToBayer<SimdPixelFormatBayerGbrg>(bgra, width, height, bgraStride, bayer, bayerStride);
+                break;
+            case SimdPixelFormatBayerRggb:
+                BgraToBayer<SimdPixelFormatBayerRggb>(bgra, width, height, bgraStride, bayer, bayerStride);
+                break;
+            case SimdPixelFormatBayerBggr:
+                BgraToBayer<SimdPixelFormatBayerBggr>(bgra, width, height, bgraStride, bayer, bayerStride);
+                break;
+            default:
+                assert(0);
             }        
         }
     }

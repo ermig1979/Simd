@@ -151,6 +151,8 @@ int main(int argc, char* argv[])
 
     EXECUTE_TEST(BayerToBgrTest);
 
+    EXECUTE_TEST(BgrToBayerTest);
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << "Performance report:" << std::endl;
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, false) << std::endl;
