@@ -1180,6 +1180,36 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
         Base::GetAbsDxColSums(src, stride, width, height, sums);
 }
 
+SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ValueSum(src, stride, width, height, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ValueSum(src, stride, width, height, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::ValueSum(src, stride, width, height, sum);
+}
+
+SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SquareSum(src, stride, width, height, sum);
+    else
+#endif// SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::SquareSum(src, stride, width, height, sum);
+    else
+#endif// SIMD_SSE2_ENABLE
+        Base::SquareSum(src, stride, width, height, sum);
+}
+
 SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
                     uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {

@@ -283,4 +283,86 @@ namespace Test
 
         return result;
     }
+
+    namespace
+    {
+        struct Func4
+        {
+            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+            FuncPtr func;
+            std::string description;
+
+            Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint64_t * sum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, sum);
+            }
+        };
+    }
+
+#define FUNC4(function) Func4(function, #function)
+
+    bool SumTest(int width, int height, const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        uint64_t sum1;
+        uint64_t sum2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, &sum1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, &sum2));
+
+        TEST_CHECK_VALUE(sum);
+
+        return result;
+    }
+
+    bool ValueSumTest()
+    {
+        bool result = true;
+
+        result = result && SumTest(W, H, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && SumTest(W, H, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+            result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+            result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+        }
+#endif 
+
+        return result;
+    }
+
+    bool SquareSumTest()
+    {
+        bool result = true;
+
+        result = result && SumTest(W, H, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && SumTest(W, H, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+            result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+            result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+        }
+#endif  
+
+        return result;
+    }
 }
