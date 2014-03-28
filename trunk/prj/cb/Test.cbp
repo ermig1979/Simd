@@ -83,6 +83,9 @@
 		<Unit filename="../../src/Test/TestBayerToBgr.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestBayerToBgra.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestBgrToBayer.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

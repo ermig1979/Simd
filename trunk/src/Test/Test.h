@@ -35,7 +35,11 @@ namespace Test
 
     bool BayerToBgrTest();
 
+    bool BayerToBgraTest();
+
     bool BgraToBayerTest();
+
+    bool BgraToBgrTest();
 
     bool BgraToGrayTest();
 
@@ -134,7 +138,5 @@ namespace Test
     bool SobelDxAbsTest();
     bool SobelDyTest();
     bool SobelDyAbsTest();
-
-    bool BgraToBgrTest();
 }
 #endif//__Test_h__

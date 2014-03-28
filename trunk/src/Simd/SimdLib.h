@@ -491,6 +491,24 @@ extern "C"
     SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
     /**
+    * \fn void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+    *
+    * \short Converts 8-bit Bayer image to 32-bit BGRA. 
+    *
+    * All images must have the same width and height. The width and the height must be even.
+    *
+    * \param [in] bayer - a pointer to pixels data of output 8-bit Bayer image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bayerStride - a row size of the bayer image.
+    * \param [in] bayerFormat - a format of the input bayer image. It can be ::SimdPixelFormatBayerGrbg, ::SimdPixelFormatBayerGbrg, ::SimdPixelFormatBayerRggb or ::SimdPixelFormatBayerBggr.
+    * \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+    * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in] alpha - a value of alpha channel.
+    */
+    SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+
+    /**
     * \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
     *
     * \short Converts 32-bit BGRA image to 8-bit Bayer image. 
