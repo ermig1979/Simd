@@ -1703,6 +1703,32 @@ extern "C"
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
     /**
+    * \fn void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+    *
+    * \short Gets sum of value of pixels for gray 8-bit image. 
+    *
+    * \param [in] src - a pointer to pixels data of the image.
+    * \param [in] stride - a row size of the image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - the result sum.
+    */
+    SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+    /**
+    * \fn void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+    *
+    * \short Gets sum of squared value of pixels for gray 8-bit image . 
+    *
+    * \param [in] src - a pointer to pixels data of the image.
+    * \param [in] stride - a row size of the image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] sum - the result sum.
+    */
+    SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+    /**
     * \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
     *
     * \short Stretches input 8-bit gray image in two times. 

@@ -95,6 +95,8 @@ namespace Test
     bool GetColSumsTest();
     bool GetAbsDyRowSumsTest();
     bool GetAbsDxColSumsTest();
+    bool ValueSumTest();
+    bool SquareSumTest();
 
     bool StretchGray2x2Test();
 

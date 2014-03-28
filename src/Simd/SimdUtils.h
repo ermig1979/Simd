@@ -145,6 +145,15 @@ namespace Simd
         SimdBayerToBgr(bayer.data, bayer.width, bayer.height, bayer.stride, (SimdPixelFormatType)bayer.format, bgr.data, bgr.stride);
     }
 
+    SIMD_INLINE void BayerToBgra(const View & bayer, View & bgra, uint8_t alpha = 0xFF)
+    {
+        assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32);
+        assert(bayer.format >= View::BayerGrbg && bayer.format <= View::BayerBggr);
+        assert((bayer.width%2 == 0) && (bayer.height%2 == 0));
+
+        SimdBayerToBgra(bayer.data, bayer.width, bayer.height, bayer.stride, (SimdPixelFormatType)bayer.format, bgra.data, bgra.stride, alpha);
+    }
+
     SIMD_INLINE void BgraToBayer(const View & bgra, View & bayer)
     {
         assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32);
@@ -593,6 +602,20 @@ namespace Simd
         assert(src.format == View::Gray8);
 
         SimdGetAbsDxColSums(src.data, src.stride, src.width, src.height, sums);
+    }
+
+    SIMD_INLINE void ValueSum(const View & src, uint64_t & sum)
+    {
+        assert(src.format == View::Gray8);
+
+        SimdValueSum(src.data, src.stride, src.width, src.height, &sum);
+    }
+
+    SIMD_INLINE void SquareSum(const View & src, uint64_t & sum)
+    {
+        assert(src.format == View::Gray8);
+
+        SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
     }
 
     SIMD_INLINE void StretchGray2x2(const View & src, View & dst)

@@ -149,5 +149,33 @@ namespace Simd
                 src1 += stride;
             }
         }
+
+        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                    rowSum += src[col];
+                *sum += rowSum;
+                src += stride;
+            }
+        }
+
+        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width < 0x10000);
+
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                    rowSum += Square(src[col]);
+                *sum += rowSum;
+                src += stride;
+            }
+        }
     }
 }
