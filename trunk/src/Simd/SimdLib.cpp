@@ -364,6 +364,11 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
         Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
 }
 
+SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
+{
+    Base::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+}
+
 SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
 {
 #ifdef SIMD_AVX2_ENABLE

@@ -136,6 +136,15 @@ namespace Simd
         SimdBackgroundInitMask(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
     }
 
+    SIMD_INLINE void BayerToBgr(const View & bayer, View & bgr)
+    {
+        assert(EqualSize(bgr, bayer) && bgr.format == View::Bgr24);
+        assert(bayer.format >= View::BayerGrbg && bayer.format <= View::BayerBggr);
+        assert((bayer.width%2 == 0) && (bayer.height%2 == 0));
+
+        SimdBayerToBgr(bayer.data, bayer.width, bayer.height, bayer.stride, (SimdPixelFormatType)bayer.format, bgr.data, bgr.stride);
+    }
+
     SIMD_INLINE void BgraToBayer(const View & bgra, View & bayer)
     {
         assert(EqualSize(bgra, bayer) && bgra.format == View::Bgra32);
@@ -157,6 +166,15 @@ namespace Simd
         assert(EqualSize(bgra, gray) && bgra.format == View::Bgra32 && gray.format == View::Gray8);
 
         SimdBgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
+    }
+
+    SIMD_INLINE void BgrToBayer(const View & bgr, View & bayer)
+    {
+        assert(EqualSize(bgr, bayer) && bgr.format == View::Bgr24);
+        assert(bayer.format >= View::BayerGrbg && bayer.format <= View::BayerBggr);
+        assert((bayer.width%2 == 0) && (bayer.height%2 == 0));
+
+        SimdBgrToBayer(bgr.data, bgr.width, bgr.height, bgr.stride, bayer.data, bayer.stride, (SimdPixelFormatType)bayer.format);
     }
 
     SIMD_INLINE void BgrToBgra(const View & bgr, View & bgra, uint8_t alpha = 0xFF)
