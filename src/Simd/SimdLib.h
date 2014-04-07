@@ -1092,7 +1092,23 @@ extern "C"
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
     /**
-    * \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride);
+    * \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);
+    *
+    * \short Converts 8-bit gray image to 24-bit BGR image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] gray - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] grayStride - a row size of the gray image.
+    * \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
+    * \param [in] bgrStride - a row size of the bgr image.
+    */
+    SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);
+
+    /**
+    * \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts 8-bit gray image to 32-bit BGRA image. 
     *
@@ -1104,6 +1120,7 @@ extern "C"
     * \param [in] grayStride - a row size of the gray image.
     * \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
     * \param [in] bgraStride - a row size of the bgra image.
+    * \param [in] alpha - a value of alpha channel.
     */
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);

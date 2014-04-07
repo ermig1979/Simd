@@ -127,6 +127,8 @@ namespace Test
     bool FillBgraTest();
     bool FillBgrTest();
 
+    bool GrayToBgrTest();
+
     bool GrayToBgraTest();
 
     bool AlphaBlendingTest();

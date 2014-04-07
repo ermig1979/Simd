@@ -133,6 +133,8 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(FillBgraTest);
     EXECUTE_TEST(FillBgrTest);
 
+    EXECUTE_TEST(GrayToBgrTest);
+
     EXECUTE_TEST(GrayToBgraTest);
 
     EXECUTE_TEST(AlphaBlendingTest);

@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp" />

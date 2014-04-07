@@ -76,6 +76,9 @@
 		<Unit filename="../../src/Simd/SimdSsse3BgraToBgr.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSsse3GrayToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSsse3ReduceGray2x2.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
