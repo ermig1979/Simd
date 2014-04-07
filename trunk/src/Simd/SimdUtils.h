@@ -365,6 +365,13 @@ namespace Simd
         SimdGaussianBlur3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
     }
 
+    SIMD_INLINE void GrayToBgr(const View & gray, View & bgr)
+    {
+        assert(EqualSize(gray, bgr) && bgr.format == View::Bgr24 && gray.format == View::Gray8);
+
+        SimdGrayToBgr(gray.data, gray.width, gray.height, gray.stride, bgr.data, bgr.stride);
+    }
+
     SIMD_INLINE void GrayToBgra(const View & gray, View & bgra, uint8_t alpha = 0xFF)
     {
         assert(EqualSize(gray, bgra) && bgra.format == View::Bgra32 && gray.format == View::Gray8);

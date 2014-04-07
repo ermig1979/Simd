@@ -124,6 +124,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBayerToBgra.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgr.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

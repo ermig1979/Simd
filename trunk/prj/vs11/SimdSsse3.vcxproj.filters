@@ -16,6 +16,15 @@
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">
@@ -42,6 +51,9 @@
       <Filter>Alg</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3GrayToBgr.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
   </ItemGroup>

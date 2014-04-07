@@ -727,6 +727,21 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
+SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+    else
+#endif//SIMD_AVX2_ENABLE 
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+    else
+#endif//SIMD_SSSE3_ENABLE       
+        Base::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+}
+
 SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
 {
 #ifdef SIMD_AVX2_ENABLE

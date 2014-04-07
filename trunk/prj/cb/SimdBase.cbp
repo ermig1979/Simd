@@ -121,6 +121,9 @@
 		<Unit filename="../../src/Simd/SimdBaseGaussianBlur3x3.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseGrayToBgr.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseGrayToBgra.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
