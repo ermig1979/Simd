@@ -106,22 +106,22 @@ namespace Simd
 			a[4] = LoadAfterLast<step>(a[3]);
 		}
 
-        SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m128i a[2])
+        SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m128i a[3])
         {
             a[0] = LoadBeforeFirst<1>(_mm_loadu_si128((__m128i*)p));
-            a[1] = _mm_loadu_si128((__m128i*)(p + 1));
+            a[2] = _mm_loadu_si128((__m128i*)(p + 1));
         }
 
-        SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m128i a[2])
+        SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m128i a[3])
         {
             a[0] = _mm_loadu_si128((__m128i*)(p - 1));
-            a[1] = _mm_loadu_si128((__m128i*)(p + 1));
+            a[2] = _mm_loadu_si128((__m128i*)(p + 1));
         }
 
-        SIMD_INLINE void LoadTailDx(const uint8_t * p, __m128i a[2])
+        SIMD_INLINE void LoadTailDx(const uint8_t * p, __m128i a[3])
         {
             a[0] = _mm_loadu_si128((__m128i*)(p - 1));
-            a[1] = LoadAfterLast<1>(_mm_loadu_si128((__m128i*)p));
+            a[2] = LoadAfterLast<1>(_mm_loadu_si128((__m128i*)p));
         }
 	}
 #endif//SIMD_SSE2_ENABLE
@@ -255,22 +255,22 @@ namespace Simd
             LoadAfterLast<align, step>(p, a[3], a[4]);
         }
 
-        SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m256i a[2])
+        SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m256i a[3])
         {
             a[0] = LoadBeforeFirst<false, 1>(p);
-            a[1] = _mm256_loadu_si256((__m256i*)(p + 1));
+            a[2] = _mm256_loadu_si256((__m256i*)(p + 1));
         }
 
-        SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m256i a[2])
+        SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m256i a[3])
         {
             a[0] = _mm256_loadu_si256((__m256i*)(p - 1));
-            a[1] = _mm256_loadu_si256((__m256i*)(p + 1));
+            a[2] = _mm256_loadu_si256((__m256i*)(p + 1));
         }
 
-        SIMD_INLINE void LoadTailDx(const uint8_t * p, __m256i a[2])
+        SIMD_INLINE void LoadTailDx(const uint8_t * p, __m256i a[3])
         {
             a[0] = _mm256_loadu_si256((__m256i*)(p - 1));
-            a[1] = LoadAfterLast<false, 1>(p);
+            a[2] = LoadAfterLast<false, 1>(p);
         }
     }
 #endif//SIMD_AVX2_ENABLE

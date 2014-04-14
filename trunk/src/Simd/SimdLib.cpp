@@ -1014,12 +1014,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
 SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
+    if(Sse2::Enable && width > Sse2::A)
         Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_SSE2_ENABLE
@@ -1029,12 +1029,12 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
 SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
+    if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_SSSE3_ENABLE
@@ -1044,12 +1044,12 @@ SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width
 SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
+    if(Sse2::Enable && width > Sse2::A)
         Sse2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_SSE2_ENABLE
@@ -1059,16 +1059,62 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
 SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
+    if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif//SIMD_SSSE3_ENABLE
         Base::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+    else
+#endif//SIMD_SSSE3_ENABLE
+        Base::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+                                       const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
+    else
+#endif//SIMD_SSSE3_ENABLE
+        Base::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
+}
+
+SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width > Sse2::A)
+        Sse2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+    else
+#endif//SIMD_SSE2_ENABLE
+        Base::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
 }
 
 SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 

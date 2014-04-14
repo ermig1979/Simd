@@ -1557,6 +1557,81 @@ extern "C"
     SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     /**
+    * \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+    *
+    * \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    * This function is used for contour extraction. 
+    *
+    * For every point: 
+    * \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+    * \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+    * \n dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1).
+    *
+    * \param [in] src - a pointer to pixels data of the gray 8-bit input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] dst - a pointer to pixels data of the output 16-bit image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+    /**
+    * \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
+    *
+    * \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. 
+    *
+    * All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+    * This function is used for contour extraction. 
+    *
+    * For every point: 
+    * \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+    * \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+    * \n dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1).
+    *
+    * \param [in] src - a pointer to pixels data of the gray 8-bit input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] mask - a pointer to pixels data of the mask 8-bit image.
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] indexMin - a mask minimal permissible index.
+    * \param [out] dst - a pointer to pixels data of the output 16-bit image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
+
+    /**
+    * \fn void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
+    *
+    * \short Extract contour anchors from contour metrics. 
+    *
+    * All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format. 
+    * Input image with metrics can be estimated by using ::SimdContourMetrics or SimdContourMetricsMasked functions. 
+    * This function is used for contour extraction. 
+    *
+    * For every point (except border): 
+    * \n a[x, y] = src[x, y] >> 1.
+    * \n if(src[x, y] & 1)
+    * \n dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
+    * \n else
+    * \n dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x, y + 1] >= threshold) && (a[x, y] - a[x, y - 1] >= threshold) ? 255 : 0;
+    *
+    * \param [in] src - a pointer to pixels data of the 16-bit input image.
+    * \param [in] srcStride - a row size of the input image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] step - a row step (to skip some rows).
+    * \param [in] threshold - a threshold of anchor creation.
+    * \param [out] dst - a pointer to pixels data of the output 8-bit gray image.
+    * \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
+
+    /**
     * \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Calculates sum of squared differences for two 8-bit gray images. 
@@ -1580,7 +1655,7 @@ extern "C"
     /**
     * \fn void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
-    * \short Calculates sum of squared differences for two  images with using mask. 
+    * \short Calculates sum of squared differences for two images with using mask. 
     *
     * All images must have the same width, height and format (8-bit gray). 
     *

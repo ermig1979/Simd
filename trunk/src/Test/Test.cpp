@@ -148,6 +148,9 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(SobelDxAbsTest);
     EXECUTE_TEST(SobelDyTest);
     EXECUTE_TEST(SobelDyAbsTest);
+    EXECUTE_TEST(ContourMetricsTest);
+    EXECUTE_TEST(ContourMetricsMaskedTest);
+    EXECUTE_TEST(ContourAnchorsTest);
 
     EXECUTE_TEST(BgraToBgrTest);
 

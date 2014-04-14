@@ -555,6 +555,27 @@ namespace Simd
         SimdSobelDyAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    SIMD_INLINE void ContourMetrics(const View & src, View & dst)
+    {
+        assert(EqualSize(src, dst) && src.format == View::Gray8 && dst.format == View::Int16);
+
+        SimdContourMetrics(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
+    SIMD_INLINE void ContourMetrics(const View & src, const View & mask, uint8_t indexMin, View & dst)
+    {
+        assert(Compatible(src, mask) && EqualSize(src, dst) && src.format == View::Gray8 && dst.format == View::Int16);
+
+        SimdContourMetricsMasked(src.data, src.stride, src.width, src.height, mask.data, mask.stride, indexMin, dst.data, dst.stride);
+    }
+
+    SIMD_INLINE void ContourAnchors(const View & src, size_t step, int16_t threshold, View & dst)
+    {
+        assert(EqualSize(src, dst) && src.format == View::Int16 && dst.format == View::Gray8);
+
+        SimdContourAnchors(src.data, src.stride, src.width, src.height, step, threshold, dst.data, dst.stride);
+    }
+
     SIMD_INLINE void SquaredDifferenceSum(const View & a, const View & b, uint64_t & sum)
     {
         assert(Compatible(a, b) && a.format == View::Gray8);
