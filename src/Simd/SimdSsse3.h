@@ -47,6 +47,11 @@ namespace Simd
 
         void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+        void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
+
         void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
             size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 

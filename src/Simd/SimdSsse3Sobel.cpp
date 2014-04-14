@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
@@ -32,27 +33,35 @@ namespace Simd
 #ifdef SIMD_SSSE3_ENABLE    
     namespace Ssse3
     {
-        template<bool align> SIMD_INLINE void SobelDxAbs(__m128i a[3][2], int16_t * dst)
+        SIMD_INLINE void SobelDxAbs(__m128i a[3][3], __m128i & lo, __m128i & hi)
         {
-            Store<align>((__m128i*)dst + 0, _mm_abs_epi16(BinomialSum16(
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[0][1], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][1], K_ZERO), _mm_unpacklo_epi8(a[1][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][1], K_ZERO), _mm_unpacklo_epi8(a[2][0], K_ZERO))))); 
-            Store<align>((__m128i*)dst + 1, _mm_abs_epi16(BinomialSum16(
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[0][1], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][1], K_ZERO), _mm_unpackhi_epi8(a[1][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][1], K_ZERO), _mm_unpackhi_epi8(a[2][0], K_ZERO))))); 
+            lo = _mm_abs_epi16(BinomialSum16(
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[0][2], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][2], K_ZERO), _mm_unpacklo_epi8(a[1][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][2], K_ZERO), _mm_unpacklo_epi8(a[2][0], K_ZERO)))); 
+            hi = _mm_abs_epi16(BinomialSum16(
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[0][2], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][2], K_ZERO), _mm_unpackhi_epi8(a[1][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][2], K_ZERO), _mm_unpackhi_epi8(a[2][0], K_ZERO)))); 
+        }
+
+        template<bool align> SIMD_INLINE void SobelDxAbs(__m128i a[3][3], int16_t * dst)
+        {
+            __m128i lo, hi;
+            SobelDxAbs(a, lo, hi);
+            Store<align>((__m128i*)dst + 0, lo); 
+            Store<align>((__m128i*)dst + 1, hi); 
         }
 
         template <bool align> void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
-            assert(width >= A);
+            assert(width > A);
             if(align)
                 assert(Aligned(dst) && Aligned(dstStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
-            __m128i a[3][2];
+            __m128i a[3][3];
 
             for(size_t row = 0; row < height; ++row)
             {
@@ -94,27 +103,35 @@ namespace Simd
                 SobelDxAbs<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
-        template<bool align> SIMD_INLINE void SobelDyAbs(__m128i a[2][3], int16_t * dst)
+        SIMD_INLINE void SobelDyAbs(__m128i a[3][3], __m128i & lo, __m128i & hi)
         {
-            Store<align>((__m128i*)dst + 0, _mm_abs_epi16(BinomialSum16(
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][0], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][1], K_ZERO), _mm_unpacklo_epi8(a[0][1], K_ZERO)),
-                _mm_sub_epi16(_mm_unpacklo_epi8(a[1][2], K_ZERO), _mm_unpacklo_epi8(a[0][2], K_ZERO))))); 
-            Store<align>((__m128i*)dst + 1, _mm_abs_epi16(BinomialSum16(
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][0], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][1], K_ZERO), _mm_unpackhi_epi8(a[0][1], K_ZERO)),
-                _mm_sub_epi16(_mm_unpackhi_epi8(a[1][2], K_ZERO), _mm_unpackhi_epi8(a[0][2], K_ZERO))))); 
+            lo = _mm_abs_epi16(BinomialSum16(
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][0], K_ZERO), _mm_unpacklo_epi8(a[0][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][1], K_ZERO), _mm_unpacklo_epi8(a[0][1], K_ZERO)),
+                _mm_sub_epi16(_mm_unpacklo_epi8(a[2][2], K_ZERO), _mm_unpacklo_epi8(a[0][2], K_ZERO)))); 
+            hi = _mm_abs_epi16(BinomialSum16(
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][0], K_ZERO), _mm_unpackhi_epi8(a[0][0], K_ZERO)),
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][1], K_ZERO), _mm_unpackhi_epi8(a[0][1], K_ZERO)),
+                _mm_sub_epi16(_mm_unpackhi_epi8(a[2][2], K_ZERO), _mm_unpackhi_epi8(a[0][2], K_ZERO)))); 
+        }
+
+        template<bool align> SIMD_INLINE void SobelDyAbs(__m128i a[3][3], int16_t * dst)
+        {
+            __m128i lo, hi;
+            SobelDyAbs(a, lo, hi);
+            Store<align>((__m128i*)dst + 0, lo); 
+            Store<align>((__m128i*)dst + 1, hi); 
         }
 
         template <bool align> void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
-            assert(width >= A);
+            assert(width > A);
             if(align)
                 assert(Aligned(dst) && Aligned(dstStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
-            __m128i a[2][3];
+            __m128i a[3][3];
 
             for(size_t row = 0; row < height; ++row)
             {
@@ -127,16 +144,16 @@ namespace Simd
                     src2 = src1;
 
                 LoadNose3<align, 1>(src0 + 0, a[0]);
-                LoadNose3<align, 1>(src2 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
                 SobelDyAbs<align>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBody3<align, 1>(src0 + col, a[0]);
-                    LoadBody3<align, 1>(src2 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
                     SobelDyAbs<align>(a, dst + col);
                 }
                 LoadTail3<false, 1>(src0 + width - A, a[0]);
-                LoadTail3<false, 1>(src2 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
                 SobelDyAbs<false>(a, dst + width - A);
 
                 dst += dstStride;
@@ -151,6 +168,141 @@ namespace Simd
                 SobelDyAbs<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
                 SobelDyAbs<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        SIMD_INLINE __m128i ContourMetrics(__m128i dx, __m128i dy)
+        {
+            return _mm_add_epi16(_mm_slli_epi16(_mm_add_epi16(dx, dy), 1), _mm_and_si128(_mm_cmplt_epi16(dx, dy), K16_0001)); 
+        }
+
+        SIMD_INLINE void ContourMetrics(__m128i a[3][3], __m128i & lo, __m128i & hi)
+        {
+            __m128i dxLo, dxHi, dyLo, dyHi;
+            SobelDxAbs(a, dxLo, dxHi);
+            SobelDyAbs(a, dyLo, dyHi);
+            lo = ContourMetrics(dxLo, dyLo);
+            hi = ContourMetrics(dxHi, dyHi);
+        }
+
+        template<bool align> SIMD_INLINE void ContourMetrics(__m128i a[3][3], int16_t * dst)
+        {
+            __m128i lo, hi;
+            ContourMetrics(a, lo, hi);
+            Store<align>((__m128i*)dst + 0, lo); 
+            Store<align>((__m128i*)dst + 1, hi); 
+        }
+
+        template <bool align> void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        {
+            assert(width > A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+            __m128i a[3][3];
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride*(row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                ContourMetrics<align>(a, dst + 0);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    ContourMetrics<align>(a, dst + col);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src1 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                ContourMetrics<false>(a, dst + width - A);
+
+                dst += dstStride;
+            }
+        }
+
+        void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        template<bool align> SIMD_INLINE void ContourMetricsMasked(__m128i a[3][3], const uint8_t * mask, const __m128i & indexMin, int16_t * dst)
+        {
+            __m128i m = GreaterOrEqualU8(Load<align>((__m128i*)mask), indexMin);
+            __m128i lo, hi;
+            ContourMetrics(a, lo, hi);
+            Store<align>((__m128i*)dst + 0, _mm_and_si128(lo, _mm_unpacklo_epi8(m, m))); 
+            Store<align>((__m128i*)dst + 1, _mm_and_si128(hi, _mm_unpackhi_epi8(m, m))); 
+        }
+
+        template <bool align> void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t indexMin, int16_t * dst, size_t dstStride)
+        {
+            assert(width > A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride) && Aligned(mask) && Aligned(maskStride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+            __m128i _indexMin = _mm_set1_epi8(indexMin);
+            __m128i a[3][3];
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride*(row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                ContourMetricsMasked<align>(a, mask + 0, _indexMin, dst + 0);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    ContourMetricsMasked<align>(a, mask + col, _indexMin, dst + col);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src1 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                ContourMetricsMasked<false>(a, mask + width - A, _indexMin, dst + width - A);
+
+                dst += dstStride;
+                mask += maskStride;
+            }
+        }
+
+        void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride) && Aligned(mask) && Aligned(maskStride))
+                ContourMetricsMasked<true>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
     }
 #endif// SIMD_SSSE3_ENABLE

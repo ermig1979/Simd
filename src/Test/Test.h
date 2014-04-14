@@ -142,5 +142,8 @@ namespace Test
     bool SobelDxAbsTest();
     bool SobelDyTest();
     bool SobelDyAbsTest();
+    bool ContourMetricsTest();
+    bool ContourMetricsMaskedTest();
+    bool ContourAnchorsTest();
 }
 #endif//__Test_h__
