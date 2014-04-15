@@ -1579,7 +1579,7 @@ extern "C"
     SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     /**
-    * \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
+    * \fn void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
     *
     * \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. 
     *
@@ -1610,7 +1610,7 @@ extern "C"
     * \short Extract contour anchors from contour metrics. 
     *
     * All images must have the same width and height. Input image must has 16-bit integer format, output image must has 8-bit gray format. 
-    * Input image with metrics can be estimated by using ::SimdContourMetrics or SimdContourMetricsMasked functions. 
+    * Input image with metrics can be estimated by using ::SimdContourMetrics or ::SimdContourMetricsMasked functions. 
     * This function is used for contour extraction. 
     *
     * For every point (except border): 
