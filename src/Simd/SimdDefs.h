@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <limits.h>
+#include <math.h>
 
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
