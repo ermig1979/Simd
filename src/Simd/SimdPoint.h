@@ -228,7 +228,7 @@ namespace Simd
     }
 
     template <typename T> 
-    SIMD_INLINE double Distance(const TPoint<T> & p1, const TPoint<T> & p2)
+    SIMD_INLINE double Distance(const Point<T> & p1, const Point<T> & p2)
     {
         return ::sqrt(double(SquaredDistance(p1, p2)));
     }
