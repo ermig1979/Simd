@@ -66,6 +66,7 @@ namespace Simd
 	template <typename TP, typename TA> Point<TP> operator * (const TA & a, const Point<TP> & p);
 
     template <typename T> T SquaredDistance(const Point<T> & p1, const Point<T> & p2);
+    template <typename T> double Distance(const Point<T> & p1, const Point<T> & p2);
     template <typename T> T DotProduct(const Point<T> & p1, const Point<T> & p2);
     template <typename T> T CrossProduct(const Point<T> & p1, const Point<T> & p2);
 
@@ -224,6 +225,12 @@ namespace Simd
     {
         Point<T> dp = p2 - p1;
         return dp.x*dp.x + dp.y*dp.y;
+    }
+
+    template <typename T> 
+    SIMD_INLINE double Distance(const TPoint<T> & p1, const TPoint<T> & p2)
+    {
+        return ::sqrt(double(SquaredDistance(p1, p2)));
     }
 
     template <typename T>
