@@ -32,6 +32,9 @@ namespace Simd
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
+        void AlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
+
         void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
         void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);

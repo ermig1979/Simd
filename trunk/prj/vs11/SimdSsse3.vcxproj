@@ -67,6 +67,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToGray.cpp" />

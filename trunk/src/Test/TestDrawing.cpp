@@ -102,6 +102,11 @@ namespace Test
             result = result && AlphaBlendingTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(Simd::Avx2::AlphaBlending));
 #endif 
 
+#if defined(SIMD_SSSE3_ENABLE)
+        if(Simd::Ssse3::Enable)
+            result = result && AlphaBlendingTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#endif 
+
         return result;    
     }
 }
