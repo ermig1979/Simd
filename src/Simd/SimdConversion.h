@@ -381,6 +381,23 @@ namespace Simd
             return _mm256_packus_epi16(lo, hi);
         }
 
+        template <int index> __m256i GrayToBgr(__m256i gray);
+
+        template<> SIMD_INLINE __m256i GrayToBgr<0>(__m256i gray)
+        {
+            return _mm256_shuffle_epi8(_mm256_permute4x64_epi64(gray, 0x44), K8_SHUFFLE_GRAY_TO_BGR0);
+        }
+
+        template<> SIMD_INLINE __m256i GrayToBgr<1>(__m256i gray)
+        {
+            return _mm256_shuffle_epi8(_mm256_permute4x64_epi64(gray, 0x99), K8_SHUFFLE_GRAY_TO_BGR1);
+        }
+
+        template<> SIMD_INLINE __m256i GrayToBgr<2>(__m256i gray)
+        {
+            return _mm256_shuffle_epi8(_mm256_permute4x64_epi64(gray, 0xEE), K8_SHUFFLE_GRAY_TO_BGR2);
+        }
+
         template <int index> __m256i InterleaveBgr(__m256i blue, __m256i green, __m256i red);
 
         template<> SIMD_INLINE __m256i InterleaveBgr<0>(__m256i blue, __m256i green, __m256i red)

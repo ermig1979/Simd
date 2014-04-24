@@ -177,7 +177,12 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+    else
+#endif//SIMD_SSSE3_ENABLE 
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);

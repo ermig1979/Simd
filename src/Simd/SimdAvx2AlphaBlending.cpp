@@ -26,6 +26,7 @@
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdConversion.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx2.h"
@@ -69,6 +70,16 @@ namespace Simd
                 alpha = _mm256_permute4x64_epi64(alpha, 0xD8);
                 AlphaBlending<align>(src + 0, dst + 0, _mm256_unpacklo_epi8(alpha, alpha));
                 AlphaBlending<align>(src + 1, dst + 1, _mm256_unpackhi_epi8(alpha, alpha));
+            }
+        };
+
+        template <bool align> struct AlphaBlender<align, 3>
+        {
+            SIMD_INLINE void operator()(const __m256i * src, __m256i * dst, __m256i alpha)
+            {
+                AlphaBlending<align>(src + 0, dst + 0, GrayToBgr<0>(alpha));
+                AlphaBlending<align>(src + 1, dst + 1, GrayToBgr<1>(alpha));
+                AlphaBlending<align>(src + 2, dst + 2, GrayToBgr<2>(alpha));
             }
         };
 
@@ -125,6 +136,7 @@ namespace Simd
             {
             case 1 : AlphaBlending<align, 1>(src, srcStride, width, height, alpha, alphaStride, dst, dstStride); break;
             case 2 : AlphaBlending<align, 2>(src, srcStride, width, height, alpha, alphaStride, dst, dstStride); break;
+            case 3 : AlphaBlending<align, 3>(src, srcStride, width, height, alpha, alphaStride, dst, dstStride); break;
             case 4 : AlphaBlending<align, 4>(src, srcStride, width, height, alpha, alphaStride, dst, dstStride); break;
             default:
                 assert(0);
@@ -134,15 +146,10 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
         {
-            if(channelCount == 3)
-                Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+            if(Aligned(src) && Aligned(srcStride) && Aligned(alpha) && Aligned(alphaStride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlending<true>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
             else
-            {
-                if(Aligned(src) && Aligned(srcStride) && Aligned(alpha) && Aligned(alphaStride) && Aligned(dst) && Aligned(dstStride))
-                    AlphaBlending<true>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
-                else
-                    AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
-            }
+                AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
