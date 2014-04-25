@@ -94,7 +94,7 @@ namespace Test
 
     namespace
     {
-        struct Func2
+        struct FuncM
         {
             typedef void (*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
@@ -102,7 +102,7 @@ namespace Test
             FuncPtr func;
             std::string description;
 
-            Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
             void Call(const View & mask, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy) const
             {
@@ -112,9 +112,13 @@ namespace Test
         };
     }
 
-#define FUNC2(function) Func2(function, #function)
+#define FUNC_M(function) FuncM(function, #function)
 
-    bool GetMomentsTest(int width, int height, const Func2 & f1, const Func2 & f2)
+#define ARGS_M(scale, function1, function2) \
+    FuncM(function1.func, function1.description + ScaleDescription(scale)), \
+    FuncM(function2.func, function2.description + ScaleDescription(scale)) 
+
+    bool GetMomentsTest(ptrdiff_t width, ptrdiff_t height, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
@@ -141,20 +145,41 @@ namespace Test
         return result;
     }
 
+    bool GetMomentsTest(const Point & scale, const FuncM & f1, const FuncM & f2)
+    {
+        bool result = true;
+
+        result = result && GetMomentsTest(W*scale.x, H*scale.y, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsTest(W*scale.x + 1, H*scale.y - 1, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsTest(W*scale.x - 1, H*scale.y + 1, ARGS_M(scale, f1, f2));
+
+        return result;
+    }
+
+    bool GetMomentsTest(const FuncM & f1, const FuncM & f2)
+    {
+        bool result = true;
+
+        result = result && GetMomentsTest(Point(1, 1), f1, f2);
+#ifdef _DEBUG
+        result = result && GetMomentsTest(Point(50, 20), f1, f2);
+#else
+        result = result && GetMomentsTest(Point(5, 2), f1, f2);
+#endif
+
+        return result;
+    }
+
     bool GetMomentsTest()
     {
         bool result = true;
 
-        result = result && GetMomentsTest(W, H, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
-        result = result && GetMomentsTest(W + 1, H - 1, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
-        result = result && GetMomentsTest(W - 1, H + 1, FUNC2(Simd::Base::GetMoments), FUNC2(SimdGetMoments));
+        result = result && GetMomentsTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetMomentsTest(W, H, FUNC2(Simd::Sse2::GetMoments), FUNC2(Simd::Avx2::GetMoments));
-            result = result && GetMomentsTest(W + 1, H - 1, FUNC2(Simd::Sse2::GetMoments), FUNC2(Simd::Avx2::GetMoments));
-            result = result && GetMomentsTest(W - 1, H + 1, FUNC2(Simd::Sse2::GetMoments), FUNC2(Simd::Avx2::GetMoments));
+            result = result && GetMomentsTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(Simd::Avx2::GetMoments));
         }
 #endif 
 

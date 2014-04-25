@@ -89,10 +89,7 @@ namespace Simd
                 GetStatistic<false>(src, stride, width, height, min, max, average);
         }
 
-        template <bool small> SIMD_INLINE void GetMoments16(__m256i row, __m256i col, 
-            __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy);
-
-        template<> SIMD_INLINE void GetMoments16<true>(__m256i row, __m256i col, 
+        SIMD_INLINE void GetMoments16Small(__m256i row, __m256i col, 
             __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy)
         {
             x = _mm256_add_epi32(x, _mm256_madd_epi16(col, K16_0001));
@@ -102,28 +99,46 @@ namespace Simd
             yy = _mm256_add_epi32(yy, _mm256_madd_epi16(row, row));
         }
 
-        template<> SIMD_INLINE void GetMoments16<false>(__m256i row, __m256i col, 
+        SIMD_INLINE void GetMoments16Large(__m256i row, __m256i col, 
             __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy)
         {
             x = _mm256_add_epi32(x, _mm256_madd_epi16(col, K16_0001));
             y = _mm256_add_epi32(y, _mm256_madd_epi16(row, K16_0001));
-            xx = _mm256_add_epi64(xx, HorizontalSum32(_mm256_madd_epi16(col, col)));
-            xy = _mm256_add_epi64(xy, HorizontalSum32(_mm256_madd_epi16(col, row)));
-            yy = _mm256_add_epi64(yy, HorizontalSum32(_mm256_madd_epi16(row, row)));
+            xx = _mm256_madd_epi16(col, col);
+            xy = _mm256_madd_epi16(col, row);
+            yy = _mm256_madd_epi16(row, row);
         }
 
-        template <bool small> SIMD_INLINE void GetMoments8(__m256i mask, __m256i & row, __m256i & col, 
+        SIMD_INLINE void GetMoments8Small(__m256i mask, __m256i & row, __m256i & col, 
             __m256i & area, __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy)
         {
             area = _mm256_add_epi64(area, _mm256_sad_epu8(_mm256_and_si256(K8_01, mask), K_ZERO));
 
             const __m256i lo = _mm256_cmpeq_epi16(_mm256_unpacklo_epi8(mask, K_ZERO), K16_00FF);
-            GetMoments16<small>(_mm256_and_si256(lo, row), _mm256_and_si256(lo, col), x, y, xx, xy, yy);
+            GetMoments16Small(_mm256_and_si256(lo, row), _mm256_and_si256(lo, col), x, y, xx, xy, yy);
             col = _mm256_add_epi16(col, K16_0008);
 
             const __m256i hi = _mm256_cmpeq_epi16(_mm256_unpackhi_epi8(mask, K_ZERO), K16_00FF);
-            GetMoments16<small>(_mm256_and_si256(hi, row), _mm256_and_si256(hi, col), x, y, xx, xy, yy);
+            GetMoments16Small(_mm256_and_si256(hi, row), _mm256_and_si256(hi, col), x, y, xx, xy, yy);
             col = _mm256_add_epi16(col, K16_0018);
+        }
+
+        SIMD_INLINE void GetMoments8Large(__m256i mask, __m256i & row, __m256i & col, 
+            __m256i & area, __m256i & x, __m256i & y, __m256i & xx, __m256i & xy, __m256i & yy)
+        {
+            area = _mm256_add_epi64(area, _mm256_sad_epu8(_mm256_and_si256(K8_01, mask), K_ZERO));
+
+            __m256i xxLo, xyLo, yyLo, maskLo = _mm256_cmpeq_epi16(_mm256_unpacklo_epi8(mask, K_ZERO), K16_00FF);
+            GetMoments16Large(_mm256_and_si256(maskLo, row), _mm256_and_si256(maskLo, col), x, y, xxLo, xyLo, yyLo);
+            col = _mm256_add_epi16(col, K16_0008);
+
+            __m256i xxHi, xyHi, yyHi, maskHi = _mm256_cmpeq_epi16(_mm256_unpackhi_epi8(mask, K_ZERO), K16_00FF);
+            GetMoments16Large(_mm256_and_si256(maskHi, row), _mm256_and_si256(maskHi, col), x, y, xxHi, xyHi, yyHi);
+            col = _mm256_add_epi16(col, K16_0018);
+
+            xx = _mm256_add_epi64(xx, HorizontalSum32(_mm256_hadd_epi32(xxLo, xxHi)));
+            xy = _mm256_add_epi64(xy, HorizontalSum32(_mm256_hadd_epi32(xyLo, xyHi)));
+            yy = _mm256_add_epi64(yy, HorizontalSum32(_mm256_hadd_epi32(yyLo, yyHi)));
         }
 
         template <bool align> void GetMomentsSmall(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
@@ -149,19 +164,19 @@ namespace Simd
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
                     __m256i _mask = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask + col)), _index);
-                    GetMoments8<true>(_mask, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
+                    GetMoments8Small(_mask, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
                 }
                 if(alignedWidth != width)
                 {
                     __m256i _mask = _mm256_and_si256(_mm256_cmpeq_epi8(Load<false>((__m256i*)(mask + width - A)), _index), tailMask);
                     _col = tailCol;
-                    GetMoments8<true>(_mask, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
+                    GetMoments8Small(_mask, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
                 }
                 x = _mm256_add_epi64(x, HorizontalSum32(_rowX));
                 y = _mm256_add_epi64(y, HorizontalSum32(_rowY));
                 xx = _mm256_add_epi64(xx, HorizontalSum32(_rowXX));
                 xy = _mm256_add_epi64(xy, HorizontalSum32(_rowXY));
-                y = _mm256_add_epi64(yy, HorizontalSum32(_rowYY));
+                yy = _mm256_add_epi64(yy, HorizontalSum32(_rowYY));
 
                 mask += stride;
             }
@@ -187,13 +202,13 @@ namespace Simd
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
                     __m256i _mask = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask + col)), _index);
-                    GetMoments8<false>(_mask, _row, _col, area, _rowX, _rowY, xx, xy, yy);
+                    GetMoments8Large(_mask, _row, _col, area, _rowX, _rowY, xx, xy, yy);
                 }
                 if(alignedWidth != width)
                 {
                     __m256i _mask = _mm256_and_si256(_mm256_cmpeq_epi8(Load<false>((__m256i*)(mask + width - A)), _index), tailMask);
                     _col = tailCol;
-                    GetMoments8<false>(_mask, _row, _col, area, _rowX, _rowY, xx, xy, yy);
+                    GetMoments8Large(_mask, _row, _col, area, _rowX, _rowY, xx, xy, yy);
                 }
                 x = _mm256_add_epi64(x, HorizontalSum32(_rowX));
                 y = _mm256_add_epi64(y, HorizontalSum32(_rowY));
