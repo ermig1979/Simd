@@ -55,15 +55,9 @@ namespace Simd
             *max = max_;
         }
 
-        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+        void GetMomentsSmall(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
-            *area = 0;
-            *x = 0;
-            *y = 0;
-            *xx = 0;
-            *xy = 0;
-            *yy = 0;
             for(size_t row = 0; row < height; ++row)
             {
                 size_t rowArea = 0;
@@ -93,6 +87,57 @@ namespace Simd
 
                 mask += stride;
             }
+        }
+
+        void GetMomentsLarge(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t rowArea = 0;
+                size_t rowX = 0;
+                size_t rowY = 0;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col] == index)
+                    {
+                        rowArea++;
+                        rowX += col;
+                        rowY += row;
+                        *xx += col*col;
+                        *xy += col*row;
+                        *yy += row*row;
+                    }               
+                }
+                *area += rowArea;
+                *x += rowX;
+                *y += rowY;
+
+                mask += stride;
+            }
+        }
+
+        SIMD_INLINE bool IsSmall(uint64_t width, uint64_t height)
+        {
+            return 
+                width*width*width < 0x300000000ui64 && 
+                width*width*height < 0x200000000ui64 && 
+                width*height*height < 0x100000000ui64;
+        }
+
+        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            *area = 0;
+            *x = 0;
+            *y = 0;
+            *xx = 0;
+            *xy = 0;
+            *yy = 0;
+            if(IsSmall(width, height))
+                GetMomentsSmall(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+            else
+                GetMomentsLarge(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
 
         void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
