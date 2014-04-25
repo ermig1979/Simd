@@ -196,6 +196,13 @@ namespace Test
         }
     }
 
+    std::string ScaleDescription(const Point & scale)
+    {
+        std::stringstream ss;
+        ss << "[" << scale.x << "x" << scale.y << "]";
+        return ss.str();
+    }
+
     std::string CompareTypeDescription(SimdCompareType type)
     {
         switch(type)

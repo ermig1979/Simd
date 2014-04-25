@@ -51,6 +51,8 @@ namespace Test
 
     std::string FormatDescription(View::Format format);
 
+    std::string ScaleDescription(const Point & scale);
+
     std::string CompareTypeDescription(SimdCompareType type);
 
     std::string ExpandToLeft(const std::string & value, size_t count);

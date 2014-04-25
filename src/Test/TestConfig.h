@@ -53,6 +53,7 @@
 namespace Test
 {
 	typedef Simd::View View;
+    typedef Simd::Point<ptrdiff_t> Point;
 	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
     typedef std::vector<uint32_t> Sums;
 
