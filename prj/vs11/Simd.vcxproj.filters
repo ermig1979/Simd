@@ -58,6 +58,9 @@
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h">
       <Filter>Alg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Lib">

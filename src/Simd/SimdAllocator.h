@@ -1,5 +1,5 @@
 /*
-* Simd Library Tests.
+* Simd Library.
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
 *
@@ -21,51 +21,33 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __TestConfig_h__
-#define __TestConfig_h__
+#ifndef __SimdAllocator_h__
+#define __SimdAllocator_h__
 
-#ifndef _DEBUG
-#define TEST_PERFORMANCE_TEST_ENABLE
-#endif
+#include "Simd/SimdMemory.h"
 
-#include <stdlib.h>
-
-#include <iostream>
-#include <string>
-#include <vector>
-#include <map>
-#include <algorithm>
-#include <sstream>
-#include <limits>
-#include <iomanip>
-#include <memory>
-
-#define SIMD_STATIC
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
-#include "Simd/SimdSsse3.h"
-#include "Simd/SimdSse41.h"
-#include "Simd/SimdSse42.h"
-#include "Simd/SimdAvx2.h"
-#include "Simd/SimdUtils.h"
-
-namespace Test
+namespace Simd
 {
-	typedef Simd::View<Simd::Allocator> View;
-    typedef Simd::Point<ptrdiff_t> Point;
-	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
-    typedef std::vector<uint32_t> Sums;
+    struct Allocator
+    {
+        static void * Allocate(size_t size, size_t align);
 
-#ifdef _DEBUG
-	const int W = 128;
-	const int H = 96;
-#else
-	const int W = 1920;
-	const int H = 1080;
-#endif
+        static void Free(void * p);
+    };
 
-	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+    //-------------------------------------------------------------------------
+
+    // struct Allocator implementation:
+
+    SIMD_INLINE void * Allocator::Allocate(size_t size, size_t align)
+    {
+        return Simd::Allocate(size, align);
+    }
+
+    SIMD_INLINE void Allocator::Free(void * p)
+    {
+        Simd::Free(p);
+    }
 }
 
-#endif//__TestConfig_h__
+#endif//__SimdAllocator_h__

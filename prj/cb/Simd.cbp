@@ -75,6 +75,9 @@
 				</ExtraCommands>
 			</Target>
 		</Build>
+		<Unit filename="../../src/Simd/SimdAllocator.h">
+			<Option virtualFolder="Utils/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdAvx2.h">
 			<Option virtualFolder="Sys/" />
 		</Unit>
