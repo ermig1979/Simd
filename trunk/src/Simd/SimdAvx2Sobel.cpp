@@ -69,7 +69,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -149,7 +149,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -228,7 +228,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -291,7 +291,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride) && Aligned(mask) && Aligned(maskStride));
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA) && Aligned(mask) && Aligned(maskStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -370,7 +370,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             __m256i _threshold = _mm256_set1_epi16(threshold);

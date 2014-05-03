@@ -48,7 +48,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -110,7 +110,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -183,7 +183,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             __m128i _threshold = _mm_set1_epi16(threshold);
