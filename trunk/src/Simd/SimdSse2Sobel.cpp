@@ -183,7 +183,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
+                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             __m128i _threshold = _mm_set1_epi16(threshold);
