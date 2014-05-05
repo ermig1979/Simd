@@ -29,18 +29,28 @@
 if(argc < 2 || std::string(#test).find(argv[1]) != std::string::npos) \
 {\
 	std::cout << #test << " is started :" << std::endl; \
-	bool result = test(); \
+	result = test(); \
 	std::cout << #test << " is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; \
 	if(!result) \
 	{ \
 		std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \
-		return 1; \
+		goto end; \
 	} \
 }
 
 int main(int argc, char* argv[])
 {
     using namespace Test;
+
+    bool result = true;
+
+#ifdef CUDA_ENABLE
+    if(::cudaSetDevice(0) != ::cudaSuccess)
+    {
+        std::cout << "Operation ::cudaSetDevice(0) is failed!" << std::endl;
+        goto end;
+    }
+#endif
 
     EXECUTE_TEST(ReduceGray2x2Test);
     EXECUTE_TEST(ReduceGray3x3Test);
@@ -167,5 +177,12 @@ int main(int argc, char* argv[])
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, false) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
-	return 0;
+end:
+
+#ifdef CUDA_ENABLE
+    if(::cudaDeviceReset() != ::cudaSuccess)
+        std::cout << "Operation ::cudaDeviceReset() is failed!" << std::endl;
+#endif
+
+	return result ? 1 : 0;
 }

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="..\..\src\Cuda\CudaLib.cu">
+      <Filter>Lib</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\..\src\Cuda\CudaMedianFilter.cu">
+      <Filter>Alg</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Lib">
+      <UniqueIdentifier>{e6ed206a-3ce1-4c0b-8d90-263fa58e630e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sys">
+      <UniqueIdentifier>{739080e8-004b-4552-a1ac-463fda8f036e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utils">
+      <UniqueIdentifier>{d09e2e5d-8fcb-44dc-90f4-f417acfd4787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg">
+      <UniqueIdentifier>{57ab06f6-88cb-48eb-b2f7-77c8f3c30d61}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Cuda\CudaLib.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaTypes.h">
+      <Filter>Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaConfig.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaAllocator.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaDefs.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaUtils.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaAlg.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Cuda\CudaMath.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
