@@ -116,10 +116,10 @@ namespace Simd
         bool _owner;
     };
 
-    template <class A> bool EqualSize(const View<A> & a, const View<A> & b);
+    template <class A, class B> bool EqualSize(const View<A> & a, const View<B> & b);
     template <class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
 
-    template <class A> bool Compatible(const View<A> & a, const View<A> & b);
+    template <class A, class B> bool Compatible(const View<A> & a, const View<B> & b);
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
@@ -430,7 +430,7 @@ namespace Simd
 
     // View utilities implementation:
 
-    template <class A> SIMD_INLINE bool EqualSize(const View<A> & a, const View<A> & b)
+    template <class A, class B> SIMD_INLINE bool EqualSize(const View<A> & a, const View<B> & b)
     {
         return
             (a.width == b.width && a.height == b.height);
@@ -443,10 +443,10 @@ namespace Simd
             (a.width == c.width && a.height == c.height);
     }
 
-    template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b)
+    template <class A, class B> SIMD_INLINE bool Compatible(const View<A> & a, const View<B> & b)
     {
         return
-            (a.width == b.width && a.height == b.height && a.format == b.format);
+            (a.width == b.width && a.height == b.height && a.format == (View<A>::Format)b.format);
     }
 
     template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c)

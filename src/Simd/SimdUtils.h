@@ -250,7 +250,7 @@ namespace Simd
         SimdConditionalSquareGradientSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
-    template<class A> SIMD_INLINE void Copy(const View<A>& src, View<A>& dst)
+    template<class A, class B> SIMD_INLINE void Copy(const View<A> & src, View<B> & dst)
     {
         assert(Compatible(src, dst));
 

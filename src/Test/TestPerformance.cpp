@@ -203,6 +203,9 @@ namespace Test
             std::pair<Pm, Pm> sse2;
             std::pair<Pm, Pm> ssse3;
             std::pair<Pm, Pm> avx2;
+#ifdef CUDA_ENABLE
+            Pm cuda;
+#endif
         };
         typedef std::map<std::string, Statistic> StatisticMap;
 
@@ -214,7 +217,7 @@ namespace Test
             const std::string & desc = it->second->Description();
             std::string name = FunctionShortName(desc);
             Statistic & s = statistic[name];
-            if(desc.find("Simd::") == std::string::npos)
+            if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
                 s.simd = *it->second;
             if(desc.find("Simd::Base::") != std::string::npos)
                 s.base = *it->second;
@@ -241,11 +244,16 @@ namespace Test
                 else
                     s.avx2.second = *it->second;
             }
+#ifdef CUDA_ENABLE
+            if(desc.find("Cuda") == 0)
+                s.cuda = *it->second;
+#endif
             timeMax = std::max(timeMax, it->second->Average());
             sizeMax = std::max(name.size(), sizeMax);
         }
 
-        const size_t ic = std::max<size_t>(3, (size_t)::log10(std::max(timeMax, 0.001)) + 3);
+        const size_t ic = 1 + (size_t)::log10(std::max(timeMax*1000, 1.0));
+        const size_t ir = 3;
         const size_t fc = 3;
 
         std::vector<std::string> statistics;
@@ -255,6 +263,9 @@ namespace Test
             std::stringstream ss;
             ss << ExpandToRight(it->first, sizeMax) << " | ";
             ss << ToString(s.simd.Average()*1000.0, ic, fc) << " ";
+#ifdef CUDA_ENABLE
+            ss << ToString(s.cuda.Average()*1000.0, ic, fc) << " ";
+#endif
             ss << ToString(s.base.Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.sse2.first.Average()*1000.0, ic, fc) << " ";
             if(ssse3)
@@ -262,21 +273,27 @@ namespace Test
             if(sse42)
                 ss << ToString(s.sse42.Average()*1000.0, ic, fc) << " ";
             ss << ToString(s.avx2.first.Average()*1000.0, ic, fc) << " | ";
-            ss << ToString(Relation(s.base, s.sse2.first), ic, fc) << " ";
+            ss << ToString(Relation(s.base, s.sse2.first), ir, fc) << " ";
             if(ssse3)
-                ss << ToString(Relation(s.base, s.ssse3.first), ic, fc) << " ";
+                ss << ToString(Relation(s.base, s.ssse3.first), ir, fc) << " ";
             if(sse42)
-                ss << ToString(Relation(s.base, s.sse42), ic, fc) << " ";
-            ss << ToString(Relation(s.base, s.avx2.first), ic, fc) << " | ";
+                ss << ToString(Relation(s.base, s.sse42), ir, fc) << " ";
+            ss << ToString(Relation(s.base, s.avx2.first), ir, fc) << " | ";
+
             if(ssse3)
-                ss << ToString(Relation(s.ssse3.first, s.avx2.first), ic, fc) << " ";
-            ss << ToString(Relation(s.sse2.first, s.avx2.first), ic, fc) << " | ";
+                ss << ToString(Relation(s.ssse3.first, s.avx2.first), ir, fc) << " ";
+            ss << ToString(Relation(s.sse2.first, s.avx2.first), ir, fc) << " | ";
+
+#ifdef CUDA_ENABLE
+            ss << ToString(Relation(s.simd, s.cuda), ir, fc) << " | ";
+#endif  
+
             if(align)
             {
-                ss << ToString(Relation(s.sse2.second, s.sse2.first), ic, fc) << " ";
+                ss << ToString(Relation(s.sse2.second, s.sse2.first), ir, fc) << " ";
                 if(ssse3)
-                    ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ic, fc) << " ";
-                ss << ToString(Relation(s.avx2.second, s.avx2.first), ic, fc) << " | ";
+                    ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ir, fc) << " ";
+                ss << ToString(Relation(s.avx2.second, s.avx2.first), ir, fc) << " | ";
             }
             statistics.push_back(ss.str());
         }
@@ -287,6 +304,9 @@ namespace Test
         report << std::endl;
         report << ExpandToRight("Function", sizeMax) << " | ";
         report << ExpandToLeft("Simd", ic + fc + 1) << " ";
+#ifdef CUDA_ENABLE
+        report << ExpandToLeft("Cuda", ic + fc + 1) << " ";
+#endif
         report << ExpandToLeft("Base", ic + fc + 1) << " ";
         report << ExpandToLeft("Sse2", ic + fc + 1) << " ";
         if(ssse3)
@@ -294,21 +314,26 @@ namespace Test
         if(sse42)
             report << ExpandToLeft("Sse42", ic + fc + 1) << " ";
         report << ExpandToLeft("Avx2", ic + fc + 1) << " | ";
-        report << ExpandToLeft("B/S2", ic + fc + 1) << " ";
+        report << ExpandToLeft("B/S2", ir + fc + 1) << " ";
         if(ssse3)
-            report << ExpandToLeft("B/S3", ic + fc + 1) << " ";
+            report << ExpandToLeft("B/S3", ir + fc + 1) << " ";
         if(sse42)
-            report << ExpandToLeft("B/S4", ic + fc + 1) << " ";
-        report << ExpandToLeft("B/A2", ic + fc + 1) << " | ";
+            report << ExpandToLeft("B/S4", ir + fc + 1) << " ";
+        report << ExpandToLeft("B/A2", ir + fc + 1) << " | ";
         if(ssse3)
-            report << ExpandToLeft("S3/A2", ic + fc + 1) << " ";
-        report << ExpandToLeft("S2/A2", ic + fc + 1) << " | ";
+            report << ExpandToLeft("S3/A2", ir + fc + 1) << " ";
+        report << ExpandToLeft("S2/A2", ir + fc + 1) << " | ";
+
+#ifdef CUDA_ENABLE
+        report << ExpandToLeft("S/C", ir + fc + 1) << " | ";
+#endif
+
         if(align)
         {
-            report << ExpandToLeft("S2:U/A", ic + fc + 1) << " ";
+            report << ExpandToLeft("S2:U/A", ir + fc + 1) << " ";
             if(ssse3)
-                report << ExpandToLeft("S3:U/A", ic + fc + 1) << " ";
-            report << ExpandToLeft("A2:U/A", ic + fc + 1) << " | ";
+                report << ExpandToLeft("S3:U/A", ir + fc + 1) << " ";
+            report << ExpandToLeft("A2:U/A", ir + fc + 1) << " | ";
         }
 
         report << std::endl;

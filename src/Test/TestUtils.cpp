@@ -226,7 +226,7 @@ namespace Test
 
     std::string ExpandToLeft(const std::string & value, size_t count)
     {
-        assert(count <= value.size());
+        assert(count >= value.size());
         std::stringstream ss;
         for(size_t i = value.size(); i < count; i++)
             ss << " ";
@@ -236,7 +236,7 @@ namespace Test
 
     std::string ExpandToRight(const std::string & value, size_t count)
     {
-        assert(count <= value.size());
+        assert(count >= value.size());
         std::stringstream ss;
         ss << value;
         for(size_t i = value.size(); i < count; i++)

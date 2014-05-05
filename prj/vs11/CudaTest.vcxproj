@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Properties.props" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Test\Test.h" />
+    <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestPerformance.h" />
+    <ClInclude Include="..\..\src\Test\TestUtils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Test\Test.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgraToBayer.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgrToBayer.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
+    <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
+    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFill.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
+    <ClCompile Include="..\..\src\Test\TestGrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
+    <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestResize.cpp" />
+    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSobel.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
+    <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Cuda.vcxproj">
+      <Project>{4e561460-f642-4fdf-bb3d-c7212ff3671a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Simd.vcxproj">
+      <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdAvx2.vcxproj">
+      <Project>{9b30a102-f407-44ec-987f-209c7b65c836}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdBase.vcxproj">
+      <Project>{1ca0c5b9-6a60-4df5-96ea-ba70a0bd0cc6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse2.vcxproj">
+      <Project>{91831958-6ad7-4126-8056-e2dd3e12a887}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse41.vcxproj">
+      <Project>{2397c4ee-3030-42e9-b16b-eb074d491887}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse42.vcxproj">
+      <Project>{ca3044c1-147b-4884-b3fd-15ece7a24337}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSsse3.vcxproj">
+      <Project>{2ca34bf2-043b-40fd-b58c-ec2e29fac263}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{539FE4C3-D764-4D79-AE34-07CF45A6351B}</ProjectGuid>
+    <RootNamespace>CudaTest</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 6.0.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>CUDA_TEST; WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <AdditionalCompilerOptions>
+      </AdditionalCompilerOptions>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>CUDA_TEST;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;WIN64;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <SubSystem>Console</SubSystem>
+      <AdditionalDependencies>cudart.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>echo copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"
+copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+    <CudaCompile>
+      <TargetMachinePlatform>64</TargetMachinePlatform>
+    </CudaCompile>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 6.0.targets" />
+  </ImportGroup>
+</Project>

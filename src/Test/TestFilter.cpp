@@ -40,8 +40,26 @@ namespace Test
 
 			void Call(const View & src, View & dst) const
 			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
+#ifdef CUDA_ENABLE
+                if(description.substr(0, 4) == "Cuda")
+                {
+                    HView hsrc(src.Size(), (HView::Format)src.format), hdst(dst.Size(), (HView::Format)dst.format);
+                    DView dsrc(src.Size(), (DView::Format)src.format), ddst(dst.Size(), (DView::Format)dst.format);
+                    Simd::Copy(src, hsrc);
+                    Cuda::Copy(hsrc, dsrc);
+                    {
+                        TEST_PERFORMANCE_TEST(description);
+                        func(dsrc.data, dsrc.stride, dsrc.width, dsrc.height, dsrc.PixelSize(), ddst.data, ddst.stride);
+                    }
+                    Cuda::Copy(ddst, hdst);
+                    Simd::Copy(hdst, dst);
+                }
+                else
+#endif
+                {
+                    TEST_PERFORMANCE_TEST(description);
+                    func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
+                }
 			}
 		};
 
@@ -138,6 +156,10 @@ namespace Test
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
             result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, Simd::Avx2::MedianFilterRhomb3x3));
+#endif 
+
+#if defined(CUDA_ENABLE)
+        result = result && ColorFilterTest(ARGS_C2(SimdMedianFilterRhomb3x3, CudaMedianFilterRhomb3x3));
 #endif 
 
         return result;

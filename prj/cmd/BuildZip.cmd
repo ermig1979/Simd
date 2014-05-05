@@ -35,6 +35,7 @@ erase %TMP_DIR%\prj\*.ncb /q /s /f
 erase %TMP_DIR%\prj\*.depend /q /s /f
 erase %TMP_DIR%\prj\*.layout /q /s /f
 erase %TMP_DIR%\prj\*.cbTemp /q /s /f
+erase %TMP_DIR%\prj\*.pdb /q /s /f
 
 erase %TMP_DIR%\prj\cmd\*.txt /q /s /f
 erase %TMP_DIR%\prj\cmd\*.lnk /q /s /f
