@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -26,6 +26,8 @@
 
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -56,14 +58,14 @@ namespace Simd
 		return Max(min, Min(max, value));
 	}
 
-	template <class T> SIMD_INLINE T Square(T a) 
+	template <class T> SIMD_INLINE T Square(T a)
 	{
 		return a*a;
 	}
 
     SIMD_INLINE int Round(double value)
     {
-#if defined(SIMD_SSE2_ENABLE) && ((defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined(__x86_64__))) 
+#if defined(SIMD_SSE2_ENABLE) && ((defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined(__x86_64__)))
         __m128d t = _mm_set_sd(value);
         return _mm_cvtsd_si32(t);
 #else
@@ -172,7 +174,7 @@ namespace Simd
         }
 	}
 
-#ifdef SIMD_SSE2_ENABLE    
+#ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
 		SIMD_INLINE __m128i SaturateI16ToU8(__m128i value)
@@ -228,7 +230,7 @@ namespace Simd
 		SIMD_INLINE __m128i HorizontalSum32(__m128i a)
 		{
 			return _mm_add_epi64(
-				_mm_and_si128(a, K64_00000000FFFFFFFF), 
+				_mm_and_si128(a, K64_00000000FFFFFFFF),
 				_mm_and_si128(_mm_srli_si128(a, 4), K64_00000000FFFFFFFF));
 		}
 
@@ -266,11 +268,11 @@ namespace Simd
             __m128i lo = AlphaBlendingI16(_mm_unpacklo_epi8(_src, K_ZERO), _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
             __m128i hi = AlphaBlendingI16(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
             Store<align>(dst, _mm_packus_epi16(lo, hi));
-        } 
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_AVX2_ENABLE    
+#ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
         SIMD_INLINE __m256i SaturateI16ToU8(__m256i value)

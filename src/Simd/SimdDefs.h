@@ -40,9 +40,15 @@
 
 #define SIMD_ALIGNED(x) __declspec(align(x))
 
+#ifdef _M_IX86
+#define SIMD_X86_ENABLE
+#endif
+
 #ifdef _M_X64
 #define SIMD_X64_ENABLE
 #endif
+
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if !defined(SIMD_SSE2_DEPRECATE) && _MSC_VER >= 1300
 #define SIMD_SSE2_ENABLE
@@ -68,15 +74,23 @@
 #define SIMD_AVX2_ENABLE
 #endif
 
+#endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+
 #elif defined(__GNUC__)
 
 #define SIMD_INLINE inline __attribute__ ((always_inline))
 
 #define SIMD_ALIGNED(x) __attribute__ ((aligned(x)))
 
+#ifdef __i386__
+#define SIMD_X86_ENABLE
+#endif
+
 #ifdef __x86_64__
 #define SIMD_X64_ENABLE
 #endif
+
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
 #define SIMD_SSE2_ENABLE
@@ -101,6 +115,8 @@
 #if !defined(SIMD_AVX2_DEPRECATE) && defined(__AVX2__)
 #define SIMD_AVX2_ENABLE
 #endif
+
+#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #else
 
@@ -133,9 +149,9 @@
 #elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE)
 #define SIMD_ALIGN 16
 #elif defined (SIMD_X64_ENABLE)
-#define SIMD_ALIGN 8 
+#define SIMD_ALIGN 8
 #else
-#define SIMD_ALIGN 4 
+#define SIMD_ALIGN 4
 #endif
 
 #endif//__SimdDefs_h__

@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-    template <class TAllocator> 
+    template <class TAllocator>
     struct View
     {
         enum Format
@@ -446,7 +446,7 @@ namespace Simd
     template <class A, class B> SIMD_INLINE bool Compatible(const View<A> & a, const View<B> & b)
     {
         return
-            (a.width == b.width && a.height == b.height && a.format == (View<A>::Format)b.format);
+            (a.width == b.width && a.height == b.height && a.format == (View<A>::Format)(b.format));
     }
 
     template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c)

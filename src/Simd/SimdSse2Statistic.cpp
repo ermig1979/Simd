@@ -204,9 +204,9 @@ namespace Simd
         SIMD_INLINE bool IsSmall(uint64_t width, uint64_t height)
         {
             return 
-                width*width*width < 0x300000000ui64 && 
-                width*width*height < 0x200000000ui64 && 
-                width*height*height < 0x100000000ui64;
+                width*width*width < 0x300000000ULL && 
+                width*width*height < 0x200000000ULL && 
+                width*height*height < 0x100000000ULL;
         }
 
         template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
