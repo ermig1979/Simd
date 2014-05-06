@@ -39,6 +39,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
     namespace Cpuid
     {
         enum Level
@@ -266,5 +267,7 @@ namespace Simd
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
 #endif// SIMD_AVX2_ENABLE
+
+#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 }
 #endif//__SimdEnable_h__
