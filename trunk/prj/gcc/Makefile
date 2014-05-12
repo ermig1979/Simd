@@ -1,8 +1,12 @@
+
 TRUNK_DIR=../..
 
 SRC_DIR=$(TRUNK_DIR)/src
 SIMD_SRC_DIR=$(SRC_DIR)/Simd
 TEST_SRC_DIR=$(SRC_DIR)/Test
+SIMD_VERSION_H=$(SIMD_SRC_DIR)/SimdVersion.h
+SIMD_VERSION_H_TXT=$(TRUNK_DIR)/prj/txt/SimdVersion.h.txt
+USER_VERSION_TXT=$(TRUNK_DIR)/prj/txt/Version.txt
 
 CXX=g++ -I$(SRC_DIR) -fPIC
 LNK=g++
@@ -112,7 +116,7 @@ $(SIMD_OBJ_DIR)/%.o: $(SIMD_SRC_DIR)/%.cpp $(SIMD_DEPS)
 TEST_SRCS = $(shell ls $(TEST_SRC_DIR)/*.cpp)
 TEST_DEPS = $(shell ls $(TEST_SRC_DIR)/*.h)
 TEST_OBJS = $(patsubst $(TEST_SRC_DIR)/%.cpp, $(TEST_OBJ_DIR)/%.o, $(TEST_SRCS))
-TEST_EXE=$(BIN_DIR)/Test.exe
+TEST_EXE=$(BIN_DIR)/Test
 
 $(TEST_EXE): $(TEST_OBJS)
 	$(DIR_GUARD) 
@@ -122,10 +126,16 @@ $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp $(TEST_DEPS) $(SIMD_DEPS)
 	$(DIR_GUARD)
 	$(CXX) -march=core-avx2 -std=c++11 -c -o $@ $< 
 
-all: $(SIMD_BASE_LIB) $(SIMD_SSE2_LIB) $(SIMD_SSSE3_LIB) $(SIMD_SSE41_LIB) $(SIMD_SSE42_LIB) $(SIMD_AVX2_LIB) $(SIMD_LIB) $(TEST_EXE) 
+all: getversion $(SIMD_BASE_LIB) $(SIMD_SSE2_LIB) $(SIMD_SSSE3_LIB) $(SIMD_SSE41_LIB) $(SIMD_SSE42_LIB) $(SIMD_AVX2_LIB) $(SIMD_LIB) $(TEST_EXE) 
 
 clean:
 	rm -f -r $(TEST_OBJ_DIR)/* $(SIMD_OBJ_DIR)/* $(BIN_DIR)/*.a $(TEST_EXE)
 
 remake: clean all
+
+getversion:
+	sh ./GetVersion.sh
+
+
+
 
