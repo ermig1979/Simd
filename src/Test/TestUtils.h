@@ -28,9 +28,9 @@
 
 namespace Test
 {
-	inline int Random(int range)
+	SIMD_INLINE int Random(int range)
 	{
-		return (::rand()*range)/RAND_MAX;
+		return ((::rand()&INT16_MAX)*range)/INT16_MAX;
 	}
 
     void FillRandom(View & view);
