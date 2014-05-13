@@ -1,20 +1,15 @@
-
 TRUNK_DIR=../..
-
 SRC_DIR=$(TRUNK_DIR)/src
 SIMD_SRC_DIR=$(SRC_DIR)/Simd
 TEST_SRC_DIR=$(SRC_DIR)/Test
-SIMD_VERSION_H=$(SIMD_SRC_DIR)/SimdVersion.h
-SIMD_VERSION_H_TXT=$(TRUNK_DIR)/prj/txt/SimdVersion.h.txt
-USER_VERSION_TXT=$(TRUNK_DIR)/prj/txt/Version.txt
 
-CXX=g++ -I$(SRC_DIR) -fPIC
-LNK=g++
+CXX=g++ -I$(SRC_DIR) -fPIC 
+LNK=g++ 
 DIR_GUARD=@mkdir -p $(@D)
 
 ifeq ($(DEBUG),1)
 CFG=Debug
-CXX+= -g -DDEBUG
+CXX+= -g -D_DEBUG
 else
 CFG=Release
 CXX+= -O3 -DNDEBUG
@@ -28,90 +23,41 @@ BIN_DIR=$(TRUNK_DIR)/bin/$(CFG)
 LNK+=-L$(BIN_DIR)
 
 SIMD_DEPS = $(shell ls $(SIMD_SRC_DIR)/*.h)
+SIMD_SRCS = $(shell ls $(SIMD_SRC_DIR)/*.cpp)
+SIMD_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SRCS))
+SIMD_LIB=$(BIN_DIR)/libSimd.so
 
-SIMD_BASE_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdBase*.cpp)
-SIMD_BASE_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_BASE_SRCS))
-SIMD_BASE_LIB=$(BIN_DIR)/libSimdBase.a
-
-$(SIMD_BASE_LIB): $(SIMD_BASE_OBJS)
+$(SIMD_LIB): $(SIMD_OBJS)
 	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_BASE_OBJS) -o $@
+	$(LNK) -shared $(SIMD_OBJS) -o $@
 
 $(SIMD_OBJ_DIR)/SimdBase%.o: $(SIMD_SRC_DIR)/SimdBase%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
 	$(CXX) -c -o $@ $< 
 
-SIMD_SSE2_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdSse2*.cpp)
-SIMD_SSE2_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SSE2_SRCS))
-SIMD_SSE2_LIB=$(BIN_DIR)/libSimdSse2.a
-
-$(SIMD_SSE2_LIB): $(SIMD_SSE2_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_SSE2_OBJS) -o $@
-
 $(SIMD_OBJ_DIR)/SimdSse2%.o: $(SIMD_SRC_DIR)/SimdSse2%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=pentium4 -c -o $@ $< 
-
-SIMD_SSSE3_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdSsse3*.cpp)
-SIMD_SSSE3_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SSSE3_SRCS))
-SIMD_SSSE3_LIB=$(BIN_DIR)/libSimdSsse3.a
-
-$(SIMD_SSSE3_LIB): $(SIMD_SSSE3_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_SSSE3_OBJS) -o $@
+	$(CXX) -msse2 -c -o $@ $< 
 
 $(SIMD_OBJ_DIR)/SimdSsse3%.o: $(SIMD_SRC_DIR)/SimdSsse3%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=core2 -c -o $@ $< 
-
-SIMD_SSE41_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdSse41*.cpp)
-SIMD_SSE41_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SSE41_SRCS))
-SIMD_SSE41_LIB=$(BIN_DIR)/libSimdSse41.a
-
-$(SIMD_SSE41_LIB): $(SIMD_SSE41_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_SSE41_OBJS) -o $@
+	$(CXX) -mssse3 -c -o $@ $< 
 
 $(SIMD_OBJ_DIR)/SimdSse41%.o: $(SIMD_SRC_DIR)/SimdSse41%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=corei7 -c -o $@ $< 
-
-SIMD_SSE42_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdSse42*.cpp)
-SIMD_SSE42_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SSE42_SRCS))
-SIMD_SSE42_LIB=$(BIN_DIR)/libSimdSse42.a
-
-$(SIMD_SSE42_LIB): $(SIMD_SSE42_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_SSE42_OBJS) -o $@
+	$(CXX) -msse4.1 -c -o $@ $< 
 
 $(SIMD_OBJ_DIR)/SimdSse42%.o: $(SIMD_SRC_DIR)/SimdSse42%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=corei7 -c -o $@ $< 
-
-SIMD_AVX2_SRCS = $(shell ls $(SIMD_SRC_DIR)/SimdAvx2*.cpp)
-SIMD_AVX2_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_AVX2_SRCS))
-SIMD_AVX2_LIB=$(BIN_DIR)/libSimdAvx2.a
-
-$(SIMD_AVX2_LIB): $(SIMD_AVX2_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_AVX2_OBJS) -o $@
+	$(CXX) -msse4.2 -c -o $@ $< 
 
 $(SIMD_OBJ_DIR)/SimdAvx2%.o: $(SIMD_SRC_DIR)/SimdAvx2%.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=core-avx2 -c -o $@ $< 
+	$(CXX) -mavx2 -c -o $@ $< 
 
-SIMD_SRCS = $(SIMD_SRC_DIR)/SimdLib.cpp
-SIMD_OBJS = $(patsubst $(SIMD_SRC_DIR)/%.cpp, $(SIMD_OBJ_DIR)/%.o, $(SIMD_SRCS))
-SIMD_LIB=$(BIN_DIR)/libSimd.a
-
-$(SIMD_LIB): $(SIMD_OBJS)
-	$(DIR_GUARD) 
-	$(LNK) -shared -static $(SIMD_OBJS) -o $@
-
-$(SIMD_OBJ_DIR)/%.o: $(SIMD_SRC_DIR)/%.cpp $(SIMD_DEPS)
+$(SIMD_OBJ_DIR)/SimdLib.o: $(SIMD_SRC_DIR)/SimdLib.cpp $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=core-avx2 -c -o $@ $< 
+	$(CXX) -mavx2 -c -o $@ $< 
 
 TEST_SRCS = $(shell ls $(TEST_SRC_DIR)/*.cpp)
 TEST_DEPS = $(shell ls $(TEST_SRC_DIR)/*.h)
@@ -120,16 +66,16 @@ TEST_EXE=$(BIN_DIR)/Test
 
 $(TEST_EXE): $(TEST_OBJS)
 	$(DIR_GUARD) 
-	$(LNK) $(TEST_OBJS) $(SIMD_LIB) $(SIMD_BASE_LIB) $(SIMD_SSE2_LIB) $(SIMD_SSSE3_LIB)  $(SIMD_SSE41_LIB)   $(SIMD_SSE42_LIB) $(SIMD_AVX2_LIB) -o $@
+	$(LNK) $(TEST_OBJS) -l:$(SIMD_LIB) -o $@
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp $(TEST_DEPS) $(SIMD_DEPS)
 	$(DIR_GUARD)
-	$(CXX) -march=core-avx2 -std=c++11 -c -o $@ $< 
+	$(CXX) -mavx2 -std=c++11 -c -o $@ $< 
 
-all: getversion $(SIMD_BASE_LIB) $(SIMD_SSE2_LIB) $(SIMD_SSSE3_LIB) $(SIMD_SSE41_LIB) $(SIMD_SSE42_LIB) $(SIMD_AVX2_LIB) $(SIMD_LIB) $(TEST_EXE) 
+all: getversion $(SIMD_LIB) $(TEST_EXE) 
 
 clean:
-	rm -f -r $(TEST_OBJ_DIR)/* $(SIMD_OBJ_DIR)/* $(BIN_DIR)/*.a $(TEST_EXE)
+	rm -f -r $(TEST_OBJ_DIR)/* $(SIMD_OBJ_DIR)/* $(BIN_DIR)/*.a $(BIN_DIR)/*.so $(TEST_EXE)
 
 remake: clean all
 
