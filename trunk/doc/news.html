@@ -26,14 +26,18 @@
  <li>Wrong stride alignment checking in functions SobelDx, SobelDxAbs, SobelDy, SobelDyAbs, ContourMetrics, ContourMetricsMasked and ContourAnchors.</li>
  <li>Compiler error on non x86 platforms (using cpuid instruction).</li>
  <li>GCC compiler errors.</li>
- <li>Test::Random() always return 0 for Linux.</li>
- <li>Wrong test for function ContourAnchors.</li>
 </ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
  <li>Tests for verifying functionality of CUDA version of function MedianFilterRhomb3x3.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Test::Random() always return 0 for Linux.</li>
+ <li>Wrong test for function ContourAnchors.</li>
+ <li>Wrong using _DEBUG macro instead of NDEBUG.</li>
 </ul>
 
 <h4>Infrastructure</h4>

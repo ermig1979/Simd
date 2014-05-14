@@ -161,10 +161,10 @@ namespace Test
         bool result = true;
 
         result = result && GetMomentsTest(Point(1, 1), f1, f2);
-#ifdef _DEBUG
-        result = result && GetMomentsTest(Point(50, 20), f1, f2);
-#else
+#ifdef NDEBUG
         result = result && GetMomentsTest(Point(5, 2), f1, f2);
+#else
+        result = result && GetMomentsTest(Point(50, 20), f1, f2);
 #endif
 
         return result;

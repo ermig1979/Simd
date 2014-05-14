@@ -24,7 +24,7 @@
 #ifndef __TestConfig_h__
 #define __TestConfig_h__
 
-#ifndef _DEBUG
+#ifdef NDEBUG
 #define TEST_PERFORMANCE_TEST_ENABLE
 #endif
 
@@ -69,12 +69,12 @@ namespace Test
     typedef Cuda::HView HView;
 #endif
 
-#ifdef _DEBUG
-	const int W = 128;
-	const int H = 96;
-#else
+#ifdef NDEBUG
 	const int W = 1920;
 	const int H = 1080;
+#else
+    const int W = 128;
+    const int H = 96;
 #endif
 
 	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
