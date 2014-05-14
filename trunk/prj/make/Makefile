@@ -9,7 +9,7 @@ DIR_GUARD=@mkdir -p $(@D)
 
 ifeq ($(DEBUG),1)
 CFG=Debug
-CXX+= -g -D_DEBUG
+CXX+= -g
 else
 CFG=Release
 CXX+= -O3 -DNDEBUG
@@ -80,7 +80,7 @@ clean:
 remake: clean all
 
 getversion:
-	sh ./GetVersion.sh
+	sh ../sh/GetVersion.sh
 
 
 
