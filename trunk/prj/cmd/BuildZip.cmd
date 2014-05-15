@@ -43,6 +43,6 @@ erase %TMP_DIR%\prj\cmd\BuildSite.cmd /q /s /f
 erase %TMP_DIR%\doc\help /q /s /f
 rmdir %TMP_DIR%\doc\help /q /s
 
-%RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%VERSION%.zip %TMP_DIR%
+%RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
 
 
