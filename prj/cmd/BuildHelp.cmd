@@ -25,7 +25,7 @@ rmdir %OUT_DIR% /q /s
 
 echo Create or update file %CONFIG%.
 echo PROJECT_NAME="Simd Library">%CONFIG%
-echo PROJECT_NUMBER=%VERSION%>>%CONFIG%
+echo PROJECT_NUMBER=%FULL_VERSION%>>%CONFIG%
 echo OUTPUT_DIRECTORY=%DOXYGEN_OUT%>>%CONFIG%
 echo INPUT=..\..\src\Simd>>%CONFIG%
 echo EXTRACT_ALL=NO>>%CONFIG%
