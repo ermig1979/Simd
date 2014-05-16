@@ -157,6 +157,9 @@
 		<Unit filename="../../src/Simd/SimdBaseResizeBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdBaseSegmentation.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdBaseShiftBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

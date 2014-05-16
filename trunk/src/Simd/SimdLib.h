@@ -1454,6 +1454,26 @@ extern "C"
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
     /**
+    * \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
+    *
+    * \short Finds actual region of mask index location. 
+    *
+    * Mask must has 8-bit gray pixel format. 
+    *
+    * \param [in] mask - a pointer to pixels data of 8-bit gray mask image.
+    * \param [in] stride - a row size of the mask image.
+    * \param [in] width - an mask width.
+    * \param [in] height - an mask height.
+    * \param [in] index - a mask index.
+    * \param [in, out] left - a pointer to left side.
+    * \param [in, out] top - a pointer to top side.
+    * \param [in, out] right - a pointer to right side.
+    * \param [in, out] bottom - a pointer to bottom side.
+    */
+    SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+        ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
+
+    /**
     * \fn void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
     *
     * \short Performs shifting of input image with using bilinear interpolation. 

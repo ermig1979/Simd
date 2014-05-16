@@ -519,7 +519,15 @@ namespace Simd
         }
     }
 
-    template<class A> SIMD_INLINE void ShiftBilinear(const View<A>& src, const View<A>& bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A>& dst)
+    template<class A> SIMD_INLINE void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)
+    {
+        assert(mask.format == View<A>::Gray8);
+        assert(rect.Width() > 0 && rect.Height() > 0 && Rectangle<ptrdiff_t>(mask.Size()).Contains(Rect));
+
+        SimdSegmentationShrinkRegion(mask.data, mask.stride, mask.width, mask.height, index, &rect.left, &rect.top, &rect.right, &rect.bottom);
+    }
+
+    template<class A> SIMD_INLINE void ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst)
     {
         assert(Compatible(src, bkg, dst) && src.ChannelSize() == 1);
 

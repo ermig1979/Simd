@@ -26,7 +26,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Empty.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
   </ItemGroup>

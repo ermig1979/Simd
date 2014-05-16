@@ -166,6 +166,17 @@ namespace Test
         assert(a.size() == b.size());
         return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
     }
+
+    bool Compare(const Rect & a, const Rect & b, bool printError)
+    {
+        bool result(a == b);
+        if(!result && printError)
+        {
+            std::cout << "Rectangles is not equal: (" << a.left << ", " << a.top << ", " << a.right  << ", " << a.bottom << ") != (" 
+                << b.left << ", " << b.top << ", " << b.right  << ", " << b.bottom << ") !" << std::endl;
+        }
+        return result;
+    }
     
 	std::string ColorDescription(View::Format format)
 	{

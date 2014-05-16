@@ -64,7 +64,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Empty.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

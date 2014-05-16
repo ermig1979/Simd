@@ -47,6 +47,8 @@ namespace Test
     bool Compare(const Sums & a, const Sums & b, 
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
+    bool Compare(const Rect & a, const Rect & b, bool printError = false);
+
 	std::string ColorDescription(View::Format format);
 
     std::string FormatDescription(View::Format format);

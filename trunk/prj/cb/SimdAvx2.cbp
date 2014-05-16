@@ -133,6 +133,7 @@
 		<Unit filename="../../src/Simd/SimdAvx2ResizeBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdAvx2Segmentation.cpp" />
 		<Unit filename="../../src/Simd/SimdAvx2ShiftBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
