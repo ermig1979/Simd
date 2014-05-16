@@ -102,6 +102,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSquaredDifferenceSum.cpp" />

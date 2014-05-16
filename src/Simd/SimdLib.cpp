@@ -996,6 +996,22 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
         Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 }
 
+SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+                                           ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A && *right - *left >= Avx2::A)
+        Avx2::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+    else
+#endif//SIMD_AVX2_ENABLE
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A && *right - *left >= Sse41::A)
+        Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+    else
+#endif//SIMD_SSE41_ENABLE
+        Base::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+}
+
 SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
     const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
     size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)

@@ -158,6 +158,9 @@
 		<Unit filename="../../src/Test/TestResize.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestSegmentation.cpp">
+			<Option virtualFolder="Test/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestShift.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

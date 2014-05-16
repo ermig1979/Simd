@@ -66,7 +66,7 @@
 		<Unit filename="../../src/Simd/SimdSse41.h">
 			<Option virtualFolder="Alg/" />
 		</Unit>
-		<Unit filename="../../src/Simd/SimdSse41Empty.cpp">
+		<Unit filename="../../src/Simd/SimdSse41Segmentation.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
 		<Unit filename="../../src/Simd/SimdTypes.h">
