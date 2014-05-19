@@ -66,7 +66,7 @@ TEST_EXE=$(BIN_DIR)/Test
 
 $(TEST_EXE): $(TEST_OBJS)
 	$(DIR_GUARD) 
-	$(LNK) $(TEST_OBJS) -l:$(SIMD_LIB) -o $@
+	$(LNK) $(TEST_OBJS) $(SIMD_LIB) -o $@
 
 $(TEST_OBJ_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp $(TEST_DEPS) $(SIMD_DEPS)
 	$(DIR_GUARD)
