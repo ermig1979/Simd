@@ -29,7 +29,7 @@
 #ifndef __SimdTypes_h__
 #define __SimdTypes_h__
 
-#include <stdlib.h>
+#include <stddef.h>
 
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
 #include <stdint.h>
