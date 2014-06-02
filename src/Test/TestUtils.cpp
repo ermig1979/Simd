@@ -55,6 +55,24 @@ namespace Test
 		}
 	}
 
+    void FillRhombMask(View & mask, const Rect & rect, uint8_t index)
+    {
+        assert(mask.format == View::Gray8 && Rect(mask.Size()).Contains(rect));
+
+        Simd::Fill(mask, 0);
+
+        Point c = rect.Center();
+        for(ptrdiff_t row = rect.top; row < rect.bottom; ++row)
+        {
+            ptrdiff_t indent = std::abs(row - c.y)*rect.Width()/rect.Height();
+            ptrdiff_t left = rect.left + indent;
+            ptrdiff_t right = rect.right - indent;
+            ptrdiff_t offset = row*mask.stride + left;
+            for(ptrdiff_t col = left; col < right; ++col, ++offset)
+                mask.data[offset] = Random(2) ? index : 0;
+        }
+    }
+
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
         const std::string & description)
     {

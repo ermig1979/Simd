@@ -45,6 +45,18 @@ namespace Simd
             return false;
         }
 
+        SIMD_INLINE bool ColsHasIndex(const uint8_t * mask, size_t stride, size_t size, __m256i index, uint8_t * cols)
+        {
+            __m256i _cols = _mm256_setzero_si256();
+            for (size_t row = 0; row < size; ++row)
+            {
+                _cols = _mm256_or_si256(_cols, _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)mask), index));
+                mask += stride;
+            }
+            _mm256_storeu_si256((__m256i*)cols, _cols);
+            return !_mm256_testz_si256(_cols, K_INV_ZERO);
+        }
+
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {
@@ -84,34 +96,40 @@ namespace Simd
             }
 
             search = true;
-            for (ptrdiff_t col = *left; search && col < *right; ++col)
+            for (ptrdiff_t col = *left; search && col < *left + alignedWidth; col += A)
             {
-                const uint8_t * _mask = mask + (*top)*stride + col; 
-                for (ptrdiff_t row = *top; row < *bottom; ++row)
+                uint8_t cols[A];
+                if(ColsHasIndex(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols))
                 {
-                    if (*_mask == index)
+                    for(size_t i = 0; i < A; i++)
                     {
-                        search = false;
-                        *left = col;
-                        break;
+                        if (cols[i])
+                        {
+                            *left = col + i;
+                            break;
+                        }
                     }
-                    _mask += stride;
+                    search = false;
+                    break;
                 }
             }
 
             search = true;
-            for (ptrdiff_t col = *right - 1; search && col >= *left; --col)
+            for (ptrdiff_t col = *right; search && col > *left; col -= A)
             {
-                const uint8_t * _mask = mask + (*top)*stride + col; 
-                for (ptrdiff_t row = *top; row < *bottom; ++row)
+                uint8_t cols[A];
+                if(ColsHasIndex(mask + (*top)*stride + col - A, stride, *bottom - *top, _index, cols))
                 {
-                    if (*_mask == index)
+                    for(ptrdiff_t i = A - 1; i >= 0; i--)
                     {
-                        search = false;
-                        *right = col + 1;
-                        break;
+                        if (cols[i])
+                        {
+                            *right = col - A + i + 1;
+                            break;
+                        }
                     }
-                    _mask += stride;
+                    search = false;
+                    break;
                 }
             }
         }

@@ -58,8 +58,7 @@ namespace Test
         const uint8_t index = 3;
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         Rect rs1(s.Size()), rs2(s.Size()), rd1, rd2;
-        Simd::Fill(s, 0);
-        FillRandomMask(s.Region(width*3/16, height*5/16, width*11/16, height*13/16).Ref(), index);
+        FillRhombMask(s, Rect(width*1/15, height*2/15, width*11/15, height*12/15), index);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, index, rs1, rd1));
 
