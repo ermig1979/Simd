@@ -36,6 +36,8 @@ namespace Test
     void FillRandom(View & view);
 
 	void FillRandomMask(View & view, uint8_t index);
+
+    void FillRhombMask(View & mask, const Rect & rect, uint8_t index);
     
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0, 
