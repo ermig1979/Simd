@@ -25,13 +25,19 @@
 #define __SimdEnable_h__
 
 #if defined(_MSC_VER)
+
 #define NOMINMAX
 #include <windows.h>
 #include <intrin.h>
-#elif defined(__GNUC__)
+
+#elif defined(__GNUC__) 
+
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 #include <cpuid.h>
+#endif
+
 #else
-#error Do not know how to detect CPU info
+# error Do not know how to detect CPU info
 #endif
 
 #include "Simd/SimdTypes.h"
