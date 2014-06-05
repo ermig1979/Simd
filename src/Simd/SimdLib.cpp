@@ -1017,13 +1017,13 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
     size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && shiftX + Avx2::A < cropRight - cropLeft)
+    if(Avx2::Enable)
         Avx2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && shiftX + Sse2::A < cropRight - cropLeft)
+    if(Sse2::Enable)
         Sse2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
