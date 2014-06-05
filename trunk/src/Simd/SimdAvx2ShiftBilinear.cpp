@@ -179,13 +179,14 @@ namespace Simd
 			const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
 			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 		{
-			assert(shiftX + A < cropRight - cropLeft);
-
 			int fDx, fDy;
 			Base::CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 
 				cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
-			ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
+            if(shiftX + A < cropRight - cropLeft)
+			    Avx2::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
+            else
+                Base::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
 		}
 	}
 #endif//SIMD_AVX2_ENABLE
