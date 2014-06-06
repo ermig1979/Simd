@@ -166,6 +166,9 @@
 		<Unit filename="../../src/Simd/SimdSse2ResizeBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>
+		<Unit filename="../../src/Simd/SimdSse2Segmentation.cpp">
+			<Option virtualFolder="Alg/" />
+		</Unit>
 		<Unit filename="../../src/Simd/SimdSse2ShiftBilinear.cpp">
 			<Option virtualFolder="Alg/" />
 		</Unit>

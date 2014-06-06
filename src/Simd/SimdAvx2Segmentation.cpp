@@ -24,12 +24,52 @@
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        template<bool align> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, __m256i index)
+        {
+            const __m256i up = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask - stride)), index);
+            const __m256i left = _mm256_cmpeq_epi8(Load<false>((__m256i*)(mask - 1)), index);
+            const __m256i right = _mm256_cmpeq_epi8(Load<false>((__m256i*)(mask + 1)), index);
+            const __m256i down = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask + stride)), index);
+            StoreMasked<align>((__m256i*)mask, index, _mm256_and_si256(_mm256_and_si256(up, left), _mm256_and_si256(right, down)));
+        }
+
+        template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        {
+            assert(width > 2 && height > 2);
+
+            height -= 1;
+            width -= 1;
+            __m256i _index = _mm256_set1_epi8((char)index);
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 1; row < height; ++row)
+            {
+                mask += stride;
+
+                FillSingleHoles<false>(mask + 1, stride, _index);
+
+                for(size_t col = A; col < alignedWidth; col += A)
+                    FillSingleHoles<align>(mask + col, stride, _index);
+
+                if(alignedWidth != width )
+                    FillSingleHoles<false>(mask + width - A, stride, _index);
+            }
+        }
+
+        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
+            else
+                SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
+        }
+
         SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, __m256i index)
         {
             for (size_t col = 0; col < alignedSize; col += A)

@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SquaredDifferenceSum.cpp" />

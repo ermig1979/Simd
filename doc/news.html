@@ -15,11 +15,18 @@
 <h5>New features</h5>
 <ul>
  <li>Improved SSE41 and AVX2 optimization of function SegmentationShrinkRegion.</li>
+ <li>Base implementation, SSE2 and AVX2 optimization of function SegmentationFillSingleHoles.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Crash in function SimdShiftBilinear (Linux, CPU without support of AVX).</li>
  <li>GCC compile error for PowerPC.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function SegmentationFillSingleHoles.</li>
 </ul>
 
 <h3>June 2, 2014 (version 1.4.18.255)</h3>

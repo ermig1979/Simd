@@ -35,11 +35,6 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
 	namespace Sse2
 	{
-        SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
-        {
-            return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
-        }
-
         template <bool align, SimdCompareType compareType> 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)

@@ -35,11 +35,6 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        SIMD_INLINE __m256i Combine(__m256i mask, __m256i positive, __m256i negative)
-        {
-            return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
-        }
-
         template <bool align, SimdCompareType compareType> 
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride)

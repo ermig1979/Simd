@@ -147,5 +147,6 @@ namespace Test
     bool ContourAnchorsTest();
 
     bool SegmentationShrinkRegionTest();
+    bool SegmentationFillSingleHolesTest();
 }
 #endif//__Test_h__
