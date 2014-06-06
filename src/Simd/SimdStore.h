@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -25,7 +25,6 @@
 #define __SimdStore_h__
 
 #include "Simd/SimdDefs.h"
-#include "Simd/SimdMath.h"
 #include "Simd/SimdLoad.h"
 
 namespace Simd
@@ -37,13 +36,18 @@ namespace Simd
 
 		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
 		{
-			return _mm_storeu_si128(p, a); 
+			return _mm_storeu_si128(p, a);
 		}
 
 		template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
 		{
-			return _mm_store_si128(p, a); 
+			return _mm_store_si128(p, a);
 		}
+
+        SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
+        {
+            return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
+        }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
         {
@@ -60,13 +64,18 @@ namespace Simd
 
 		template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
 		{
-			return _mm256_storeu_si256(p, a); 
+			return _mm256_storeu_si256(p, a);
 		}
 
 		template <> SIMD_INLINE void Store<true>(__m256i * p, __m256i a)
 		{
-			return _mm256_store_si256(p, a); 
+			return _mm256_store_si256(p, a);
 		}
+
+        SIMD_INLINE __m256i Combine(__m256i mask, __m256i positive, __m256i negative)
+        {
+            return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
+        }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
         {
@@ -76,23 +85,23 @@ namespace Simd
 
         SIMD_INLINE __m256i PackI16ToI8(__m256i lo, __m256i hi)
         {
-            return _mm256_permute4x64_epi64(_mm256_packs_epi16(lo, hi), 0xD8); 
+            return _mm256_permute4x64_epi64(_mm256_packs_epi16(lo, hi), 0xD8);
         }
 
         SIMD_INLINE __m256i PackU16ToU8(__m256i lo, __m256i hi)
         {
-            return _mm256_permute4x64_epi64(_mm256_packus_epi16(lo, hi), 0xD8); 
+            return _mm256_permute4x64_epi64(_mm256_packus_epi16(lo, hi), 0xD8);
         }
 
         SIMD_INLINE __m256i PackI32ToI16(__m256i lo, __m256i hi)
         {
-            return _mm256_permute4x64_epi64(_mm256_packs_epi32(lo, hi), 0xD8); 
-        }	
+            return _mm256_permute4x64_epi64(_mm256_packs_epi32(lo, hi), 0xD8);
+        }
 
         SIMD_INLINE __m256i PackU32ToI16(__m256i lo, __m256i hi)
         {
-            return _mm256_permute4x64_epi64(_mm256_packus_epi32(lo, hi), 0xD8); 
-        } 
+            return _mm256_permute4x64_epi64(_mm256_packus_epi32(lo, hi), 0xD8);
+        }
 
         SIMD_INLINE void Permute2x128(__m256i & lo, __m256i & hi)
         {

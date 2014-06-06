@@ -269,11 +269,6 @@ namespace Simd
             __m128i hi = AlphaBlendingI16(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
             Store<align>(dst, _mm_packus_epi16(lo, hi));
         }
-
-        SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
-        {
-            return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
-        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
@@ -327,11 +322,6 @@ namespace Simd
         SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)
         {
             return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
-        }
-
-        SIMD_INLINE __m256i Combine(__m256i mask, __m256i positive, __m256i negative)
-        {
-            return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
         }
     }
 #endif// SIMD_AVX2_ENABLE

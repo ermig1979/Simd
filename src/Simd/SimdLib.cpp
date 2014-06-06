@@ -73,7 +73,7 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
         return Base::Crc32c(src, size);
 }
 
-SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride, 
+SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride,
                                    size_t width, size_t height, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -89,7 +89,7 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Base::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
 }
 
-SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
                                          const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -137,7 +137,7 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
         Base::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
 }
 
-SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                           uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -153,7 +153,7 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 }
 
-SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                        const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
                                        uint16_t weight, uint8_t * difference, size_t differenceStride)
 {
@@ -170,7 +170,7 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
         Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
 }
 
-SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
                    const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -182,12 +182,12 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE 
+#endif//SIMD_SSSE3_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE       
+#endif//SIMD_SSE2_ENABLE
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
@@ -243,19 +243,19 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 }
 
-SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
-                                        uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+                                        uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
                                         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
 #endif// SIMD_SSE2_ENABLE
@@ -263,23 +263,23 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
 }
 
-SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
-                                              uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+                                              uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
                                               uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Avx2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Sse2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride, 
+        Base::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 }
 
@@ -304,17 +304,17 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+        Avx2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride,
         mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, 
+        Sse2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride,
         mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, 
+        Base::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask,
         maskStride);
 }
 
@@ -365,12 +365,12 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
-#endif//SIMD_SSE2_ENABLE       
+#endif//SIMD_SSE2_ENABLE
         Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
 }
 
@@ -401,12 +401,12 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::HA)
         Sse2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE       
+#endif//SIMD_SSE2_ENABLE
         Base::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
 }
 
@@ -421,16 +421,16 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_SSSE3_ENABLE  
+#endif//SIMD_SSSE3_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_SSE2_ENABLE       
+#endif//SIMD_SSE2_ENABLE
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
-SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                   uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -447,7 +447,7 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
 }
 
 SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-                           uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, 
+                           uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
                            uint8_t * dst, size_t dstStride, SimdCompareType compareType)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -463,7 +463,7 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
         Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
 }
 
-SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height,
                                    uint8_t value, SimdCompareType compareType, uint32_t * count)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -479,7 +479,7 @@ SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t wi
         Base::ConditionalCount(src, stride, width, height, value, compareType, count);
 }
 
-SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                  const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -495,7 +495,7 @@ SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t w
         Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
-SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                        const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -511,7 +511,7 @@ SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, si
         Base::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
-SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                        const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -532,13 +532,13 @@ SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size
     Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);
 }
 
-SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
+SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
                            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride)
 {
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
 }
 
-SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, 
+SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
                     uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -605,41 +605,41 @@ SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t val
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
 }
 
-SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
                                uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, 
+        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
 }
 
-SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
                                uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
+        Avx2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
+        Sse2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height, 
+        Base::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
 }
 
@@ -680,7 +680,7 @@ SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height
     Base::Fill(dst, stride, width, height, pixelSize, value);
 }
 
-SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
                            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
 {
     Base::FillFrame(dst, stride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, value);
@@ -716,7 +716,7 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
 }
 
-SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -738,12 +738,12 @@ SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, si
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
-#endif//SIMD_SSSE3_ENABLE       
+#endif//SIMD_SSSE3_ENABLE
         Base::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
 }
 
@@ -753,12 +753,12 @@ SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE 
+#endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE       
+#endif//SIMD_SSE2_ENABLE
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
@@ -782,8 +782,8 @@ SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, siz
     Base::Histogram(src, width, height, stride, histogram);
 }
 
-SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
-                      uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                      uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride,
                       SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat)
 {
     Base::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
@@ -864,7 +864,7 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
                size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -880,7 +880,7 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }
 
-SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
                                     size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -911,7 +911,7 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 
-SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -932,7 +932,7 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
         Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
-SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -948,7 +948,7 @@ SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcH
         Base::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
 }
 
-SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -964,7 +964,7 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
         Base::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
-SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1015,20 +1015,20 @@ SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, 
                                            ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A && *right - *left >= Avx2::A)
+    if(Avx2::Enable && width >= Avx2::A && *right - *left >= (ptrdiff_t)Avx2::A)
         Avx2::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
 #endif//SIMD_AVX2_ENABLE
 #ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable && width >= Sse41::A && *right - *left >= Sse41::A)
+    if(Sse41::Enable && width >= Sse41::A && *right - *left >= (ptrdiff_t)Sse41::A)
         Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
 #endif//SIMD_SSE41_ENABLE
         Base::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
 }
 
-SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-    const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+    const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY,
     size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1122,7 +1122,7 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
         Base::ContourMetrics(src, srcStride, width, height, dst, dstStride);
 }
 
-SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                        const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1153,7 +1153,7 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
         Base::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
 }
 
-SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
                           size_t width, size_t height, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1169,7 +1169,7 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
         Base::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
 }
 
-SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
+SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
                           const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1185,7 +1185,7 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
         Base::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 }
 
-SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
                   uint8_t * min, uint8_t * max, uint8_t * average)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1201,7 +1201,7 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Base::GetStatistic(src, stride, width, height, min, max, average);
 }
 
-SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1214,7 +1214,7 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
         Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif// SIMD_SSE2_ENABLE
-        Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);    
+        Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 }
 
 SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
@@ -1307,7 +1307,7 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
         Base::SquareSum(src, stride, width, height, sum);
 }
 
-SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                     uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1323,7 +1323,7 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
         Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
-SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1339,7 +1339,7 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
         Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 }
 
-SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                       uint8_t boost, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1355,7 +1355,7 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
         Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
 }
 
-SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                              const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1371,7 +1371,7 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
         Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
 }
 
-SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                 int shift, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1387,7 +1387,7 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
-SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                  size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1403,7 +1403,7 @@ SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Base::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 }
 
-SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                  size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1419,7 +1419,7 @@ SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Base::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 }
 
-SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                   size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1435,7 +1435,7 @@ SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t
         Base::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 }
 
-SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                   size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1451,7 +1451,7 @@ SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t
         Base::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 }
 
-SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                  size_t width, size_t height, uint8_t * hue, size_t hueStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1467,7 +1467,7 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Base::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 }
 
-SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
                  size_t width, size_t height, uint8_t * hue, size_t hueStride)
 {
 #ifdef SIMD_AVX2_ENABLE
