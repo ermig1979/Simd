@@ -173,6 +173,7 @@ int main(int argc, char* argv[])
     EXECUTE_TEST(BgrToBayerTest);
 
     EXECUTE_TEST(SegmentationShrinkRegionTest);
+    EXECUTE_TEST(SegmentationFillSingleHolesTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << "Performance report:" << std::endl;

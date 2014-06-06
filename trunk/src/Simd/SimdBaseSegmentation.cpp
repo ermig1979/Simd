@@ -27,6 +27,29 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE void FillSingleHole(uint8_t * mask, ptrdiff_t stride, uint8_t index)
+        {
+            if(mask[-stride] == index && mask[stride] == index && mask[-1] == index && mask[1] == index)
+                mask[0] = index;
+        }
+
+        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        {
+            assert(width > 2 && height > 2);
+
+            mask += stride + 1;
+            height -= 2;
+            width -= 2;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    FillSingleHole(mask + col, stride, index);
+                }
+                mask += stride;
+            }
+        }
+
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {

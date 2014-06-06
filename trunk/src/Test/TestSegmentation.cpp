@@ -88,4 +88,66 @@ namespace Test
 
         return result;    
     }
+
+    namespace
+    {
+        struct FuncFSH
+        {
+            typedef void(*FuncPtr)(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
+            FuncPtr func;
+            std::string description;
+
+            FuncFSH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint8_t index, View & dst) const
+            {
+                Simd::Copy(src, dst);
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width, dst.height, index);
+            }
+        };	
+    }
+
+#define ARG_FSH(func1, func2) FuncFSH(func1, #func1), FuncFSH(func2, #func2)
+
+    bool SegmentationFillSingleHolesTest(int width, int height, const FuncFSH & f1, const FuncFSH & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
+
+        const uint8_t index = 3;
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandomMask(s, index);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, index, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, index, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool SegmentationFillSingleHolesTest()
+    {
+        bool result = true;
+
+        result = result && SegmentationFillSingleHolesTest(W, H, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesTest(W + 1, H - 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesTest(W - 1, H + 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
+        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+        {
+            result = result && SegmentationFillSingleHolesTest(W, H, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+            result = result && SegmentationFillSingleHolesTest(W + 1, H - 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+            result = result && SegmentationFillSingleHolesTest(W - 1, H + 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+        }
+#endif
+
+        return result;    
+    }
 }

@@ -1454,6 +1454,21 @@ extern "C"
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
     /**
+    * \fn void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
+    *
+    * \short Fill single holes in mask. 
+    *
+    * Mask must has 8-bit gray pixel format. 
+    *
+    * \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
+    * \param [in] stride - a row size of the mask image.
+    * \param [in] width - an mask width.
+    * \param [in] height - an mask height.
+    * \param [in] index - a mask index.
+    */
+    SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
+
+    /**
     * \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
     *
     * \short Finds actual region of mask index location. 

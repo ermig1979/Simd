@@ -25,6 +25,8 @@
 #define __SimdStore_h__
 
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
 
 namespace Simd
 {
@@ -42,6 +44,12 @@ namespace Simd
 		{
 			return _mm_store_si128(p, a); 
 		}
+
+        template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
+        {
+            __m128i old = Load<align>(p);
+            Store<align>(p, Combine(mask, value, old));
+        }
 	}
 #endif//SIMD_SSE2_ENABLE
 
@@ -59,6 +67,12 @@ namespace Simd
 		{
 			return _mm256_store_si256(p, a); 
 		}
+
+        template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
+        {
+            __m256i old = Load<align>(p);
+            Store<align>(p, Combine(mask, value, old));
+        }
 
         SIMD_INLINE __m256i PackI16ToI8(__m256i lo, __m256i hi)
         {
