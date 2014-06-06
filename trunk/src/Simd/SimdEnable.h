@@ -24,13 +24,16 @@
 #ifndef __SimdEnable_h__
 #define __SimdEnable_h__
 
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
+
 #if defined(_MSC_VER)
 
 #define NOMINMAX
 #include <windows.h>
 #include <intrin.h>
 
-#elif defined(__GNUC__) 
+#elif defined(__GNUC__)
 
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 #include <cpuid.h>
@@ -39,9 +42,6 @@
 #else
 # error Do not know how to detect CPU info
 #endif
-
-#include "Simd/SimdTypes.h"
-#include "Simd/SimdDefs.h"
 
 namespace Simd
 {
