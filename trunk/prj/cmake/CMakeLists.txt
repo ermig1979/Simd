@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 2.8)
 set(TRUNK_DIR ${CMAKE_SOURCE_DIR}/../..)
 
 if(CMAKE_BUILD_TYPE STREQUAL "")
-message("CMAKE_BUILD_TYPE variable is not defined. Set CMAKE_BUILD_TYPE = 'Release'.")
-set(CMAKE_BUILD_TYPE "Release")
+ message("CMAKE_BUILD_TYPE variable is not defined. Set CMAKE_BUILD_TYPE = 'Release'.")
+ set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 if((CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
-set(EXECUTABLE_OUTPUT_PATH ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
+ set(EXECUTABLE_OUTPUT_PATH ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
+ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
 endif()
 
 include_directories(${TRUNK_DIR}/src)
@@ -18,9 +18,13 @@ execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
 
 set(COMMON_CXX_FLAGS "${MAKE_CXX_FLAGS} -fPIC")
 
+message("CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
+
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+
+if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"))
 
 file(GLOB_RECURSE SIMD_SSE2_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
 add_library(SimdSse2 STATIC ${SIMD_SSE2_SOURCES})
@@ -51,3 +55,18 @@ file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd)
 set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+
+elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
+
+file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
+add_library(Simd SHARED ${SIMD_SOURCES})
+target_link_libraries(Simd SimdBase)
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+
+file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
+add_executable(Test ${TEST_SOURCES})
+target_link_libraries(Test Simd)
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
+
+endif()
+
