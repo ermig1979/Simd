@@ -89,6 +89,10 @@
 #define SIMD_X64_ENABLE
 #endif
 
+#ifdef __BIG_ENDIAN__
+#define SIMD_BIG_ENDIAN
+#endif
+
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
