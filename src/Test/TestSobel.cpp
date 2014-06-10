@@ -257,7 +257,9 @@ namespace Test
 
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        Simd::Fill(d1, 0);        Simd::Fill(d2, 0);
+        Simd::Fill(d1, 0);
+        Simd::Fill(d2, 0);
+
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, 3, 0, d1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, 3, 0, d2));
