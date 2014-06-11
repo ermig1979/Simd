@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -73,7 +74,7 @@ namespace Test
 #define FUNC2(function, correction) Func2(function, #function, correction)
 
 	template <class Func1, class Func2>
-	bool ReduceGrayTest(int width, int height, const Func1 & f1, const Func2 & f2)
+	bool ReduceGrayAutoTest(int width, int height, const Func1 & f1, const Func2 & f2)
 	{
 		bool result = true;
 
@@ -98,83 +99,133 @@ namespace Test
 	}
 
     template <class Func1, class Func2>
-    bool ReduceGrayTest(const Func1 & f1, const Func2 & f2)
+    bool ReduceGrayAutoTest(const Func1 & f1, const Func2 & f2)
     {
         bool result = true;
 
-        result = result && ReduceGrayTest(W, H, f1, f2);
-        result = result && ReduceGrayTest(W + 2, H - 2, f1, f2);
-        result = result && ReduceGrayTest(W - 3, H + 3, f1, f2);
+        result = result && ReduceGrayAutoTest(W, H, f1, f2);
+        result = result && ReduceGrayAutoTest(W + 2, H - 2, f1, f2);
+        result = result && ReduceGrayAutoTest(W - 3, H + 3, f1, f2);
 
         return result;
     }
 
-	bool ReduceGray2x2Test()
+	bool ReduceGray2x2AutoTest()
 	{
 		bool result = true;
 
-        result = result && ReduceGrayTest(FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
+        result = result && ReduceGrayAutoTest(FUNC1(Simd::Base::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SSSE3_ENABLE)
         if(Simd::Sse2::Enable && Simd::Ssse3::Enable)
-            result = result && ReduceGrayTest(FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Ssse3::ReduceGray2x2));
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Ssse3::ReduceGray2x2));
 #endif 
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ReduceGrayTest(FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray2x2), FUNC1(Simd::Avx2::ReduceGray2x2));
 #endif 
 
 		return result;
 	}
 
-	bool ReduceGray3x3Test()
+	bool ReduceGray3x3AutoTest()
 	{
 		bool result = true;
 
-		result = result && ReduceGrayTest(FUNC2(Simd::Base::ReduceGray3x3, true), FUNC2(SimdReduceGray3x3, true));
-		result = result && ReduceGrayTest(FUNC2(Simd::Base::ReduceGray3x3, false), FUNC2(SimdReduceGray3x3, false));
+		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray3x3, true), FUNC2(SimdReduceGray3x3, true));
+		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray3x3, false), FUNC2(SimdReduceGray3x3, false));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && ReduceGrayTest(FUNC2(Simd::Sse2::ReduceGray3x3, true), FUNC2(Simd::Avx2::ReduceGray3x3, true));
-            result = result && ReduceGrayTest(FUNC2(Simd::Sse2::ReduceGray3x3, false), FUNC2(Simd::Avx2::ReduceGray3x3, false));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray3x3, true), FUNC2(Simd::Avx2::ReduceGray3x3, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray3x3, false), FUNC2(Simd::Avx2::ReduceGray3x3, false));
         }
 #endif 
 
 		return result;
 	}
 
-	bool ReduceGray4x4Test()
+	bool ReduceGray4x4AutoTest()
 	{
 		bool result = true;
 
-		result = result && ReduceGrayTest(FUNC1(Simd::Base::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
+		result = result && ReduceGrayAutoTest(FUNC1(Simd::Base::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ReduceGrayTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
 #endif 
 
 		return result;
 	}
 
-	bool ReduceGray5x5Test()
+	bool ReduceGray5x5AutoTest()
 	{
 		bool result = true;
 
-		result = result && ReduceGrayTest(FUNC2(Simd::Base::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
-		result = result && ReduceGrayTest(FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
+		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && ReduceGrayTest(FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
-            result = result && ReduceGrayTest(FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
         }
 #endif 
 
 		return result;
 	}
+
+    template <class Func>
+    bool ReduceGrayDataTest(bool create, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        const int reducedWidth = (width + 1)/2;
+        const int reducedHeight = (height + 1)/2;
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d1(reducedWidth, reducedHeight, View::Gray8, NULL, TEST_ALIGN(reducedWidth));
+        View d2(reducedWidth, reducedHeight, View::Gray8, NULL, TEST_ALIGN(reducedWidth));
+
+
+        if(create)
+        {
+            FillRandom(s);
+            TEST_SAVE(s);
+
+            f.Call(s, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+            TEST_LOAD(d1);
+
+            f.Call(s, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool ReduceGray2x2DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ReduceGrayDataTest(create, DW, DH, FUNC1(SimdReduceGray2x2));
+
+        return result;
+    }
 }

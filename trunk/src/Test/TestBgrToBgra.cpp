@@ -47,7 +47,7 @@ namespace Test
 
 #define FUNC(func) Func(func, #func)
 
-    bool BgrToBgraTest(int width, int height, const Func & f1, const Func & f2)
+    bool BgrToBgraAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -70,20 +70,20 @@ namespace Test
         return result;
     }
 
-    bool BgrToBgraTest()
+    bool BgrToBgraAutoTest()
     {
         bool result = true;
 
-        result = result && BgrToBgraTest(W, H, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
-        result = result && BgrToBgraTest(W + 1, H - 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
-        result = result && BgrToBgraTest(W - 1, H + 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
+        result = result && BgrToBgraAutoTest(W, H, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
+        result = result && BgrToBgraAutoTest(W + 1, H - 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
+        result = result && BgrToBgraAutoTest(W - 1, H + 1, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
 
 #if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
         {
-            result = result && BgrToBgraTest(W, H, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
-            result = result && BgrToBgraTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
-            result = result && BgrToBgraTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
+            result = result && BgrToBgraAutoTest(W, H, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
+            result = result && BgrToBgraAutoTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
+            result = result && BgrToBgraAutoTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToBgra), FUNC(Simd::Avx2::BgrToBgra));
         }
 #endif 
 
@@ -111,7 +111,7 @@ namespace Test
 
 #define FUNCP(func) FuncP(func, #func)
 
-    bool Bgr48pToBgra32Test(int width, int height, const FuncP & f1, const FuncP & f2)
+    bool Bgr48pToBgra32AutoTest(int width, int height, const FuncP & f1, const FuncP & f2)
     {
         bool result = true;
 
@@ -138,20 +138,20 @@ namespace Test
         return result;
     }
 
-    bool Bgr48pToBgra32Test()
+    bool Bgr48pToBgra32AutoTest()
     {
         bool result = true;
 	
-        result = result && Bgr48pToBgra32Test(W, H, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
-        result = result && Bgr48pToBgra32Test(W + 1, H - 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
-        result = result && Bgr48pToBgra32Test(W - 1, H + 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+        result = result && Bgr48pToBgra32AutoTest(W, H, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+        result = result && Bgr48pToBgra32AutoTest(W + 1, H - 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+        result = result && Bgr48pToBgra32AutoTest(W - 1, H + 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && Bgr48pToBgra32Test(W, H, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
-            result = result && Bgr48pToBgra32Test(W + 1, H - 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
-            result = result && Bgr48pToBgra32Test(W - 1, H + 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
+            result = result && Bgr48pToBgra32AutoTest(W, H, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
+            result = result && Bgr48pToBgra32AutoTest(W + 1, H - 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
+            result = result && Bgr48pToBgra32AutoTest(W - 1, H + 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
         }
 #endif 
 		return result;    

@@ -47,7 +47,7 @@ namespace Test
 
 #define FUNC(func) Func(func, #func)
 
-    bool BayerToBgrTest(int width, int height, View::Format format, const Func & f1, const Func & f2)
+    bool BayerToBgrAutoTest(int width, int height, View::Format format, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -68,25 +68,25 @@ namespace Test
         return result;
     }
 
-    bool BayerToBgrTest(int width, int height, const Func & f1, const Func & f2)
+    bool BayerToBgrAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
         for(View::Format format = View::BayerGrbg; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            result = result && BayerToBgrTest(width, height, format, f1, f2);
+            result = result && BayerToBgrAutoTest(width, height, format, f1, f2);
         }
 
         return result;
     }
 
-    bool BayerToBgrTest()
+    bool BayerToBgrAutoTest()
     {
         bool result = true;
 
-        result = result && BayerToBgrTest(W, H, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
-        result = result && BayerToBgrTest(W + 2, H - 2, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
-        result = result && BayerToBgrTest(W - 2, H + 2, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
+        result = result && BayerToBgrAutoTest(W, H, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
+        result = result && BayerToBgrAutoTest(W + 2, H - 2, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
+        result = result && BayerToBgrAutoTest(W - 2, H + 2, FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
 
         return result;    
     }

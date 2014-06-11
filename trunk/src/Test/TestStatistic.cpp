@@ -49,7 +49,7 @@ namespace Test
 
 #define FUNC1(function) Func1(function, #function)
 
-	bool GetStatisticTest(int width, int height, const Func1 & f1, const Func1 & f2)
+	bool GetStatisticAutoTest(int width, int height, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -72,20 +72,20 @@ namespace Test
 		return result;
 	}
 
-	bool GetStatisticTest()
+	bool GetStatisticAutoTest()
 	{
 		bool result = true;
 
-		result = result && GetStatisticTest(W, H, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
-		result = result && GetStatisticTest(W + 1, H - 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
-        result = result && GetStatisticTest(W - 1, H + 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+		result = result && GetStatisticAutoTest(W, H, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+		result = result && GetStatisticAutoTest(W + 1, H - 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+        result = result && GetStatisticAutoTest(W - 1, H + 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetStatisticTest(W, H, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
-            result = result && GetStatisticTest(W + 1, H - 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
-            result = result && GetStatisticTest(W - 1, H + 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
+            result = result && GetStatisticAutoTest(W, H, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
+            result = result && GetStatisticAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
+            result = result && GetStatisticAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
         }
 #endif 
 
@@ -118,7 +118,7 @@ namespace Test
     FuncM(function1.func, function1.description + ScaleDescription(scale)), \
     FuncM(function2.func, function2.description + ScaleDescription(scale)) 
 
-    bool GetMomentsTest(ptrdiff_t width, ptrdiff_t height, const FuncM & f1, const FuncM & f2)
+    bool GetMomentsAutoTest(ptrdiff_t width, ptrdiff_t height, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
@@ -145,41 +145,41 @@ namespace Test
         return result;
     }
 
-    bool GetMomentsTest(const Point & scale, const FuncM & f1, const FuncM & f2)
+    bool GetMomentsAutoTest(const Point & scale, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        result = result && GetMomentsTest(W*scale.x, H*scale.y, ARGS_M(scale, f1, f2));
-        result = result && GetMomentsTest(W*scale.x + 1, H*scale.y - 1, ARGS_M(scale, f1, f2));
-        result = result && GetMomentsTest(W*scale.x - 1, H*scale.y + 1, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsAutoTest(W*scale.x, H*scale.y, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsAutoTest(W*scale.x + 1, H*scale.y - 1, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsAutoTest(W*scale.x - 1, H*scale.y + 1, ARGS_M(scale, f1, f2));
 
         return result;
     }
 
-    bool GetMomentsTest(const FuncM & f1, const FuncM & f2)
+    bool GetMomentsAutoTest(const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        result = result && GetMomentsTest(Point(1, 1), f1, f2);
+        result = result && GetMomentsAutoTest(Point(1, 1), f1, f2);
 #ifdef NDEBUG
-        result = result && GetMomentsTest(Point(5, 2), f1, f2);
+        result = result && GetMomentsAutoTest(Point(5, 2), f1, f2);
 #else
-        result = result && GetMomentsTest(Point(50, 20), f1, f2);
+        result = result && GetMomentsAutoTest(Point(50, 20), f1, f2);
 #endif
 
         return result;
     }
 
-    bool GetMomentsTest()
+    bool GetMomentsAutoTest()
     {
         bool result = true;
 
-        result = result && GetMomentsTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
+        result = result && GetMomentsAutoTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetMomentsTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(Simd::Avx2::GetMoments));
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(Simd::Avx2::GetMoments));
         }
 #endif 
 
@@ -207,7 +207,7 @@ namespace Test
 
 #define FUNC3(function) Func3(function, #function)
 
-    bool GetSumsTest(int width, int height, const Func3 & f1, const Func3 & f2, bool isRow)
+    bool GetSumsAutoTest(int width, int height, const Func3 & f1, const Func3 & f2, bool isRow)
     {
         bool result = true;
 
@@ -229,80 +229,80 @@ namespace Test
         return result;
     }
 
-    bool GetRowSumsTest()
+    bool GetRowSumsAutoTest()
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
-            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
-            result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
+            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
+            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
+            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
         }
 #endif 
 
         return result;
     }
 
-    bool GetColSumsTest()
+    bool GetColSumsAutoTest()
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
+        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
+        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
+        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
-            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
-            result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
+            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
+            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
+            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetColSums), FUNC3(Simd::Avx2::GetColSums), false);
         }
 #endif 
 
         return result;
     }
 
-    bool GetAbsDyRowSumsTest()
+    bool GetAbsDyRowSumsAutoTest()
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
-            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
-            result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
+            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
+            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
+            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
         }
 #endif 
 
         return result;
     }
 
-    bool GetAbsDxColSumsTest()
+    bool GetAbsDxColSumsAutoTest()
     {
         bool result = true;
 
-        result = result && GetSumsTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-        result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-        result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GetSumsTest(W, H, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
-            result = result && GetSumsTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
-            result = result && GetSumsTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
+            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
+            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
+            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
         }
 #endif 
 
@@ -330,7 +330,7 @@ namespace Test
 
 #define FUNC4(function) Func4(function, #function)
 
-    bool SumTest(int width, int height, const Func4 & f1, const Func4 & f2)
+    bool SumAutoTest(int width, int height, const Func4 & f1, const Func4 & f2)
     {
         bool result = true;
 
@@ -351,40 +351,40 @@ namespace Test
         return result;
     }
 
-    bool ValueSumTest()
+    bool ValueSumAutoTest()
     {
         bool result = true;
 
-        result = result && SumTest(W, H, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
-        result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
-        result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumAutoTest(W, H, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && SumTest(W, H, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
-            result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
-            result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+            result = result && SumAutoTest(W, H, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+            result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
+            result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
         }
 #endif 
 
         return result;
     }
 
-    bool SquareSumTest()
+    bool SquareSumAutoTest()
     {
         bool result = true;
 
-        result = result && SumTest(W, H, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
-        result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
-        result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumAutoTest(W, H, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && SumTest(W, H, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
-            result = result && SumTest(W + 1, H - 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
-            result = result && SumTest(W - 1, H + 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+            result = result && SumAutoTest(W, H, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+            result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
+            result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
         }
 #endif  
 

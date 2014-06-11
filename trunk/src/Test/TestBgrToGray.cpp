@@ -47,7 +47,7 @@ namespace Test
 
 #define FUNC(func) Func(func, #func)
 
-    bool BgrToGrayTest(int width, int height, const Func & f1, const Func & f2)
+    bool BgrToGrayAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -68,29 +68,29 @@ namespace Test
         return result;
     }
 
-    bool BgrToGrayTest()
+    bool BgrToGrayAutoTest()
     {
         bool result = true;
 	
-        result = result && BgrToGrayTest(W, H, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
-        result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
-        result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
+        result = result && BgrToGrayAutoTest(W, H, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
+        result = result && BgrToGrayAutoTest(W + 1, H - 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
+        result = result && BgrToGrayAutoTest(W - 1, H + 1, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && BgrToGrayTest(W, H, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
-            result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
-            result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
+            result = result && BgrToGrayAutoTest(W, H, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
+            result = result && BgrToGrayAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
+            result = result && BgrToGrayAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::BgrToGray), FUNC(Simd::Avx2::BgrToGray));
         }
 #endif 
 
 #if defined(SIMD_SSSE3_ENABLE)
         if(Simd::Ssse3::Enable)
         {
-            result = result && BgrToGrayTest(W, H, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
-            result = result && BgrToGrayTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
-            result = result && BgrToGrayTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+            result = result && BgrToGrayAutoTest(W, H, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+            result = result && BgrToGrayAutoTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
+            result = result && BgrToGrayAutoTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
         }
 #endif 
 

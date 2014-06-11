@@ -49,7 +49,7 @@ namespace Test
 #define ARGS_BGRA(width, height, function1, function2) \
 	width, height, FuncBgra(function1, std::string(#function1)), FuncBgra(function2, std::string(#function2))
 
-	bool FillBgraTest(int width, int height, const FuncBgra & f1, const FuncBgra & f2)
+	bool FillBgraAutoTest(int width, int height, const FuncBgra & f1, const FuncBgra & f2)
 	{
 		bool result = true;
 
@@ -73,20 +73,20 @@ namespace Test
 		return result;
 	}
 
-	bool FillBgraTest()
+	bool FillBgraAutoTest()
 	{
 		bool result = true;
 
-		result = result && FillBgraTest(ARGS_BGRA(W, H, Simd::Base::FillBgra, SimdFillBgra));
-        result = result && FillBgraTest(ARGS_BGRA(W + 1, H - 1, Simd::Base::FillBgra, SimdFillBgra));
-        result = result && FillBgraTest(ARGS_BGRA(W - 1, H + 1, Simd::Base::FillBgra, SimdFillBgra));
+		result = result && FillBgraAutoTest(ARGS_BGRA(W, H, Simd::Base::FillBgra, SimdFillBgra));
+        result = result && FillBgraAutoTest(ARGS_BGRA(W + 1, H - 1, Simd::Base::FillBgra, SimdFillBgra));
+        result = result && FillBgraAutoTest(ARGS_BGRA(W - 1, H + 1, Simd::Base::FillBgra, SimdFillBgra));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && FillBgraTest(ARGS_BGRA(W, H, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
-            result = result && FillBgraTest(ARGS_BGRA(W + 1, H - 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
-            result = result && FillBgraTest(ARGS_BGRA(W - 1, H + 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
+            result = result && FillBgraAutoTest(ARGS_BGRA(W, H, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
+            result = result && FillBgraAutoTest(ARGS_BGRA(W + 1, H - 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
+            result = result && FillBgraAutoTest(ARGS_BGRA(W - 1, H + 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
         }
 #endif 
 
@@ -115,7 +115,7 @@ namespace Test
 #define ARGS_BGR(width, height, function1, function2) \
     width, height, FuncBgr(function1, std::string(#function1)), FuncBgr(function2, std::string(#function2))
 
-    bool FillBgrTest(int width, int height, const FuncBgr & f1, const FuncBgr & f2)
+    bool FillBgrAutoTest(int width, int height, const FuncBgr & f1, const FuncBgr & f2)
     {
         bool result = true;
 
@@ -138,20 +138,20 @@ namespace Test
         return result;
     }
 
-    bool FillBgrTest()
+    bool FillBgrAutoTest()
     {
         bool result = true;
 
-        result = result && FillBgrTest(ARGS_BGR(W, H, Simd::Base::FillBgr, SimdFillBgr));
-        result = result && FillBgrTest(ARGS_BGR(W + 1, H - 1, Simd::Base::FillBgr, SimdFillBgr));
-        result = result && FillBgrTest(ARGS_BGR(W - 1, H + 1, Simd::Base::FillBgr, SimdFillBgr));
+        result = result && FillBgrAutoTest(ARGS_BGR(W, H, Simd::Base::FillBgr, SimdFillBgr));
+        result = result && FillBgrAutoTest(ARGS_BGR(W + 1, H - 1, Simd::Base::FillBgr, SimdFillBgr));
+        result = result && FillBgrAutoTest(ARGS_BGR(W - 1, H + 1, Simd::Base::FillBgr, SimdFillBgr));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && FillBgrTest(ARGS_BGR(W, H, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
-            result = result && FillBgrTest(ARGS_BGR(W + 1, H - 1, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
-            result = result && FillBgrTest(ARGS_BGR(W - 1, H + 1, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
+            result = result && FillBgrAutoTest(ARGS_BGR(W, H, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
+            result = result && FillBgrAutoTest(ARGS_BGR(W + 1, H - 1, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
+            result = result && FillBgrAutoTest(ARGS_BGR(W - 1, H + 1, Simd::Sse2::FillBgr, Simd::Avx2::FillBgr));
         }
 #endif 
 

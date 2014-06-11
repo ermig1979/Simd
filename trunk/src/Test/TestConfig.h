@@ -31,6 +31,7 @@
 #include <stdlib.h>
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -39,6 +40,7 @@
 #include <limits>
 #include <iomanip>
 #include <memory>
+#include <exception>
 
 #define SIMD_STATIC
 #include "Simd/SimdEnable.h"
@@ -79,6 +81,9 @@ namespace Test
 #endif
 
 	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+
+    const int DW = 48;
+    const int DH = 64;
 }
 
 #endif//__TestConfig_h__

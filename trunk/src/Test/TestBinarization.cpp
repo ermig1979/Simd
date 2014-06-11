@@ -55,7 +55,7 @@ namespace Test
 #define ARGS12(function1, function2) \
     Func1(function1, std::string(#function1)), Func1(function2, std::string(#function2))
 
-	bool BinarizationTest(int width, int height, SimdCompareType type, const Func1 & f1, const Func1 & f2)
+	bool BinarizationAutoTest(int width, int height, SimdCompareType type, const Func1 & f1, const Func1 & f2)
 	{
 		bool result = true;
 
@@ -80,29 +80,29 @@ namespace Test
 		return result;
 	}
 
-    bool BinarizationTest(const Func1 & f1, const Func1 & f2)
+    bool BinarizationAutoTest(const Func1 & f1, const Func1 & f2)
     {
         bool result = true;
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && BinarizationTest(ARGS11(W, H, type, f1, f2));
-            result = result && BinarizationTest(ARGS11(W + 1, H - 1, type, f1, f2));
-            result = result && BinarizationTest(ARGS11(W - 1, H + 1, type, f1, f2));
+            result = result && BinarizationAutoTest(ARGS11(W, H, type, f1, f2));
+            result = result && BinarizationAutoTest(ARGS11(W + 1, H - 1, type, f1, f2));
+            result = result && BinarizationAutoTest(ARGS11(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
     }
 
-	bool BinarizationTest()
+	bool BinarizationAutoTest()
 	{
 		bool result = true;
 
-		result = result && BinarizationTest(ARGS12(Simd::Base::Binarization, SimdBinarization));
+		result = result && BinarizationAutoTest(ARGS12(Simd::Base::Binarization, SimdBinarization));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && BinarizationTest(ARGS12(Simd::Avx2::Binarization, Simd::Sse2::Binarization));
+            result = result && BinarizationAutoTest(ARGS12(Simd::Avx2::Binarization, Simd::Sse2::Binarization));
 #endif 
 
 		return result;
@@ -137,7 +137,7 @@ namespace Test
 #define ARGS22(function1, function2) \
     Func2(function1, std::string(#function1)), Func2(function2, std::string(#function2))
 
-    bool AveragingBinarizationTest(int width, int height, SimdCompareType type, const Func2 & f1, const Func2 & f2)
+    bool AveragingBinarizationAutoTest(int width, int height, SimdCompareType type, const Func2 & f1, const Func2 & f2)
     {
         bool result = true;
 
@@ -164,29 +164,29 @@ namespace Test
         return result;
     }
 
-    bool AveragingBinarizationTest(const Func2 & f1, const Func2 & f2)
+    bool AveragingBinarizationAutoTest(const Func2 & f1, const Func2 & f2)
     {
         bool result = true;
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && AveragingBinarizationTest(ARGS21(W, H, type, f1, f2));
-            result = result && AveragingBinarizationTest(ARGS21(W + 1, H - 1, type, f1, f2));
-            result = result && AveragingBinarizationTest(ARGS21(W - 1, H + 1, type, f1, f2));
+            result = result && AveragingBinarizationAutoTest(ARGS21(W, H, type, f1, f2));
+            result = result && AveragingBinarizationAutoTest(ARGS21(W + 1, H - 1, type, f1, f2));
+            result = result && AveragingBinarizationAutoTest(ARGS21(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
     }
 
-    bool AveragingBinarizationTest()
+    bool AveragingBinarizationAutoTest()
     {
         bool result = true;
 
-        result = result && AveragingBinarizationTest(ARGS22(Simd::Base::AveragingBinarization, SimdAveragingBinarization));
+        result = result && AveragingBinarizationAutoTest(ARGS22(Simd::Base::AveragingBinarization, SimdAveragingBinarization));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && AveragingBinarizationTest(ARGS22(Simd::Avx2::AveragingBinarization, Simd::Sse2::AveragingBinarization));
+            result = result && AveragingBinarizationAutoTest(ARGS22(Simd::Avx2::AveragingBinarization, Simd::Sse2::AveragingBinarization));
 #endif 
 
         return result;

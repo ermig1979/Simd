@@ -56,7 +56,7 @@ namespace Test
     FuncC(function1, std::string(#function1)), FuncC(function2, std::string(#function2))
 
 
-    bool ConditionalCountTest(int width, int height, SimdCompareType type, const FuncC & f1, const FuncC & f2)
+    bool ConditionalCountAutoTest(int width, int height, SimdCompareType type, const FuncC & f1, const FuncC & f2)
     {
         bool result = true;
 
@@ -77,29 +77,29 @@ namespace Test
         return result;
     }
 
-    bool ConditionalCountTest(const FuncC & f1, const FuncC & f2)
+    bool ConditionalCountAutoTest(const FuncC & f1, const FuncC & f2)
     {
         bool result = true;
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalCountTest(ARGS_C1(W, H, type, f1, f2));
-            result = result && ConditionalCountTest(ARGS_C1(W + 1, H - 1, type, f1, f2));
-            result = result && ConditionalCountTest(ARGS_C1(W - 1, H + 1, type, f1, f2));
+            result = result && ConditionalCountAutoTest(ARGS_C1(W, H, type, f1, f2));
+            result = result && ConditionalCountAutoTest(ARGS_C1(W + 1, H - 1, type, f1, f2));
+            result = result && ConditionalCountAutoTest(ARGS_C1(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
     }
 
-    bool ConditionalCountTest()
+    bool ConditionalCountAutoTest()
     {
         bool result = true;
 
-        result = result && ConditionalCountTest(ARGS_C2(Simd::Base::ConditionalCount, SimdConditionalCount));
+        result = result && ConditionalCountAutoTest(ARGS_C2(Simd::Base::ConditionalCount, SimdConditionalCount));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalCountTest(ARGS_C2(Simd::Avx2::ConditionalCount, Simd::Sse2::ConditionalCount));
+            result = result && ConditionalCountAutoTest(ARGS_C2(Simd::Avx2::ConditionalCount, Simd::Sse2::ConditionalCount));
 #endif 
 
         return result;
@@ -133,7 +133,7 @@ namespace Test
 #define ARGS_S2(function1, function2) \
     FuncS(function1, std::string(#function1)), FuncS(function2, std::string(#function2))
 
-    bool ConditionalSumTest(int width, int height, SimdCompareType type, const FuncS & f1, const FuncS & f2)
+    bool ConditionalSumAutoTest(int width, int height, SimdCompareType type, const FuncS & f1, const FuncS & f2)
     {
         bool result = true;
 
@@ -156,57 +156,57 @@ namespace Test
         return result;
     }
 
-    bool ConditionalSumTest(const FuncS & f1, const FuncS & f2)
+    bool ConditionalSumAutoTest(const FuncS & f1, const FuncS & f2)
     {
         bool result = true;
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalSumTest(ARGS_S1(W, H, type, f1, f2));
-            result = result && ConditionalSumTest(ARGS_S1(W + 1, H - 1, type, f1, f2));
-            result = result && ConditionalSumTest(ARGS_S1(W - 1, H + 1, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S1(W, H, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S1(W + 1, H - 1, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S1(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
     }
 
-    bool ConditionalSumTest()
+    bool ConditionalSumAutoTest()
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSum, SimdConditionalSum));
+        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSum, SimdConditionalSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumTest(ARGS_S2(Simd::Avx2::ConditionalSum, Simd::Sse2::ConditionalSum));
+            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSum, Simd::Sse2::ConditionalSum));
 #endif 
 
         return result;
     }
 
-    bool ConditionalSquareSumTest()
+    bool ConditionalSquareSumAutoTest()
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareSum, SimdConditionalSquareSum));
+        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSquareSum, SimdConditionalSquareSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumTest(ARGS_S2(Simd::Avx2::ConditionalSquareSum, Simd::Sse2::ConditionalSquareSum));
+            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSquareSum, Simd::Sse2::ConditionalSquareSum));
 #endif 
 
         return result;
     }
 
-    bool ConditionalSquareGradientSumTest()
+    bool ConditionalSquareGradientSumAutoTest()
     {
         bool result = true;
 
-        result = result && ConditionalSumTest(ARGS_S2(Simd::Base::ConditionalSquareGradientSum, SimdConditionalSquareGradientSum));
+        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSquareGradientSum, SimdConditionalSquareGradientSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumTest(ARGS_S2(Simd::Avx2::ConditionalSquareGradientSum, Simd::Sse2::ConditionalSquareGradientSum));
+            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSquareGradientSum, Simd::Sse2::ConditionalSquareGradientSum));
 #endif 
 
         return result;

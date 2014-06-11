@@ -52,7 +52,7 @@ namespace Test
 
 #define FUNC(function) Func(function, std::string(#function))
 
-	bool AddFeatureDifferenceTest(int width, int height, uint16_t weight, const Func & f1, const Func & f2)
+	bool AddFeatureDifferenceAutoTest(int width, int height, uint16_t weight, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -79,31 +79,31 @@ namespace Test
 		return result;
 	}
 
-    bool AddFeatureDifferenceTest(int width, int height, const Func & f1, const Func & f2)
+    bool AddFeatureDifferenceAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
         const uint16_t delta = 256*7;
         for(uint16_t weight = 0; weight < 4 && result; ++weight)
-            result = result &&  AddFeatureDifferenceTest(width, height, weight*delta, f1, f2);
+            result = result &&  AddFeatureDifferenceAutoTest(width, height, weight*delta, f1, f2);
 
         return result;
     }
 
-    bool AddFeatureDifferenceTest()
+    bool AddFeatureDifferenceAutoTest()
     {
         bool result = true;
 
-        result = result && AddFeatureDifferenceTest(W, H, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
-        result = result && AddFeatureDifferenceTest(W + 1, H - 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
-        result = result && AddFeatureDifferenceTest(W - 1, H + 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        result = result && AddFeatureDifferenceAutoTest(W, H, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        result = result && AddFeatureDifferenceAutoTest(W + 1, H - 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        result = result && AddFeatureDifferenceAutoTest(W - 1, H + 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && AddFeatureDifferenceTest(W, H, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
-            result = result && AddFeatureDifferenceTest(W + 1, H - 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
-            result = result && AddFeatureDifferenceTest(W - 1, H + 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
+            result = result && AddFeatureDifferenceAutoTest(W, H, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
+            result = result && AddFeatureDifferenceAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
+            result = result && AddFeatureDifferenceAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
         }
 #endif 
 

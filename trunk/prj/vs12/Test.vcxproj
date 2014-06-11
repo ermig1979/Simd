@@ -66,6 +66,7 @@
     <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
+    <ClCompile Include="..\..\src\Test\TestData.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
     <ClCompile Include="..\..\src\Test\TestGrayToBgr.cpp" />
@@ -95,6 +96,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\Test.h" />
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestData.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestUtils.h" />
   </ItemGroup>

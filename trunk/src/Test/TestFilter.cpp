@@ -91,7 +91,7 @@ namespace Test
 #define ARGS_G(function1, function2) \
     GrayFunc(function1, std::string(#function1)), GrayFunc(function2, std::string(#function2))
 
-	bool ColorFilterTest(View::Format format, int width, int height, const ColorFunc & f1, const ColorFunc & f2)
+	bool ColorFilterAutoTest(View::Format format, int width, int height, const ColorFunc & f1, const ColorFunc & f2)
 	{
 		bool result = true;
 
@@ -112,7 +112,7 @@ namespace Test
 		return result;
 	}
 
-	bool GrayFilterTest(int width, int height, const GrayFunc & f1, const GrayFunc & f2)
+	bool GrayFilterAutoTest(int width, int height, const GrayFunc & f1, const GrayFunc & f2)
 	{
 		bool result = true;
 
@@ -133,128 +133,128 @@ namespace Test
 		return result;
 	}
 
-    bool ColorFilterTest(const ColorFunc & f1, const ColorFunc & f2)
+    bool ColorFilterAutoTest(const ColorFunc & f1, const ColorFunc & f2)
     {
         bool result = true;
 
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ColorFilterTest(ARGS_C1(format, W, H, f1, f2));
-            result = result && ColorFilterTest(ARGS_C1(format, W + 1, H - 1, f1, f2));
-            result = result && ColorFilterTest(ARGS_C1(format, W - 1, H + 1, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C1(format, W, H, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C1(format, W + 1, H - 1, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C1(format, W - 1, H + 1, f1, f2));
         }
 
         return result;
     }
 
-    bool MedianFilterRhomb3x3Test()
+    bool MedianFilterRhomb3x3AutoTest()
     {
         bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, Simd::Avx2::MedianFilterRhomb3x3));
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, Simd::Avx2::MedianFilterRhomb3x3));
 #endif 
 
 #if defined(CUDA_ENABLE)
-        result = result && ColorFilterTest(ARGS_C2(SimdMedianFilterRhomb3x3, CudaMedianFilterRhomb3x3));
+        result = result && ColorFilterAutoTest(ARGS_C2(SimdMedianFilterRhomb3x3, CudaMedianFilterRhomb3x3));
 #endif 
 
         return result;
     }
 
-    bool MedianFilterRhomb5x5Test()
+    bool MedianFilterRhomb5x5AutoTest()
     {
         bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, Simd::Avx2::MedianFilterRhomb5x5));
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, Simd::Avx2::MedianFilterRhomb5x5));
 #endif 
 
         return result;
     }
 
-	bool MedianFilterSquare3x3Test()
+	bool MedianFilterSquare3x3AutoTest()
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, Simd::Avx2::MedianFilterSquare3x3));
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, Simd::Avx2::MedianFilterSquare3x3));
 #endif 
 
 		return result;
 	}
 
-	bool MedianFilterSquare5x5Test()
+	bool MedianFilterSquare5x5AutoTest()
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, Simd::Avx2::MedianFilterSquare5x5));
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, Simd::Avx2::MedianFilterSquare5x5));
 #endif 
 
 		return result;
 	}
 
-	bool GaussianBlur3x3Test()
+	bool GaussianBlur3x3AutoTest()
 	{
 		bool result = true;
 
-        result = result && ColorFilterTest(ARGS_C2(Simd::Base::GaussianBlur3x3, SimdGaussianBlur3x3));
+        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::GaussianBlur3x3, SimdGaussianBlur3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterTest(ARGS_C2(Simd::Sse2::GaussianBlur3x3, Simd::Avx2::GaussianBlur3x3));
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::GaussianBlur3x3, Simd::Avx2::GaussianBlur3x3));
 #endif 
 
 		return result;
 	}
 
-	bool AbsGradientSaturatedSumTest()
+	bool AbsGradientSaturatedSumAutoTest()
 	{
 		bool result = true;
 
-		result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
-		result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
-        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+		result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+		result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+        result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GrayFilterTest(W, H, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
-            result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
-            result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
+            result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
+            result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
+            result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
         }
 #endif 
 
 		return result;
 	}
 
-    bool LbpEstimateTest()
+    bool LbpEstimateAutoTest()
     {
         bool result = true;
 
-        result = result && GrayFilterTest(W, H, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
-        result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
-        result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GrayFilterTest(W, H, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
-            result = result && GrayFilterTest(W + 1, H - 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
-            result = result && GrayFilterTest(W - 1, H + 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+            result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+            result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
+            result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
         }
 #endif 
 

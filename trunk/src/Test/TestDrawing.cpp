@@ -49,7 +49,7 @@ namespace Test
 
 #define FUNC_AB(func) FuncAB(func, #func)
 
-    bool AlphaBlendingTest(View::Format format, int width, int height, const FuncAB & f1, const FuncAB & f2)
+    bool AlphaBlendingAutoTest(View::Format format, int width, int height, const FuncAB & f1, const FuncAB & f2)
     {
         bool result = true;
 
@@ -74,7 +74,7 @@ namespace Test
         return result;
     }
 
-    bool AlphaBlendingTest(const FuncAB & f1, const FuncAB & f2)
+    bool AlphaBlendingAutoTest(const FuncAB & f1, const FuncAB & f2)
     {
         bool result = true;
 
@@ -83,28 +83,28 @@ namespace Test
             FuncAB f1c = FuncAB(f1.func, f1.description + ColorDescription(format));
             FuncAB f2c = FuncAB(f2.func, f2.description + ColorDescription(format));
             
-            result = result && AlphaBlendingTest(format, W, H, f1c, f2c);
-            result = result && AlphaBlendingTest(format, W + 1, H - 1, f1c, f2c);
-            result = result && AlphaBlendingTest(format, W - 1, H + 1, f1c, f2c);
+            result = result && AlphaBlendingAutoTest(format, W, H, f1c, f2c);
+            result = result && AlphaBlendingAutoTest(format, W + 1, H - 1, f1c, f2c);
+            result = result && AlphaBlendingAutoTest(format, W - 1, H + 1, f1c, f2c);
         }
 
         return result;
     }
 
-    bool AlphaBlendingTest()
+    bool AlphaBlendingAutoTest()
     {
         bool result = true;
 
-        result = result && AlphaBlendingTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+        result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && AlphaBlendingTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(Simd::Avx2::AlphaBlending));
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(Simd::Avx2::AlphaBlending));
 #endif 
 
 #if defined(SIMD_SSSE3_ENABLE)
         if(Simd::Ssse3::Enable)
-            result = result && AlphaBlendingTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
         return result;    

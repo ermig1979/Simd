@@ -49,7 +49,7 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool StretchGrayTest(int width, int height, const Func & f1, const Func & f2)
+	bool StretchGrayAutoTest(int width, int height, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -73,20 +73,20 @@ namespace Test
 		return result;
 	}
 
-	bool StretchGray2x2Test()
+	bool StretchGray2x2AutoTest()
 	{
 		bool result = true;
 
-		result = result && StretchGrayTest(W, H, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
-		result = result && StretchGrayTest(W + 1, H - 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
-        result = result && StretchGrayTest(W - 1, H + 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
+		result = result && StretchGrayAutoTest(W, H, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
+		result = result && StretchGrayAutoTest(W + 1, H - 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
+        result = result && StretchGrayAutoTest(W - 1, H + 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && StretchGrayTest(W, H, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
-            result = result && StretchGrayTest(W + 1, H - 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
-            result = result && StretchGrayTest(W - 1, H + 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
+            result = result && StretchGrayAutoTest(W, H, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
+            result = result && StretchGrayAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
+            result = result && StretchGrayAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
         }
 #endif 
 

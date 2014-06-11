@@ -49,7 +49,7 @@ namespace Test
 
 #define FUNC_SR(func) FuncSR(func, #func)
 
-    bool SegmentationShrinkRegionTest(int width, int height, const FuncSR & f1, const FuncSR & f2)
+    bool SegmentationShrinkRegionAutoTest(int width, int height, const FuncSR & f1, const FuncSR & f2)
     {
         bool result = true;
 
@@ -69,20 +69,20 @@ namespace Test
         return result;
     }
 
-    bool SegmentationShrinkRegionTest()
+    bool SegmentationShrinkRegionAutoTest()
     {
         bool result = true;
 
-        result = result && SegmentationShrinkRegionTest(W, H, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
-        result = result && SegmentationShrinkRegionTest(W + 1, H - 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
-        result = result && SegmentationShrinkRegionTest(W - 1, H + 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+        result = result && SegmentationShrinkRegionAutoTest(W, H, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+        result = result && SegmentationShrinkRegionAutoTest(W + 1, H - 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+        result = result && SegmentationShrinkRegionAutoTest(W - 1, H + 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse41::Enable && Simd::Avx2::Enable)
         {
-            result = result && SegmentationShrinkRegionTest(W, H, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
-            result = result && SegmentationShrinkRegionTest(W + 1, H - 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
-            result = result && SegmentationShrinkRegionTest(W - 1, H + 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
+            result = result && SegmentationShrinkRegionAutoTest(W, H, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
+            result = result && SegmentationShrinkRegionAutoTest(W + 1, H - 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
+            result = result && SegmentationShrinkRegionAutoTest(W - 1, H + 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
         }
 #endif
 
@@ -110,7 +110,7 @@ namespace Test
 
 #define ARG_FSH(func1, func2) FuncFSH(func1, #func1), FuncFSH(func2, #func2)
 
-    bool SegmentationFillSingleHolesTest(int width, int height, const FuncFSH & f1, const FuncFSH & f2)
+    bool SegmentationFillSingleHolesAutoTest(int width, int height, const FuncFSH & f1, const FuncFSH & f2)
     {
         bool result = true;
 
@@ -131,20 +131,20 @@ namespace Test
         return result;
     }
 
-    bool SegmentationFillSingleHolesTest()
+    bool SegmentationFillSingleHolesAutoTest()
     {
         bool result = true;
 
-        result = result && SegmentationFillSingleHolesTest(W, H, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
-        result = result && SegmentationFillSingleHolesTest(W + 1, H - 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
-        result = result && SegmentationFillSingleHolesTest(W - 1, H + 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesAutoTest(W, H, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesAutoTest(W + 1, H - 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesAutoTest(W - 1, H + 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && SegmentationFillSingleHolesTest(W, H, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
-            result = result && SegmentationFillSingleHolesTest(W + 1, H - 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
-            result = result && SegmentationFillSingleHolesTest(W - 1, H + 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+            result = result && SegmentationFillSingleHolesAutoTest(W, H, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+            result = result && SegmentationFillSingleHolesAutoTest(W + 1, H - 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
+            result = result && SegmentationFillSingleHolesAutoTest(W - 1, H + 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
         }
 #endif
 
