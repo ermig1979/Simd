@@ -26,127 +26,134 @@
 
 namespace Test
 {
-    bool ReduceGray2x2Test();
-    bool ReduceGray3x3Test();
-    bool ReduceGray4x4Test();
-    bool ReduceGray5x5Test();
+    /***************************** Auto Tests: *******************************/
 
-    bool Crc32cTest();
+    bool ReduceGray2x2AutoTest();
+    bool ReduceGray3x3AutoTest();
+    bool ReduceGray4x4AutoTest();
+    bool ReduceGray5x5AutoTest();
 
-    bool BayerToBgrTest();
+    bool Crc32cAutoTest();
 
-    bool BayerToBgraTest();
+    bool BayerToBgrAutoTest();
 
-    bool BgraToBayerTest();
+    bool BayerToBgraAutoTest();
 
-    bool BgraToBgrTest();
+    bool BgraToBayerAutoTest();
 
-    bool BgraToGrayTest();
+    bool BgraToBgrAutoTest();
 
-    bool BgrToBayerTest();
+    bool BgraToGrayAutoTest();
 
-    bool BgrToBgraTest();
-    bool Bgr48pToBgra32Test();
+    bool BgrToBayerAutoTest();
 
-    bool BgrToGrayTest();
+    bool BgrToBgraAutoTest();
+    bool Bgr48pToBgra32AutoTest();
 
-    bool Yuv444pToHueTest();
-    bool Yuv420pToHueTest();
+    bool BgrToGrayAutoTest();
 
-    bool Yuv444pToBgrTest();
-    bool Yuv420pToBgrTest();
+    bool Yuv444pToHueAutoTest();
+    bool Yuv420pToHueAutoTest();
 
-    bool Yuv444pToBgraTest();
-    bool Yuv420pToBgraTest();
+    bool Yuv444pToBgrAutoTest();
+    bool Yuv420pToBgrAutoTest();
 
-    bool MedianFilterRhomb3x3Test();
-    bool MedianFilterRhomb5x5Test();
-    bool MedianFilterSquare3x3Test();
-    bool MedianFilterSquare5x5Test();
-    bool GaussianBlur3x3Test();
-    bool AbsGradientSaturatedSumTest();
-    bool LbpEstimateTest();
+    bool Yuv444pToBgraAutoTest();
+    bool Yuv420pToBgraAutoTest();
 
-    bool SquareDifferenceSumTest();
-    bool SquareDifferenceSumMaskedTest();
-    bool AbsDifferenceSumTest();
-    bool AbsDifferenceSumMaskedTest();
-    bool AbsDifferenceSums3x3Test();
-    bool AbsDifferenceSums3x3MaskedTest();
+    bool MedianFilterRhomb3x3AutoTest();
+    bool MedianFilterRhomb5x5AutoTest();
+    bool MedianFilterSquare3x3AutoTest();
+    bool MedianFilterSquare5x5AutoTest();
+    bool GaussianBlur3x3AutoTest();
+    bool AbsGradientSaturatedSumAutoTest();
+    bool LbpEstimateAutoTest();
 
-    bool ResizeBilinearTest();
+    bool SquareDifferenceSumAutoTest();
+    bool SquareDifferenceSumMaskedAutoTest();
+    bool AbsDifferenceSumAutoTest();
+    bool AbsDifferenceSumMaskedAutoTest();
+    bool AbsDifferenceSums3x3AutoTest();
+    bool AbsDifferenceSums3x3MaskedAutoTest();
 
-    bool DeinterleaveUvTest();
+    bool ResizeBilinearAutoTest();
 
-    bool OperationBinary8uTest();
-    bool OperationBinary16iTest();
-    bool VectorProductTest();
+    bool DeinterleaveUvAutoTest();
 
-    bool AbsSecondDerivativeHistogramTest();
+    bool OperationBinary8uAutoTest();
+    bool OperationBinary16iAutoTest();
+    bool VectorProductAutoTest();
 
-    bool BinarizationTest();
-    bool AveragingBinarizationTest();
+    bool AbsSecondDerivativeHistogramAutoTest();
 
-    bool ShiftBilinearTest();
+    bool BinarizationAutoTest();
+    bool AveragingBinarizationAutoTest();
 
-    bool GetStatisticTest();
-    bool GetMomentsTest();
-    bool GetRowSumsTest();
-    bool GetColSumsTest();
-    bool GetAbsDyRowSumsTest();
-    bool GetAbsDxColSumsTest();
-    bool ValueSumTest();
-    bool SquareSumTest();
+    bool ShiftBilinearAutoTest();
 
-    bool StretchGray2x2Test();
+    bool GetStatisticAutoTest();
+    bool GetMomentsAutoTest();
+    bool GetRowSumsAutoTest();
+    bool GetColSumsAutoTest();
+    bool GetAbsDyRowSumsAutoTest();
+    bool GetAbsDxColSumsAutoTest();
+    bool ValueSumAutoTest();
+    bool SquareSumAutoTest();
 
-    bool BackgroundGrowRangeSlowTest();
-    bool BackgroundGrowRangeFastTest();
-    bool BackgroundIncrementCountTest();
-    bool BackgroundAdjustRangeTest();
-    bool BackgroundAdjustRangeMaskedTest();
-    bool BackgroundShiftRangeTest();
-    bool BackgroundShiftRangeMaskedTest();
-    bool BackgroundInitMaskTest();
+    bool StretchGray2x2AutoTest();
 
-    bool EdgeBackgroundGrowRangeSlowTest();
-    bool EdgeBackgroundGrowRangeFastTest();
-    bool EdgeBackgroundIncrementCountTest();
-    bool EdgeBackgroundAdjustRangeTest();
-    bool EdgeBackgroundAdjustRangeMaskedTest();
-    bool EdgeBackgroundShiftRangeTest();
-    bool EdgeBackgroundShiftRangeMaskedTest();
+    bool BackgroundGrowRangeSlowAutoTest();
+    bool BackgroundGrowRangeFastAutoTest();
+    bool BackgroundIncrementCountAutoTest();
+    bool BackgroundAdjustRangeAutoTest();
+    bool BackgroundAdjustRangeMaskedAutoTest();
+    bool BackgroundShiftRangeAutoTest();
+    bool BackgroundShiftRangeMaskedAutoTest();
+    bool BackgroundInitMaskAutoTest();
 
-    bool AddFeatureDifferenceTest();
+    bool EdgeBackgroundGrowRangeSlowAutoTest();
+    bool EdgeBackgroundGrowRangeFastAutoTest();
+    bool EdgeBackgroundIncrementCountAutoTest();
+    bool EdgeBackgroundAdjustRangeAutoTest();
+    bool EdgeBackgroundAdjustRangeMaskedAutoTest();
+    bool EdgeBackgroundShiftRangeAutoTest();
+    bool EdgeBackgroundShiftRangeMaskedAutoTest();
 
-    bool TextureBoostedSaturatedGradientTest();
-    bool TextureBoostedUvTest();
-    bool TextureGetDifferenceSumTest();
-    bool TexturePerformCompensationTest();
+    bool AddFeatureDifferenceAutoTest();
 
-    bool FillBgraTest();
-    bool FillBgrTest();
+    bool TextureBoostedSaturatedGradientAutoTest();
+    bool TextureBoostedUvAutoTest();
+    bool TextureGetDifferenceSumAutoTest();
+    bool TexturePerformCompensationAutoTest();
 
-    bool GrayToBgrTest();
+    bool FillBgraAutoTest();
+    bool FillBgrAutoTest();
 
-    bool GrayToBgraTest();
+    bool GrayToBgrAutoTest();
 
-    bool AlphaBlendingTest();
+    bool GrayToBgraAutoTest();
 
-    bool ConditionalCountTest();
-    bool ConditionalSumTest();
-    bool ConditionalSquareSumTest();
-    bool ConditionalSquareGradientSumTest();
+    bool AlphaBlendingAutoTest();
 
-    bool SobelDxTest();
-    bool SobelDxAbsTest();
-    bool SobelDyTest();
-    bool SobelDyAbsTest();
-    bool ContourMetricsTest();
-    bool ContourMetricsMaskedTest();
-    bool ContourAnchorsTest();
+    bool ConditionalCountAutoTest();
+    bool ConditionalSumAutoTest();
+    bool ConditionalSquareSumAutoTest();
+    bool ConditionalSquareGradientSumAutoTest();
 
-    bool SegmentationShrinkRegionTest();
-    bool SegmentationFillSingleHolesTest();
+    bool SobelDxAutoTest();
+    bool SobelDxAbsAutoTest();
+    bool SobelDyAutoTest();
+    bool SobelDyAbsAutoTest();
+    bool ContourMetricsAutoTest();
+    bool ContourMetricsMaskedAutoTest();
+    bool ContourAnchorsAutoTest();
+
+    bool SegmentationShrinkRegionAutoTest();
+    bool SegmentationFillSingleHolesAutoTest();
+
+    /***************************** Data Tests: *******************************/
+
+    bool ReduceGray2x2DataTest(bool create);
+
 }
 #endif//__Test_h__

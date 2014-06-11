@@ -47,7 +47,7 @@ namespace Test
 
 #define FUNC(func) Func(func, #func)
 
-    bool BgraToBgrTest(int width, int height, const Func & f1, const Func & f2)
+    bool BgraToBgrAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -68,20 +68,20 @@ namespace Test
         return result;
     }
 
-    bool BgraToBgrTest()
+    bool BgraToBgrAutoTest()
     {
         bool result = true;
 
-        result = result && BgraToBgrTest(W, H, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
-        result = result && BgraToBgrTest(W + 1, H - 1, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
-        result = result && BgraToBgrTest(W - 1, H + 1, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
+        result = result && BgraToBgrAutoTest(W, H, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
+        result = result && BgraToBgrAutoTest(W + 1, H - 1, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
+        result = result && BgraToBgrAutoTest(W - 1, H + 1, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
 
 #if defined(SIMD_SSSE3_ENABLE)
         if(Simd::Ssse3::Enable)
         {
-            result = result && BgraToBgrTest(W, H, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
-            result = result && BgraToBgrTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
-            result = result && BgraToBgrTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
+            result = result && BgraToBgrAutoTest(W, H, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
+            result = result && BgraToBgrAutoTest(W + 1, H - 1, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
+            result = result && BgraToBgrAutoTest(W - 1, H + 1, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
         }
 #endif 
 

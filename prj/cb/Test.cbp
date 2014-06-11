@@ -116,6 +116,12 @@
 		<Unit filename="../../src/Test/TestCrc32.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>
+		<Unit filename="../../src/Test/TestData.cpp">
+			<Option virtualFolder="Sys/" />
+		</Unit>
+		<Unit filename="../../src/Test/TestData.h">
+			<Option virtualFolder="Sys/" />
+		</Unit>
 		<Unit filename="../../src/Test/TestDeinterleave.cpp">
 			<Option virtualFolder="Test/" />
 		</Unit>

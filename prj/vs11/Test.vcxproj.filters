@@ -112,6 +112,9 @@
     <ClCompile Include="..\..\src\Test\TestSegmentation.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestData.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Test\Test.h">
       <Filter>Test</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestData.h">
+      <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

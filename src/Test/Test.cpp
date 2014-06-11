@@ -25,20 +25,56 @@
 
 #include "Test/Test.h"
 
-#define EXECUTE_TEST(test)\
-if(argc < 2 || std::string(#test).find(argv[1]) != std::string::npos) \
+struct Options
+{
+    enum Type
+    {
+        Auto,
+        Create, 
+        Verify,
+    } type;
+    std::string filter;
+
+    Options(int argc, char* argv[])
+        : type(Auto)
+    {
+        if(argc > 1)
+        {
+            std::string first(argv[1]); 
+            if(first == "auto" || first == "create" || first == "verify")
+            {
+                if(first == "create")
+                    type = Create;
+                if(first == "verify")
+                    type = Verify;
+                if(argc > 2)
+                    filter = argv[2];
+            }
+            else
+                filter = first;
+        }
+    }
+
+    bool NeedToPerform(const std::string & name) const
+    {
+        return filter.empty() || name.find(filter) != std::string::npos;
+    }
+};
+
+#define EXECUTE_AUTO_TEST(test)\
+    if(options.NeedToPerform(#test)) \
 {\
-	std::cout << #test << " is started :" << std::endl; \
-	result = test(); \
-	std::cout << #test << " is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; \
-	if(!result) \
-	{ \
-		std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \
-		goto end; \
-	} \
+    std::cout << #test << " is started :" << std::endl; \
+    result = test(); \
+    std::cout << #test << " is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; \
+    if(!result) \
+    { \
+        std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \
+        goto end; \
+    } \
 }
 
-int main(int argc, char* argv[])
+int ExecuteAutoTest(const Options & options)
 {
     using namespace Test;
 
@@ -52,128 +88,128 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    EXECUTE_TEST(ReduceGray2x2Test);
-    EXECUTE_TEST(ReduceGray3x3Test);
-    EXECUTE_TEST(ReduceGray4x4Test);
-    EXECUTE_TEST(ReduceGray5x5Test);
+    EXECUTE_AUTO_TEST(ReduceGray2x2AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray3x3AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray4x4AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray5x5AutoTest);
 
-    EXECUTE_TEST(Crc32cTest);
+    EXECUTE_AUTO_TEST(Crc32cAutoTest);
 
-    EXECUTE_TEST(BgraToGrayTest);
+    EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
 
-    EXECUTE_TEST(BgrToBgraTest);
-    EXECUTE_TEST(Bgr48pToBgra32Test);
+    EXECUTE_AUTO_TEST(BgrToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Bgr48pToBgra32AutoTest);
 
-    EXECUTE_TEST(BgrToGrayTest);
+    EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
 
-    EXECUTE_TEST(Yuv444pToHueTest);
-    EXECUTE_TEST(Yuv420pToHueTest);
+    EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
 
-    EXECUTE_TEST(Yuv444pToBgrTest);
-    EXECUTE_TEST(Yuv420pToBgrTest);
+    EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
 
-    EXECUTE_TEST(Yuv444pToBgraTest);
-    EXECUTE_TEST(Yuv420pToBgraTest);
+    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
-    EXECUTE_TEST(MedianFilterRhomb3x3Test);
-    EXECUTE_TEST(MedianFilterRhomb5x5Test);
-    EXECUTE_TEST(MedianFilterSquare3x3Test);
-    EXECUTE_TEST(MedianFilterSquare5x5Test);
-    EXECUTE_TEST(GaussianBlur3x3Test);
-    EXECUTE_TEST(AbsGradientSaturatedSumTest);
-    EXECUTE_TEST(LbpEstimateTest);
+    EXECUTE_AUTO_TEST(MedianFilterRhomb3x3AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterRhomb5x5AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterSquare3x3AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterSquare5x5AutoTest);
+    EXECUTE_AUTO_TEST(GaussianBlur3x3AutoTest);
+    EXECUTE_AUTO_TEST(AbsGradientSaturatedSumAutoTest);
+    EXECUTE_AUTO_TEST(LbpEstimateAutoTest);
 
-    EXECUTE_TEST(SquareDifferenceSumTest);
-    EXECUTE_TEST(SquareDifferenceSumMaskedTest);
-    EXECUTE_TEST(AbsDifferenceSumTest);
-    EXECUTE_TEST(AbsDifferenceSumMaskedTest);
-    EXECUTE_TEST(AbsDifferenceSums3x3Test);
-    EXECUTE_TEST(AbsDifferenceSums3x3MaskedTest);
+    EXECUTE_AUTO_TEST(SquareDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(SquareDifferenceSumMaskedAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSumMaskedAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3AutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3MaskedAutoTest);
 
-    EXECUTE_TEST(ResizeBilinearTest);
+    EXECUTE_AUTO_TEST(ResizeBilinearAutoTest);
 
-    EXECUTE_TEST(DeinterleaveUvTest);
+    EXECUTE_AUTO_TEST(DeinterleaveUvAutoTest);
 
-    EXECUTE_TEST(OperationBinary8uTest);
-    EXECUTE_TEST(OperationBinary16iTest);
-    EXECUTE_TEST(VectorProductTest);
+    EXECUTE_AUTO_TEST(OperationBinary8uAutoTest);
+    EXECUTE_AUTO_TEST(OperationBinary16iAutoTest);
+    EXECUTE_AUTO_TEST(VectorProductAutoTest);
 
-    EXECUTE_TEST(AbsSecondDerivativeHistogramTest);
+    EXECUTE_AUTO_TEST(AbsSecondDerivativeHistogramAutoTest);
 
-    EXECUTE_TEST(BinarizationTest);
-    EXECUTE_TEST(AveragingBinarizationTest);
+    EXECUTE_AUTO_TEST(BinarizationAutoTest);
+    EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
 
-    EXECUTE_TEST(ShiftBilinearTest);
+    EXECUTE_AUTO_TEST(ShiftBilinearAutoTest);
 
-    EXECUTE_TEST(GetStatisticTest);
-    EXECUTE_TEST(GetMomentsTest);
-    EXECUTE_TEST(GetRowSumsTest);
-    EXECUTE_TEST(GetColSumsTest);
-    EXECUTE_TEST(GetAbsDyRowSumsTest);
-    EXECUTE_TEST(GetAbsDxColSumsTest);
-    EXECUTE_TEST(ValueSumTest);
-    EXECUTE_TEST(SquareSumTest);
+    EXECUTE_AUTO_TEST(GetStatisticAutoTest);
+    EXECUTE_AUTO_TEST(GetMomentsAutoTest);
+    EXECUTE_AUTO_TEST(GetRowSumsAutoTest);
+    EXECUTE_AUTO_TEST(GetColSumsAutoTest);
+    EXECUTE_AUTO_TEST(GetAbsDyRowSumsAutoTest);
+    EXECUTE_AUTO_TEST(GetAbsDxColSumsAutoTest);
+    EXECUTE_AUTO_TEST(ValueSumAutoTest);
+    EXECUTE_AUTO_TEST(SquareSumAutoTest);
 
-    EXECUTE_TEST(StretchGray2x2Test);
+    EXECUTE_AUTO_TEST(StretchGray2x2AutoTest);
 
-    EXECUTE_TEST(BackgroundGrowRangeSlowTest);
-    EXECUTE_TEST(BackgroundGrowRangeFastTest);
-    EXECUTE_TEST(BackgroundIncrementCountTest);
-    EXECUTE_TEST(BackgroundAdjustRangeTest);
-    EXECUTE_TEST(BackgroundAdjustRangeMaskedTest);
-    EXECUTE_TEST(BackgroundShiftRangeTest);
-    EXECUTE_TEST(BackgroundShiftRangeMaskedTest);
-    EXECUTE_TEST(BackgroundInitMaskTest);
+    EXECUTE_AUTO_TEST(BackgroundGrowRangeSlowAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundGrowRangeFastAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundIncrementCountAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundAdjustRangeAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundAdjustRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundShiftRangeAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundShiftRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundInitMaskAutoTest);
 
-    EXECUTE_TEST(EdgeBackgroundGrowRangeSlowTest);
-    EXECUTE_TEST(EdgeBackgroundGrowRangeFastTest);
-    EXECUTE_TEST(EdgeBackgroundIncrementCountTest);
-    EXECUTE_TEST(EdgeBackgroundAdjustRangeTest);
-    EXECUTE_TEST(EdgeBackgroundAdjustRangeMaskedTest);
-    EXECUTE_TEST(EdgeBackgroundShiftRangeTest);
-    EXECUTE_TEST(EdgeBackgroundShiftRangeMaskedTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeSlowAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeFastAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundIncrementCountAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeMaskedAutoTest);
 
-    EXECUTE_TEST(AddFeatureDifferenceTest);
+    EXECUTE_AUTO_TEST(AddFeatureDifferenceAutoTest);
 
-    EXECUTE_TEST(TextureBoostedSaturatedGradientTest);
-    EXECUTE_TEST(TextureBoostedUvTest);
-    EXECUTE_TEST(TextureGetDifferenceSumTest);
-    EXECUTE_TEST(TexturePerformCompensationTest);
+    EXECUTE_AUTO_TEST(TextureBoostedSaturatedGradientAutoTest);
+    EXECUTE_AUTO_TEST(TextureBoostedUvAutoTest);
+    EXECUTE_AUTO_TEST(TextureGetDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(TexturePerformCompensationAutoTest);
 
-    EXECUTE_TEST(FillBgraTest);
-    EXECUTE_TEST(FillBgrTest);
+    EXECUTE_AUTO_TEST(FillBgraAutoTest);
+    EXECUTE_AUTO_TEST(FillBgrAutoTest);
 
-    EXECUTE_TEST(GrayToBgrTest);
+    EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
 
-    EXECUTE_TEST(GrayToBgraTest);
+    EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
 
-    EXECUTE_TEST(AlphaBlendingTest);
+    EXECUTE_AUTO_TEST(AlphaBlendingAutoTest);
 
-    EXECUTE_TEST(ConditionalCountTest);
-    EXECUTE_TEST(ConditionalSumTest);
-    EXECUTE_TEST(ConditionalSquareSumTest);
-    EXECUTE_TEST(ConditionalSquareGradientSumTest);
+    EXECUTE_AUTO_TEST(ConditionalCountAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSumAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSquareSumAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSquareGradientSumAutoTest);
 
-    EXECUTE_TEST(SobelDxTest);
-    EXECUTE_TEST(SobelDxAbsTest);
-    EXECUTE_TEST(SobelDyTest);
-    EXECUTE_TEST(SobelDyAbsTest);
-    EXECUTE_TEST(ContourMetricsTest);
-    EXECUTE_TEST(ContourMetricsMaskedTest);
-    EXECUTE_TEST(ContourAnchorsTest);
+    EXECUTE_AUTO_TEST(SobelDxAutoTest);
+    EXECUTE_AUTO_TEST(SobelDxAbsAutoTest);
+    EXECUTE_AUTO_TEST(SobelDyAutoTest);
+    EXECUTE_AUTO_TEST(SobelDyAbsAutoTest);
+    EXECUTE_AUTO_TEST(ContourMetricsAutoTest);
+    EXECUTE_AUTO_TEST(ContourMetricsMaskedAutoTest);
+    EXECUTE_AUTO_TEST(ContourAnchorsAutoTest);
 
-    EXECUTE_TEST(BgraToBgrTest);
+    EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
 
-    EXECUTE_TEST(BgraToBayerTest);
+    EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
 
-    EXECUTE_TEST(BayerToBgrTest);
+    EXECUTE_AUTO_TEST(BayerToBgrAutoTest);
 
-    EXECUTE_TEST(BayerToBgraTest);
+    EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
 
-    EXECUTE_TEST(BgrToBayerTest);
+    EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
 
-    EXECUTE_TEST(SegmentationShrinkRegionTest);
-    EXECUTE_TEST(SegmentationFillSingleHolesTest);
+    EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
+    EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << "Performance report:" << std::endl;
@@ -187,5 +223,43 @@ end:
         std::cout << "Operation ::cudaDeviceReset() is failed!" << std::endl;
 #endif
 
-	return result ? 1 : 0;
+    return result ? 1 : 0;
+}
+
+#define EXECUTE_DATA_TEST(test)\
+if(options.NeedToPerform(#test)) \
+{ \
+    bool create = options.type == Options::Create; \
+    std::cout << #test << " - data " << (create ? "creation" : "verification") << " is started :" << std::endl; \
+    result = test(create); \
+    std::cout << #test << " - data " << (create ? "creation" : "verification") << " is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; \
+    if(!result) \
+    { \
+        std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; \
+        goto end; \
+    } \
+}
+
+int ExecuteDataTest(const Options & options)
+{
+    using namespace Test;
+
+    bool result = true;
+
+    EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
+
+end:
+
+    return result ? 1 : 0;
+}
+
+
+int main(int argc, char* argv[])
+{
+    Options options(argc, argv);
+
+    if(options.type == Options::Auto)
+        return ExecuteAutoTest(options);
+    else
+        return ExecuteDataTest(options);
 }

@@ -58,7 +58,7 @@ namespace Test
 #define ARGS2(function1, function2) \
     Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
 
-	bool ShiftTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
+	bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -83,40 +83,40 @@ namespace Test
 		return result;
 	}
 
-	bool ShiftTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
+	bool ShiftAutoTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
 		const double x0 = 7.1, dx = -5.3, y0 = -5.2, dy = 3.7;
 		for(int i = 0; i < 4; ++i)
-			result = result && ShiftTest(format, width, height, x0 + i*dx, y0 + i*dy, i*3, f1, f2);
+			result = result && ShiftAutoTest(format, width, height, x0 + i*dx, y0 + i*dy, i*3, f1, f2);
 
 		return result;
 	}
 
-    bool ShiftBilinearTest(const Func & f1, const Func & f2)
+    bool ShiftBilinearAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ShiftTest(ARGS1(format, W, H, f1, f2));
-            result = result && ShiftTest(ARGS1(format, W + 1, H - 1, f1, f2));
-            result = result && ShiftTest(ARGS1(format, W - 1, H + 1, f1, f2));
+            result = result && ShiftAutoTest(ARGS1(format, W, H, f1, f2));
+            result = result && ShiftAutoTest(ARGS1(format, W + 1, H - 1, f1, f2));
+            result = result && ShiftAutoTest(ARGS1(format, W - 1, H + 1, f1, f2));
         }
 
         return result;
     }
 
-	bool ShiftBilinearTest()
+	bool ShiftBilinearAutoTest()
 	{
 		bool result = true;
 
-		result = result && ShiftBilinearTest(ARGS2(Simd::Base::ShiftBilinear, SimdShiftBilinear));
+		result = result && ShiftBilinearAutoTest(ARGS2(Simd::Base::ShiftBilinear, SimdShiftBilinear));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ShiftBilinearTest(ARGS2(Simd::Sse2::ShiftBilinear, Simd::Avx2::ShiftBilinear));
+            result = result && ShiftBilinearAutoTest(ARGS2(Simd::Sse2::ShiftBilinear, Simd::Avx2::ShiftBilinear));
 #endif 
 
 		return result;

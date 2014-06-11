@@ -126,7 +126,7 @@ namespace Test
 
 #define ARGS_VP(function) FuncVP(function, std::string(#function))
 
-	bool OperationBinary8uTest(View::Format format, int width, int height, SimdOperationBinary8uType type, const FuncOB8U & f1, const FuncOB8U & f2)
+	bool OperationBinary8uAutoTest(View::Format format, int width, int height, SimdOperationBinary8uType type, const FuncOB8U & f1, const FuncOB8U & f2)
 	{
 		bool result = true;
 
@@ -150,7 +150,7 @@ namespace Test
 		return result;
 	}
 
-	bool OperationBinary8uTest(const FuncOB8U & f1, const FuncOB8U & f2)
+	bool OperationBinary8uAutoTest(const FuncOB8U & f1, const FuncOB8U & f2)
 	{
 		bool result = true;
 
@@ -158,30 +158,30 @@ namespace Test
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                result = result && OperationBinary8uTest(ARGS_OB8U1(format, W, H, type, f1, f2));
-                result = result && OperationBinary8uTest(ARGS_OB8U1(format, W + 1, H - 1, type, f1, f2));
-                result = result && OperationBinary8uTest(ARGS_OB8U1(format, W - 1, H + 1, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W, H, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W + 1, H - 1, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W - 1, H + 1, type, f1, f2));
             }
         }
 
 		return result;
 	}
 
-	bool OperationBinary8uTest()
+	bool OperationBinary8uAutoTest()
 	{
 		bool result = true;
 
-		result = result && OperationBinary8uTest(ARGS_OB8U2(Simd::Base::OperationBinary8u, SimdOperationBinary8u));
+		result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Base::OperationBinary8u, SimdOperationBinary8u));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
 		if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-			result = result && OperationBinary8uTest(ARGS_OB8U2(Simd::Avx2::OperationBinary8u, Simd::Sse2::OperationBinary8u));
+			result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Avx2::OperationBinary8u, Simd::Sse2::OperationBinary8u));
 #endif 
 
 		return result;
 	}
 
-    bool OperationBinary16iTest(int width, int height, SimdOperationBinary16iType type, const FuncOB16I & f1, const FuncOB16I & f2)
+    bool OperationBinary16iAutoTest(int width, int height, SimdOperationBinary16iType type, const FuncOB16I & f1, const FuncOB16I & f2)
     {
         bool result = true;
 
@@ -205,35 +205,35 @@ namespace Test
         return result;
     }
 
-    bool OperationBinary16iTest(const FuncOB16I & f1, const FuncOB16I & f2)
+    bool OperationBinary16iAutoTest(const FuncOB16I & f1, const FuncOB16I & f2)
     {
         bool result = true;
 
         for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iAddition && result; type = SimdOperationBinary16iType(type + 1))
         {
-            result = result && OperationBinary16iTest(ARGS_OB16I1(W, H, type, f1, f2));
-            result = result && OperationBinary16iTest(ARGS_OB16I1(W + 1, H - 1, type, f1, f2));
-            result = result && OperationBinary16iTest(ARGS_OB16I1(W - 1, H + 1, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W, H, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W + 1, H - 1, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W - 1, H + 1, type, f1, f2));
         }
 
         return result;
     }
 
-    bool OperationBinary16iTest()
+    bool OperationBinary16iAutoTest()
     {
         bool result = true;
 
-        result = result && OperationBinary16iTest(ARGS_OB16I2(Simd::Base::OperationBinary16i, SimdOperationBinary16i));
+        result = result && OperationBinary16iAutoTest(ARGS_OB16I2(Simd::Base::OperationBinary16i, SimdOperationBinary16i));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && OperationBinary16iTest(ARGS_OB16I2(Simd::Avx2::OperationBinary16i, Simd::Sse2::OperationBinary16i));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I2(Simd::Avx2::OperationBinary16i, Simd::Sse2::OperationBinary16i));
 #endif 
 
         return result;
     }
 
-    bool VectorProductTest(int width, int height, const FuncVP & f1, const FuncVP & f2)
+    bool VectorProductAutoTest(int width, int height, const FuncVP & f1, const FuncVP & f2)
     {
         bool result = true;
 
@@ -256,20 +256,20 @@ namespace Test
         return result;
     }
 
-    bool VectorProductTest()
+    bool VectorProductAutoTest()
     {
         bool result = true;
 
-        result = result && VectorProductTest(W, H, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
-        result = result && VectorProductTest(W - 1, H + 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
-        result = result && VectorProductTest(W + 1, H - 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductAutoTest(W, H, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductAutoTest(W - 1, H + 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductAutoTest(W + 1, H - 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && VectorProductTest(W, H, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
-            result = result && VectorProductTest(W - 1, H + 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
-            result = result && VectorProductTest(W + 1, H - 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
+            result = result && VectorProductAutoTest(W, H, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
+            result = result && VectorProductAutoTest(W - 1, H + 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
+            result = result && VectorProductAutoTest(W + 1, H - 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
         }
 #endif 
 

@@ -67,7 +67,7 @@ namespace Test
 #define FUNC_S(function) FuncS(function, #function)
 #define FUNC_M(function) FuncM(function, #function)
 
-	template <size_t count> bool DifferenceSumsTest(int width, int height, const FuncS & f1, const FuncS & f2)
+	template <size_t count> bool DifferenceSumsAutoTest(int width, int height, const FuncS & f1, const FuncS & f2)
 	{
 		bool result = true;
 
@@ -97,7 +97,7 @@ namespace Test
 		return result;
 	}
 
-	template <size_t count> bool DifferenceSumsMaskedTest(int width, int height, const FuncM & f1, const FuncM & f2)
+	template <size_t count> bool DifferenceSumsMaskedAutoTest(int width, int height, const FuncM & f1, const FuncM & f2)
 	{
 		bool result = true;
 
@@ -131,120 +131,120 @@ namespace Test
 		return result;
 	}
 
-	bool SquareDifferenceSumTest()
+	bool SquareDifferenceSumAutoTest()
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
-		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
-        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
+		result = result && DifferenceSumsAutoTest<1>(W, H, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
+		result = result && DifferenceSumsAutoTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
+        result = result && DifferenceSumsAutoTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
-            result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
-            result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W, H, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W + 1, H - 1, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W - 1, H + 1, FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(Simd::Avx2::SquaredDifferenceSum));
         }
 #endif 
 
 		return result;
 	}
 
-	bool SquareDifferenceSumMaskedTest()
+	bool SquareDifferenceSumMaskedAutoTest()
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
-		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
-        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedAutoTest<1>(W, H, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedAutoTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
+        result = result && DifferenceSumsMaskedAutoTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
-            result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
-            result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W, H, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W + 1, H - 1, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W - 1, H + 1, FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(Simd::Avx2::SquaredDifferenceSumMasked));
         }
 #endif 
 
 		return result;
 	}
 
-	bool AbsDifferenceSumTest()
+	bool AbsDifferenceSumAutoTest()
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
-		result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
-        result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
+		result = result && DifferenceSumsAutoTest<1>(W, H, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
+		result = result && DifferenceSumsAutoTest<1>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
+        result = result && DifferenceSumsAutoTest<1>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSum), FUNC_S(SimdAbsDifferenceSum));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsTest<1>(W, H, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
-            result = result && DifferenceSumsTest<1>(W + 1, H - 1, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
-            result = result && DifferenceSumsTest<1>(W - 1, H + 1, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W, H, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W + 1, H - 1, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
+            result = result && DifferenceSumsAutoTest<1>(W - 1, H + 1, FUNC_S(Simd::Sse2::AbsDifferenceSum), FUNC_S(Simd::Avx2::AbsDifferenceSum));
         }
 #endif 
 
 		return result;
 	}
 
-	bool AbsDifferenceSumMaskedTest()
+	bool AbsDifferenceSumMaskedAutoTest()
 	{
 		bool result = true;
 
-		result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
-		result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
-        result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedAutoTest<1>(W, H, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
+		result = result && DifferenceSumsMaskedAutoTest<1>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
+        result = result && DifferenceSumsMaskedAutoTest<1>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsMaskedTest<1>(W, H, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
-            result = result && DifferenceSumsMaskedTest<1>(W + 1, H - 1, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
-            result = result && DifferenceSumsMaskedTest<1>(W - 1, H + 1, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W, H, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W + 1, H - 1, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
+            result = result && DifferenceSumsMaskedAutoTest<1>(W - 1, H + 1, FUNC_M(Simd::Sse2::AbsDifferenceSumMasked), FUNC_M(Simd::Avx2::AbsDifferenceSumMasked));
         }
 #endif 
 
 		return result;
 	}
 
-    bool AbsDifferenceSums3x3Test()
+    bool AbsDifferenceSums3x3AutoTest()
     {
         bool result = true;
 
-        result = result && DifferenceSumsTest<9>(W, H, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
-        result = result && DifferenceSumsTest<9>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
-        result = result && DifferenceSumsTest<9>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
+        result = result && DifferenceSumsAutoTest<9>(W, H, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
+        result = result && DifferenceSumsAutoTest<9>(W + 1, H - 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
+        result = result && DifferenceSumsAutoTest<9>(W - 1, H + 1, FUNC_S(Simd::Base::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsTest<9>(W, H, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
-            result = result && DifferenceSumsTest<9>(W + 1, H - 1, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
-            result = result && DifferenceSumsTest<9>(W - 1, H + 1, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
+            result = result && DifferenceSumsAutoTest<9>(W, H, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
+            result = result && DifferenceSumsAutoTest<9>(W + 1, H - 1, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
+            result = result && DifferenceSumsAutoTest<9>(W - 1, H + 1, FUNC_S(Simd::Sse2::AbsDifferenceSums3x3), FUNC_S(Simd::Avx2::AbsDifferenceSums3x3));
         }
 #endif 
 
         return result;
     }
 
-    bool AbsDifferenceSums3x3MaskedTest()
+    bool AbsDifferenceSums3x3MaskedAutoTest()
     {
         bool result = true;
 
-        result = result && DifferenceSumsMaskedTest<9>(W, H, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
-        result = result && DifferenceSumsMaskedTest<9>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
-        result = result && DifferenceSumsMaskedTest<9>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
+        result = result && DifferenceSumsMaskedAutoTest<9>(W, H, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
+        result = result && DifferenceSumsMaskedAutoTest<9>(W + 1, H - 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
+        result = result && DifferenceSumsMaskedAutoTest<9>(W - 1, H + 1, FUNC_M(Simd::Base::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && DifferenceSumsMaskedTest<9>(W, H, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
-            result = result && DifferenceSumsMaskedTest<9>(W + 1, H - 1, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
-            result = result && DifferenceSumsMaskedTest<9>(W - 1, H + 1, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
+            result = result && DifferenceSumsMaskedAutoTest<9>(W, H, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
+            result = result && DifferenceSumsMaskedAutoTest<9>(W + 1, H - 1, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
+            result = result && DifferenceSumsMaskedAutoTest<9>(W - 1, H + 1, FUNC_M(Simd::Sse2::AbsDifferenceSums3x3Masked), FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked));
         }
 #endif 
 

@@ -47,7 +47,7 @@ namespace Test
 
 #define FUNC(func) Func(func, #func)
 
-    bool GrayToBgraTest(int width, int height, const Func & f1, const Func & f2)
+    bool GrayToBgraAutoTest(int width, int height, const Func & f1, const Func & f2)
     {
         bool result = true;
 
@@ -68,20 +68,20 @@ namespace Test
         return result;
     }
 
-    bool GrayToBgraTest()
+    bool GrayToBgraAutoTest()
     {
         bool result = true;
 
-        result = result && GrayToBgraTest(W, H, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
-        result = result && GrayToBgraTest(W + 1, H - 1, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
-        result = result && GrayToBgraTest(W - 1, H + 1, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
+        result = result && GrayToBgraAutoTest(W, H, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
+        result = result && GrayToBgraAutoTest(W + 1, H - 1, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
+        result = result && GrayToBgraAutoTest(W - 1, H + 1, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && GrayToBgraTest(W, H, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
-            result = result && GrayToBgraTest(W + 1, H - 1, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
-            result = result && GrayToBgraTest(W - 1, H + 1, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
+            result = result && GrayToBgraAutoTest(W, H, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
+            result = result && GrayToBgraAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
+            result = result && GrayToBgraAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::GrayToBgra), FUNC(Simd::Avx2::GrayToBgra));
         }
 #endif 
 

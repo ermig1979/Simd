@@ -49,7 +49,7 @@ namespace Test
 	}
 #define FUNC2(function) Func2(function, #function)
 
-	bool Deinterleave2Test(int width, int height, const Func2 & f1, const Func2 & f2)
+	bool Deinterleave2AutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
 	{
 		bool result = true;
 
@@ -74,20 +74,20 @@ namespace Test
 		return result;
 	}
 
-	bool DeinterleaveUvTest()
+	bool DeinterleaveUvAutoTest()
 	{
 		bool result = true;
 
-		result = result && Deinterleave2Test(W, H, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
-        result = result && Deinterleave2Test(W + 1, H - 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
-		result = result && Deinterleave2Test(W - 1, H + 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+		result = result && Deinterleave2AutoTest(W, H, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+        result = result && Deinterleave2AutoTest(W + 1, H - 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+		result = result && Deinterleave2AutoTest(W - 1, H + 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && Deinterleave2Test(W, H, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
-            result = result && Deinterleave2Test(W + 1, H - 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
-            result = result && Deinterleave2Test(W - 1, H + 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
+            result = result && Deinterleave2AutoTest(W, H, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
+            result = result && Deinterleave2AutoTest(W + 1, H - 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
+            result = result && Deinterleave2AutoTest(W - 1, H + 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
         }
 #endif 
 

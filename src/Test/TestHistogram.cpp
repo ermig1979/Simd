@@ -51,7 +51,7 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool HistogramTest(int width, int height, int step, int indent, const Func & f1, const Func & f2)
+	bool HistogramAutoTest(int width, int height, int step, int indent, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
@@ -72,22 +72,22 @@ namespace Test
 		return result;
 	}
 
-	bool AbsSecondDerivativeHistogramTest()
+	bool AbsSecondDerivativeHistogramAutoTest()
 	{
 		bool result = true;
 
-		result = result && HistogramTest(W, H, 1, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
-		result = result && HistogramTest(W + 1, H - 1, 2, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
-		result = result && HistogramTest(W, H, 3, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
-		result = result && HistogramTest(W - 1, H + 1, 4, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+		result = result && HistogramAutoTest(W, H, 1, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+		result = result && HistogramAutoTest(W + 1, H - 1, 2, 16, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+		result = result && HistogramAutoTest(W, H, 3, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+		result = result && HistogramAutoTest(W - 1, H + 1, 4, 8, FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
         {
-            result = result && HistogramTest(W, H, 1, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
-            result = result && HistogramTest(W + 1, H - 1, 2, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
-            result = result && HistogramTest(W, H, 3, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
-            result = result && HistogramTest(W - 1, H + 1, 4, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
+            result = result && HistogramAutoTest(W, H, 1, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
+            result = result && HistogramAutoTest(W + 1, H - 1, 2, 16, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
+            result = result && HistogramAutoTest(W, H, 3, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
+            result = result && HistogramAutoTest(W - 1, H + 1, 4, 8, FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(Simd::Avx2::AbsSecondDerivativeHistogram));
         }
 #endif 
 
