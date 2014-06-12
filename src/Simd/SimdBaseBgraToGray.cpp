@@ -23,8 +23,6 @@
 */
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdLoad.h"
-#include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdBase.h"
 

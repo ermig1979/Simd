@@ -66,7 +66,7 @@ set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
 file(GLOB_RECURSE SIMD_VSX_SOURCES ${TRUNK_DIR}/src/Simd/SimdVsx*.cpp)
 add_library(SimdVsx STATIC ${SIMD_VSX_SOURCES})
-set_target_properties(SimdVsx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+set_target_properties(SimdVsx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd SHARED ${SIMD_SOURCES})
