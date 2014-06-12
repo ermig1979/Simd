@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -173,9 +174,19 @@ namespace Test
 
 		result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Base::OperationBinary8u, SimdOperationBinary8u));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-		if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-			result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Avx2::OperationBinary8u, Simd::Sse2::OperationBinary8u));
+#ifdef SIMD_SSE2_ENABLE
+		if(Simd::Sse2::Enable)
+			result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Sse2::OperationBinary8u, SimdOperationBinary8u));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Avx2::OperationBinary8u, SimdOperationBinary8u));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Vsx::OperationBinary8u, SimdOperationBinary8u));
 #endif 
 
 		return result;
@@ -272,6 +283,66 @@ namespace Test
             result = result && VectorProductAutoTest(W + 1, H - 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
         }
 #endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+#define FUNC_OB8U(format, type, function) \
+    format, type, FuncOB8U(function, std::string(#function) + OperationBinary8uTypeDescription(type) + ColorDescription(format))
+
+    bool OperationBinary8uDataTest(bool create, int width, int height, View::Format format, SimdOperationBinary8uType type, const FuncOB8U & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View a(width, height, format, NULL, TEST_ALIGN(width));
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(a);
+            FillRandom(b);
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(a, b, d1, type);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+            TEST_LOAD(d1);
+
+            f.Call(a, b, d2, type);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool OperationBinary8uDataTest(bool create)
+    {
+        bool result = true;
+
+        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedSubtraction && result; type = SimdOperationBinary8uType(type + 1))
+        {
+            for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+            {
+                result = result && OperationBinary8uDataTest(create, DW, DH, FUNC_OB8U(format, type, SimdOperationBinary8u));
+            }
+        }
 
         return result;
     }

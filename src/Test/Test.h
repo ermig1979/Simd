@@ -155,5 +155,6 @@ namespace Test
 
     bool ReduceGray2x2DataTest(bool create);
 
+    bool OperationBinary8uDataTest(bool create);
 }
 #endif//__Test_h__

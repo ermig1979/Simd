@@ -33,7 +33,7 @@ namespace Test
 {
     std::string Data::Path(const std::string & name) const
     {
-        return _path + name + ".txt";
+        return _path + "/" + name + ".txt";
     }
 
     bool Data::CreatePath(const std::string & path) const
@@ -56,7 +56,18 @@ namespace Test
 
     Data::Data(const std::string & test)
     {
-        _path = std::string("../../test/") + test + std::string("/");
+        std::stringstream path;
+        path << "../../test/";
+        for(size_t i = 0; i < test.size(); ++i)
+        {
+            if(test[i] == '<')
+                path << '_';
+            else if(test[i] == '>')
+                path << "";
+            else
+                path << test[i];
+        }
+        _path = path.str();
     }
 
     bool Data::Save(const View & image, const std::string & name) const
