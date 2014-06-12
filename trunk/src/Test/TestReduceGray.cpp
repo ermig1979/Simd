@@ -189,6 +189,8 @@ namespace Test
 		return result;
 	}
 
+    //-----------------------------------------------------------------------
+
     template <class Func>
     bool ReduceGrayDataTest(bool create, int width, int height, const Func & f)
     {
