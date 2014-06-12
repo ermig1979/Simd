@@ -21,27 +21,39 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdLog_h__
+#define __SimdLog_h__
 
-//#define SIMD_SSE2_DEPRECATE
+#include "Simd/SimdConst.h"
 
-//#define SIMD_SSSE3_DEPRECATE
+#ifdef SIMD_LOG_ENABLE
+#include <iostream>
 
-//#define SIMD_SSE41_DEPRECATE
+namespace Simd
+{
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE void Log(const v128_u8 & value, const std::string & name)
+        {
+            std::cout << name << " = { ";
+            for(int i = 0; i < 16; i++)
+            {
+                int element = vec_extract(value, i);
+                std::cout << element << " ";
+            }
+            std::cout << "} " << std::endl;    
+        }
+    }
+#endif//SIMD_VSX_ENABLE
+}
 
-//#define SIMD_SSE42_DEPRECATE
+#define SIMD_LOG(value) Log(value, #value)
 
-//#define SIMD_AVX_DEPRECATE
+#else//SIMD_LOG_ENABLE
 
-//#define SIMD_AVX2_DEPRECATE
+#define SIMD_LOG(value)
 
-#define SIMD_AVX2_GATHER_DEPRECATE
+#endif//SIMD_LOG_ENABLE 
 
-//#define SIMD_VSX_DEPRECATE
-
-//#define SIMD_STATIC
-
-#define SIMD_LOG_ENABLE
-
-#endif//__SimdConfig_h__
+#endif//__SimdLog_h__

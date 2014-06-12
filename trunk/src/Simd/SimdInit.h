@@ -272,6 +272,37 @@ namespace Simd
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+
+#define SIMD_VEC_SET1_EPI8(a) \
+    {a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a}
+
+#define SIMD_VEC_SET2_EPI8(a0, a1) \
+    {a0, a1, a0, a1, a0, a1, a0, a1, a0, a1, a0, a1, a0, a1, a0, a1}
+
+#define SIMD_VEC_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) \
+    {a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af}
+
+#define SIMD_VEC_SET1_EPI16(a) \
+    {a, a, a, a, a, a, a, a}
+
+#define SIMD_VEC_SET2_EPI16(a0, a1) \
+    {a0, a1, a0, a1, a0, a1, a0, a1}
+
+#define SIMD_VEC_SETR_EPI16(a0, a1, a2, a3, a4, a5, a6, a7) \
+    {a0, a1, a2, a3, a4, a5, a6, a7}
+
+#define SIMD_VEC_SET1_EPI32(a) \
+    {a, a, a, a}
+
+#define SIMD_VEC_SET2_EPI32(a0, a1) \
+    {a0, a1, a0, a1}
+
+#define SIMD_VEC_SETR_EPI32(a0, a1, a2, a3) \
+    {a0, a1, a2, a3}
+
+#endif//SIMD_VSX_ENABLE
 }
 
 #endif//__SimdInit_h__

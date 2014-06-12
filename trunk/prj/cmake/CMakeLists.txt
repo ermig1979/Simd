@@ -16,15 +16,15 @@ include_directories(${TRUNK_DIR}/src)
 
 execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
 
-set(COMMON_CXX_FLAGS "${MAKE_CXX_FLAGS} -fPIC")
-
 message("CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
+
+if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"))
+
+set(COMMON_CXX_FLAGS "${MAKE_CXX_FLAGS} -fPIC")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
-
-if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"))
 
 file(GLOB_RECURSE SIMD_SSE2_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
 add_library(SimdSse2 STATIC ${SIMD_SSE2_SOURCES})
@@ -58,9 +58,19 @@ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
+set(COMMON_CXX_FLAGS "${MAKE_CXX_FLAGS} -fPIC -mcpu=power7")
+
+file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
+add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+
+file(GLOB_RECURSE SIMD_VSX_SOURCES ${TRUNK_DIR}/src/Simd/SimdVsx*.cpp)
+add_library(SimdVsx STATIC ${SIMD_VSX_SOURCES})
+set_target_properties(SimdVsx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd SHARED ${SIMD_SOURCES})
-target_link_libraries(Simd SimdBase)
+target_link_libraries(Simd SimdBase SimdVsx)
 set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)

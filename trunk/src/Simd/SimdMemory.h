@@ -112,6 +112,21 @@ namespace Simd
 		}
 	}
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(vec_uchar16))
+        {
+            return Simd::Aligned(size, align);
+        }
+
+        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(vec_uchar16))
+        {
+            return Simd::Aligned(p, align);
+        }
+    }
+#endif// SIMD_VSX_ENABLE
 }
 
 #endif//__SimdMemory_h__

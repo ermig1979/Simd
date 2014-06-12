@@ -50,7 +50,6 @@ namespace Test
         return true;
 #else
         system((std::string("mkdir -p ") + path).c_str());
-        //std::cerr << "Data::CreatePath: Is not implemented yet!" << std::endl;
         return true;
 #endif
     }
@@ -87,17 +86,17 @@ namespace Test
             {
                 for(size_t col = 0; col < image.width; ++col)
                 {
-                    for(size_t c = 0; c < channelCount; ++c)
+                    for(size_t channel = 0; channel < channelCount; ++channel)
                     {
-                        const uint8_t * channel = image.data + row*image.stride + col*pixelSize + c*channelCount;
+                        const uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
                         for(size_t i = 0; i < channelSize; ++i)
                         {
 #ifdef SIMD_BIG_ENDIAN
-                            ofs << (int)(channel[i] >> 4);
-                            ofs << (int)(value[i] & 0xF);
+                            ofs << (int)(data[i] >> 4);
+                            ofs << (int)(data[i] & 0xF);
 #else
-                            ofs << (int)(channel[channelSize - i - 1] >> 4);
-                            ofs << (int)(channel[channelSize - i - 1] & 0xF);
+                            ofs << (int)(data[channelSize - i - 1] >> 4);
+                            ofs << (int)(data[channelSize - i - 1] & 0xF);
 #endif                    
                         }
                         ofs << " ";
@@ -154,16 +153,16 @@ namespace Test
             {
                 for(size_t col = 0; col < image.width; ++col)
                 {
-                    for(size_t c = 0; c < channelCount; ++c)
+                    for(size_t channel = 0; channel < channelCount; ++channel)
                     {
-                        uint8_t * channel = image.data + row*image.stride + col*pixelSize + c*channelCount;
+                        uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
                         ifs >> value;
                         for(size_t i = 0; i < channelSize; ++i)
                         {
 #ifdef SIMD_BIG_ENDIAN
-                            channel[i] = ((uint8_t*)&value)[7 - i];
+                            data[i] = ((uint8_t*)&value)[7 - i];
 #else
-                            channel[i] = ((uint8_t*)&value)[i];
+                            data[i] = ((uint8_t*)&value)[i];
 #endif                    
                         }
                     }

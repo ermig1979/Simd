@@ -95,6 +95,7 @@ namespace Simd
             return (registers[index] & bit) == bit;
         }
     }
+#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
@@ -274,6 +275,21 @@ namespace Simd
 	}
 #endif// SIMD_AVX2_ENABLE
 
-#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return true;
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+            return true;
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif// SIMD_VSX_ENABLE
 }
 #endif//__SimdEnable_h__

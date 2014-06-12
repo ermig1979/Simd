@@ -21,27 +21,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdVsx_h__
+#define __SimdVsx_h__
 
-//#define SIMD_SSE2_DEPRECATE
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
 
-//#define SIMD_SSSE3_DEPRECATE
-
-//#define SIMD_SSE41_DEPRECATE
-
-//#define SIMD_SSE42_DEPRECATE
-
-//#define SIMD_AVX_DEPRECATE
-
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_VSX_DEPRECATE
-
-//#define SIMD_STATIC
-
-#define SIMD_LOG_ENABLE
-
-#endif//__SimdConfig_h__
+namespace Simd
+{
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+    }
+#endif// SIMD_VSX_ENABLE
+}
+#endif//__SimdVsx_h__
