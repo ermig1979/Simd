@@ -231,5 +231,26 @@ namespace Simd
             0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF);
 	}
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE    
+    namespace Vsx
+    {
+        typedef __vector uint8_t v128_u8;
+        typedef __vector uint16_t v128_u16;
+
+        const size_t A = sizeof(v128_u8);
+        const size_t DA = 2*A;
+        const size_t QA = 4*A;
+        const size_t OA = 8*A;
+        const size_t HA = A/2;
+
+        const v128_u8 K8_00 = SIMD_VEC_SET1_EPI8(0x00);
+        const v128_u8 K8_01 = SIMD_VEC_SET1_EPI8(0x01);
+        const v128_u8 K8_FF = SIMD_VEC_SET1_EPI8(0xFF);
+
+        const v128_u16 K16_0002 = SIMD_VEC_SET1_EPI16(0x0002);
+        const v128_u16 K16_00FF = SIMD_VEC_SET1_EPI16(0x00FF);
+    }
+#endif//SIMD_VSX_ENABLE
 }
 #endif//__SimdConst_h__

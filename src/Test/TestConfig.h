@@ -50,6 +50,7 @@
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdVsx.h"
 #include "Simd/SimdUtils.h"
 
 #ifdef CUDA_TEST

@@ -212,8 +212,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-    std::cout << "Performance report:" << std::endl;
-    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false, false) << std::endl;
+    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, true) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
 end:

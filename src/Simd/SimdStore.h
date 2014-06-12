@@ -36,12 +36,12 @@ namespace Simd
 
 		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
 		{
-			return _mm_storeu_si128(p, a);
+			_mm_storeu_si128(p, a);
 		}
 
 		template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
 		{
-			return _mm_store_si128(p, a);
+			_mm_store_si128(p, a);
 		}
 
         SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
@@ -64,12 +64,12 @@ namespace Simd
 
 		template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
 		{
-			return _mm256_storeu_si256(p, a);
+			_mm256_storeu_si256(p, a);
 		}
 
 		template <> SIMD_INLINE void Store<true>(__m256i * p, __m256i a)
 		{
-			return _mm256_store_si256(p, a);
+			_mm256_store_si256(p, a);
 		}
 
         SIMD_INLINE __m256i Combine(__m256i mask, __m256i positive, __m256i negative)
@@ -111,5 +111,29 @@ namespace Simd
         }
     }
 #endif//SIMD_SAVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        template <bool align> SIMD_INLINE void Store(uint8_t * p, v128_u8 a);
+
+        template <> SIMD_INLINE void Store<false>(uint8_t * p, v128_u8 a)
+        {
+            //v128_u8 lo = vec_ld(0, p);
+            //v128_u8 hi = vec_ld(A, p);
+            //v128_u8 perm = vec_lvsr(0, p);
+            //v128_u8 mask = vec_perm(K8_00, K8_FF, perm);
+            //v128_u8 value = vec_perm(a, a, perm);
+            //vec_st(vec_sel(lo, value, mask), 0, p);
+            //vec_st(vec_sel(value, hi, mask), A, p);
+            vec_vsx_st(a, 0, p);
+        }
+
+        template <> SIMD_INLINE void Store<true>(uint8_t * p, v128_u8 a)
+        {
+            vec_st(a, 0, p);
+        }
+    }
+#endif//SIMD_VSX_ENABLE
 }
 #endif//__SimdStore_h__

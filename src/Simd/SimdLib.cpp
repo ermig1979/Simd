@@ -55,6 +55,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdVsx.h"
 
 using namespace Simd;
 
@@ -929,6 +930,11 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
         Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && srcWidth >= Vsx::DA)
+        Vsx::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 

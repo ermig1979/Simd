@@ -93,6 +93,10 @@
 #define SIMD_BIG_ENDIAN
 #endif
 
+#ifdef __powerpc64__
+#define SIMD_PPC64_ENABLE
+#endif
+
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
@@ -121,6 +125,10 @@
 
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
+#if !defined(SIMD_VSX_DEPRECATE) && defined(__VSX__)
+#define SIMD_VSX_ENABLE
+#endif
+
 #else
 
 #error This platform is unsupported!
@@ -147,11 +155,21 @@
 #include <immintrin.h>
 #endif
 
+#ifdef SIMD_VSX_ENABLE
+#include <altivec.h>
+#include <vec_types.h>
+#ifdef __cplusplus
+#undef vector
+#undef point
+#undef bool
+#endif
+#endif
+
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
-#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE)
+#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) || defined(SIMD_VSX_ENABLE)
 #define SIMD_ALIGN 16
-#elif defined (SIMD_X64_ENABLE)
+#elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
 #define SIMD_ALIGN 8
 #else
 #define SIMD_ALIGN 4
