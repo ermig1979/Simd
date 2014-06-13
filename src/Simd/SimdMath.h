@@ -324,5 +324,20 @@ namespace Simd
         }
     }
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE v128_u8 ShiftLeft(v128_u8 value, size_t shift)
+        {
+            return vec_perm(K8_00, value, vec_lvsr(shift, (uint8_t*)0));        
+        }
+
+        SIMD_INLINE v128_u8 ShiftRight(v128_u8 value, size_t shift)
+        {
+            return vec_perm(value, K8_00, vec_lvsl(shift, (uint8_t*)0));        
+        }
+    }
+#endif//SIMD_VSX_ENABLE
 }
 #endif//__SimdMath_h__

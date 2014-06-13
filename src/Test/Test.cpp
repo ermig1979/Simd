@@ -245,6 +245,8 @@ int ExecuteDataTest(const Options & options)
 
     bool result = true;
 
+    EXECUTE_DATA_TEST(BackgroundGrowRangeSlowDataTest);
+
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
 
     EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
@@ -254,7 +256,6 @@ end:
 
     return result ? 1 : 0;
 }
-
 
 int main(int argc, char* argv[])
 {

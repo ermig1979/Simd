@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -78,6 +79,17 @@ namespace Test
 
 		return result;
 	}
+
+    bool BackgroundChangeRangeAutoTest(const Func1 & f1, const Func1 &f2)
+    {
+        bool result = true;
+
+        result = result && BackgroundChangeRangeAutoTest(W, H, f1, f2);
+        result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, f1, f2);
+        result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, f1, f2);
+
+        return result;
+    }
 
 	namespace
 	{
@@ -380,17 +392,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
-		result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
-        result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
+		result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::BackgroundGrowRangeSlow), FUNC1(Simd::Avx2::BackgroundGrowRangeSlow));
-            result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::BackgroundGrowRangeSlow), FUNC1(Simd::Avx2::BackgroundGrowRangeSlow));
-            result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::BackgroundGrowRangeSlow), FUNC1(Simd::Avx2::BackgroundGrowRangeSlow));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
 		return result;
@@ -535,4 +551,68 @@ namespace Test
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool BackgroundChangeRangeDataTest(bool create, int width, int height, const Func1 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View loDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(loSrc);
+            FillRandom(hiSrc);
+
+            TEST_SAVE(value);
+            TEST_SAVE(loSrc);
+            TEST_SAVE(hiSrc);
+
+            f.Call(value, loSrc, hiSrc, loDst1, hiDst1);
+
+            TEST_SAVE(loDst1);
+            TEST_SAVE(hiDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(loSrc);
+            TEST_LOAD(hiSrc);
+
+            TEST_LOAD(loDst1);
+            TEST_LOAD(hiDst1);
+
+            f.Call(value, loSrc, hiSrc, loDst2, hiDst2);
+
+            TEST_SAVE(loDst2);
+            TEST_SAVE(hiDst2);
+
+            result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
+            result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+        }
+
+        return result;
+    }
+
+    bool BackgroundGrowRangeSlowDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundGrowRangeSlow));
+
+        return result;
+    }
 }
