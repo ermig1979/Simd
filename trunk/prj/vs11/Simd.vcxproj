@@ -114,6 +114,9 @@
     <ProjectReference Include="SimdSsse3.vcxproj">
       <Project>{2ca34bf2-043b-40fd-b58c-ec2e29fac263}</Project>
     </ProjectReference>
+    <ProjectReference Include="SimdVsx.vcxproj">
+      <Project>{00cbfe2a-935b-449f-a0e0-cdfd8ac93bb3}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

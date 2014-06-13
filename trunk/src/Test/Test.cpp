@@ -245,9 +245,10 @@ int ExecuteDataTest(const Options & options)
 
     bool result = true;
 
-    EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
-
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
+
+    EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
+    EXECUTE_DATA_TEST(ReduceGray4x4DataTest);
 
 end:
 

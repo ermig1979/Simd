@@ -163,9 +163,19 @@ namespace Test
 
 		result = result && ReduceGrayAutoTest(FUNC1(Simd::Base::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(Simd::Avx2::ReduceGray4x4));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Vsx::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
 		return result;
@@ -237,6 +247,15 @@ namespace Test
         bool result = true;
 
         result = result && ReduceGrayDataTest(create, DW, DH, FUNC1(SimdReduceGray2x2));
+
+        return result;
+    }
+
+    bool ReduceGray4x4DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ReduceGrayDataTest(create, DW, DH, FUNC1(SimdReduceGray4x4));
 
         return result;
     }

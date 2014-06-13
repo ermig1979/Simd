@@ -154,6 +154,7 @@ namespace Test
     /***************************** Data Tests: *******************************/
 
     bool ReduceGray2x2DataTest(bool create);
+    bool ReduceGray4x4DataTest(bool create);
 
     bool OperationBinary8uDataTest(bool create);
 }
