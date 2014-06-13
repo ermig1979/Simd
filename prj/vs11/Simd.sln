@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdSsse3", "SimdSsse3.vcxp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdSse41", "SimdSse41.vcxproj", "{2397C4EE-3030-42E9-B16B-EB074D491887}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdVsx", "SimdVsx.vcxproj", "{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -89,6 +91,14 @@ Global
 		{2397C4EE-3030-42E9-B16B-EB074D491887}.Release|Win32.Build.0 = Release|Win32
 		{2397C4EE-3030-42E9-B16B-EB074D491887}.Release|x64.ActiveCfg = Release|x64
 		{2397C4EE-3030-42E9-B16B-EB074D491887}.Release|x64.Build.0 = Release|x64
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Debug|Win32.Build.0 = Debug|Win32
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Debug|x64.ActiveCfg = Debug|x64
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Debug|x64.Build.0 = Debug|x64
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Release|Win32.ActiveCfg = Release|Win32
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Release|Win32.Build.0 = Release|Win32
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Release|x64.ActiveCfg = Release|x64
+		{00CBFE2A-935B-449F-A0E0-CDFD8AC93BB3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

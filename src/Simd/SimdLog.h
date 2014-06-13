@@ -44,6 +44,27 @@ namespace Simd
             }
             std::cout << "} " << std::endl;    
         }
+
+        SIMD_INLINE void Log(const v128_u16 & value, const std::string & name)
+        {
+            std::cout << name << " = { ";
+            for(int i = 0; i < 8; i++)
+            {
+                int element = vec_extract(value, i);
+                std::cout << element << " ";
+            }
+            std::cout << "} " << std::endl;    
+        }
+
+        template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
+        {
+            std::cout << name << " = { ";
+            for(int i = 0; i < size; i++)
+            {
+                std::cout << int(data[i]) << " ";
+            }
+            std::cout << "} " << std::endl;    
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

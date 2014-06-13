@@ -292,6 +292,55 @@ namespace Simd
         {
             return vec_ld(0, p); 
         }
+
+        template <bool align> SIMD_INLINE v128_u16 Load(const uint16_t * p)
+        {
+            return (v128_u16)Load<align>((const uint8_t*)p);
+        }
+
+        template <size_t count> SIMD_INLINE v128_u8 LoadBeforeFirst(v128_u8 first);
+
+        template <> SIMD_INLINE v128_u8 LoadBeforeFirst<1>(v128_u8 first)
+        {
+            return vec_perm(first, first, K8_PERM_LOAD_BEFORE_FIRST_1);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadBeforeFirst<2>(v128_u8 first)
+        {
+            return vec_perm(first, first, K8_PERM_LOAD_BEFORE_FIRST_2);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadBeforeFirst<3>(v128_u8 first)
+        {
+            return vec_perm(first, first, K8_PERM_LOAD_BEFORE_FIRST_3);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadBeforeFirst<4>(v128_u8 first)
+        {
+            return vec_perm(first, first, K8_PERM_LOAD_BEFORE_FIRST_4);
+        }
+
+        template <size_t count> SIMD_INLINE v128_u8 LoadAfterLast(v128_u8 last);
+
+        template <> SIMD_INLINE v128_u8 LoadAfterLast<1>(v128_u8 last)
+        {
+            return vec_perm(last, last, K8_PERM_LOAD_AFTER_LAST_1);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadAfterLast<2>(v128_u8 last)
+        {
+            return vec_perm(last, last, K8_PERM_LOAD_AFTER_LAST_2);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadAfterLast<3>(v128_u8 last)
+        {
+            return vec_perm(last, last, K8_PERM_LOAD_AFTER_LAST_3);
+        }
+
+        template <> SIMD_INLINE v128_u8 LoadAfterLast<4>(v128_u8 last)
+        {
+            return vec_perm(last, last, K8_PERM_LOAD_AFTER_LAST_4);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

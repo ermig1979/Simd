@@ -133,6 +133,11 @@ namespace Simd
         {
             vec_st(a, 0, p);
         }
+
+        template <bool align> SIMD_INLINE void Store(uint16_t * p, v128_u16 a)
+        {
+            Store<align>((uint8_t*)p, (v128_u8)a);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }
