@@ -276,6 +276,12 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
+        hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
 }

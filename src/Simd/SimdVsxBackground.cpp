@@ -182,6 +182,74 @@ namespace Simd
                 BackgroundIncrementCount<false>(value, valueStride, width, height,
                 loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
         }
+
+        SIMD_INLINE v128_u8 AdjustLo(const v128_u8 & count, const v128_u8 & value, const v128_u8 & mask, const v128_u8 & threshold)
+        {
+            const v128_u8 dec = vec_and(mask, vec_cmpgt(count, threshold));
+            const v128_u8 inc = vec_and(mask, vec_cmplt(count, threshold));
+            return vec_subs(vec_adds(value, inc), dec);
+        }
+
+        SIMD_INLINE v128_u8 AdjustHi(const v128_u8 & count, const v128_u8 & value, const v128_u8 & mask, const v128_u8 & threshold)
+        {
+            const v128_u8 inc = vec_and(mask, vec_cmpgt(count, threshold));
+            const v128_u8 dec = vec_and(mask, vec_cmplt(count, threshold));
+            return vec_subs(vec_adds(value, inc), dec);
+        }
+
+        template <bool align> SIMD_INLINE void BackgroundAdjustRange(uint8_t * loCount, uint8_t * loValue, 
+            uint8_t * hiCount, uint8_t * hiValue, size_t offset, const v128_u8 & threshold, const v128_u8 & mask)
+        {
+            const v128_u8 _loCount = Load<align>(loCount + offset);
+            const v128_u8 _loValue = Load<align>(loValue + offset);
+            const v128_u8 _hiCount = Load<align>(hiCount + offset);
+            const v128_u8 _hiValue = Load<align>(hiValue + offset);
+
+            Store<align>(loValue + offset, AdjustLo(_loCount, _loValue, mask, threshold));
+            Store<align>(hiValue + offset, AdjustHi(_hiCount, _hiValue, mask, threshold));
+            Store<align>(loCount + offset, K8_00);
+            Store<align>(hiCount + offset, K8_00);
+        }
+
+        template <bool align> void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+                assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+            }
+
+            const v128_u8 _threshold = SIMD_VEC_SET1_EPI8(threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, col, _threshold, K8_01);
+                if(alignedWidth != width)
+                    BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, width - A, _threshold, tailMask);
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+            }
+        }
+
+        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+        {
+            if(	Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
+                Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+                BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+            else
+                BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
