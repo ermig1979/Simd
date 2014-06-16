@@ -229,6 +229,17 @@ namespace Test
 		return result;
 	}
 
+    bool BackgroundAdjustRangeAutoTest(const Func3 & f1, const Func3 & f2)
+    {
+        bool result = true;
+
+        result = result && BackgroundAdjustRangeAutoTest(W, H, f1, f2);
+        result = result && BackgroundAdjustRangeAutoTest(W + 1, H - 1, f1, f2);
+        result = result && BackgroundAdjustRangeAutoTest(W - 1, H + 1, f1, f2);
+
+        return result;
+    }
+
 	namespace
 	{
 		struct Func4
@@ -475,17 +486,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundAdjustRangeAutoTest(W, H, FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
-		result = result && BackgroundAdjustRangeAutoTest(W + 1, H - 1, FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
-        result = result && BackgroundAdjustRangeAutoTest(W - 1, H + 1, FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+		result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Base::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundAdjustRangeAutoTest(W, H, FUNC3(Simd::Sse2::BackgroundAdjustRange), FUNC3(Simd::Avx2::BackgroundAdjustRange));
-            result = result && BackgroundAdjustRangeAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::BackgroundAdjustRange), FUNC3(Simd::Avx2::BackgroundAdjustRange));
-            result = result && BackgroundAdjustRangeAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::BackgroundAdjustRange), FUNC3(Simd::Avx2::BackgroundAdjustRange));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Sse2::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx2::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Vsx::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
 		return result;
@@ -710,6 +725,84 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundIncrementCountDataTest(create, DW, DH, FUNC2(SimdBackgroundIncrementCount));
+
+        return result;
+    }
+
+    bool BackgroundAdjustRangeDataTest(bool create, int width, int height, const Func3 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View loCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View loCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(loCountSrc);
+            FillRandom(loValueSrc);
+            FillRandom(hiCountSrc);
+            FillRandom(hiValueSrc);
+
+            TEST_SAVE(loCountSrc);
+            TEST_SAVE(loValueSrc);
+            TEST_SAVE(hiCountSrc);
+            TEST_SAVE(hiValueSrc);
+
+            f.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc, loCountDst1, loValueDst1, hiCountDst1, hiValueDst1, 0x80);
+
+            TEST_SAVE(loCountDst1);
+            TEST_SAVE(loValueDst1);
+            TEST_SAVE(hiCountDst1);
+            TEST_SAVE(hiValueDst1);
+        }
+        else
+        {
+            TEST_LOAD(loCountSrc);
+            TEST_LOAD(loValueSrc);
+            TEST_LOAD(hiCountSrc);
+            TEST_LOAD(hiValueSrc);
+
+            TEST_LOAD(loCountDst1);
+            TEST_LOAD(loValueDst1);
+            TEST_LOAD(hiCountDst1);
+            TEST_LOAD(hiValueDst1);
+
+            f.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc, loCountDst2, loValueDst2, hiCountDst2, hiValueDst2, 0x80);
+
+            TEST_SAVE(loCountDst2);
+            TEST_SAVE(loValueDst2);
+            TEST_SAVE(hiCountDst2);
+            TEST_SAVE(hiValueDst2);
+
+            result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "loCount");
+            result = result && Compare(loValueDst1, loValueDst2, 0, true, 10, 0, "loValue");
+            result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hiCount");
+            result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 10, 0, "hiValue");
+        }
+
+        return result;
+    }
+
+    bool BackgroundAdjustRangeDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundAdjustRangeDataTest(create, DW, DH, FUNC3(SimdBackgroundAdjustRange));
 
         return result;
     }
