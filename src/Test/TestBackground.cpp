@@ -414,22 +414,26 @@ namespace Test
 
 	bool BackgroundGrowRangeFastAutoTest()
 	{
-		bool result = true;
+        bool result = true;
 
-		result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
-		result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
-        result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
+        result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::BackgroundGrowRangeFast), FUNC1(Simd::Avx2::BackgroundGrowRangeFast));
-            result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::BackgroundGrowRangeFast), FUNC1(Simd::Avx2::BackgroundGrowRangeFast));
-            result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::BackgroundGrowRangeFast), FUNC1(Simd::Avx2::BackgroundGrowRangeFast));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif 
 
-		return result;
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
+#endif 
+
+        return result;
 	}
 
 	bool BackgroundIncrementCountAutoTest()
@@ -612,6 +616,15 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundGrowRangeSlow));
+
+        return result;
+    }
+
+    bool BackgroundGrowRangeFastDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundGrowRangeFast));
 
         return result;
     }

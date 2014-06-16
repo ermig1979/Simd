@@ -226,6 +226,11 @@ SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStr
         Sse2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
 }
 
