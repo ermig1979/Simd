@@ -247,6 +247,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BackgroundGrowRangeSlowDataTest);
     EXECUTE_DATA_TEST(BackgroundGrowRangeFastDataTest);
+    EXECUTE_DATA_TEST(BackgroundIncrementCountDataTest);
 
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
 

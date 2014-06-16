@@ -250,6 +250,12 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundIncrementCount(value, valueStride, width, height,
+        loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::BackgroundIncrementCount(value, valueStride, width, height,
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 }
