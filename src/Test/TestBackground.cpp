@@ -80,7 +80,7 @@ namespace Test
 		return result;
 	}
 
-    bool BackgroundChangeRangeAutoTest(const Func1 & f1, const Func1 &f2)
+    bool BackgroundChangeRangeAutoTest(const Func1 & f1, const Func1 & f2)
     {
         bool result = true;
 
@@ -150,6 +150,17 @@ namespace Test
 
 		return result;
 	}
+
+    bool BackgroundIncrementCountAutoTest(const Func2 & f1, const Func2 & f2)
+    {
+        bool result = true;
+
+        result = result && BackgroundIncrementCountAutoTest(W, H, f1, f2);
+        result = result && BackgroundIncrementCountAutoTest(W + 1, H - 1, f1, f2);
+        result = result && BackgroundIncrementCountAutoTest(W - 1, H + 1, f1, f2);
+
+        return result;
+    }
 
 	namespace
 	{
@@ -440,17 +451,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundIncrementCountAutoTest(W, H, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
-		result = result && BackgroundIncrementCountAutoTest(W + 1, H - 1, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
-        result = result && BackgroundIncrementCountAutoTest(W - 1, H + 1, FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+		result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Base::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundIncrementCountAutoTest(W, H, FUNC2(Simd::Sse2::BackgroundIncrementCount), FUNC2(Simd::Avx2::BackgroundIncrementCount));
-            result = result && BackgroundIncrementCountAutoTest(W + 1, H - 1, FUNC2(Simd::Sse2::BackgroundIncrementCount), FUNC2(Simd::Avx2::BackgroundIncrementCount));
-            result = result && BackgroundIncrementCountAutoTest(W - 1, H + 1, FUNC2(Simd::Sse2::BackgroundIncrementCount), FUNC2(Simd::Avx2::BackgroundIncrementCount));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Sse2::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Avx2::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Vsx::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
 		return result;
@@ -625,6 +640,76 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundGrowRangeFast));
+
+        return result;
+    }
+
+    bool BackgroundIncrementCountDataTest(bool create, int width, int height, const Func2 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View loCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(loValue);
+            FillRandom(hiValue);
+            FillRandom(loCountSrc);
+            FillRandom(hiCountSrc);
+
+            TEST_SAVE(value);
+            TEST_SAVE(loValue);
+            TEST_SAVE(hiValue);
+            TEST_SAVE(loCountSrc);
+            TEST_SAVE(hiCountSrc);
+
+            f.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst1, hiCountDst1);
+
+            TEST_SAVE(loCountDst1);
+            TEST_SAVE(hiCountDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(loValue);
+            TEST_LOAD(hiValue);
+            TEST_LOAD(loCountSrc);
+            TEST_LOAD(hiCountSrc);
+
+            TEST_LOAD(loCountDst1);
+            TEST_LOAD(hiCountDst1);
+
+            f.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst2, hiCountDst2);
+
+            TEST_SAVE(loCountDst2);
+            TEST_SAVE(hiCountDst2);
+
+            result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "lo");
+            result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hi");
+        }
+
+        return result;
+    }
+
+    bool BackgroundIncrementCountDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundIncrementCountDataTest(create, DW, DH, FUNC2(SimdBackgroundIncrementCount));
 
         return result;
     }
