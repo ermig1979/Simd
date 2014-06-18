@@ -56,6 +56,12 @@ namespace Simd
             return vec_subs(a, b);
         }
 
+        template <SimdOperationBinary8uType type, bool align, bool first> 
+        SIMD_INLINE void OperationBinary8u(const Loader<align> & a, const Loader<align> & b, Storer<align> & dst)
+        {
+            Store<align, first>(dst, OperationBinary8u<type>(Load<align, first>(a), Load<align, first>(b)));
+        }
+
         template <bool align, SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
         {
@@ -67,18 +73,21 @@ namespace Simd
             size_t alignedSize = Simd::AlignLo(size, A);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t offset = 0; offset < alignedSize; offset += A)
-                {
-                    const v128_u8 _a = Load<align>(a + offset);
-                    const v128_u8 _b = Load<align>(b + offset);
-                    Store<align>(dst + offset, OperationBinary8u<type>(_a, _b));
-                }
+                Loader<align> _a(a), _b(b);
+                Storer<align> _dst(dst);
+                OperationBinary8u<type, align, true>(_a, _b, _dst);
+                for(size_t offset = A; offset < alignedSize; offset += A)
+                    OperationBinary8u<type, align, false>(_a, _b, _dst);
+                _dst.Flush();
+
                 if(alignedSize != size)
                 {
-                    const v128_u8 _a = Load<false>(a + size - A);
-                    const v128_u8 _b = Load<false>(b + size - A);
-                    Store<false>(dst + size - A, OperationBinary8u<type>(_a, _b));
+                    Loader<false> _a(a + size - A), _b(b + size - A);
+                    Storer<false> _dst(dst + size - A);
+                    OperationBinary8u<type, false, true>(_a, _b, _dst);
+                    _dst.Flush();
                 }
+
                 a += aStride;
                 b += bStride;
                 dst += dstStride;

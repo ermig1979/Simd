@@ -34,17 +34,19 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE  
     namespace Vsx
     {
-        template <bool align> SIMD_INLINE void BackgroundGrowRangeSlow(const uint8_t * value, uint8_t * lo, uint8_t * hi, v128_u8 tailMask)
+        template <bool align, bool first> 
+        SIMD_INLINE void BackgroundGrowRangeSlow(const Loader<align> & value, const Loader<align> & loSrc, const Loader<align> &  hiSrc, 
+            v128_u8 mask, Storer<align> & loDst, Storer<align> &  hiDst)
         {
-            const v128_u8 _value = Load<align>(value);
-            const v128_u8 _lo = Load<align>(lo);
-            const v128_u8 _hi = Load<align>(hi);
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _lo = Load<align, first>(loSrc);
+            const v128_u8 _hi = Load<align, first>(hiSrc);
 
-            const v128_u8 inc = vec_and(tailMask, vec_cmpgt(_value, _hi));
-            const v128_u8 dec = vec_and(tailMask, vec_cmplt(_value, _lo));
+            const v128_u8 inc = vec_and(mask, vec_cmpgt(_value, _hi));
+            const v128_u8 dec = vec_and(mask, vec_cmplt(_value, _lo));
 
-            Store<align>(lo, vec_subs(_lo, dec));
-            Store<align>(hi, vec_adds(_hi, inc));
+            Store<align, first>(loDst, vec_subs(_lo, dec));
+            Store<align, first>(hiDst, vec_adds(_hi, inc));
         }
 
         template <bool align> void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
@@ -59,13 +61,24 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            v128_u8 _lo, _hi, tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundGrowRangeSlow<align>(value + col, lo + col, hi + col, K8_01);
+                Loader<align> _value(value), _loSrc(lo), _hiSrc(hi);
+                Storer<align> _loDst(lo), _hiDst(hi);
+                BackgroundGrowRangeSlow<align, true>(_value, _loSrc, _hiSrc, K8_01, _loDst, _hiDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundGrowRangeSlow<align, false>(_value, _loSrc, _hiSrc, K8_01, _loDst, _hiDst);
+                _loDst.Flush();
+                _hiDst.Flush();
                 if(alignedWidth != width)
-                    BackgroundGrowRangeSlow<false>(value + width - A, lo + width - A, hi + width - A, tailMask);
+                {
+                    Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
+                    Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
+                    BackgroundGrowRangeSlow<false, true>(_value, _loSrc, _hiSrc, tailMask, _loDst, _hiDst);
+                    _loDst.Flush();
+                    _hiDst.Flush();
+                }
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
@@ -81,14 +94,16 @@ namespace Simd
                 BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
         }
 
-        template <bool align> SIMD_INLINE void BackgroundGrowRangeFast(const uint8_t * value, uint8_t * lo, uint8_t * hi, v128_u8 tailMask)
+        template <bool align, bool first> 
+        SIMD_INLINE void BackgroundGrowRangeFast(const Loader<align> & value, const Loader<align> & loSrc, const Loader<align> &  hiSrc, 
+            Storer<align> & loDst, Storer<align> &  hiDst)
         {
-            const v128_u8 _value = Load<align>(value);
-            const v128_u8 _lo = Load<align>(lo);
-            const v128_u8 _hi = Load<align>(hi);
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _lo = Load<align, first>(loSrc);
+            const v128_u8 _hi = Load<align, first>(hiSrc);
 
-            Store<align>(lo, vec_min(_lo, _value));
-            Store<align>(hi, vec_max(_hi, _value));
+            Store<align, first>(loDst, vec_min(_lo, _value));
+            Store<align, first>(hiDst, vec_max(_hi, _value));
         }
 
         template <bool align> void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
@@ -103,13 +118,23 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundGrowRangeFast<align>(value + col, lo + col, hi + col, K8_01);
+                Loader<align> _value(value), _loSrc(lo), _hiSrc(hi);
+                Storer<align> _loDst(lo), _hiDst(hi);
+                BackgroundGrowRangeFast<align, true>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundGrowRangeFast<align, false>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
+                _loDst.Flush();
+                _hiDst.Flush();
                 if(alignedWidth != width)
-                    BackgroundGrowRangeFast<false>(value + width - A, lo + width - A, hi + width - A, tailMask);
+                {
+                    Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
+                    Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
+                    BackgroundGrowRangeFast<false, true>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
+                    _loDst.Flush();
+                    _hiDst.Flush();
+                }
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
@@ -125,20 +150,21 @@ namespace Simd
                 BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
         }
 
-        template <bool align> SIMD_INLINE void BackgroundIncrementCount(const uint8_t * value, 
-            const uint8_t * loValue, const uint8_t * hiValue, uint8_t * loCount, uint8_t * hiCount, size_t offset, v128_u8 tailMask)
+        template <bool align, bool first> 
+        SIMD_INLINE void BackgroundIncrementCount(const Loader<align> & value, const Loader<align> & loValue, const Loader<align> & hiValue, 
+            const Loader<align> & loCountSrc, const Loader<align> & hiCountSrc, v128_u8 mask, Storer<align> & loCountDst, Storer<align> & hiCountDst)
         {
-            const v128_u8 _value = Load<align>(value + offset);
-            const v128_u8 _loValue = Load<align>(loValue + offset);
-            const v128_u8 _loCount = Load<align>(loCount + offset);
-            const v128_u8 _hiValue = Load<align>(hiValue + offset);
-            const v128_u8 _hiCount = Load<align>(hiCount + offset);
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _loValue = Load<align, first>(loValue);
+            const v128_u8 _loCount = Load<align, first>(loCountSrc);
+            const v128_u8 _hiValue = Load<align, first>(hiValue);
+            const v128_u8 _hiCount = Load<align, first>(hiCountSrc);
 
-            const v128_u8 incLo = vec_and(tailMask, vec_cmplt(_value, _loValue));
-            const v128_u8 incHi = vec_and(tailMask, vec_cmpgt(_value, _hiValue));
+            const v128_u8 incLo = vec_and(mask, vec_cmplt(_value, _loValue));
+            const v128_u8 incHi = vec_and(mask, vec_cmpgt(_value, _hiValue));
 
-            Store<align>(loCount + offset, vec_adds(_loCount, incLo));
-            Store<align>(hiCount + offset, vec_adds(_hiCount, incHi));
+            Store<align, first>(loCountDst, vec_adds(_loCount, incLo));
+            Store<align, first>(hiCountDst, vec_adds(_hiCount, incHi));
         }
 
         template <bool align> void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
@@ -157,10 +183,22 @@ namespace Simd
             v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundIncrementCount<align>(value, loValue, hiValue, loCount, hiCount, col, K8_01);
+                Loader<align> _value(value), _loValue(loValue), _hiValue(hiValue), _loCountSrc(loCount), _hiCountSrc(hiCount);
+                Storer<align> _loCountDst(loCount), _hiCountDst(hiCount);
+                BackgroundIncrementCount<align, true>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, K8_01, _loCountDst, _hiCountDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundIncrementCount<align, false>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, K8_01, _loCountDst, _hiCountDst);
+                _loCountDst.Flush();
+                _hiCountDst.Flush();
                 if(alignedWidth != width)
-                    BackgroundIncrementCount<false>(value, loValue, hiValue, loCount, hiCount, width - A, tailMask);
+                {
+                    Loader<false> _value(value + width - A), _loValue(loValue + width - A), _hiValue(hiValue + width - A), 
+                        _loCountSrc(loCount + width - A), _hiCountSrc(hiCount + width - A);
+                    Storer<false> _loCountDst(loCount + width - A), _hiCountDst(hiCount + width - A);
+                    BackgroundIncrementCount<false, true>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, tailMask, _loCountDst, _hiCountDst);
+                    _loCountDst.Flush();
+                    _hiCountDst.Flush();
+                }
                 value += valueStride;
                 loValue += loValueStride;
                 hiValue += hiValueStride;
@@ -197,18 +235,20 @@ namespace Simd
             return vec_subs(vec_adds(value, inc), dec);
         }
 
-        template <bool align> SIMD_INLINE void BackgroundAdjustRange(uint8_t * loCount, uint8_t * loValue, 
-            uint8_t * hiCount, uint8_t * hiValue, size_t offset, const v128_u8 & threshold, const v128_u8 & mask)
+        template <bool align, bool first> 
+        SIMD_INLINE void BackgroundAdjustRange(const Loader<align> & loCountSrc, const Loader<align> & loValueSrc, 
+            const Loader<align> & hiCountSrc, const Loader<align> & hiValueSrc, const v128_u8 & threshold, const v128_u8 & mask, 
+            Storer<align> & loCountDst, Storer<align> & loValueDst, Storer<align> & hiCountDst, Storer<align> & hiValueDst)
         {
-            const v128_u8 _loCount = Load<align>(loCount + offset);
-            const v128_u8 _loValue = Load<align>(loValue + offset);
-            const v128_u8 _hiCount = Load<align>(hiCount + offset);
-            const v128_u8 _hiValue = Load<align>(hiValue + offset);
+            const v128_u8 _loCount = Load<align, first>(loCountSrc);
+            const v128_u8 _loValue = Load<align, first>(loValueSrc);
+            const v128_u8 _hiCount = Load<align, first>(hiCountSrc);
+            const v128_u8 _hiValue = Load<align, first>(hiValueSrc);
 
-            Store<align>(loValue + offset, AdjustLo(_loCount, _loValue, mask, threshold));
-            Store<align>(hiValue + offset, AdjustHi(_hiCount, _hiValue, mask, threshold));
-            Store<align>(loCount + offset, K8_00);
-            Store<align>(hiCount + offset, K8_00);
+            Store<align, first>(loValueDst, AdjustLo(_loCount, _loValue, mask, threshold));
+            Store<align, first>(hiValueDst, AdjustHi(_hiCount, _hiValue, mask, threshold));
+            Store<align, first>(loCountDst, K8_00);
+            Store<align, first>(hiCountDst, K8_00);
         }
 
         template <bool align> void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
@@ -227,10 +267,30 @@ namespace Simd
             v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, col, _threshold, K8_01);
+                Loader<align> _loCountSrc(loCount), _loValueSrc(loValue), _hiCountSrc(hiCount), _hiValueSrc(hiValue);
+                Storer<align> _loCountDst(loCount), _loValueDst(loValue), _hiCountDst(hiCount), _hiValueDst(hiValue);
+                BackgroundAdjustRange<align, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc,
+                    _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundAdjustRange<align, false>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc,
+                    _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                _loValueDst.Flush();
+                _hiValueDst.Flush();
+                _loCountDst.Flush();
+                _hiCountDst.Flush();
+
                 if(alignedWidth != width)
-                    BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, width - A, _threshold, tailMask);
+                {
+                    Loader<false> _loCountSrc(loCount + width - A), _loValueSrc(loValue + width - A), _hiCountSrc(hiCount + width - A), _hiValueSrc(hiValue + width - A);
+                    Storer<false> _loCountDst(loCount + width - A), _loValueDst(loValue + width - A), _hiCountDst(hiCount + width - A), _hiValueDst(hiValue + width - A);
+                    BackgroundAdjustRange<false, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc,
+                        _threshold, tailMask, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                    _loValueDst.Flush();
+                    _hiValueDst.Flush();
+                    _loCountDst.Flush();
+                    _hiCountDst.Flush();
+                }
+
                 loValue += loValueStride;
                 hiValue += hiValueStride;
                 loCount += loCountStride;

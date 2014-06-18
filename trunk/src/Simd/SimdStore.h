@@ -27,6 +27,7 @@
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -119,7 +120,6 @@ namespace Simd
 
         template <> SIMD_INLINE void Store<false>(uint8_t * p, v128_u8 a)
         {
-            //vec_vsx_st(a, 0, p);
             v128_u8 lo = vec_ld(0, p);
             v128_u8 hi = vec_ld(A, p);
             v128_u8 perm = vec_lvsr(0, p);
@@ -137,6 +137,99 @@ namespace Simd
         template <bool align> SIMD_INLINE void Store(uint16_t * p, v128_u16 a)
         {
             Store<align>((uint8_t*)p, (v128_u8)a);
+        }
+
+        template <bool align> struct Storer;
+
+        template <> struct Storer<true>
+        {
+            template <class T> Storer(T * ptr)
+                :_ptr((uint8_t*)ptr)
+            {
+            }
+
+            template <class T> SIMD_INLINE void First(T value)
+            {
+                vec_st((v128_u8)value, 0, _ptr);
+            }
+
+            template <class T> SIMD_INLINE void Next(T value)
+            {
+                _ptr += A;
+                vec_st((v128_u8)value, 0, _ptr);
+            }
+
+            SIMD_INLINE void Flush()
+            {
+            }
+
+        private:
+            uint8_t * _ptr;
+        };
+
+        template <> struct Storer<false>
+        {
+            template <class T> SIMD_INLINE Storer(T * ptr)
+                :_ptr((uint8_t*)ptr)
+            {
+                _perm = vec_lvsr(0, _ptr);
+                _mask = vec_perm(K8_00, K8_FF, _perm);
+            }
+
+            template <class T> SIMD_INLINE void First(T value)
+            {
+                _last = (v128_u8)value;
+                v128_u8 background = vec_ld(0, _ptr);
+                v128_u8 foreground = vec_perm(_last, _last, _perm);
+                vec_st(vec_sel(background, foreground, _mask), 0, _ptr);
+            }
+
+            template <class T> SIMD_INLINE void Next(T value)
+            {
+                _ptr += A;
+                vec_st(vec_perm(_last, (v128_u8)value, _perm), 0, _ptr);
+                _last = (v128_u8)value;
+            }
+
+            SIMD_INLINE void Flush()
+            {
+                v128_u8 background = vec_ld(A, _ptr);
+                v128_u8 foreground = vec_perm(_last, _last, _perm); 
+                vec_st(vec_sel(foreground, background, _mask), A, _ptr);
+            }
+
+        private:
+            uint8_t * _ptr;
+            v128_u8 _perm;
+            v128_u8 _mask;
+            v128_u8 _last;
+        };
+
+        template <bool align, bool first> void Store(Storer<align> & storer, v128_u8 value);
+
+        template <> SIMD_INLINE void Store<true, true>(Storer<true> & storer, v128_u8 value)
+        {
+            storer.First(value);
+        }
+
+        template <> SIMD_INLINE void Store<false, true>(Storer<false> & storer, v128_u8 value)
+        {
+            storer.First(value);
+        }
+
+        template <> SIMD_INLINE void Store<true, false>(Storer<true> & storer, v128_u8 value)
+        {
+            storer.Next(value);
+        }
+
+        template <> SIMD_INLINE void Store<false, false>(Storer<false> & storer, v128_u8 value)
+        {
+            storer.Next(value);
+        }
+
+        template <bool align, bool first> void Store(Storer<align> & storer, v128_u16 value)
+        {
+            Store<align, first>(storer, (v128_u8)value);
         }
     }
 #endif//SIMD_VSX_ENABLE

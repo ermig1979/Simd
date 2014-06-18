@@ -41,6 +41,7 @@
 #include <iomanip>
 #include <memory>
 #include <exception>
+#include <stdexcept>
 
 #define SIMD_STATIC
 #include "Simd/SimdEnable.h"
