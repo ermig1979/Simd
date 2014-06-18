@@ -153,6 +153,8 @@ namespace Test
 
     /***************************** Data Tests: *******************************/
 
+    bool AddFeatureDifferenceDataTest(bool create);
+
     bool BackgroundGrowRangeSlowDataTest(bool create);
     bool BackgroundGrowRangeFastDataTest(bool create);
     bool BackgroundIncrementCountDataTest(bool create);

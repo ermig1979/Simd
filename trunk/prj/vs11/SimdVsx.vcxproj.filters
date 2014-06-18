@@ -13,6 +13,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxBackground.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxAddFeatureDifference.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

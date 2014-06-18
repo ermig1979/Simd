@@ -34,6 +34,16 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE
     namespace Vsx
     {
+        template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
+        {
+            std::cout << name << " = { ";
+            for(int i = 0; i < size; i++)
+            {
+                std::cout << int(data[i]) << " ";
+            }
+            std::cout << "} " << std::endl;    
+        }
+
         SIMD_INLINE void Log(const v128_u8 & value, const std::string & name)
         {
             std::cout << name << " = { ";
@@ -56,12 +66,13 @@ namespace Simd
             std::cout << "} " << std::endl;    
         }
 
-        template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
+        SIMD_INLINE void Log(const v128_u32 & value, const std::string & name)
         {
             std::cout << name << " = { ";
-            for(int i = 0; i < size; i++)
+            for(int i = 0; i < 4; i++)
             {
-                std::cout << int(data[i]) << " ";
+                int element = vec_extract(value, i);
+                std::cout << element << " ";
             }
             std::cout << "} " << std::endl;    
         }

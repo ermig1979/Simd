@@ -74,6 +74,7 @@
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray2x2.cpp" />
