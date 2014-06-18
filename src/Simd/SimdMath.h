@@ -337,6 +337,11 @@ namespace Simd
         {
             return vec_perm(value, K8_00, vec_lvsl(shift, (uint8_t*)0));        
         }
+
+        SIMD_INLINE v128_u16 MulHiU16(v128_u16 a, v128_u16 b)
+        {
+            return (v128_u16)vec_perm(vec_mule(a, b), vec_mulo(a, b), K8_PERM_MUL_HI_U16);        
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

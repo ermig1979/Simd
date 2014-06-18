@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -74,18 +75,22 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, lo, hi, weight, differenceSrc, differenceDst2));
 
-		result = result && Compare(differenceDst1, differenceDst2, 0, true, 10, 0);
+		result = result && Compare(differenceDst1, differenceDst2, 0, true, 32, 0);
 
 		return result;
 	}
 
-    bool AddFeatureDifferenceAutoTest(int width, int height, const Func & f1, const Func & f2)
+    bool AddFeatureDifferenceAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
         const uint16_t delta = 256*7;
         for(uint16_t weight = 0; weight < 4 && result; ++weight)
-            result = result &&  AddFeatureDifferenceAutoTest(width, height, weight*delta, f1, f2);
+        {
+            result = result &&  AddFeatureDifferenceAutoTest(W, H, weight*delta, f1, f2);
+            result = result &&  AddFeatureDifferenceAutoTest(W + 3, H - 3, weight*delta, f1, f2);
+            result = result &&  AddFeatureDifferenceAutoTest(W - 3, H + 3, weight*delta, f1, f2);
+        }
 
         return result;
     }
@@ -94,18 +99,86 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AddFeatureDifferenceAutoTest(W, H, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
-        result = result && AddFeatureDifferenceAutoTest(W + 1, H - 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
-        result = result && AddFeatureDifferenceAutoTest(W - 1, H + 1, FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && AddFeatureDifferenceAutoTest(W, H, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
-            result = result && AddFeatureDifferenceAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
-            result = result && AddFeatureDifferenceAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::AddFeatureDifference), FUNC(Simd::Avx2::AddFeatureDifference));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Sse2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Vsx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+#endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool AddFeatureDifferenceDataTest(bool create, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hi(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View differenceSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View differenceDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View differenceDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint16_t weight = 256*7;
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(lo);
+            FillRandom(hi);
+            FillRandom(differenceSrc);
+
+            TEST_SAVE(value);
+            TEST_SAVE(lo);
+            TEST_SAVE(hi);
+            TEST_SAVE(differenceSrc);
+
+            f.Call(value, lo, hi, weight, differenceSrc, differenceDst1);
+
+            TEST_SAVE(differenceDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(lo);
+            TEST_LOAD(hi);
+
+            TEST_LOAD(differenceSrc);
+            TEST_LOAD(differenceDst1);
+
+            f.Call(value, lo, hi, weight, differenceSrc, differenceDst2);
+
+            TEST_SAVE(differenceDst2);
+
+            result = result && Compare(differenceDst1, differenceDst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool AddFeatureDifferenceDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AddFeatureDifferenceDataTest(create, DW, DH, FUNC(SimdAddFeatureDifference));
 
         return result;
     }

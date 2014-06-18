@@ -412,6 +412,16 @@ namespace Simd
         {
             return loader.Next();
         }
+
+        SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 value)
+        {
+            return (v128_u16)vec_perm(K8_00, value, K8_PERM_UNPACK_LO_U8);
+        }
+
+        SIMD_INLINE v128_u16 UnpackHiU8(v128_u8 value)
+        {
+            return (v128_u16)vec_perm(K8_00, value, K8_PERM_UNPACK_HI_U8);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }
