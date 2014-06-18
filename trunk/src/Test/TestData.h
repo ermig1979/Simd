@@ -41,6 +41,17 @@ namespace Test
 
         bool Save(const View & image, const std::string & name) const;
         bool Load(View & image, const std::string & name) const;
+
+        bool Save(const uint64_t & value, const std::string & name) const;
+        bool Load(uint64_t & value, const std::string & name) const;
+
+        inline bool Load(uint32_t & value, const std::string & name) const
+        {
+            uint64_t tmp;
+            bool result = Load(tmp, name);
+            value = (uint32_t)tmp;
+            return result;
+        }
     };
 }
 

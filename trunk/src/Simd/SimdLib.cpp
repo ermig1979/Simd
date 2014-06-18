@@ -504,6 +504,11 @@ SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t wi
         Sse2::ConditionalCount(src, stride, width, height, value, compareType, count);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::ConditionalCount(src, stride, width, height, value, compareType, count);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::ConditionalCount(src, stride, width, height, value, compareType, count);
 }
 

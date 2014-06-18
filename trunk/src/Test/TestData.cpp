@@ -192,4 +192,61 @@ namespace Test
 
         return true;
     }
+
+    bool Data::Save(const uint64_t & value, const std::string & name) const
+    {
+        if(!CreatePath(_path))
+            return false;
+
+        std::string path = Path(name);
+        std::ofstream ofs(path);
+        if(ofs.bad())
+        {
+            std::cout << "Can't create file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            ofs << value << std::endl;
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't save value to file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ofs.close();
+            return false;
+        }
+
+        ofs.close();
+
+        return true;
+    }
+
+    bool Data::Load(uint64_t & value, const std::string & name) const
+    {
+        std::string path = Path(name);
+        std::ifstream ifs(path);
+        if(ifs.bad())
+        {
+            std::cout << "Can't open file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            ifs >> value;
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't load value from file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ifs.close();
+            return false;
+        }
+
+        ifs.close();
+
+        return true;
+    }
 }
