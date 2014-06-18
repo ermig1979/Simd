@@ -187,5 +187,42 @@ namespace Simd
         }
     }
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE    
+    namespace Vsx
+    {
+        template<SimdCompareType compareType> SIMD_INLINE v128_u8 Compare(v128_u8 a, v128_u8 b);
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareEqual>(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u8)vec_cmpeq(a, b);
+        }
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareNotEqual>(v128_u8 a, v128_u8 b)
+        {
+            return vec_xor((v128_u8)vec_cmpeq(a, b), K8_FF);
+        }
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareGreater>(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u8)vec_cmpgt(a, b);
+        }
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareGreaterOrEqual>(v128_u8 a, v128_u8 b)
+        {
+            return vec_xor((v128_u8)vec_cmplt(a, b), K8_FF);
+        }
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareLesser>(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u8)vec_cmplt(a, b);
+        }
+
+        template<> SIMD_INLINE v128_u8 Compare<SimdCompareLesserOrEqual>(v128_u8 a, v128_u8 b)
+        {
+            return vec_xor((v128_u8)vec_cmpgt(a, b), K8_FF);;
+        }
+    }
+#endif// SIMD_VSX_ENABLE
 }
 #endif//__SimdCompare_h__

@@ -251,6 +251,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BackgroundIncrementCountDataTest);
     EXECUTE_DATA_TEST(BackgroundAdjustRangeDataTest);
 
+    EXECUTE_DATA_TEST(ConditionalCountDataTest);
+
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
 
     EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
