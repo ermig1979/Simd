@@ -74,8 +74,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loSrc, hiSrc, loDst2, hiDst2));
 
-		result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
-		result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+		result = result && Compare(loDst1, loDst2, 0, true, 32, 0, "lo");
+		result = result && Compare(hiDst1, hiDst2, 0, true, 32, 0, "hi");
 
 		return result;
 	}

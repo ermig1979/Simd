@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Test/TestPerformance.h"
-
 #include "Test/Test.h"
 
 struct Options
@@ -41,11 +40,11 @@ struct Options
         if(argc > 1)
         {
             std::string first(argv[1]); 
-            if(first == "auto" || first == "create" || first == "verify")
+            if(first == "a" || first == "c" || first == "v")
             {
-                if(first == "create")
+                if(first == "c")
                     type = Create;
-                if(first == "verify")
+                if(first == "v")
                     type = Verify;
                 if(argc > 2)
                     filter = argv[2];
@@ -211,11 +210,11 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
     EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
 
+end:
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, true) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
-
-end:
 
 #ifdef CUDA_ENABLE
     if(::cudaDeviceReset() != ::cudaSuccess)

@@ -282,7 +282,6 @@ namespace Simd
 
         template <> SIMD_INLINE v128_u8 Load<false>(const uint8_t * p)
         {
-            //return vec_vsx_ld(0, p);
             v128_u8 lo = vec_ld(0, p);
             v128_u8 hi = vec_ld(A, p);
             return vec_perm(lo, hi, vec_lvsl(0, p));        
@@ -340,6 +339,78 @@ namespace Simd
         template <> SIMD_INLINE v128_u8 LoadAfterLast<4>(v128_u8 last)
         {
             return vec_perm(last, last, K8_PERM_LOAD_AFTER_LAST_4);
+        }
+
+        template <bool align> struct Loader;
+
+        template <> struct Loader<true>
+        {
+            template <class T> Loader(const T * ptr)
+                :_ptr((const uint8_t*)ptr)
+            {
+            }
+
+            SIMD_INLINE v128_u8 First() const
+            {
+                return vec_ld(0, _ptr);
+            }
+
+            SIMD_INLINE v128_u8 Next() const
+            {
+                _ptr += A;
+                return vec_ld(0, _ptr);
+            }
+
+        private:
+            mutable const uint8_t * _ptr;
+        };
+
+        template <> struct Loader<false>
+        {
+            template <class T> SIMD_INLINE Loader(const T * ptr)
+                :_ptr((const uint8_t*)ptr)
+            {
+                _perm = vec_lvsl(0, _ptr);
+            }
+
+            SIMD_INLINE v128_u8 First() const
+            {
+                return vec_perm(vec_ld(0, _ptr), vec_ld(A, _ptr), _perm);
+            }
+
+            SIMD_INLINE v128_u8 Next() const
+            {
+                _ptr += A;
+                return vec_perm(vec_ld(0, _ptr), vec_ld(A, _ptr), _perm);
+            }
+
+            v128_u8 value;
+
+        private:
+            mutable const uint8_t * _ptr;
+            v128_u8 _perm;
+        };
+
+        template <bool align, bool first> v128_u8 Load(const Loader<align> & loader);
+
+        template <> SIMD_INLINE v128_u8 Load<true, true>(const Loader<true> & loader)
+        {
+            return loader.First();
+        }
+
+        template <> SIMD_INLINE v128_u8 Load<false, true>(const Loader<false> & loader)
+        {
+            return loader.First();
+        }
+
+        template <> SIMD_INLINE v128_u8 Load<true, false>(const Loader<true> & loader)
+        {
+            return loader.Next();
+        }
+
+        template <> SIMD_INLINE v128_u8 Load<false, false>(const Loader<false> & loader)
+        {
+            return loader.Next();
         }
     }
 #endif//SIMD_VSX_ENABLE

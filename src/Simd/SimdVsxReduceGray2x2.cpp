@@ -50,6 +50,14 @@ namespace Simd
             return vec_pack(lo, hi);
         }
 
+        template<bool align, bool first> 
+        SIMD_INLINE void Average(const Loader<align> & src0, const Loader<align> & src1, Storer<align> & dst)
+        {
+            Store<align, first>(dst, Average8(
+                Load<align, first>(src0), Load<align, false>(src0), 
+                Load<align, first>(src1), Load<align, false>(src1)));
+        }
+
         template<bool align> void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
@@ -66,20 +74,21 @@ namespace Simd
             {
                 const uint8_t *src0 = src;
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                size_t srcOffset = 0, dstOffset = 0;
-                for(; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
-                {
-                    Store<align>(dst + dstOffset, Average8(
-                        Load<align>(src0 + srcOffset), Load<align>(src0 + srcOffset + A), 
-                        Load<align>(src1 + srcOffset), Load<align>(src1 + srcOffset + A)));
-                }
+
+                Loader<align> _src0(src0), _src1(src1);
+                Storer<align> _dst(dst);
+                Average<align, true>(_src0, _src1, _dst);
+                for(size_t srcOffset = DA; srcOffset < alignedWidth; srcOffset += DA)
+                    Average<align, false>(_src0, _src1, _dst);
+                _dst.Flush();
+
                 if(alignedWidth != srcWidth)
                 {
-                    dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
-                    srcOffset = evenWidth - DA;
-                    Store<align>(dst + dstOffset, Average8(
-                        Load<align>(src0 + srcOffset), Load<align>(src0 + srcOffset + A), 
-                        Load<align>(src1 + srcOffset), Load<align>(src1 + srcOffset + A)));
+                    Loader<false> _src0(src0 + evenWidth - DA), _src1(src1 + evenWidth - DA);
+                    Storer<false> _dst(dst + dstWidth - A - (evenWidth != srcWidth ? 1 : 0));
+                    Average<false, true>(_src0, _src1, _dst);
+                    _dst.Flush();
+
                     if(evenWidth != srcWidth)
                     {
                         dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
