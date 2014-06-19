@@ -166,6 +166,8 @@ namespace Test
 
     bool ConditionalCountDataTest(bool create);
 
+    bool DeinterleaveUvDataTest(bool create);
+
     bool GrayToBgraDataTest(bool create);
 
     bool ReduceGray2x2DataTest(bool create);
