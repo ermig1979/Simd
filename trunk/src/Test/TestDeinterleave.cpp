@@ -23,13 +23,14 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
 {
 	namespace
 	{
-		struct Func2
+		struct Func
 		{
 			typedef void (*FuncPtr)(
 				const uint8_t * uv, size_t uvStride, size_t width, size_t height,
@@ -38,7 +39,7 @@ namespace Test
 			FuncPtr func;
 			std::string description;
 
-			Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
 			void Call(const View & uv, View & u, View & v) const
 			{
@@ -47,14 +48,13 @@ namespace Test
 			}
 		};
 	}
-#define FUNC2(function) Func2(function, #function)
+#define FUNC(function) Func(function, #function)
 
-	bool Deinterleave2AutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
+	bool DeinterleaveUvAutoTest(int width, int height, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description
-			<< " [" << width << ", " << height << "]." << std::endl;
+		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
 		View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
 		FillRandom(uv);
@@ -74,23 +74,94 @@ namespace Test
 		return result;
 	}
 
+    bool DeinterleaveUvAutoTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        result = result && DeinterleaveUvAutoTest(W, H, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W + 3, H - 3, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
+
 	bool DeinterleaveUvAutoTest()
 	{
 		bool result = true;
 
-		result = result && Deinterleave2AutoTest(W, H, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
-        result = result && Deinterleave2AutoTest(W + 1, H - 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
-		result = result && Deinterleave2AutoTest(W - 1, H + 1, FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+		result = result && DeinterleaveUvAutoTest(FUNC(Simd::Base::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && Deinterleave2AutoTest(W, H, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
-            result = result && Deinterleave2AutoTest(W + 1, H - 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
-            result = result && Deinterleave2AutoTest(W - 1, H + 1, FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(Simd::Avx2::DeinterleaveUv));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC(Simd::Sse2::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC(Simd::Avx2::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC(Simd::Vsx::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
 #endif 
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool DeinterleaveUvDataTest(bool create, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+
+        View u1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View v1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(uv);
+
+            TEST_SAVE(uv);
+
+            f.Call(uv, u1, v1);
+
+            TEST_SAVE(u1);
+            TEST_SAVE(v1);
+        }
+        else
+        {
+            TEST_LOAD(uv);
+
+            TEST_LOAD(u1);
+            TEST_LOAD(v1);
+
+            f.Call(uv, u2, v2);
+
+            TEST_SAVE(u2);
+            TEST_SAVE(v2);
+
+            result = result && Compare(u1, u2, 0, true, 32, 0, "u");
+            result = result && Compare(v1, v2, 0, true, 32, 0, "v");
+        }
+
+        return result;
+    }
+
+    bool DeinterleaveUvDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DeinterleaveUvDataTest(create, DW, DH, FUNC(SimdDeinterleaveUv));
+
+        return result;
+    }
 }

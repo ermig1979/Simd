@@ -594,6 +594,11 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Sse2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 

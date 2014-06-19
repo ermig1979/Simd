@@ -257,6 +257,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(ConditionalCountDataTest);
 
+    EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
+
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);

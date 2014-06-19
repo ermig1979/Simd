@@ -31,6 +31,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToGray.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxDeinterleaveUv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
