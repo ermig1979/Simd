@@ -162,6 +162,8 @@ namespace Test
 
     bool BgraToGrayDataTest(bool create);
 
+    bool BgrToGrayDataTest(bool create);
+
     bool ConditionalCountDataTest(bool create);
 
     bool GrayToBgraDataTest(bool create);

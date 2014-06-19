@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxOperation.cpp" />
