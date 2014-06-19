@@ -237,6 +237,7 @@ namespace Simd
     {
         typedef __vector int8_t v128_s8;
         typedef __vector uint8_t v128_u8;
+        typedef __vector int16_t v128_s16;
         typedef __vector uint16_t v128_u16;
         typedef __vector uint32_t v128_u32;
 

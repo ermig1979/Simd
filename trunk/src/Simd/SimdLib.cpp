@@ -1384,6 +1384,11 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
         Sse2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 }
 
