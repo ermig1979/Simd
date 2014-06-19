@@ -399,6 +399,11 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
         Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
 }
 

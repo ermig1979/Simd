@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -63,28 +64,93 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-        result = result && Compare(d1, d2, 0, true, 10);
+        result = result && Compare(d1, d2, 0, true, 32);
 
         return result;
+    }
+
+    bool BgraToGrayAutoTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        result = result && BgraToGrayAutoTest(W, H, f1, f2);
+        result = result && BgraToGrayAutoTest(W + 3, H - 3, f1, f2);
+        result = result && BgraToGrayAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;    
     }
 
     bool BgraToGrayAutoTest()
     {
         bool result = true;
 
-        result = result && BgraToGrayAutoTest(W, H, FUNC(Simd::Base::BgraToGray), FUNC(SimdBgraToGray));
-        result = result && BgraToGrayAutoTest(W + 1, H - 1, FUNC(Simd::Base::BgraToGray), FUNC(SimdBgraToGray));
-        result = result && BgraToGrayAutoTest(W - 1, H + 1, FUNC(Simd::Base::BgraToGray), FUNC(SimdBgraToGray));
+        result = result && BgraToGrayAutoTest(FUNC(Simd::Base::BgraToGray), FUNC(SimdBgraToGray));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BgraToGrayAutoTest(W, H, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
-            result = result && BgraToGrayAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
-            result = result && BgraToGrayAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::BgraToGray), FUNC(Simd::Avx2::BgraToGray));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BgraToGrayAutoTest(FUNC(Simd::Sse2::BgraToGray), FUNC(SimdBgraToGray));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BgraToGrayAutoTest(FUNC(Simd::Avx2::BgraToGray), FUNC(SimdBgraToGray));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BgraToGrayAutoTest(FUNC(Simd::Vsx::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
         return result;    
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool BgraToGrayDataTest(bool create, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View bgra(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        View gray1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View gray2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(bgra);
+
+            TEST_SAVE(bgra);
+
+            f.Call(bgra, gray1);
+
+            TEST_SAVE(gray1);
+        }
+        else
+        {
+            TEST_LOAD(bgra);
+
+            TEST_LOAD(gray1);
+
+            f.Call(bgra, gray2);
+
+            TEST_SAVE(gray2);
+
+            result = result && Compare(gray1, gray2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool BgraToGrayDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BgraToGrayDataTest(create, DW, DH, FUNC(SimdBgraToGray));
+
+        return result;
     }
 }
