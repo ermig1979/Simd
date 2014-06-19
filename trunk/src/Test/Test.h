@@ -160,6 +160,8 @@ namespace Test
     bool BackgroundIncrementCountDataTest(bool create);
     bool BackgroundAdjustRangeDataTest(bool create);
 
+    bool BgraToGrayDataTest(bool create);
+
     bool ConditionalCountDataTest(bool create);
 
     bool GrayToBgraDataTest(bool create);
