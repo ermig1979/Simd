@@ -29,7 +29,11 @@ namespace Simd
     {
         SIMD_INLINE uint32_t GrayToBgra(uint32_t gray, uint32_t alpha)
         {
+#ifdef SIMD_BIG_ENDIAN
+            return alpha | (gray << 8) | (gray << 16) | (gray << 24);
+#else
             return gray | (gray << 8) | (gray << 16) | (alpha << 24);
+#endif
         }
 
         void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
