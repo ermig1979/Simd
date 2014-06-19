@@ -166,5 +166,7 @@ namespace Test
     bool ReduceGray4x4DataTest(bool create);
 
     bool OperationBinary8uDataTest(bool create);
+
+    bool TextureBoostedSaturatedGradientDataTest(bool create);
 }
 #endif//__Test_h__

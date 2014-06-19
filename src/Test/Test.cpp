@@ -258,6 +258,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
     EXECUTE_DATA_TEST(ReduceGray4x4DataTest);
 
+    EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
+
 end:
 
     return result ? 1 : 0;

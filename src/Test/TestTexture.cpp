@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -84,21 +85,36 @@ namespace Test
         return result;
     }
 
+    bool TextureBoostedSaturatedGradientAutoTest(const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
+
+        result = result && TextureBoostedSaturatedGradientAutoTest(W, H, f1, f2);
+        result = result && TextureBoostedSaturatedGradientAutoTest(W + 1, H - 1, f1, f2);
+        result = result && TextureBoostedSaturatedGradientAutoTest(W - 1, H + 1, f1, f2);
+
+        return result;
+    }
+
     bool TextureBoostedSaturatedGradientAutoTest()
     {
         bool result = true;
 
-        result = result && TextureBoostedSaturatedGradientAutoTest(W, H, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
-        result = result && TextureBoostedSaturatedGradientAutoTest(W + 1, H - 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
-        result = result && TextureBoostedSaturatedGradientAutoTest(W - 1, H + 1, FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+        result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && TextureBoostedSaturatedGradientAutoTest(W, H, FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(Simd::Avx2::TextureBoostedSaturatedGradient));
-            result = result && TextureBoostedSaturatedGradientAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(Simd::Avx2::TextureBoostedSaturatedGradient));
-            result = result && TextureBoostedSaturatedGradientAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(Simd::Avx2::TextureBoostedSaturatedGradient));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Vsx::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
         return result;
@@ -319,6 +335,63 @@ namespace Test
             result = result && TexturePerformCompensationAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
         }
 #endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool TextureBoostedSaturatedGradientDataTest(bool create, int width, int height, const Func1 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dx1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dy1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dx2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dy2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const int saturation = 16, boost = 4; 
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, saturation, boost, dx1, dy1);
+
+            TEST_SAVE(dx1);
+            TEST_SAVE(dy1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dx1);
+            TEST_LOAD(dy1);
+
+            f.Call(src, saturation, boost, dx2, dy2);
+
+            TEST_SAVE(dx2);
+            TEST_SAVE(dy2);
+
+            result = result && Compare(dx1, dx2, 0, true, 32, 0, "dx");
+            result = result && Compare(dy1, dy2, 0, true, 32, 0, "dy");
+        }
+
+        return result;
+    }
+
+    bool TextureBoostedSaturatedGradientDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && TextureBoostedSaturatedGradientDataTest(create, DW, DH, FUNC1(SimdTextureBoostedSaturatedGradient));
 
         return result;
     }
