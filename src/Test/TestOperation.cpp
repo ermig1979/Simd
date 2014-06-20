@@ -290,7 +290,7 @@ namespace Test
     //-----------------------------------------------------------------------
 
 #define FUNC_OB8U(format, type, function) \
-    format, type, FuncOB8U(function, std::string(#function) + OperationBinary8uTypeDescription(type) + ColorDescription(format))
+    format, type, FuncOB8U(function, std::string(#function) + Data::Description(type) + Data::Description(format))
 
     bool OperationBinary8uDataTest(bool create, int width, int height, View::Format format, SimdOperationBinary8uType type, const FuncOB8U & f)
     {

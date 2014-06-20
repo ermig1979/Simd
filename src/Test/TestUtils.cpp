@@ -253,27 +253,6 @@ namespace Test
         return "(Unknown)";
     }
 
-    std::string CompareTypeDataDescription(SimdCompareType type)
-    {
-        switch(type)
-        {
-        case SimdCompareEqual:
-            return "_eq";
-        case SimdCompareNotEqual:
-            return "_ne";
-        case SimdCompareGreater:
-            return "_gt";
-        case SimdCompareGreaterOrEqual:
-            return "_ge";
-        case SimdCompareLesser:
-            return "_lt";
-        case SimdCompareLesserOrEqual:
-            return "_le";
-        }
-        assert(0);
-        return "(Unknown)";
-    }
-
     std::string ExpandToLeft(const std::string & value, size_t count)
     {
         assert(count >= value.size());

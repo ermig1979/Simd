@@ -342,6 +342,11 @@ namespace Simd
         {
             return (v128_u16)vec_perm(vec_mule(a, b), vec_mulo(a, b), K8_PERM_MUL_HI_U16);        
         }
+
+        SIMD_INLINE v128_u8 AbsDifferenceU8(v128_u8 a, v128_u8 b)
+        {
+            return vec_sub(vec_max(a, b), vec_min(a, b));
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

@@ -52,6 +52,13 @@ namespace Test
             value = (uint32_t)tmp;
             return result;
         }
+
+        bool Save(const Sums & sums, const std::string & name) const;
+        bool Load(Sums & sums, const std::string & name) const;
+
+        static std::string Description(SimdCompareType type);
+        static std::string Description(SimdOperationBinary8uType type);
+        static std::string Description(View::Format format);
     };
 }
 

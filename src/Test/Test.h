@@ -175,6 +175,8 @@ namespace Test
 
     bool OperationBinary8uDataTest(bool create);
 
+    bool GetAbsDyRowSumsDataTest(bool create);
+
     bool TextureBoostedSaturatedGradientDataTest(bool create);
 }
 #endif//__Test_h__

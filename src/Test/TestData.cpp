@@ -249,4 +249,147 @@ namespace Test
 
         return true;
     }
+
+    bool Data::Save(const Sums & sums, const std::string & name) const
+    {
+        if(!CreatePath(_path))
+            return false;
+
+        std::string path = Path(name);
+        std::ofstream ofs(path);
+        if(ofs.bad())
+        {
+            std::cout << "Can't create file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            size_t size = sums.size();
+
+            ofs << (int)size << std::endl;
+            for(size_t i = 0; i < size; ++i)
+                ofs << sums[i] << " ";
+            ofs << std::endl;
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't save sums to file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ofs.close();
+            return false;
+        }
+
+        ofs.close();
+
+        return true;
+    }
+
+    bool Data::Load(Sums & sums, const std::string & name) const
+    {
+        std::string path = Path(name);
+        std::ifstream ifs(path);
+        if(ifs.bad())
+        {
+            std::cout << "Can't open file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            uint64_t value;
+            ifs >> value;
+            if(value != (uint64_t)sums.size())
+                throw std::runtime_error("Invalid sums size!");
+
+            for(size_t i = 0; i < sums.size(); ++i)
+                ifs >> sums[i];
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't load sums from file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ifs.close();
+            return false;
+        }
+
+        ifs.close();
+
+        return true;
+    }
+
+    std::string Data::Description(SimdCompareType type)
+    {
+        switch(type)
+        {
+        case SimdCompareEqual:
+            return "_Equal";
+        case SimdCompareNotEqual:
+            return "_NotEqual";
+        case SimdCompareGreater:
+            return "_Greater";
+        case SimdCompareGreaterOrEqual:
+            return "_GreaterOrEqual";
+        case SimdCompareLesser:
+            return "_Lesser";
+        case SimdCompareLesserOrEqual:
+            return "_LesserOrEqual";
+        }
+        assert(0);
+        return "_Unknown";
+    }
+
+    std::string Data::Description(SimdOperationBinary8uType type)
+    {
+        switch(type)
+        {
+        case SimdOperationBinary8uAverage:
+            return "_Average";
+        case SimdOperationBinary8uAnd:
+            return "_And";
+        case SimdOperationBinary8uMaximum:
+            return "_Maximum";
+        case SimdOperationBinary8uSaturatedSubtraction:
+            return "_SaturatedSubtraction";
+        }
+        assert(0);
+        return "_Unknown";
+    }
+
+    std::string Data::Description(View::Format format)
+    {
+        switch(format)
+        {
+        case View::None:      
+            return "_None";
+        case View::Gray8:     
+            return "_Gray8";
+        case View::Uv16:      
+            return "_Uv16";
+        case View::Bgr24:     
+            return "_Bgr24";
+        case View::Bgra32:    
+            return "_Bgra32";
+        case View::Int16:     
+            return "_Int16";
+        case View::Int32:     
+            return "_Int32";
+        case View::Int64:     
+            return "_Int64";
+        case View::Float:     
+            return "_Float";
+        case View::Double:    
+            return "_Double";
+        case View::BayerGrbg: 
+            return "_BayerGrgb";
+        case View::BayerGbrg: 
+            return "_BayerGbgr";
+        case View::BayerRggb: 
+            return "_BayerRggb";
+        case View::BayerBggr: 
+            return "_BayerBggr";
+        }
+        assert(0); 
+        return "_Unknown";
+    }
 }

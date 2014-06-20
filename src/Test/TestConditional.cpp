@@ -269,7 +269,7 @@ namespace Test
         FuncC f = FUNC_C(SimdConditionalCount);
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalCountDataTest(create, DW, DH, type, FuncC(f.func, f.description + CompareTypeDataDescription(type)));
+            result = result && ConditionalCountDataTest(create, DW, DH, type, FuncC(f.func, f.description + Data::Description(type)));
         }
 
         return result;

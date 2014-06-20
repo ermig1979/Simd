@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -229,6 +230,17 @@ namespace Test
         return result;
     }
 
+    bool GetSumsAutoTest(const Func3 & f1, const Func3 & f2, bool isRow)
+    {
+        bool result = true;
+
+        result = result && GetSumsAutoTest(W, H, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W + 1, H - 1, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W - 1, H + 1, f1, f2, isRow);
+
+        return result;
+    }
+
     bool GetRowSumsAutoTest()
     {
         bool result = true;
@@ -273,17 +285,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
-        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
-            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
-            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(Simd::Avx2::GetAbsDyRowSums), true);
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Vsx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
         return result;
@@ -387,6 +403,57 @@ namespace Test
             result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
         }
 #endif  
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool GetSumsDataTest(bool create, int width, int height, const Func3 & f, bool isRow)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        size_t size = isRow ? height : width;
+        Sums sums1(size, 0);
+        Sums sums2(size, 0);
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, sums1.data());
+
+            TEST_SAVE(sums1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(sums1);
+
+            f.Call(src, sums2.data());
+
+            TEST_SAVE(sums2);
+
+            result = result && Compare(sums1, sums2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool GetAbsDyRowSumsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GetSumsDataTest(create, DW, DH, FUNC3(SimdGetAbsDyRowSums), true);
 
         return result;
     }
