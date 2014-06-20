@@ -81,6 +81,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray4x4.cpp" />

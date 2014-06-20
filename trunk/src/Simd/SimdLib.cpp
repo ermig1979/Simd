@@ -827,6 +827,11 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Sse2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A + 2*indent)
+        Vsx::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 }
 
