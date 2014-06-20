@@ -250,7 +250,7 @@ namespace Test
         return true;
     }
 
-    bool Data::Save(const Sums & sums, const std::string & name) const
+    bool Data::Save(const uint32_t * data, size_t size, const std::string & name) const
     {
         if(!CreatePath(_path))
             return false;
@@ -265,11 +265,9 @@ namespace Test
 
         try
         {
-            size_t size = sums.size();
-
-            ofs << (int)size << std::endl;
+            ofs << size << std::endl;
             for(size_t i = 0; i < size; ++i)
-                ofs << sums[i] << " ";
+                ofs << data[i] << " ";
             ofs << std::endl;
         }
         catch (std::exception e)
@@ -285,7 +283,7 @@ namespace Test
         return true;
     }
 
-    bool Data::Load(Sums & sums, const std::string & name) const
+    bool Data::Load(uint32_t * data, size_t size, const std::string & name) const
     {
         std::string path = Path(name);
         std::ifstream ifs(path);
@@ -299,11 +297,11 @@ namespace Test
         {
             uint64_t value;
             ifs >> value;
-            if(value != (uint64_t)sums.size())
+            if(value != (uint64_t)size)
                 throw std::runtime_error("Invalid sums size!");
 
-            for(size_t i = 0; i < sums.size(); ++i)
-                ifs >> sums[i];
+            for(size_t i = 0; i < size; ++i)
+                ifs >> data[i];
         }
         catch (std::exception e)
         {

@@ -261,6 +261,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
+    EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
+
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
 
     EXECUTE_DATA_TEST(ReduceGray2x2DataTest);

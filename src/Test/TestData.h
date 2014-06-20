@@ -53,8 +53,26 @@ namespace Test
             return result;
         }
 
-        bool Save(const Sums & sums, const std::string & name) const;
-        bool Load(Sums & sums, const std::string & name) const;
+        bool Save(const uint32_t * data, size_t size, const std::string & name) const;
+        bool Load(uint32_t * data, size_t size, const std::string & name) const;
+
+        inline bool Save(const Sums & sums, const std::string & name) const
+        {
+            return Save(sums.data(), sums.size(), name);
+        }
+        bool Load(Sums & sums, const std::string & name) const
+        {
+            return Load(sums.data(), sums.size(), name);
+        }
+
+        inline bool Save(const Histogram & histogram, const std::string & name) const
+        {
+            return Save(histogram, Simd::HISTOGRAM_SIZE, name);
+        }
+        bool Load(Histogram & histogram, const std::string & name) const
+        {
+            return Load(histogram, Simd::HISTOGRAM_SIZE, name);
+        }
 
         static std::string Description(SimdCompareType type);
         static std::string Description(SimdOperationBinary8uType type);
