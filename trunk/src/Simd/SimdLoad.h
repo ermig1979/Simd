@@ -297,6 +297,11 @@ namespace Simd
             return (v128_u16)Load<align>((const uint8_t*)p);
         }
 
+        template <bool align> SIMD_INLINE v128_u32 Load(const uint32_t * p)
+        {
+            return (v128_u32)Load<align>((const uint8_t*)p);
+        }
+
         template <size_t count> SIMD_INLINE v128_u8 LoadBeforeFirst(v128_u8 first);
 
         template <> SIMD_INLINE v128_u8 LoadBeforeFirst<1>(v128_u8 first)
@@ -384,8 +389,6 @@ namespace Simd
                 return vec_perm(vec_ld(0, _ptr), vec_ld(A, _ptr), _perm);
             }
 
-            v128_u8 value;
-
         private:
             mutable const uint8_t * _ptr;
             v128_u8 _perm;
@@ -415,12 +418,22 @@ namespace Simd
 
         SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 value)
         {
-            return (v128_u16)vec_perm(K8_00, value, K8_PERM_UNPACK_LO_U8);
+            return (v128_u16)vec_perm(value, K8_00, K8_PERM_UNPACK_LO_U8);
         }
 
         SIMD_INLINE v128_u16 UnpackHiU8(v128_u8 value)
         {
-            return (v128_u16)vec_perm(K8_00, value, K8_PERM_UNPACK_HI_U8);
+            return (v128_u16)vec_perm(value, K8_00, K8_PERM_UNPACK_HI_U8);
+        }
+
+        SIMD_INLINE v128_u32 UnpackLoU16(v128_u16 value)
+        {
+            return (v128_u32)vec_perm(value, K16_0000, K8_PERM_UNPACK_LO_U16);
+        }
+
+        SIMD_INLINE v128_u32 UnpackHiU16(v128_u16 value)
+        {
+            return (v128_u32)vec_perm(value, K16_0000, K8_PERM_UNPACK_HI_U16);
         }
     }
 #endif//SIMD_VSX_ENABLE

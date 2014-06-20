@@ -309,17 +309,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
-        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
-            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
-            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(Simd::Avx2::GetAbsDxColSums), false);
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Vsx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
         return result;
@@ -454,6 +458,16 @@ namespace Test
         bool result = true;
 
         result = result && GetSumsDataTest(create, DW, DH, FUNC3(SimdGetAbsDyRowSums), true);
+
+        return result;
+    }
+
+
+    bool GetAbsDxColSumsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GetSumsDataTest(create, DW, DH, FUNC3(SimdGetAbsDxColSums), false);
 
         return result;
     }
