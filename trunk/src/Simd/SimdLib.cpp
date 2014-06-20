@@ -1327,6 +1327,11 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
         Sse2::GetAbsDyRowSums(src, stride, width, height, sums);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::GetAbsDyRowSums(src, stride, width, height, sums);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::GetAbsDyRowSums(src, stride, width, height, sums);
 }
 

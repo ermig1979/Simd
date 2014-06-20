@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxTexture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
