@@ -1347,6 +1347,11 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
         Sse2::GetAbsDxColSums(src, stride, width, height, sums);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::GetAbsDxColSums(src, stride, width, height, sums);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::GetAbsDxColSums(src, stride, width, height, sums);
 }
 

@@ -139,6 +139,11 @@ namespace Simd
             Store<align>((uint8_t*)p, (v128_u8)a);
         }
 
+        template <bool align> SIMD_INLINE void Store(uint32_t * p, v128_u32 a)
+        {
+            Store<align>((uint8_t*)p, (v128_u8)a);
+        }
+
         template <bool align> struct Storer;
 
         template <> struct Storer<true>
