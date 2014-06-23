@@ -36,6 +36,58 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE  
     namespace Vsx
     {
+        template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t * min, uint8_t * max, uint8_t * average)
+        {
+            assert(width*height && width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+            uint64_t sum = 0;
+            v128_u8 min_ = K8_FF;
+            v128_u8 max_ = K8_00;
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 rowSum = K32_00000000;
+                for(size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const v128_u8 value = Load<align>(src + col);
+                    min_ = vec_min(min_, value);
+                    max_ = vec_max(max_, value);
+                    rowSum = vec_msum(value, K8_01, rowSum);
+                }
+                if(width - bodyWidth)
+                {
+                    const v128_u8 value = Load<false>(src + width - A);
+                    min_ = vec_min(min_, value);
+                    max_ = vec_max(max_, value);
+                    rowSum = vec_msum(vec_and(value, tailMask), K8_01, rowSum);
+                }
+                sum += ExtractSum(rowSum);
+                src += stride;
+            }
+
+            *min = UCHAR_MAX;
+            *max = 0;
+            for (size_t i = 0; i < A; ++i)
+            {
+                *min = Base::MinU8(vec_extract(min_, i), *min);
+                *max = Base::MaxU8(vec_extract(max_, i), *max);
+            }
+            *average = (uint8_t)((sum + width*height/2)/(width*height));
+        }
+
+        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            uint8_t * min, uint8_t * max, uint8_t * average)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetStatistic<true>(src, stride, width, height, min, max, average);
+            else
+                GetStatistic<false>(src, stride, width, height, min, max, average);
+        }
+
         template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);

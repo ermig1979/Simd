@@ -53,6 +53,14 @@ namespace Test
             return result;
         }
 
+        inline bool Load(uint8_t & value, const std::string & name) const
+        {
+            uint64_t tmp;
+            bool result = Load(tmp, name);
+            value = (uint8_t)tmp;
+            return result;
+        }
+
         bool Save(const uint32_t * data, size_t size, const std::string & name) const;
         bool Load(uint32_t * data, size_t size, const std::string & name) const;
 
