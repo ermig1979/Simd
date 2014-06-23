@@ -302,6 +302,11 @@ namespace Simd
             return (v128_u32)Load<align>((const uint8_t*)p);
         }
 
+        template <bool align> SIMD_INLINE v128_u8 LoadMaskU8(const uint8_t * p, v128_u8 index)
+        {
+            return (v128_u8)vec_cmpeq(Load<align>(p), index);
+        }
+
         template <size_t count> SIMD_INLINE v128_u8 LoadBeforeFirst(v128_u8 first);
 
         template <> SIMD_INLINE v128_u8 LoadBeforeFirst<1>(v128_u8 first)
