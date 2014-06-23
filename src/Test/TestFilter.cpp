@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -88,8 +89,8 @@ namespace Test
 #define ARGS_C2(function1, function2) \
     ColorFunc(function1, std::string(#function1)), ColorFunc(function2, std::string(#function2))
 
-#define ARGS_G(function1, function2) \
-    GrayFunc(function1, std::string(#function1)), GrayFunc(function2, std::string(#function2))
+#define FUNC_G(function) \
+    GrayFunc(function, std::string(#function))
 
 	bool ColorFilterAutoTest(View::Format format, int width, int height, const ColorFunc & f1, const ColorFunc & f2)
 	{
@@ -143,6 +144,17 @@ namespace Test
             result = result && ColorFilterAutoTest(ARGS_C1(format, W + 1, H - 1, f1, f2));
             result = result && ColorFilterAutoTest(ARGS_C1(format, W - 1, H + 1, f1, f2));
         }
+
+        return result;
+    }
+
+    bool GrayFilterAutoTest(const GrayFunc & f1, const GrayFunc & f2)
+    {
+        bool result = true;
+
+        result = result && GrayFilterAutoTest(W, H, f1, f2);
+        result = result && GrayFilterAutoTest(W + 3, H - 3, f1, f2);
+        result = result && GrayFilterAutoTest(W - 3, H + 3, f1, f2);
 
         return result;
     }
@@ -225,17 +237,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
-		result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
-        result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Base::AbsGradientSaturatedSum, SimdAbsGradientSaturatedSum));
+		result = result && GrayFilterAutoTest(FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
-            result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
-            result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Sse2::AbsGradientSaturatedSum, Simd::Avx2::AbsGradientSaturatedSum));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Sse2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Avx2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Vsx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 		return result;
@@ -245,18 +261,74 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
-        result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
-        result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Base::LbpEstimate, SimdLbpEstimate));
+        result = result && GrayFilterAutoTest(FUNC_G(Simd::Base::LbpEstimate), FUNC_G(SimdLbpEstimate));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GrayFilterAutoTest(W, H, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
-            result = result && GrayFilterAutoTest(W + 1, H - 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
-            result = result && GrayFilterAutoTest(W - 1, H + 1, ARGS_G(Simd::Sse2::LbpEstimate, Simd::Avx2::LbpEstimate));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Sse2::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Avx2::LbpEstimate), FUNC_G(SimdLbpEstimate));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && GrayFilterAutoTest(FUNC_G(Simd::Vsx::AbsGradientSaturatedSum), FUNC_G(SimdLbpEstimate));
+//#endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool GrayFilterDataTest(bool create, int width, int height, const GrayFunc & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint16_t weight = 256*7;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool AbsGradientSaturatedSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GrayFilterDataTest(create, DW, DH, FUNC_G(SimdAbsGradientSaturatedSum));
 
         return result;
     }
