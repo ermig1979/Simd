@@ -1282,6 +1282,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Sse2::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif// SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::GetStatistic(src, stride, width, height, min, max, average);
+    else
+#endif// SIMD_VSX_ENABLE
         Base::GetStatistic(src, stride, width, height, min, max, average);
 }
 

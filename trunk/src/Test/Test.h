@@ -183,6 +183,7 @@ namespace Test
 
     bool GetAbsDyRowSumsDataTest(bool create);
     bool GetAbsDxColSumsDataTest(bool create);
+    bool GetStatisticDataTest(bool create);
 
     bool TextureBoostedSaturatedGradientDataTest(bool create);
 }

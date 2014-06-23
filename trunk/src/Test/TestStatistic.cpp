@@ -73,21 +73,36 @@ namespace Test
 		return result;
 	}
 
+    bool GetStatisticAutoTest(const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
+
+        result = result && GetStatisticAutoTest(W, H, f1, f2);
+        result = result && GetStatisticAutoTest(W + 3, H - 3, f1, f2);
+        result = result && GetStatisticAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
+
 	bool GetStatisticAutoTest()
 	{
 		bool result = true;
 
-		result = result && GetStatisticAutoTest(W, H, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
-		result = result && GetStatisticAutoTest(W + 1, H - 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
-        result = result && GetStatisticAutoTest(W - 1, H + 1, FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+		result = result && GetStatisticAutoTest(FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GetStatisticAutoTest(W, H, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
-            result = result && GetStatisticAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
-            result = result && GetStatisticAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::GetStatistic), FUNC1(Simd::Avx2::GetStatistic));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Sse2::GetStatistic), FUNC1(SimdGetStatistic));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Avx2::GetStatistic), FUNC1(SimdGetStatistic));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Vsx::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
 		return result;
@@ -412,6 +427,62 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
+
+    bool GetStatisticDataTest(bool create, int width, int height, const Func1 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint8_t min1, max1, average1;
+        uint8_t min2, max2, average2;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, &min1, &max1, &average1);
+
+            TEST_SAVE(min1);
+            TEST_SAVE(max1);
+            TEST_SAVE(average1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(min1);
+            TEST_LOAD(max1);
+            TEST_LOAD(average1);
+
+            f.Call(src, &min2, &max2, &average2);
+
+            TEST_SAVE(min2);
+            TEST_SAVE(max2);
+            TEST_SAVE(average2);
+
+            TEST_CHECK_VALUE(min);
+            TEST_CHECK_VALUE(max);
+            TEST_CHECK_VALUE(average);
+        }
+
+        return result;
+    }
+
+    bool GetStatisticDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GetStatisticDataTest(create, DW, DH, FUNC1(SimdGetStatistic));
+
+        return result;
+    }
 
     bool GetSumsDataTest(bool create, int width, int height, const Func3 & f, bool isRow)
     {
