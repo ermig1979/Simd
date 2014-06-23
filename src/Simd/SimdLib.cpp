@@ -1121,6 +1121,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif//SIMD_SSE2_ENABLE
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable)
+        Vsx::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+        shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+    else
+#endif//SIMD_VSX_ENABLE
         Base::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }

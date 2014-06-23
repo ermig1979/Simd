@@ -90,6 +90,25 @@ namespace Simd
         }
 	}
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE v128_u8 SetU8(uint8_t a)
+        {
+            SIMD_ALIGNED(16) uint8_t t[16];
+            t[0] = a;
+            return vec_splat(vec_ld(0, t), 0);
+        }
+
+        SIMD_INLINE v128_u16 SetU16(uint16_t a)
+        {
+            SIMD_ALIGNED(16) uint16_t t[8];
+            t[0] = a;
+            return vec_splat(vec_ld(0, t), 0);
+        }
+    }
+#endif// SIMD_VSX_ENABLE
 }
 
 #endif//__SimdSet_h__

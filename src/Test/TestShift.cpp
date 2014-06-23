@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -50,13 +51,13 @@ namespace Test
 		};
 	}
 
-#define ARGS1(format, width, height, function1, function2) \
+#define ARGS(format, width, height, function1, function2) \
 	format, width, height, \
 	Func(function1.func, function1.description + ColorDescription(format)), \
 	Func(function2.func, function2.description + ColorDescription(format))
 
-#define ARGS2(function1, function2) \
-    Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
+#define FUNC(function) \
+    Func(function, std::string(#function))
 
 	bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
 	{
@@ -78,7 +79,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d2));
 
-		result = result && Compare(d1, d2, 0, true, 10);
+		result = result && Compare(d1, d2, 0, true, 32);
 
 		return result;
 	}
@@ -100,9 +101,9 @@ namespace Test
 
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ShiftAutoTest(ARGS1(format, W, H, f1, f2));
-            result = result && ShiftAutoTest(ARGS1(format, W + 1, H - 1, f1, f2));
-            result = result && ShiftAutoTest(ARGS1(format, W - 1, H + 1, f1, f2));
+            result = result && ShiftAutoTest(ARGS(format, W, H, f1, f2));
+            result = result && ShiftAutoTest(ARGS(format, W + 1, H - 1, f1, f2));
+            result = result && ShiftAutoTest(ARGS(format, W - 1, H + 1, f1, f2));
         }
 
         return result;
@@ -112,13 +113,81 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && ShiftBilinearAutoTest(ARGS2(Simd::Base::ShiftBilinear, SimdShiftBilinear));
+		result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ShiftBilinearAutoTest(ARGS2(Simd::Sse2::ShiftBilinear, Simd::Avx2::ShiftBilinear));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Sse2::ShiftBilinear), FUNC(SimdShiftBilinear));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx2::ShiftBilinear), FUNC(SimdShiftBilinear));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Vsx::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool ShiftBilinearDataTest(bool create, int width, int height, View::Format format, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, format, NULL, TEST_ALIGN(width));
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        const double dx = -5.3, dy = 3.7;
+        const int crop = 3;
+
+        if(create)
+        {
+            FillRandom(s);
+            FillRandom(b);
+            TEST_SAVE(s);
+            TEST_SAVE(b);
+
+            f.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+            TEST_LOAD(b);
+            TEST_LOAD(d1);
+
+            f.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool ShiftBilinearDataTest(bool create)
+    {
+        bool result = true;
+
+        Func f = FUNC(SimdShiftBilinear);
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ShiftBilinearDataTest(create, DW, DH, format, Func(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
 }

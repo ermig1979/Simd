@@ -75,6 +75,10 @@ namespace Simd
         void ReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+            const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
+
         void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
         void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
