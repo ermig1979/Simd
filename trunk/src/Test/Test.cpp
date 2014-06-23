@@ -245,6 +245,7 @@ int ExecuteDataTest(const Options & options)
     bool result = true;
 
     EXECUTE_DATA_TEST(AbsDifferenceSumDataTest);
+    EXECUTE_DATA_TEST(AbsDifferenceSumMaskedDataTest);
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 

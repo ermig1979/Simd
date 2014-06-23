@@ -228,10 +228,10 @@ namespace Test
             result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Avx2::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked), 1);
 #endif 
 
-        //#ifdef SIMD_VSX_ENABLE
-        //        if(Simd::Vsx::Enable)
-        //            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Vsx::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked), 1);
-        //#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Vsx::AbsDifferenceSumMasked), FUNC_M(SimdAbsDifferenceSumMasked), 1);
+#endif 
 
         return result;
     }
@@ -333,6 +333,63 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsDataTest(create, DW, DH, FUNC_S(SimdAbsDifferenceSum), 1);
+
+        return result;
+    }
+
+    bool DifferenceSumsMaskedDataTest(bool create, int width, int height, const FuncM & f, int count)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View m(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        Sums64 s1(count, 0), s2(count, 0);
+
+        uint8_t index = 17;
+
+        if(create)
+        {
+            FillRandom(a);
+            FillRandom(b);
+            FillRandomMask(m, index);
+
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+            TEST_SAVE(m);
+
+            f.Call(a, b, m, index, s1.data());
+
+            TEST_SAVE(s1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+            TEST_LOAD(m);
+
+            TEST_LOAD(s1);
+
+            f.Call(a, b, m, index, s2.data());
+
+            TEST_SAVE(s2);
+
+            result = result && Compare(s1, s2, 0, true, count);
+        }
+
+        return result;
+    }
+
+    bool AbsDifferenceSumMaskedDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSumsMaskedDataTest(create, DW, DH, FUNC_M(SimdAbsDifferenceSumMasked), 1);
 
         return result;
     }
