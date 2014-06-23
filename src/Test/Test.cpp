@@ -118,8 +118,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(AbsGradientSaturatedSumAutoTest);
     EXECUTE_AUTO_TEST(LbpEstimateAutoTest);
 
-    EXECUTE_AUTO_TEST(SquareDifferenceSumAutoTest);
-    EXECUTE_AUTO_TEST(SquareDifferenceSumMaskedAutoTest);
+    EXECUTE_AUTO_TEST(SquaredDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(SquaredDifferenceSumMaskedAutoTest);
     EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
     EXECUTE_AUTO_TEST(AbsDifferenceSumMaskedAutoTest);
     EXECUTE_AUTO_TEST(AbsDifferenceSums3x3AutoTest);
@@ -243,6 +243,8 @@ int ExecuteDataTest(const Options & options)
     using namespace Test;
 
     bool result = true;
+
+    EXECUTE_DATA_TEST(AbsDifferenceSumDataTest);
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 

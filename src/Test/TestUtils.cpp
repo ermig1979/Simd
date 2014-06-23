@@ -185,6 +185,12 @@ namespace Test
         return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
     }
 
+    bool Compare(const Sums64 & a, const Sums64 & b, int differenceMax, bool printError, int errorCountMax)
+    {
+        assert(a.size() == b.size());
+        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
+    }
+
     bool Compare(const Rect & a, const Rect & b, bool printError)
     {
         bool result(a == b);

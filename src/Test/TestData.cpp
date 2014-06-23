@@ -54,6 +54,72 @@ namespace Test
 #endif
     }
 
+    template <class T> bool Data::SaveArray(const T * data, size_t size, const std::string & name) const
+    {
+        if(!CreatePath(_path))
+            return false;
+
+        std::string path = Path(name);
+        std::ofstream ofs(path);
+        if(ofs.bad())
+        {
+            std::cout << "Can't create file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            ofs << size << std::endl;
+            for(size_t i = 0; i < size; ++i)
+                ofs << data[i] << " ";
+            ofs << std::endl;
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't save array to file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ofs.close();
+            return false;
+        }
+
+        ofs.close();
+
+        return true;
+    }
+
+    template <class T> bool Data::LoadArray(T * data, size_t size, const std::string & name) const
+    {
+        std::string path = Path(name);
+        std::ifstream ifs(path);
+        if(ifs.bad())
+        {
+            std::cout << "Can't open file '" << path << "'!" << std::endl; 
+            return false;
+        }
+
+        try
+        {
+            uint64_t value;
+            ifs >> value;
+            if(value != (uint64_t)size)
+                throw std::runtime_error("Invalid sums size!");
+
+            for(size_t i = 0; i < size; ++i)
+                ifs >> data[i];
+        }
+        catch (std::exception e)
+        {
+            std::cout << "Can't load array from file '" << path << "'!" << std::endl; 
+            std::cout << "There is an exception: " << e.what() << std::endl; 
+            ifs.close();
+            return false;
+        }
+
+        ifs.close();
+
+        return true;
+    }
+
     Data::Data(const std::string & test)
     {
         std::stringstream path;
@@ -195,125 +261,52 @@ namespace Test
 
     bool Data::Save(const uint64_t & value, const std::string & name) const
     {
-        if(!CreatePath(_path))
-            return false;
-
-        std::string path = Path(name);
-        std::ofstream ofs(path);
-        if(ofs.bad())
-        {
-            std::cout << "Can't create file '" << path << "'!" << std::endl; 
-            return false;
-        }
-
-        try
-        {
-            ofs << value << std::endl;
-        }
-        catch (std::exception e)
-        {
-            std::cout << "Can't save value to file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
-            ofs.close();
-            return false;
-        }
-
-        ofs.close();
-
-        return true;
+        return SaveArray(&value, 1, name);
     }
 
     bool Data::Load(uint64_t & value, const std::string & name) const
     {
-        std::string path = Path(name);
-        std::ifstream ifs(path);
-        if(ifs.bad())
-        {
-            std::cout << "Can't open file '" << path << "'!" << std::endl; 
-            return false;
-        }
-
-        try
-        {
-            ifs >> value;
-        }
-        catch (std::exception e)
-        {
-            std::cout << "Can't load value from file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
-            ifs.close();
-            return false;
-        }
-
-        ifs.close();
-
-        return true;
+        return LoadArray(&value, 1, name);
     }
 
-    bool Data::Save(const uint32_t * data, size_t size, const std::string & name) const
+    bool Data::Load(uint32_t & value, const std::string & name) const
     {
-        if(!CreatePath(_path))
-            return false;
-
-        std::string path = Path(name);
-        std::ofstream ofs(path);
-        if(ofs.bad())
-        {
-            std::cout << "Can't create file '" << path << "'!" << std::endl; 
-            return false;
-        }
-
-        try
-        {
-            ofs << size << std::endl;
-            for(size_t i = 0; i < size; ++i)
-                ofs << data[i] << " ";
-            ofs << std::endl;
-        }
-        catch (std::exception e)
-        {
-            std::cout << "Can't save sums to file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
-            ofs.close();
-            return false;
-        }
-
-        ofs.close();
-
-        return true;
+        return LoadArray(&value, 1, name);
     }
 
-    bool Data::Load(uint32_t * data, size_t size, const std::string & name) const
+    bool Data::Load(uint8_t & value, const std::string & name) const
     {
-        std::string path = Path(name);
-        std::ifstream ifs(path);
-        if(ifs.bad())
-        {
-            std::cout << "Can't open file '" << path << "'!" << std::endl; 
-            return false;
-        }
+        return LoadArray(&value, 1, name);
+    }
 
-        try
-        {
-            uint64_t value;
-            ifs >> value;
-            if(value != (uint64_t)size)
-                throw std::runtime_error("Invalid sums size!");
+    bool Data::Save(const Sums & sums, const std::string & name) const
+    {
+        return SaveArray(sums.data(), sums.size(), name);
+    }
 
-            for(size_t i = 0; i < size; ++i)
-                ifs >> data[i];
-        }
-        catch (std::exception e)
-        {
-            std::cout << "Can't load sums from file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
-            ifs.close();
-            return false;
-        }
+    bool Data::Load(Sums & sums, const std::string & name) const
+    {
+        return LoadArray(sums.data(), sums.size(), name);
+    }
 
-        ifs.close();
+    bool Data::Save(const Histogram & histogram, const std::string & name) const
+    {
+        return SaveArray(histogram, Simd::HISTOGRAM_SIZE, name);
+    }
 
-        return true;
+    bool Data::Load(Histogram & histogram, const std::string & name) const
+    {
+        return LoadArray(histogram, Simd::HISTOGRAM_SIZE, name);
+    }
+
+    bool Data::Save(const Sums64 & sums, const std::string & name) const
+    {
+        return SaveArray(sums.data(), sums.size(), name);
+    }
+
+    bool Data::Load(Sums64 & sums, const std::string & name) const
+    {
+        return LoadArray(sums.data(), sums.size(), name);
     }
 
     std::string Data::Description(SimdCompareType type)

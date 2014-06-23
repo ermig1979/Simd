@@ -69,8 +69,8 @@ namespace Test
     bool AbsGradientSaturatedSumAutoTest();
     bool LbpEstimateAutoTest();
 
-    bool SquareDifferenceSumAutoTest();
-    bool SquareDifferenceSumMaskedAutoTest();
+    bool SquaredDifferenceSumAutoTest();
+    bool SquaredDifferenceSumMaskedAutoTest();
     bool AbsDifferenceSumAutoTest();
     bool AbsDifferenceSumMaskedAutoTest();
     bool AbsDifferenceSums3x3AutoTest();
@@ -152,6 +152,8 @@ namespace Test
     bool SegmentationFillSingleHolesAutoTest();
 
     /***************************** Data Tests: *******************************/
+
+    bool AbsDifferenceSumDataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
 
