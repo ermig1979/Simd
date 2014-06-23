@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
@@ -74,6 +75,7 @@
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBackground.cpp" />

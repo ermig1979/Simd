@@ -36,6 +36,9 @@ namespace Test
 
         bool CreatePath(const std::string & path) const;
 
+        template <class T> bool SaveArray(const T * data, size_t size, const std::string & name) const;
+        template <class T> bool LoadArray(T * data, size_t size, const std::string & name) const;
+
     public:
         Data(const std::string & name);
 
@@ -44,43 +47,17 @@ namespace Test
 
         bool Save(const uint64_t & value, const std::string & name) const;
         bool Load(uint64_t & value, const std::string & name) const;
+        bool Load(uint32_t & value, const std::string & name) const;
+        bool Load(uint8_t & value, const std::string & name) const;
 
-        inline bool Load(uint32_t & value, const std::string & name) const
-        {
-            uint64_t tmp;
-            bool result = Load(tmp, name);
-            value = (uint32_t)tmp;
-            return result;
-        }
+        bool Save(const Sums & sums, const std::string & name) const;
+        bool Load(Sums & sums, const std::string & name) const;
 
-        inline bool Load(uint8_t & value, const std::string & name) const
-        {
-            uint64_t tmp;
-            bool result = Load(tmp, name);
-            value = (uint8_t)tmp;
-            return result;
-        }
+        bool Save(const Histogram & histogram, const std::string & name) const;
+        bool Load(Histogram & histogram, const std::string & name) const;
 
-        bool Save(const uint32_t * data, size_t size, const std::string & name) const;
-        bool Load(uint32_t * data, size_t size, const std::string & name) const;
-
-        inline bool Save(const Sums & sums, const std::string & name) const
-        {
-            return Save(sums.data(), sums.size(), name);
-        }
-        bool Load(Sums & sums, const std::string & name) const
-        {
-            return Load(sums.data(), sums.size(), name);
-        }
-
-        inline bool Save(const Histogram & histogram, const std::string & name) const
-        {
-            return Save(histogram, Simd::HISTOGRAM_SIZE, name);
-        }
-        bool Load(Histogram & histogram, const std::string & name) const
-        {
-            return Load(histogram, Simd::HISTOGRAM_SIZE, name);
-        }
+        bool Save(const Sums64 & sums, const std::string & name) const;
+        bool Load(Sums64 & sums, const std::string & name) const;
 
         static std::string Description(SimdCompareType type);
         static std::string Description(SimdOperationBinary8uType type);

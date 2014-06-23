@@ -46,6 +46,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxShiftBilinear.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxAbsDifferenceSum.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -88,6 +91,9 @@
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
       <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>
