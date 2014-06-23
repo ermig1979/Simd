@@ -179,6 +179,8 @@ namespace Test
 
     bool OperationBinary8uDataTest(bool create);
 
+    bool ShiftBilinearDataTest(bool create);
+
     bool GetAbsDyRowSumsDataTest(bool create);
     bool GetAbsDxColSumsDataTest(bool create);
 
