@@ -253,6 +253,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BackgroundGrowRangeFastDataTest);
     EXECUTE_DATA_TEST(BackgroundIncrementCountDataTest);
     EXECUTE_DATA_TEST(BackgroundAdjustRangeDataTest);
+    EXECUTE_DATA_TEST(BackgroundAdjustRangeMaskedDataTest);
 
     EXECUTE_DATA_TEST(BgraToGrayDataTest);
 

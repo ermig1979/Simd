@@ -162,6 +162,7 @@ namespace Test
     bool BackgroundGrowRangeFastDataTest(bool create);
     bool BackgroundIncrementCountDataTest(bool create);
     bool BackgroundAdjustRangeDataTest(bool create);
+    bool BackgroundAdjustRangeMaskedDataTest(bool create);
 
     bool BgraToGrayDataTest(bool create);
 

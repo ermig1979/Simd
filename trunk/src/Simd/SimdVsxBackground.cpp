@@ -27,6 +27,7 @@
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -262,7 +263,7 @@ namespace Simd
                 assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
             }
 
-            const v128_u8 _threshold = SIMD_VEC_SET1_EPI8(threshold);
+            const v128_u8 _threshold = SetU8(threshold);
             size_t alignedWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
@@ -309,6 +310,78 @@ namespace Simd
             else
                 BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
                 hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+        }
+
+        template <bool align, bool first> SIMD_INLINE void BackgroundAdjustRangeMasked(const Loader<align> & loCountSrc, const Loader<align> & loValueSrc, 
+            const Loader<align> & hiCountSrc, const Loader<align> & hiValueSrc, const Loader<align> & mask, const v128_u8 & threshold, const v128_u8 & tailMask,
+            Storer<align> & loCountDst, Storer<align> & loValueDst, Storer<align> & hiCountDst, Storer<align> & hiValueDst)
+        {
+            const v128_u8 _mask = vec_and(Load<align, first>(mask), tailMask);
+            BackgroundAdjustRange<align, first>(loCountSrc, loValueSrc, hiCountSrc, hiValueSrc, threshold, _mask, loCountDst, loValueDst, hiCountDst, hiValueDst);
+        }
+
+        template <bool align> void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+                assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+                assert(Aligned(mask) && Aligned(maskStride));
+            }
+
+            const v128_u8 _threshold = SetU8(threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _loCountSrc(loCount), _loValueSrc(loValue), _hiCountSrc(hiCount), _hiValueSrc(hiValue), _mask(mask);
+                Storer<align> _loCountDst(loCount), _loValueDst(loValue), _hiCountDst(hiCount), _hiValueDst(hiValue);
+                BackgroundAdjustRangeMasked<align, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc, _mask,
+                    _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundAdjustRangeMasked<align, false>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc, _mask,
+                    _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                _loValueDst.Flush();
+                _hiValueDst.Flush();
+                _loCountDst.Flush();
+                _hiCountDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    Loader<false> _loCountSrc(loCount + width - A), _loValueSrc(loValue + width - A), 
+                        _hiCountSrc(hiCount + width - A), _hiValueSrc(hiValue + width - A), _mask(mask + width - A);
+                    Storer<false> _loCountDst(loCount + width - A), _loValueDst(loValue + width - A), _hiCountDst(hiCount + width - A), _hiValueDst(hiValue + width - A);
+                    BackgroundAdjustRangeMasked<false, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc, _mask,
+                        _threshold, tailMask, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
+                    _loValueDst.Flush();
+                    _hiValueDst.Flush();
+                    _loCountDst.Flush();
+                    _hiCountDst.Flush();
+                }
+
+                loValue += loValueStride;
+                hiValue += hiValueStride;
+                loCount += loCountStride;
+                hiCount += hiCountStride;
+                mask += maskStride;
+            }		
+        }
+
+        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            if(	Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) && 
+                Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride) &&
+                Aligned(mask) && Aligned(maskStride))
+                BackgroundAdjustRangeMasked<true>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+            else
+                BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
+                hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
         }
     }
 #endif// SIMD_VSX_ENABLE

@@ -70,7 +70,7 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
     if(Sse42::Enable)
         return Sse42::Crc32c(src, size);
     else
-#endif//SIMD_SSE42_ENABLE
+#endif
         return Base::Crc32c(src, size);
 }
 
@@ -155,17 +155,17 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
     if(Avx2::Enable && width >= Avx2::A)
         Simd::Avx2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -177,17 +177,17 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
 }
 
@@ -198,17 +198,17 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
@@ -219,17 +219,17 @@ SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStr
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::BackgroundGrowRangeSlow(value, valueStride, width, height, lo, loStride, hi, hiStride);
 }
 
@@ -240,17 +240,17 @@ SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStr
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
 }
 
@@ -263,19 +263,19 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
         Avx2::BackgroundIncrementCount(value, valueStride, width, height,
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundIncrementCount(value, valueStride, width, height,
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BackgroundIncrementCount(value, valueStride, width, height,
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::BackgroundIncrementCount(value, valueStride, width, height,
         loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 }
@@ -289,19 +289,19 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
         Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold);
 }
@@ -315,13 +315,19 @@ SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountS
         Avx2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
+        hiCount, hiCountStride,hiValue, hiValueStride, threshold, mask, maskStride);
+    else
+#endif
         Base::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
         hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 }
@@ -333,12 +339,12 @@ SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
 }
 
@@ -350,13 +356,13 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
         Avx2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride,
         mask, maskStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride,
         mask, maskStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask,
         maskStride);
 }
@@ -368,12 +374,12 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 
@@ -398,7 +404,7 @@ SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, s
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
     else
-#endif// SIMD_SSSE3_ENABLE
+#endif
         Base::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
 }
 
@@ -408,17 +414,17 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
 }
 
@@ -433,12 +439,12 @@ SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, siz
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
     else
-#endif// SIMD_SSSE3_ENABLE
+#endif
         Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
 }
 
@@ -449,12 +455,12 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::HA)
         Sse2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
 }
 
@@ -464,22 +470,22 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
@@ -490,12 +496,12 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
 }
 
@@ -507,12 +513,12 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
 }
 
@@ -523,17 +529,17 @@ SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t wi
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ConditionalCount(src, stride, width, height, value, compareType, count);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::ConditionalCount(src, stride, width, height, value, compareType, count);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::ConditionalCount(src, stride, width, height, value, compareType, count);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::ConditionalCount(src, stride, width, height, value, compareType, count);
 }
 
@@ -544,12 +550,12 @@ SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t w
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
@@ -560,12 +566,12 @@ SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, si
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
@@ -576,12 +582,12 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
     if(Avx2::Enable && width >= Avx2::A + 3)
         Avx2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A + 3)
         Sse2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
@@ -603,17 +609,17 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
@@ -624,12 +630,12 @@ SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valu
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundGrowRangeSlow(value, valueStride, width, height, background, backgroundStride);
 }
 
@@ -640,12 +646,12 @@ SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valu
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
 }
 
@@ -657,13 +663,13 @@ SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t val
         Avx2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundIncrementCount(value, valueStride, width, height,
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
 }
@@ -676,13 +682,13 @@ SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t ba
         Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
 }
@@ -695,13 +701,13 @@ SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, siz
         Avx2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundAdjustRangeMasked(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold, mask, maskStride);
 }
@@ -713,12 +719,12 @@ SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueSt
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
 }
 
@@ -729,12 +735,12 @@ SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t v
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::EdgeBackgroundShiftRangeMasked(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
 }
 
@@ -755,12 +761,12 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::FillBgr(dst, stride, width, height, blue, green, red);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::FillBgr(dst, stride, width, height, blue, green, red);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::FillBgr(dst, stride, width, height, blue, green, red);
 }
 
@@ -770,12 +776,12 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
 }
 
@@ -786,12 +792,12 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
@@ -801,12 +807,12 @@ SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, si
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
 }
 
@@ -816,17 +822,17 @@ SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
@@ -836,17 +842,17 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
     if(Avx2::Enable && width >= Avx2::A + 2*indent)
         Avx2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A + 2*indent)
         Sse2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A + 2*indent)
         Vsx::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 }
 
@@ -868,12 +874,12 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
     if(Avx2::Enable && width >= Avx2::A + 2)
         Avx2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A + 2)
         Sse2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -883,12 +889,12 @@ SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, si
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
@@ -898,12 +904,12 @@ SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, si
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
@@ -913,12 +919,12 @@ SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, s
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::MedianFilterSquare3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
@@ -928,12 +934,12 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
@@ -944,17 +950,17 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
     if(Avx2::Enable && width*channelCount >= Avx2::A)
         Avx2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width*channelCount >= Vsx::A)
         Vsx::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }
 
@@ -965,12 +971,12 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::HA)
         Sse2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 
@@ -980,12 +986,12 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 
@@ -996,22 +1002,22 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
     if(Avx2::Enable && srcWidth >= Avx2::DA)
         Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && srcWidth >= Ssse3::DA)
         Ssse3::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth >= Sse2::DA)
         Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && srcWidth >= Vsx::DA)
         Vsx::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
@@ -1022,12 +1028,12 @@ SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcH
     if(Avx2::Enable && srcWidth >= Avx2::DA)
         Avx2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth >= Sse2::A)
         Sse2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
 }
 
@@ -1038,17 +1044,17 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
     if(Avx2::Enable && srcWidth > Avx2::DA)
         Avx2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth > Sse2::A)
         Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && srcWidth >= Vsx::DA)
         Vsx::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
@@ -1059,12 +1065,12 @@ SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcH
     if(Avx2::Enable && srcWidth >= Avx2::DA)
         Avx2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth >= Sse2::A)
         Sse2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
 }
 
@@ -1075,12 +1081,12 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
     if(Avx2::Enable && dstWidth >= Avx2::A)
         Avx2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && dstWidth >= Sse2::A)
         Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 }
 
@@ -1090,12 +1096,12 @@ SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, siz
     if(Avx2::Enable && width > Avx2::A + 1)
         Avx2::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A + 1)
         Sse2::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::SegmentationFillSingleHoles(mask, stride, width, height, index);
 }
 
@@ -1106,12 +1112,12 @@ SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, 
     if(Avx2::Enable && width >= Avx2::A && *right - *left >= (ptrdiff_t)Avx2::A)
         Avx2::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A && *right - *left >= (ptrdiff_t)Sse41::A)
         Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
-#endif//SIMD_SSE41_ENABLE
+#endif
         Base::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
 }
 
@@ -1124,19 +1130,19 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         Avx2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable)
         Sse2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable)
         Vsx::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }
@@ -1147,12 +1153,12 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A)
         Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::SobelDx(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -1162,12 +1168,12 @@ SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -1177,12 +1183,12 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A)
         Sse2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::SobelDy(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -1192,12 +1198,12 @@ SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -1207,12 +1213,12 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
     if(Avx2::Enable && width > Avx2::A)
         Avx2::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::ContourMetrics(src, srcStride, width, height, dst, dstStride);
 }
 
@@ -1223,12 +1229,12 @@ SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, si
     if(Avx2::Enable && width > Avx2::A)
         Avx2::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width > Ssse3::A)
         Ssse3::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
 }
 
@@ -1238,12 +1244,12 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
     if(Avx2::Enable && width > Avx2::A)
         Avx2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A)
         Sse2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
 }
 
@@ -1254,12 +1260,12 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
 }
 
@@ -1270,12 +1276,12 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
 }
 
@@ -1286,17 +1292,17 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetStatistic(src, stride, width, height, min, max, average);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetStatistic(src, stride, width, height, min, max, average);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::GetStatistic(src, stride, width, height, min, max, average);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::GetStatistic(src, stride, width, height, min, max, average);
 }
 
@@ -1307,12 +1313,12 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
     if(Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A && width < SHRT_MAX && height < SHRT_MAX)
         Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 }
 
@@ -1322,12 +1328,12 @@ SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetRowSums(src, stride, width, height, sums);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetRowSums(src, stride, width, height, sums);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::GetRowSums(src, stride, width, height, sums);
 }
 
@@ -1337,12 +1343,12 @@ SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, s
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetColSums(src, stride, width, height, sums);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetColSums(src, stride, width, height, sums);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::GetColSums(src, stride, width, height, sums);
 }
 
@@ -1352,17 +1358,17 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetAbsDyRowSums(src, stride, width, height, sums);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetAbsDyRowSums(src, stride, width, height, sums);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::GetAbsDyRowSums(src, stride, width, height, sums);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::GetAbsDyRowSums(src, stride, width, height, sums);
 }
 
@@ -1372,17 +1378,17 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetAbsDxColSums(src, stride, width, height, sums);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetAbsDxColSums(src, stride, width, height, sums);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::GetAbsDxColSums(src, stride, width, height, sums);
     else
-#endif// SIMD_VSX_ENABLE
+#endif
         Base::GetAbsDxColSums(src, stride, width, height, sums);
 }
 
@@ -1392,12 +1398,12 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ValueSum(src, stride, width, height, sum);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::ValueSum(src, stride, width, height, sum);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::ValueSum(src, stride, width, height, sum);
 }
 
@@ -1407,12 +1413,12 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::SquareSum(src, stride, width, height, sum);
     else
-#endif// SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::SquareSum(src, stride, width, height, sum);
     else
-#endif// SIMD_SSE2_ENABLE
+#endif
         Base::SquareSum(src, stride, width, height, sum);
 }
 
@@ -1423,12 +1429,12 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
     if(Avx2::Enable && srcWidth >= Avx2::A)
         Avx2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth >= Sse2::A)
         Sse2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
@@ -1439,17 +1445,17 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
         Vsx::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
-#endif//SIMD_VSX_ENABLE
+#endif
         Base::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 }
 
@@ -1460,12 +1466,12 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
 }
 
@@ -1476,12 +1482,12 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
 }
 
@@ -1492,12 +1498,12 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
@@ -1508,12 +1514,12 @@ SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
     if(Avx2::Enable && width >= Avx2::DA)
         Avx2::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::DA)
         Ssse3::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 }
 
@@ -1524,12 +1530,12 @@ SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
-#endif//SIMD_SSSE3_ENABLE
+#endif
         Base::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 }
 
@@ -1540,12 +1546,12 @@ SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t
     if(Avx2::Enable && width >= Avx2::DA)
         Avx2::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::DA)
         Sse2::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 }
 
@@ -1556,12 +1562,12 @@ SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 }
 
@@ -1572,12 +1578,12 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
     if(Avx2::Enable && width >= Avx2::DA)
         Avx2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::DA)
         Sse2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 }
 
@@ -1588,12 +1594,12 @@ SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t 
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
-#endif//SIMD_AVX2_ENABLE
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
         Sse2::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
-#endif//SIMD_SSE2_ENABLE
+#endif
         Base::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 }
 
