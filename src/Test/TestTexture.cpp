@@ -234,11 +234,18 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lo, hi, &s2));
 
-        if(s1 != s2)
-        {
-            result = false;
-            std::cout << "Error sum: (" << s1 << " != " << s2 << ")! " << std::endl;
-        }
+        TEST_CHECK_VALUE(s);
+
+        return result;
+    }
+
+    bool TextureGetDifferenceSumAutoTest(const Func3 & f1, const Func3 & f2)
+    {
+        bool result = true;
+
+        result = result && TextureGetDifferenceSumAutoTest(W, H, f1, f2);
+        result = result && TextureGetDifferenceSumAutoTest(W + 3, H - 3, f1, f2);
+        result = result && TextureGetDifferenceSumAutoTest(W - 3, H + 3, f1, f2);
 
         return result;
     }
@@ -247,17 +254,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && TextureGetDifferenceSumAutoTest(W, H, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
-        result = result && TextureGetDifferenceSumAutoTest(W + 1, H - 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
-        result = result && TextureGetDifferenceSumAutoTest(W - 1, H + 1, FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+        result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && TextureGetDifferenceSumAutoTest(W, H, FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(Simd::Avx2::TextureGetDifferenceSum));
-            result = result && TextureGetDifferenceSumAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(Simd::Avx2::TextureGetDifferenceSum));
-            result = result && TextureGetDifferenceSumAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(Simd::Avx2::TextureGetDifferenceSum));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Vsx::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
         return result;
@@ -392,6 +403,61 @@ namespace Test
         bool result = true;
 
         result = result && TextureBoostedSaturatedGradientDataTest(create, DW, DH, FUNC1(SimdTextureBoostedSaturatedGradient));
+
+        return result;
+    }
+
+    bool TextureGetDifferenceSumDataTest(bool create, int width, int height, const Func3 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hi(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        int64_t s1, s2;
+
+        if(create)
+        {
+            FillRandom(src);
+            FillRandom(lo);
+            FillRandom(hi);
+
+            TEST_SAVE(src);
+            TEST_SAVE(lo);
+            TEST_SAVE(hi);
+
+            f.Call(src, lo, hi, &s1);
+
+            TEST_SAVE(s1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(lo);
+            TEST_LOAD(hi);
+
+            TEST_LOAD(s1);
+
+            f.Call(src, lo, hi, &s2);
+
+            TEST_SAVE(s2);
+
+            TEST_CHECK_VALUE(s);
+        }
+
+        return result;
+    }
+
+    bool TextureGetDifferenceSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && TextureGetDifferenceSumDataTest(create, DW, DH, FUNC3(SimdTextureGetDifferenceSum));
 
         return result;
     }

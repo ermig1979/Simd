@@ -269,6 +269,11 @@ namespace Test
         return LoadArray(&value, 1, name);
     }
 
+    bool Data::Load(int64_t & value, const std::string & name) const
+    {
+        return LoadArray(&value, 1, name);
+    }
+
     bool Data::Load(uint32_t & value, const std::string & name) const
     {
         return LoadArray(&value, 1, name);

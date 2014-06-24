@@ -47,6 +47,7 @@ namespace Test
 
         bool Save(const uint64_t & value, const std::string & name) const;
         bool Load(uint64_t & value, const std::string & name) const;
+        bool Load(int64_t & value, const std::string & name) const;
         bool Load(uint32_t & value, const std::string & name) const;
         bool Load(uint8_t & value, const std::string & name) const;
 
