@@ -145,7 +145,7 @@ namespace Test
         return false;
     }
 
-    template <class T> bool Compare(const T * a, const T * b, size_t size, int differenceMax, bool printError, int errorCountMax)
+    template <class T> bool Compare(const T * a, const T * b, size_t size, int64_t differenceMax, bool printError, int errorCountMax)
     {
         int errorCount = 0;
         for(size_t i = 0; i < size; ++i)
@@ -154,7 +154,7 @@ namespace Test
             {
                 if(differenceMax > 0)
                 {
-                    int difference = Simd::Base::Max(a[i], b[i]) - Simd::Base::Min(a[i], b[i]);
+                    int64_t difference = Simd::Max<int64_t>(a[i], b[i]) - Simd::Min<int64_t>(a[i], b[i]);
                     if(difference <= differenceMax)
                         continue;
                 }
