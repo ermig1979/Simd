@@ -58,6 +58,10 @@ namespace Simd
             uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
             uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
+        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, 
+            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, 
+            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
+
         void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
         void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
