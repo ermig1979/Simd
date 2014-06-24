@@ -387,6 +387,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
         Sse2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+    else
+#endif
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 

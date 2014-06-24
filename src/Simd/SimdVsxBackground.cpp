@@ -503,6 +503,59 @@ namespace Simd
             else
                 BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
         }
+
+        template <bool align, bool first> SIMD_INLINE void BackgroundInitMask(const Loader<align> & src, Loader<align> & dstSrc, 
+            const v128_u8 & index, const v128_u8 & value, Storer<align> & dstDst)
+        {
+            v128_u8 _mask = (v128_u8)vec_cmpeq(Load<align, first>(src), index);
+            v128_u8 _old = Load<align, first>(dstSrc);
+            v128_u8 _new = vec_and(_mask, value);
+            Store<align, first>(dstDst, vec_sel(_old, _new, _mask));
+        }
+
+        template <bool align> void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 _index = SetU8(index);
+            v128_u8 _value = SetU8(value);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _src(src), _dstSrc(dst);
+                Storer<align> _dstDst(dst);
+                BackgroundInitMask<align, true>(_src, _dstSrc, _index, _value, _dstDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundInitMask<align, false>(_src, _dstSrc, _index, _value, _dstDst);
+                _dstDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    Loader<false> _src(src + width - A), _dstSrc(dst + width - A);
+                    Storer<false> _dstDst(dst + width - A);
+                    BackgroundInitMask<false, true>(_src, _dstSrc, _index, _value, _dstDst);
+                    _dstDst.Flush();
+                }
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
+            else
+                BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

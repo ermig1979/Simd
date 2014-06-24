@@ -145,8 +145,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loValue, hiValue, loCountSrc, hiCountSrc, loCountDst2, hiCountDst2));
 
-		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "lo");
-		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hi");
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 32, 0, "lo");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 32, 0, "hi");
 
 		return result;
 	}
@@ -369,8 +369,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, loSrc, hiSrc, loDst2, hiDst2, mask));
 
-		result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
-		result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+		result = result && Compare(loDst1, loDst2, 0, true, 32, 0, "lo");
+		result = result && Compare(hiDst1, hiDst2, 0, true, 32, 0, "hi");
 
 		return result;
 	}
@@ -414,7 +414,7 @@ namespace Test
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		 uint8_t index = 1 + Random(255);
+		uint8_t index = 1 + Random(255);
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandomMask(src, index);
 
@@ -427,10 +427,21 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, index, 0xFF, dst2));
 
-		result = result && Compare(dst1, dst2, 0, true, 10);
+		result = result && Compare(dst1, dst2, 0, true, 32);
 
 		return result;
 	}
+
+    bool BackgroundInitMaskAutoTest(const Func6 & f1, const Func6 & f2)
+    {
+        bool result = true;
+
+        result = result && BackgroundInitMaskAutoTest(W, H, f1, f2);
+        result = result && BackgroundInitMaskAutoTest(W + 3, H - 3, f1, f2);
+        result = result && BackgroundInitMaskAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
 
 	bool BackgroundGrowRangeSlowAutoTest()
 	{
@@ -604,17 +615,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundInitMaskAutoTest(W, H, FUNC6(Simd::Base::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
-		result = result && BackgroundInitMaskAutoTest(W + 1, H - 1, FUNC6(Simd::Base::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
-        result = result && BackgroundInitMaskAutoTest(W - 1, H + 1, FUNC6(Simd::Base::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+		result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Base::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundInitMaskAutoTest(W, H, FUNC6(Simd::Sse2::BackgroundInitMask), FUNC6(Simd::Avx2::BackgroundInitMask));
-            result = result && BackgroundInitMaskAutoTest(W + 1, H - 1, FUNC6(Simd::Sse2::BackgroundInitMask), FUNC6(Simd::Avx2::BackgroundInitMask));
-            result = result && BackgroundInitMaskAutoTest(W - 1, H + 1, FUNC6(Simd::Sse2::BackgroundInitMask), FUNC6(Simd::Avx2::BackgroundInitMask));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Sse2::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Avx2::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Vsx::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
 		return result;
@@ -983,8 +998,8 @@ namespace Test
             TEST_SAVE(loDst2);
             TEST_SAVE(hiDst2);
 
-            result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
-            result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+            result = result && Compare(loDst1, loDst2, 0, true, 32, 0, "lo");
+            result = result && Compare(hiDst1, hiDst2, 0, true, 32, 0, "hi");
         }
 
         return result;
@@ -995,6 +1010,61 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundShiftRangeMaskedDataTest(create, DW, DH, FUNC5(SimdBackgroundShiftRangeMasked));
+
+        return result;
+    }
+
+
+    bool BackgroundInitMaskDataTest(bool create, int width, int height, const Func6 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint8_t index = 17;
+
+        if(create)
+        {
+            FillRandomMask(src, index);
+
+            memset(dst1.data, 0, dst1.stride*height);
+
+            TEST_SAVE(src);
+
+            f.Call(src, index, 0xFF, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            memset(dst2.data, 0, dst2.stride*height);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, index, 0xFF, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool BackgroundInitMaskDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundInitMaskDataTest(create, DW, DH, FUNC6(SimdBackgroundInitMask));
 
         return result;
     }
