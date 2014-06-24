@@ -62,7 +62,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            v128_u8 _lo, _hi, tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
                 Loader<align> _value(value), _loSrc(lo), _hiSrc(hi);
@@ -382,6 +382,68 @@ namespace Simd
             else
                 BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride, 
                 hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+        }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void BackgroundShiftRange(const Loader<align> & value, const Loader<align> & loSrc, const Loader<align> &  hiSrc, 
+            v128_u8 mask, Storer<align> & loDst, Storer<align> &  hiDst)
+        {
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _lo = Load<align, first>(loSrc);
+            const v128_u8 _hi = Load<align, first>(hiSrc);
+
+            const v128_u8 add = vec_and(mask, vec_subs(_value, _hi));
+            const v128_u8 sub = vec_and(mask, vec_subs(_lo, _value));
+
+            Store<align, first>(loDst, vec_subs(vec_adds(_lo, add), sub));
+            Store<align, first>(hiDst, vec_subs(vec_adds(_hi, add), sub));
+        }
+
+        template <bool align> void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(lo) && Aligned(loStride));
+                assert(Aligned(hi) && Aligned(hiStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _value(value), _loSrc(lo), _hiSrc(hi);
+                Storer<align> _loDst(lo), _hiDst(hi);
+                BackgroundShiftRange<align, true>(_value, _loSrc, _hiSrc, K8_FF, _loDst, _hiDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    BackgroundShiftRange<align, false>(_value, _loSrc, _hiSrc, K8_FF, _loDst, _hiDst);
+                _loDst.Flush();
+                _hiDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
+                    Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
+                    BackgroundShiftRange<false, true>(_value, _loSrc, _hiSrc, tailMask, _loDst, _hiDst);
+                    _loDst.Flush();
+                    _hiDst.Flush();
+                }
+
+                value += valueStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+        }
+
+        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+                BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+            else
+                BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
         }
     }
 #endif// SIMD_VSX_ENABLE

@@ -545,17 +545,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
-		result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
-        result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+		result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Base::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::BackgroundShiftRange), FUNC1(Simd::Avx2::BackgroundShiftRange));
-            result = result && BackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::BackgroundShiftRange), FUNC1(Simd::Avx2::BackgroundShiftRange));
-            result = result && BackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::BackgroundShiftRange), FUNC1(Simd::Avx2::BackgroundShiftRange));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
 		return result;
@@ -901,6 +905,15 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundAdjustRangeMaskedDataTest(create, DW, DH, FUNC4(SimdBackgroundAdjustRangeMasked));
+
+        return result;
+    }
+
+    bool BackgroundShiftRangeDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundShiftRange));
 
         return result;
     }
