@@ -194,5 +194,6 @@ namespace Test
 
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);
+    bool TexturePerformCompensationDataTest(bool create);
 }
 #endif//__Test_h__

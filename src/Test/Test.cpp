@@ -285,6 +285,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
     EXECUTE_DATA_TEST(TextureGetDifferenceSumDataTest);
+    EXECUTE_DATA_TEST(TexturePerformCompensationDataTest);
 
 end:
 

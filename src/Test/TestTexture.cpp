@@ -330,21 +330,36 @@ namespace Test
         return result;
     }
 
+    bool TexturePerformCompensationAutoTest(const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        result = result && TexturePerformCompensationAutoTest(W, H, f1, f2);
+        result = result && TexturePerformCompensationAutoTest(W + 3, H - 3, f1, f2);
+        result = result && TexturePerformCompensationAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
+
     bool TexturePerformCompensationAutoTest()
     {
         bool result = true;
 
-        result = result && TexturePerformCompensationAutoTest(W, H, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
-        result = result && TexturePerformCompensationAutoTest(W + 1, H - 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
-        result = result && TexturePerformCompensationAutoTest(W - 1, H + 1, FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+        result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && TexturePerformCompensationAutoTest(W, H, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
-            result = result && TexturePerformCompensationAutoTest(W + 1, H - 1, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
-            result = result && TexturePerformCompensationAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(Simd::Avx2::TexturePerformCompensation));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Vsx::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
         return result;
@@ -458,6 +473,57 @@ namespace Test
         bool result = true;
 
         result = result && TextureGetDifferenceSumDataTest(create, DW, DH, FUNC3(SimdTextureGetDifferenceSum));
+
+        return result;
+    }
+
+    bool TexturePerformCompensationDataTest(bool create, int width, int height, const Func4 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const int shift = -7;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, shift, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, shift, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool TexturePerformCompensationDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && TexturePerformCompensationDataTest(create, DW, DH, FUNC4(SimdTexturePerformCompensation));
 
         return result;
     }

@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdVsx.h"
+#include "Simd/SimdBase.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdLoad.h"
@@ -29,6 +30,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -167,6 +169,72 @@ namespace Simd
                 TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
             else
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+        }
+
+        template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uint8_t * dst, size_t dstStride)
+        {
+            assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
+            if(align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = src == dst ? ShiftLeft(K8_FF, A - width + alignedWidth) : K8_FF;
+            if(shift > 0)
+            {
+                v128_u8 _shift = SetU8(shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    Storer<align> _dst(dst);
+                    _dst.First(vec_adds(Load<align>(src), _shift));
+                    for (size_t col = A; col < alignedWidth; col += A)
+                        _dst.Next(vec_adds(Load<align>(src + col), _shift));
+                    _dst.Flush();
+                    if(width != alignedWidth)
+                    {
+                        const v128_u8 _src = Load<false>(src + width - A);
+                        Store<false>(dst + width - A, vec_adds(_src, vec_and(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+            if(shift < 0)
+            {
+                v128_u8 _shift = SetU8(-shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    Storer<align> _dst(dst);
+                    _dst.First(vec_subs(Load<align>(src), _shift));
+                    for (size_t col = A; col < alignedWidth; col += A)
+                        _dst.Next(vec_subs(Load<align>(src + col), _shift));
+                    _dst.Flush();
+                    if(width != alignedWidth)
+                    {
+                        const v128_u8 _src = Load<false>(src + width - A);
+                        Store<false>(dst + width - A, vec_subs(_src, vec_and(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+        }
+
+        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            int shift, uint8_t * dst, size_t dstStride)
+        {
+            if(shift == 0)
+            {
+                if(src != dst)
+                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+            else
+                TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
         }
     }
 #endif// SIMD_VSX_ENABLE
