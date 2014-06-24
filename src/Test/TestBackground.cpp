@@ -375,6 +375,17 @@ namespace Test
 		return result;
 	}
 
+    bool BackgroundShiftRangeMaskedAutoTest(const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        result = result && BackgroundShiftRangeMaskedAutoTest(W, H, f1, f2);
+        result = result && BackgroundShiftRangeMaskedAutoTest(W + 3, H - 3, f1, f2);
+        result = result && BackgroundShiftRangeMaskedAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
+
 	namespace
 	{
 		struct Func6
@@ -569,17 +580,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BackgroundShiftRangeMaskedAutoTest(W, H, FUNC5(Simd::Base::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
-		result = result && BackgroundShiftRangeMaskedAutoTest(W + 1, H - 1, FUNC5(Simd::Base::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
-        result = result && BackgroundShiftRangeMaskedAutoTest(W - 1, H + 1, FUNC5(Simd::Base::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+		result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Base::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && BackgroundShiftRangeMaskedAutoTest(W, H, FUNC5(Simd::Sse2::BackgroundShiftRangeMasked), FUNC5(Simd::Avx2::BackgroundShiftRangeMasked));
-            result = result && BackgroundShiftRangeMaskedAutoTest(W + 1, H - 1, FUNC5(Simd::Sse2::BackgroundShiftRangeMasked), FUNC5(Simd::Avx2::BackgroundShiftRangeMasked));
-            result = result && BackgroundShiftRangeMaskedAutoTest(W - 1, H + 1, FUNC5(Simd::Sse2::BackgroundShiftRangeMasked), FUNC5(Simd::Avx2::BackgroundShiftRangeMasked));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Sse2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Vsx::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
 		return result;
@@ -914,6 +929,72 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdBackgroundShiftRange));
+
+        return result;
+    }
+
+    bool BackgroundShiftRangeMaskedDataTest(bool create, int width, int height, const Func5 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View loDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View loDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hiDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(loSrc);
+            FillRandom(hiSrc);
+            FillRandomMask(mask, 0xFF);
+
+            TEST_SAVE(value);
+            TEST_SAVE(loSrc);
+            TEST_SAVE(hiSrc);
+            TEST_SAVE(mask);
+
+            f.Call(value, loSrc, hiSrc, loDst1, hiDst1, mask);
+
+            TEST_SAVE(loDst1);
+            TEST_SAVE(hiDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(loSrc);
+            TEST_LOAD(hiSrc);
+            TEST_LOAD(mask);
+
+            TEST_LOAD(loDst1);
+            TEST_LOAD(hiDst1);
+
+            f.Call(value, loSrc, hiSrc, loDst2, hiDst2, mask);
+
+            TEST_SAVE(loDst2);
+            TEST_SAVE(hiDst2);
+
+            result = result && Compare(loDst1, loDst2, 0, true, 10, 0, "lo");
+            result = result && Compare(hiDst1, hiDst2, 0, true, 10, 0, "hi");
+        }
+
+        return result;
+    }
+
+    bool BackgroundShiftRangeMaskedDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BackgroundShiftRangeMaskedDataTest(create, DW, DH, FUNC5(SimdBackgroundShiftRangeMasked));
 
         return result;
     }
