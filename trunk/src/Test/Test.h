@@ -193,5 +193,6 @@ namespace Test
     bool GetStatisticDataTest(bool create);
 
     bool TextureBoostedSaturatedGradientDataTest(bool create);
+    bool TextureGetDifferenceSumDataTest(bool create);
 }
 #endif//__Test_h__
