@@ -345,6 +345,11 @@ SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride
         Sse2::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
+    else
+#endif
         Base::BackgroundShiftRange(value, valueStride, width, height, lo, loStride, hi, hiStride);
 }
 
