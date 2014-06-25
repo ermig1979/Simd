@@ -285,6 +285,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(GetAbsDyRowSumsDataTest);
     EXECUTE_DATA_TEST(GetAbsDxColSumsDataTest);
     EXECUTE_DATA_TEST(GetStatisticDataTest);
+    EXECUTE_DATA_TEST(GetMomentsDataTest);
 
     EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
     EXECUTE_DATA_TEST(TextureGetDifferenceSumDataTest);

@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -86,6 +87,104 @@ namespace Simd
                 GetStatistic<true>(src, stride, width, height, min, max, average);
             else
                 GetStatistic<false>(src, stride, width, height, min, max, average);
+        }
+
+        SIMD_INLINE void GetMoments(const v128_u16 & row, const v128_u16 & col, 
+            v128_u32 & x, v128_u32 & y, v128_u32 & xx, v128_u32 & xy, v128_u32 & yy)
+        {
+            x = vec_msum(col, K16_0001, x);
+            y = vec_msum(row, K16_0001, y);
+            xx = vec_msum(col, col, xx);
+            xy = vec_msum(col, row, xy);
+            yy = vec_msum(row, row, yy);
+        }
+
+        SIMD_INLINE void SumTo(const v128_u32 & value, uint64_t * sum)
+        {
+            *sum += vec_extract(value, 0);
+            *sum += vec_extract(value, 1);
+            *sum += vec_extract(value, 2);
+            *sum += vec_extract(value, 3);
+        }
+
+        SIMD_INLINE void GetMoments(const v128_u8 & mask, v128_u16 & row, v128_u16 & col, 
+            v128_u32 & area, v128_u32 & x, v128_u32 & y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            area = vec_msum(vec_and(K8_01, mask), K8_01, area);
+
+            v128_u32 _xx = K32_00000000;
+            v128_u32 _xy = K32_00000000;
+            v128_u32 _yy = K32_00000000;
+
+            const v128_u16 lo = (v128_u16)vec_unpackh((v128_s8)mask);
+            GetMoments(vec_and(lo, row), vec_and(lo, col), x, y, _xx, _xy, _yy);
+            col = vec_add(col, K16_0008);
+
+            const v128_u16 hi = (v128_u16)vec_unpackl((v128_s8)mask);
+            GetMoments(vec_and(hi, row), vec_and(hi, col), x, y, _xx, _xy, _yy);
+            col = vec_add(col, K16_0008);
+
+            SumTo(_xx, xx);
+            SumTo(_xy, xy);
+            SumTo(_yy, yy);
+        }
+
+        template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            assert(width >= A && width < SHRT_MAX && height < SHRT_MAX);
+            if(align)
+                assert(Aligned(mask) && Aligned(stride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+
+            const v128_u16 K16_I = SIMD_VEC_SETR_EPI16(0, 1, 2, 3, 4, 5, 6, 7);
+            const v128_u8 _index = SetU8(index);
+            const v128_u16 tailCol = vec_add(K16_I, SetU16(width - A));
+
+            *x = 0;
+            *y = 0;
+            *xx = 0;
+            *xy = 0;
+            *yy = 0;
+
+            v128_u32 _area = K32_00000000;
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u16 _col = K16_I;
+                v128_u16 _row = SetU16(row);
+
+                v128_u32 _x = K32_00000000;
+                v128_u32 _y = K32_00000000;
+
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    v128_u8 _mask = (v128_u8 )vec_cmpeq(Load<align>(mask + col), _index);
+                    GetMoments(_mask, _row, _col, _area, _x, _y, xx, xy, yy);
+                }
+                if(alignedWidth != width)
+                {
+                    v128_u8 _mask = vec_and(vec_cmpeq(Load<false>(mask + width - A), _index), tailMask);
+                    _col = tailCol;
+                    GetMoments(_mask, _row, _col, _area, _x, _y, xx, xy, yy);
+                }
+
+                *x += ExtractSum(_x);
+                *y += ExtractSum(_y);
+
+                mask += stride;
+            }
+            *area = ExtractSum(_area);
+        }
+
+        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+            uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                GetMoments<true>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+            else
+                GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
 
         template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
