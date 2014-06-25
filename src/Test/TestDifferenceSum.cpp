@@ -276,10 +276,10 @@ namespace Test
             result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
 #endif 
 
-        //#ifdef SIMD_VSX_ENABLE
-        //        if(Simd::Vsx::Enable)
-        //            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Vsx::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
-        //#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Vsx::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
+#endif 
 
         return result;
     }
@@ -399,6 +399,16 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsMaskedDataTest(create, DW, DH, FUNC_M(SimdAbsDifferenceSumMasked), 1);
+
+        return result;
+    }
+
+
+    bool AbsDifferenceSums3x3MaskedDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSumsMaskedDataTest(create, DW, DH, FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
 
         return result;
     }
