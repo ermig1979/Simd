@@ -220,10 +220,10 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+#endif 
 
         return result;
     }
