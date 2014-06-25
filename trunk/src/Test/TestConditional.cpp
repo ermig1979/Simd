@@ -196,10 +196,10 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSum), FUNC_S(SimdConditionalSum));
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSum), FUNC_S(SimdConditionalSum));
+#endif 
 
         return result;
     }
