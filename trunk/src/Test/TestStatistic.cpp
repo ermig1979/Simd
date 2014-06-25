@@ -192,11 +192,19 @@ namespace Test
 
         result = result && GetMomentsAutoTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(Simd::Avx2::GetMoments));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(SimdGetMoments));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx2::GetMoments), FUNC_M(SimdGetMoments));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Vsx::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
         return result;
@@ -480,6 +488,75 @@ namespace Test
         bool result = true;
 
         result = result && GetStatisticDataTest(create, DW, DH, FUNC1(SimdGetStatistic));
+
+        return result;
+    }
+
+    bool GetMomentsDataTest(bool create, int width, int height, const FuncM & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        const uint8_t index = 7;
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint64_t area1, x1, y1, xx1, xy1, yy1;
+        uint64_t area2, x2, y2, xx2, xy2, yy2;
+
+        if(create)
+        {
+            FillRandomMask(mask, index);
+
+            TEST_SAVE(mask);
+
+            f.Call(mask, index, &area1, &x1, &y1, &xx1, &xy1, &yy1);
+
+            TEST_SAVE(area1);
+            TEST_SAVE(x1);
+            TEST_SAVE(y1);
+            TEST_SAVE(xx1);
+            TEST_SAVE(xy1);
+            TEST_SAVE(yy1);
+        }
+        else
+        {
+            TEST_LOAD(mask);
+
+            TEST_LOAD(area1);
+            TEST_LOAD(x1);
+            TEST_LOAD(y1);
+            TEST_LOAD(xx1);
+            TEST_LOAD(xy1);
+            TEST_LOAD(yy1);
+
+            f.Call(mask, index, &area2, &x2, &y2, &xx2, &xy2, &yy2);
+
+            TEST_SAVE(area2);
+            TEST_SAVE(x2);
+            TEST_SAVE(y2);
+            TEST_SAVE(xx2);
+            TEST_SAVE(xy2);
+            TEST_SAVE(yy2);
+
+            TEST_CHECK_VALUE(area);
+            TEST_CHECK_VALUE(x);
+            TEST_CHECK_VALUE(y);
+            TEST_CHECK_VALUE(xx);
+            TEST_CHECK_VALUE(xy);
+            TEST_CHECK_VALUE(yy);
+        }
+
+        return result;
+    }
+
+    bool GetMomentsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GetMomentsDataTest(create, DW, DH, FUNC_M(SimdGetMoments));
 
         return result;
     }

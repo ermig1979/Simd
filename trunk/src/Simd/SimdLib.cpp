@@ -1346,6 +1346,11 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
         Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A && width < SHRT_MAX && height < SHRT_MAX)
+        Vsx::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+    else
+#endif
         Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 }
 

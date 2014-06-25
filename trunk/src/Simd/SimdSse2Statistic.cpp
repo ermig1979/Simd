@@ -98,7 +98,7 @@ namespace Simd
             y = _mm_add_epi32(y, _mm_madd_epi16(row, K16_0001));
             xx = _mm_add_epi32(xx, _mm_madd_epi16(col, col));
             xy = _mm_add_epi32(xy, _mm_madd_epi16(col, row));
-            yy = _mm_add_epi32(yy, _mm_madd_epi16(row,row));
+            yy = _mm_add_epi32(yy, _mm_madd_epi16(row, row));
         }
 
         template<> SIMD_INLINE void GetMoments16<false>(__m128i row, __m128i col, 
