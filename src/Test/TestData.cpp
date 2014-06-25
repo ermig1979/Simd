@@ -281,7 +281,10 @@ namespace Test
 
     bool Data::Load(uint8_t & value, const std::string & name) const
     {
-        return LoadArray(&value, 1, name);
+        uint32_t _value;
+        bool result = LoadArray(&_value, 1, name);
+        value = (uint8_t)_value;
+        return result;
     }
 
     bool Data::Save(const Sums & sums, const std::string & name) const

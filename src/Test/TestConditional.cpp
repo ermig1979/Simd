@@ -324,6 +324,7 @@ namespace Test
             FillRandom(mask);
 
             TEST_SAVE(src);
+            TEST_SAVE(mask);
 
             f.Call(src, mask, value, type, s1);
 

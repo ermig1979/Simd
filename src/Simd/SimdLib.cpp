@@ -129,6 +129,11 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
         Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A + 2)
+        Vsx::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+    else
+#endif
         Base::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
 }
 
