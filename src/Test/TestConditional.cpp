@@ -135,13 +135,13 @@ namespace Test
         };
     }
 
-#define ARGS_S1(width, height, type, function1, function2) \
+#define ARGS_S(width, height, type, function1, function2) \
     width, height, type, \
     FuncS(function1.func, function1.description + CompareTypeDescription(type)), \
     FuncS(function2.func, function2.description + CompareTypeDescription(type))
 
-#define ARGS_S2(function1, function2) \
-    FuncS(function1, std::string(#function1)), FuncS(function2, std::string(#function2))
+#define FUNC_S(function) \
+    FuncS(function, std::string(#function))
 
     bool ConditionalSumAutoTest(int width, int height, SimdCompareType type, const FuncS & f1, const FuncS & f2)
     {
@@ -172,9 +172,9 @@ namespace Test
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalSumAutoTest(ARGS_S1(W, H, type, f1, f2));
-            result = result && ConditionalSumAutoTest(ARGS_S1(W + 1, H - 1, type, f1, f2));
-            result = result && ConditionalSumAutoTest(ARGS_S1(W - 1, H + 1, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S(W, H, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S(W + 3, H - 3, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S(W - 3, H + 3, type, f1, f2));
         }
 
         return result;
@@ -184,12 +184,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSum, SimdConditionalSum));
+        result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSum), FUNC_S(SimdConditionalSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSum, Simd::Sse2::ConditionalSum));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSum), FUNC_S(SimdConditionalSum));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSum), FUNC_S(SimdConditionalSum));
+//#endif 
 
         return result;
     }
@@ -198,12 +208,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSquareSum, SimdConditionalSquareSum));
+        result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSquareSum, Simd::Sse2::ConditionalSquareSum));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+//#endif 
 
         return result;
     }
@@ -212,11 +232,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Base::ConditionalSquareGradientSum, SimdConditionalSquareGradientSum));
+        result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ConditionalSumAutoTest(ARGS_S2(Simd::Avx2::ConditionalSquareGradientSum, Simd::Sse2::ConditionalSquareGradientSum));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vsx::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
         return result;
@@ -270,6 +300,86 @@ namespace Test
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCountDataTest(create, DW, DH, type, FuncC(f.func, f.description + Data::Description(type)));
+        }
+
+        return result;
+    }
+
+    bool ConditionalSumDataTest(bool create, int width, int height, SimdCompareType type, const FuncS & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        uint8_t value = 127;
+        uint64_t s1, s2;
+
+        if(create)
+        {
+            FillRandom(src);
+            FillRandom(mask);
+
+            TEST_SAVE(src);
+
+            f.Call(src, mask, value, type, s1);
+
+            TEST_SAVE(s1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(mask);
+
+            TEST_LOAD(s1);
+
+            f.Call(src, mask, value, type, s2);
+
+            TEST_SAVE(s2);
+
+            TEST_CHECK_VALUE(s);
+        }
+
+        return result;
+    }
+
+    bool ConditionalSumDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncS f = FUNC_S(SimdConditionalSum);
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
+        }
+
+        return result;
+    }
+
+    bool ConditionalSquareSumDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncS f = FUNC_S(SimdConditionalSquareSum);
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
+        }
+
+        return result;
+    }
+
+    bool ConditionalSquareGradientSumDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncS f = FUNC_S(SimdConditionalSquareGradientSum);
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
         }
 
         return result;

@@ -172,6 +172,9 @@ namespace Test
     bool BgrToGrayDataTest(bool create);
 
     bool ConditionalCountDataTest(bool create);
+    bool ConditionalSumDataTest(bool create);
+    bool ConditionalSquareSumDataTest(bool create);
+    bool ConditionalSquareGradientSumDataTest(bool create);
 
     bool DeinterleaveUvDataTest(bool create);
 
