@@ -263,6 +263,9 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
 
     EXECUTE_DATA_TEST(ConditionalCountDataTest);
+    EXECUTE_DATA_TEST(ConditionalSumDataTest);
+    EXECUTE_DATA_TEST(ConditionalSquareSumDataTest);
+    EXECUTE_DATA_TEST(ConditionalSquareGradientSumDataTest);
 
     EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
 

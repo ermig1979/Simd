@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -91,6 +92,92 @@ namespace Simd
                 return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
             case SimdCompareLesserOrEqual: 
                 return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
+            }
+        }
+
+        template <bool align>
+        SIMD_INLINE void AddSquareDifference(const uint8_t * src, ptrdiff_t step, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 a = vec_and(Load<align>(src - step), mask);
+            const v128_u8 b = vec_and(Load<align>(src + step), mask);
+            const v128_u8 d = AbsDifferenceU8(a, b);
+            sum = vec_msum(d, d, sum);
+        }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+        {
+            assert(width >= A + 3 && height >= 3);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
+
+            src += srcStride;
+            mask += maskStride;
+            height -= 2;
+
+            size_t alignedWidth = Simd::AlignLo(width - 1, A);
+            v128_u8 noseMask = ShiftRight(K8_FF, 1);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + 1 + alignedWidth);
+
+            v128_u8 _value = SetU8(value);
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 rowSum = K32_00000000;
+                {
+                    const v128_u8 _mask = vec_and(Compare<compareType>(Load<false>(mask + 1), _value), noseMask);
+                    AddSquareDifference<false>(src + 1, 1, _mask, rowSum);
+                    AddSquareDifference<false>(src + 1, srcStride, _mask, rowSum);
+                }
+                for(size_t col = A; col < alignedWidth; col += A)
+                {
+                    const v128_u8 _mask = Compare<compareType>(Load<align>(mask + col), _value);
+                    AddSquareDifference<false>(src + col, 1, _mask, rowSum);
+                    AddSquareDifference<align>(src + col, srcStride, _mask, rowSum);
+                }
+                if(alignedWidth != width - 1)
+                {
+                    size_t offset = width - A - 1;
+                    const v128_u8 _mask = vec_and(Compare<compareType>(Load<false>(mask + offset), _value), tailMask);
+                    AddSquareDifference<false>(src + offset, 1, _mask, rowSum);
+                    AddSquareDifference<false>(src + offset, srcStride, _mask, rowSum);
+                }
+                *sum += ExtractSum(rowSum);
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+                ConditionalSquareGradientSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+            else
+                ConditionalSquareGradientSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+        }
+
+        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalSquareGradientSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareNotEqual: 
+                return ConditionalSquareGradientSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreater: 
+                return ConditionalSquareGradientSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalSquareGradientSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesser: 
+                return ConditionalSquareGradientSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalSquareGradientSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
             default: 
                 assert(0);
             }
