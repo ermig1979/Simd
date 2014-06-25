@@ -568,6 +568,11 @@ SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t w
         Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+    else
+#endif
         Base::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
