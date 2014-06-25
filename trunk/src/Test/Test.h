@@ -155,6 +155,7 @@ namespace Test
 
     bool AbsDifferenceSumDataTest(bool create);
     bool AbsDifferenceSumMaskedDataTest(bool create);
+    bool AbsDifferenceSums3x3DataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
 

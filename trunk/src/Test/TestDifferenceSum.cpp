@@ -252,10 +252,10 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Avx2::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3), 9);
 #endif 
 
-        //#ifdef SIMD_VSX_ENABLE
-        //        if(Simd::Vsx::Enable)
-        //            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Vsx::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3), 9);
-        //#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Vsx::AbsDifferenceSums3x3), FUNC_S(SimdAbsDifferenceSums3x3), 9);
+#endif 
 
         return result;
     }
@@ -333,6 +333,15 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsDataTest(create, DW, DH, FUNC_S(SimdAbsDifferenceSum), 1);
+
+        return result;
+    }
+
+    bool AbsDifferenceSums3x3DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSumsDataTest(create, DW, DH, FUNC_S(SimdAbsDifferenceSums3x3), 9);
 
         return result;
     }

@@ -124,6 +124,86 @@ namespace Simd
             else
                 AbsDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
         }
+
+        template <bool align> void AbsDifferenceSums3(const v128_u8 & current, const uint8_t * background, v128_u32 sums[3])
+        {
+            sums[0] = vec_msum(AbsDifferenceU8(current, Load<align>(background - 1)), K8_01, sums[0]);
+            sums[1] = vec_msum(AbsDifferenceU8(current, Load<false>(background)), K8_01, sums[1]);
+            sums[2] = vec_msum(AbsDifferenceU8(current, Load<false>(background + 1)), K8_01, sums[2]);
+        }
+
+        template <bool align> void AbsDifferenceSums3x3(const v128_u8 & current, const uint8_t * background, size_t stride, v128_u32 sums[9])
+        {
+            AbsDifferenceSums3<align>(current, background - stride, sums + 0);
+            AbsDifferenceSums3<align>(current, background, sums + 3);
+            AbsDifferenceSums3<align>(current, background + stride, sums + 6);
+        }
+
+        template <bool align> void AbsDifferenceSums3Masked(const v128_u8 & current, const uint8_t * background, const v128_u8 & mask, v128_u32 sums[3])
+        {
+            sums[0] = vec_msum(AbsDifferenceU8(current, vec_and(mask, Load<align>(background - 1))), K8_01, sums[0]);
+            sums[1] = vec_msum(AbsDifferenceU8(current, vec_and(mask, Load<false>(background))), K8_01, sums[1]);
+            sums[2] = vec_msum(AbsDifferenceU8(current, vec_and(mask, Load<false>(background + 1))), K8_01, sums[2]);
+        }
+
+        template <bool align> void AbsDifferenceSums3x3Masked(const v128_u8 & current, const uint8_t * background, size_t stride, const v128_u8 & mask, v128_u32 sums[9])
+        {
+            AbsDifferenceSums3Masked<align>(current, background - stride, mask, sums + 0);
+            AbsDifferenceSums3Masked<align>(current, background, mask, sums + 3);
+            AbsDifferenceSums3Masked<align>(current, background + stride, mask, sums + 6);
+        }
+
+        template <bool align> void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, 
+            const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums)
+        {
+            assert(height > 2 && width > A + 2);
+            if(align)
+                assert(Aligned(background) && Aligned(backgroundStride));
+
+            width -= 2;
+            height -= 2;
+            current += 1 + currentStride;
+            background += 1 + backgroundStride;
+
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+
+            for(size_t i = 0; i < 9; ++i)
+                sums[i] = 0;
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 _sums[9];
+                for(size_t i = 0; i < 9; ++i)
+                    _sums[i] = K32_00000000;
+
+                for(size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const v128_u8 _current = Load<false>(current + col);
+                    AbsDifferenceSums3x3<align>(_current, background + col, backgroundStride, _sums);
+                }
+                if(width - bodyWidth)
+                {
+                    const v128_u8 _current = vec_and(tailMask, Load<false>(current + width - A));
+                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, _sums);
+                }
+
+                for(size_t i = 0; i < 9; ++i)
+                    sums[i] += ExtractSum(_sums[i]);
+
+                current += currentStride;
+                background += backgroundStride;
+            }
+        }
+
+        void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+            size_t width, size_t height, uint64_t * sums)
+        {
+            if(Aligned(background) && Aligned(backgroundStride))
+                AbsDifferenceSums3x3<true>(current, currentStride, background, backgroundStride, width, height, sums);
+            else
+                AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
