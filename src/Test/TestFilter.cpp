@@ -196,9 +196,19 @@ namespace Test
 
         result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, Simd::Avx2::MedianFilterRhomb5x5));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
 #endif 
 
         return result;
@@ -403,15 +413,32 @@ namespace Test
         return result;
     }
 
+    bool ColorFilterDataTest(bool create, int width, int height, const ColorFunc & f)
+    {
+        bool result = true;
+
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ColorFilterDataTest(create, width, height, format, ColorFunc(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
+
     bool MedianFilterRhomb3x3DataTest(bool create)
     {
         bool result = true;
 
-        ColorFunc f = FUNC_C(SimdMedianFilterRhomb3x3);
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
-        }
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMedianFilterRhomb3x3));
+
+        return result;
+    }
+
+    bool MedianFilterRhomb5x5DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMedianFilterRhomb5x5));
 
         return result;
     }
@@ -420,11 +447,7 @@ namespace Test
     {
         bool result = true;
 
-        ColorFunc f = FUNC_C(SimdMedianFilterSquare3x3);
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
-        }
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMedianFilterSquare3x3));
 
         return result;
     }
@@ -433,11 +456,7 @@ namespace Test
     {
         bool result = true;
 
-        ColorFunc f = FUNC_C(SimdMedianFilterSquare5x5);
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
-        {
-            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
-        }
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMedianFilterSquare5x5));
 
         return result;
     }
