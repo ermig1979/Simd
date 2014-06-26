@@ -156,6 +156,7 @@ namespace Test
     bool AbsDifferenceSumDataTest(bool create);
     bool AbsDifferenceSumMaskedDataTest(bool create);
     bool AbsDifferenceSums3x3DataTest(bool create);
+    bool AbsDifferenceSums3x3MaskedDataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
 
@@ -200,5 +201,7 @@ namespace Test
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);
     bool TexturePerformCompensationDataTest(bool create);
+
+    bool Yuv420pToBgraDataTest(bool create);
 }
 #endif//__Test_h__

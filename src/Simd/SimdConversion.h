@@ -26,6 +26,8 @@
 
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -424,5 +426,56 @@ namespace Simd
         }
     }
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_VSX_ENABLE    
+    namespace Vsx
+    {
+        SIMD_INLINE v128_s16 AdjustY(v128_u16 y)
+        {
+            return vec_sub((v128_s16)y, K16_Y_ADJUST);
+        }
+
+        SIMD_INLINE v128_s16 AdjustUV(v128_u16 uv)
+        {
+            return vec_sub((v128_s16)uv, K16_UV_ADJUST);
+        }
+
+        SIMD_INLINE v128_s32 PreparedYuvToRed(v128_s16 y_1, v128_s16 v_0)
+        {
+            return vec_sra(vec_msum(y_1, K16_YRGB_RT, vec_msum(v_0, K16_VR_0, (v128_s32)K32_00000000)), K32_YUV_TO_BGR_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 AdjustedYuvToRed(v128_s16 y, v128_s16 v)
+        {
+            return SaturateI16ToU8(vec_pack(
+                PreparedYuvToRed((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)v)), 
+                PreparedYuvToRed((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)v))));
+        }
+
+        SIMD_INLINE v128_s32 PreparedYuvToGreen(v128_s16 y_1, v128_s16 u_v)
+        {
+            return vec_sra(vec_msum(y_1, K16_YRGB_RT, vec_msum(u_v, K16_UG_VG, (v128_s32)K32_00000000)), K32_YUV_TO_BGR_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 AdjustedYuvToGreen(v128_s16 y, v128_s16 u, v128_s16 v)
+        {
+            return SaturateI16ToU8(vec_pack(
+                PreparedYuvToGreen((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16((v128_u16)v, (v128_u16)u)), 
+                PreparedYuvToGreen((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16((v128_u16)v, (v128_u16)u))));
+        }
+
+        SIMD_INLINE v128_s32 PreparedYuvToBlue(v128_s16 y_1, v128_s16 u_0)
+        {
+            return vec_sra(vec_msum(y_1, K16_YRGB_RT, vec_msum(u_0, K16_UB_0, (v128_s32)K32_00000000)), K32_YUV_TO_BGR_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 AdjustedYuvToBlue(v128_s16 y, v128_s16 u)
+        {
+            return SaturateI16ToU8(vec_pack(
+                PreparedYuvToBlue((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)u)), 
+                PreparedYuvToBlue((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)u))));
+        }
+    }
+#endif// SIMD_VSX_ENABLE
 }
 #endif//__SimdConversion_h__

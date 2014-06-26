@@ -91,6 +91,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxYuvToBgra.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
