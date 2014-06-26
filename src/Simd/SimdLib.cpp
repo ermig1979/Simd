@@ -932,6 +932,11 @@ SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, si
         Sse2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width*channelCount >= Vsx::A)
+        Vsx::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
         Base::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 

@@ -100,6 +100,9 @@ namespace Simd
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
 
+        void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t * dst, size_t dstStride);
+
         void MedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
