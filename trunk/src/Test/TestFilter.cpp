@@ -168,12 +168,22 @@ namespace Test
 
         result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, Simd::Avx2::MedianFilterRhomb3x3));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
 #endif 
 
-#if defined(CUDA_ENABLE)
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+#endif 
+
+#ifdef CUDA_ENABLE
         result = result && ColorFilterAutoTest(ARGS_C2(SimdMedianFilterRhomb3x3, CudaMedianFilterRhomb3x3));
 #endif 
 
@@ -388,6 +398,19 @@ namespace Test
             TEST_SAVE(dst2);
 
             result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool MedianFilterRhomb3x3DataTest(bool create)
+    {
+        bool result = true;
+
+        ColorFunc f = FUNC_C(SimdMedianFilterRhomb3x3);
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
         }
 
         return result;
