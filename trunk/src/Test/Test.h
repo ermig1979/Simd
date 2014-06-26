@@ -160,6 +160,8 @@ namespace Test
 
     bool AddFeatureDifferenceDataTest(bool create);
 
+    bool AbsGradientSaturatedSumDataTest(bool create);
+
     bool BackgroundGrowRangeSlowDataTest(bool create);
     bool BackgroundGrowRangeFastDataTest(bool create);
     bool BackgroundIncrementCountDataTest(bool create);
@@ -184,12 +186,12 @@ namespace Test
 
     bool AbsSecondDerivativeHistogramDataTest(bool create);
 
-    bool AbsGradientSaturatedSumDataTest(bool create);
+    bool MedianFilterSquare3x3DataTest(bool create);
+
+    bool OperationBinary8uDataTest(bool create);
 
     bool ReduceGray2x2DataTest(bool create);
     bool ReduceGray4x4DataTest(bool create);
-
-    bool OperationBinary8uDataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);
 

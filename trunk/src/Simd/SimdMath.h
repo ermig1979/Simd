@@ -352,6 +352,13 @@ namespace Simd
         {
             return (v128_u16)vec_min((v128_s16)K16_00FF, vec_max(value, (v128_s16)K16_0000));
         }
+
+        SIMD_INLINE void SortU8(v128_u8 & a, v128_u8 & b)
+        {
+            v128_u8 t = a;
+            a = vec_min(t, b);
+            b = vec_max(t, b);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

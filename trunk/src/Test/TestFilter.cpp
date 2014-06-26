@@ -89,6 +89,9 @@ namespace Test
 #define ARGS_C2(function1, function2) \
     ColorFunc(function1, std::string(#function1)), ColorFunc(function2, std::string(#function2))
 
+#define FUNC_C(function) \
+    ColorFunc(function, std::string(#function))
+
 #define FUNC_G(function) \
     GrayFunc(function, std::string(#function))
 
@@ -141,8 +144,8 @@ namespace Test
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ColorFilterAutoTest(ARGS_C1(format, W, H, f1, f2));
-            result = result && ColorFilterAutoTest(ARGS_C1(format, W + 1, H - 1, f1, f2));
-            result = result && ColorFilterAutoTest(ARGS_C1(format, W - 1, H + 1, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C1(format, W + 3, H - 3, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C1(format, W - 3, H + 3, f1, f2));
         }
 
         return result;
@@ -197,9 +200,19 @@ namespace Test
 
         result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, Simd::Avx2::MedianFilterSquare3x3));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
 #endif 
 
 		return result;
@@ -296,8 +309,6 @@ namespace Test
         View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const uint16_t weight = 256*7;
-
         if(create)
         {
             FillRandom(src);
@@ -329,6 +340,58 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterDataTest(create, DW, DH, FUNC_G(SimdAbsGradientSaturatedSum));
+
+        return result;
+    }
+
+    bool ColorFilterDataTest(bool create, int width, int height, View::Format format, const ColorFunc & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, format, NULL, TEST_ALIGN(width));
+        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool MedianFilterSquare3x3DataTest(bool create)
+    {
+        bool result = true;
+
+        ColorFunc f = FUNC_C(SimdMedianFilterSquare3x3);
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
+        }
 
         return result;
     }
