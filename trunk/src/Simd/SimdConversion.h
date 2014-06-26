@@ -447,9 +447,16 @@ namespace Simd
 
         SIMD_INLINE v128_u16 AdjustedYuvToRed(v128_s16 y, v128_s16 v)
         {
-            return SaturateI16ToU8(vec_pack(
-                PreparedYuvToRed((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)v)), 
-                PreparedYuvToRed((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)v))));
+            v128_s32 lo = PreparedYuvToRed((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)v));
+            v128_s32 hi = PreparedYuvToRed((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)v));
+            return SaturateI16ToU8(vec_pack(lo, hi));
+        }
+
+        SIMD_INLINE v128_u8 YuvToRed(v128_u8 y, v128_u8 v)
+        {
+            v128_u16 lo = AdjustedYuvToRed(AdjustY(UnpackLoU8(y)), AdjustUV(UnpackLoU8(v)));
+            v128_u16 hi = AdjustedYuvToRed(AdjustY(UnpackHiU8(y)), AdjustUV(UnpackHiU8(v)));
+            return vec_pack(lo, hi);
         }
 
         SIMD_INLINE v128_s32 PreparedYuvToGreen(v128_s16 y_1, v128_s16 u_v)
@@ -459,9 +466,16 @@ namespace Simd
 
         SIMD_INLINE v128_u16 AdjustedYuvToGreen(v128_s16 y, v128_s16 u, v128_s16 v)
         {
-            return SaturateI16ToU8(vec_pack(
-                PreparedYuvToGreen((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16((v128_u16)v, (v128_u16)u)), 
-                PreparedYuvToGreen((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16((v128_u16)v, (v128_u16)u))));
+            v128_s32 lo = PreparedYuvToGreen((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16((v128_u16)v, (v128_u16)u));
+            v128_s32 hi = PreparedYuvToGreen((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16((v128_u16)v, (v128_u16)u));
+            return SaturateI16ToU8(vec_pack(lo, hi));
+        }
+
+        SIMD_INLINE v128_u8 YuvToGreen(v128_u8 y, v128_u8 u, v128_u8 v)
+        {
+            v128_u16 lo = AdjustedYuvToGreen(AdjustY(UnpackLoU8(y)), AdjustUV(UnpackLoU8(u)), AdjustUV(UnpackLoU8(v)));
+            v128_u16 hi = AdjustedYuvToGreen(AdjustY(UnpackHiU8(y)), AdjustUV(UnpackHiU8(u)), AdjustUV(UnpackHiU8(v)));
+            return vec_pack(lo, hi);
         }
 
         SIMD_INLINE v128_s32 PreparedYuvToBlue(v128_s16 y_1, v128_s16 u_0)
@@ -471,9 +485,33 @@ namespace Simd
 
         SIMD_INLINE v128_u16 AdjustedYuvToBlue(v128_s16 y, v128_s16 u)
         {
-            return SaturateI16ToU8(vec_pack(
-                PreparedYuvToBlue((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)u)), 
-                PreparedYuvToBlue((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)u))));
+            v128_s32 lo = PreparedYuvToBlue((v128_s16)UnpackLoU16(K16_0001, (v128_u16)y), (v128_s16)UnpackLoU16(K16_0000, (v128_u16)u));
+            v128_s32 hi = PreparedYuvToBlue((v128_s16)UnpackHiU16(K16_0001, (v128_u16)y), (v128_s16)UnpackHiU16(K16_0000, (v128_u16)u));
+            return SaturateI16ToU8(vec_pack(lo, hi));
+        }
+
+        SIMD_INLINE v128_u8 YuvToBlue(v128_u8 y, v128_u8 u)
+        {
+            v128_u16 lo = AdjustedYuvToBlue(AdjustY(UnpackLoU8(y)), AdjustUV(UnpackLoU8(u)));
+            v128_u16 hi = AdjustedYuvToBlue(AdjustY(UnpackHiU8(y)), AdjustUV(UnpackHiU8(u)));
+            return vec_pack(lo, hi);
+        }
+
+        template <int index> v128_u8 InterleaveBgr(v128_u8 blue, v128_u8 green, v128_u8 red);
+
+        template<> SIMD_INLINE v128_u8 InterleaveBgr<0>(v128_u8 blue, v128_u8 green, v128_u8 red)
+        {
+            return vec_perm(vec_perm(blue, green, K8_PERM_INTERLEAVE_BGR_00), red, K8_PERM_INTERLEAVE_BGR_01);
+        }
+
+        template<> SIMD_INLINE v128_u8 InterleaveBgr<1>(v128_u8 blue, v128_u8 green, v128_u8 red)
+        {
+            return vec_perm(vec_perm(blue, green, K8_PERM_INTERLEAVE_BGR_10), red, K8_PERM_INTERLEAVE_BGR_11);
+        }
+
+        template<> SIMD_INLINE v128_u8 InterleaveBgr<2>(v128_u8 blue, v128_u8 green, v128_u8 red)
+        {
+            return vec_perm(vec_perm(blue, green, K8_PERM_INTERLEAVE_BGR_20), red, K8_PERM_INTERLEAVE_BGR_21);
         }
     }
 #endif// SIMD_VSX_ENABLE
