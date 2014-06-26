@@ -239,6 +239,7 @@ namespace Simd
         typedef __vector uint8_t v128_u8;
         typedef __vector int16_t v128_s16;
         typedef __vector uint16_t v128_u16;
+        typedef __vector int32_t v128_s32;
         typedef __vector uint32_t v128_u32;
 
         const size_t A = sizeof(v128_u8);
@@ -264,6 +265,16 @@ namespace Simd
         const v128_u16 K16_FFFF = SIMD_VEC_SET1_EPI16(0xFFFF);
 
         const v128_u32 K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
+
+        const v128_s16 K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST); 
+        const v128_s16 K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);
+
+        const v128_s16 K16_YRGB_RT = SIMD_VEC_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
+        const v128_s16 K16_VR_0 = SIMD_VEC_SET2_EPI16(Base::V_TO_RED_WEIGHT, 0);
+        const v128_s16 K16_UG_VG = SIMD_VEC_SET2_EPI16(Base::U_TO_GREEN_WEIGHT, Base::V_TO_GREEN_WEIGHT);
+        const v128_s16 K16_UB_0 = SIMD_VEC_SET2_EPI16(Base::U_TO_BLUE_WEIGHT, 0);
+
+        const v128_u32 K32_YUV_TO_BGR_AVERAGING_SHIFT = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_AVERAGING_SHIFT);
 
         //(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
         const v128_u8 K8_PERM_LOAD_BEFORE_FIRST_1 = SIMD_VEC_SETR_EPI8(0x0, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE);

@@ -66,6 +66,17 @@ namespace Simd
             std::cout << "} " << std::endl;    
         }
 
+        SIMD_INLINE void Log(const v128_s16 & value, const std::string & name)
+        {
+            std::cout << name << " = { ";
+            for(int i = 0; i < 8; i++)
+            {
+                int element = vec_extract(value, i);
+                std::cout << element << " ";
+            }
+            std::cout << "} " << std::endl;    
+        }
+
         SIMD_INLINE void Log(const v128_u32 & value, const std::string & name)
         {
             std::cout << name << " = { ";

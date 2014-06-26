@@ -247,6 +247,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(AbsDifferenceSumDataTest);
     EXECUTE_DATA_TEST(AbsDifferenceSumMaskedDataTest);
     EXECUTE_DATA_TEST(AbsDifferenceSums3x3DataTest);
+    EXECUTE_DATA_TEST(AbsDifferenceSums3x3MaskedDataTest);
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 
@@ -291,6 +292,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
     EXECUTE_DATA_TEST(TextureGetDifferenceSumDataTest);
     EXECUTE_DATA_TEST(TexturePerformCompensationDataTest);
+
+    EXECUTE_DATA_TEST(Yuv420pToBgraDataTest);
 
 end:
 

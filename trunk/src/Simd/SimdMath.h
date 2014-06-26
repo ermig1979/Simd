@@ -347,6 +347,11 @@ namespace Simd
         {
             return vec_sub(vec_max(a, b), vec_min(a, b));
         }
+
+        SIMD_INLINE v128_u16 SaturateI16ToU8(v128_s16 value)
+        {
+            return (v128_u16)vec_min((v128_s16)K16_00FF, vec_max(value, (v128_s16)K16_0000));
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

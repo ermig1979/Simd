@@ -421,24 +421,24 @@ namespace Simd
             return loader.Next();
         }
 
-        SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 value)
+        SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 a, v128_u8 b = K8_00)
         {
-            return (v128_u16)vec_perm(value, K8_00, K8_PERM_UNPACK_LO_U8);
+            return (v128_u16)vec_perm(a, b, K8_PERM_UNPACK_LO_U8);
         }
 
-        SIMD_INLINE v128_u16 UnpackHiU8(v128_u8 value)
+        SIMD_INLINE v128_u16 UnpackHiU8(v128_u8 a, v128_u8 b = K8_00)
         {
-            return (v128_u16)vec_perm(value, K8_00, K8_PERM_UNPACK_HI_U8);
+            return (v128_u16)vec_perm(a, b, K8_PERM_UNPACK_HI_U8);
         }
 
-        SIMD_INLINE v128_u32 UnpackLoU16(v128_u16 value)
+        SIMD_INLINE v128_u32 UnpackLoU16(v128_u16 a, v128_u16 b = K16_0000)
         {
-            return (v128_u32)vec_perm(value, K16_0000, K8_PERM_UNPACK_LO_U16);
+            return (v128_u32)vec_perm(a, b, K8_PERM_UNPACK_LO_U16);
         }
 
-        SIMD_INLINE v128_u32 UnpackHiU16(v128_u16 value)
+        SIMD_INLINE v128_u32 UnpackHiU16(v128_u16 a, v128_u16 b = K16_0000)
         {
-            return (v128_u32)vec_perm(value, K16_0000, K8_PERM_UNPACK_HI_U16);
+            return (v128_u32)vec_perm(a, b, K8_PERM_UNPACK_HI_U16);
         }
     }
 #endif//SIMD_VSX_ENABLE
