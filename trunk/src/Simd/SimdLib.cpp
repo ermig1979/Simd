@@ -952,6 +952,11 @@ SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, si
         Sse2::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width*channelCount >= Vsx::A)
+        Vsx::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
         Base::MedianFilterRhomb5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
