@@ -1567,6 +1567,11 @@ SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Ssse3::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::DA)
+        Vsx::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+    else
+#endif
         Base::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 }
 

@@ -50,17 +50,11 @@ namespace Simd
             Store<align, false>(bgra, (v128_u8)UnpackHiU16(ra, bg));
         }
 
-        template <bool align, bool first> 
-        SIMD_INLINE void YuvToBgra(const v128_u16 & y, const v128_u16 & u, const v128_u16 & v, const v128_u16 & a, Storer<align> & bgra)
-        {
-            AdjustedYuvToBgra<align, first>(AdjustY(y), AdjustUV(u), AdjustUV(v), a, bgra);
-        }
-
         template <bool align, bool first>
         SIMD_INLINE void YuvToBgra(const v128_u8 & y, const v128_u8 & u, const v128_u8 & v, const v128_u16 & a, Storer<align> & bgra)
         {
-            YuvToBgra<align, first>(UnpackLoU8(y), UnpackLoU8(u), UnpackLoU8(v), a, bgra);
-            YuvToBgra<align, false>(UnpackHiU8(y), UnpackHiU8(u), UnpackHiU8(v), a, bgra);
+            AdjustedYuvToBgra<align, first>(AdjustY(UnpackLoU8(y)), AdjustUV(UnpackLoU8(u)), AdjustUV(UnpackLoU8(v)), a, bgra);
+            AdjustedYuvToBgra<align, false>(AdjustY(UnpackHiU8(y)), AdjustUV(UnpackHiU8(u)), AdjustUV(UnpackHiU8(v)), a, bgra);
         }
 
         template <bool align, bool first> 
