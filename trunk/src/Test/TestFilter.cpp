@@ -224,10 +224,20 @@ namespace Test
 
         result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, Simd::Avx2::MedianFilterSquare5x5));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+#endif
 
 		return result;
 	}
@@ -388,6 +398,19 @@ namespace Test
         bool result = true;
 
         ColorFunc f = FUNC_C(SimdMedianFilterSquare3x3);
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
+
+    bool MedianFilterSquare5x5DataTest(bool create)
+    {
+        bool result = true;
+
+        ColorFunc f = FUNC_C(SimdMedianFilterSquare5x5);
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ColorFilterDataTest(create, DW, DH, format, ColorFunc(f.func, f.description + Data::Description(format)));

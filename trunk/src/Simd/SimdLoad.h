@@ -442,6 +442,33 @@ namespace Simd
             a[2] = LoadAfterLast<step>(a[1]);
         }
 
+        template <bool align, size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, v128_u8 a[5])
+        {
+            a[2] = Load<align>(p);
+            a[1] = LoadBeforeFirst<step>(a[2]);
+            a[0] = LoadBeforeFirst<step>(a[1]);
+            a[3] = Load<false>(p + step);
+            a[4] = Load<false>(p + 2*step);
+        }
+
+        template <bool align, size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, v128_u8 a[5])
+        {
+            a[0] = Load<false>(p - 2*step);
+            a[1] = Load<false>(p - step);
+            a[2] = Load<align>(p);
+            a[3] = Load<false>(p + step);
+            a[4] = Load<false>(p + 2*step);
+        }
+
+        template <bool align, size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, v128_u8 a[5])
+        {
+            a[0] = Load<false>(p - 2*step);
+            a[1] = Load<false>(p - step);
+            a[2] = Load<align>(p);
+            a[3] = LoadAfterLast<step>(a[2]);
+            a[4] = LoadAfterLast<step>(a[3]);
+        }
+
         SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 a, v128_u8 b = K8_00)
         {
             return (v128_u16)vec_perm(a, b, K8_PERM_UNPACK_LO_U8);
