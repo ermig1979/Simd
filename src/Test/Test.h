@@ -187,6 +187,7 @@ namespace Test
     bool AbsSecondDerivativeHistogramDataTest(bool create);
 
     bool MedianFilterSquare3x3DataTest(bool create);
+    bool MedianFilterSquare5x5DataTest(bool create);
 
     bool OperationBinary8uDataTest(bool create);
 

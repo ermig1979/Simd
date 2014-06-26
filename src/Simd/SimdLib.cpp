@@ -982,6 +982,11 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Sse2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width*channelCount >= Vsx::A)
+        Vsx::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
