@@ -251,6 +251,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 
+    EXECUTE_DATA_TEST(AbsGradientSaturatedSumDataTest);
+
     EXECUTE_DATA_TEST(BackgroundGrowRangeSlowDataTest);
     EXECUTE_DATA_TEST(BackgroundGrowRangeFastDataTest);
     EXECUTE_DATA_TEST(BackgroundIncrementCountDataTest);
@@ -275,7 +277,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
 
-    EXECUTE_DATA_TEST(AbsGradientSaturatedSumDataTest);
+    EXECUTE_DATA_TEST(MedianFilterSquare3x3DataTest);
 
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
 
