@@ -97,10 +97,10 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDx), FUNC_S(SimdSobelDx));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDx), FUNC_S(SimdSobelDx));
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDx), FUNC_S(SimdSobelDx));
+#endif 
 
         return result;
     }
@@ -401,6 +401,42 @@ namespace Test
 
             result = result && Compare(dst1, dst2, 0, true, 32, 0);
         }
+
+        return result;
+    }
+
+    bool SobelDxDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdSobelDx));
+
+        return result;
+    }
+
+    bool SobelDxAbsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdSobelDxAbs));
+
+        return result;
+    }
+
+    bool SobelDyDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdSobelDy));
+
+        return result;
+    }
+
+    bool SobelDyAbsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdSobelDyAbs));
 
         return result;
     }

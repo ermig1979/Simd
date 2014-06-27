@@ -1221,6 +1221,11 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
         Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A)
+        Vsx::SobelDx(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
         Base::SobelDx(src, srcStride, width, height, dst, dstStride);
 }
 
