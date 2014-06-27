@@ -1281,6 +1281,11 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
         Ssse3::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A)
+        Vsx::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
         Base::ContourMetrics(src, srcStride, width, height, dst, dstStride);
 }
 

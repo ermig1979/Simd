@@ -23,8 +23,8 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
-
 namespace Test
 {
     namespace
@@ -46,8 +46,8 @@ namespace Test
         };
     }
 
-#define ARGS_S(function1, function2) \
-    FuncS(function1, std::string(#function1)), FuncS(function2, std::string(#function2))
+#define FUNC_S(function) \
+    FuncS(function, std::string(#function))
 
     bool SobelAutoTest(int width, int height, const FuncS & f1, const FuncS & f2)
     {
@@ -85,12 +85,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SobelAutoTest(ARGS_S(Simd::Base::SobelDx, SimdSobelDx));
+        result = result && SobelAutoTest(FUNC_S(Simd::Base::SobelDx), FUNC_S(SimdSobelDx));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && SobelAutoTest(ARGS_S(Simd::Sse2::SobelDx, Simd::Avx2::SobelDx));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Sse2::SobelDx), FUNC_S(SimdSobelDx));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDx), FUNC_S(SimdSobelDx));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDx), FUNC_S(SimdSobelDx));
+//#endif 
 
         return result;
     }
@@ -99,12 +109,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SobelAutoTest(ARGS_S(Simd::Base::SobelDxAbs, SimdSobelDxAbs));
+        result = result && SobelAutoTest(FUNC_S(Simd::Base::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
 
-#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
-            result = result && SobelAutoTest(ARGS_S(Simd::Ssse3::SobelDxAbs, Simd::Avx2::SobelDxAbs));
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Ssse3::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
+//#endif
 
         return result;
     }
@@ -113,12 +133,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SobelAutoTest(ARGS_S(Simd::Base::SobelDy, SimdSobelDy));
+        result = result && SobelAutoTest(FUNC_S(Simd::Base::SobelDy), FUNC_S(SimdSobelDy));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && SobelAutoTest(ARGS_S(Simd::Sse2::SobelDy, Simd::Avx2::SobelDy));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Sse2::SobelDy), FUNC_S(SimdSobelDy));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDy), FUNC_S(SimdSobelDy));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDy), FUNC_S(SimdSobelDy));
+//#endif
 
         return result;
     }
@@ -127,12 +157,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SobelAutoTest(ARGS_S(Simd::Base::SobelDyAbs, SimdSobelDyAbs));
+        result = result && SobelAutoTest(FUNC_S(Simd::Base::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
 
-#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
-            result = result && SobelAutoTest(ARGS_S(Simd::Ssse3::SobelDyAbs, Simd::Avx2::SobelDyAbs));
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Ssse3::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
+//#endif
 
         return result;
     }
@@ -141,12 +181,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SobelAutoTest(ARGS_S(Simd::Base::ContourMetrics, SimdContourMetrics));
+        result = result && SobelAutoTest(FUNC_S(Simd::Base::ContourMetrics), FUNC_S(SimdContourMetrics));
 
-#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
-            result = result && SobelAutoTest(ARGS_S(Simd::Ssse3::ContourMetrics, Simd::Avx2::ContourMetrics));
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Ssse3::ContourMetrics), FUNC_S(SimdContourMetrics));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Avx2::ContourMetrics), FUNC_S(SimdContourMetrics));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::ContourMetrics), FUNC_S(SimdContourMetrics));
+#endif
 
         return result;
     }
@@ -290,6 +340,56 @@ namespace Test
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
             result = result && ContourAnchorsAutoTest(ARGS_A(Simd::Sse2::ContourAnchors, Simd::Avx2::ContourAnchors));
 #endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool SobelDataTest(bool create, int width, int height, const FuncS & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool ContourMetricsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdContourMetrics));
 
         return result;
     }
