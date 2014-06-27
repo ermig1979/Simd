@@ -297,6 +297,11 @@ namespace Simd
             return (v128_u16)Load<align>((const uint8_t*)p);
         }
 
+        template <bool align> SIMD_INLINE v128_s16 Load(const int16_t * p)
+        {
+            return (v128_s16)Load<align>((const uint8_t*)p);
+        }
+
         template <bool align> SIMD_INLINE v128_u32 Load(const uint32_t * p)
         {
             return (v128_u32)Load<align>((const uint8_t*)p);
