@@ -107,6 +107,13 @@ namespace Simd
             t[0] = a;
             return vec_splat(vec_ld(0, t), 0);
         }
+
+        SIMD_INLINE v128_s16 SetI16(int16_t a)
+        {
+            SIMD_ALIGNED(16) int16_t t[8];
+            t[0] = a;
+            return vec_splat(vec_ld(0, t), 0);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

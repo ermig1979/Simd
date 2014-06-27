@@ -1322,6 +1322,11 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
         Sse2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A)
+        Vsx::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+    else
+#endif
         Base::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
 }
 

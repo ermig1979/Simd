@@ -303,8 +303,8 @@ namespace Test
         };
     }
 
-#define ARGS_A(function1, function2) \
-    FuncA(function1, std::string(#function1)), FuncA(function2, std::string(#function2))
+#define FUNC_A(function) \
+    FuncA(function, std::string(#function))
 
     bool ContourAnchorsAutoTest(int width, int height, const FuncA & f1, const FuncA & f2)
     {
@@ -334,8 +334,8 @@ namespace Test
         bool result = true;
 
         result = result && ContourAnchorsAutoTest(W, H, f1, f2);
-        result = result && ContourAnchorsAutoTest(W + 1, H - 1, f1, f2);
-        result = result && ContourAnchorsAutoTest(W - 1, H + 1, f1, f2);
+        result = result && ContourAnchorsAutoTest(W + 3, H - 3, f1, f2);
+        result = result && ContourAnchorsAutoTest(W - 3, H + 3, f1, f2);
 
         return result;
     }
@@ -344,11 +344,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ContourAnchorsAutoTest(ARGS_A(Simd::Base::ContourAnchors, SimdContourAnchors));
+        result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ContourAnchorsAutoTest(ARGS_A(Simd::Sse2::ContourAnchors, Simd::Avx2::ContourAnchors));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse2::ContourAnchors), FUNC_A(SimdContourAnchors));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx2::ContourAnchors), FUNC_A(SimdContourAnchors));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vsx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
         return result;
@@ -452,6 +462,58 @@ namespace Test
         bool result = true;
 
         result = result && ContourMetricsMaskedDataTest(create, DW, DH, FUNC_M(SimdContourMetricsMasked));
+
+        return result;
+    }
+
+    bool ContourAnchorsDataTest(bool create, int width, int height, const FuncA & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, View::Int16, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(s);
+
+            TEST_SAVE(s);
+
+            Simd::Fill(d1, 0);
+
+            f.Call(s, 3, 0, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(d1);
+
+            Simd::Fill(d2, 0);
+
+            f.Call(s, 3, 0, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool ContourAnchorsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ContourAnchorsDataTest(create, DW, DH, FUNC_A(SimdContourAnchors));
 
         return result;
     }
