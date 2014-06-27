@@ -237,9 +237,9 @@ namespace Test
                         for(size_t i = 0; i < channelSize; ++i)
                         {
 #ifdef SIMD_BIG_ENDIAN
-                            data[i] = ((uint8_t*)&value)[7 - i];
+                            data[i] = (value >> 8*(channelSize - i - 1))&0xFF;
 #else
-                            data[i] = ((uint8_t*)&value)[i];
+                            data[i] = (value >> 8*i)&0xFF;
 #endif                    
                         }
                     }
@@ -271,7 +271,10 @@ namespace Test
 
     bool Data::Load(int64_t & value, const std::string & name) const
     {
-        return LoadArray(&value, 1, name);
+        uint64_t _value;
+        bool result = LoadArray(&_value, 1, name);
+        value = (int64_t)_value;
+        return result;
     }
 
     bool Data::Load(uint32_t & value, const std::string & name) const

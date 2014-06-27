@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -137,6 +138,76 @@ namespace Simd
                 ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
                 ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        template<bool align, bool first> SIMD_INLINE void ContourMetricsMasked(v128_u8 a[3][3], const uint8_t * mask, const v128_u8 & indexMin, Storer<align> & dst)
+        {
+            v128_u8 m = GreaterOrEqual(Load<align>(mask), indexMin);
+            v128_u16 lo, hi;
+            ContourMetrics(a, lo, hi);
+            Store<align, first>(dst, vec_and(lo, UnpackLoU8(m, m))); 
+            Store<align, false>(dst, vec_and(hi, UnpackHiU8(m, m))); 
+        }
+
+        template <bool align> void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t indexMin, int16_t * dst, size_t dstStride)
+        {
+            assert(width > A);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Sse2::Aligned(dstStride, HA) && Aligned(mask) && Aligned(maskStride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+            v128_u8 _indexMin = SetU8(indexMin);
+            v128_u8 a[3][3];
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride*(row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                Storer<align> _dst(dst);
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                ContourMetricsMasked<align, true>(a, mask, _indexMin, _dst);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    ContourMetricsMasked<align, false>(a, mask + col, _indexMin, _dst);
+                }
+                _dst.Flush();
+
+                {
+                    Storer<false> _dst(dst + width - A);
+                    LoadTail3<false, 1>(src0 + width - A, a[0]);
+                    LoadTail3<false, 1>(src1 + width - A, a[1]);
+                    LoadTail3<false, 1>(src2 + width - A, a[2]);
+                    ContourMetricsMasked<false, true>(a, mask + width - A, _indexMin, _dst);
+                    _dst.Flush();
+                }
+
+                dst += dstStride;
+                mask += maskStride;
+            }
+        }
+
+        void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride) && Aligned(mask) && Aligned(maskStride))
+                ContourMetricsMasked<true>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
     }
 #endif// SIMD_VSX_ENABLE

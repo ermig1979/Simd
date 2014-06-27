@@ -221,8 +221,8 @@ namespace Test
         };
     }
 
-#define ARGS_M(function1, function2) \
-    FuncM(function1, std::string(#function1)), FuncM(function2, std::string(#function2))
+#define FUNC_M(function) \
+    FuncM(function, std::string(#function))
 
     bool ContourMetricsMaskedAutoTest(int width, int height, const FuncM & f1, const FuncM & f2)
     {
@@ -263,12 +263,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ContourMetricsMaskedAutoTest(ARGS_M(Simd::Base::ContourMetricsMasked, SimdContourMetricsMasked));
+        result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
-#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
-            result = result && ContourMetricsMaskedAutoTest(ARGS_M(Simd::Ssse3::ContourMetricsMasked, Simd::Avx2::ContourMetricsMasked));
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Ssse3::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx2::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vsx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+#endif
 
         return result;
     }
@@ -390,6 +400,58 @@ namespace Test
         bool result = true;
 
         result = result && SobelDataTest(create, DW, DH, FUNC_S(SimdContourMetrics));
+
+        return result;
+    }
+
+    bool ContourMetricsMaskedDataTest(bool create, int width, int height, const FuncM & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(src);
+            FillRandom(mask);
+
+            TEST_SAVE(src);
+            TEST_SAVE(mask);
+
+            f.Call(src, mask, 128, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(mask);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, mask, 128, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool ContourMetricsMaskedDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ContourMetricsMaskedDataTest(create, DW, DH, FUNC_M(SimdContourMetricsMasked));
 
         return result;
     }

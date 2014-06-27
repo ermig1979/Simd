@@ -191,6 +191,11 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE    
     namespace Vsx
     {
+        SIMD_INLINE v128_u8 GreaterOrEqual(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u8)vec_cmpeq(vec_max(a, b), a);
+        }
+
         template<SimdCompareType compareType> SIMD_INLINE v128_u8 Compare(v128_u8 a, v128_u8 b);
 
         template<> SIMD_INLINE v128_u8 Compare<SimdCompareEqual>(v128_u8 a, v128_u8 b)
@@ -210,7 +215,7 @@ namespace Simd
 
         template<> SIMD_INLINE v128_u8 Compare<SimdCompareGreaterOrEqual>(v128_u8 a, v128_u8 b)
         {
-            return vec_xor((v128_u8)vec_cmplt(a, b), K8_FF);
+            return GreaterOrEqual(a, b);
         }
 
         template<> SIMD_INLINE v128_u8 Compare<SimdCompareLesser>(v128_u8 a, v128_u8 b)
