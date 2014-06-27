@@ -364,6 +364,11 @@ namespace Simd
         {
             return vec_sr(vec_add(vec_add(value, K16_0001), vec_sr(value, K16_0008)), K16_0008);
         }
+
+        SIMD_INLINE v128_u16 BinomialSum(const v128_u16 & a, const v128_u16 & b, const v128_u16 & c)
+        {
+            return vec_add(vec_add(a, c), vec_add(b, b));
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }
