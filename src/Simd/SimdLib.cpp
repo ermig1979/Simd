@@ -1049,6 +1049,11 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Sse2::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::VectorProduct(vertical, horizontal, dst, stride, width, height);
+    else
+#endif
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 

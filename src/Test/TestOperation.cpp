@@ -267,21 +267,36 @@ namespace Test
         return result;
     }
 
+    bool VectorProductAutoTest(const FuncVP & f1, const FuncVP & f2)
+    {
+        bool result = true;
+
+        result = result && VectorProductAutoTest(W, H, f1, f2);
+        result = result && VectorProductAutoTest(W - 3, H + 3, f1, f2);
+        result = result && VectorProductAutoTest(W + 3, H - 3, f1, f2);
+
+        return result;
+    }
+
     bool VectorProductAutoTest()
     {
         bool result = true;
 
-        result = result && VectorProductAutoTest(W, H, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
-        result = result && VectorProductAutoTest(W - 1, H + 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
-        result = result && VectorProductAutoTest(W + 1, H - 1, ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
+        result = result && VectorProductAutoTest(ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && VectorProductAutoTest(W, H, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
-            result = result && VectorProductAutoTest(W - 1, H + 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
-            result = result && VectorProductAutoTest(W + 1, H - 1, ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(Simd::Sse2::VectorProduct));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && VectorProductAutoTest(ARGS_VP(Simd::Sse2::VectorProduct), ARGS_VP(SimdVectorProduct));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && VectorProductAutoTest(ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(SimdVectorProduct));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && VectorProductAutoTest(ARGS_VP(Simd::Vsx::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
         return result;
@@ -342,6 +357,49 @@ namespace Test
             {
                 result = result && OperationBinary8uDataTest(create, DW, DH, FUNC_OB8U(format, type, SimdOperationBinary8u));
             }
+        }
+
+        return result;
+    }
+
+    bool VectorProductDataTest(bool create, int width, int height, const FuncVP & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View v(height, 1, View::Gray8, NULL, TEST_ALIGN(height));
+        View h(width, 1, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(v);
+            FillRandom(h);
+
+            TEST_SAVE(v);
+            TEST_SAVE(h);
+
+            f.Call(v, h, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(v);
+            TEST_LOAD(h);
+
+            TEST_LOAD(d1);
+
+            f.Call(v, h, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
         }
 
         return result;
