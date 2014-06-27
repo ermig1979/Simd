@@ -210,6 +210,16 @@ namespace Simd
                 SobelDy<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
+        void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
         SIMD_INLINE v128_u16 ContourMetrics(v128_u16 dx, v128_u16 dy)
         {
             return vec_or(vec_sl(vec_add(dx, dy), K16_0001), vec_and(vec_cmplt(dx, dy), K16_0001)); 
