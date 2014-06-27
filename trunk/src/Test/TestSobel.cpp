@@ -121,10 +121,10 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
-//#endif
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
+#endif
 
         return result;
     }

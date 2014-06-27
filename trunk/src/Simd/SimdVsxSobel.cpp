@@ -126,6 +126,16 @@ namespace Simd
                 SobelDx<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
+        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(dst) && Aligned(dstStride))
+                SobelDx<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
         template <bool abs> SIMD_INLINE void SobelDy(v128_u8 a[3][3], v128_u16 & lo, v128_u16 & hi)
         {
             lo = ConditionalAbs<abs>(BinomialSum(

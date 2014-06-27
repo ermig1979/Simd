@@ -129,6 +129,8 @@ namespace Simd
 
         void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+        void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
         void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
