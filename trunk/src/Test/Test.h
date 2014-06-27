@@ -199,6 +199,7 @@ namespace Test
     bool ShiftBilinearDataTest(bool create);
 
     bool ContourMetricsDataTest(bool create);
+    bool ContourMetricsMaskedDataTest(bool create);
 
     bool GetAbsDyRowSumsDataTest(bool create);
     bool GetAbsDxColSumsDataTest(bool create);

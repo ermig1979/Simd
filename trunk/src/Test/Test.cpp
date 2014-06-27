@@ -290,6 +290,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ShiftBilinearDataTest);
 
     EXECUTE_DATA_TEST(ContourMetricsDataTest);
+    EXECUTE_DATA_TEST(ContourMetricsMaskedDataTest);
 
     EXECUTE_DATA_TEST(GetAbsDyRowSumsDataTest);
     EXECUTE_DATA_TEST(GetAbsDxColSumsDataTest);
