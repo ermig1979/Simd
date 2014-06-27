@@ -27,6 +27,7 @@
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -119,6 +120,47 @@ namespace Simd
                 OperationBinary8u<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
             else
                 OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+        }
+
+        template <bool align, bool first> SIMD_INLINE void VectorProduct(const v128_u16 & vertical, const uint8_t * horizontal, Storer<align> & dst)
+        {
+            v128_u8 _horizontal = Load<align>(horizontal);
+            v128_u16 lo = DivideBy255(vec_mladd(vertical, UnpackLoU8(_horizontal), K16_0000));
+            v128_u16 hi = DivideBy255(vec_mladd(vertical, UnpackHiU8(_horizontal), K16_0000));
+            Store<align, first>(dst, vec_pack(lo, hi));
+        } 
+
+        template <bool align> void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u16 _vertical = SetU16(vertical[row]);
+                Storer<align> _dst(dst);
+                VectorProduct<align, true>(_vertical, horizontal, _dst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    VectorProduct<align, false>(_vertical, horizontal + col, _dst);
+                _dst.Flush();
+                if(alignedWidth != width)
+                {
+                    Storer<false> _dst(dst + width - A);
+                    VectorProduct<false, true>(_vertical, horizontal + width - A, _dst);
+                    _dst.Flush();
+                }
+                dst += stride;
+            }
+        }
+
+        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+        {
+            if(Aligned(horizontal) && Aligned(dst) && Aligned(stride))
+                VectorProduct<true>(vertical, horizontal, dst, stride, width, height);
+            else
+                VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
         }
     }
 #endif// SIMD_VSX_ENABLE

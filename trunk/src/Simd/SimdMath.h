@@ -359,6 +359,11 @@ namespace Simd
             a = vec_min(t, b);
             b = vec_max(t, b);
         }
+
+        SIMD_INLINE v128_u16 DivideBy255(v128_u16 value)
+        {
+            return vec_sr(vec_add(vec_add(value, K16_0001), vec_sr(value, K16_0008)), K16_0008);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }
