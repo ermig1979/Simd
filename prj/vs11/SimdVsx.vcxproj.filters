@@ -108,6 +108,9 @@
     <ClInclude Include="..\..\src\Simd\SimdExtract.h">
       <Filter>Sys</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sys">

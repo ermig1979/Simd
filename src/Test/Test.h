@@ -198,6 +198,10 @@ namespace Test
 
     bool ShiftBilinearDataTest(bool create);
 
+    bool SobelDxDataTest(bool create);
+    bool SobelDxAbsDataTest(bool create);
+    bool SobelDyDataTest(bool create);
+    bool SobelDyAbsDataTest(bool create);
     bool ContourMetricsDataTest(bool create);
     bool ContourMetricsMaskedDataTest(bool create);
 

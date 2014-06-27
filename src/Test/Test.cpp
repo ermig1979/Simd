@@ -289,6 +289,10 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(ShiftBilinearDataTest);
 
+    EXECUTE_DATA_TEST(SobelDxDataTest);
+    EXECUTE_DATA_TEST(SobelDxAbsDataTest);
+    EXECUTE_DATA_TEST(SobelDyDataTest);
+    EXECUTE_DATA_TEST(SobelDyAbsDataTest);
     EXECUTE_DATA_TEST(ContourMetricsDataTest);
     EXECUTE_DATA_TEST(ContourMetricsMaskedDataTest);
 
