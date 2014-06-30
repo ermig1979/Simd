@@ -31,7 +31,11 @@ namespace Simd
         {
             if(fillAlpha)
             {
-				const int32_t alphaMask = alpha << 24;
+#ifdef SIMD_BIG_ENDIAN
+                const int32_t alphaMask = alpha;
+#else
+                const int32_t alphaMask = alpha << 24;
+#endif
                 for(size_t i = (lastRow ? 1 : 0); i < size; ++i, bgr += 3, bgra += 4)
                 {
                     *(int32_t*)bgra = (*(int32_t*)bgr) | alphaMask;
