@@ -171,6 +171,8 @@ namespace Test
     bool BackgroundShiftRangeMaskedDataTest(bool create);
     bool BackgroundInitMaskDataTest(bool create);
 
+    bool BgraToBgrDataTest(bool create);
+
     bool BgraToGrayDataTest(bool create);
 
     bool BgrToGrayDataTest(bool create);
