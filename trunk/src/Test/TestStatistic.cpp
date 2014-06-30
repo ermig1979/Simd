@@ -258,8 +258,8 @@ namespace Test
         bool result = true;
 
         result = result && GetSumsAutoTest(W, H, f1, f2, isRow);
-        result = result && GetSumsAutoTest(W + 1, H - 1, f1, f2, isRow);
-        result = result && GetSumsAutoTest(W - 1, H + 1, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W + 3, H - 3, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W - 3, H + 3, f1, f2, isRow);
 
         return result;
     }
@@ -268,17 +268,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
-        result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
-        result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
+        result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GetSumsAutoTest(W, H, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
-            result = result && GetSumsAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
-            result = result && GetSumsAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::GetRowSums), FUNC3(Simd::Avx2::GetRowSums), true);
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetRowSums), FUNC3(SimdGetRowSums), true);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetRowSums), FUNC3(SimdGetRowSums), true);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Vsx::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
         return result;
@@ -616,6 +620,15 @@ namespace Test
 
             result = result && Compare(sums1, sums2, 0, true, 32);
         }
+
+        return result;
+    }
+
+    bool GetRowSumsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GetSumsDataTest(create, DW, DH, FUNC3(SimdGetRowSums), true);
 
         return result;
     }
