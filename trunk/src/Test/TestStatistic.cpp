@@ -445,10 +445,10 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Avx2::SquareSum), FUNC4(SimdSquareSum));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && SumAutoTest(FUNC4(Simd::Vsx::SquareSum), FUNC4(SimdSquareSum));
-//#endif
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Vsx::SquareSum), FUNC4(SimdSquareSum));
+#endif
 
         return result;
     }
@@ -681,6 +681,15 @@ namespace Test
         bool result = true;
 
         result = result && SumDataTest(create, DW, DH, FUNC4(SimdValueSum));
+
+        return result;
+    }
+
+    bool SquareSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SumDataTest(create, DW, DH, FUNC4(SimdSquareSum));
 
         return result;
     }
