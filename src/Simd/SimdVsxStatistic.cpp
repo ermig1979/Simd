@@ -187,6 +187,38 @@ namespace Simd
                 GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
 
+        template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+
+            memset(sums, 0, sizeof(uint32_t)*height);
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 sum = K32_00000000;
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    v128_u8 _src = Load<align>(src + col);
+                    sum = vec_msum(_src, K8_01, sum);
+                }
+                if(alignedWidth != width)
+                {
+                    v128_u8 _src = Load<false>(src + width - A);
+                    sum = vec_msum(_src, tailMask, sum);
+                }
+                sums[row] = ExtractSum(sum);
+                src += stride;
+            }
+        }
+
+        void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetRowSums<true>(src, stride, width, height, sums);
+            else
+                GetRowSums<false>(src, stride, width, height, sums);
+        }
+
         template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);

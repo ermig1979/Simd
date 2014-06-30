@@ -205,6 +205,7 @@ namespace Test
     bool ContourMetricsDataTest(bool create);
     bool ContourMetricsMaskedDataTest(bool create);
 
+    bool GetRowSumsDataTest(bool create);
     bool GetAbsDyRowSumsDataTest(bool create);
     bool GetAbsDxColSumsDataTest(bool create);
     bool GetStatisticDataTest(bool create);
