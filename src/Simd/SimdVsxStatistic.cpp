@@ -292,6 +292,55 @@ namespace Simd
             Store<align>(sums32 + 4, vec_add(Load<align>(sums32 + 4), UnpackHiU16(src16)));
         }
 
+        template <bool align> void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        {
+            size_t alignedLoWidth = AlignLo(width, A);
+            size_t alignedHiWidth = AlignHi(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedLoWidth);
+            size_t stepSize = SCHAR_MAX + 1;
+            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+
+            Buffer buffer(alignedHiWidth);
+            memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+
+            for(size_t step = 0; step < stepCount; ++step)
+            {
+                size_t rowStart = step*stepSize;
+                size_t rowEnd = Min(rowStart + stepSize, height);
+
+                memset(buffer.sums16, 0, sizeof(uint16_t)*width);
+                for(size_t row = rowStart; row < rowEnd; ++row)
+                {
+                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    {
+                        v128_u8 _src = Load<align>(src + col);
+                        Sum16<true>(_src, buffer.sums16 + col);
+                    }
+                    if(alignedLoWidth != width)
+                    {
+                        v128_u8 _src = Load<false>(src + width - A);
+                        Sum16<false>(vec_and(_src, tailMask), buffer.sums16 + width - A);
+                    }
+                    src += stride;
+                }
+
+                for(size_t col = 0; col < alignedHiWidth; col += HA)
+                {
+                    v128_u16 src16 = Load<true>(buffer.sums16 + col);
+                    Sum32<true>(src16, buffer.sums32 + col);
+                }
+            }
+            memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+        }
+
+        void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        {
+            if(Aligned(src) && Aligned(stride))
+                GetColSums<true>(src, stride, width, height, sums);
+            else
+                GetColSums<false>(src, stride, width, height, sums);
+        }
+
         template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             width--;
