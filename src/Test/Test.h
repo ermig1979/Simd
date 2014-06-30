@@ -209,6 +209,7 @@ namespace Test
     bool GetAbsDxColSumsDataTest(bool create);
     bool GetStatisticDataTest(bool create);
     bool GetMomentsDataTest(bool create);
+    bool ValueSumDataTest(bool create);
 
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);
