@@ -205,11 +205,12 @@ namespace Test
     bool ContourMetricsDataTest(bool create);
     bool ContourMetricsMaskedDataTest(bool create);
 
-    bool GetRowSumsDataTest(bool create);
-    bool GetAbsDyRowSumsDataTest(bool create);
-    bool GetAbsDxColSumsDataTest(bool create);
     bool GetStatisticDataTest(bool create);
     bool GetMomentsDataTest(bool create);
+    bool GetRowSumsDataTest(bool create);
+    bool GetColSumsDataTest(bool create);
+    bool GetAbsDyRowSumsDataTest(bool create);
+    bool GetAbsDxColSumsDataTest(bool create);
     bool ValueSumDataTest(bool create);
     bool SquareSumDataTest(bool create);
 
