@@ -472,6 +472,11 @@ SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, siz
         Ssse3::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+    else
+#endif
         Base::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
 }
 
