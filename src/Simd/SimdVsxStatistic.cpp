@@ -347,6 +347,42 @@ namespace Simd
             else
                 ValueSum<false>(src, stride, width, height, sum);
         }
+
+
+        template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 _sum = K32_00000000;
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const v128_u8 _src = Load<align>(src + col);
+                    _sum = vec_msum(_src, _src, _sum);
+                }
+                if(alignedWidth != width)
+                {
+                    const v128_u8 _src = vec_and(Load<false>(src + width - A), tailMask);
+                    _sum = vec_msum(_src, _src, _sum);
+                }
+                *sum += ExtractSum(_sum);
+                src += stride;
+            }
+        }
+
+        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                SquareSum<true>(src, stride, width, height, sum);
+            else
+                SquareSum<false>(src, stride, width, height, sum);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
