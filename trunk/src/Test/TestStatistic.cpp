@@ -394,21 +394,36 @@ namespace Test
         return result;
     }
 
+    bool SumAutoTest(const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        result = result && SumAutoTest(W, H, f1, f2);
+        result = result && SumAutoTest(W + 3, H - 3, f1, f2);
+        result = result && SumAutoTest(W - 3, H + 3, f1, f2);
+
+        return result;
+    }
+
     bool ValueSumAutoTest()
     {
         bool result = true;
 
-        result = result && SumAutoTest(W, H, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
-        result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
-        result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
+        result = result && SumAutoTest(FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && SumAutoTest(W, H, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
-            result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
-            result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::ValueSum), FUNC4(Simd::Avx2::ValueSum));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse2::ValueSum), FUNC4(SimdValueSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx2::ValueSum), FUNC4(SimdValueSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Vsx::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
         return result;
@@ -418,18 +433,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SumAutoTest(W, H, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
-        result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
-        result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
+        result = result && SumAutoTest(FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && SumAutoTest(W, H, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
-            result = result && SumAutoTest(W + 1, H - 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
-            result = result && SumAutoTest(W - 1, H + 1, FUNC4(Simd::Sse2::SquareSum), FUNC4(Simd::Avx2::SquareSum));
-        }
-#endif  
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse2::SquareSum), FUNC4(SimdSquareSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx2::SquareSum), FUNC4(SimdSquareSum));
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && SumAutoTest(FUNC4(Simd::Vsx::SquareSum), FUNC4(SimdSquareSum));
+//#endif
 
         return result;
     }
@@ -610,12 +629,58 @@ namespace Test
         return result;
     }
 
-
     bool GetAbsDxColSumsDataTest(bool create)
     {
         bool result = true;
 
         result = result && GetSumsDataTest(create, DW, DH, FUNC3(SimdGetAbsDxColSums), false);
+
+        return result;
+    }
+
+    bool SumDataTest(bool create, int width, int height, const Func4 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint64_t sum1, sum2;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, &sum1);
+
+            TEST_SAVE(sum1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(sum1);
+
+            f.Call(src, &sum2);
+
+            TEST_SAVE(sum2);
+
+            TEST_CHECK_VALUE(sum);
+        }
+
+        return result;
+    }
+
+    bool ValueSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SumDataTest(create, DW, DH, FUNC4(SimdValueSum));
 
         return result;
     }

@@ -1506,6 +1506,11 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Sse2::ValueSum(src, stride, width, height, sum);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::ValueSum(src, stride, width, height, sum);
+    else
+#endif
         Base::ValueSum(src, stride, width, height, sum);
 }
 
