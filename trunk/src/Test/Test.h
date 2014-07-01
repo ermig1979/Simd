@@ -198,6 +198,7 @@ namespace Test
     bool OperationBinary8uDataTest(bool create);
 
     bool ReduceGray2x2DataTest(bool create);
+    bool ReduceGray3x3DataTest(bool create);
     bool ReduceGray4x4DataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);
