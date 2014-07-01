@@ -197,23 +197,39 @@ namespace Test
 		return result;
 	}
 
-	bool ReduceGray5x5AutoTest()
-	{
-		bool result = true;
+    bool ReduceGray5x5AutoTest()
+    {
+        bool result = true;
 
-		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
-		result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+        result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+        result = result && ReduceGrayAutoTest(FUNC2(Simd::Base::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
         {
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(Simd::Avx2::ReduceGray5x5, false));
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(Simd::Avx2::ReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Sse2::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
         }
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+        {
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Avx2::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Avx2::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
+        }
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+        {
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
+        }
+#endif 
+
+        return result;
+    }
 
     //-----------------------------------------------------------------------
 
@@ -281,6 +297,15 @@ namespace Test
         bool result = true;
 
         result = result && ReduceGrayDataTest(create, DW, DH, FUNC1(SimdReduceGray4x4));
+
+        return result;
+    }
+
+    bool ReduceGray5x5DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ReduceGrayDataTest(create, DW, DH, FUNC2(SimdReduceGray5x5, true));
 
         return result;
     }

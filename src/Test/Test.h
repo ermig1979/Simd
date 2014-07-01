@@ -200,6 +200,7 @@ namespace Test
     bool ReduceGray2x2DataTest(bool create);
     bool ReduceGray3x3DataTest(bool create);
     bool ReduceGray4x4DataTest(bool create);
+    bool ReduceGray5x5DataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);
 
