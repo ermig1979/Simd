@@ -105,9 +105,9 @@ namespace Simd
                 BlurCol<true>(a, buffer.src0 + col);
             }
             LoadTail3<align, step>(src + size - A, a);
-            BlurCol<align>(a, buffer.src0 + size - A);
+            BlurCol<true>(a, buffer.src0 + bodySize);
 
-            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*size);
+            memcpy(buffer.src1, buffer.src0, sizeof(uint16_t)*(bodySize + A));
 
             for(size_t row = 0; row < height; ++row, dst += dstStride)
             {
@@ -123,11 +123,11 @@ namespace Simd
                     BlurCol<true>(a, buffer.src2 + col);
                 }
                 LoadTail3<align, step>(src2 + size - A, a);
-                BlurCol<align>(a, buffer.src2 + size - A);
+                BlurCol<true>(a, buffer.src2 + bodySize);
 
                 for(size_t col = 0; col < bodySize; col += A)
                     Store<align>((__m256i*)(dst + col), BlurRow<true>(buffer, col));
-                Store<align>((__m256i*)(dst + size - A), BlurRow<align>(buffer, size - A));
+                Store<align>((__m256i*)(dst + size - A), BlurRow<true>(buffer, bodySize));
 
                 Swap(buffer.src0, buffer.src2);
                 Swap(buffer.src0, buffer.src1);
