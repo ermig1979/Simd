@@ -91,6 +91,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSobel.cpp" />
