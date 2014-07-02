@@ -313,6 +313,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ValueSumDataTest);
     EXECUTE_DATA_TEST(SquareSumDataTest);
 
+    EXECUTE_DATA_TEST(StretchGray2x2DataTest);
+
     EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
     EXECUTE_DATA_TEST(TextureGetDifferenceSumDataTest);
     EXECUTE_DATA_TEST(TexturePerformCompensationDataTest);

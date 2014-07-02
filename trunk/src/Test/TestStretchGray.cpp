@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -49,14 +50,14 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool StretchGrayAutoTest(int width, int height, const Func & f1, const Func & f2)
+	bool StretchGrayAutoTest(int width, int height, const Func & f1, const Func & f2, int stretch)
 	{
 		bool result = true;
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		const int stretchedWidth = width*2;
-		const int stretchedHeight = height*2;
+		const int stretchedWidth = width*stretch;
+		const int stretchedHeight = height*stretch;
 
 		View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(s);
@@ -73,23 +74,91 @@ namespace Test
 		return result;
 	}
 
+    bool StretchGrayAutoTest(const Func & f1, const Func & f2, int stretch)
+    {
+        bool result = true;
+
+        result = result && StretchGrayAutoTest(W, H, f1, f2, stretch);
+        result = result && StretchGrayAutoTest(W + O, H - O, f1, f2, stretch);
+        result = result && StretchGrayAutoTest(W - O, H + O, f1, f2, stretch);
+
+        return result;
+    }
+
 	bool StretchGray2x2AutoTest()
 	{
 		bool result = true;
 
-		result = result && StretchGrayAutoTest(W, H, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
-		result = result && StretchGrayAutoTest(W + 1, H - 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
-        result = result && StretchGrayAutoTest(W - 1, H + 1, FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2));
+		result = result && StretchGrayAutoTest(FUNC(Simd::Base::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && StretchGrayAutoTest(W, H, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
-            result = result && StretchGrayAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
-            result = result && StretchGrayAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::StretchGray2x2), FUNC(Simd::Avx2::StretchGray2x2));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && StretchGrayAutoTest(FUNC(Simd::Sse2::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && StretchGrayAutoTest(FUNC(Simd::Avx2::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && StretchGrayAutoTest(FUNC(Simd::Vsx::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 #endif 
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool StretchGrayDataTest(bool create, int width, int height, const Func & f, int stretch)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        const int stretchedWidth = width*stretch;
+        const int stretchedHeight = height*stretch;
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View d1(stretchedWidth, stretchedHeight, View::Gray8, NULL, TEST_ALIGN(stretchedWidth));
+        View d2(stretchedWidth, stretchedHeight, View::Gray8, NULL, TEST_ALIGN(stretchedWidth));
+
+        if(create)
+        {
+            FillRandom(s);
+
+            TEST_SAVE(s);
+
+            f.Call(s, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(d1);
+
+            f.Call(s, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool StretchGray2x2DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && StretchGrayDataTest(create, DW, DH, FUNC(SimdStretchGray2x2), 2);
+
+        return result;
+    }
 }
