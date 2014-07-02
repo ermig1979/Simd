@@ -321,6 +321,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgraDataTest);
+    EXECUTE_DATA_TEST(Yuv444pToBgraDataTest);
 
 end:
 
