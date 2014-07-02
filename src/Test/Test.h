@@ -230,5 +230,6 @@ namespace Test
     bool Yuv444pToBgrDataTest(bool create);
 
     bool Yuv420pToBgraDataTest(bool create);
+    bool Yuv444pToBgraDataTest(bool create);
 }
 #endif//__Test_h__

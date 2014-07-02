@@ -73,6 +73,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray5x5.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

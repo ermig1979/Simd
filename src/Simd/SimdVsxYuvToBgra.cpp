@@ -121,6 +121,57 @@ namespace Simd
             else
                 Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
         }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void Yuv444pToBgra(const uint8_t * y, const uint8_t * u, const uint8_t * v, const v128_u16 & a, Storer<align> & bgra)
+        {
+            YuvToBgra<align, first>(Load<align>(y), Load<align>(u), Load<align>(v), a, bgra);
+        }
+
+        template <bool align> void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            v128_u16 a = SetU16(alpha);
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _bgra(bgra);
+                Yuv444pToBgra<align, true>(y, u, v, a, _bgra);
+                for(size_t col = A; col < bodyWidth; col += A)
+                    Yuv444pToBgra<align, false>(y + col, u + col, v + col, a, _bgra);
+                _bgra.Flush();
+
+                if(tail)
+                {
+                    size_t col = width - A;
+                    Storer<false> _bgra(bgra + 4*col);
+                    Yuv444pToBgra<false, true>(y + col, u + col, v + col, a, _bgra);
+                    _bgra.Flush();
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+            else
+                Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
