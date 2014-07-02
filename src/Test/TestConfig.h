@@ -83,7 +83,10 @@ namespace Test
     const int H = 96;
 #endif
 
-	const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+    const int E = 10;
+    const int O = 9;
+
+    const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
 
     const int DW = 48;
     const int DH = 64;

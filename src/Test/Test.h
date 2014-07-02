@@ -222,6 +222,8 @@ namespace Test
     bool ValueSumDataTest(bool create);
     bool SquareSumDataTest(bool create);
 
+    bool StretchGray2x2DataTest(bool create);
+
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);
     bool TexturePerformCompensationDataTest(bool create);

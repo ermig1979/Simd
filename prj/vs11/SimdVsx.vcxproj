@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxStatistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxStretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxYuvToBgra.cpp" />
