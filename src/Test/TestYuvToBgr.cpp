@@ -107,10 +107,10 @@ namespace Test
             result = result && YuvToBgrAutoTest(FUNC(Simd::Avx2::Yuv444pToBgr), FUNC(SimdYuv444pToBgr), false);
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && YuvToBgrAutoTest(FUNC(Simd::Vsx::Yuv444pToBgr), FUNC(SimdYuv444pToBgr), false);
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && YuvToBgrAutoTest(FUNC(Simd::Vsx::Yuv444pToBgr), FUNC(SimdYuv444pToBgr), false);
+#endif 
 
         return result;
     }
@@ -195,6 +195,15 @@ namespace Test
         bool result = true;
 
         result = result && YuvToBgrDataTest(create, DW, DH, FUNC(SimdYuv420pToBgr), true);
+
+        return result;
+    }
+
+    bool Yuv444pToBgrDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && YuvToBgrDataTest(create, DW, DH, FUNC(SimdYuv444pToBgr), false);
 
         return result;
     }

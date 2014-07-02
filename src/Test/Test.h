@@ -227,6 +227,7 @@ namespace Test
     bool TexturePerformCompensationDataTest(bool create);
 
     bool Yuv420pToBgrDataTest(bool create);
+    bool Yuv444pToBgrDataTest(bool create);
 
     bool Yuv420pToBgraDataTest(bool create);
 }

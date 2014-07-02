@@ -318,6 +318,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(TexturePerformCompensationDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgrDataTest);
+    EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgraDataTest);
 
