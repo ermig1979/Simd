@@ -158,6 +158,7 @@ namespace Test
     bool AbsDifferenceSums3x3DataTest(bool create);
     bool AbsDifferenceSums3x3MaskedDataTest(bool create);
     bool SquaredDifferenceSumDataTest(bool create);
+    bool SquaredDifferenceSumMaskedDataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
 
