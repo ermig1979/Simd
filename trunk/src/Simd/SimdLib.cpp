@@ -1383,6 +1383,11 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
         Sse2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
         Base::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
 }
 

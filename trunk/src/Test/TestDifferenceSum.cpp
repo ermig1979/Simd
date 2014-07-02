@@ -156,10 +156,10 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Avx2::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Vsx::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Vsx::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
+#endif 
 
 		return result;
 	}
@@ -342,6 +342,15 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsDataTest(create, DW, DH, FUNC_S(SimdAbsDifferenceSums3x3), 9);
+
+        return result;
+    }
+
+    bool SquaredDifferenceSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSumsDataTest(create, DW, DH, FUNC_S(SimdSquaredDifferenceSum), 1);
 
         return result;
     }
