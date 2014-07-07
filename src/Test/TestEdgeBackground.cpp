@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -61,7 +62,6 @@ namespace Test
 		View backgroundSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(backgroundSrc);
 
-
 		View backgroundDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View backgroundDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
@@ -73,6 +73,17 @@ namespace Test
 
 		return result;
 	}
+
+    bool EdgeBackgroundChangeRangeAutoTest(const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundChangeRangeAutoTest(W, H, f1, f2);
+        result = result && EdgeBackgroundChangeRangeAutoTest(W + O, H - O, f1, f2);
+        result = result && EdgeBackgroundChangeRangeAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
 
 	namespace
 	{
@@ -278,25 +289,29 @@ namespace Test
 		return result;
 	}
 
-	bool EdgeBackgroundGrowRangeSlowAutoTest()
-	{
-		bool result = true;
+    bool EdgeBackgroundGrowRangeSlowAutoTest()
+    {
+        bool result = true;
 
-		result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
-		result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
-        result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+        result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Base::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+#endif 
+
+        return result;
+    }
 
 	bool EdgeBackgroundGrowRangeFastAutoTest()
 	{
@@ -417,4 +432,58 @@ namespace Test
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool EdgeBackgroundChangeRangeDataTest(bool create, int width, int height, const Func1 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View backgroundDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(backgroundSrc);
+
+            TEST_SAVE(value);
+            TEST_SAVE(backgroundSrc);
+
+            f.Call(value, backgroundSrc, backgroundDst1);
+
+            TEST_SAVE(backgroundDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(backgroundSrc);
+
+            TEST_LOAD(backgroundDst1);
+
+            f.Call(value, backgroundSrc, backgroundDst2);
+
+            TEST_SAVE(backgroundDst2);
+
+            result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool EdgeBackgroundGrowRangeSlowDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+
+        return result;
+    }
 }

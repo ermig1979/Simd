@@ -279,6 +279,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
 
+    EXECUTE_DATA_TEST(EdgeBackgroundGrowRangeSlowDataTest);
+
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
