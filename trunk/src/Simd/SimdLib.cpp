@@ -782,6 +782,11 @@ SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueSt
         Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif
         Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
 }
 

@@ -137,6 +137,57 @@ namespace Simd
             else
                 EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
         }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void EdgeBackgroundShiftRange(const Loader<align> & value, const Loader<align> & backgroundSrc, const v128_u8 & mask, Storer<align> & backgroundDst)
+        {
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _background = Load<align, first>(backgroundSrc);
+            Store<align, first>(backgroundDst, vec_sel(_background, _value, mask));
+        }
+
+        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(background) && Aligned(backgroundStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _value(value), _backgroundSrc(background);
+                Storer<align> _backgroundDst(background);
+                EdgeBackgroundShiftRange<align, true>(_value, _backgroundSrc, K8_FF, _backgroundDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    EdgeBackgroundShiftRange<align, false>(_value, _backgroundSrc, K8_FF, _backgroundDst);
+                _backgroundDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    Loader<false> _value(value + width - A), _backgroundSrc(background + width - A);
+                    Storer<false> _backgroundDst(background + width - A);
+                    EdgeBackgroundShiftRange<false, true>(_value, _backgroundSrc, tailMask, _backgroundDst);
+                    _backgroundDst.Flush();
+                }
+
+                value += valueStride;
+                background += backgroundStride;
+            }
+        }
+
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            uint8_t * background, size_t backgroundStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride);
+            else
+                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
