@@ -107,10 +107,10 @@ namespace Test
             result = result && YuvToHueAutoTest(FUNC(Simd::Avx2::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && YuvToHueAutoTest(FUNC(Simd::Vsx::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Vsx::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+#endif 
 
         return result;
 	}
@@ -156,8 +156,8 @@ namespace Test
         View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
         View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
 
-        View hue1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
-        View hue2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+        View hue1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View hue2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
         if(create)
         {
@@ -196,6 +196,15 @@ namespace Test
         bool result = true;
 
         result = result && YuvToHueDataTest(create, DW, DH, FUNC(SimdYuv420pToHue), true);
+
+        return result;
+    }
+
+    bool Yuv444pToHueDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && YuvToHueDataTest(create, DW, DH, FUNC(SimdYuv444pToHue), false);
 
         return result;
     }

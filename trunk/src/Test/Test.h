@@ -234,5 +234,8 @@ namespace Test
 
     bool Yuv420pToBgraDataTest(bool create);
     bool Yuv444pToBgraDataTest(bool create);
+
+    bool Yuv420pToHueDataTest(bool create);
+    bool Yuv444pToHueDataTest(bool create);
 }
 #endif//__Test_h__
