@@ -130,7 +130,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, backgroundValue, backgroundCountSrc, backgroundCountDst2));
 
-		result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 10, 0);
+		result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 32, 0);
 
 		return result;
 	}
@@ -397,25 +397,29 @@ namespace Test
 		return result;
 	}
 
-	bool EdgeBackgroundShiftRangeAutoTest()
-	{
-		bool result = true;
+    bool EdgeBackgroundShiftRangeAutoTest()
+    {
+        bool result = true;
 
-		result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
-		result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
-        result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
+        result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(Simd::Avx2::EdgeBackgroundShiftRange));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
+#endif 
+
+        return result;
+    }
 
 	bool EdgeBackgroundShiftRangeMaskedAutoTest()
 	{
@@ -496,6 +500,15 @@ namespace Test
         bool result = true;
 
         result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundGrowRangeFast));
+
+        return result;
+    }
+
+    bool EdgeBackgroundShiftRangeDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundShiftRange));
 
         return result;
     }
