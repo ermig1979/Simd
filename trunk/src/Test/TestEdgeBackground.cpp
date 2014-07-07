@@ -313,25 +313,29 @@ namespace Test
         return result;
     }
 
-	bool EdgeBackgroundGrowRangeFastAutoTest()
-	{
-		bool result = true;
+    bool EdgeBackgroundGrowRangeFastAutoTest()
+    {
+        bool result = true;
 
-		result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
-		result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
-        result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
+        result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Base::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundChangeRangeAutoTest(W, H, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W + 1, H - 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
-            result = result && EdgeBackgroundChangeRangeAutoTest(W - 1, H + 1, FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Sse2::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Vsx::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
+#endif 
+
+        return result;
+    }
 
 	bool EdgeBackgroundIncrementCountAutoTest()
 	{
@@ -483,6 +487,15 @@ namespace Test
         bool result = true;
 
         result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+
+        return result;
+    }
+
+    bool EdgeBackgroundGrowRangeFastDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundGrowRangeFast));
 
         return result;
     }

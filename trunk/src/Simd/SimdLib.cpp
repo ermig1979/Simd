@@ -704,6 +704,11 @@ SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valu
         Sse2::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+    else
+#endif
         Base::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
 }
 
