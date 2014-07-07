@@ -188,6 +188,8 @@ namespace Test
 
     bool DeinterleaveUvDataTest(bool create);
 
+    bool EdgeBackgroundGrowRangeSlowDataTest(bool create);
+
     bool GrayToBgraDataTest(bool create);
 
     bool AbsSecondDerivativeHistogramDataTest(bool create);
