@@ -56,17 +56,12 @@ namespace Simd
             const v128_u16 max = Max(red, green, blue);
             const v128_u16 range = vec_subs(max, Min(red, green, blue));
 
-            const v128_u16 redMaxMask = (v128_u16)vec_cmpeq(red, max);
-            const v128_u16 greenMaxMask = vec_and(vec_xor(redMaxMask, K16_FFFF), vec_cmpeq(green, max));
-            const v128_u16 blueMaxMask = vec_and(vec_xor(redMaxMask, K16_FFFF), vec_xor(greenMaxMask, K16_FFFF));
+            const v128_u16 dividend = vec_sel(vec_sel(
+                vec_mladd(range, K16_0004, vec_sub(red, green)),
+                vec_mladd(range, K16_0002, vec_sub(blue, red)), vec_cmpeq(green, max)), 
+                vec_mladd(range, K16_0006, vec_sub(green, blue)), vec_cmpeq(red, max));
 
-            const v128_u16 redMaxCase = vec_and(redMaxMask, vec_mladd(range, K16_0006, vec_sub(green, blue))); 
-            const v128_u16 greenMaxCase = vec_and(greenMaxMask, vec_mladd(range, K16_0002, vec_sub(blue, red))); 
-            const v128_u16 blueMaxCase = vec_and(blueMaxMask, vec_mladd(range, K16_0004, vec_sub(red, green))); 
-
-            const v128_u16 dividend = vec_or(vec_or(redMaxCase, greenMaxCase), blueMaxCase);
-
-            return vec_and(vec_xor(vec_cmpeq(range, K16_0000), K16_FFFF), vec_and(MulDiv(dividend, range, KF_255_DIV_6), K16_00FF));
+            return vec_sel(vec_and(MulDiv(dividend, range, KF_255_DIV_6), K16_00FF), K16_0000, vec_cmpeq(range, K16_0000));
         }
 
         SIMD_INLINE v128_u8 YuvToHue(const v128_u8 & y, const v128_u8 & u, const v128_u8 & v, const v128_f32 & KF_255_DIV_6)
@@ -94,7 +89,6 @@ namespace Simd
             }
 
             const v128_f32 KF_255_DIV_6 = SetF32(Base::KF_255_DIV_6);
-
             size_t bodyWidth = AlignLo(width, DA);
             size_t tail = width - bodyWidth;
             for(size_t row = 0; row < height; row += 2)
@@ -140,6 +134,57 @@ namespace Simd
                 Yuv420pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
             else
                 Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+        }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void Yuv444pToHue(const uint8_t * y, const uint8_t * u, const uint8_t * v, const v128_f32 & KF_255_DIV_6, Storer<align> & hue)
+        {
+            Store<align, first>(hue, YuvToHue(Load<align>(y), Load<align>(u), Load<align>(v), KF_255_DIV_6));
+        }
+
+        template <bool align> void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * hue, size_t hueStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
+            }
+
+            const v128_f32 KF_255_DIV_6 = SetF32(Base::KF_255_DIV_6);
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _hue(hue);
+                Yuv444pToHue<align, true>(y, u, v, KF_255_DIV_6, _hue);
+                for(size_t col = A; col < bodyWidth; col += A)
+                    Yuv444pToHue<align, false>(y + col, u + col, v + col, KF_255_DIV_6, _hue);
+                _hue.Flush();
+
+                if(tail)
+                {
+                    size_t col = width - A;
+                    Storer<false> _hue(hue + col);
+                    Yuv444pToHue<false, true>(y + col, u + col, v + col, KF_255_DIV_6, _hue);
+                    _hue.Flush();
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                hue += hueStride;
+            }
+        }
+
+        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * hue, size_t hueStride)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
+                Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+            else
+                Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
         }
     }
 #endif// SIMD_VSX_ENABLE
