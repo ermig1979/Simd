@@ -1200,6 +1200,11 @@ SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, 
         Sse41::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A && *right - *left >= (ptrdiff_t)Vsx::A)
+        Vsx::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+    else
+#endif
         Base::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
 }
 

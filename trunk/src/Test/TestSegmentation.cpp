@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -69,21 +70,36 @@ namespace Test
         return result;
     }
 
+    bool SegmentationShrinkRegionAutoTest(const FuncSR & f1, const FuncSR & f2)
+    {
+        bool result = true;
+
+        result = result && SegmentationShrinkRegionAutoTest(W, H, f1, f2);
+        result = result && SegmentationShrinkRegionAutoTest(W + O, H - O, f1, f2);
+        result = result && SegmentationShrinkRegionAutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
     bool SegmentationShrinkRegionAutoTest()
     {
         bool result = true;
 
-        result = result && SegmentationShrinkRegionAutoTest(W, H, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
-        result = result && SegmentationShrinkRegionAutoTest(W + 1, H - 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
-        result = result && SegmentationShrinkRegionAutoTest(W - 1, H + 1, FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+        result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse41::Enable && Simd::Avx2::Enable)
-        {
-            result = result && SegmentationShrinkRegionAutoTest(W, H, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
-            result = result && SegmentationShrinkRegionAutoTest(W + 1, H - 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
-            result = result && SegmentationShrinkRegionAutoTest(W - 1, H + 1, FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(Simd::Avx2::SegmentationShrinkRegion));
-        }
+#ifdef SIMD_SSE41_ENABLE
+        if(Simd::Sse41::Enable)
+            result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx2::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Vsx::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
         return result;    
@@ -149,5 +165,55 @@ namespace Test
 #endif
 
         return result;    
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool SegmentationShrinkRegionDataTest(bool create, int width, int height, const FuncSR & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        Rect rs1(s.Size()), rs2(s.Size()), rd1, rd2;
+
+        const uint8_t index = 3;
+
+        if(create)
+        {
+            FillRhombMask(s, Rect(width*1/15, height*2/15, width*11/15, height*12/15), index);
+
+            TEST_SAVE(s);
+
+            f.Call(s, index, rs1, rd1);
+
+            TEST_SAVE(rd1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(rd1);
+
+            f.Call(s, index, rs1, rd1);
+
+            TEST_SAVE(rd2);
+
+            result = result && Compare(rd1, rd2, true);
+        }
+
+        return result;
+    }
+
+    bool SegmentationShrinkRegionDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SegmentationShrinkRegionDataTest(create, DW, DH, FUNC_SR(SimdSegmentationShrinkRegion));
+
+        return result;
     }
 }
