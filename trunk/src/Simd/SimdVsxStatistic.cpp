@@ -306,7 +306,7 @@ namespace Simd
             for(size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
-                size_t rowEnd = Min(rowStart + stepSize, height);
+                size_t rowEnd = Simd::Min(rowStart + stepSize, height);
 
                 memset(buffer.sums16, 0, sizeof(uint16_t)*width);
                 for(size_t row = rowStart; row < rowEnd; ++row)
@@ -356,7 +356,7 @@ namespace Simd
             for(size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
-                size_t rowEnd = Min(rowStart + stepSize, height);
+                size_t rowEnd = Simd::Min(rowStart + stepSize, height);
 
                 memset(buffer.sums16, 0, sizeof(uint16_t)*width);
                 for(size_t row = rowStart; row < rowEnd; ++row)

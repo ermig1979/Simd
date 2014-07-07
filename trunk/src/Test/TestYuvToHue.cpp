@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test 
@@ -77,43 +78,125 @@ namespace Test
 		return result;
 	}
 
+    bool YuvToHueAutoTest(const Func & f1, const Func & f2, bool is420)
+    {
+        bool result = true;
+
+        const int D = is420 ? E : O;
+
+        result = result && YuvToHueAutoTest(W, H, f1, f2, is420);
+        result = result && YuvToHueAutoTest(W + D, H - D, f1, f2, is420);
+        result = result && YuvToHueAutoTest(W - D, H + D, f1, f2, is420);
+
+        return result;
+    }
+
 	bool Yuv444pToHueAutoTest()
 	{
 		bool result = true;
 
-		result = result && YuvToHueAutoTest(W, H, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
-		result = result && YuvToHueAutoTest(W + 1, H - 1, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
-        result = result && YuvToHueAutoTest(W - 1, H + 1, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+		result = result && YuvToHueAutoTest(FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && YuvToHueAutoTest(W, H, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
-            result = result && YuvToHueAutoTest(W + 1, H - 1, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
-            result = result && YuvToHueAutoTest(W - 1, H + 1, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(Simd::Avx2::Yuv444pToHue), false);
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Sse2::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
 #endif 
 
-		return result;
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Avx2::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+#endif 
+
+//#ifdef SIMD_VSX_ENABLE
+//        if(Simd::Vsx::Enable)
+//            result = result && YuvToHueAutoTest(FUNC(Simd::Vsx::Yuv444pToHue), FUNC(SimdYuv444pToHue), false);
+//#endif 
+
+        return result;
 	}
 
 	bool Yuv420pToHueAutoTest()
 	{
 		bool result = true;
 
-		result = result && YuvToHueAutoTest(W, H, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
-		result = result && YuvToHueAutoTest(W - 2, H + 2, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
-        result = result && YuvToHueAutoTest(W + 2, H - 2, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
+        result = result && YuvToHueAutoTest(FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && YuvToHueAutoTest(W, H, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
-            result = result && YuvToHueAutoTest(W - 2, H + 2, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
-            result = result && YuvToHueAutoTest(W + 2, H - 2, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(Simd::Avx2::Yuv420pToHue), true);
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Sse2::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Avx2::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && YuvToHueAutoTest(FUNC(Simd::Vsx::Yuv420pToHue), FUNC(SimdYuv420pToHue), true);
+#endif
 
 		return result;
 	}
+
+    //-----------------------------------------------------------------------
+
+    bool YuvToHueDataTest(bool create, int width, int height, const Func & f, bool is420)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        const int uvWidth = is420 ? width/2 : width;
+        const int uvHeight = is420 ? height/2 : height;
+
+        View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+        View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+
+        View hue1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+        View hue2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(y);
+            FillRandom(u);
+            FillRandom(v);
+
+            TEST_SAVE(y);
+            TEST_SAVE(u);
+            TEST_SAVE(v);
+
+            f.Call(y, u, v, hue1);
+
+            TEST_SAVE(hue1);
+        }
+        else
+        {
+            TEST_LOAD(y);
+            TEST_LOAD(u);
+            TEST_LOAD(v);
+
+            TEST_LOAD(hue1);
+
+            f.Call(y, u, v, hue2);
+
+            TEST_SAVE(hue2);
+
+            result = result && Compare(hue1, hue2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool Yuv420pToHueDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && YuvToHueDataTest(create, DW, DH, FUNC(SimdYuv420pToHue), true);
+
+        return result;
+    }
 }

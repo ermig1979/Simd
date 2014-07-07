@@ -369,6 +369,16 @@ namespace Simd
         {
             return vec_add(vec_add(a, c), vec_add(b, b));
         }
+
+        template<class T> SIMD_INLINE T Max(const T & a, const T & b, const T & c)
+        {
+            return vec_max(a, vec_max(b, c));
+        }
+
+        template<class T> SIMD_INLINE T Min(const T & a, const T & b, const T & c)
+        {
+            return vec_min(a, vec_min(b, c));
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

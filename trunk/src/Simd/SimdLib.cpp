@@ -1771,6 +1771,11 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Sse2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::DA)
+        Vsx::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+    else
+#endif
         Base::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 }
 
