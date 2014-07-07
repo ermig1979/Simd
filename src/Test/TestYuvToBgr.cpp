@@ -183,8 +183,9 @@ namespace Test
 
             f.Call(y, u, v, bgr2);
 
-            TEST_SAVE(bgr2)
-                result = result && Compare(bgr1, bgr2, 0, true, 64);
+            TEST_SAVE(bgr2);
+
+            result = result && Compare(bgr1, bgr2, 0, true, 64);
         }
 
         return result;

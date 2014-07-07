@@ -241,6 +241,7 @@ namespace Simd
         typedef __vector uint16_t v128_u16;
         typedef __vector int32_t v128_s32;
         typedef __vector uint32_t v128_u32;
+        typedef __vector float v128_f32;
 
         const size_t A = sizeof(v128_u8);
         const size_t DA = 2*A;
