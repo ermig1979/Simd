@@ -227,6 +227,7 @@ namespace Test
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);
     bool TexturePerformCompensationDataTest(bool create);
+    bool TextureBoostedUvDataTest(bool create);
 
     bool Yuv420pToBgrDataTest(bool create);
     bool Yuv444pToBgrDataTest(bool create);

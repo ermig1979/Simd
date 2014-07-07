@@ -174,21 +174,36 @@ namespace Test
         return result;
     }
 
+    bool TextureBoostedUvAutoTest(const Func2 & f1, const Func2 & f2)
+    {
+        bool result = true;
+
+        result = result && TextureBoostedUvAutoTest(W, H, f1, f2);
+        result = result && TextureBoostedUvAutoTest(W + O, H - O, f1, f2);
+        result = result && TextureBoostedUvAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
     bool TextureBoostedUvAutoTest()
     {
         bool result = true;
 
-        result = result && TextureBoostedUvAutoTest(W, H, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
-        result = result && TextureBoostedUvAutoTest(W + 1, H - 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
-        result = result && TextureBoostedUvAutoTest(W - 1, H + 1, FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+        result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && TextureBoostedUvAutoTest(W, H, FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(Simd::Avx2::TextureBoostedUv));
-            result = result && TextureBoostedUvAutoTest(W + 1, H - 1, FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(Simd::Avx2::TextureBoostedUv));
-            result = result && TextureBoostedUvAutoTest(W - 1, H + 1, FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(Simd::Avx2::TextureBoostedUv));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Vsx::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
         return result;
@@ -418,6 +433,55 @@ namespace Test
         bool result = true;
 
         result = result && TextureBoostedSaturatedGradientDataTest(create, DW, DH, FUNC1(SimdTextureBoostedSaturatedGradient));
+
+        return result;
+    }
+
+    bool TextureBoostedUvDataTest(bool create, int width, int height, const Func2 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const int boost = 4; 
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, boost, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, boost, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool TextureBoostedUvDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && TextureBoostedUvDataTest(create, DW, DH, FUNC2(SimdTextureBoostedUv));
 
         return result;
     }

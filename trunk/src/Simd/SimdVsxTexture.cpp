@@ -119,6 +119,60 @@ namespace Simd
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
 
+        template<bool align, bool first> 
+        SIMD_INLINE void TextureBoostedUv(const uint8_t * src, const v128_u8 & min, const v128_u8 & max, const v128_u16 & boost, Storer<align> & dst)
+        {
+            const v128_u8 _src = Load<align>(src);
+            const v128_u8 saturated = vec_subs(vec_min(_src, max), min);
+            const v128_u16 lo = vec_mladd(UnpackLoU8(saturated), boost, K16_0000);
+            const v128_u16 hi = vec_mladd(UnpackHiU8(saturated), boost, K16_0000);
+            Store<align, first>(dst, vec_packsu(lo, hi));
+        }
+
+        template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t boost, uint8_t * dst, size_t dstStride)
+        {
+            assert(width >= A && boost < 0x80);
+            if(align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            int min = 128 - (128/boost);
+            int max = 255 - min;
+
+            v128_u8 _min = SetU8(min);
+            v128_u8 _max = SetU8(max);
+            v128_u16 _boost = SetU16(boost);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _dst(dst);
+                TextureBoostedUv<align, true>(src, _min, _max, _boost, _dst);
+                for (size_t col = A; col < alignedWidth; col += A)
+                    TextureBoostedUv<align, false>(src + col, _min, _max, _boost, _dst);
+                _dst.Flush();
+
+                if(width != alignedWidth)
+                {
+                    Storer<false> _dst(dst + width - A);
+                    TextureBoostedUv<false, true>(src + width - A, _min, _max, _boost, _dst);
+                    _dst.Flush();
+                }
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t boost, uint8_t * dst, size_t dstStride)
+        {
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+            else
+                TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+        }
+
         template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, 
             v128_u32 & positive, v128_u32 & negative, const v128_u8 & mask)
         {
