@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />

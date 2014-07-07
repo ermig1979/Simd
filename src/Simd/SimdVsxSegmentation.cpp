@@ -21,91 +21,58 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdAvx2.h"
+#include "Simd/SimdVsx.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdCompare.h"
+#include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE
-    namespace Avx2
+#ifdef SIMD_VSX_ENABLE  
+    namespace Vsx
     {
-        template<bool align> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, __m256i index)
-        {
-            const __m256i up = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask - stride)), index);
-            const __m256i left = _mm256_cmpeq_epi8(Load<false>((__m256i*)(mask - 1)), index);
-            const __m256i right = _mm256_cmpeq_epi8(Load<false>((__m256i*)(mask + 1)), index);
-            const __m256i down = _mm256_cmpeq_epi8(Load<align>((__m256i*)(mask + stride)), index);
-            StoreMasked<align>((__m256i*)mask, index, _mm256_and_si256(_mm256_and_si256(up, left), _mm256_and_si256(right, down)));
-        }
-
-        template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
-        {
-            assert(width > 2 && height > 2);
-
-            height -= 1;
-            width -= 1;
-            __m256i _index = _mm256_set1_epi8((char)index);
-            size_t alignedWidth = Simd::AlignLo(width, A);
-            for(size_t row = 1; row < height; ++row)
-            {
-                mask += stride;
-
-                FillSingleHoles<false>(mask + 1, stride, _index);
-
-                for(size_t col = A; col < alignedWidth; col += A)
-                    FillSingleHoles<align>(mask + col, stride, _index);
-
-                if(alignedWidth != width )
-                    FillSingleHoles<false>(mask + width - A, stride, _index);
-            }
-        }
-
-        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
-        {
-            if(Aligned(mask) && Aligned(stride))
-                SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
-            else
-                SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
-        }
-
-        SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, __m256i index)
+        SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, v128_u8 index)
         {
             for (size_t col = 0; col < alignedSize; col += A)
             {
-                if(!_mm256_testz_si256(_mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + col)), index), K_INV_ZERO))
+                if(vec_any_eq(Load<false>(mask + col), index))
                     return true;
             }
             if(alignedSize != fullSize)
             {
-                if(!_mm256_testz_si256(_mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(mask + fullSize - A)), index), K_INV_ZERO))
+                if(vec_any_eq(Load<false>(mask + fullSize - A), index))
                     return true;
             }
             return false;
         }
 
-        SIMD_INLINE bool ColsHasIndex(const uint8_t * mask, size_t stride, size_t size, __m256i index, uint8_t * cols)
+        SIMD_INLINE bool ColsHasIndex(const uint8_t * mask, size_t stride, size_t size, v128_u8 index, uint8_t * cols)
         {
-            __m256i _cols = _mm256_setzero_si256();
+            v128_u8 _cols = K8_00;
             for (size_t row = 0; row < size; ++row)
             {
-                _cols = _mm256_or_si256(_cols, _mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)mask), index));
+                _cols = vec_or(_cols, (v128_u8)vec_cmpeq(Load<false>(mask), index));
                 mask += stride;
             }
-            _mm256_storeu_si256((__m256i*)cols, _cols);
-            return !_mm256_testz_si256(_cols, K_INV_ZERO);
+            Store<true>(cols, _cols);
+            return vec_any_eq(_cols, K8_FF);
         }
 
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {
-            assert(*right - *left >= A && *bottom > *top);
-            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
+            assert(*right - *left >= (ptrdiff_t)A && *bottom > *top);
+            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)width);
 
-            size_t fullWidth = *right - *left;          
+            size_t fullWidth = *right - *left;
             ptrdiff_t alignedWidth = Simd::AlignLo(fullWidth, A);
-            __m256i _index = _mm256_set1_epi8(index);
+            v128_u8 _index = SetU8(index);
             bool search = true;
             for (ptrdiff_t row = *top; search && row < *bottom; ++row)
             {
@@ -138,7 +105,7 @@ namespace Simd
             search = true;
             for (ptrdiff_t col = *left; search && col < *left + alignedWidth; col += A)
             {
-                uint8_t cols[A];
+                SIMD_ALIGNED(16) uint8_t cols[A];
                 if(ColsHasIndex(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols))
                 {
                     for(size_t i = 0; i < A; i++)
@@ -157,7 +124,7 @@ namespace Simd
             search = true;
             for (ptrdiff_t col = *right; search && col > *left; col -= A)
             {
-                uint8_t cols[A];
+                SIMD_ALIGNED(16) uint8_t cols[A];
                 if(ColsHasIndex(mask + (*top)*stride + col - A, stride, *bottom - *top, _index, cols))
                 {
                     for(ptrdiff_t i = A - 1; i >= 0; i--)
@@ -174,5 +141,5 @@ namespace Simd
             }
         }
     }
-#endif//SIMD_AVX2_ENABLE
+#endif// SIMD_VSX_ENABLE
 }

@@ -61,7 +61,7 @@ namespace Simd
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {
             assert(*right - *left >= (ptrdiff_t)A && *bottom > *top);
-            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)width);
+            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
 
             size_t fullWidth = *right - *left;
             ptrdiff_t alignedWidth = Simd::AlignLo(fullWidth, A);

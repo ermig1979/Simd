@@ -60,6 +60,9 @@ namespace Test
         bool Save(const Sums64 & sums, const std::string & name) const;
         bool Load(Sums64 & sums, const std::string & name) const;
 
+        bool Save(const Rect & rect, const std::string & name) const;
+        bool Load(Rect & rect, const std::string & name) const;
+
         static std::string Description(SimdCompareType type);
         static std::string Description(SimdOperationBinary8uType type);
         static std::string Description(View::Format format);
