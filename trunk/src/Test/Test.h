@@ -181,6 +181,9 @@ namespace Test
 
     bool BgrToGrayDataTest(bool create);
 
+    bool BinarizationDataTest(bool create);
+    bool AveragingBinarizationDataTest(bool create);
+
     bool ConditionalCountDataTest(bool create);
     bool ConditionalSumDataTest(bool create);
     bool ConditionalSquareSumDataTest(bool create);
