@@ -727,6 +727,12 @@ SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t val
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::EdgeBackgroundIncrementCount(value, valueStride, width, height,
+        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+    else
+#endif
         Base::EdgeBackgroundIncrementCount(value, valueStride, width, height,
         backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
 }
