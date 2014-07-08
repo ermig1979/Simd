@@ -272,6 +272,9 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
 
+    EXECUTE_DATA_TEST(BinarizationDataTest);
+    EXECUTE_DATA_TEST(AveragingBinarizationDataTest);
+
     EXECUTE_DATA_TEST(ConditionalCountDataTest);
     EXECUTE_DATA_TEST(ConditionalSumDataTest);
     EXECUTE_DATA_TEST(ConditionalSquareSumDataTest);
