@@ -283,6 +283,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(EdgeBackgroundGrowRangeFastDataTest);
     EXECUTE_DATA_TEST(EdgeBackgroundIncrementCountDataTest);
     EXECUTE_DATA_TEST(EdgeBackgroundAdjustRangeDataTest);
+    EXECUTE_DATA_TEST(EdgeBackgroundAdjustRangeMaskedDataTest);
     EXECUTE_DATA_TEST(EdgeBackgroundShiftRangeDataTest);
 
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
