@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxEdgeBackground.cpp" />

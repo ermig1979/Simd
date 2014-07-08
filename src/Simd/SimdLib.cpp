@@ -534,6 +534,11 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
         Sse2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+    else
+#endif
         Base::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
 }
 

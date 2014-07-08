@@ -85,6 +85,9 @@ namespace Simd
 
         void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
+        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
+
         void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
             uint8_t value, SimdCompareType compareType, uint32_t * count);
 
