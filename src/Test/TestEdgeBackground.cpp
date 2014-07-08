@@ -322,6 +322,17 @@ namespace Test
 		return result;
 	}
 
+    bool EdgeBackgroundShiftRangeMaskedAutoTest(const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W, H, f1, f2);
+        result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W + O, H - O, f1, f2);
+        result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
     bool EdgeBackgroundGrowRangeSlowAutoTest()
     {
         bool result = true;
@@ -466,25 +477,29 @@ namespace Test
         return result;
     }
 
-	bool EdgeBackgroundShiftRangeMaskedAutoTest()
-	{
-		bool result = true;
+    bool EdgeBackgroundShiftRangeMaskedAutoTest()
+    {
+        bool result = true;
 
-		result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W, H, FUNC5(Simd::Base::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
-		result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W + 1, H - 1, FUNC5(Simd::Base::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
-        result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W - 1, H + 1, FUNC5(Simd::Base::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
+        result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Base::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W, H, FUNC5(Simd::Sse2::EdgeBackgroundShiftRangeMasked), FUNC5(Simd::Avx2::EdgeBackgroundShiftRangeMasked));
-            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W + 1, H - 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRangeMasked), FUNC5(Simd::Avx2::EdgeBackgroundShiftRangeMasked));
-            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(W - 1, H + 1, FUNC5(Simd::Sse2::EdgeBackgroundShiftRangeMasked), FUNC5(Simd::Avx2::EdgeBackgroundShiftRangeMasked));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Sse2::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx2::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Vsx::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
+#endif 
+
+        return result;
+    }
 
     //-----------------------------------------------------------------------
 
@@ -730,6 +745,62 @@ namespace Test
         bool result = true;
 
         result = result && EdgeBackgroundAdjustRangeMaskedDataTest(create, DW, DH, FUNC4(SimdEdgeBackgroundAdjustRangeMasked));
+
+        return result;
+    }
+
+    bool EdgeBackgroundShiftRangeMaskedDataTest(bool create, int width, int height, const Func5 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View backgroundDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(backgroundSrc);
+            FillRandomMask(mask, 0xFF);
+
+            TEST_SAVE(value);
+            TEST_SAVE(backgroundSrc);
+            TEST_SAVE(mask);
+
+            f.Call(value, backgroundSrc, backgroundDst1, mask);
+
+            TEST_SAVE(backgroundDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(backgroundSrc);
+            TEST_LOAD(mask);
+
+            TEST_LOAD(backgroundDst1);
+
+            f.Call(value, backgroundSrc, backgroundDst2, mask);
+
+            TEST_SAVE(backgroundDst2);
+
+            result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool EdgeBackgroundShiftRangeMaskedDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundShiftRangeMaskedDataTest(create, DW, DH, FUNC5(SimdEdgeBackgroundShiftRangeMasked));
 
         return result;
     }
