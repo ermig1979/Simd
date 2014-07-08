@@ -862,6 +862,11 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
         Sse2::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::FillBgr(dst, stride, width, height, blue, green, red);
+    else
+#endif
         Base::FillBgr(dst, stride, width, height, blue, green, red);
 }
 
