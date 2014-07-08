@@ -752,6 +752,12 @@ SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t ba
         backgroundValue, backgroundValueStride, threshold);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
+        backgroundValue, backgroundValueStride, threshold);
+    else
+#endif
         Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
         backgroundValue, backgroundValueStride, threshold);
 }

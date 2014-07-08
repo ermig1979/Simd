@@ -69,7 +69,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, backgroundSrc, backgroundDst2));
 
-		result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 10, 0);
+		result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 32, 0);
 
 		return result;
 	}
@@ -192,11 +192,22 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst2, backgroundValueDst2, 0x80));
 
-		result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 10, 0, "backgroundCount");
-		result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 10, 0, "backgroundValue");
+		result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 32, 0, "backgroundCount");
+		result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 32, 0, "backgroundValue");
 
 		return result;
 	}
+
+    bool EdgeBackgroundAdjustRangeAutoTest(const Func3 & f1, const Func3 & f2)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundAdjustRangeAutoTest(W, H, f1, f2);
+        result = result && EdgeBackgroundAdjustRangeAutoTest(W + O, H - O, f1, f2);
+        result = result && EdgeBackgroundAdjustRangeAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
 
 	namespace
 	{
@@ -376,17 +387,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && EdgeBackgroundAdjustRangeAutoTest(W, H, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
-		result = result && EdgeBackgroundAdjustRangeAutoTest(W + 1, H - 1, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
-        result = result && EdgeBackgroundAdjustRangeAutoTest(W - 1, H + 1, FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
+		result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Base::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundAdjustRangeAutoTest(W, H, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
-            result = result && EdgeBackgroundAdjustRangeAutoTest(W + 1, H - 1, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
-            result = result && EdgeBackgroundAdjustRangeAutoTest(W - 1, H + 1, FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Sse2::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Vsx::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
 #endif 
 
 		return result;
@@ -580,6 +595,64 @@ namespace Test
         bool result = true;
 
         result = result && EdgeBackgroundIncrementCountDataTest(create, DW, DH, FUNC2(SimdEdgeBackgroundIncrementCount));
+
+        return result;
+    }
+
+    bool EdgeBackgroundAdjustRangeDataTest(bool create, int width, int height, const Func3 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View backgroundCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundValueDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundValueDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(backgroundCountSrc);
+            FillRandom(backgroundValueSrc);
+
+            TEST_SAVE(backgroundCountSrc);
+            TEST_SAVE(backgroundValueSrc);
+
+            f.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst1, backgroundValueDst1, 0x80);
+
+            TEST_SAVE(backgroundCountDst1);
+            TEST_SAVE(backgroundValueDst1);
+        }
+        else
+        {
+            TEST_LOAD(backgroundCountSrc);
+            TEST_LOAD(backgroundValueSrc);
+
+            TEST_LOAD(backgroundCountDst1);
+            TEST_LOAD(backgroundValueDst1);
+
+            f.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst2, backgroundValueDst2, 0x80);
+
+            TEST_SAVE(backgroundCountDst2);
+            TEST_SAVE(backgroundValueDst2);
+
+            result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 32, 0, "backgroundCount");
+            result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 32, 0, "backgroundValue");
+        }
+
+        return result;
+    }
+
+    bool EdgeBackgroundAdjustRangeDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundAdjustRangeDataTest(create, DW, DH, FUNC3(SimdEdgeBackgroundAdjustRange));
 
         return result;
     }
