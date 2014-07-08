@@ -199,6 +199,8 @@ namespace Test
     bool EdgeBackgroundShiftRangeDataTest(bool create);
     bool EdgeBackgroundShiftRangeMaskedDataTest(bool create);
 
+    bool FillBgrDataTest(bool create);
+
     bool GrayToBgraDataTest(bool create);
 
     bool AbsSecondDerivativeHistogramDataTest(bool create);

@@ -83,23 +83,39 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE uint64_t Fill64(uint8_t a, uint8_t b, uint8_t c)
+        {
+#ifdef SIMD_BIG_ENDIAN
+            return (size_t(a) << 56) | (size_t(b) << 48) | (size_t(c) << 40) | (size_t(a) << 32) | (size_t(b) << 24) | (size_t(c) << 16) | (size_t(a) << 8) | size_t(b);
+#else
+            return size_t(a) | (size_t(b) << 8) | (size_t(c) << 16) | (size_t(a) << 24) | (size_t(b) << 32) | (size_t(c) << 40) | (size_t(a) << 48) | (size_t(b) << 56);
+#endif
+        }
+
+        SIMD_INLINE uint32_t Fill32(uint8_t a, uint8_t b, uint8_t c)
+        {
+#ifdef SIMD_BIG_ENDIAN
+            return (size_t(a) << 24) | (size_t(b) << 16) | (size_t(c) << 8) | size_t(a);
+#else
+            return size_t(a) | (size_t(b) << 8) | (size_t(c) << 16) | (size_t(a) << 24);
+#endif
+        }
+
         void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
             size_t size = width*3;
             size_t step = sizeof(size_t)*3;
             size_t alignedSize = AlignLo(width, sizeof(size_t))*3;
             size_t bgrs[3];
-#ifdef SIMD_X64_ENABLE
-            bgrs[0] = size_t(blue) | (size_t(green) << 8) | (size_t(red) << 16) | (size_t(blue) << 24) |
-                (size_t(green) << 32) | (size_t(red) << 40) | (size_t(blue) << 48) | (size_t(green) << 56);
-            bgrs[1] = size_t(red) | (size_t(blue) << 8) | (size_t(green) << 16) | (size_t(red) << 24) |
-                (size_t(blue) << 32) | (size_t(green) << 40) | (size_t(red) << 48) | (size_t(blue) << 56);
-            bgrs[2] = size_t(green) | (size_t(red) << 8) | (size_t(blue) << 16) | (size_t(green) << 24) |
-                (size_t(red) << 32) | (size_t(blue) << 40) | (size_t(green) << 48) | (size_t(red) << 56);
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+            bgrs[0] = Fill64(blue, green, red);
+            bgrs[1] = Fill64(red, blue, green);
+            bgrs[2] = Fill64(green, red, blue);
+
 #else
-            bgrs[0] = size_t(blue) | (size_t(green) << 8) | (size_t(red) << 16) | (size_t(blue) << 24);
-            bgrs[1] = size_t(green) | (size_t(red) << 8) | (size_t(blue) << 16) | (size_t(green) << 24);
-            bgrs[2] = size_t(red) | (size_t(blue) << 8) | (size_t(green) << 16) | (size_t(red) << 24);
+            bgrs[0] = Fill32(blue, green, red);
+            bgrs[2] = Fill32(green, red, blue);
+            bgrs[1] = Fill32(red, blue, green);
 #endif
             for(size_t row = 0; row < height; ++row)
             {
