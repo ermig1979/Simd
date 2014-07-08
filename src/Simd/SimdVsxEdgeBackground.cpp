@@ -272,6 +272,70 @@ namespace Simd
         }
 
         template <bool align, bool first> 
+        SIMD_INLINE void EdgeBackgroundAdjustRangeMasked(const Loader<align> & backgroundCountSrc, const Loader<align> & backgroundValueSrc, 
+            const Loader<align> & mask, const v128_u8 & threshold, const v128_u8 & tailMask,
+            Storer<align> & backgroundCountDst, Storer<align> & backgroundValueDst)
+        {
+            const v128_u8 _mask = vec_and(Load<align, first>(mask), tailMask);
+            EdgeBackgroundAdjustRange<align, first>(backgroundCountSrc, backgroundValueSrc, threshold, _mask, backgroundCountDst, backgroundValueDst);
+        }
+
+        template <bool align> void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+                assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+                assert(Aligned(mask) && Aligned(maskStride));
+            }
+
+            const v128_u8 _threshold = SetU8(threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _backgroundCountSrc(backgroundCount), _backgroundValueSrc(backgroundValue), _mask(mask);
+                Storer<align> _backgroundCountDst(backgroundCount), _backgroundValueDst(backgroundValue);
+                EdgeBackgroundAdjustRangeMasked<align, true>(_backgroundCountSrc, _backgroundValueSrc, _mask,
+                    _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    EdgeBackgroundAdjustRangeMasked<align, false>(_backgroundCountSrc, _backgroundValueSrc, _mask,
+                    _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
+                _backgroundValueDst.Flush();
+                _backgroundCountDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    size_t col = width - A;
+                    Loader<false> _backgroundCountSrc(backgroundCount + col), _backgroundValueSrc(backgroundValue + col), _mask(mask + col);
+                    Storer<false> _backgroundCountDst(backgroundCount + col), _backgroundValueDst(backgroundValue + col);
+                    EdgeBackgroundAdjustRangeMasked<false, true>(_backgroundCountSrc, _backgroundValueSrc, _mask,
+                        _threshold, tailMask, _backgroundCountDst, _backgroundValueDst);
+                    _backgroundValueDst.Flush();
+                    _backgroundCountDst.Flush();
+                }
+
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+                mask += maskStride;
+            }		
+        }
+
+        void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+        {
+            if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride) && 
+                Aligned(mask) && Aligned(maskStride))
+                EdgeBackgroundAdjustRangeMasked<true>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, 
+                threshold, mask, maskStride);
+            else
+                EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, 
+                threshold, mask, maskStride);
+        }
+
+        template <bool align, bool first> 
         SIMD_INLINE void EdgeBackgroundShiftRange(const Loader<align> & value, const Loader<align> & backgroundSrc, const v128_u8 & mask, Storer<align> & backgroundDst)
         {
             const v128_u8 _value = Load<align, first>(value);
