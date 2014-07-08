@@ -191,6 +191,7 @@ namespace Test
     bool EdgeBackgroundGrowRangeSlowDataTest(bool create);
     bool EdgeBackgroundGrowRangeFastDataTest(bool create);
     bool EdgeBackgroundIncrementCountDataTest(bool create);
+    bool EdgeBackgroundAdjustRangeDataTest(bool create);
     bool EdgeBackgroundShiftRangeDataTest(bool create);
 
     bool GrayToBgraDataTest(bool create);

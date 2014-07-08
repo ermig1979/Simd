@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -198,6 +199,76 @@ namespace Simd
             else
                 EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
                 backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        }
+
+        SIMD_INLINE v128_u8 AdjustEdge(const v128_u8 & count, const v128_u8 & value, const v128_u8 & mask, const v128_u8 & threshold)
+        {
+            const v128_u8 inc = vec_and(mask, vec_cmpgt(count, threshold));
+            const v128_u8 dec = vec_and(mask, vec_cmplt(count, threshold));
+            return vec_subs(vec_adds(value, inc), dec);
+        }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void EdgeBackgroundAdjustRange(const Loader<align> & countSrc, const Loader<align> & valueSrc, 
+            const v128_u8 & threshold, const v128_u8 & mask, Storer<align> & countDst, Storer<align> & valueDst)
+        {
+            const v128_u8 _count = Load<align, first>(countSrc);
+            const v128_u8 _value = Load<align, first>(valueSrc);
+
+            Store<align, first>(valueDst, AdjustEdge(_count, _value, mask, threshold));
+            Store<align, first>(countDst, K8_00);
+        }
+
+        template <bool align> void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
+            }
+
+            const v128_u8 _threshold = SetU8(threshold);
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _backgroundCountSrc(backgroundCount), _backgroundValueSrc(backgroundValue);
+                Storer<align> _backgroundCountDst(backgroundCount), _backgroundValueDst(backgroundValue);
+                EdgeBackgroundAdjustRange<align, true>(_backgroundCountSrc, _backgroundValueSrc,
+                    _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    EdgeBackgroundAdjustRange<align, false>(_backgroundCountSrc, _backgroundValueSrc,
+                    _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
+                _backgroundValueDst.Flush();
+                _backgroundCountDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    size_t col = width - A;
+                    Loader<false> _backgroundCountSrc(backgroundCount + col), _backgroundValueSrc(backgroundValue + col);
+                    Storer<false> _backgroundCountDst(backgroundCount + col), _backgroundValueDst(backgroundValue + col);
+                    EdgeBackgroundAdjustRange<false, true>(_backgroundCountSrc, _backgroundValueSrc,
+                        _threshold, tailMask, _backgroundCountDst, _backgroundValueDst);
+                    _backgroundValueDst.Flush();
+                    _backgroundCountDst.Flush();
+                }
+
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
+
+        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, 
+            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+        {
+            if(	Aligned(backgroundValue) && Aligned(backgroundValueStride) && 
+                Aligned(backgroundCount) && Aligned(backgroundCountStride))
+                EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, 
+                backgroundValue, backgroundValueStride, threshold);
+            else
+                EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, 
+                backgroundValue, backgroundValueStride, threshold);
         }
 
         template <bool align, bool first> 
