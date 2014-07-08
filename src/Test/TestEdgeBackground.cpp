@@ -135,6 +135,17 @@ namespace Test
 		return result;
 	}
 
+    bool EdgeBackgroundIncrementCountAutoTest(const Func2 & f1, const Func2 & f2)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundIncrementCountAutoTest(W, H, f1, f2);
+        result = result && EdgeBackgroundIncrementCountAutoTest(W + O, H - O, f1, f2);
+        result = result && EdgeBackgroundIncrementCountAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
 	namespace
 	{
 		struct Func3
@@ -341,17 +352,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && EdgeBackgroundIncrementCountAutoTest(W, H, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
-		result = result && EdgeBackgroundIncrementCountAutoTest(W + 1, H - 1, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
-        result = result && EdgeBackgroundIncrementCountAutoTest(W - 1, H + 1, FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
+		result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Base::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && EdgeBackgroundIncrementCountAutoTest(W, H, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
-            result = result && EdgeBackgroundIncrementCountAutoTest(W + 1, H - 1, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
-            result = result && EdgeBackgroundIncrementCountAutoTest(W - 1, H + 1, FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Sse2::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Vsx::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
 #endif 
 
 		return result;
@@ -509,6 +524,62 @@ namespace Test
         bool result = true;
 
         result = result && EdgeBackgroundChangeRangeDataTest(create, DW, DH, FUNC1(SimdEdgeBackgroundShiftRange));
+
+        return result;
+    }
+
+    bool EdgeBackgroundIncrementCountDataTest(bool create, int width, int height, const Func2 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View backgroundCountDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View backgroundCountDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(value);
+            FillRandom(backgroundValue);
+            FillRandom(backgroundCountSrc);
+
+            TEST_SAVE(value);
+            TEST_SAVE(backgroundValue);
+            TEST_SAVE(backgroundCountSrc);
+
+            f.Call(value, backgroundValue, backgroundCountSrc, backgroundCountDst1);
+
+            TEST_SAVE(backgroundCountDst1);
+        }
+        else
+        {
+            TEST_LOAD(value);
+            TEST_LOAD(backgroundValue);
+            TEST_LOAD(backgroundCountSrc);
+
+            TEST_LOAD(backgroundCountDst1);
+
+            f.Call(value, backgroundValue, backgroundCountSrc, backgroundCountDst2);
+
+            TEST_SAVE(backgroundCountDst2);
+
+            result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool EdgeBackgroundIncrementCountDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && EdgeBackgroundIncrementCountDataTest(create, DW, DH, FUNC2(SimdEdgeBackgroundIncrementCount));
 
         return result;
     }

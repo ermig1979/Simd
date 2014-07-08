@@ -139,6 +139,68 @@ namespace Simd
         }
 
         template <bool align, bool first> 
+        SIMD_INLINE void EdgeBackgroundIncrementCount(const Loader<align> & value, const Loader<align> & backgroundValue, 
+            const Loader<align> & backgroundCountSrc, v128_u8 mask, Storer<align> & backgroundCountDst)
+        {
+            const v128_u8 _value = Load<align, first>(value);
+            const v128_u8 _backgroundValue = Load<align, first>(backgroundValue);
+            const v128_u8 _backgroundCount = Load<align, first>(backgroundCountSrc);
+
+            const v128_u8 inc = vec_and(mask, vec_cmpgt(_value, _backgroundValue));
+
+            Store<align, first>(backgroundCountDst, vec_adds(_backgroundCount, inc));
+        }
+
+        template <bool align> void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+        {
+            assert(width >= A);
+            if(align)
+            {
+                assert(Aligned(value) && Aligned(valueStride));
+                assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+                assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Loader<align> _value(value), _backgroundValue(backgroundValue), _backgroundCountSrc(backgroundCount);
+                Storer<align> _backgroundCountDst(backgroundCount);
+                EdgeBackgroundIncrementCount<align, true>(_value, _backgroundValue, _backgroundCountSrc, K8_01, _backgroundCountDst);
+                for(size_t col = A; col < alignedWidth; col += A)
+                    EdgeBackgroundIncrementCount<align, false>(_value, _backgroundValue, _backgroundCountSrc, K8_01, _backgroundCountDst);
+                _backgroundCountDst.Flush();
+
+                if(alignedWidth != width)
+                {
+                    size_t col = width - A;
+                    Loader<false> _value(value + col), _backgroundValue(backgroundValue + col), _backgroundCountSrc(backgroundCount + col);
+                    Storer<false> _backgroundCountDst(backgroundCount + col);
+                    EdgeBackgroundIncrementCount<false, true>(_value, _backgroundValue, _backgroundCountSrc, tailMask, _backgroundCountDst);
+                    _backgroundCountDst.Flush();
+                }
+
+                value += valueStride;
+                backgroundValue += backgroundValueStride;
+                backgroundCount += backgroundCountStride;
+            }
+        }
+
+        void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+        {
+            if(Aligned(value) && Aligned(valueStride) && 
+                Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride))
+                EdgeBackgroundIncrementCount<true>(value, valueStride, width, height,
+                backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+            else
+                EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
+                backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        }
+
+        template <bool align, bool first> 
         SIMD_INLINE void EdgeBackgroundShiftRange(const Loader<align> & value, const Loader<align> & backgroundSrc, const v128_u8 & mask, Storer<align> & backgroundDst)
         {
             const v128_u8 _value = Load<align, first>(value);
