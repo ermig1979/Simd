@@ -81,13 +81,10 @@ namespace Test
 		};
 	}
 
-#define ARGS_C1(format, width, height, function1, function2) \
+#define ARGS_C(format, width, height, function1, function2) \
     format, width, height, \
     ColorFunc(function1.func, function1.description + ColorDescription(format)), \
     ColorFunc(function2.func, function2.description + ColorDescription(format))
-
-#define ARGS_C2(function1, function2) \
-    ColorFunc(function1, std::string(#function1)), ColorFunc(function2, std::string(#function2))
 
 #define FUNC_C(function) \
     ColorFunc(function, std::string(#function))
@@ -111,7 +108,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 10);
+		result = result && Compare(d1, d2, 0, true, 32);
 
 		return result;
 	}
@@ -132,7 +129,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 10);
+		result = result && Compare(d1, d2, 0, true, 32);
 
 		return result;
 	}
@@ -143,9 +140,9 @@ namespace Test
 
         for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ColorFilterAutoTest(ARGS_C1(format, W, H, f1, f2));
-            result = result && ColorFilterAutoTest(ARGS_C1(format, W + 3, H - 3, f1, f2));
-            result = result && ColorFilterAutoTest(ARGS_C1(format, W - 3, H + 3, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C(format, W, H, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C(format, W + O, H - O, f1, f2));
+            result = result && ColorFilterAutoTest(ARGS_C(format, W - O, H + O, f1, f2));
         }
 
         return result;
@@ -156,8 +153,8 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterAutoTest(W, H, f1, f2);
-        result = result && GrayFilterAutoTest(W + 3, H - 3, f1, f2);
-        result = result && GrayFilterAutoTest(W - 3, H + 3, f1, f2);
+        result = result && GrayFilterAutoTest(W + O, H - O, f1, f2);
+        result = result && GrayFilterAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -166,25 +163,25 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterRhomb3x3, SimdMedianFilterRhomb3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vsx::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef CUDA_ENABLE
-        result = result && ColorFilterAutoTest(ARGS_C2(SimdMedianFilterRhomb3x3, CudaMedianFilterRhomb3x3));
+        result = result && ColorFilterAutoTest(FUNC_C(SimdMedianFilterRhomb3x3), FUNC_C(CudaMedianFilterRhomb3x3));
 #endif 
 
         return result;
@@ -194,21 +191,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterRhomb5x5, SimdMedianFilterRhomb5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vsx::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
         return result;
@@ -218,21 +215,21 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterSquare3x3, SimdMedianFilterSquare3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vsx::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 		return result;
@@ -242,21 +239,21 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Avx2::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Vsx::MedianFilterSquare5x5, SimdMedianFilterSquare5x5));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vsx::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif
 
 		return result;
@@ -266,11 +263,11 @@ namespace Test
 	{
 		bool result = true;
 
-        result = result && ColorFilterAutoTest(ARGS_C2(Simd::Base::GaussianBlur3x3, SimdGaussianBlur3x3));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 
 #if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
         if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(ARGS_C2(Simd::Sse2::GaussianBlur3x3, Simd::Avx2::GaussianBlur3x3));
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(Simd::Avx2::GaussianBlur3x3));
 #endif 
 
 		return result;
@@ -316,10 +313,10 @@ namespace Test
             result = result && GrayFilterAutoTest(FUNC_G(Simd::Avx2::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
-//#ifdef SIMD_VSX_ENABLE
-//        if(Simd::Vsx::Enable)
-//            result = result && GrayFilterAutoTest(FUNC_G(Simd::Vsx::AbsGradientSaturatedSum), FUNC_G(SimdLbpEstimate));
-//#endif 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GrayFilterAutoTest(FUNC_G(Simd::Vsx::LbpEstimate), FUNC_G(SimdLbpEstimate));
+#endif 
 
         return result;
     }
@@ -370,6 +367,15 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterDataTest(create, DW, DH, FUNC_G(SimdAbsGradientSaturatedSum));
+
+        return result;
+    }
+
+    bool LbpEstimateDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GrayFilterDataTest(create, DW, DH, FUNC_G(SimdLbpEstimate));
 
         return result;
     }
