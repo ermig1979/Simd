@@ -47,8 +47,8 @@ namespace Test
 		};
 	}
 
-#define ARGS_BGRA(width, height, function1, function2) \
-	width, height, FuncBgra(function1, std::string(#function1)), FuncBgra(function2, std::string(#function2))
+#define FUNC_BGRA(function) \
+	FuncBgra(function, std::string(#function))
 
 	bool FillBgraAutoTest(int width, int height, const FuncBgra & f1, const FuncBgra & f2)
 	{
@@ -74,25 +74,40 @@ namespace Test
 		return result;
 	}
 
-	bool FillBgraAutoTest()
-	{
-		bool result = true;
+    bool FillBgraAutoTest(const FuncBgra & f1, const FuncBgra & f2)
+    {
+        bool result = true;
 
-		result = result && FillBgraAutoTest(ARGS_BGRA(W, H, Simd::Base::FillBgra, SimdFillBgra));
-        result = result && FillBgraAutoTest(ARGS_BGRA(W + 1, H - 1, Simd::Base::FillBgra, SimdFillBgra));
-        result = result && FillBgraAutoTest(ARGS_BGRA(W - 1, H + 1, Simd::Base::FillBgra, SimdFillBgra));
+        result = result && FillBgraAutoTest(W, H, f1, f2);
+        result = result && FillBgraAutoTest(W + O, H - O, f1, f2);
+        result = result && FillBgraAutoTest(W - O, H + O, f1, f2);
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && FillBgraAutoTest(ARGS_BGRA(W, H, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
-            result = result && FillBgraAutoTest(ARGS_BGRA(W + 1, H - 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
-            result = result && FillBgraAutoTest(ARGS_BGRA(W - 1, H + 1, Simd::Sse2::FillBgra, Simd::Avx2::FillBgra));
-        }
+        return result;
+    }
+
+    bool FillBgraAutoTest()
+    {
+        bool result = true;
+
+        result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sse2::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
-		return result;
-	}
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx2::FillBgra), FUNC_BGRA(SimdFillBgra));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Vsx::FillBgra), FUNC_BGRA(SimdFillBgra));
+#endif 
+
+        return result;
+    }
 
     namespace
     {
@@ -217,6 +232,51 @@ namespace Test
         bool result = true;
 
         result = result && FillBgrDataTest(create, DW, DH, FUNC_BGR(SimdFillBgr));
+
+        return result;
+    }
+
+    bool FillBgraDataTest(bool create, int width, int height, const FuncBgra & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        const uint8_t blue = 0x11;
+        const uint8_t green = 0xAA;
+        const uint8_t red = 0x77;
+        const uint8_t alpha = 0xFF;
+
+        if(create)
+        {
+            f.Call(bgra1, blue, green, red, alpha);
+
+            TEST_SAVE(bgra1);
+        }
+        else
+        {
+            TEST_LOAD(bgra1);
+
+            f.Call(bgra2, blue, green, red, alpha);
+
+            TEST_SAVE(bgra2);
+
+            result = result && Compare(bgra1, bgra2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool FillBgraDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && FillBgraDataTest(create, DW, DH, FUNC_BGRA(SimdFillBgra));
 
         return result;
     }

@@ -200,6 +200,7 @@ namespace Test
     bool EdgeBackgroundShiftRangeMaskedDataTest(bool create);
 
     bool FillBgrDataTest(bool create);
+    bool FillBgraDataTest(bool create);
 
     bool GrayToBgraDataTest(bool create);
 

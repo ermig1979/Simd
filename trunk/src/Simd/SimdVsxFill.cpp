@@ -29,6 +29,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdLog.h"
 
 namespace Simd
@@ -80,6 +81,36 @@ namespace Simd
                 FillBgr<true>(dst, stride, width, height, blue, green, red);
             else
                 FillBgr<false>(dst, stride, width, height, blue, green, red);
+        }
+
+        template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+        {
+            if(align)
+                assert(Aligned(dst) && Aligned(stride));
+
+            uint32_t bgra32 = uint32_t(alpha) | (uint32_t(red) << 8) | (uint32_t(green) << 16) | (uint32_t(blue) << 24);
+
+            size_t alignedWidth = AlignLo(width, 4);
+            v128_u8 bgra128 = (v128_u8)SetU32(bgra32);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _dst(dst);
+                Store<align, true>(_dst, bgra128);
+                for(size_t col = 4; col < alignedWidth; col += 4)
+                    Store<align, false>(_dst, bgra128);
+                _dst.Flush();
+                if(width != alignedWidth)
+                    Store<false>(dst + 4*(width - 4), bgra128);
+                dst += stride;
+            }
+        }
+
+        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+        {
+            if(Aligned(dst) && Aligned(stride))
+                FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
+            else
+                FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
         }
     }
 #endif// SIMD_VSX_ENABLE
