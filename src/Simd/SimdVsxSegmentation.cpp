@@ -140,6 +140,52 @@ namespace Simd
                 }
             }
         }
+
+        template<bool align> SIMD_INLINE v128_u8 FillSingleHoles(uint8_t * src, ptrdiff_t stride, const v128_u8 & index)
+        {
+            const v128_u8 current = Load<align>(src);
+            const v128_u8 up = (v128_u8)vec_cmpeq(Load<align>(src - stride), index);
+            const v128_u8 left = (v128_u8)vec_cmpeq(Load<false>(src - 1), index);
+            const v128_u8 right = (v128_u8)vec_cmpeq(Load<false>(src + 1), index);
+            const v128_u8 down = (v128_u8)vec_cmpeq(Load<align>(src + stride), index);
+            return vec_sel(current, index, vec_and(vec_and(up, left), vec_and(right, down)));
+        }
+
+        template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        {
+            assert(width > A + 2 && height > 2);
+
+            height -= 1;
+            width -= 1;
+            v128_u8 _index = SetU8(index);
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 1; row < height; ++row)
+            {
+                mask += stride;
+
+                Store<false>(mask + 1, FillSingleHoles<false>(mask + 1, stride, _index));
+
+                if(width > DA + 2)
+                {
+                    Storer<align> _dst(mask + A);
+                    _dst.First(FillSingleHoles<align>(mask + A, stride, _index));
+                    for(size_t col = DA; col < alignedWidth; col += A)
+                        _dst.Next(FillSingleHoles<align>(mask + col, stride, _index));
+                    _dst.Flush();
+                }
+
+                if(alignedWidth != width)
+                    Store<false>(mask + width - A, FillSingleHoles<false>(mask + width - A, stride, _index));
+            }
+        }
+
+        void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
+            else
+                SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

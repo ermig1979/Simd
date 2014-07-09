@@ -317,6 +317,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ResizeBilinearDataTest);
 
     EXECUTE_DATA_TEST(SegmentationShrinkRegionDataTest);
+    EXECUTE_DATA_TEST(SegmentationFillSingleHolesDataTest);
 
     EXECUTE_DATA_TEST(ShiftBilinearDataTest);
 

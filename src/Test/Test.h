@@ -226,6 +226,7 @@ namespace Test
     bool ResizeBilinearDataTest(bool create);
 
     bool SegmentationShrinkRegionDataTest(bool create);
+    bool SegmentationFillSingleHolesDataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);
 
