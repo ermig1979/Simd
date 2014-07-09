@@ -138,9 +138,13 @@ namespace Simd
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
+#ifdef SIMD_BIG_ENDIAN
+            uint32_t bgra32 = uint32_t(alpha) | (uint32_t(red) << 8) | (uint32_t(green) << 16) | (uint32_t(blue) << 24);
+#else
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
+#endif
 
-#ifdef SIMD_X64_ENABLE
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
             uint64_t bgra64 = uint64_t(bgra32) | (uint64_t(bgra32) << 32);
             size_t alignedWidth = AlignLo(width, 2);
             for(size_t row = 0; row < height; ++row)
