@@ -202,6 +202,8 @@ namespace Test
     bool FillBgrDataTest(bool create);
     bool FillBgraDataTest(bool create);
 
+    bool GaussianBlur3x3DataTest(bool create);
+
     bool GrayToBgraDataTest(bool create);
 
     bool AbsSecondDerivativeHistogramDataTest(bool create);

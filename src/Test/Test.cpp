@@ -293,6 +293,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(FillBgrDataTest);
     EXECUTE_DATA_TEST(FillBgraDataTest);
 
+    EXECUTE_DATA_TEST(GaussianBlur3x3DataTest);
+
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);

@@ -261,14 +261,24 @@ namespace Test
 
 	bool GaussianBlur3x3AutoTest()
 	{
-		bool result = true;
+        bool result = true;
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(Simd::Avx2::GaussianBlur3x3));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vsx::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+#endif
 
 		return result;
 	}
@@ -463,6 +473,15 @@ namespace Test
         bool result = true;
 
         result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMedianFilterSquare5x5));
+
+        return result;
+    }
+
+    bool GaussianBlur3x3DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdGaussianBlur3x3));
 
         return result;
     }
