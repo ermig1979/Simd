@@ -154,23 +154,39 @@ namespace Test
         return result;
     }
 
+    bool Bgr48pToBgra32AutoTest(const FuncP & f1, const FuncP & f2)
+    {
+        bool result = true;
+
+        result = result && Bgr48pToBgra32AutoTest(W, H, f1, f2);
+        result = result && Bgr48pToBgra32AutoTest(W + O, H - O, f1, f2);
+        result = result && Bgr48pToBgra32AutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
     bool Bgr48pToBgra32AutoTest()
     {
         bool result = true;
 	
-        result = result && Bgr48pToBgra32AutoTest(W, H, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
-        result = result && Bgr48pToBgra32AutoTest(W + 1, H - 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
-        result = result && Bgr48pToBgra32AutoTest(W - 1, H + 1, FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+        result = result && Bgr48pToBgra32AutoTest(FUNCP(Simd::Base::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && Bgr48pToBgra32AutoTest(W, H, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
-            result = result && Bgr48pToBgra32AutoTest(W + 1, H - 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
-            result = result && Bgr48pToBgra32AutoTest(W - 1, H + 1, FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(Simd::Avx2::Bgr48pToBgra32));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && Bgr48pToBgra32AutoTest(FUNCP(Simd::Sse2::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
 #endif 
-		return result;    
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && Bgr48pToBgra32AutoTest(FUNCP(Simd::Avx2::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && Bgr48pToBgra32AutoTest(FUNCP(Simd::Vsx::Bgr48pToBgra32), FUNCP(SimdBgr48pToBgra32));
+#endif 
+
+        return result;    
     }
 
     //-----------------------------------------------------------------------
@@ -219,6 +235,64 @@ namespace Test
         bool result = true;
 
         result = result && BgrToBgraDataTest(create, DW, DH, FUNC(SimdBgrToBgra));
+
+        return result;
+    }
+
+    bool Bgr48pToBgra32DataTest(bool create, int width, int height, const FuncP & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View blue(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View green(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View red(width, height, View::Int16, NULL, TEST_ALIGN(width));
+
+        uint8_t alpha = 0xFF;
+
+        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(blue);
+            FillRandom(green);
+            FillRandom(red);
+
+            TEST_SAVE(blue);
+            TEST_SAVE(green);
+            TEST_SAVE(red);
+
+            f.Call(blue, green, red, bgra1, alpha);
+
+            TEST_SAVE(bgra1);
+        }
+        else
+        {
+            TEST_LOAD(blue);
+            TEST_LOAD(green);
+            TEST_LOAD(red);
+
+            TEST_LOAD(bgra1);
+
+            f.Call(blue, green, red, bgra2, alpha);
+
+            TEST_SAVE(bgra2);
+
+            result = result && Compare(bgra1, bgra2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool Bgr48pToBgra32DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && Bgr48pToBgra32DataTest(create, DW, DH, FUNCP(SimdBgr48pToBgra32));
 
         return result;
     }

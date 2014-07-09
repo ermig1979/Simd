@@ -93,6 +93,69 @@ namespace Simd
             else
                 BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
         }
+
+        const v128_u8 K8_PERM_48 = SIMD_VEC_SETR_EPI8(0x01, 0x11, 0x03, 0x13, 0x05, 0x15, 0x07, 0x17, 0x09, 0x19, 0x0B, 0x1B, 0x0D, 0x1D, 0x0F, 0x1F);
+
+        template <bool align, bool first> 
+        SIMD_INLINE void Bgr48pToBgra32(const uint8_t * blue, const uint8_t * green, const uint8_t * red, size_t offset, 
+            const v128_u8 & alpha, Storer<align> & bgra)
+        {
+            const v128_u8 _blue = Load<align>(blue + offset);
+            const v128_u8 _green = Load<align>(green + offset);
+            const v128_u8 _red = Load<align>(red + offset);
+
+            v128_u16 bg = (v128_u16)vec_perm(_blue, _green, K8_PERM_48);
+            v128_u16 ra = (v128_u16)vec_perm(_red, alpha, K8_PERM_48);
+
+            Store<align, first>(bgra, (v128_u8)UnpackLoU16(ra, bg));
+            Store<align, false>(bgra, (v128_u8)UnpackHiU16(ra, bg));
+        }
+
+        template <bool align> void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert(width >= HA);
+            if(align)
+            {
+                assert(Aligned(blue) && Aligned(blueStride));
+                assert(Aligned(green) && Aligned(greenStride));
+                assert(Aligned(red) && Aligned(redStride));
+                assert(Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            v128_u8 _alpha = SetU8(alpha);
+            size_t alignedWidth = AlignLo(width, HA);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _bgra(bgra);
+                Bgr48pToBgra32<align, true>(blue, green, red, 0, _alpha, _bgra);
+                for(size_t col = HA; col < alignedWidth; col += HA)
+                    Bgr48pToBgra32<align, false>(blue, green, red, col*2, _alpha, _bgra);
+                _bgra.Flush();
+
+                if(width != alignedWidth)
+                {
+                    Storer<false> _bgra(bgra + (width - HA)*4);
+                    Bgr48pToBgra32<false, true>(blue, green, red, (width - HA)*2, _alpha, _bgra);
+                    _bgra.Flush();
+                }
+
+                blue += blueStride;
+                green += greenStride;
+                red += redStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
+            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            if(Aligned(blue) && Aligned(blueStride) && Aligned(green) && Aligned(greenStride) && 
+                Aligned(red) && Aligned(redStride) && Aligned(bgra) && Aligned(bgraStride))
+                Bgr48pToBgra32<true>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+            else
+                Bgr48pToBgra32<false>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

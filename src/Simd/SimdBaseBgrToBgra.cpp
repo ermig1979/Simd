@@ -85,9 +85,15 @@ namespace Simd
                 uint8_t * pBgra = bgra;
                 for(size_t col = 0; col < width; ++col)
                 {
-                    pBgra[0] = *pBlue;
-                    pBgra[1] = *pGreen;
-                    pBgra[2] = *pRed;
+#ifdef SIMD_BIG_ENDIAN
+                    pBgra[0] = pBlue[1];
+                    pBgra[1] = pGreen[1];
+                    pBgra[2] = pRed[1];
+#else
+                    pBgra[0] = pBlue[0];
+                    pBgra[1] = pGreen[0];
+                    pBgra[2] = pRed[0];
+#endif
                     pBgra[3] = alpha;
                     pBlue += 2;
                     pGreen += 2;
