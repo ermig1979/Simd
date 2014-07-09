@@ -1112,6 +1112,11 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Sse2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::HA)
+        Vsx::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+    else
+#endif
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 

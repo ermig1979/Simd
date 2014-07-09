@@ -368,6 +368,17 @@ namespace Test
         return "_Unknown";
     }
 
+    std::string Data::Description(SimdOperationBinary16iType type)
+    {
+        switch(type)
+        {
+        case SimdOperationBinary16iAddition:
+            return "_Addition";
+        }
+        assert(0);
+        return "_Unknown";
+    }
+
     std::string Data::Description(View::Format format)
     {
         switch(format)
