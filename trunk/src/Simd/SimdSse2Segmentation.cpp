@@ -42,7 +42,7 @@ namespace Simd
 
         template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
         {
-            assert(width > 2 && height > 2);
+            assert(width > A + 2 && height > 2);
 
             height -= 1;
             width -= 1;

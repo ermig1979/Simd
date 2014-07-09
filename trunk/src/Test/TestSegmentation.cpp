@@ -124,7 +124,7 @@ namespace Test
         };	
     }
 
-#define ARG_FSH(func1, func2) FuncFSH(func1, #func1), FuncFSH(func2, #func2)
+#define FUNC_FSH(func) FuncFSH(func, #func)
 
     bool SegmentationFillSingleHolesAutoTest(int width, int height, const FuncFSH & f1, const FuncFSH & f2)
     {
@@ -147,21 +147,36 @@ namespace Test
         return result;
     }
 
+    bool SegmentationFillSingleHolesAutoTest(const FuncFSH & f1, const FuncFSH & f2)
+    {
+        bool result = true;
+
+        result = result && SegmentationFillSingleHolesAutoTest(W, H, f1, f2);
+        result = result && SegmentationFillSingleHolesAutoTest(W + O, H - O, f1, f2);
+        result = result && SegmentationFillSingleHolesAutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
     bool SegmentationFillSingleHolesAutoTest()
     {
         bool result = true;
 
-        result = result && SegmentationFillSingleHolesAutoTest(W, H, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
-        result = result && SegmentationFillSingleHolesAutoTest(W + 1, H - 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
-        result = result && SegmentationFillSingleHolesAutoTest(W - 1, H + 1, ARG_FSH(Simd::Base::SegmentationFillSingleHoles, SimdSegmentationFillSingleHoles));
+        result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Base::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-        {
-            result = result && SegmentationFillSingleHolesAutoTest(W, H, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
-            result = result && SegmentationFillSingleHolesAutoTest(W + 1, H - 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
-            result = result && SegmentationFillSingleHolesAutoTest(W - 1, H + 1, ARG_FSH(Simd::Sse2::SegmentationFillSingleHoles, Simd::Avx2::SegmentationFillSingleHoles));
-        }
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sse2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Vsx::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
         return result;    
@@ -213,6 +228,56 @@ namespace Test
         bool result = true;
 
         result = result && SegmentationShrinkRegionDataTest(create, DW, DH, FUNC_SR(SimdSegmentationShrinkRegion));
+
+        return result;
+    }
+
+    bool SegmentationFillSingleHolesDataTest(bool create, int width, int height, const FuncFSH & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint8_t index = 3;
+
+        if(create)
+        {
+            FillRandomMask(s, index);
+
+            TEST_SAVE(s);
+
+            f.Call(s, index, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(d1);
+
+            f.Call(s, index, d1);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool SegmentationFillSingleHolesDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SegmentationFillSingleHolesDataTest(create, DW, DH, FUNC_FSH(SimdSegmentationFillSingleHoles));
 
         return result;
     }

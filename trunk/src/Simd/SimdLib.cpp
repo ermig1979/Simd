@@ -1262,6 +1262,11 @@ SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, siz
         Sse2::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A + 1)
+        Vsx::SegmentationFillSingleHoles(mask, stride, width, height, index);
+    else
+#endif
         Base::SegmentationFillSingleHoles(mask, stride, width, height, index);
 }
 
