@@ -216,6 +216,7 @@ namespace Test
     bool MedianFilterSquare5x5DataTest(bool create);
 
     bool OperationBinary8uDataTest(bool create);
+    bool OperationBinary16iDataTest(bool create);
 
     bool ReduceGray2x2DataTest(bool create);
     bool ReduceGray3x3DataTest(bool create);

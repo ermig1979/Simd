@@ -109,21 +109,21 @@ namespace Test
         return "<Unknown";
     }
 
-#define ARGS_OB8U1(format, width, height, type, function1, function2) \
+#define ARGS_OB8U(format, width, height, type, function1, function2) \
 	format, width, height, type, \
 	FuncOB8U(function1.func, function1.description + OperationBinary8uTypeDescription(type) + ColorDescription(format)), \
 	FuncOB8U(function2.func, function2.description + OperationBinary8uTypeDescription(type) + ColorDescription(format))
 
-#define ARGS_OB8U2(function1, function2) \
-	FuncOB8U(function1, std::string(#function1)), FuncOB8U(function2, std::string(#function2))
+#define FUNC_OB8U(function) \
+	FuncOB8U(function, std::string(#function))
 
-#define ARGS_OB16I1(width, height, type, function1, function2) \
+#define ARGS_OB16I(width, height, type, function1, function2) \
     width, height, type, \
     FuncOB16I(function1.func, function1.description + OperationBinary16iTypeDescription(type)), \
     FuncOB16I(function2.func, function2.description + OperationBinary16iTypeDescription(type))
 
-#define ARGS_OB16I2(function1, function2) \
-    FuncOB16I(function1, std::string(#function1)), FuncOB16I(function2, std::string(#function2))
+#define FUNC_OB16I(function) \
+    FuncOB16I(function, std::string(#function))
 
 #define ARGS_VP(function) FuncVP(function, std::string(#function))
 
@@ -159,9 +159,9 @@ namespace Test
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W, H, type, f1, f2));
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W + 1, H - 1, type, f1, f2));
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U1(format, W - 1, H + 1, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W, H, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W + 1, H - 1, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W - 1, H + 1, type, f1, f2));
             }
         }
 
@@ -172,21 +172,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Base::OperationBinary8u, SimdOperationBinary8u));
+		result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Base::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 
 #ifdef SIMD_SSE2_ENABLE
 		if(Simd::Sse2::Enable)
-			result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Sse2::OperationBinary8u, SimdOperationBinary8u));
+			result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sse2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Avx2::OperationBinary8u, SimdOperationBinary8u));
+            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Avx2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && OperationBinary8uAutoTest(ARGS_OB8U2(Simd::Vsx::OperationBinary8u, SimdOperationBinary8u));
+            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Vsx::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 		return result;
@@ -222,9 +222,9 @@ namespace Test
 
         for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iAddition && result; type = SimdOperationBinary16iType(type + 1))
         {
-            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W, H, type, f1, f2));
-            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W + 1, H - 1, type, f1, f2));
-            result = result && OperationBinary16iAutoTest(ARGS_OB16I1(W - 1, H + 1, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I(W, H, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I(W + O, H - O, type, f1, f2));
+            result = result && OperationBinary16iAutoTest(ARGS_OB16I(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -234,11 +234,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && OperationBinary16iAutoTest(ARGS_OB16I2(Simd::Base::OperationBinary16i, SimdOperationBinary16i));
+        result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Base::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && OperationBinary16iAutoTest(ARGS_OB16I2(Simd::Avx2::OperationBinary16i, Simd::Sse2::OperationBinary16i));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Sse2::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Avx2::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Vsx::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
         return result;
@@ -272,8 +282,8 @@ namespace Test
         bool result = true;
 
         result = result && VectorProductAutoTest(W, H, f1, f2);
-        result = result && VectorProductAutoTest(W - 3, H + 3, f1, f2);
-        result = result && VectorProductAutoTest(W + 3, H - 3, f1, f2);
+        result = result && VectorProductAutoTest(W - O, H + O, f1, f2);
+        result = result && VectorProductAutoTest(W + O, H - O, f1, f2);
 
         return result;
     }
@@ -303,9 +313,6 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
-
-#define FUNC_OB8U(format, type, function) \
-    format, type, FuncOB8U(function, std::string(#function) + Data::Description(type) + Data::Description(format))
 
     bool OperationBinary8uDataTest(bool create, int width, int height, View::Format format, SimdOperationBinary8uType type, const FuncOB8U & f)
     {
@@ -351,12 +358,68 @@ namespace Test
     {
         bool result = true;
 
+        FuncOB8U f = FUNC_OB8U(SimdOperationBinary8u);
         for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedSubtraction && result; type = SimdOperationBinary8uType(type + 1))
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                result = result && OperationBinary8uDataTest(create, DW, DH, FUNC_OB8U(format, type, SimdOperationBinary8u));
+                std::string description = f.description + Data::Description(type) + Data::Description(format);
+                result = result && OperationBinary8uDataTest(create, DW, DH, format, type, FuncOB8U(f.func, description));
             }
+        }
+
+        return result;
+    }
+
+    bool OperationBinary16iDataTest(bool create, int width, int height, SimdOperationBinary16iType type, const FuncOB16I & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View a(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View b(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View d1(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Int16, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(a);
+            FillRandom(b);
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(a, b, d1, type);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+            TEST_LOAD(d1);
+
+            f.Call(a, b, d2, type);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool OperationBinary16iDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncOB16I f = FUNC_OB16I(SimdOperationBinary16i);
+        for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iAddition && result; type = SimdOperationBinary16iType(type + 1))
+        {
+            std::string description = f.description + Data::Description(type);
+            result = result && OperationBinary16iDataTest(create, DW, DH, type, FuncOB16I(f.func, description));
         }
 
         return result;

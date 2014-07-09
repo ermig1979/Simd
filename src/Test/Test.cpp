@@ -307,6 +307,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(MedianFilterSquare5x5DataTest);
 
     EXECUTE_DATA_TEST(OperationBinary8uDataTest);
+    EXECUTE_DATA_TEST(OperationBinary16iDataTest);
 
     EXECUTE_DATA_TEST(ReduceGray2x2DataTest);
     EXECUTE_DATA_TEST(ReduceGray3x3DataTest);

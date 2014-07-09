@@ -65,6 +65,7 @@ namespace Test
 
         static std::string Description(SimdCompareType type);
         static std::string Description(SimdOperationBinary8uType type);
+        static std::string Description(SimdOperationBinary16iType type);
         static std::string Description(View::Format format);
     };
 }

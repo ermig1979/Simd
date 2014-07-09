@@ -236,6 +236,11 @@ namespace Simd
         {
             Store<align, first>(storer, (v128_u8)value);
         }
+
+        template <bool align, bool first> void Store(Storer<align> & storer, v128_s16 value)
+        {
+            Store<align, first>(storer, (v128_u8)value);
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }
