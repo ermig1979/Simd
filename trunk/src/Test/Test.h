@@ -218,6 +218,8 @@ namespace Test
     bool ReduceGray4x4DataTest(bool create);
     bool ReduceGray5x5DataTest(bool create);
 
+    bool ResizeBilinearDataTest(bool create);
+
     bool SegmentationShrinkRegionDataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);

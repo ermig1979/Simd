@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -49,13 +50,13 @@ namespace Test
 		};
 	}
 
-#define ARGS1(format, width, height, k, function1, function2) \
+#define ARGS(format, width, height, k, function1, function2) \
     format, width, height, k, \
     Func(function1.func, function1.description + ColorDescription(format)), \
     Func(function2.func, function2.description + ColorDescription(format))
 
-#define ARGS2(function1, function2) \
-    Func(function1, std::string(#function1)), Func(function2, std::string(#function2))
+#define FUNC(function) \
+    Func(function, std::string(#function))
 
 	bool ResizeAutoTest(View::Format format, int width, int height, double k, const Func & f1, const Func & f2)
 	{
@@ -83,17 +84,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeAutoTest(ARGS1(View::Gray8, W, H, 0.9, f1, f2));
-        result = result && ResizeAutoTest(ARGS1(View::Gray8, W + 1, H - 1, 1.1, f1, f2));
-
-        result = result && ResizeAutoTest(ARGS1(View::Uv16, W, H, 0.9, f1, f2));
-        result = result && ResizeAutoTest(ARGS1(View::Uv16, W + 1, H - 1, 1.1, f1, f2));
-
-        result = result && ResizeAutoTest(ARGS1(View::Bgr24, W, H, 0.9, f1, f2));
-        result = result && ResizeAutoTest(ARGS1(View::Bgr24, W + 1, H - 1, 1.1, f1, f2));
-
-        result = result && ResizeAutoTest(ARGS1(View::Bgra32, W, H, 0.9, f1, f2));
-        result = result && ResizeAutoTest(ARGS1(View::Bgra32, W + 1, H - 1, 1.1, f1, f2));
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ResizeAutoTest(ARGS(format, W, H, 0.9, f1, f2));
+            result = result && ResizeAutoTest(ARGS(format, W + O, H - O, 1.3, f1, f2));
+            result = result && ResizeAutoTest(ARGS(format, W - O, H + O, 0.7, f1, f2));
+        }
 
         return result;
     }
@@ -102,12 +98,78 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizeBilinearAutoTest(ARGS2(Simd::Base::ResizeBilinear, SimdResizeBilinear));
+        result = result && ResizeBilinearAutoTest(FUNC(Simd::Base::ResizeBilinear), FUNC(SimdResizeBilinear));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && ResizeBilinearAutoTest(ARGS2(Simd::Sse2::ResizeBilinear, Simd::Avx2::ResizeBilinear));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ResizeBilinearAutoTest(FUNC(Simd::Sse2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ResizeBilinearAutoTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ResizeBilinearAutoTest(FUNC(Simd::Vsx::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool ResizeBilinearDataTest(bool create, int width, int height, View::Format format, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+
+        const double k = 0.7;
+
+        View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(s);
+            TEST_SAVE(s);
+
+            f.Call(s, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(d1);
+
+            f.Call(s, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool ResizeBilinearDataTest(bool create)
+    {
+        bool result = true;
+
+        Func f = FUNC(SimdResizeBilinear);
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && ResizeBilinearDataTest(create, DW, DH, format, Func(f.func, f.description + Data::Description(format)));
+        }
 
         return result;
     }
