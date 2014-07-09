@@ -903,6 +903,11 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Sse2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width*channelCount >= Vsx::A)
+        Vsx::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
         Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
