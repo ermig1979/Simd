@@ -309,6 +309,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ReduceGray4x4DataTest);
     EXECUTE_DATA_TEST(ReduceGray5x5DataTest);
 
+    EXECUTE_DATA_TEST(ResizeBilinearDataTest);
+
     EXECUTE_DATA_TEST(SegmentationShrinkRegionDataTest);
 
     EXECUTE_DATA_TEST(ShiftBilinearDataTest);
