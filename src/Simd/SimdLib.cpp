@@ -985,6 +985,11 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
         Sse2::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A + 2)
+        Vsx::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 

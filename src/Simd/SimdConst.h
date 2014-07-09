@@ -251,7 +251,13 @@ namespace Simd
 
         const v128_u8 K8_00 = SIMD_VEC_SET1_EPI8(0x00);
         const v128_u8 K8_01 = SIMD_VEC_SET1_EPI8(0x01);
+        const v128_u8 K8_02 = SIMD_VEC_SET1_EPI8(0x02);
+        const v128_u8 K8_04 = SIMD_VEC_SET1_EPI8(0x04);
+        const v128_u8 K8_08 = SIMD_VEC_SET1_EPI8(0x08);
         const v128_u8 K8_10 = SIMD_VEC_SET1_EPI8(0x10);
+        const v128_u8 K8_20 = SIMD_VEC_SET1_EPI8(0x20);
+        const v128_u8 K8_40 = SIMD_VEC_SET1_EPI8(0x40);
+        const v128_u8 K8_80 = SIMD_VEC_SET1_EPI8(0x80);
         const v128_u8 K8_FF = SIMD_VEC_SET1_EPI8(0xFF);
 
         const v128_u16 K16_0000 = SIMD_VEC_SET1_EPI16(0x0000);

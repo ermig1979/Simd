@@ -297,6 +297,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
 
+    EXECUTE_DATA_TEST(LbpEstimateDataTest);
+
     EXECUTE_DATA_TEST(MedianFilterRhomb3x3DataTest);
     EXECUTE_DATA_TEST(MedianFilterRhomb5x5DataTest);
     EXECUTE_DATA_TEST(MedianFilterSquare3x3DataTest);
