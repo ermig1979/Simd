@@ -213,7 +213,7 @@ namespace Test
 
             TEST_LOAD(rd1);
 
-            f.Call(s, index, rs1, rd1);
+            f.Call(s, index, rs2, rd2);
 
             TEST_SAVE(rd2);
 
@@ -263,7 +263,7 @@ namespace Test
 
             TEST_LOAD(d1);
 
-            f.Call(s, index, d1);
+            f.Call(s, index, d2);
 
             TEST_SAVE(d2);
 

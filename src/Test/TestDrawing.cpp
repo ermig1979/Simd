@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -84,8 +85,8 @@ namespace Test
             FuncAB f2c = FuncAB(f2.func, f2.description + ColorDescription(format));
             
             result = result && AlphaBlendingAutoTest(format, W, H, f1c, f2c);
-            result = result && AlphaBlendingAutoTest(format, W + 1, H - 1, f1c, f2c);
-            result = result && AlphaBlendingAutoTest(format, W - 1, H + 1, f1c, f2c);
+            result = result && AlphaBlendingAutoTest(format, W + O, H - O, f1c, f2c);
+            result = result && AlphaBlendingAutoTest(format, W - O, H + O, f1c, f2c);
         }
 
         return result;
@@ -97,16 +98,89 @@ namespace Test
 
         result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Sse2::Enable && Simd::Avx2::Enable)
-            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(Simd::Avx2::AlphaBlending));
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
-#if defined(SIMD_SSSE3_ENABLE)
+#ifdef SIMD_SSSE3_ENABLE
         if(Simd::Ssse3::Enable)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Avx2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Vsx::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#endif
+
         return result;    
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool AlphaBlendingDataTest(bool create, View::Format format, int width, int height, const FuncAB & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, format, NULL, TEST_ALIGN(width));
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(s);
+            FillRandom(a);
+            FillRandom(b);
+
+            TEST_SAVE(s);
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(s, a, b, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+
+            TEST_LOAD(d1);
+
+            f.Call(s, a, b, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool AlphaBlendingDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncAB f = FUNC_AB(SimdAlphaBlending);
+
+        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && AlphaBlendingDataTest(create, format, DW, DH, FuncAB(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
     }
 }
