@@ -30,7 +30,24 @@ namespace Test
 {
 	namespace
 	{
-		struct Func
+        struct FuncH
+        {
+            typedef void (*FuncPtr)(
+                const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
+
+            FuncPtr func;
+            std::string description;
+
+            FuncH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint32_t * histogram) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.width, src.height, src.stride, histogram);
+            }
+        };
+
+		struct FuncASDH
 		{
 			typedef void (*FuncPtr)(
 				const uint8_t *src, size_t width, size_t height, size_t stride,
@@ -39,7 +56,7 @@ namespace Test
 			FuncPtr func;
 			std::string description;
 
-			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncASDH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
 			void Call(const View & src, size_t step, size_t indent, uint32_t * histogram) const
 			{
@@ -50,9 +67,51 @@ namespace Test
 		};
 	}
 
-#define FUNC(function) Func(function, #function)
+#define FUNC_H(function) FuncH(function, #function)
 
-	bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, const Func & f1, const Func & f2)
+#define FUNC_ASDH(function) FuncASDH(function, #function)
+
+    bool HistogramAutoTest(int width, int height, const FuncH & f1, const FuncH & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(s);
+
+        Histogram h1 = {0}, h2 = {0};
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, h2));
+
+        result = result && Compare(h1, h2, 0, true, 32);
+
+        return result;
+    }
+
+    bool HistogramAutoTest(const FuncH & f1, const FuncH & f2)
+    {
+        bool result = true;
+
+        result = result && HistogramAutoTest(W, H, f1, f2);
+        result = result && HistogramAutoTest(W + O, H - O, f1, f2);
+        result = result && HistogramAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
+    bool HistogramAutoTest()
+    {
+        bool result = true;
+
+        result = result && HistogramAutoTest(FUNC_H(Simd::Base::Histogram), FUNC_H(SimdHistogram));
+
+        return result;
+    }
+
+	bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, const FuncASDH & f1, const FuncASDH & f2)
 	{
 		bool result = true;
 
@@ -68,12 +127,12 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, step, indent, h2));
 
-		result = result && Compare(h1, h2, 0, true, 10);
+		result = result && Compare(h1, h2, 0, true, 32);
 
 		return result;
 	}
 
-    bool AbsSecondDerivativeHistogramAutoTest(const Func & f1, const Func & f2)
+    bool AbsSecondDerivativeHistogramAutoTest(const FuncASDH & f1, const FuncASDH & f2)
     {
         bool result = true;
 
@@ -89,21 +148,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AbsSecondDerivativeHistogramAutoTest(FUNC(Simd::Base::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+		result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Base::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC(Simd::Avx2::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC(Simd::Vsx::AbsSecondDerivativeHistogram), FUNC(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Vsx::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 		return result;
@@ -111,7 +170,54 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool AbsSecondDerivativeHistogramDataTest(bool create, int width, int height, const Func & f)
+    bool HistogramDataTest(bool create, int width, int height, const FuncH & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        Histogram h1, h2;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, h1);
+
+            TEST_SAVE(h1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(h1);
+
+            f.Call(src, h2);
+
+            TEST_SAVE(h2);
+
+            result = result && Compare(h1, h2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool HistogramDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && HistogramDataTest(create, DW, DH, FUNC_H(SimdHistogram));
+
+        return result;
+    }
+
+    bool AbsSecondDerivativeHistogramDataTest(bool create, int width, int height, const FuncASDH & f)
     {
         bool result = true;
 
@@ -154,7 +260,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AbsSecondDerivativeHistogramDataTest(create, DW, DH, FUNC(SimdAbsSecondDerivativeHistogram));
+        result = result && AbsSecondDerivativeHistogramDataTest(create, DW, DH, FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 
         return result;
     }
