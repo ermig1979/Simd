@@ -74,8 +74,8 @@ namespace Test
         bool result = true;
 
         result = result && BgraToGrayAutoTest(W, H, f1, f2);
-        result = result && BgraToGrayAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BgraToGrayAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BgraToGrayAutoTest(W + O, H - O, f1, f2);
+        result = result && BgraToGrayAutoTest(W - O, H + O, f1, f2);
 
         return result;    
     }

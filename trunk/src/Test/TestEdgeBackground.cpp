@@ -257,8 +257,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(backgroundCountSrc, backgroundValueSrc, backgroundCountDst2, backgroundValueDst2, 0x80, mask));
 
-        result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 10, 0, "backgroundCount");
-        result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 10, 0, "backgroundValue");
+        result = result && Compare(backgroundCountDst1, backgroundCountDst2, 0, true, 32, 0, "backgroundCount");
+        result = result && Compare(backgroundValueDst1, backgroundValueDst2, 0, true, 32, 0, "backgroundValue");
 
 		return result;
 	}
@@ -317,7 +317,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, backgroundSrc, backgroundDst2, mask));
 
-		result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 10, 0);
+		result = result && Compare(backgroundDst1, backgroundDst2, 0, true, 32, 0);
 
 		return result;
 	}

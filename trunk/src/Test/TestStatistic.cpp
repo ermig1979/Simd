@@ -78,8 +78,8 @@ namespace Test
         bool result = true;
 
         result = result && GetStatisticAutoTest(W, H, f1, f2);
-        result = result && GetStatisticAutoTest(W + 3, H - 3, f1, f2);
-        result = result && GetStatisticAutoTest(W - 3, H + 3, f1, f2);
+        result = result && GetStatisticAutoTest(W + O, H - O, f1, f2);
+        result = result && GetStatisticAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -166,8 +166,8 @@ namespace Test
         bool result = true;
 
         result = result && GetMomentsAutoTest(W*scale.x, H*scale.y, ARGS_M(scale, f1, f2));
-        result = result && GetMomentsAutoTest(W*scale.x + 1, H*scale.y - 1, ARGS_M(scale, f1, f2));
-        result = result && GetMomentsAutoTest(W*scale.x - 1, H*scale.y + 1, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsAutoTest(W*scale.x + O, H*scale.y - O, ARGS_M(scale, f1, f2));
+        result = result && GetMomentsAutoTest(W*scale.x - O, H*scale.y + O, ARGS_M(scale, f1, f2));
 
         return result;
     }
@@ -258,8 +258,8 @@ namespace Test
         bool result = true;
 
         result = result && GetSumsAutoTest(W, H, f1, f2, isRow);
-        result = result && GetSumsAutoTest(W + 3, H - 3, f1, f2, isRow);
-        result = result && GetSumsAutoTest(W - 3, H + 3, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W + O, H - O, f1, f2, isRow);
+        result = result && GetSumsAutoTest(W - O, H + O, f1, f2, isRow);
 
         return result;
     }
@@ -407,8 +407,8 @@ namespace Test
         bool result = true;
 
         result = result && SumAutoTest(W, H, f1, f2);
-        result = result && SumAutoTest(W + 3, H - 3, f1, f2);
-        result = result && SumAutoTest(W - 3, H + 3, f1, f2);
+        result = result && SumAutoTest(W + O, H - O, f1, f2);
+        result = result && SumAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }

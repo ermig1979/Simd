@@ -78,9 +78,9 @@ namespace Test
         bool result = true;
 
         result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 1, 16, f1, f2);
-        result = result && AbsSecondDerivativeHistogramAutoTest(W + 3, H - 3, 2, 16, f1, f2);
+        result = result && AbsSecondDerivativeHistogramAutoTest(W + O, H - O, 2, 16, f1, f2);
         result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 3, 8, f1, f2);
-        result = result && AbsSecondDerivativeHistogramAutoTest(W - 3, H + 3, 4, 8, f1, f2);
+        result = result && AbsSecondDerivativeHistogramAutoTest(W - O, H + O, 4, 8, f1, f2);
 
         return result;
     }

@@ -160,8 +160,8 @@ namespace Test
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
                 result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W, H, type, f1, f2));
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W + 1, H - 1, type, f1, f2));
-                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W - 1, H + 1, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W + O, H - O, type, f1, f2));
+                result = result && OperationBinary8uAutoTest(ARGS_OB8U(format, W - O, H + O, type, f1, f2));
             }
         }
 

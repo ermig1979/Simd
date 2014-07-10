@@ -76,8 +76,8 @@ namespace Test
         bool result = true;
 
         result = result && BgrToBgraAutoTest(W, H, f1, f2);
-        result = result && BgrToBgraAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BgrToBgraAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BgrToBgraAutoTest(W + O, H - O, f1, f2);
+        result = result && BgrToBgraAutoTest(W - O, H + O, f1, f2);
 
         return result;    
     }

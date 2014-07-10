@@ -63,7 +63,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2, 0xFF));
 
-        result = result && Compare(d1, d2, 0, true, 10);
+        result = result && Compare(d1, d2, 0, true, 32);
 
         return result;
     }
@@ -85,8 +85,8 @@ namespace Test
         bool result = true;
 
         result = result && BayerToBgraAutoTest(W, H, FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
-        result = result && BayerToBgraAutoTest(W + 2, H - 2, FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
-        result = result && BayerToBgraAutoTest(W - 2, H + 2, FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
+        result = result && BayerToBgraAutoTest(W + E, H - E, FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
+        result = result && BayerToBgraAutoTest(W - E, H + E, FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
 
         return result;    
     }

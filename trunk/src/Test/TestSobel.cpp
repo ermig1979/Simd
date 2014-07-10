@@ -75,8 +75,8 @@ namespace Test
         bool result = true;
 
         result = result && SobelAutoTest(W, H, f1, f2);
-        result = result && SobelAutoTest(W + 1, H - 1, f1, f2);
-        result = result && SobelAutoTest(W - 1, H + 1, f1, f2);
+        result = result && SobelAutoTest(W + O, H - O, f1, f2);
+        result = result && SobelAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -253,8 +253,8 @@ namespace Test
         bool result = true;
 
         result = result && ContourMetricsMaskedAutoTest(W, H, f1, f2);
-        result = result && ContourMetricsMaskedAutoTest(W + 1, H - 1, f1, f2);
-        result = result && ContourMetricsMaskedAutoTest(W - 1, H + 1, f1, f2);
+        result = result && ContourMetricsMaskedAutoTest(W + O, H - O, f1, f2);
+        result = result && ContourMetricsMaskedAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -334,8 +334,8 @@ namespace Test
         bool result = true;
 
         result = result && ContourAnchorsAutoTest(W, H, f1, f2);
-        result = result && ContourAnchorsAutoTest(W + 3, H - 3, f1, f2);
-        result = result && ContourAnchorsAutoTest(W - 3, H + 3, f1, f2);
+        result = result && ContourAnchorsAutoTest(W + O, H - O, f1, f2);
+        result = result && ContourAnchorsAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
