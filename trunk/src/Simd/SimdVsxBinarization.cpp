@@ -141,16 +141,16 @@ namespace Simd
         SIMD_INLINE void AddRows(const Loader<srcAlign> & src, const v128_u8 & value, const v128_u8 & mask, const Loader<dstAlign> & saSrc, Storer<dstAlign> & saDst)
         {
             const v128_u8 inc = vec_and(Compare<compareType>(Load<srcAlign, first>(src), value), mask);
-            Store<dstAlign, first>(saDst, vec_add(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(inc, mask)));
-            Store<dstAlign, false>(saDst, vec_add(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(inc, mask)));
+            Store<dstAlign, first>(saDst, vec_add(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(mask, inc)));
+            Store<dstAlign, false>(saDst, vec_add(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(mask, inc)));
         }
 
         template <bool srcAlign, bool dstAlign, bool first, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const Loader<srcAlign> & src, const v128_u8 & value, const v128_u8 & mask, const Loader<dstAlign> & saSrc, Storer<dstAlign> & saDst)
         {
             const v128_u8 dec = vec_and(Compare<compareType>(Load<srcAlign, first>(src), value), mask);
-            Store<dstAlign, first>(saDst, vec_sub(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(dec, mask)));
-            Store<dstAlign, false>(saDst, vec_sub(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(dec, mask)));
+            Store<dstAlign, first>(saDst, vec_sub(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(mask, dec)));
+            Store<dstAlign, false>(saDst, vec_sub(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(mask, dec)));
         }
 
         template <bool srcAlign, bool dstAlign, bool first>
