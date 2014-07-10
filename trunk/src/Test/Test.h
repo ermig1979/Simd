@@ -84,6 +84,7 @@ namespace Test
     bool OperationBinary16iAutoTest();
     bool VectorProductAutoTest();
 
+    bool HistogramAutoTest();
     bool AbsSecondDerivativeHistogramAutoTest();
 
     bool BinarizationAutoTest();
@@ -207,6 +208,7 @@ namespace Test
 
     bool GrayToBgraDataTest(bool create);
 
+    bool HistogramDataTest(bool create);
     bool AbsSecondDerivativeHistogramDataTest(bool create);
 
     bool LbpEstimateDataTest(bool create);

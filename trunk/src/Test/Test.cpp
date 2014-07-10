@@ -133,6 +133,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(OperationBinary16iAutoTest);
     EXECUTE_AUTO_TEST(VectorProductAutoTest);
 
+    EXECUTE_AUTO_TEST(HistogramAutoTest);
     EXECUTE_AUTO_TEST(AbsSecondDerivativeHistogramAutoTest);
 
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
@@ -298,6 +299,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
+    EXECUTE_DATA_TEST(HistogramDataTest);
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
 
     EXECUTE_DATA_TEST(LbpEstimateDataTest);
