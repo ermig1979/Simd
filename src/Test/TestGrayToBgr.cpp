@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -68,23 +69,88 @@ namespace Test
         return result;
     }
 
+    bool GrayToBgrAutoTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        result = result && GrayToBgrAutoTest(W, H, f1, f2);
+        result = result && GrayToBgrAutoTest(W + O, H - O, f1, f2);
+        result = result && GrayToBgrAutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
     bool GrayToBgrAutoTest()
     {
         bool result = true;
 
-        result = result && GrayToBgrAutoTest(W, H, FUNC(Simd::Base::GrayToBgr), FUNC(SimdGrayToBgr));
-        result = result && GrayToBgrAutoTest(W + 1, H - 1, FUNC(Simd::Base::GrayToBgr), FUNC(SimdGrayToBgr));
-        result = result && GrayToBgrAutoTest(W - 1, H + 1, FUNC(Simd::Base::GrayToBgr), FUNC(SimdGrayToBgr));
+        result = result && GrayToBgrAutoTest(FUNC(Simd::Base::GrayToBgr), FUNC(SimdGrayToBgr));
 
-#if defined(SIMD_SSSE3_ENABLE) && defined(SIMD_AVX2_ENABLE)
-        if(Simd::Ssse3::Enable && Simd::Avx2::Enable)
-        {
-            result = result && GrayToBgrAutoTest(W, H, FUNC(Simd::Ssse3::GrayToBgr), FUNC(Simd::Avx2::GrayToBgr));
-            result = result && GrayToBgrAutoTest(W + 1, H - 1, FUNC(Simd::Ssse3::GrayToBgr), FUNC(Simd::Avx2::GrayToBgr));
-            result = result && GrayToBgrAutoTest(W - 1, H + 1, FUNC(Simd::Ssse3::GrayToBgr), FUNC(Simd::Avx2::GrayToBgr));
-        }
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && GrayToBgrAutoTest(FUNC(Simd::Ssse3::GrayToBgr), FUNC(SimdGrayToBgr));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GrayToBgrAutoTest(FUNC(Simd::Avx2::GrayToBgr), FUNC(SimdGrayToBgr));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && GrayToBgrAutoTest(FUNC(Simd::Vsx::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
         return result;    
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool GrayToBgrDataTest(bool create, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View gray(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View bgr1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+        View bgr2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(gray);
+
+            TEST_SAVE(gray);
+
+            f.Call(gray, bgr1);
+
+            TEST_SAVE(bgr1);
+        }
+        else
+        {
+            TEST_LOAD(gray);
+
+            TEST_LOAD(bgr1);
+
+            f.Call(gray, bgr2);
+
+            TEST_SAVE(bgr2);
+
+            result = result && Compare(bgr1, bgr2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool GrayToBgrDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GrayToBgrDataTest(create, DW, DH, FUNC(SimdGrayToBgr));
+
+        return result;
     }
 }

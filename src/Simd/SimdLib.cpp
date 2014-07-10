@@ -928,6 +928,11 @@ SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, si
         Ssse3::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+    else
+#endif
         Base::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
 }
 
