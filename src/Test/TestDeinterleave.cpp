@@ -68,8 +68,8 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(uv, u2, v2));
 
-		result = result && Compare(u1, u2, 0, true, 10);
-		result = result && Compare(v1, v2, 0, true, 10);
+		result = result && Compare(u1, u2, 0, true, 32);
+		result = result && Compare(v1, v2, 0, true, 32);
 
 		return result;
 	}
@@ -79,8 +79,8 @@ namespace Test
         bool result = true;
 
         result = result && DeinterleaveUvAutoTest(W, H, f1, f2);
-        result = result && DeinterleaveUvAutoTest(W + 3, H - 3, f1, f2);
-        result = result && DeinterleaveUvAutoTest(W - 3, H + 3, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W + O, H - O, f1, f2);
+        result = result && DeinterleaveUvAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }

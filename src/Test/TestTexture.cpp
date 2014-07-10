@@ -90,8 +90,8 @@ namespace Test
         bool result = true;
 
         result = result && TextureBoostedSaturatedGradientAutoTest(W, H, f1, f2);
-        result = result && TextureBoostedSaturatedGradientAutoTest(W + 1, H - 1, f1, f2);
-        result = result && TextureBoostedSaturatedGradientAutoTest(W - 1, H + 1, f1, f2);
+        result = result && TextureBoostedSaturatedGradientAutoTest(W + O, H - O, f1, f2);
+        result = result && TextureBoostedSaturatedGradientAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -259,8 +259,8 @@ namespace Test
         bool result = true;
 
         result = result && TextureGetDifferenceSumAutoTest(W, H, f1, f2);
-        result = result && TextureGetDifferenceSumAutoTest(W + 3, H - 3, f1, f2);
-        result = result && TextureGetDifferenceSumAutoTest(W - 3, H + 3, f1, f2);
+        result = result && TextureGetDifferenceSumAutoTest(W + O, H - O, f1, f2);
+        result = result && TextureGetDifferenceSumAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -350,8 +350,8 @@ namespace Test
         bool result = true;
 
         result = result && TexturePerformCompensationAutoTest(W, H, f1, f2);
-        result = result && TexturePerformCompensationAutoTest(W + 3, H - 3, f1, f2);
-        result = result && TexturePerformCompensationAutoTest(W - 3, H + 3, f1, f2);
+        result = result && TexturePerformCompensationAutoTest(W + O, H - O, f1, f2);
+        result = result && TexturePerformCompensationAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }

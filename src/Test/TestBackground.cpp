@@ -85,8 +85,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundChangeRangeAutoTest(W, H, f1, f2);
-        result = result && BackgroundChangeRangeAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundChangeRangeAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundChangeRangeAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundChangeRangeAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -156,8 +156,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundIncrementCountAutoTest(W, H, f1, f2);
-        result = result && BackgroundIncrementCountAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundIncrementCountAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundIncrementCountAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundIncrementCountAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -221,10 +221,10 @@ namespace Test
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
 			loCountDst2, loValueDst2, hiCountDst2, hiValueDst2, 0x80));
 
-		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "loCount");
-		result = result && Compare(loValueDst1, loValueDst2, 0, true, 10, 0, "loValue");
-		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hiCount");
-		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 10, 0, "hiValue");
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 32, 0, "loCount");
+		result = result && Compare(loValueDst1, loValueDst2, 0, true, 32, 0, "loValue");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 32, 0, "hiCount");
+		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 32, 0, "hiValue");
 
 		return result;
 	}
@@ -234,8 +234,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundAdjustRangeAutoTest(W, H, f1, f2);
-        result = result && BackgroundAdjustRangeAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundAdjustRangeAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundAdjustRangeAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundAdjustRangeAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -301,10 +301,10 @@ namespace Test
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(loCountSrc, loValueSrc,hiCountSrc, hiValueSrc,  
 			loCountDst2, loValueDst2, hiCountDst2, hiValueDst2, 0x80, mask));
 
-		result = result && Compare(loCountDst1, loCountDst2, 0, true, 10, 0, "loCount");
-		result = result && Compare(loValueDst1, loValueDst2, 0, true, 10, 0, "loValue");
-		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 10, 0, "hiCount");
-		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 10, 0, "hiValue");
+		result = result && Compare(loCountDst1, loCountDst2, 0, true, 32, 0, "loCount");
+		result = result && Compare(loValueDst1, loValueDst2, 0, true, 32, 0, "loValue");
+		result = result && Compare(hiCountDst1, hiCountDst2, 0, true, 32, 0, "hiCount");
+		result = result && Compare(hiValueDst1, hiValueDst2, 0, true, 32, 0, "hiValue");
 
 		return result;
 	}
@@ -314,8 +314,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundAdjustRangeMaskedAutoTest(W, H, f1, f2);
-        result = result && BackgroundAdjustRangeMaskedAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundAdjustRangeMaskedAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundAdjustRangeMaskedAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundAdjustRangeMaskedAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -380,8 +380,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundShiftRangeMaskedAutoTest(W, H, f1, f2);
-        result = result && BackgroundShiftRangeMaskedAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundShiftRangeMaskedAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundShiftRangeMaskedAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundShiftRangeMaskedAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -437,8 +437,8 @@ namespace Test
         bool result = true;
 
         result = result && BackgroundInitMaskAutoTest(W, H, f1, f2);
-        result = result && BackgroundInitMaskAutoTest(W + 3, H - 3, f1, f2);
-        result = result && BackgroundInitMaskAutoTest(W - 3, H + 3, f1, f2);
+        result = result && BackgroundInitMaskAutoTest(W + O, H - O, f1, f2);
+        result = result && BackgroundInitMaskAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }

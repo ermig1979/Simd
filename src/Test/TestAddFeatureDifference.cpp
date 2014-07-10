@@ -88,8 +88,8 @@ namespace Test
         for(uint16_t weight = 0; weight < 4 && result; ++weight)
         {
             result = result &&  AddFeatureDifferenceAutoTest(W, H, weight*delta, f1, f2);
-            result = result &&  AddFeatureDifferenceAutoTest(W + 3, H - 3, weight*delta, f1, f2);
-            result = result &&  AddFeatureDifferenceAutoTest(W - 3, H + 3, weight*delta, f1, f2);
+            result = result &&  AddFeatureDifferenceAutoTest(W + O, H - O, weight*delta, f1, f2);
+            result = result &&  AddFeatureDifferenceAutoTest(W - O, H + O, weight*delta, f1, f2);
         }
 
         return result;

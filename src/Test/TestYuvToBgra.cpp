@@ -82,7 +82,7 @@ namespace Test
     {
         bool result = true;
 
-        int step = is420 ? 4 : 3;
+        int step = is420 ? E : O;
 
         result = result && YuvToBgraAutoTest(W, H, f1, f2, is420);
         result = result && YuvToBgraAutoTest(W + step, H - step, f1, f2, is420);

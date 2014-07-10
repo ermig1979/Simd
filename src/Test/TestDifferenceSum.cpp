@@ -96,8 +96,8 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsAutoTest(W, H, f1, f2, count);
-        result = result && DifferenceSumsAutoTest(W + 3, H - 3, f1, f2, count);
-        result = result && DifferenceSumsAutoTest(W - 3, H + 3, f1, f2, count);
+        result = result && DifferenceSumsAutoTest(W + O, H - O, f1, f2, count);
+        result = result && DifferenceSumsAutoTest(W - O, H + O, f1, f2, count);
 
         return result;
     }
@@ -134,8 +134,8 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsMaskedAutoTest(W, H, f1, f2, count);
-        result = result && DifferenceSumsMaskedAutoTest(W + 3, H - 3, f1, f2, count);
-        result = result && DifferenceSumsMaskedAutoTest(W - 3, H + 3, f1, f2, count);
+        result = result && DifferenceSumsMaskedAutoTest(W + O, H - O, f1, f2, count);
+        result = result && DifferenceSumsMaskedAutoTest(W - O, H + O, f1, f2, count);
 
         return result;
     }

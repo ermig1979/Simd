@@ -84,8 +84,8 @@ namespace Test
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCountAutoTest(ARGS_C(W, H, type, f1, f2));
-            result = result && ConditionalCountAutoTest(ARGS_C(W + 1, H - 1, type, f1, f2));
-            result = result && ConditionalCountAutoTest(ARGS_C(W - 1, H + 1, type, f1, f2));
+            result = result && ConditionalCountAutoTest(ARGS_C(W + O, H - O, type, f1, f2));
+            result = result && ConditionalCountAutoTest(ARGS_C(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -173,8 +173,8 @@ namespace Test
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalSumAutoTest(ARGS_S(W, H, type, f1, f2));
-            result = result && ConditionalSumAutoTest(ARGS_S(W + 3, H - 3, type, f1, f2));
-            result = result && ConditionalSumAutoTest(ARGS_S(W - 3, H + 3, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S(W + O, H - O, type, f1, f2));
+            result = result && ConditionalSumAutoTest(ARGS_S(W - O, H + O, type, f1, f2));
         }
 
         return result;

@@ -104,8 +104,8 @@ namespace Test
         bool result = true;
 
         result = result && ReduceGrayAutoTest(W, H, f1, f2);
-        result = result && ReduceGrayAutoTest(W + 2, H - 2, f1, f2);
-        result = result && ReduceGrayAutoTest(W - 3, H + 3, f1, f2);
+        result = result && ReduceGrayAutoTest(W + E, H - E, f1, f2);
+        result = result && ReduceGrayAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
