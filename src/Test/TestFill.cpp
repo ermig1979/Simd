@@ -28,6 +28,78 @@
 
 namespace Test
 {
+    namespace
+    {
+        struct Func
+        {
+            typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
+
+            FuncPtr func;
+            std::string description;
+
+            Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(View & dst, uint8_t value) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), value);
+            }
+        };
+    }
+
+#define FUNC(function) \
+    Func(function, std::string(#function))
+
+    bool FillAutoTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description
+            << " [" << width << ", " << height << "]." << std::endl;
+
+        uint8_t value = Random(256);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, value));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, value));
+
+        result = result && Compare(d1, d2, 0, true, 32);
+
+        return result;
+    }
+
+    bool FillAutoTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            if(format == View::Float || format == View::Double)
+                continue;
+
+            Func f1c = Func(f1.func, f1.description + ColorDescription(format));
+            Func f2c = Func(f2.func, f2.description + ColorDescription(format));
+
+            result = result && FillAutoTest(format, W, H, f1c, f2c);
+            result = result && FillAutoTest(format, W + O, H - O, f1c, f2c);
+            result = result && FillAutoTest(format, W - O, H + O, f1c, f2c);
+        }
+
+        return result;
+    }
+
+    bool FillAutoTest()
+    {
+        bool result = true;
+
+        result = result && FillAutoTest(FUNC(Simd::Base::Fill), FUNC(SimdFill));
+
+        return result;
+    }
+
 	namespace
 	{
 		struct FuncBgra
@@ -191,6 +263,56 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
+    
+    bool FillDataTest(bool create, View::Format format, int width, int height, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        const uint8_t value = 0x77;
+
+        if(create)
+        {
+            f.Call(d1, value);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(d1);
+
+            f.Call(d2, value);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool FillDataTest(bool create)
+    {
+        bool result = true;
+
+        Func f = FUNC(SimdFill);
+
+        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            if(format == View::Float || format == View::Double)
+                continue;
+
+            result = result && FillDataTest(create, format, DW, DH, Func(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
 
     bool FillBgrDataTest(bool create, int width, int height, const FuncBgr & f)
     {
