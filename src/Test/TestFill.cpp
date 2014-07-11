@@ -100,6 +100,83 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncF
+        {
+            typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+                size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
+
+            FuncPtr func;
+            std::string description;
+
+            FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(View & dst, const Rect & frame, uint8_t value) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), 
+                    frame.left, frame.top, frame.right, frame.bottom, value);
+            }
+        };
+    }
+
+#define FUNC_F(function) \
+    FuncF(function, std::string(#function))
+
+    bool FillFrameAutoTest(View::Format format, int width, int height, const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description
+            << " [" << width << ", " << height << "]." << std::endl;
+
+        uint8_t value = Random(256);
+        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+        Simd::Fill(d1, 0);
+        Simd::Fill(d2, 0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, frame, value));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, frame, value));
+
+        result = result && Compare(d1, d2, 0, true, 32);
+
+        return result;
+    }
+
+    bool FillFrameAutoTest(const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
+
+        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            if(format == View::Float || format == View::Double)
+                continue;
+
+            FuncF f1c = FuncF(f1.func, f1.description + ColorDescription(format));
+            FuncF f2c = FuncF(f2.func, f2.description + ColorDescription(format));
+
+            result = result && FillFrameAutoTest(format, W, H, f1c, f2c);
+            result = result && FillFrameAutoTest(format, W + O, H - O, f1c, f2c);
+            result = result && FillFrameAutoTest(format, W - O, H + O, f1c, f2c);
+        }
+
+        return result;
+    }
+
+    bool FillFrameAutoTest()
+    {
+        bool result = true;
+
+        result = result && FillFrameAutoTest(FUNC_F(Simd::Base::FillFrame), FUNC_F(SimdFillFrame));
+
+        return result;
+    }
+
 	namespace
 	{
 		struct FuncBgra
@@ -309,6 +386,62 @@ namespace Test
                 continue;
 
             result = result && FillDataTest(create, format, DW, DH, Func(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
+
+    bool FillFrameDataTest(bool create, View::Format format, int width, int height, const FuncF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        const uint8_t value = 0x77;
+
+        if(create)
+        {
+            Simd::Fill(d1, 0);
+
+            f.Call(d1, frame, value);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            Simd::Fill(d2, 0);
+
+            TEST_LOAD(d1);
+
+            f.Call(d2, frame, value);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool FillFrameDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncF f = FUNC_F(SimdFillFrame);
+
+        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            if(format == View::Float || format == View::Double)
+                continue;
+
+            result = result && FillFrameDataTest(create, format, DW, DH, FuncF(f.func, f.description + Data::Description(format)));
         }
 
         return result;

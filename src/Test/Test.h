@@ -128,6 +128,7 @@ namespace Test
     bool TexturePerformCompensationAutoTest();
 
     bool FillAutoTest();
+    bool FillFrameAutoTest();
     bool FillBgraAutoTest();
     bool FillBgrAutoTest();
 
@@ -203,6 +204,7 @@ namespace Test
     bool EdgeBackgroundShiftRangeMaskedDataTest(bool create);
 
     bool FillDataTest(bool create);
+    bool FillFrameDataTest(bool create);
     bool FillBgrDataTest(bool create);
     bool FillBgraDataTest(bool create);
 

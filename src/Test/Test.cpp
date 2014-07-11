@@ -177,6 +177,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(TexturePerformCompensationAutoTest);
 
     EXECUTE_AUTO_TEST(FillAutoTest);
+    EXECUTE_AUTO_TEST(FillFrameAutoTest);
     EXECUTE_AUTO_TEST(FillBgrAutoTest);
     EXECUTE_AUTO_TEST(FillBgraAutoTest);
 
@@ -294,6 +295,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(EdgeBackgroundShiftRangeMaskedDataTest);
 
     EXECUTE_DATA_TEST(FillDataTest);
+    EXECUTE_DATA_TEST(FillFrameDataTest);
     EXECUTE_DATA_TEST(FillBgrDataTest);
     EXECUTE_DATA_TEST(FillBgraDataTest);
 
