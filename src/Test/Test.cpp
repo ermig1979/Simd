@@ -92,6 +92,9 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(ReduceGray4x4AutoTest);
     EXECUTE_AUTO_TEST(ReduceGray5x5AutoTest);
 
+    EXECUTE_AUTO_TEST(CopyAutoTest);
+    EXECUTE_AUTO_TEST(CopyFrameAutoTest);
+
     EXECUTE_AUTO_TEST(Crc32cAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
@@ -283,6 +286,9 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ConditionalSumDataTest);
     EXECUTE_DATA_TEST(ConditionalSquareSumDataTest);
     EXECUTE_DATA_TEST(ConditionalSquareGradientSumDataTest);
+
+    EXECUTE_DATA_TEST(CopyDataTest);
+    EXECUTE_DATA_TEST(CopyFrameDataTest);
 
     EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
 
