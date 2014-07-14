@@ -72,6 +72,7 @@
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
     <ClCompile Include="..\..\src\Test\TestGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
     <ClCompile Include="..\..\src\Test\TestSegmentation.cpp" />
     <ClCompile Include="..\..\src\Test\TestSobel.cpp" />
     <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
