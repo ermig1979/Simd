@@ -33,6 +33,9 @@ namespace Test
     bool ReduceGray4x4AutoTest();
     bool ReduceGray5x5AutoTest();
 
+    bool CopyAutoTest();
+    bool CopyFrameAutoTest();
+
     bool Crc32cAutoTest();
 
     bool BayerToBgrAutoTest();
@@ -192,6 +195,9 @@ namespace Test
     bool ConditionalSumDataTest(bool create);
     bool ConditionalSquareSumDataTest(bool create);
     bool ConditionalSquareGradientSumDataTest(bool create);
+
+    bool CopyDataTest(bool create);
+    bool CopyFrameDataTest(bool create);
 
     bool DeinterleaveUvDataTest(bool create);
 

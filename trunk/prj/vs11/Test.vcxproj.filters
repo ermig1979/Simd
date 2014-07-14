@@ -115,6 +115,9 @@
     <ClCompile Include="..\..\src\Test\TestData.cpp">
       <Filter>Sys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestCopy.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
