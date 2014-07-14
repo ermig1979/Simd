@@ -139,6 +139,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(HistogramAutoTest);
     EXECUTE_AUTO_TEST(AbsSecondDerivativeHistogramAutoTest);
 
+    EXECUTE_AUTO_TEST(IntegralAutoTest);
+
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
     EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
 
@@ -216,11 +218,11 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
     EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
 
-end:
-
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, true) << std::endl;
+    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, false) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
+
+end:
 
 #ifdef CUDA_ENABLE
     if(::cudaDeviceReset() != ::cudaSuccess)
@@ -292,6 +294,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
 
+    EXECUTE_DATA_TEST(AlphaBlendingDataTest);
+
     EXECUTE_DATA_TEST(EdgeBackgroundGrowRangeSlowDataTest);
     EXECUTE_DATA_TEST(EdgeBackgroundGrowRangeFastDataTest);
     EXECUTE_DATA_TEST(EdgeBackgroundIncrementCountDataTest);
@@ -311,6 +315,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(HistogramDataTest);
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
+
+    EXECUTE_DATA_TEST(IntegralDataTest);
 
     EXECUTE_DATA_TEST(LbpEstimateDataTest);
 

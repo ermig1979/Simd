@@ -341,7 +341,7 @@ namespace Test
                 ss << "| ";
             }
 
-            if(align && (sse2 || ssse3 || sse41 || avx2 || vsx))
+            if(align)
             {
                 ss << ToString(Relation(s.base.second, s.base.first), ir, fc) << " ";
                 if(sse2) ss << ToString(Relation(s.sse2.second, s.sse2.first), ir, fc) << " ";
@@ -401,7 +401,7 @@ namespace Test
             header << "| ";
         }
 
-        if(align && (sse2 || ssse3 || sse41 || avx2 || vsx))
+        if(align)
         {
             header << ExpandToLeft("B:U/A", ir + fc + 1) << " ";
             if(sse2) header << ExpandToLeft("S2:U/A", ir + fc + 1) << " ";

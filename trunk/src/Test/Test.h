@@ -28,6 +28,13 @@ namespace Test
 {
     /***************************** Auto Tests: *******************************/
 
+    bool AbsDifferenceSumAutoTest();
+    bool AbsDifferenceSumMaskedAutoTest();
+    bool AbsDifferenceSums3x3AutoTest();
+    bool AbsDifferenceSums3x3MaskedAutoTest();
+    bool SquaredDifferenceSumAutoTest();
+    bool SquaredDifferenceSumMaskedAutoTest();
+
     bool ReduceGray2x2AutoTest();
     bool ReduceGray3x3AutoTest();
     bool ReduceGray4x4AutoTest();
@@ -72,13 +79,6 @@ namespace Test
     bool AbsGradientSaturatedSumAutoTest();
     bool LbpEstimateAutoTest();
 
-    bool SquaredDifferenceSumAutoTest();
-    bool SquaredDifferenceSumMaskedAutoTest();
-    bool AbsDifferenceSumAutoTest();
-    bool AbsDifferenceSumMaskedAutoTest();
-    bool AbsDifferenceSums3x3AutoTest();
-    bool AbsDifferenceSums3x3MaskedAutoTest();
-
     bool ResizeBilinearAutoTest();
 
     bool DeinterleaveUvAutoTest();
@@ -89,6 +89,8 @@ namespace Test
 
     bool HistogramAutoTest();
     bool AbsSecondDerivativeHistogramAutoTest();
+
+    bool IntegralAutoTest();
 
     bool BinarizationAutoTest();
     bool AveragingBinarizationAutoTest();
@@ -146,6 +148,9 @@ namespace Test
     bool ConditionalSquareSumAutoTest();
     bool ConditionalSquareGradientSumAutoTest();
 
+    bool SegmentationShrinkRegionAutoTest();
+    bool SegmentationFillSingleHolesAutoTest();
+
     bool SobelDxAutoTest();
     bool SobelDxAbsAutoTest();
     bool SobelDyAutoTest();
@@ -153,9 +158,6 @@ namespace Test
     bool ContourMetricsAutoTest();
     bool ContourMetricsMaskedAutoTest();
     bool ContourAnchorsAutoTest();
-
-    bool SegmentationShrinkRegionAutoTest();
-    bool SegmentationFillSingleHolesAutoTest();
 
     /***************************** Data Tests: *******************************/
 
@@ -201,6 +203,8 @@ namespace Test
 
     bool DeinterleaveUvDataTest(bool create);
 
+    bool AlphaBlendingDataTest(bool create);
+
     bool EdgeBackgroundGrowRangeSlowDataTest(bool create);
     bool EdgeBackgroundGrowRangeFastDataTest(bool create);
     bool EdgeBackgroundIncrementCountDataTest(bool create);
@@ -220,6 +224,8 @@ namespace Test
 
     bool HistogramDataTest(bool create);
     bool AbsSecondDerivativeHistogramDataTest(bool create);
+
+    bool IntegralDataTest(bool create);
 
     bool LbpEstimateDataTest(bool create);
 

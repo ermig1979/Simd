@@ -126,20 +126,27 @@ namespace Test
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
 		const std::string & description)
     {
-        assert(Simd::Compatible(a, b) && a.format != View::Float && a.format != View::Double);
+        assert(Simd::Compatible(a, b));
 
-        switch(a.ChannelSize())
+        if(a.format == View::Float)
+            return Compare<float>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        else if(a.format == View::Double)
+            return Compare<double>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+        else
         {
-        case 1:
-            return Compare<uint8_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
-        case 2:
-            return Compare<int16_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
-        case 4:
-            return Compare<int32_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
-        case 8:
-            return Compare<int64_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
-        default:
-            assert(0);
+            switch(a.ChannelSize())
+            {
+            case 1:
+                return Compare<uint8_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+            case 2:
+                return Compare<int16_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+            case 4:
+                return Compare<int32_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+            case 8:
+                return Compare<int64_t>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);
+            default:
+                assert(0);
+            }
         }
 
         return false;
