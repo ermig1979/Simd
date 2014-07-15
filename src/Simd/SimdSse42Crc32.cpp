@@ -53,11 +53,11 @@ namespace Simd
             size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
             size_t * tail = (size_t*)AlignLo(nose + size, sizeof(size_t));
 
-            size_t crc = 0;
+            size_t crc = 0xFFFFFFFF;
             Crc32c(crc, nose, (uint8_t*)body);
             Crc32c(crc, body, tail);
             Crc32c(crc, (uint8_t*)tail, nose + size);
-            return (uint32_t)crc;
+            return ~(uint32_t)crc;
         }
     }
 #endif// SIMD_SSE42_ENABLE
