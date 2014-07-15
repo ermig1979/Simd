@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -38,10 +39,10 @@ namespace Test
 
 			Func(const FunkPtr & f, const std::string & d) : func(f), description(d) {}
 
-			uint32_t Call(const void *src, size_t size) const
+			uint32_t Call(const std::vector<uint8_t> & src) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				return func(src, size);
+				return func(src.data(), src.size());
 			}
 		};
 	}
@@ -54,23 +55,35 @@ namespace Test
             data[i] = Random(256);
     }
 
-    bool Crc32AutoTest(const std::vector<unsigned char> & data, const Func & f1, const Func & f2)
+    bool Crc32AutoTest(size_t size, const Func & f1, const Func & f2)
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " for size = " << data.size() << "." << std::endl;
+        std::vector<unsigned char> src(W*H - 1);
+        TEST_ALIGN(size);
 
-        uint32_t crc1;
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc1 = f1.Call(&data[0], data.size()));
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size = " << size << "." << std::endl;
 
-		uint32_t crc2;
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc2 = f2.Call(&data[0], data.size()));
+        SetRandom(src.data(), src.size());
 
-        if(crc1 != crc2)
-        {
-            result = false;
-            std::cout << "Crc32Test is failed (" << crc1 << " != " << crc2 <<")!" << std::endl;
-        }
+        uint32_t crc1, crc2;
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc1 = f1.Call(src));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc2 = f2.Call(src));
+
+        TEST_CHECK_VALUE(crc);
+
+        return result;
+    }
+
+    bool Crc32AutoTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
+
+        result = result && Crc32AutoTest(W*H, f1, f2);
+        result = result && Crc32AutoTest(W*H + O, f1, f2);
+
         return result;
     }
 
@@ -78,17 +91,61 @@ namespace Test
     {
         bool result = true;
 
-		std::vector<unsigned char> data(W*H - 1);
-        SetRandom(&data[0], data.size());
+        result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
-        result = result && Crc32AutoTest(data, FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
-
-#if defined(SIMD_SSE42_ENABLE)
+#ifdef SIMD_SSE42_ENABLE
         if(Simd::Sse42::Enable)
-        {
-            result = result && Crc32AutoTest(data, FUNC(Simd::Sse42::Crc32c), FUNC(SimdCrc32c));
-        }
+            result = result && Crc32AutoTest(FUNC(Simd::Sse42::Crc32c), FUNC(SimdCrc32c));
 #endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool Crc32cDataTest(bool create, int size, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "]." << std::endl;
+
+        std::vector<uint8_t> src(size);
+
+        uint32_t crc1, crc2;
+
+        if(create)
+        {
+            SetRandom(src.data(), src.size());
+
+            TEST_SAVE(src);
+
+            crc1 = f.Call(src);
+
+            TEST_SAVE(crc1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(crc1);
+
+            crc2 = f.Call(src);
+
+            TEST_SAVE(crc2);
+
+            TEST_CHECK_VALUE(crc);
+        }
+
+        return result;
+    }
+
+    bool Crc32cDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && Crc32cDataTest(create, DW, FUNC(SimdCrc32c));
 
         return result;
     }

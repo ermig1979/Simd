@@ -87,64 +87,111 @@ int ExecuteAutoTest(const Options & options)
     }
 #endif
 
-    EXECUTE_AUTO_TEST(ReduceGray2x2AutoTest);
-    EXECUTE_AUTO_TEST(ReduceGray3x3AutoTest);
-    EXECUTE_AUTO_TEST(ReduceGray4x4AutoTest);
-    EXECUTE_AUTO_TEST(ReduceGray5x5AutoTest);
+    EXECUTE_AUTO_TEST(AddFeatureDifferenceAutoTest);
 
-    EXECUTE_AUTO_TEST(CopyAutoTest);
-    EXECUTE_AUTO_TEST(CopyFrameAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSumMaskedAutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3AutoTest);
+    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3MaskedAutoTest);
+    EXECUTE_AUTO_TEST(SquaredDifferenceSumAutoTest);
+    EXECUTE_AUTO_TEST(SquaredDifferenceSumMaskedAutoTest);
 
-    EXECUTE_AUTO_TEST(Crc32cAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundGrowRangeSlowAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundGrowRangeFastAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundIncrementCountAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundAdjustRangeAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundAdjustRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundShiftRangeAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundShiftRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(BackgroundInitMaskAutoTest);
+
+    EXECUTE_AUTO_TEST(BayerToBgrAutoTest);
+
+    EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
+
+    EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
+
+    EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
 
     EXECUTE_AUTO_TEST(BgrToBgraAutoTest);
     EXECUTE_AUTO_TEST(Bgr48pToBgra32AutoTest);
 
+    EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
+
     EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
 
-    EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
+    EXECUTE_AUTO_TEST(BinarizationAutoTest);
+    EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
 
-    EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalCountAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSumAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSquareSumAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalSquareGradientSumAutoTest);
 
-    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(CopyAutoTest);
+    EXECUTE_AUTO_TEST(CopyFrameAutoTest);
 
-    EXECUTE_AUTO_TEST(MedianFilterRhomb3x3AutoTest);
-    EXECUTE_AUTO_TEST(MedianFilterRhomb5x5AutoTest);
-    EXECUTE_AUTO_TEST(MedianFilterSquare3x3AutoTest);
-    EXECUTE_AUTO_TEST(MedianFilterSquare5x5AutoTest);
-    EXECUTE_AUTO_TEST(GaussianBlur3x3AutoTest);
-    EXECUTE_AUTO_TEST(AbsGradientSaturatedSumAutoTest);
-    EXECUTE_AUTO_TEST(LbpEstimateAutoTest);
-
-    EXECUTE_AUTO_TEST(SquaredDifferenceSumAutoTest);
-    EXECUTE_AUTO_TEST(SquaredDifferenceSumMaskedAutoTest);
-    EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
-    EXECUTE_AUTO_TEST(AbsDifferenceSumMaskedAutoTest);
-    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3AutoTest);
-    EXECUTE_AUTO_TEST(AbsDifferenceSums3x3MaskedAutoTest);
-
-    EXECUTE_AUTO_TEST(ResizeBilinearAutoTest);
+    EXECUTE_AUTO_TEST(Crc32cAutoTest);
 
     EXECUTE_AUTO_TEST(DeinterleaveUvAutoTest);
 
-    EXECUTE_AUTO_TEST(OperationBinary8uAutoTest);
-    EXECUTE_AUTO_TEST(OperationBinary16iAutoTest);
-    EXECUTE_AUTO_TEST(VectorProductAutoTest);
+    EXECUTE_AUTO_TEST(AlphaBlendingAutoTest);
+
+    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeSlowAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeFastAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundIncrementCountAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeMaskedAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeAutoTest);
+    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeMaskedAutoTest);
+
+    EXECUTE_AUTO_TEST(FillAutoTest);
+    EXECUTE_AUTO_TEST(FillFrameAutoTest);
+    EXECUTE_AUTO_TEST(FillBgrAutoTest);
+    EXECUTE_AUTO_TEST(FillBgraAutoTest);
+
+    EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
+
+    EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
 
     EXECUTE_AUTO_TEST(HistogramAutoTest);
     EXECUTE_AUTO_TEST(AbsSecondDerivativeHistogramAutoTest);
 
     EXECUTE_AUTO_TEST(IntegralAutoTest);
 
-    EXECUTE_AUTO_TEST(BinarizationAutoTest);
-    EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
+    EXECUTE_AUTO_TEST(AbsGradientSaturatedSumAutoTest);
+    EXECUTE_AUTO_TEST(GaussianBlur3x3AutoTest);
+    EXECUTE_AUTO_TEST(LbpEstimateAutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterRhomb3x3AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterRhomb5x5AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterSquare3x3AutoTest);
+    EXECUTE_AUTO_TEST(MedianFilterSquare5x5AutoTest);
+
+    EXECUTE_AUTO_TEST(OperationBinary8uAutoTest);
+    EXECUTE_AUTO_TEST(OperationBinary16iAutoTest);
+    EXECUTE_AUTO_TEST(VectorProductAutoTest);
+
+    EXECUTE_AUTO_TEST(ReduceGray2x2AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray3x3AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray4x4AutoTest);
+    EXECUTE_AUTO_TEST(ReduceGray5x5AutoTest);
+
+    EXECUTE_AUTO_TEST(ResizeBilinearAutoTest);
 
     EXECUTE_AUTO_TEST(ShiftBilinearAutoTest);
+
+    EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
+    EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
+
+    EXECUTE_AUTO_TEST(SobelDxAutoTest);
+    EXECUTE_AUTO_TEST(SobelDxAbsAutoTest);
+    EXECUTE_AUTO_TEST(SobelDyAutoTest);
+    EXECUTE_AUTO_TEST(SobelDyAbsAutoTest);
+    EXECUTE_AUTO_TEST(ContourMetricsAutoTest);
+    EXECUTE_AUTO_TEST(ContourMetricsMaskedAutoTest);
+    EXECUTE_AUTO_TEST(ContourAnchorsAutoTest);
 
     EXECUTE_AUTO_TEST(GetStatisticAutoTest);
     EXECUTE_AUTO_TEST(GetMomentsAutoTest);
@@ -157,69 +204,22 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(StretchGray2x2AutoTest);
 
-    EXECUTE_AUTO_TEST(BackgroundGrowRangeSlowAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundGrowRangeFastAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundIncrementCountAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundAdjustRangeAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundAdjustRangeMaskedAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundShiftRangeAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundShiftRangeMaskedAutoTest);
-    EXECUTE_AUTO_TEST(BackgroundInitMaskAutoTest);
-
-    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeSlowAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundGrowRangeFastAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundIncrementCountAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundAdjustRangeMaskedAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeAutoTest);
-    EXECUTE_AUTO_TEST(EdgeBackgroundShiftRangeMaskedAutoTest);
-
-    EXECUTE_AUTO_TEST(AddFeatureDifferenceAutoTest);
-
     EXECUTE_AUTO_TEST(TextureBoostedSaturatedGradientAutoTest);
     EXECUTE_AUTO_TEST(TextureBoostedUvAutoTest);
     EXECUTE_AUTO_TEST(TextureGetDifferenceSumAutoTest);
     EXECUTE_AUTO_TEST(TexturePerformCompensationAutoTest);
 
-    EXECUTE_AUTO_TEST(FillAutoTest);
-    EXECUTE_AUTO_TEST(FillFrameAutoTest);
-    EXECUTE_AUTO_TEST(FillBgrAutoTest);
-    EXECUTE_AUTO_TEST(FillBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
 
-    EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
 
-    EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
-
-    EXECUTE_AUTO_TEST(AlphaBlendingAutoTest);
-
-    EXECUTE_AUTO_TEST(ConditionalCountAutoTest);
-    EXECUTE_AUTO_TEST(ConditionalSumAutoTest);
-    EXECUTE_AUTO_TEST(ConditionalSquareSumAutoTest);
-    EXECUTE_AUTO_TEST(ConditionalSquareGradientSumAutoTest);
-
-    EXECUTE_AUTO_TEST(SobelDxAutoTest);
-    EXECUTE_AUTO_TEST(SobelDxAbsAutoTest);
-    EXECUTE_AUTO_TEST(SobelDyAutoTest);
-    EXECUTE_AUTO_TEST(SobelDyAbsAutoTest);
-    EXECUTE_AUTO_TEST(ContourMetricsAutoTest);
-    EXECUTE_AUTO_TEST(ContourMetricsMaskedAutoTest);
-    EXECUTE_AUTO_TEST(ContourAnchorsAutoTest);
-
-    EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
-
-    EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
-
-    EXECUTE_AUTO_TEST(BayerToBgrAutoTest);
-
-    EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
-
-    EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
-
-    EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
-    EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(false, true, false) << std::endl;
+    std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false) << std::endl;
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
 end:
@@ -291,6 +291,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(CopyDataTest);
     EXECUTE_DATA_TEST(CopyFrameDataTest);
+
+    EXECUTE_DATA_TEST(Crc32cDataTest);
 
     EXECUTE_DATA_TEST(DeinterleaveUvDataTest);
 

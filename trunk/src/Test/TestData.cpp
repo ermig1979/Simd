@@ -330,6 +330,16 @@ namespace Test
         return LoadArray((ptrdiff_t *)&rect, 4, name);
     }
 
+    bool Data::Save(const std::vector<uint8_t> & data, const std::string & name) const
+    {
+        return SaveArray(data.data(), data.size(), name);
+    }
+
+    bool Data::Load(std::vector<uint8_t> & data, const std::string & name) const
+    {
+        return LoadArray(data.data(), data.size(), name);
+    }
+
     std::string Data::Description(SimdCompareType type)
     {
         switch(type)
