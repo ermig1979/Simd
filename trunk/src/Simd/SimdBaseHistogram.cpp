@@ -21,8 +21,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdMemory.h"
 
 namespace Simd
 {
@@ -60,13 +61,27 @@ namespace Simd
 
         void Histogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram)
         {
-            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
+            uint32_t histograms[4][HISTOGRAM_SIZE];
+            memset(histograms, 0, sizeof(uint32_t)*HISTOGRAM_SIZE*4);
+            size_t alignedWidth = Simd::AlignLo(width, 4);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < width; ++col)
-                    ++histogram[src[col]];
+                size_t col = 0;
+                for(; col < alignedWidth; col += 4)
+                {
+                    ++histograms[0][src[col + 0]];
+                    ++histograms[1][src[col + 1]];
+                    ++histograms[2][src[col + 2]];
+                    ++histograms[3][src[col + 3]];
+                }
+                for(; col < width; ++col)
+                    ++histograms[0][src[col + 0]];
+
                 src += stride;
             }
+
+            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+                histogram[i] = histograms[0][i] + histograms[1][i] + histograms[2][i] + histograms[3][i];
         }
 	}
 }
