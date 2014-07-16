@@ -1268,17 +1268,17 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
 SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width > Avx2::A + 1)
+    if(Avx2::Enable && width > Avx2::A + 2)
         Avx2::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A + 1)
+    if(Sse2::Enable && width > Sse2::A + 2)
         Sse2::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable && width > Vsx::A + 1)
+    if(Vsx::Enable && width > Vsx::A + 2)
         Vsx::SegmentationFillSingleHoles(mask, stride, width, height, index);
     else
 #endif
