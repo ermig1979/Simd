@@ -189,6 +189,8 @@ namespace Test
 
     bool BgraToGrayDataTest(bool create);
 
+    bool BgrToBayerDataTest(bool create);
+
     bool BgrToBgraDataTest(bool create);
     bool Bgr48pToBgra32DataTest(bool create);
 

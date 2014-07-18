@@ -282,6 +282,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BgraToGrayDataTest);
 
+    EXECUTE_DATA_TEST(BgrToBayerDataTest);
+
     EXECUTE_DATA_TEST(BgrToBgraDataTest);
     EXECUTE_DATA_TEST(Bgr48pToBgra32DataTest);
 
