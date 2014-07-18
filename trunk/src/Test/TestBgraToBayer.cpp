@@ -23,6 +23,7 @@
 */
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
+#include "Test/TestData.h"
 #include "Test/Test.h"
 
 namespace Test
@@ -68,13 +69,15 @@ namespace Test
         return result;
     }
 
-    bool BgraToBayerAutoTest(int width, int height, const Func & f1, const Func & f2)
+    bool BgraToBayerAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
         for(View::Format format = View::BayerGrbg; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            result = result && BgraToBayerAutoTest(width, height, format, f1, f2);
+            result = result && BgraToBayerAutoTest(W, H, format, f1, f2);
+            result = result && BgraToBayerAutoTest(W + E, H - E, format, f1, f2);
+            result = result && BgraToBayerAutoTest(W - E, H + E, format, f1, f2);
         }
 
         return result;
@@ -84,10 +87,63 @@ namespace Test
     {
         bool result = true;
 
-        result = result && BgraToBayerAutoTest(W, H, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
-        result = result && BgraToBayerAutoTest(W + E, H - E, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
-        result = result && BgraToBayerAutoTest(W - E, H + E, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
+        result = result && BgraToBayerAutoTest(FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
 
         return result;    
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool BgraToBayerDataTest(bool create, int width, int height, View::Format format, const Func & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, format, NULL, TEST_ALIGN(width));
+        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32, 0);
+        }
+
+        return result;
+    }
+
+    bool BgraToBayerDataTest(bool create)
+    {
+        bool result = true;
+
+        Func f = FUNC(SimdBgraToBayer);
+        for(View::Format format = View::BayerGrbg; format <= View::BayerBggr; format = View::Format(format + 1))
+        {
+            Func fc = Func(f.func, f.description + Data::Description(format));
+            result = result && BgraToBayerDataTest(create, DW, DH, format, fc);
+        }
+
+        return result;
     }
 }
