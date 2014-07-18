@@ -274,6 +274,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BayerToBgrDataTest);
 
+    EXECUTE_DATA_TEST(BayerToBgraDataTest);
+
     EXECUTE_DATA_TEST(BgraToBgrDataTest);
 
     EXECUTE_DATA_TEST(BgraToGrayDataTest);
