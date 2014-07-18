@@ -86,18 +86,20 @@ namespace Simd
         SIMD_INLINE uint64_t Fill64(uint8_t a, uint8_t b, uint8_t c)
         {
 #ifdef SIMD_BIG_ENDIAN
-            return (size_t(a) << 56) | (size_t(b) << 48) | (size_t(c) << 40) | (size_t(a) << 32) | (size_t(b) << 24) | (size_t(c) << 16) | (size_t(a) << 8) | size_t(b);
+            return (uint64_t(a) << 56) | (uint64_t(b) << 48) | (uint64_t(c) << 40) | (uint64_t(a) << 32) | 
+                (uint64_t(b) << 24) | (uint64_t(c) << 16) | (uint64_t(a) << 8) | uint64_t(b);
 #else
-            return size_t(a) | (size_t(b) << 8) | (size_t(c) << 16) | (size_t(a) << 24) | (size_t(b) << 32) | (size_t(c) << 40) | (size_t(a) << 48) | (size_t(b) << 56);
+            return uint64_t(a) | (uint64_t(b) << 8) | (uint64_t(c) << 16) | (uint64_t(a) << 24) | 
+                (uint64_t(b) << 32) | (uint64_t(c) << 40) | (uint64_t(a) << 48) | (uint64_t(b) << 56);
 #endif
         }
 
         SIMD_INLINE uint32_t Fill32(uint8_t a, uint8_t b, uint8_t c)
         {
 #ifdef SIMD_BIG_ENDIAN
-            return (size_t(a) << 24) | (size_t(b) << 16) | (size_t(c) << 8) | size_t(a);
+            return (uint32_t(a) << 24) | (uint32_t(b) << 16) | (uint32_t(c) << 8) | uint32_t(a);
 #else
-            return size_t(a) | (size_t(b) << 8) | (size_t(c) << 16) | (size_t(a) << 24);
+            return uint32_t(a) | (uint32_t(b) << 8) | (uint32_t(c) << 16) | (uint32_t(a) << 24);
 #endif
         }
 
