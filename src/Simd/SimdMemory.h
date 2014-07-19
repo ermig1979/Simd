@@ -91,6 +91,13 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSSE3_ENABLE
+    namespace Ssse3
+    {
+        using namespace Sse2;
+    }
+#endif// SIMD_SSSE3_ENABLE
+
 #ifdef SIMD_SSE42_ENABLE
 	namespace Sse42
 	{
