@@ -92,6 +92,11 @@ namespace Test
 #ifdef SIMD_SSSE3_ENABLE
         if(Simd::Ssse3::Enable)
             result = result && BgraToBayerAutoTest(FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BgraToBayerAutoTest(FUNC(Simd::Vsx::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
         return result;    

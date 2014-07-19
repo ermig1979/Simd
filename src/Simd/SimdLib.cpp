@@ -427,6 +427,11 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
         Ssse3::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
     else
 #endif
+#ifdef SIMD_VSX_ENABLE
+        if(Vsx::Enable && width >= Vsx::A)
+            Vsx::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+        else
+#endif
         Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
 }
 
