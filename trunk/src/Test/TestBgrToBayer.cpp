@@ -94,6 +94,10 @@ namespace Test
             result = result && BgrToBayerAutoTest(FUNC(Simd::Ssse3::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BgrToBayerAutoTest(FUNC(Simd::Vsx::BgrToBayer), FUNC(SimdBgrToBayer));
+#endif 
         return result;    
     }
 

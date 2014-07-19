@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBinarization.cpp" />
