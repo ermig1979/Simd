@@ -81,6 +81,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxAlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxBgrToBgra.cpp" />
