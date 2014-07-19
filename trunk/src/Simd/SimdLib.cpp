@@ -422,7 +422,12 @@ SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height
 
 SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
 {
-    Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
+        Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
 }
 
 SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
@@ -462,7 +467,12 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
 
 SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
 {
-    Base::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
+        Base::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
 }
 
 SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
