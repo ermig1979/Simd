@@ -428,9 +428,9 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
-        if(Vsx::Enable && width >= Vsx::A)
-            Vsx::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
-        else
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+    else
 #endif
         Base::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
 }
@@ -475,6 +475,11 @@ SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, s
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
     else
 #endif
         Base::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
