@@ -160,7 +160,7 @@
 #include <vec_types.h>
 #ifdef __cplusplus
 #undef vector
-#undef point
+#undef pixel
 #undef bool
 #endif
 #endif
