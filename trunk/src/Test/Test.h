@@ -98,6 +98,7 @@ namespace Test
     bool GrayToBgraAutoTest();
 
     bool HistogramAutoTest();
+    bool HistogramMaskedAutoTest();
     bool AbsSecondDerivativeHistogramAutoTest();
 
     bool IntegralAutoTest();
@@ -229,6 +230,7 @@ namespace Test
     bool GrayToBgraDataTest(bool create);
 
     bool HistogramDataTest(bool create);
+    bool HistogramMaskedDataTest(bool create);
     bool AbsSecondDerivativeHistogramDataTest(bool create);
 
     bool IntegralDataTest(bool create);

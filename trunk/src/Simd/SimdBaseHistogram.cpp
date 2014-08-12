@@ -83,5 +83,21 @@ namespace Simd
             for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
                 histogram[i] = histograms[0][i] + histograms[1][i] + histograms[2][i] + histograms[3][i];
         }
+
+        void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
+        {
+            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col] == index)
+                        ++histogram[src[col]];
+                }
+                src += srcStride;
+                mask += maskStride;
+            }
+        }
 	}
 }

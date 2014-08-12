@@ -393,6 +393,13 @@ namespace Simd
         SimdHistogram(src.data, src.width, src.height, src.stride, histogram);
     }
 
+    template<class A> SIMD_INLINE void HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram)
+    {
+        assert(Compatible(src, mask) && src.format == View<A>::Gray8);
+
+        SimdHistogramMasked(src.data, src.stride, src.width, src.height, mask.data, mask.stride, index, histogram);
+    }
+
     template<class A> SIMD_INLINE void Integral(const View<A>& src, View<A>& sum)
     {
         assert(src.width + 1 == sum.width && src.height + 1 == sum.height);
