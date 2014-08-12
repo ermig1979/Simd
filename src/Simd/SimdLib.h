@@ -1163,6 +1163,26 @@ extern "C"
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
     /**
+    * \fn void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
+    *
+    * \short Calculates histogram for 8-bit gray image with using mask. 
+    *
+    * For every point where mask[i] == index: 
+    * \n histogram[src(i)]++.
+    *
+    * \param [in] src - a pointer to pixels data of input 8-bit gray image.
+    * \param [in] srcStride - a row size of the image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] mask - a pointer to pixels data of the mask 8-bit image.
+    * \param [in] maskStride - a row size of the mask image.
+    * \param [in] index - a mask index.
+    * \param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+    */
+    SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
+
+    /**
     * \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
     *
     * \short Calculates integral images for input 8-bit gray image. 
