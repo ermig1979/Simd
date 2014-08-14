@@ -37,7 +37,7 @@ namespace Simd
 	namespace Avx2
 	{
         template <bool align, SimdCompareType compareType> 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             assert(width >= A);
             if(align)
@@ -52,12 +52,12 @@ namespace Simd
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m256i mask = Compare<compareType>(Load<align>((__m256i*)(src + col)), _value);
+                    const __m256i mask = Compare8u<compareType>(Load<align>((__m256i*)(src + col)), _value);
                     _count = _mm256_add_epi64(_count, _mm256_sad_epu8(_mm256_and_si256(mask, K8_01), K_ZERO));
                 }
                 if(alignedWidth != width)
                 {
-                    const __m256i mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(src + width - A)), _value), tailMask);
+                    const __m256i mask = _mm256_and_si256(Compare8u<compareType>(Load<false>((__m256i*)(src + width - A)), _value), tailMask);
                     _count = _mm256_add_epi64(_count, _mm256_sad_epu8(_mm256_and_si256(mask, K8_01), K_ZERO));
                 }
                 src += stride;
@@ -66,31 +66,92 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             if(Aligned(src) && Aligned(stride))
-                ConditionalCount<true, compareType>(src, stride, width, height, value, count);
+                ConditionalCount8u<true, compareType>(src, stride, width, height, value, count);
             else
-                ConditionalCount<false, compareType>(src, stride, width, height, value, count);
+                ConditionalCount8u<false, compareType>(src, stride, width, height, value, count);
         }
 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
             uint8_t value, SimdCompareType compareType, uint32_t * count)
         {
             switch(compareType)
             {
             case SimdCompareEqual: 
-                return ConditionalCount<SimdCompareEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareEqual>(src, stride, width, height, value, count);
             case SimdCompareNotEqual: 
-                return ConditionalCount<SimdCompareNotEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareNotEqual>(src, stride, width, height, value, count);
             case SimdCompareGreater: 
-                return ConditionalCount<SimdCompareGreater>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreater>(src, stride, width, height, value, count);
             case SimdCompareGreaterOrEqual: 
-                return ConditionalCount<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
             case SimdCompareLesser: 
-                return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesser>(src, stride, width, height, value, count);
             case SimdCompareLesserOrEqual: 
-                return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
+            }
+        }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, HA);
+            __m256i tailMask = SetMask<uint16_t>(0, HA - width + alignedWidth, 0xFFFF);
+
+            __m256i _value = _mm256_set1_epi16(value);
+            __m256i _count = _mm256_setzero_si256();
+            for(size_t row = 0; row < height; ++row)
+            {
+                const int16_t * s = (const int16_t *)src;
+                for(size_t col = 0; col < alignedWidth; col += HA)
+                {
+                    const __m256i mask = Compare16i<compareType>(Load<align>((__m256i*)(s + col)), _value);
+                    _count = _mm256_add_epi64(_count, _mm256_sad_epu8(_mm256_and_si256(mask, K16_0001), K_ZERO));
+                }
+                if(alignedWidth != width)
+                {
+                    const __m256i mask = _mm256_and_si256(Compare16i<compareType>(Load<false>((__m256i*)(s + width - HA)), _value), tailMask);
+                    _count = _mm256_add_epi64(_count, _mm256_sad_epu8(_mm256_and_si256(mask, K16_0001), K_ZERO));
+                }
+                src += stride;
+            }
+            *count = ExtractSum<uint32_t>(_count);
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+        {
+            if(Aligned(src) && Aligned(stride))
+                ConditionalCount16i<true, compareType>(src, stride, width, height, value, count);
+            else
+                ConditionalCount16i<false, compareType>(src, stride, width, height, value, count);
+        }
+
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            int16_t value, SimdCompareType compareType, uint32_t * count)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalCount16i<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual: 
+                return ConditionalCount16i<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater: 
+                return ConditionalCount16i<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalCount16i<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser: 
+                return ConditionalCount16i<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalCount16i<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
             default: 
                 assert(0);
             }
@@ -114,13 +175,13 @@ namespace Simd
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
                     const __m256i _src = Load<align>((__m256i*)(src + col));
-                    const __m256i _mask = Compare<compareType>(Load<align>((__m256i*)(mask + col)), _value);
+                    const __m256i _mask = Compare8u<compareType>(Load<align>((__m256i*)(mask + col)), _value);
                     _sum = _mm256_add_epi64(_sum, _mm256_sad_epu8(_mm256_and_si256(_mask, _src), K_ZERO));
                 }
                 if(alignedWidth != width)
                 {
                     const __m256i _src = Load<false>((__m256i*)(src + width - A));
-                    const __m256i _mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(mask + width - A)), _value), tailMask);
+                    const __m256i _mask = _mm256_and_si256(Compare8u<compareType>(Load<false>((__m256i*)(mask + width - A)), _value), tailMask);
                     _sum = _mm256_add_epi64(_sum, _mm256_sad_epu8(_mm256_and_si256(_mask, _src), K_ZERO));
                 }
                 src += srcStride;
@@ -187,13 +248,13 @@ namespace Simd
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
                     const __m256i _src = Load<align>((__m256i*)(src + col));
-                    const __m256i _mask = Compare<compareType>(Load<align>((__m256i*)(mask + col)), _value);
+                    const __m256i _mask = Compare8u<compareType>(Load<align>((__m256i*)(mask + col)), _value);
                     rowSum = _mm256_add_epi32(rowSum, Square(_mm256_and_si256(_mask, _src)));
                 }
                 if(alignedWidth != width)
                 {
                     const __m256i _src = Load<false>((__m256i*)(src + width - A));
-                    const __m256i _mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(mask + width - A)), _value), tailMask);
+                    const __m256i _mask = _mm256_and_si256(Compare8u<compareType>(Load<false>((__m256i*)(mask + width - A)), _value), tailMask);
                     rowSum = _mm256_add_epi32(rowSum, Square(_mm256_and_si256(_mask, _src)));
                 }
                 _sum = _mm256_add_epi64(_sum, HorizontalSum32(rowSum));
@@ -267,20 +328,20 @@ namespace Simd
             {
                 __m256i rowSum = _mm256_setzero_si256();
                 {
-                    const __m256i _mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(mask + 1)), _value), noseMask);
+                    const __m256i _mask = _mm256_and_si256(Compare8u<compareType>(Load<false>((__m256i*)(mask + 1)), _value), noseMask);
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<false>(src + 1, 1, _mask));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<false>(src + 1, srcStride, _mask));
                 }
                 for(size_t col = A; col < alignedWidth; col += A)
                 {
-                    const __m256i _mask = Compare<compareType>(Load<align>((__m256i*)(mask + col)), _value);
+                    const __m256i _mask = Compare8u<compareType>(Load<align>((__m256i*)(mask + col)), _value);
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<false>(src + col, 1, _mask));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<align>(src + col, srcStride, _mask));
                 }
                 if(alignedWidth != width - 1)
                 {
                     size_t offset = width - A - 1;
-                    const __m256i _mask = _mm256_and_si256(Compare<compareType>(Load<false>((__m256i*)(mask + offset)), _value), tailMask);
+                    const __m256i _mask = _mm256_and_si256(Compare8u<compareType>(Load<false>((__m256i*)(mask + offset)), _value), tailMask);
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<false>(src + offset, 1, _mask));
                     rowSum = _mm256_add_epi32(rowSum, SquaredDifference<false>(src + offset, srcStride, _mask));
                 }

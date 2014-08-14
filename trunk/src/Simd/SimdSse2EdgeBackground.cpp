@@ -38,7 +38,7 @@ namespace Simd
         {
             const __m128i _value = Load<align>((__m128i*)value);
             const __m128i _background = Load<align>((__m128i*)background);
-            const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _background));
+            const __m128i inc = _mm_and_si128(tailMask, Greater8u(_value, _background));
             Store<align>((__m128i*)background, _mm_adds_epu8(_background, inc));
         }
 
@@ -119,7 +119,7 @@ namespace Simd
             const __m128i _backgroundValue = Load<align>((__m128i*)(backgroundValue + offset));
             const __m128i _backgroundCount = Load<align>((__m128i*)(backgroundCount + offset));
 
-            const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _backgroundValue));
+            const __m128i inc = _mm_and_si128(tailMask, Greater8u(_value, _backgroundValue));
 
             Store<align>((__m128i*)(backgroundCount + offset), _mm_adds_epu8(_backgroundCount, inc));
         }
@@ -162,8 +162,8 @@ namespace Simd
 
         SIMD_INLINE __m128i AdjustEdge(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
-            const __m128i inc = _mm_and_si128(mask, GreaterU8(count, threshold));
-            const __m128i dec = _mm_and_si128(mask, LesserU8(count, threshold));
+            const __m128i inc = _mm_and_si128(mask, Greater8u(count, threshold));
+            const __m128i dec = _mm_and_si128(mask, Lesser8u(count, threshold));
             return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
         }
 

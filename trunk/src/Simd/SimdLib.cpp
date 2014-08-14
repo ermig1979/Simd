@@ -594,25 +594,46 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
         Base::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
 }
 
-SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height,
+SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
                                    uint8_t value, SimdCompareType compareType, uint32_t * count)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::ConditionalCount(src, stride, width, height, value, compareType, count);
+        Avx2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalCount(src, stride, width, height, value, compareType, count);
+        Sse2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A)
-        Vsx::ConditionalCount(src, stride, width, height, value, compareType, count);
+        Vsx::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
-        Base::ConditionalCount(src, stride, width, height, value, compareType, count);
+        Base::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+}
+
+SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height,
+                                     int16_t value, SimdCompareType compareType, uint32_t * count)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+    else
+#endif
+        Base::ConditionalCount16i(src, stride, width, height, value, compareType, count);
 }
 
 SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,

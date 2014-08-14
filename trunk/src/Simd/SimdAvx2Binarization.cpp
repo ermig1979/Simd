@@ -52,12 +52,12 @@ namespace Simd
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m256i mask = Compare<compareType>(Load<align>((__m256i*)(src + col)), value_);
+                    const __m256i mask = Compare8u<compareType>(Load<align>((__m256i*)(src + col)), value_);
                     Store<align>((__m256i*)(dst + col), Combine(mask, positive_, negative_));
                 }
                 if(alignedWidth != width)
                 {
-                    const __m256i mask = Compare<compareType>(Load<false>((__m256i*)(src + width - A)), value_);
+                    const __m256i mask = Compare8u<compareType>(Load<false>((__m256i*)(src + width - A)), value_);
                     Store<false>((__m256i*)(dst + width - A), Combine(mask, positive_, negative_));
                 }
                 src += srcStride;
@@ -127,7 +127,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uint8_t * src, uint16_t * sa, const __m256i & value, const __m256i & mask)
         {
-            const __m256i inc = _mm256_permute4x64_epi64(_mm256_and_si256(Compare<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
+            const __m256i inc = _mm256_permute4x64_epi64(_mm256_and_si256(Compare8u<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
             Store<dstAlign>((__m256i*)sa + 0, _mm256_add_epi8(Load<dstAlign>((__m256i*)sa + 0), _mm256_unpacklo_epi8(inc, _mm256_permute4x64_epi64(mask, 0xD8))));
             Store<dstAlign>((__m256i*)sa + 1, _mm256_add_epi8(Load<dstAlign>((__m256i*)sa + 1), _mm256_unpackhi_epi8(inc, _mm256_permute4x64_epi64(mask, 0xD8))));
         }
@@ -135,7 +135,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const uint8_t * src, uint16_t * sa, const __m256i & value, const __m256i & mask)
         {
-            const __m256i dec = _mm256_permute4x64_epi64(_mm256_and_si256(Compare<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
+            const __m256i dec = _mm256_permute4x64_epi64(_mm256_and_si256(Compare8u<compareType>(Load<srcAlign>((__m256i*)src), value), mask), 0xD8);
             Store<dstAlign>((__m256i*)sa + 0, _mm256_sub_epi8(Load<dstAlign>((__m256i*)sa + 0), _mm256_unpacklo_epi8(dec, _mm256_permute4x64_epi64(mask, 0xD8))));
             Store<dstAlign>((__m256i*)sa + 1, _mm256_sub_epi8(Load<dstAlign>((__m256i*)sa + 1), _mm256_unpackhi_epi8(dec, _mm256_permute4x64_epi64(mask, 0xD8))));
         }

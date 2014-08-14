@@ -40,8 +40,8 @@ namespace Simd
             const __m128i _lo = Load<align>((__m128i*)lo);
             const __m128i _hi = Load<align>((__m128i*)hi);
 
-            const __m128i inc = _mm_and_si128(tailMask, GreaterU8(_value, _hi));
-            const __m128i dec = _mm_and_si128(tailMask, LesserU8(_value, _lo));
+            const __m128i inc = _mm_and_si128(tailMask, Greater8u(_value, _hi));
+            const __m128i dec = _mm_and_si128(tailMask, Lesser8u(_value, _lo));
 
             Store<align>((__m128i*)lo, _mm_subs_epu8(_lo, dec));
             Store<align>((__m128i*)hi, _mm_adds_epu8(_hi, inc));
@@ -133,8 +133,8 @@ namespace Simd
             const __m128i _hiValue = Load<align>((__m128i*)(hiValue + offset));
             const __m128i _hiCount = Load<align>((__m128i*)(hiCount + offset));
 
-            const __m128i incLo = _mm_and_si128(tailMask, LesserU8(_value, _loValue));
-            const __m128i incHi = _mm_and_si128(tailMask, GreaterU8(_value, _hiValue));
+            const __m128i incLo = _mm_and_si128(tailMask, Lesser8u(_value, _loValue));
+            const __m128i incHi = _mm_and_si128(tailMask, Greater8u(_value, _hiValue));
 
             Store<align>((__m128i*)(loCount + offset), _mm_adds_epu8(_loCount, incLo));
             Store<align>((__m128i*)(hiCount + offset), _mm_adds_epu8(_hiCount, incHi));
@@ -184,15 +184,15 @@ namespace Simd
 
         SIMD_INLINE __m128i AdjustLo(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
-            const __m128i dec = _mm_and_si128(mask, GreaterU8(count, threshold));
-            const __m128i inc = _mm_and_si128(mask, LesserU8(count, threshold));
+            const __m128i dec = _mm_and_si128(mask, Greater8u(count, threshold));
+            const __m128i inc = _mm_and_si128(mask, Lesser8u(count, threshold));
             return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
         }
 
         SIMD_INLINE __m128i AdjustHi(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
-            const __m128i inc = _mm_and_si128(mask, GreaterU8(count, threshold));
-            const __m128i dec = _mm_and_si128(mask, LesserU8(count, threshold));
+            const __m128i inc = _mm_and_si128(mask, Greater8u(count, threshold));
+            const __m128i dec = _mm_and_si128(mask, Lesser8u(count, threshold));
             return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
         }
 
