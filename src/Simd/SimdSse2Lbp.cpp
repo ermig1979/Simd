@@ -37,14 +37,14 @@ namespace Simd
         {
             __m128i threshold = Load<false>((__m128i*)src);
             __m128i lbp = _mm_setzero_si128();
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<align>((__m128i*)(src - 1 - stride)), threshold), K8_01));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<false>((__m128i*)(src     - stride)), threshold), K8_02));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<false>((__m128i*)(src + 1 - stride)), threshold), K8_04));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<false>((__m128i*)(src + 1         )), threshold), K8_08));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<false>((__m128i*)(src + 1 + stride)), threshold), K8_10));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<false>((__m128i*)(src     + stride)), threshold), K8_20));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<align>((__m128i*)(src - 1 + stride)), threshold), K8_40));
-            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqualU8(Load<align>((__m128i*)(src - 1         )), threshold), K8_80));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1 - stride)), threshold), K8_01));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src     - stride)), threshold), K8_02));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1 - stride)), threshold), K8_04));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1         )), threshold), K8_08));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src + 1 + stride)), threshold), K8_10));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<false>((__m128i*)(src     + stride)), threshold), K8_20));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1 + stride)), threshold), K8_40));
+            lbp = _mm_or_si128(lbp, _mm_and_si128(GreaterOrEqual8u(Load<align>((__m128i*)(src - 1         )), threshold), K8_80));
             Store<false>((__m128i*)dst, lbp);
         }
 

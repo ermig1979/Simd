@@ -333,6 +333,11 @@ namespace Simd
             return vec_perm(K8_00, value, vec_lvsr(shift, (uint8_t*)0));        
         }
 
+        SIMD_INLINE v128_u16 ShiftLeft(v128_u16 value, size_t shift)
+        {
+            return (v128_u16)ShiftLeft((v128_u8)value, 2*shift);      
+        }
+
         SIMD_INLINE v128_u8 ShiftRight(v128_u8 value, size_t shift)
         {
             return vec_perm(value, K8_00, vec_lvsl(shift, (uint8_t*)0));        

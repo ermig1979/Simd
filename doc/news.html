@@ -14,17 +14,23 @@
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
+ <li>Base implementation, SSE2, AVX2 and VSX optimization of function ConditionalCount16i.</li>
  <li>Base implementation of function HistogramMasked.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Hid macro "pixel" for C++ (pixel is Altivec built-in type synonym).</li>
 </ul>
+<h5>Renaming</h5>
+<ul>
+ <li>SimdConditionalCount to SimdConditionalCount8u.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
  <li>Tests for verifying functionality of function HistogramMasked.</li>
+ <li>Tests for verifying functionality of function ConditionalCount16i.</li>
 </ul>
 
 <h3>August 11, 2014 (version 2.0.20.372)</h3>

@@ -277,7 +277,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void ContourMetricsMasked(__m256i a[3][3], const uint8_t * mask, const __m256i & indexMin, int16_t * dst)
         {
-            __m256i m = GreaterOrEqualU8(Load<align>((__m256i*)mask), indexMin);
+            __m256i m = GreaterOrEqual8u(Load<align>((__m256i*)mask), indexMin);
             __m256i lo, hi;
             ContourMetrics(a, lo, hi);
             lo = _mm256_and_si256(lo, _mm256_unpacklo_epi8(m, m));

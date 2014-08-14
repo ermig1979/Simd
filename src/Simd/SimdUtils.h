@@ -222,14 +222,21 @@ namespace Simd
             neighborhood, threshold, positive, negative, dst.data, dst.stride, compareType);
     }
 
-    template<class A> SIMD_INLINE void ConditionalCount(const View<A>& src, uint8_t value, SimdCompareType compareType, uint32_t & count)
+    template<class A> SIMD_INLINE void ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count)
     {
         assert(src.format == View<A>::Gray8);
 
-        SimdConditionalCount(src.data, src.stride, src.width, src.height, value, compareType, &count);
+        SimdConditionalCount8u(src.data, src.stride, src.width, src.height, value, compareType, &count);
     }
 
-    template<class A> SIMD_INLINE void ConditionalSum(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
+    template<class A> SIMD_INLINE void ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count)
+    {
+        assert(src.format == View<A>::Int16);
+
+        SimdConditionalCount16i(src.data, src.stride, src.width, src.height, value, compareType, &count);
+    }
+
+    template<class A> SIMD_INLINE void ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum)
     {
         assert(Compatible(src, mask) && src.format == View<A>::Gray8);
 

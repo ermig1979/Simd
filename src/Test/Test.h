@@ -66,7 +66,8 @@ namespace Test
     bool BinarizationAutoTest();
     bool AveragingBinarizationAutoTest();
 
-    bool ConditionalCountAutoTest();
+    bool ConditionalCount8uAutoTest();
+    bool ConditionalCount16iAutoTest();
     bool ConditionalSumAutoTest();
     bool ConditionalSquareSumAutoTest();
     bool ConditionalSquareGradientSumAutoTest();
@@ -200,7 +201,8 @@ namespace Test
     bool BinarizationDataTest(bool create);
     bool AveragingBinarizationDataTest(bool create);
 
-    bool ConditionalCountDataTest(bool create);
+    bool ConditionalCount8uDataTest(bool create);
+    bool ConditionalCount16iDataTest(bool create);
     bool ConditionalSumDataTest(bool create);
     bool ConditionalSquareSumDataTest(bool create);
     bool ConditionalSquareGradientSumDataTest(bool create);

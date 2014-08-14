@@ -36,7 +36,7 @@ namespace Simd
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < width; ++col)
-                    dst[col] = Compare<compareType>(src[col], value) ? positive : negative;
+                    dst[col] = Compare8u<compareType>(src[col], value) ? positive : negative;
                 src += srcStride;
                 dst += dstStride;
             }
@@ -90,9 +90,9 @@ namespace Simd
         template<SimdCompareType compareType> SIMD_INLINE uint32_t GetSa(uint8_t src, uint8_t value)
         {
 #ifdef SIMD_BIG_ENDIAN
-            return Compare<compareType>(src, value) ? 0x00010001 : 0x00000001;
+            return Compare8u<compareType>(src, value) ? 0x00010001 : 0x00000001;
 #else
-            return Compare<compareType>(src, value) ? 0x00010001 : 0x00010000;
+            return Compare8u<compareType>(src, value) ? 0x00010001 : 0x00010000;
 #endif
         }
 

@@ -684,7 +684,7 @@ extern "C"
         uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
     /**
-    * \fn void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
+    * \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
     *
     * \short Calculates number of points satisfying certain condition for 8-bit gray image. 
     *
@@ -700,8 +700,28 @@ extern "C"
     * \param [in] compareType - a compare operation type (see ::SimdCompareType).
     * \param [out] count - a pointer to result unsigned 32-bit value.
     */
-    SIMD_API void SimdConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+    SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
         uint8_t value, SimdCompareType compareType, uint32_t * count);
+    
+    /**
+    * \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
+    *
+    * \short Calculates number of points satisfying certain condition for 16-bit signed integer image. 
+    *
+    * For every point:
+    * \n count += compare(src[i], value) ? 1 : 0,
+    * \n compare(a, b) depends from compareType (see ::SimdCompareType).
+    *
+    * \param [in] src - a pointer to pixels data of input 16-bit signed integer image (first value for compare operation).
+    * \param [in] stride - a row size of the src image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] value - a second value for compare operation.
+    * \param [in] compareType - a compare operation type (see ::SimdCompareType).
+    * \param [out] count - a pointer to result unsigned 32-bit value.
+    */
+    SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        int16_t value, SimdCompareType compareType, uint32_t * count);
 
     /**
     * \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);

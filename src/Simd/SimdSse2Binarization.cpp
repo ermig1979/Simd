@@ -52,12 +52,12 @@ namespace Simd
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m128i mask = Compare<compareType>(Load<align>((__m128i*)(src + col)), value_);
+                    const __m128i mask = Compare8u<compareType>(Load<align>((__m128i*)(src + col)), value_);
                     Store<align>((__m128i*)(dst + col), Combine(mask, positive_, negative_));
                 }
                 if(alignedWidth != width)
                 {
-                    const __m128i mask = Compare<compareType>(Load<false>((__m128i*)(src + width - A)), value_);
+                    const __m128i mask = Compare8u<compareType>(Load<false>((__m128i*)(src + width - A)), value_);
                     Store<false>((__m128i*)(dst + width - A), Combine(mask, positive_, negative_));
                 }
                 src += srcStride;
@@ -127,7 +127,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void AddRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
-            const __m128i inc = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
+            const __m128i inc = _mm_and_si128(Compare8u<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
             Store<dstAlign>((__m128i*)sa + 0, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(inc, mask)));
             Store<dstAlign>((__m128i*)sa + 1, _mm_add_epi8(Load<dstAlign>((__m128i*)sa + 1), _mm_unpackhi_epi8(inc, mask)));
         }
@@ -135,7 +135,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const uint8_t * src, uint16_t * sa, const __m128i & value, const __m128i & mask)
         {
-            const __m128i dec = _mm_and_si128(Compare<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
+            const __m128i dec = _mm_and_si128(Compare8u<compareType>(Load<srcAlign>((__m128i*)src), value), mask);
             Store<dstAlign>((__m128i*)sa + 0, _mm_sub_epi8(Load<dstAlign>((__m128i*)sa + 0), _mm_unpacklo_epi8(dec, mask)));
             Store<dstAlign>((__m128i*)sa + 1, _mm_sub_epi8(Load<dstAlign>((__m128i*)sa + 1), _mm_unpackhi_epi8(dec, mask)));
         }

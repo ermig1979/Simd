@@ -39,7 +39,7 @@ namespace Simd
         template <bool align, bool first, SimdCompareType compareType> 
         SIMD_INLINE void Binarization(const Loader<align> & src, const v128_u8 & value, const v128_u8 & positive, const v128_u8 & negative, Storer<align> & dst)
         {
-            const v128_u8 mask = Compare<compareType>(Load<align, first>(src), value);
+            const v128_u8 mask = Compare8u<compareType>(Load<align, first>(src), value);
             Store<align, first>(dst, vec_sel(negative, positive, mask));
         }
 
@@ -140,7 +140,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, bool first, SimdCompareType compareType>
         SIMD_INLINE void AddRows(const Loader<srcAlign> & src, const v128_u8 & value, const v128_u8 & mask, const Loader<dstAlign> & saSrc, Storer<dstAlign> & saDst)
         {
-            const v128_u8 inc = vec_and(Compare<compareType>(Load<srcAlign, first>(src), value), mask);
+            const v128_u8 inc = vec_and(Compare8u<compareType>(Load<srcAlign, first>(src), value), mask);
             Store<dstAlign, first>(saDst, vec_add(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(mask, inc)));
             Store<dstAlign, false>(saDst, vec_add(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(mask, inc)));
         }
@@ -148,7 +148,7 @@ namespace Simd
         template <bool srcAlign, bool dstAlign, bool first, SimdCompareType compareType>
         SIMD_INLINE void SubRows(const Loader<srcAlign> & src, const v128_u8 & value, const v128_u8 & mask, const Loader<dstAlign> & saSrc, Storer<dstAlign> & saDst)
         {
-            const v128_u8 dec = vec_and(Compare<compareType>(Load<srcAlign, first>(src), value), mask);
+            const v128_u8 dec = vec_and(Compare8u<compareType>(Load<srcAlign, first>(src), value), mask);
             Store<dstAlign, first>(saDst, vec_sub(Load<dstAlign, first>(saSrc), (v128_u8)UnpackLoU8(mask, dec)));
             Store<dstAlign, false>(saDst, vec_sub(Load<dstAlign, false>(saSrc), (v128_u8)UnpackHiU8(mask, dec)));
         }

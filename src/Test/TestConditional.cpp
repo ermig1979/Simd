@@ -30,7 +30,7 @@ namespace Test
 {
     namespace
     {
-        struct FuncC
+        struct FuncC8U
         {
             typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
                 uint8_t value, SimdCompareType compareType, uint32_t * count);
@@ -38,7 +38,7 @@ namespace Test
             FuncPtr func;
             std::string description;
 
-            FuncC(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncC8U(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t value, SimdCompareType compareType, uint32_t & count) const
             {
@@ -48,15 +48,15 @@ namespace Test
         };
     }
 
-#define ARGS_C(width, height, type, function1, function2) \
+#define ARGS_C8U(width, height, type, function1, function2) \
     width, height, type, \
-    FuncC(function1.func, function1.description + CompareTypeDescription(type)), \
-    FuncC(function2.func, function2.description + CompareTypeDescription(type))
+    FuncC8U(function1.func, function1.description + CompareTypeDescription(type)), \
+    FuncC8U(function2.func, function2.description + CompareTypeDescription(type))
 
-#define FUNC_C(function) \
-    FuncC(function, std::string(#function))
+#define FUNC_C8U(function) \
+    FuncC8U(function, std::string(#function))
 
-    bool ConditionalCountAutoTest(int width, int height, SimdCompareType type, const FuncC & f1, const FuncC & f2)
+    bool ConditionalCount8uAutoTest(int width, int height, SimdCompareType type, const FuncC8U & f1, const FuncC8U & f2)
     {
         bool result = true;
 
@@ -77,39 +77,126 @@ namespace Test
         return result;
     }
 
-    bool ConditionalCountAutoTest(const FuncC & f1, const FuncC & f2)
+    bool ConditionalCount8uAutoTest(const FuncC8U & f1, const FuncC8U & f2)
     {
         bool result = true;
 
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalCountAutoTest(ARGS_C(W, H, type, f1, f2));
-            result = result && ConditionalCountAutoTest(ARGS_C(W + O, H - O, type, f1, f2));
-            result = result && ConditionalCountAutoTest(ARGS_C(W - O, H + O, type, f1, f2));
+            result = result && ConditionalCount8uAutoTest(ARGS_C8U(W, H, type, f1, f2));
+            result = result && ConditionalCount8uAutoTest(ARGS_C8U(W + O, H - O, type, f1, f2));
+            result = result && ConditionalCount8uAutoTest(ARGS_C8U(W - O, H + O, type, f1, f2));
         }
 
         return result;
     }
 
-    bool ConditionalCountAutoTest()
+    bool ConditionalCount8uAutoTest()
     {
         bool result = true;
 
-        result = result && ConditionalCountAutoTest(FUNC_C(Simd::Base::ConditionalCount), FUNC_C(SimdConditionalCount));
+        result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Base::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && ConditionalCountAutoTest(FUNC_C(Simd::Sse2::ConditionalCount), FUNC_C(SimdConditionalCount));
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sse2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && ConditionalCountAutoTest(FUNC_C(Simd::Avx2::ConditionalCount), FUNC_C(SimdConditionalCount));
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Avx2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && ConditionalCountAutoTest(FUNC_C(Simd::Vsx::ConditionalCount), FUNC_C( SimdConditionalCount));
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Vsx::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
+        struct FuncC16I
+        {
+            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
+                int16_t value, SimdCompareType compareType, uint32_t * count);
+
+            FuncPtr func;
+            std::string description;
+
+            FuncC16I(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, int16_t value, SimdCompareType compareType, uint32_t & count) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, value, compareType, &count);
+            }
+        };
+    }
+
+#define ARGS_C16I(width, height, type, function1, function2) \
+    width, height, type, \
+    FuncC16I(function1.func, function1.description + CompareTypeDescription(type)), \
+    FuncC16I(function2.func, function2.description + CompareTypeDescription(type))
+
+#define FUNC_C16I(function) \
+    FuncC16I(function, std::string(#function))
+
+    bool ConditionalCount16iAutoTest(int width, int height, SimdCompareType type, const FuncC16I & f1, const FuncC16I & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        int16_t value = 1111;
+        uint32_t c1, c2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, type, c1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, type, c2));
+
+        TEST_CHECK_VALUE(c);
+
+        return result;
+    }
+
+    bool ConditionalCount16iAutoTest(const FuncC16I & f1, const FuncC16I & f2)
+    {
+        bool result = true;
+
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalCount16iAutoTest(ARGS_C16I(W, H, type, f1, f2));
+            result = result && ConditionalCount16iAutoTest(ARGS_C16I(W + O, H - O, type, f1, f2));
+            result = result && ConditionalCount16iAutoTest(ARGS_C16I(W - O, H + O, type, f1, f2));
+        }
+
+        return result;
+    }
+
+    bool ConditionalCount16iAutoTest()
+    {
+        bool result = true;
+
+        result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Base::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sse2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Vsx::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
         return result;
@@ -254,7 +341,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool ConditionalCountDataTest(bool create, int width, int height, SimdCompareType type, const FuncC & f)
+    bool ConditionalCount8uDataTest(bool create, int width, int height, SimdCompareType type, const FuncC8U & f)
     {
         bool result = true;
 
@@ -292,14 +379,65 @@ namespace Test
         return result;
     }
 
-    bool ConditionalCountDataTest(bool create)
+    bool ConditionalCount8uDataTest(bool create)
     {
         bool result = true;
 
-        FuncC f = FUNC_C(SimdConditionalCount);
+        FuncC8U f = FUNC_C8U(SimdConditionalCount8u);
         for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
-            result = result && ConditionalCountDataTest(create, DW, DH, type, FuncC(f.func, f.description + Data::Description(type)));
+            result = result && ConditionalCount8uDataTest(create, DW, DH, type, FuncC8U(f.func, f.description + Data::Description(type)));
+        }
+
+        return result;
+    }
+
+    bool ConditionalCount16iDataTest(bool create, int width, int height, SimdCompareType type, const FuncC16I & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View src(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        int16_t value = 1111;
+        uint32_t c1, c2;
+
+        if(create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, value, type, c1);
+
+            TEST_SAVE(c1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(c1);
+
+            f.Call(src, value, type, c2);
+
+            TEST_SAVE(c2);
+
+            TEST_CHECK_VALUE(c);
+        }
+
+        return result;
+    }
+
+    bool ConditionalCount16iDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncC16I f = FUNC_C16I(SimdConditionalCount16i);
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalCount16iDataTest(create, DW, DH, type, FuncC16I(f.func, f.description + Data::Description(type)));
         }
 
         return result;

@@ -30,37 +30,75 @@ namespace Simd
 	namespace Base
 	{
         template <SimdCompareType compareType> 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             *count = 0;
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < width; ++col)
                 {
-                    if(Compare<compareType>(src[col], value))
+                    if(Compare8u<compareType>(src[col], value))
                         (*count)++;
                 }
                 src += stride;
             }
         }
 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
             uint8_t value, SimdCompareType compareType, uint32_t * count)
         {
             switch(compareType)
             {
             case SimdCompareEqual: 
-                return ConditionalCount<SimdCompareEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareEqual>(src, stride, width, height, value, count);
             case SimdCompareNotEqual: 
-                return ConditionalCount<SimdCompareNotEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareNotEqual>(src, stride, width, height, value, count);
             case SimdCompareGreater: 
-                return ConditionalCount<SimdCompareGreater>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreater>(src, stride, width, height, value, count);
             case SimdCompareGreaterOrEqual: 
-                return ConditionalCount<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
             case SimdCompareLesser: 
-                return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesser>(src, stride, width, height, value, count);
             case SimdCompareLesserOrEqual: 
-                return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
+            }
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+        {
+            *count = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                const int16_t * s = (const int16_t *)src;
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(Compare16i<compareType>(s[col], value))
+                        (*count)++;
+                }
+                src += stride;
+            }
+        }
+
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            int16_t value, SimdCompareType compareType, uint32_t * count)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalCount16i<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual: 
+                return ConditionalCount16i<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater: 
+                return ConditionalCount16i<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalCount16i<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser: 
+                return ConditionalCount16i<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalCount16i<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
             default: 
                 assert(0);
             }
@@ -76,7 +114,7 @@ namespace Simd
                 uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
-                    if(Compare<compareType>(mask[col], value))
+                    if(Compare8u<compareType>(mask[col], value))
                         rowSum += src[col];
                 }
                 *sum += rowSum;
@@ -117,7 +155,7 @@ namespace Simd
                 uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
-                    if(Compare<compareType>(mask[col], value))
+                    if(Compare8u<compareType>(mask[col], value))
                         rowSum += Square(src[col]);
                 }
                 *sum += rowSum;
@@ -163,7 +201,7 @@ namespace Simd
                 uint32_t rowSum = 0;
                 for(size_t col = 0; col < width; ++col)
                 {
-                    if(Compare<compareType>(mask[col], value))
+                    if(Compare8u<compareType>(mask[col], value))
                     {
                         rowSum += SquaredDifference(src[col + 1], src[col - 1]);
                         rowSum += SquaredDifference(src[col + srcStride], src[col - srcStride]);

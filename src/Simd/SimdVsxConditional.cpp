@@ -38,7 +38,7 @@ namespace Simd
     namespace Vsx
     {
         template <bool align, SimdCompareType compareType> 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             assert(width >= A);
             if(align)
@@ -53,12 +53,12 @@ namespace Simd
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const v128_u8 mask = vec_and(Compare<compareType>(Load<align>(src + col), _value), K8_01);
+                    const v128_u8 mask = vec_and(Compare8u<compareType>(Load<align>(src + col), _value), K8_01);
                     _count = vec_msum(mask, K8_01, _count);
                 }
                 if(alignedWidth != width)
                 {
-                    const v128_u8 mask = vec_and(Compare<compareType>(Load<false>(src + width - A), _value), tailMask);
+                    const v128_u8 mask = vec_and(Compare8u<compareType>(Load<false>(src + width - A), _value), tailMask);
                     _count = vec_msum(mask, K8_01, _count);
                 }
                 src += stride;
@@ -67,31 +67,92 @@ namespace Simd
         }
 
         template <SimdCompareType compareType> 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
         {
             if(Aligned(src) && Aligned(stride))
-                ConditionalCount<true, compareType>(src, stride, width, height, value, count);
+                ConditionalCount8u<true, compareType>(src, stride, width, height, value, count);
             else
-                ConditionalCount<false, compareType>(src, stride, width, height, value, count);
+                ConditionalCount8u<false, compareType>(src, stride, width, height, value, count);
         }
 
-        void ConditionalCount(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
             uint8_t value, SimdCompareType compareType, uint32_t * count)
         {
             switch(compareType)
             {
             case SimdCompareEqual: 
-                return ConditionalCount<SimdCompareEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareEqual>(src, stride, width, height, value, count);
             case SimdCompareNotEqual: 
-                return ConditionalCount<SimdCompareNotEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareNotEqual>(src, stride, width, height, value, count);
             case SimdCompareGreater: 
-                return ConditionalCount<SimdCompareGreater>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreater>(src, stride, width, height, value, count);
             case SimdCompareGreaterOrEqual: 
-                return ConditionalCount<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
             case SimdCompareLesser: 
-                return ConditionalCount<SimdCompareLesser>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesser>(src, stride, width, height, value, count);
             case SimdCompareLesserOrEqual: 
-                return ConditionalCount<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+                return ConditionalCount8u<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+            default: 
+                assert(0);
+            }
+        }
+
+        template <bool align, SimdCompareType compareType> 
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, HA);
+            v128_u16 tailMask = ShiftLeft(K16_0001, HA - width + alignedWidth);
+
+            v128_s16 _value = SIMD_VEC_SET1_EPI16(value);
+            v128_u32 _count = K32_00000000;
+            for(size_t row = 0; row < height; ++row)
+            {
+                const int16_t * s = (const int16_t *)src;
+                for(size_t col = 0; col < alignedWidth; col += HA)
+                {
+                    const v128_u16 mask = vec_and((v128_u16)Compare16i<compareType>(Load<align>(s + col), _value), K16_0001);
+                    _count = vec_msum(mask, K16_0001, _count);
+                }
+                if(alignedWidth != width)
+                {
+                    const v128_u16 mask = vec_and((v128_u16)Compare16i<compareType>(Load<false>(s + width - HA), _value), tailMask);
+                    _count = vec_msum(mask, K16_0001, _count);
+                }
+                src += stride;
+            }
+            *count = ExtractSum(_count);
+        }
+
+        template <SimdCompareType compareType> 
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+        {
+            if(Aligned(src) && Aligned(stride))
+                ConditionalCount16i<true, compareType>(src, stride, width, height, value, count);
+            else
+                ConditionalCount16i<false, compareType>(src, stride, width, height, value, count);
+        }
+
+        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            int16_t value, SimdCompareType compareType, uint32_t * count)
+        {
+            switch(compareType)
+            {
+            case SimdCompareEqual: 
+                return ConditionalCount16i<SimdCompareEqual>(src, stride, width, height, value, count);
+            case SimdCompareNotEqual: 
+                return ConditionalCount16i<SimdCompareNotEqual>(src, stride, width, height, value, count);
+            case SimdCompareGreater: 
+                return ConditionalCount16i<SimdCompareGreater>(src, stride, width, height, value, count);
+            case SimdCompareGreaterOrEqual: 
+                return ConditionalCount16i<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+            case SimdCompareLesser: 
+                return ConditionalCount16i<SimdCompareLesser>(src, stride, width, height, value, count);
+            case SimdCompareLesserOrEqual: 
+                return ConditionalCount16i<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
             default: 
                 assert(0);
             }
@@ -115,13 +176,13 @@ namespace Simd
                 v128_u32 rowSum = K32_00000000;
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const v128_u8 _mask = Compare<compareType>(Load<align>(mask + col), _value);
+                    const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
                     const v128_u8 _src = vec_and(Load<align>(src + col), _mask);
                     rowSum = vec_msum(_src, K8_01, rowSum);
                 }
                 if(alignedWidth != width)
                 {
-                    const v128_u8 _mask = Compare<compareType>(Load<false>(mask + width - A), _value);
+                    const v128_u8 _mask = Compare8u<compareType>(Load<false>(mask + width - A), _value);
                     const v128_u8 _src = vec_and(vec_and(Load<false>(src + width - A), _mask), tailMask);
                     rowSum = vec_msum(_src, K8_01, rowSum);
                 }
@@ -181,13 +242,13 @@ namespace Simd
                 v128_u32 rowSum = K32_00000000;
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const v128_u8 _mask = Compare<compareType>(Load<align>(mask + col), _value);
+                    const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
                     const v128_u8 _src = vec_and(Load<align>(src + col), _mask);
                     rowSum = vec_msum(_src, _src, rowSum);
                 }
                 if(alignedWidth != width)
                 {
-                    const v128_u8 _mask = Compare<compareType>(Load<false>(mask + width - A), _value);
+                    const v128_u8 _mask = Compare8u<compareType>(Load<false>(mask + width - A), _value);
                     const v128_u8 _src = vec_and(vec_and(Load<false>(src + width - A), _mask), tailMask);
                     rowSum = vec_msum(_src, _src, rowSum);
                 }
@@ -260,20 +321,20 @@ namespace Simd
             {
                 v128_u32 rowSum = K32_00000000;
                 {
-                    const v128_u8 _mask = vec_and(Compare<compareType>(Load<false>(mask + 1), _value), noseMask);
+                    const v128_u8 _mask = vec_and(Compare8u<compareType>(Load<false>(mask + 1), _value), noseMask);
                     AddSquareDifference<false>(src + 1, 1, _mask, rowSum);
                     AddSquareDifference<false>(src + 1, srcStride, _mask, rowSum);
                 }
                 for(size_t col = A; col < alignedWidth; col += A)
                 {
-                    const v128_u8 _mask = Compare<compareType>(Load<align>(mask + col), _value);
+                    const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
                     AddSquareDifference<false>(src + col, 1, _mask, rowSum);
                     AddSquareDifference<align>(src + col, srcStride, _mask, rowSum);
                 }
                 if(alignedWidth != width - 1)
                 {
                     size_t offset = width - A - 1;
-                    const v128_u8 _mask = vec_and(Compare<compareType>(Load<false>(mask + offset), _value), tailMask);
+                    const v128_u8 _mask = vec_and(Compare8u<compareType>(Load<false>(mask + offset), _value), tailMask);
                     AddSquareDifference<false>(src + offset, 1, _mask, rowSum);
                     AddSquareDifference<false>(src + offset, srcStride, _mask, rowSum);
                 }

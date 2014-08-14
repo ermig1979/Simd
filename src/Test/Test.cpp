@@ -125,7 +125,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
     EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
 
-    EXECUTE_AUTO_TEST(ConditionalCountAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalCount8uAutoTest);
+    EXECUTE_AUTO_TEST(ConditionalCount16iAutoTest);
     EXECUTE_AUTO_TEST(ConditionalSumAutoTest);
     EXECUTE_AUTO_TEST(ConditionalSquareSumAutoTest);
     EXECUTE_AUTO_TEST(ConditionalSquareGradientSumAutoTest);
@@ -293,7 +294,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BinarizationDataTest);
     EXECUTE_DATA_TEST(AveragingBinarizationDataTest);
 
-    EXECUTE_DATA_TEST(ConditionalCountDataTest);
+    EXECUTE_DATA_TEST(ConditionalCount8uDataTest);
+    EXECUTE_DATA_TEST(ConditionalCount16iDataTest);
     EXECUTE_DATA_TEST(ConditionalSumDataTest);
     EXECUTE_DATA_TEST(ConditionalSquareSumDataTest);
     EXECUTE_DATA_TEST(ConditionalSquareGradientSumDataTest);
