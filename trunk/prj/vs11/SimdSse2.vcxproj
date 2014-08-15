@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Interference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp" />

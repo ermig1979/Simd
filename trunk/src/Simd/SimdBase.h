@@ -182,6 +182,16 @@ namespace Simd
             uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
             SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
+        void InterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+
+        void InterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+            uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+
+        void InterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
+
+        void InterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+            uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+
         void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void MedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 

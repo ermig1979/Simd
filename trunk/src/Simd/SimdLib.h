@@ -1228,6 +1228,92 @@ extern "C"
         SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
     /**
+    * \fn void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+    *
+    * \short Increments statistic of interference detector. 
+    *
+    * For every point: 
+    * \n statistic[i] = min(statistic[i] + increment, saturation); 
+    *
+    * This function is used for interference detection in motion detection algorithm.
+    *
+    * \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
+    * \param [in] stride - a row size of statistic image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] increment - an increment of statistic.
+    * \param [in] saturation - an upper saturation of statistic.
+    */
+    SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+
+    /**
+    * \fn void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+    *
+    * \short Increments statistic of interference detector with using segmentation mask. 
+    *
+    * For every point when mask[i] == index: 
+    * \n statistic[i] = min(statistic[i] + increment, saturation); 
+    *
+    * All images must have the same width, height. 
+    * This function is used for interference detection in motion detection algorithm.
+    *
+    * \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
+    * \param [in] statisticStride - a row size of statistic image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] increment - an increment of statistic.
+    * \param [in] saturation - an upper saturation of statistic.
+    * \param [in] mask - a pointer to pixels data of 8-bit gray image with mask.
+    * \param [in] maskStride - a row size of mask image.
+    * \param [in] index - an index of mask.
+    */
+    SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+        uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+
+    /**
+    * \fn void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
+    *
+    * \short Decrements statistic of interference detector. 
+    *
+    * For every point: 
+    * \n statistic[i] = max(statistic[i] - decrement, saturation); 
+    *
+    * This function is used for interference detection in motion detection algorithm.
+    *
+    * \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
+    * \param [in] stride - a row size of statistic image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] decrement - an decrement of statistic.
+    * \param [in] saturation - an lower saturation of statistic.
+    */
+    SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
+
+    /**
+    * \fn void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+    *
+    * \short Decrements statistic of interference detector with using segmentation mask. 
+    *
+    * For every point when mask[i] == index: 
+    * \n statistic[i] = max(statistic[i] - decrement, saturation); 
+    *
+    * All images must have the same width, height. 
+    * This function is used for interference detection in motion detection algorithm.
+    *
+    * \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
+    * \param [in] statisticStride - a row size of statistic image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] decrement - an decrement of statistic.
+    * \param [in] saturation - an lower saturation of statistic.
+    * \param [in] mask - a pointer to pixels data of 8-bit gray image with mask.
+    * \param [in] maskStride - a row size of mask image.
+    * \param [in] index - an index of mask.
+    */
+    SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+        uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
+
+    /**
     * \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates LBP (Local Binary Patterns) for 8-bit gray image. 
