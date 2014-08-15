@@ -163,6 +163,11 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(IntegralAutoTest);
 
+    EXECUTE_AUTO_TEST(InterferenceIncrementAutoTest);
+    EXECUTE_AUTO_TEST(InterferenceIncrementMaskedAutoTest);
+    EXECUTE_AUTO_TEST(InterferenceDecrementAutoTest);
+    EXECUTE_AUTO_TEST(InterferenceDecrementMaskedAutoTest);
+
     EXECUTE_AUTO_TEST(AbsGradientSaturatedSumAutoTest);
     EXECUTE_AUTO_TEST(GaussianBlur3x3AutoTest);
     EXECUTE_AUTO_TEST(LbpEstimateAutoTest);
@@ -331,6 +336,11 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
 
     EXECUTE_DATA_TEST(IntegralDataTest);
+
+    EXECUTE_DATA_TEST(InterferenceIncrementDataTest);
+    EXECUTE_DATA_TEST(InterferenceIncrementMaskedDataTest);
+    EXECUTE_DATA_TEST(InterferenceDecrementDataTest);
+    EXECUTE_DATA_TEST(InterferenceDecrementMaskedDataTest);
 
     EXECUTE_DATA_TEST(LbpEstimateDataTest);
 

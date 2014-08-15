@@ -104,6 +104,11 @@ namespace Test
 
     bool IntegralAutoTest();
 
+    bool InterferenceIncrementAutoTest();
+    bool InterferenceIncrementMaskedAutoTest();
+    bool InterferenceDecrementAutoTest();
+    bool InterferenceDecrementMaskedAutoTest();
+
     bool MedianFilterRhomb3x3AutoTest();
     bool MedianFilterRhomb5x5AutoTest();
     bool MedianFilterSquare3x3AutoTest();
@@ -236,6 +241,11 @@ namespace Test
     bool AbsSecondDerivativeHistogramDataTest(bool create);
 
     bool IntegralDataTest(bool create);
+
+    bool InterferenceIncrementDataTest(bool create);
+    bool InterferenceIncrementMaskedDataTest(bool create);
+    bool InterferenceDecrementDataTest(bool create);
+    bool InterferenceDecrementMaskedDataTest(bool create);
 
     bool AbsGradientSaturatedSumDataTest(bool create);
     bool GaussianBlur3x3DataTest(bool create);

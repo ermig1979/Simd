@@ -25,7 +25,7 @@
 
 namespace Test
 {
-    void FillRandom(View & view)
+    void FillRandom(View & view, uint8_t lo, uint8_t hi)
     {
         assert(view.data);
 
@@ -35,7 +35,7 @@ namespace Test
             ptrdiff_t offset = row*view.stride;
             for(size_t col = 0; col < width; ++col, ++offset)
             {
-                view.data[offset] = Random(256);
+                view.data[offset] = lo + Random(hi - lo + 1);
             }
         }
     }

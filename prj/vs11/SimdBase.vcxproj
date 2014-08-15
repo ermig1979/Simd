@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseInterference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseOperation.cpp" />

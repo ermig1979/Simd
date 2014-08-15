@@ -98,7 +98,7 @@ namespace Simd
         template <bool align, SimdCompareType compareType> 
         void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
         {
-            assert(width >= A);
+            assert(width >= HA);
             if(align)
                 assert(Aligned(src) && Aligned(stride));
 

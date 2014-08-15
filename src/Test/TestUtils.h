@@ -33,7 +33,7 @@ namespace Test
 		return ((::rand()&INT16_MAX)*range)/INT16_MAX;
 	}
 
-    void FillRandom(View & view);
+    void FillRandom(View & view, uint8_t lo = 0, uint8_t hi = 255);
 
 	void FillRandomMask(View & view, uint8_t index);
 

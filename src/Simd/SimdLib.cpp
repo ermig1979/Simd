@@ -619,17 +619,17 @@ SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t
                                      int16_t value, SimdCompareType compareType, uint32_t * count)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width >= Avx2::HA)
         Avx2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
+    if(Sse2::Enable && width >= Sse2::HA)
         Sse2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable && width >= Vsx::A)
+    if(Vsx::Enable && width >= Vsx::HA)
         Vsx::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
@@ -1038,6 +1038,88 @@ SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, 
                       SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat)
 {
     Base::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
+}
+
+SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::HA)
+        Avx2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::HA)
+        Sse2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::HA)
+        Vsx::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+    else
+#endif
+        Base::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+}
+
+SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+                                              uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+    else
+#endif
+        Base::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+}
+
+SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::HA)
+        Avx2::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::HA)
+        Sse2::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::HA)
+        Vsx::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+    else
+#endif
+        Base::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+}
+
+SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+                                              uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
+    else
+#endif
+        Base::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
 }
 
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
