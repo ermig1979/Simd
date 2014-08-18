@@ -434,6 +434,34 @@ namespace Simd
             (SimdPixelFormatType)sum.format, (SimdPixelFormatType)sqsum.format);
     }
 
+    template<class A> SIMD_INLINE void InterferenceIncrement(View<A> & dst, uint8_t increment, int16_t saturation)
+    {
+        assert(dst.format == View<A>::Int16);
+
+        SimdInterferenceIncrement(dst.data, dst.stride, dst.width, dst.height, increment, saturation);
+    }
+
+    template<class A> SIMD_INLINE void InterferenceIncrementMasked(View<A> & dst, uint8_t increment, int16_t saturation, const View<A>& mask, uint8_t index)
+    {
+        assert(dst.format == View<A>::Int16 && mask.format == View<A>::Gray8 && EqualSize(dst, mask));
+
+        SimdInterferenceIncrementMasked(dst.data, dst.stride, dst.width, dst.height, increment, saturation, mask.data, mask.stride, index);
+    }
+
+    template<class A> SIMD_INLINE void InterferenceDecrement(View<A> & dst, uint8_t decrement, int16_t saturation)
+    {
+        assert(dst.format == View<A>::Int16);
+
+        SimdInterferenceDecrement(dst.data, dst.stride, dst.width, dst.height, decrement, saturation);
+    }
+
+    template<class A> SIMD_INLINE void InterferenceDecrementMasked(View<A> & dst, uint8_t decrement, int16_t saturation, const View<A>& mask, uint8_t index)
+    {
+        assert(dst.format == View<A>::Int16 && mask.format == View<A>::Gray8 && EqualSize(dst, mask));
+
+        SimdInterferenceDecrementMasked(dst.data, dst.stride, dst.width, dst.height, decrement, saturation, mask.data, mask.stride, index);
+    }
+
     template<class A> SIMD_INLINE void LbpEstimate(const View<A>& src, View<A>& dst)
     {
         assert(Compatible(src, dst) && src.format == View<A>::Gray8);
