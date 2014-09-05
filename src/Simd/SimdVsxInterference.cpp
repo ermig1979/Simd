@@ -60,7 +60,7 @@ namespace Simd
         {
             assert(width >= HA);
             if(align)
-                assert(Aligned(statistic) && Aligned(stride));
+                assert(Aligned(statistic) && Aligned(stride, HA));
 
             size_t alignedWidth = Simd::AlignLo(width, HA);
             v128_s16 tailMask = (v128_s16)ShiftLeft(K16_FFFF, HA - width + alignedWidth);
@@ -120,7 +120,7 @@ namespace Simd
         {
             assert(width >= A);
             if(align)
-                assert(Aligned(statistic) && Aligned(statisticStride) && Aligned(mask) && Aligned(maskStride));
+                assert(Aligned(statistic) && Aligned(statisticStride, HA) && Aligned(mask) && Aligned(maskStride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);

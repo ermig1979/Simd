@@ -57,7 +57,7 @@ namespace Simd
         {
             assert(width >= HA);
             if(align)
-                assert(Aligned(statistic) && Aligned(stride));
+                assert(Aligned(statistic) && Aligned(stride, HA));
 
             size_t alignedWidth = Simd::AlignLo(width, HA);
             __m256i tailMask = SetMask<uint16_t>(0, HA - width + alignedWidth, 0xFFFF);
@@ -99,7 +99,7 @@ namespace Simd
         {
             assert(width >= A);
             if(align)
-                assert(Aligned(statistic) && Aligned(statisticStride) && Aligned(mask) && Aligned(maskStride));
+                assert(Aligned(statistic) && Aligned(statisticStride, HA) && Aligned(mask) && Aligned(maskStride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
