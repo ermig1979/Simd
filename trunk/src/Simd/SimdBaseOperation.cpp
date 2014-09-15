@@ -37,17 +37,22 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8_t OperationBinary8u<SimdOperationBinary8uAnd>(const uint8_t & a, const uint8_t & b)
 		{
-			return  a & b;
+			return a & b;
 		}
 
 		template <> SIMD_INLINE uint8_t OperationBinary8u<SimdOperationBinary8uMaximum>(const uint8_t & a, const uint8_t & b)
 		{
-			return  MaxU8(a, b);
+			return MaxU8(a, b);
 		}
 
         template <> SIMD_INLINE uint8_t OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(const uint8_t & a, const uint8_t & b)
         {
-            return  SaturatedSubtractionU8(a, b);
+            return SaturatedSubtractionU8(a, b);
+        }
+
+        template <> SIMD_INLINE uint8_t OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(const uint8_t & a, const uint8_t & b)
+        {
+            return MinU8((int)a + (int)b, 255);
         }
 
 		template <SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
@@ -77,6 +82,8 @@ namespace Simd
 				return OperationBinary8u<SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
                 return OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedAddition:
+                return OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}

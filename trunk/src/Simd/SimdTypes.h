@@ -91,6 +91,8 @@ typedef enum SimdOperationBinary8uType
     SimdOperationBinary8uMaximum,
     ///Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
     SimdOperationBinary8uSaturatedSubtraction,
+    ///Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
+    SimdOperationBinary8uSaturatedAddition,
 } SimdOperationBinary8uType;
 
  /**

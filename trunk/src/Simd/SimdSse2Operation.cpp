@@ -55,6 +55,11 @@ namespace Simd
             return _mm_subs_epu8(a, b);
         }
 
+        template <> SIMD_INLINE __m128i OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(const __m128i & a, const __m128i & b)
+        {
+            return _mm_adds_epu8(a, b);
+        }
+
 		template <bool align, SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
@@ -97,6 +102,8 @@ namespace Simd
 				return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
                 return OperationBinary8u<align, SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedAddition:
+                return OperationBinary8u<align, SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			default:
 				assert(0);
 			}

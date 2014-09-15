@@ -93,6 +93,8 @@ namespace Test
             return "<Max>";
         case SimdOperationBinary8uSaturatedSubtraction:
             return "<Subs>";
+        case SimdOperationBinary8uSaturatedAddition:
+            return "<Adds>";
         }
 		assert(0);
 		return "<Unknown";
@@ -155,7 +157,7 @@ namespace Test
 	{
 		bool result = true;
 
-        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedSubtraction && result; type = SimdOperationBinary8uType(type + 1))
+        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedAddition && result; type = SimdOperationBinary8uType(type + 1))
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
@@ -359,7 +361,7 @@ namespace Test
         bool result = true;
 
         FuncOB8U f = FUNC_OB8U(SimdOperationBinary8u);
-        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedSubtraction && result; type = SimdOperationBinary8uType(type + 1))
+        for(SimdOperationBinary8uType type = SimdOperationBinary8uAverage; type <= SimdOperationBinary8uSaturatedAddition && result; type = SimdOperationBinary8uType(type + 1))
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
