@@ -373,6 +373,8 @@ namespace Test
             return "_Maximum";
         case SimdOperationBinary8uSaturatedSubtraction:
             return "_SaturatedSubtraction";
+        case SimdOperationBinary8uSaturatedAddition:
+            return "_SaturatedAddition";
         }
         assert(0);
         return "_Unknown";

@@ -57,6 +57,11 @@ namespace Simd
             return vec_subs(a, b);
         }
 
+        template <> SIMD_INLINE v128_u8 OperationBinary8u<SimdOperationBinary8uSaturatedAddition>(const v128_u8 & a, const v128_u8 & b)
+        {
+            return vec_adds(a, b);
+        }
+
         template <SimdOperationBinary8uType type, bool align, bool first> 
         SIMD_INLINE void OperationBinary8u(const Loader<align> & a, const Loader<align> & b, Storer<align> & dst)
         {
@@ -108,6 +113,8 @@ namespace Simd
                 return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
                 return OperationBinary8u<align, SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uSaturatedAddition:
+                return OperationBinary8u<align, SimdOperationBinary8uSaturatedAddition>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             default:
                 assert(0);
             }
