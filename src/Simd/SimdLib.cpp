@@ -1394,6 +1394,26 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
         Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 }
 
+SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+    else
+#endif
+        Base::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+}
+
 SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
 {
 #ifdef SIMD_AVX2_ENABLE

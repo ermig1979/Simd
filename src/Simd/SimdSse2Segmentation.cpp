@@ -69,6 +69,35 @@ namespace Simd
             else
                 SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
         }
+
+        template<bool align> SIMD_INLINE void ChangeIndex(uint8_t * mask, __m128i oldIndex, __m128i newIndex)
+        {
+            __m128i _mask = Load<align>((__m128i*)mask);
+            Store<align>((__m128i*)mask, Combine(_mm_cmpeq_epi8(_mask, oldIndex), newIndex, _mask));
+        }
+
+        template<bool align> void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        {
+            __m128i _oldIndex = _mm_set1_epi8((char)oldIndex);
+            __m128i _newIndex = _mm_set1_epi8((char)newIndex);
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < alignedWidth; col += A)
+                    ChangeIndex<align>(mask + col, _oldIndex, _newIndex);
+                if(alignedWidth != width )
+                    ChangeIndex<false>(mask + width - A, _oldIndex, _newIndex);
+                mask += stride;
+            }
+        }
+
+        void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
+            else
+                SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
+        }
     }
 #endif//SIMD_SSE2_ENABLE
 }

@@ -182,6 +182,83 @@ namespace Test
         return result;    
     }
 
+    namespace
+    {
+        struct FuncCI
+        {
+            typedef void(*FuncPtr)(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
+            FuncPtr func;
+            std::string description;
+
+            FuncCI(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint8_t oldIndex, uint8_t newIndex, View & dst) const
+            {
+                Simd::Copy(src, dst);
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width, dst.height, oldIndex, newIndex);
+            }
+        };	
+    }
+
+#define FUNC_CI(func) FuncCI(func, #func)
+
+    bool SegmentationChangeIndexAutoTest(int width, int height, const FuncCI & f1, const FuncCI & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
+
+        const uint8_t oldIndex = 3, newIndex = 2;
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandomMask(s, oldIndex);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, oldIndex, newIndex, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, oldIndex, newIndex, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool SegmentationChangeIndexAutoTest(const FuncCI & f1, const FuncCI & f2)
+    {
+        bool result = true;
+
+        result = result && SegmentationChangeIndexAutoTest(W, H, f1, f2);
+        result = result && SegmentationChangeIndexAutoTest(W + O, H - O, f1, f2);
+        result = result && SegmentationChangeIndexAutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
+    bool SegmentationChangeIndexAutoTest()
+    {
+        bool result = true;
+
+        result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sse2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Vsx::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#endif
+
+        return result;    
+    }
+
     //-----------------------------------------------------------------------
 
     bool SegmentationShrinkRegionDataTest(bool create, int width, int height, const FuncSR & f)
@@ -278,6 +355,56 @@ namespace Test
         bool result = true;
 
         result = result && SegmentationFillSingleHolesDataTest(create, DW, DH, FUNC_FSH(SimdSegmentationFillSingleHoles));
+
+        return result;
+    }
+
+    bool SegmentationChangeIndexDataTest(bool create, int width, int height, const FuncCI & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint8_t oldIndex = 3, newIndex = 2;
+
+        if(create)
+        {
+            FillRandomMask(s, oldIndex);
+
+            TEST_SAVE(s);
+
+            f.Call(s, oldIndex, newIndex, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(s);
+
+            TEST_LOAD(d1);
+
+            f.Call(s, oldIndex, newIndex, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool SegmentationChangeIndexDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SegmentationChangeIndexDataTest(create, DW, DH, FUNC_CI(SimdSegmentationChangeIndex));
 
         return result;
     }

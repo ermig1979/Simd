@@ -186,6 +186,38 @@ namespace Simd
             else
                 SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
         }
+
+        SIMD_INLINE v128_u8 ChangeIndex(const v128_u8 & mask, const v128_u8 & oldIndex, const v128_u8 & newIndex)
+        {
+            return vec_sel(mask, newIndex, (v128_u8)vec_cmpeq(mask, oldIndex));
+        }
+
+        template<bool align> void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        {
+            v128_u8 _oldIndex = SetU8(oldIndex);
+            v128_u8 _newIndex = SetU8(newIndex);
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _dst(mask);
+                _dst.First(ChangeIndex(Load<align>(mask), _oldIndex, _newIndex));
+                for(size_t col = A; col < alignedWidth; col += A)
+                    _dst.Next(ChangeIndex(Load<align>(mask + col), _oldIndex, _newIndex));
+                _dst.Flush();
+
+                if(alignedWidth != width)
+                    Store<false>(mask + width - A, ChangeIndex(Load<false>(mask + width - A), _oldIndex, _newIndex));
+                mask += stride;
+            }
+        }
+
+        void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        {
+            if(Aligned(mask) && Aligned(stride))
+                SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
+            else
+                SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }
