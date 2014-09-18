@@ -54,13 +54,6 @@
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdUtils.h"
 
-#ifdef CUDA_TEST
-#include "Cuda/CudaDefs.h"
-#ifdef CUDA_ENABLE
-#include "Cuda/CudaUtils.h"
-#endif
-#endif
-
 namespace Test
 {
 	typedef Simd::View<Simd::Allocator> View;
@@ -69,11 +62,6 @@ namespace Test
 	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
-
-#ifdef CUDA_ENABLE
-    typedef Cuda::DView DView;
-    typedef Cuda::HView HView;
-#endif
 
 #ifdef NDEBUG
 	const int W = 1920;
