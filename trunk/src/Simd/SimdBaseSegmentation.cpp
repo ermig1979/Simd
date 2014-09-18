@@ -50,6 +50,19 @@ namespace Simd
             }
         }
 
+        void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0; col < width; ++col)
+                {
+                    if(mask[col] == oldIndex)
+                        mask[col] = newIndex;
+                }
+                mask += stride;
+            }
+        }
+
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {

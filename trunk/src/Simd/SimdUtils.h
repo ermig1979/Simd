@@ -561,6 +561,13 @@ namespace Simd
         }
     }
 
+    template<class A> SIMD_INLINE void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
+    {
+        assert(mask.format == View<A>::Gray8 && mask.width > 2 && mask.height > 2);
+
+        SimdSegmentationChangeIndex(mask.data, mask.stride, mask.width, mask.height, oldIndex, newIndex);
+    }
+
     template<class A> SIMD_INLINE void SegmentationFillSingleHoles(View<A> & mask, uint8_t index)
     {
         assert(mask.format == View<A>::Gray8 && mask.width > 2 && mask.height > 2);
