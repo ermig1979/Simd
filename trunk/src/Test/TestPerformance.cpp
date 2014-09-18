@@ -205,9 +205,6 @@ namespace Test
             std::pair<Pm, Pm> sse41;
             std::pair<Pm, Pm> avx2;
             std::pair<Pm, Pm> vsx;
-#ifdef CUDA_ENABLE
-            Pm cuda;
-#endif//CUDA_ENABLE
         };
         typedef std::map<std::string, Statistic> StatisticMap;
 
@@ -227,10 +224,6 @@ namespace Test
                 else
                     s.simd.second = *it->second;
             }
-#ifdef CUDA_ENABLE
-            if(desc.find("Cuda") == 0)
-                s.cuda = *it->second;
-#else//CUDA_ENABLE
             if(desc.find("Simd::Base::") != std::string::npos)
             {
                 if(Aligned(desc))
@@ -283,7 +276,6 @@ namespace Test
                     s.vsx.second = *it->second;
                 vsx = true;
             }
-#endif//CUDA_ENABLE
 
             timeMax = std::max(timeMax, it->second->Average());
             sizeMax = std::max(name.size(), sizeMax);
@@ -301,11 +293,6 @@ namespace Test
             ss << ExpandToRight(it->first, sizeMax) << " | ";
 
             ss << ToString(s.simd.first.Average()*1000.0, ic, fc) << " ";
-#ifdef CUDA_ENABLE
-            ss << ToString(s.cuda.Average()*1000.0, ic, fc) << " | ";
-
-            ss << ToString(Relation(s.simd, s.cuda), ir, fc) << " | ";
-#else//CUDA_ENABLE
             ss << ToString(s.base.first.Average()*1000.0, ic, fc) << " ";
             if(sse2) ss << ToString(s.sse2.first.Average()*1000.0, ic, fc) << " ";
             if(ssse3) ss << ToString(s.ssse3.first.Average()*1000.0, ic, fc) << " ";
@@ -351,7 +338,6 @@ namespace Test
                 if(vsx) ss << ToString(Relation(s.vsx.second, s.vsx.first), ir, fc) << " ";
                 ss << "| ";
             }
-#endif//CUDA_ENABLE
             statistics.push_back(ss.str());
         }
 
@@ -361,11 +347,6 @@ namespace Test
         header << ExpandToRight("Function", sizeMax) << " | ";
 
         header << ExpandToLeft("Simd", ic + fc + 1) << " ";
-#ifdef CUDA_ENABLE
-        header << ExpandToLeft("Cuda", ic + fc + 1) << " | ";
-
-        header << ExpandToLeft("S/C", ir + fc + 1) << " | ";
-#else//CUDA_ENABLE
         header << ExpandToLeft("Base", ic + fc + 1) << " ";
         if(sse2) header << ExpandToLeft("Sse2", ic + fc + 1) << " ";
         if(ssse3) header << ExpandToLeft("Ssse3", ic + fc + 1) << " ";
@@ -411,7 +392,6 @@ namespace Test
             if(vsx) header << ExpandToLeft("Vs:U/A", ir + fc + 1) << " ";
             header << "| ";
         }
-#endif//CUDA_ENABLE
 
         std::stringstream separator;
         for(size_t i = 0; i < header.str().size(); ++i)

@@ -79,14 +79,6 @@ int ExecuteAutoTest(const Options & options)
 
     bool result = true;
 
-#ifdef CUDA_ENABLE
-    if(::cudaSetDevice(0) != ::cudaSuccess)
-    {
-        std::cout << "Operation ::cudaSetDevice(0) is failed!" << std::endl;
-        goto end;
-    }
-#endif
-
     EXECUTE_AUTO_TEST(AddFeatureDifferenceAutoTest);
 
     EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
@@ -230,11 +222,6 @@ int ExecuteAutoTest(const Options & options)
 #endif//TEST_PERFORMANCE_TEST_ENABLE
 
 end:
-
-#ifdef CUDA_ENABLE
-    if(::cudaDeviceReset() != ::cudaSuccess)
-        std::cout << "Operation ::cudaDeviceReset() is failed!" << std::endl;
-#endif
 
     return result ? 1 : 0;
 }
