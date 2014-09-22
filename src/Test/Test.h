@@ -131,6 +131,7 @@ namespace Test
     bool SegmentationShrinkRegionAutoTest();
     bool SegmentationFillSingleHolesAutoTest();
     bool SegmentationChangeIndexAutoTest();
+    bool SegmentationPropagate2x2AutoTest();
 
     bool ShiftBilinearAutoTest();
 
@@ -269,6 +270,7 @@ namespace Test
     bool SegmentationShrinkRegionDataTest(bool create);
     bool SegmentationFillSingleHolesDataTest(bool create);
     bool SegmentationChangeIndexDataTest(bool create);
+    bool SegmentationPropagate2x2DataTest(bool create);
 
     bool ShiftBilinearDataTest(bool create);
 

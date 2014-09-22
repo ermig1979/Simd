@@ -184,6 +184,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(SegmentationShrinkRegionAutoTest);
     EXECUTE_AUTO_TEST(SegmentationFillSingleHolesAutoTest);
     EXECUTE_AUTO_TEST(SegmentationChangeIndexAutoTest);
+    EXECUTE_AUTO_TEST(SegmentationPropagate2x2AutoTest);
 
     EXECUTE_AUTO_TEST(SobelDxAutoTest);
     EXECUTE_AUTO_TEST(SobelDxAbsAutoTest);
@@ -350,6 +351,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(SegmentationShrinkRegionDataTest);
     EXECUTE_DATA_TEST(SegmentationFillSingleHolesDataTest);
     EXECUTE_DATA_TEST(SegmentationChangeIndexDataTest);
+    EXECUTE_DATA_TEST(SegmentationPropagate2x2DataTest);
 
     EXECUTE_DATA_TEST(ShiftBilinearDataTest);
 

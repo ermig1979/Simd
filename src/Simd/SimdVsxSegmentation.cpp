@@ -218,6 +218,97 @@ namespace Simd
             else
                 SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
         }
+
+        template<bool first> 
+        SIMD_INLINE void SegmentationPropagate2x2(const v128_u8 & parentOne, const v128_u8 & parentAll, 
+            const uint8_t * difference0, const uint8_t * difference1, uint8_t * childSrc0, uint8_t * childSrc1, size_t childCol,
+            const v128_u8 & index, const v128_u8 & invalid, const v128_u8 & empty, const v128_u8 & threshold,
+            Storer<false> & childDst0, Storer<false> & childDst1)
+        {
+            const v128_u8 _difference0 = Load<false>(difference0 + childCol);
+            const v128_u8 _difference1 = Load<false>(difference1 + childCol);
+            const v128_u8 child0 = Load<false>(childSrc0 + childCol);
+            const v128_u8 child1 = Load<false>(childSrc1 + childCol);
+            const v128_u8 condition0 = vec_or(parentAll, vec_and(parentOne, vec_cmpgt(_difference0, threshold)));
+            const v128_u8 condition1 = vec_or(parentAll, vec_and(parentOne, vec_cmpgt(_difference1, threshold)));
+            Store<false, first>(childDst0, vec_sel(child0, vec_sel(empty, index, condition0), vec_cmplt(child0, invalid)));
+            Store<false, first>(childDst1, vec_sel(child1, vec_sel(empty, index, condition1), vec_cmplt(child1, invalid)));
+        }
+
+        template<bool align, bool first> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t * parent0, const uint8_t * parent1, size_t parentCol,
+            const uint8_t * difference0, const uint8_t * difference1, uint8_t * childSrc0, uint8_t * childSrc1, size_t childCol,
+            const v128_u8 & index, const v128_u8 & invalid, const v128_u8 & empty, const v128_u8 & threshold,
+            Storer<false> & childDst0, Storer<false> & childDst1)
+        {
+            const v128_u8 parent00 = (v128_u8)vec_cmpeq(Load<align>(parent0 + parentCol), index);
+            const v128_u8 parent01 = (v128_u8)vec_cmpeq(Load<false>(parent0 + parentCol + 1), index);
+            const v128_u8 parent10 = (v128_u8)vec_cmpeq(Load<align>(parent1 + parentCol), index);
+            const v128_u8 parent11 = (v128_u8)vec_cmpeq(Load<false>(parent1 + parentCol + 1), index);
+            const v128_u8 parentOne = vec_or(vec_or(parent00, parent01), vec_or(parent10, parent11));
+            const v128_u8 parentAll = vec_and(vec_and(parent00, parent01), vec_and(parent10, parent11));
+
+            SegmentationPropagate2x2<first>((v128_u8)UnpackLoU8(parentOne, parentOne), (v128_u8)UnpackLoU8(parentAll, parentAll),
+                difference0, difference1, childSrc0, childSrc1, childCol, index, invalid, empty, threshold, childDst0, childDst1);
+
+            SegmentationPropagate2x2<false>((v128_u8)UnpackHiU8(parentOne, parentOne), (v128_u8)UnpackHiU8(parentAll, parentAll),
+                difference0, difference1, childSrc0, childSrc1, childCol + A, index, invalid, empty, threshold, childDst0, childDst1);
+        }
+
+        template<bool align> void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            assert(width >= A + 1 && height >= A + 1);
+            height--;
+            width--;
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            v128_u8 index = SetU8(currentIndex);
+            v128_u8 invalid = SetU8(invalidIndex);
+            v128_u8 empty = SetU8(emptyIndex);
+            v128_u8 threshold = SetU8(differenceThreshold);
+
+            for(size_t parentRow = 0, childRow = 1; parentRow < height; ++parentRow, childRow += 2)
+            {
+                const uint8_t * parent0 = parent + parentRow*parentStride;
+                const uint8_t * parent1 = parent0 + parentStride;
+                const uint8_t * difference0 = difference + childRow*differenceStride;
+                const uint8_t * difference1 = difference0 + differenceStride;
+                uint8_t * child0 = child + childRow*childStride;
+                uint8_t * child1 = child0 + childStride;
+
+                Storer<false> childDst0(child0 + 1), childDst1(child1 + 1);
+                SegmentationPropagate2x2<align, true>(parent0, parent1, 0, difference0, difference1, 
+                    child0, child1, 1, index, invalid, empty, threshold, childDst0, childDst1);
+                for(size_t parentCol = A, childCol = DA + 1; parentCol < alignedWidth; parentCol += A, childCol += DA)
+                    SegmentationPropagate2x2<align, false>(parent0, parent1, parentCol, difference0, difference1, 
+                    child0, child1, childCol, index, invalid, empty, threshold, childDst0, childDst1);
+                childDst0.Flush();
+                childDst1.Flush();
+
+                if(alignedWidth != width)
+                {
+                    size_t childCol = (width - A)*2 + 1;
+                    Storer<false> childDst0(child0 + childCol), childDst1(child1 + childCol);
+                    SegmentationPropagate2x2<false, true>(parent0, parent1, width - A, difference0, difference1, 
+                    child0, child1, childCol, index, invalid, empty, threshold, childDst0, childDst1);
+                    childDst0.Flush();
+                    childDst1.Flush();
+                }
+            }
+        }
+
+        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            if(Aligned(parent) && Aligned(parentStride))
+                SegmentationPropagate2x2<true>(parent, parentStride, width, height, child, childStride,
+                difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+            else
+                SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
+                difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

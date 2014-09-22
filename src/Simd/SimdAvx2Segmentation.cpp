@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCompare.h"
 
 namespace Simd
 {
@@ -97,6 +98,82 @@ namespace Simd
                 SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
             else
                 SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
+        }
+
+        SIMD_INLINE void SegmentationPropagate2x2(const __m256i & parentOne, const __m256i & parentAll, 
+            const uint8_t * difference0, const uint8_t * difference1, uint8_t * child0, uint8_t * child1, size_t childCol,
+            const __m256i & index, const __m256i & invalid, const __m256i & empty, const __m256i & threshold)
+        {
+            const __m256i _difference0 = Load<false>((__m256i*)(difference0 + childCol));
+            const __m256i _difference1 = Load<false>((__m256i*)(difference1 + childCol));
+            const __m256i _child0 = Load<false>((__m256i*)(child0 + childCol));
+            const __m256i _child1 = Load<false>((__m256i*)(child1 + childCol));
+            const __m256i condition0 = _mm256_or_si256(parentAll, _mm256_and_si256(parentOne, Greater8u(_difference0, threshold)));
+            const __m256i condition1 = _mm256_or_si256(parentAll, _mm256_and_si256(parentOne, Greater8u(_difference1, threshold)));
+            Store<false>((__m256i*)(child0 + childCol), Combine(Lesser8u(_child0, invalid), Combine(condition0, index, empty), _child0));
+            Store<false>((__m256i*)(child1 + childCol), Combine(Lesser8u(_child1, invalid), Combine(condition1, index, empty), _child1));
+        }
+
+        template<bool align> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t * parent0, const uint8_t * parent1, size_t parentCol,
+            const uint8_t * difference0, const uint8_t * difference1, uint8_t * child0, uint8_t * child1, size_t childCol,
+            const __m256i & index, const __m256i & invalid, const __m256i & empty, const __m256i & threshold)
+        {
+            const __m256i parent00 = _mm256_cmpeq_epi8(Load<align>((__m256i*)(parent0 + parentCol)), index);
+            const __m256i parent01 = _mm256_cmpeq_epi8(Load<false>((__m256i*)(parent0 + parentCol + 1)), index);
+            const __m256i parent10 = _mm256_cmpeq_epi8(Load<align>((__m256i*)(parent1 + parentCol)), index);
+            const __m256i parent11 = _mm256_cmpeq_epi8(Load<false>((__m256i*)(parent1 + parentCol + 1)), index);
+            const __m256i parentOne = _mm256_permute4x64_epi64(_mm256_or_si256(_mm256_or_si256(parent00, parent01), _mm256_or_si256(parent10, parent11)), 0xD8);
+            const __m256i parentAll = _mm256_permute4x64_epi64(_mm256_and_si256(_mm256_and_si256(parent00, parent01), _mm256_and_si256(parent10, parent11)), 0xD8);
+
+            SegmentationPropagate2x2(_mm256_unpacklo_epi8(parentOne, parentOne), _mm256_unpacklo_epi8(parentAll, parentAll),
+                difference0, difference1, child0, child1, childCol, index, invalid, empty, threshold);
+
+            SegmentationPropagate2x2(_mm256_unpackhi_epi8(parentOne, parentOne), _mm256_unpackhi_epi8(parentAll, parentAll),
+                difference0, difference1, child0, child1, childCol + A, index, invalid, empty, threshold);
+        }
+
+        template<bool align> void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            assert(width >= A + 1 && height >= A + 1);
+            height--;
+            width--;
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            __m256i index = _mm256_set1_epi8((char)currentIndex);
+            __m256i invalid = _mm256_set1_epi8((char)invalidIndex);
+            __m256i empty = _mm256_set1_epi8((char)emptyIndex);
+            __m256i threshold = _mm256_set1_epi8((char)differenceThreshold);
+
+            for(size_t parentRow = 0, childRow = 1; parentRow < height; ++parentRow, childRow += 2)
+            {
+                const uint8_t * parent0 = parent + parentRow*parentStride;
+                const uint8_t * parent1 = parent0 + parentStride;
+                const uint8_t * difference0 = difference + childRow*differenceStride;
+                const uint8_t * difference1 = difference0 + differenceStride;
+                uint8_t * child0 = child + childRow*childStride;
+                uint8_t * child1 = child0 + childStride;
+
+                for(size_t parentCol = 0, childCol = 1; parentCol < alignedWidth; parentCol += A, childCol += DA)
+                    SegmentationPropagate2x2<align>(parent0, parent1, parentCol, difference0, difference1, 
+                    child0, child1, childCol, index, invalid, empty, threshold);
+                if(alignedWidth != width)
+                    SegmentationPropagate2x2<false>(parent0, parent1, width - A, difference0, difference1, 
+                    child0, child1, (width - A)*2 + 1, index, invalid, empty, threshold);
+            }
+        }
+
+        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            if(Aligned(parent) && Aligned(parentStride))
+                SegmentationPropagate2x2<true>(parent, parentStride, width, height, child, childStride,
+                difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+            else
+                SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
+                difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
         }
 
         SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, __m256i index)

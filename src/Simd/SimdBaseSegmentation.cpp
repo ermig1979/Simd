@@ -63,6 +63,57 @@ namespace Simd
             }
         }
 
+        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+        {
+            assert(width >= 2 && height >= 2);
+
+            width--;
+            height--;
+            for(size_t parentRow = 0, childRow = 1; parentRow < height; ++parentRow, childRow += 2)
+            {
+                const uint8_t * parent0 = parent + parentRow*parentStride;
+                const uint8_t * parent1 = parent0 + parentStride;
+                const uint8_t * difference0 = difference + childRow*differenceStride;
+                const uint8_t * difference1 = difference0 + differenceStride;
+                uint8_t * child0 = child + childRow*childStride;
+                uint8_t * child1 = child0 + childStride;
+                for(size_t parentCol = 0, childCol = 1; parentCol < width; ++parentCol, childCol += 2)
+                {
+                    const bool parent00 = parent0[parentCol] == currentIndex;
+                    const bool parent01 = parent0[parentCol + 1] == currentIndex;
+                    const bool parent10 = parent1[parentCol] == currentIndex;
+                    const bool parent11 = parent1[parentCol + 1] == currentIndex;
+
+                    const bool parentOne = parent00 || parent01 || parent10 || parent11;
+                    const bool parentAll = parent00 && parent01 && parent10 && parent11;
+
+                    const bool difference00 = difference0[childCol] > differenceThreshold;
+                    const bool difference01 = difference0[childCol + 1] > differenceThreshold;
+                    const bool difference10 = difference1[childCol] > differenceThreshold;
+                    const bool difference11 = difference1[childCol + 1] > differenceThreshold;
+
+                    uint8_t & child00 = child0[childCol];
+                    uint8_t & child01 = child0[childCol + 1];
+                    uint8_t & child10 = child1[childCol];
+                    uint8_t & child11 = child1[childCol + 1];
+
+                    if(child00 < invalidIndex)
+                        child00 = parentAll || (parentOne && difference00) ? currentIndex : emptyIndex;
+
+                    if(child01 < invalidIndex)
+                        child01 = parentAll || (parentOne && difference01) ? currentIndex : emptyIndex;
+
+                    if(child10< invalidIndex)
+                        child10 = parentAll || (parentOne && difference10) ? currentIndex : emptyIndex;
+
+                    if(child11 < invalidIndex)
+                        child11 = parentAll || (parentOne && difference11) ? currentIndex : emptyIndex;
+                }
+            }
+        }
+
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {

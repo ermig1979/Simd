@@ -563,7 +563,7 @@ namespace Simd
 
     template<class A> SIMD_INLINE void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
     {
-        assert(mask.format == View<A>::Gray8 && mask.width > 2 && mask.height > 2);
+        assert(mask.format == View<A>::Gray8);
 
         SimdSegmentationChangeIndex(mask.data, mask.stride, mask.width, mask.height, oldIndex, newIndex);
     }
@@ -573,6 +573,16 @@ namespace Simd
         assert(mask.format == View<A>::Gray8 && mask.width > 2 && mask.height > 2);
 
         SimdSegmentationFillSingleHoles(mask.data, mask.stride, mask.width, mask.height, index);
+    }
+
+    template<class A> SIMD_INLINE void SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t thresholdDifference)
+    {
+        assert(parent.format == View<A>::Gray8 && parent.width >= 2 && parent.height >= 2);
+        assert((child.width + 1)/2 == parent.width && (child.height + 1)/2 == parent.height);
+        assert(Compatible(child, difference) && child.format == View<A>::Gray8);
+
+        SimdSegmentationPropagate2x2(parent.data, parent.stride, parent.width, parent.height, child.data, child.stride, 
+            difference.data, difference.stride, currentIndex, invalidIndex, emptyIndex, thresholdDifference);
     }
 
     template<class A> SIMD_INLINE void SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect)

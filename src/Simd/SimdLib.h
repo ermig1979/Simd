@@ -1614,6 +1614,31 @@ extern "C"
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
     /**
+    * \fn void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
+    *
+    * \short Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window. 
+    *
+    * For parent and child image must be performed: parentWidth = (childWidth + 1)/2, parentHeight = (childHeight + 1)/2.
+    * All images must have 8-bit gray pixel format. Size of different image is equal to child image.
+    *
+    * \param [in] parent - a pointer to pixels data of 8-bit gray parent mask image.
+    * \param [in] parentStride - a row size of the parent mask image.
+    * \param [in] width - a parent mask width.
+    * \param [in] height - a parent mask height.
+    * \param [in, out] child - a pointer to pixels data of 8-bit gray child mask image.
+    * \param [in] childStride - a row size of the child mask image.
+    * \param [in] difference - a pointer to pixels data of 8-bit gray difference image.
+    * \param [in] differenceStride - a row size of the difference image.
+    * \param [in] currentIndex - propagated mask index.
+    * \param [in] invalidIndex - invalid mask index.
+    * \param [in] emptyIndex - empty mask index.
+    * \param [in] differenceThreshold - a difference threshold for conditional index propagating.
+    */
+    SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+        uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+        uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
+
+    /**
     * \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
     *
     * \short Finds actual region of mask index location. 

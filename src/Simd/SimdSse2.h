@@ -195,6 +195,10 @@ namespace Simd
 
         void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
+        void SegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
+
         void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
