@@ -259,6 +259,91 @@ namespace Test
         return result;    
     }
 
+    namespace
+    {
+        struct FuncP
+        {
+            typedef void(*FuncPtr)(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+                uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+                uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
+            FuncPtr func;
+            std::string description;
+
+            FuncP(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & parrent, const View & childSrc, View & childDst, const View & difference, 
+                uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold) const
+            {
+                Simd::Copy(childSrc, childDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(parrent.data, parrent.stride, parrent.width, parrent.height, childDst.data, childDst.stride, 
+                    difference.data, difference.stride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+            }
+        };	
+    }
+
+#define FUNC_P(func) FuncP(func, #func)
+
+    bool SegmentationPropagate2x2AutoTest(int width, int height, const FuncP & f1, const FuncP & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
+
+        const uint8_t currentIndex = 3, invalidIndex = 2, emptyIndex = 0, differenceThreshold = 128;
+        View parent(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childSrc(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View difference(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst1(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst2(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandomMask(parent, currentIndex);
+        FillRandom(childSrc, 0, currentIndex - 1);
+        FillRandom(difference);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(parent, childSrc, childDst1, difference, currentIndex, invalidIndex, emptyIndex, differenceThreshold));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(parent, childSrc, childDst2, difference, currentIndex, invalidIndex, emptyIndex, differenceThreshold));
+
+        result = result && Compare(childDst1, childDst2, 0, true, 64);
+
+        return result;
+    }
+
+    bool SegmentationPropagate2x2AutoTest(const FuncP & f1, const FuncP & f2)
+    {
+        bool result = true;
+
+        result = result && SegmentationPropagate2x2AutoTest(W, H, f1, f2);
+        result = result && SegmentationPropagate2x2AutoTest(W + O, H - O, f1, f2);
+        result = result && SegmentationPropagate2x2AutoTest(W - O, H + O, f1, f2);
+
+        return result;    
+    }
+
+    bool SegmentationPropagate2x2AutoTest()
+    {
+        bool result = true;
+
+        result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Base::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sse2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Vsx::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#endif
+
+        return result;    
+    }
+
     //-----------------------------------------------------------------------
 
     bool SegmentationShrinkRegionDataTest(bool create, int width, int height, const FuncSR & f)
@@ -405,6 +490,64 @@ namespace Test
         bool result = true;
 
         result = result && SegmentationChangeIndexDataTest(create, DW, DH, FUNC_CI(SimdSegmentationChangeIndex));
+
+        return result;
+    }
+
+    bool SegmentationPropagate2x2DataTest(bool create, int width, int height, const FuncP & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        const uint8_t currentIndex = 3, invalidIndex = 2, emptyIndex = 0, differenceThreshold = 128;
+        View parent(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childSrc(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View difference(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst1(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst2(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint8_t oldIndex = 3, newIndex = 2;
+
+        if(create)
+        {
+            FillRandomMask(parent, currentIndex);
+            FillRandom(childSrc, 0, currentIndex - 1);
+            FillRandom(difference, 255);
+
+            TEST_SAVE(parent);
+            TEST_SAVE(childSrc);
+            TEST_SAVE(difference);
+
+            f.Call(parent, childSrc, childDst1, difference, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+
+            TEST_SAVE(childDst1);
+        }
+        else
+        {
+            TEST_LOAD(parent);
+            TEST_LOAD(childSrc);
+            TEST_LOAD(difference);
+
+            TEST_LOAD(childDst1);
+
+            f.Call(parent, childSrc, childDst2, difference, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+
+            TEST_SAVE(childDst2);
+
+            result = result && Compare(childDst1, childDst2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool SegmentationPropagate2x2DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SegmentationPropagate2x2DataTest(create, DW, DH, FUNC_P(SimdSegmentationPropagate2x2));
 
         return result;
     }

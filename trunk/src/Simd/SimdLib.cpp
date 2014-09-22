@@ -1434,6 +1434,32 @@ SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, siz
         Base::SegmentationFillSingleHoles(mask, stride, width, height, index);
 }
 
+SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
+                                           uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+                                           uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A + 1)
+        Avx2::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+        difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A + 1)
+        Sse2::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+        difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A + 1)
+        Vsx::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+        difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+    else
+#endif
+        Base::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+        difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+}
+
 SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                                            ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
 {
