@@ -136,7 +136,7 @@ namespace Simd
             uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
             uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
         {
-            assert(width >= A + 1 && height >= A + 1);
+            assert(width >= A + 1 && height >= 2);
             height--;
             width--;
 
