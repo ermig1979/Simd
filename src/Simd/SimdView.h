@@ -329,11 +329,13 @@ namespace Simd
 
     template <class A> template<class T> SIMD_INLINE const T & View<A>::At(size_t x, size_t y) const
     {
+        assert(x < width && y < height);
         return ((const T*)(data + y*stride))[x];
     }
 
     template <class A> template<class T> SIMD_INLINE T & View<A>::At(size_t x, size_t y)
     {
+        assert(x < width && y < height);
         return ((T*)(data + y*stride))[x];
     }
 
