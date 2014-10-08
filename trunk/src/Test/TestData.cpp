@@ -70,8 +70,16 @@ namespace Test
         try
         {
             ofs << size << std::endl;
-            for(size_t i = 0; i < size; ++i)
-                ofs << data[i] << " ";
+            if(sizeof(T) < sizeof(int))
+            {
+                for(size_t i = 0; i < size; ++i)
+                    ofs << (int)data[i] << " ";
+            }
+            else
+            {
+                for(size_t i = 0; i < size; ++i)
+                    ofs << data[i] << " ";
+            }
             ofs << std::endl;
         }
         catch (std::exception e)
@@ -104,8 +112,20 @@ namespace Test
             if(value != (uint64_t)size)
                 throw std::runtime_error("Invalid sums size!");
 
-            for(size_t i = 0; i < size; ++i)
-                ifs >> data[i];
+            if(sizeof(T) < sizeof(int))
+            {
+                int tmp;
+                for(size_t i = 0; i < size; ++i)
+                {
+                    ifs >> tmp;
+                    data[i] = (T)tmp;
+                }
+            }
+            else
+            {
+                for(size_t i = 0; i < size; ++i)
+                    ifs >> data[i];
+            }
         }
         catch (std::exception e)
         {
