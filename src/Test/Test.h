@@ -2,6 +2,7 @@
 * Simd Library Tests.
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
+*               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +50,8 @@ namespace Test
     bool BayerToBgrAutoTest();
 
     bool BayerToBgraAutoTest();
+
+	bool BgrToYuv420pAutoTest();
 
     bool BgraToBayerAutoTest();
 
@@ -191,6 +194,8 @@ namespace Test
     bool BayerToBgrDataTest(bool create);
 
     bool BayerToBgraDataTest(bool create);
+
+	bool BgrToYuv420pDataTest(bool create);
 
     bool BgraToBayerDataTest(bool create);
 

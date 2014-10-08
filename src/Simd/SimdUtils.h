@@ -2,6 +2,7 @@
 * Simd Library.
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
+*               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -153,6 +154,16 @@ namespace Simd
 
         SimdBayerToBgra(bayer.data, bayer.width, bayer.height, bayer.stride, (SimdPixelFormatType)bayer.format, bgra.data, bgra.stride, alpha);
     }
+
+	template<class A> SIMD_INLINE void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
+	{
+		assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
+		assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
+		assert(y.width == bgr.width && y.height == bgr.height);
+		assert(y.format == View<A>::Gray8 && bgr.format == View<A>::Bgr24);
+
+		SimdBgrToYuv420p(bgr.data, bgr.width, bgr.height, bgr.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
+	}
 
     template<class A> SIMD_INLINE void BgraToBayer(const View<A>& bgra, View<A>& bayer)
     {

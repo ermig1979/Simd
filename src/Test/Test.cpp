@@ -2,6 +2,7 @@
 * Simd Library Tests.
 *
 * Copyright (c) 2011-2014 Yermalayeu Ihar.
+*               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -100,6 +101,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BayerToBgrAutoTest);
 
     EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
+
+	EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
 
@@ -272,6 +275,8 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BayerToBgraDataTest);
 
+    EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
+
     EXECUTE_DATA_TEST(BgraToBayerDataTest);
 
     EXECUTE_DATA_TEST(BgraToBgrDataTest);
@@ -386,7 +391,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(Yuv420pToHueDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
-
+	
 end:
 
     return result ? 1 : 0;
@@ -395,7 +400,6 @@ end:
 int main(int argc, char* argv[])
 {
     Options options(argc, argv);
-
     if(options.type == Options::Auto)
         return ExecuteAutoTest(options);
     else
