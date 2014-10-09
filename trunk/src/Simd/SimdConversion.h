@@ -1,7 +1,7 @@
 /*
 * Simd Library.
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
 *               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -40,22 +40,22 @@ namespace Simd
                 RED_TO_GRAY_WEIGHT*red + BGR_TO_GRAY_ROUND_TERM) >> BGR_TO_GRAY_AVERAGING_SHIFT;
         }
 
-		SIMD_INLINE int BgrToYLuminance(int blue, int green, int red)
+		SIMD_INLINE int BgrToY(int blue, int green, int red)
 		{
-			return RestrictRange((B_TO_Y_WEIGHT*blue + G_TO_Y_WEIGHT*green + R_TO_Y_WEIGHT*red + Y_ADJUST*Y_ADJUST_WEIGHT
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT);
+			return RestrictRange(((B_TO_Y_WEIGHT*blue + G_TO_Y_WEIGHT*green + R_TO_Y_WEIGHT*red
+				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + Y_ADJUST);
 		}
 
-		SIMD_INLINE int BgrToUChrominance(int blue, int green, int red)
+		SIMD_INLINE int BgrToU(int blue, int green, int red)
 		{
-			return RestrictRange((B_TO_U_WEIGHT*blue + G_TO_U_WEIGHT*green + R_TO_U_WEIGHT*red + UV_ADJUST*UV_ADJUST_WEIGHT
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT);
+			return RestrictRange(((B_TO_U_WEIGHT*blue + G_TO_U_WEIGHT*green + R_TO_U_WEIGHT*red
+				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
 		}
 
-		SIMD_INLINE int BgrToVChrominance(int blue, int green, int red)
+		SIMD_INLINE int BgrToV(int blue, int green, int red)
 		{
-			return RestrictRange((B_TO_V_WEIGHT*blue + G_TO_V_WEIGHT*green + R_TO_V_WEIGHT*red + UV_ADJUST*UV_ADJUST_WEIGHT
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT);
+			return RestrictRange(((B_TO_V_WEIGHT*blue + G_TO_V_WEIGHT*green + R_TO_V_WEIGHT*red
+				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
 		}
 
         SIMD_INLINE int YuvToBlue(int y, int u)

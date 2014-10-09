@@ -1,7 +1,8 @@
 /*
 * Simd Library.
 *
-* Copyright (c) 2014-2014 Antonenka Mikhail.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
+*               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -28,21 +29,22 @@ namespace Simd
 {
 	namespace Base
 	{
-		SIMD_INLINE void BgrRowToYRow(const uint8_t * bgr, uint8_t * y)
+		SIMD_INLINE void BgrToYuv420p(const uint8_t * bgr0, size_t bgrStride, uint8_t * y0, size_t yStride, uint8_t * u, uint8_t * v)
 		{
-			y[0] = BgrToYLuminance(bgr[0], bgr[1], bgr[2]);
-			y[1] = BgrToYLuminance(bgr[3], bgr[4], bgr[5]);
-		}
+            const uint8_t * bgr1 = bgr0 + bgrStride;
+            uint8_t * y1 = y0 + yStride;
 
-		SIMD_INLINE void BgrUnitToYuv420p(const uint8_t * bgr, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, uint8_t * v)
-		{
-			//Bgr Unit to Y unit (unit consists of 2 rows by 2 pixels: 2x2 = 4pixels)
-			BgrRowToYRow(bgr, y);
-			BgrRowToYRow(bgr + bgrStride, y + yStride);
+            y0[0] = BgrToY(bgr0[0], bgr0[1], bgr0[2]);
+            y0[1] = BgrToY(bgr0[3], bgr0[4], bgr0[5]);
+            y1[0] = BgrToY(bgr1[0], bgr1[1], bgr1[2]);
+            y1[1] = BgrToY(bgr1[3], bgr1[4], bgr1[5]);
 
-			//filling U and V planes based on left upper pixel Rgb, rather then averaging all pixels in current unit
-			u[0] = BgrToUChrominance(bgr[0], bgr[1], bgr[2]);
-			v[0] = BgrToVChrominance(bgr[0], bgr[1], bgr[2]);
+            int blue = Average(bgr0[0], bgr0[3], bgr1[0], bgr1[3]);
+            int green = Average(bgr0[1], bgr0[4], bgr1[1], bgr1[4]);
+            int red = Average(bgr0[2], bgr0[5], bgr1[2], bgr1[5]);
+
+			u[0] = BgrToU(blue, green, red);
+			v[0] = BgrToV(blue, green, red);
 		}
 
 		void BgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
@@ -54,7 +56,7 @@ namespace Simd
 			{
 				for(size_t colUV = 0, colY = 0, colBgr = 0; colY < width; colY += 2, colUV++, colBgr += 6)
 				{
-					BgrUnitToYuv420p(bgr + colBgr, bgrStride, y + colY, yStride, u + colUV, v + colUV);
+					BgrToYuv420p(bgr + colBgr, bgrStride, y + colY, yStride, u + colUV, v + colUV);
 				}
 				y += 2*yStride;
 				u += uStride;

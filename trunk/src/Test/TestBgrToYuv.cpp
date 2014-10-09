@@ -1,7 +1,7 @@
 /*
 * Simd Library Tests.
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
 *               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -51,14 +51,14 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool BgrToYuv420pAutoTest(int width, int height, const Func & f1, const Func & f2)
+	bool BgrToYuvAutoTest(int width, int height, const Func & f1, const Func & f2, bool is420)
 	{
 		bool result = true;
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		const int uvWidth = width/2;
-		const int uvHeight = height/2;
+        const int uvWidth = is420 ? width/2 : width;
+        const int uvHeight = is420 ? height/2 : height;
 
 		View bgr(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
 		FillRandom(bgr);
@@ -81,15 +81,15 @@ namespace Test
 		return result;
 	}
 
-	bool BgrToYuv420pAutoTest(const Func & f1, const Func & f2)
+	bool BgrToYuvAutoTest(const Func & f1, const Func & f2, bool is420)
 	{
 		bool result = true;
 
-		int step = E;
+        int step = is420 ? E : O;
 		
-		result = result && BgrToYuv420pAutoTest(W, H, f1, f2);
-		result = result && BgrToYuv420pAutoTest(W + step, H - step, f1, f2);
-		result = result && BgrToYuv420pAutoTest(W - step, H + step, f1, f2);
+		result = result && BgrToYuvAutoTest(W, H, f1, f2, is420);
+		result = result && BgrToYuvAutoTest(W + step, H - step, f1, f2, is420);
+		result = result && BgrToYuvAutoTest(W - step, H + step, f1, f2, is420);
 		
 		return result;
 	}
@@ -98,14 +98,14 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BgrToYuv420pAutoTest(FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+		result = result && BgrToYuvAutoTest(FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p), true);
 
 		return result;
 	}
 
 	//-----------------------------------------------------------------------
 
-	bool BgrToYuv420pDataTest(bool create, int width, int height, const Func & f)
+	bool BgrToYuvDataTest(bool create, int width, int height, const Func & f, bool is420)
 	{
 		bool result = true;
 
@@ -113,8 +113,8 @@ namespace Test
 
 		std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
 
-		const int uvWidth = width/2;
-		const int uvHeight = height/2;
+        const int uvWidth = is420 ? width/2 : width;
+        const int uvHeight = is420 ? height/2 : height;
 
 		View bgr(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
 
@@ -164,7 +164,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && BgrToYuv420pDataTest(create, DW, DH, FUNC(SimdBgrToYuv420p));
+		result = result && BgrToYuvDataTest(create, DW, DH, FUNC(SimdBgrToYuv420p), true);
 
 		return result;
 	}
