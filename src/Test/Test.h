@@ -1,7 +1,7 @@
 /*
 * Simd Library Tests.
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
 *               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -51,8 +51,6 @@ namespace Test
 
     bool BayerToBgraAutoTest();
 
-	bool BgrToYuv420pAutoTest();
-
     bool BgraToBayerAutoTest();
 
     bool BgraToBgrAutoTest();
@@ -65,6 +63,8 @@ namespace Test
     bool Bgr48pToBgra32AutoTest();
 
     bool BgrToGrayAutoTest();
+
+    bool BgrToYuv420pAutoTest();
 
     bool BinarizationAutoTest();
     bool AveragingBinarizationAutoTest();
@@ -195,8 +195,6 @@ namespace Test
 
     bool BayerToBgraDataTest(bool create);
 
-	bool BgrToYuv420pDataTest(bool create);
-
     bool BgraToBayerDataTest(bool create);
 
     bool BgraToBgrDataTest(bool create);
@@ -209,6 +207,8 @@ namespace Test
     bool Bgr48pToBgra32DataTest(bool create);
 
     bool BgrToGrayDataTest(bool create);
+
+    bool BgrToYuv420pDataTest(bool create);
 
     bool BinarizationDataTest(bool create);
     bool AveragingBinarizationDataTest(bool create);

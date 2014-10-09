@@ -1,7 +1,7 @@
 /*
 * Simd Library.
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
 *               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -62,8 +62,6 @@ namespace Simd
 
 		const int BGR_TO_YUV_AVERAGING_SHIFT = 14;
 		const int BGR_TO_YUV_ROUND_TERM = 1 << (BGR_TO_YUV_AVERAGING_SHIFT - 1);
-		const int Y_ADJUST_WEIGHT = 1 << BGR_TO_YUV_AVERAGING_SHIFT;
-		const int UV_ADJUST_WEIGHT = Y_ADJUST_WEIGHT;
 		const int B_TO_Y_WEIGHT = int(0.098*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
 		const int G_TO_Y_WEIGHT = int(0.504*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
 		const int R_TO_Y_WEIGHT = int(0.257*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);

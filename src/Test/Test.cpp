@@ -1,7 +1,7 @@
 /*
 * Simd Library Tests.
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar.
+* Copyright (c) 2011-2014 Yermalayeu Ihar,
 *               2014-2014 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -102,8 +102,6 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
 
-	EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
-
     EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
@@ -116,6 +114,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
 
     EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
+
+    EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
 
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
     EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
@@ -275,8 +275,6 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BayerToBgraDataTest);
 
-    EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
-
     EXECUTE_DATA_TEST(BgraToBayerDataTest);
 
     EXECUTE_DATA_TEST(BgraToBgrDataTest);
@@ -289,6 +287,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(Bgr48pToBgra32DataTest);
 
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
+
+    EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
 
     EXECUTE_DATA_TEST(BinarizationDataTest);
     EXECUTE_DATA_TEST(AveragingBinarizationDataTest);

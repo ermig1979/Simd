@@ -133,7 +133,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseInterference.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv420p.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
   </ItemGroup>
