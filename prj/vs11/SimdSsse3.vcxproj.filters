@@ -65,5 +65,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToBayer.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToYuv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

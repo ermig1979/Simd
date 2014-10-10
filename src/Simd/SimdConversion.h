@@ -42,20 +42,20 @@ namespace Simd
 
 		SIMD_INLINE int BgrToY(int blue, int green, int red)
 		{
-			return RestrictRange(((B_TO_Y_WEIGHT*blue + G_TO_Y_WEIGHT*green + R_TO_Y_WEIGHT*red
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + Y_ADJUST);
+			return RestrictRange(((BLUE_TO_Y_WEIGHT*blue + GREEN_TO_Y_WEIGHT*green + RED_TO_Y_WEIGHT*red + 
+				BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + Y_ADJUST);
 		}
 
 		SIMD_INLINE int BgrToU(int blue, int green, int red)
 		{
-			return RestrictRange(((B_TO_U_WEIGHT*blue + G_TO_U_WEIGHT*green + R_TO_U_WEIGHT*red
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
+			return RestrictRange(((BLUE_TO_U_WEIGHT*blue + GREEN_TO_U_WEIGHT*green + RED_TO_U_WEIGHT*red + 
+				BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
 		}
 
 		SIMD_INLINE int BgrToV(int blue, int green, int red)
 		{
-			return RestrictRange(((B_TO_V_WEIGHT*blue + G_TO_V_WEIGHT*green + R_TO_V_WEIGHT*red
-				+ BGR_TO_YUV_ROUND_TERM ) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
+			return RestrictRange(((BLUE_TO_V_WEIGHT*blue + GREEN_TO_V_WEIGHT*green + RED_TO_V_WEIGHT*red + 
+				BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
 		}
 
         SIMD_INLINE int YuvToBlue(int y, int u)
@@ -280,6 +280,65 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
+        SIMD_INLINE __m128i BgrToY32(__m128i b16_r16, __m128i g16_1)
+        {
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, K16_BY_RY), 
+                _mm_madd_epi16(g16_1, K16_GY_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m128i BgrToY16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            return SaturateI16ToU8(_mm_add_epi16(K16_Y_ADJUST, _mm_packs_epi32(
+                BgrToY32(_mm_unpacklo_epi16(b16, r16), _mm_unpacklo_epi16(g16, K16_0001)), 
+                BgrToY32(_mm_unpackhi_epi16(b16, r16), _mm_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m128i BgrToY8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToY16(_mm_unpacklo_epi8(b8, K_ZERO), _mm_unpacklo_epi8(g8, K_ZERO), _mm_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToY16(_mm_unpackhi_epi8(b8, K_ZERO), _mm_unpackhi_epi8(g8, K_ZERO), _mm_unpackhi_epi8(r8, K_ZERO)));
+        }
+
+        SIMD_INLINE __m128i BgrToU32(__m128i b16_r16, __m128i g16_1)
+        {
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, K16_BU_RU), 
+                _mm_madd_epi16(g16_1, K16_GU_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m128i BgrToU16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            return SaturateI16ToU8(_mm_add_epi16(K16_UV_ADJUST, _mm_packs_epi32(
+                BgrToU32(_mm_unpacklo_epi16(b16, r16), _mm_unpacklo_epi16(g16, K16_0001)), 
+                BgrToU32(_mm_unpackhi_epi16(b16, r16), _mm_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m128i BgrToU8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToU16(_mm_unpacklo_epi8(b8, K_ZERO), _mm_unpacklo_epi8(g8, K_ZERO), _mm_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToU16(_mm_unpackhi_epi8(b8, K_ZERO), _mm_unpackhi_epi8(g8, K_ZERO), _mm_unpackhi_epi8(r8, K_ZERO)));
+        }
+
+        SIMD_INLINE __m128i BgrToV32(__m128i b16_r16, __m128i g16_1)
+        {
+            return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(b16_r16, K16_BV_RV), 
+                _mm_madd_epi16(g16_1, K16_GV_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m128i BgrToV16(__m128i b16, __m128i g16, __m128i r16)
+        {
+            return SaturateI16ToU8(_mm_add_epi16(K16_UV_ADJUST, _mm_packs_epi32(
+                BgrToV32(_mm_unpacklo_epi16(b16, r16), _mm_unpacklo_epi16(g16, K16_0001)), 
+                BgrToV32(_mm_unpackhi_epi16(b16, r16), _mm_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m128i BgrToV8(__m128i b8, __m128i g8, __m128i r8)
+        {
+            return _mm_packus_epi16(
+                BgrToV16(_mm_unpacklo_epi8(b8, K_ZERO), _mm_unpacklo_epi8(g8, K_ZERO), _mm_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToV16(_mm_unpackhi_epi8(b8, K_ZERO), _mm_unpackhi_epi8(g8, K_ZERO), _mm_unpackhi_epi8(r8, K_ZERO)));
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -310,7 +369,31 @@ namespace Simd
                 _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR2), 
                 _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR2), 
                 _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR2)));
-        }	
+        }
+
+        SIMD_INLINE __m128i BgrToBlue(__m128i bgr[3])
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_BLUE), 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_BLUE), 
+                _mm_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_BLUE)));
+        }
+
+        SIMD_INLINE __m128i BgrToGreen(__m128i bgr[3])
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_GREEN), 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_GREEN), 
+                _mm_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_GREEN)));
+        }
+
+        SIMD_INLINE __m128i BgrToRed(__m128i bgr[3])
+        {
+            return 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_RED), 
+                _mm_or_si128(_mm_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_RED), 
+                _mm_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_RED)));
+        }
 	}
 #endif//SIMD_SSSE3_ENABLE
 
@@ -401,6 +484,66 @@ namespace Simd
             return _mm256_packus_epi16(lo, hi);
         }
 
+        SIMD_INLINE __m256i BgrToY32(__m256i b16_r16, __m256i g16_1)
+        {
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, K16_BY_RY), 
+                _mm256_madd_epi16(g16_1, K16_GY_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m256i BgrToY16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            return SaturateI16ToU8(_mm256_add_epi16(K16_Y_ADJUST, _mm256_packs_epi32(
+                BgrToY32(_mm256_unpacklo_epi16(b16, r16), _mm256_unpacklo_epi16(g16, K16_0001)), 
+                BgrToY32(_mm256_unpackhi_epi16(b16, r16), _mm256_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m256i BgrToY8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToY16(_mm256_unpacklo_epi8(b8, K_ZERO), _mm256_unpacklo_epi8(g8, K_ZERO), _mm256_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToY16(_mm256_unpackhi_epi8(b8, K_ZERO), _mm256_unpackhi_epi8(g8, K_ZERO), _mm256_unpackhi_epi8(r8, K_ZERO)));
+        }
+
+        SIMD_INLINE __m256i BgrToU32(__m256i b16_r16, __m256i g16_1)
+        {
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, K16_BU_RU), 
+                _mm256_madd_epi16(g16_1, K16_GU_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m256i BgrToU16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            return SaturateI16ToU8(_mm256_add_epi16(K16_UV_ADJUST, _mm256_packs_epi32(
+                BgrToU32(_mm256_unpacklo_epi16(b16, r16), _mm256_unpacklo_epi16(g16, K16_0001)), 
+                BgrToU32(_mm256_unpackhi_epi16(b16, r16), _mm256_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m256i BgrToU8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToU16(_mm256_unpacklo_epi8(b8, K_ZERO), _mm256_unpacklo_epi8(g8, K_ZERO), _mm256_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToU16(_mm256_unpackhi_epi8(b8, K_ZERO), _mm256_unpackhi_epi8(g8, K_ZERO), _mm256_unpackhi_epi8(r8, K_ZERO)));
+        }
+
+        SIMD_INLINE __m256i BgrToV32(__m256i b16_r16, __m256i g16_1)
+        {
+            return _mm256_srai_epi32(_mm256_add_epi32(_mm256_madd_epi16(b16_r16, K16_BV_RV), 
+                _mm256_madd_epi16(g16_1, K16_GV_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m256i BgrToV16(__m256i b16, __m256i g16, __m256i r16)
+        {
+            return SaturateI16ToU8(_mm256_add_epi16(K16_UV_ADJUST, _mm256_packs_epi32(
+                BgrToV32(_mm256_unpacklo_epi16(b16, r16), _mm256_unpacklo_epi16(g16, K16_0001)), 
+                BgrToV32(_mm256_unpackhi_epi16(b16, r16), _mm256_unpackhi_epi16(g16, K16_0001)))));
+        }
+
+        SIMD_INLINE __m256i BgrToV8(__m256i b8, __m256i g8, __m256i r8)
+        {
+            return _mm256_packus_epi16(
+                BgrToV16(_mm256_unpacklo_epi8(b8, K_ZERO), _mm256_unpacklo_epi8(g8, K_ZERO), _mm256_unpacklo_epi8(r8, K_ZERO)), 
+                BgrToV16(_mm256_unpackhi_epi8(b8, K_ZERO), _mm256_unpackhi_epi8(g8, K_ZERO), _mm256_unpackhi_epi8(r8, K_ZERO)));
+        }
+
         template <int index> __m256i GrayToBgr(__m256i gray);
 
         template<> SIMD_INLINE __m256i GrayToBgr<0>(__m256i gray)
@@ -442,6 +585,36 @@ namespace Simd
                 _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0xEE), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR2), 
                 _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0xEE), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR2), 
                 _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0xEE), K8_SHUFFLE_PERMUTED_RED_TO_BGR2)));
+        }
+
+        SIMD_INLINE __m256i BgrToBlue(__m256i bgr[3])
+        {
+            __m256i b0 = _mm256_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_BLUE);
+            __m256i b2 = _mm256_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_BLUE);
+            return 
+                _mm256_or_si256(_mm256_permute2x128_si256(b0, b2, 0x20), 
+                _mm256_or_si256(_mm256_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_BLUE), 
+                _mm256_permute2x128_si256(b0, b2, 0x31)));
+        }
+
+        SIMD_INLINE __m256i BgrToGreen(__m256i bgr[3])
+        {
+            __m256i g0 = _mm256_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_GREEN);
+            __m256i g2 = _mm256_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_GREEN);
+            return 
+                _mm256_or_si256(_mm256_permute2x128_si256(g0, g2, 0x20), 
+                _mm256_or_si256(_mm256_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_GREEN), 
+                _mm256_permute2x128_si256(g0, g2, 0x31)));
+        }
+
+        SIMD_INLINE __m256i BgrToRed(__m256i bgr[3])
+        {
+            __m256i r0 = _mm256_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_RED);
+            __m256i r2 = _mm256_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_RED);
+            return 
+                _mm256_or_si256(_mm256_permute2x128_si256(r0, r2, 0x20), 
+                _mm256_or_si256(_mm256_shuffle_epi8(bgr[1], K8_SHUFFLE_BGR1_TO_RED), 
+                _mm256_permute2x128_si256(r0, r2, 0x31)));
         }
     }
 #endif// SIMD_AVX2_ENABLE
@@ -516,6 +689,63 @@ namespace Simd
             return vec_pack(lo, hi);
         }
 
+        SIMD_INLINE v128_s32 BgrToY(v128_s16 b_r, v128_s16 g_1)
+        {
+            return vec_sra(vec_msum(b_r, K16_BY_RY, vec_msum(g_1, K16_GY_RT, (v128_s32)K32_00000000)), K32_BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 BgrToY(v128_s16 b, v128_s16 g, v128_s16 r)
+        {
+            return SaturateI16ToU8(vec_add((v128_s16)K16_Y_ADJUST, vec_pack(
+                BgrToY((v128_s16)UnpackLoU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackLoU16(K16_0001, (v128_u16)g)), 
+                BgrToY((v128_s16)UnpackHiU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackHiU16(K16_0001, (v128_u16)g)))));
+        }
+
+        SIMD_INLINE v128_u8 BgrToY(v128_u8 b, v128_u8 g, v128_u8 r)
+        {
+            return vec_pack(
+                BgrToY((v128_s16)UnpackLoU8(b), (v128_s16)UnpackLoU8(g), (v128_s16)UnpackLoU8(r)), 
+                BgrToY((v128_s16)UnpackHiU8(b), (v128_s16)UnpackHiU8(g), (v128_s16)UnpackHiU8(r)));
+        }
+
+        SIMD_INLINE v128_s32 BgrToU(v128_s16 b_r, v128_s16 g_1)
+        {
+            return vec_sra(vec_msum(b_r, K16_BU_RU, vec_msum(g_1, K16_GU_RT, (v128_s32)K32_00000000)), K32_BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 BgrToU(v128_s16 b, v128_s16 g, v128_s16 r)
+        {
+            return SaturateI16ToU8(vec_add((v128_s16)K16_UV_ADJUST, vec_pack(
+                BgrToU((v128_s16)UnpackLoU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackLoU16(K16_0001, (v128_u16)g)), 
+                BgrToU((v128_s16)UnpackHiU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackHiU16(K16_0001, (v128_u16)g)))));
+        }
+
+        SIMD_INLINE v128_u8 BgrToU(v128_u8 b, v128_u8 g, v128_u8 r)
+        {
+            return vec_pack(
+                BgrToU((v128_s16)UnpackLoU8(b), (v128_s16)UnpackLoU8(g), (v128_s16)UnpackLoU8(r)), 
+                BgrToU((v128_s16)UnpackHiU8(b), (v128_s16)UnpackHiU8(g), (v128_s16)UnpackHiU8(r)));
+        }
+
+        SIMD_INLINE v128_s32 BgrToV(v128_s16 b_r, v128_s16 g_1)
+        {
+            return vec_sra(vec_msum(b_r, K16_BV_RV, vec_msum(g_1, K16_GV_RT, (v128_s32)K32_00000000)), K32_BGR_TO_YUV_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE v128_u16 BgrToV(v128_s16 b, v128_s16 g, v128_s16 r)
+        {
+            return SaturateI16ToU8(vec_add((v128_s16)K16_UV_ADJUST, vec_pack(
+                BgrToV((v128_s16)UnpackLoU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackLoU16(K16_0001, (v128_u16)g)), 
+                BgrToV((v128_s16)UnpackHiU16((v128_u16)r, (v128_u16)b), (v128_s16)UnpackHiU16(K16_0001, (v128_u16)g)))));
+        }
+
+        SIMD_INLINE v128_u8 BgrToV(v128_u8 b, v128_u8 g, v128_u8 r)
+        {
+            return vec_pack(
+                BgrToV((v128_s16)UnpackLoU8(b), (v128_s16)UnpackLoU8(g), (v128_s16)UnpackLoU8(r)), 
+                BgrToV((v128_s16)UnpackHiU8(b), (v128_s16)UnpackHiU8(g), (v128_s16)UnpackHiU8(r)));
+        }
+
         template <int index> v128_u8 InterleaveBgr(v128_u8 blue, v128_u8 green, v128_u8 red);
 
         template<> SIMD_INLINE v128_u8 InterleaveBgr<0>(v128_u8 blue, v128_u8 green, v128_u8 red)
@@ -531,6 +761,21 @@ namespace Simd
         template<> SIMD_INLINE v128_u8 InterleaveBgr<2>(v128_u8 blue, v128_u8 green, v128_u8 red)
         {
             return vec_perm(vec_perm(blue, green, K8_PERM_INTERLEAVE_BGR_20), red, K8_PERM_INTERLEAVE_BGR_21);
+        }
+
+        SIMD_INLINE v128_u8 BgrToBlue(v128_u8 bgr[3])
+        {
+            return vec_perm(vec_perm(bgr[0], bgr[1], K8_PERM_BGR_TO_BLUE_0), bgr[2], K8_PERM_BGR_TO_BLUE_1);
+        }
+
+        SIMD_INLINE v128_u8 BgrToGreen(v128_u8 bgr[3])
+        {
+            return vec_perm(vec_perm(bgr[0], bgr[1], K8_PERM_BGR_TO_GREEN_0), bgr[2], K8_PERM_BGR_TO_GREEN_1);
+        }
+
+        SIMD_INLINE v128_u8 BgrToRed(v128_u8 bgr[3])
+        {
+            return vec_perm(vec_perm(bgr[0], bgr[1], K8_PERM_BGR_TO_RED_0), bgr[2], K8_PERM_BGR_TO_RED_1);
         }
     }
 #endif// SIMD_VSX_ENABLE

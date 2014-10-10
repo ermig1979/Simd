@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Binarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2DeinterleaveUv.cpp" />

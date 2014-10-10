@@ -74,9 +74,9 @@ namespace Test
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgr, y1, u1, v1));
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bgr, y2, u2, v2));
 
-		result = result && Compare(y1, y2, 0, true, 64);
-		result = result && Compare(u1, u2, 0, true, 64);
-		result = result && Compare(v1, v2, 0, true, 64);
+		result = result && Compare(y1, y2, 0, true, 64, 0, "y");
+		result = result && Compare(u1, u2, 0, true, 64, 0, "u");
+		result = result && Compare(v1, v2, 0, true, 64, 0, "v");
 
 		return result;
 	}
@@ -99,6 +99,21 @@ namespace Test
 		bool result = true;
 
 		result = result && BgrToYuvAutoTest(FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p), true);
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Ssse3::BgrToYuv420p), FUNC(SimdBgrToYuv420p), true);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Avx2::BgrToYuv420p), FUNC(SimdBgrToYuv420p), true);
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Vsx::BgrToYuv420p), FUNC(SimdBgrToYuv420p), true);
+#endif
 
 		return result;
 	}
@@ -152,9 +167,9 @@ namespace Test
 			TEST_SAVE(u2);
 			TEST_SAVE(v2);
 
-			result = result && Compare(y1, y2, 0, true, 64);
-			result = result && Compare(u1, u2, 0, true, 64);
-			result = result && Compare(v1, v2, 0, true, 64);
+            result = result && Compare(y1, y2, 0, true, 64, 0, "y");
+            result = result && Compare(u1, u2, 0, true, 64, 0, "u");
+            result = result && Compare(v1, v2, 0, true, 64, 0, "v");
 		}
 
 		return result;
