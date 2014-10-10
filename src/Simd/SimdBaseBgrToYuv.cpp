@@ -64,5 +64,27 @@ namespace Simd
 				bgr += 2*bgrStride;
 			}
 		}
+
+        SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
+        {
+            const int blue = bgr[0], green = bgr[1], red = bgr[2];
+            y[0] = BgrToY(blue, green, red);
+            u[0] = BgrToU(blue, green, red);
+            v[0] = BgrToV(blue, green, red);
+        }
+
+        void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t col = 0, colBgr = 0; col < width; ++col, colBgr += 3)
+                    BgrToYuv444p(bgr + colBgr, y + col, u + col, v + col);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
 	}
 }

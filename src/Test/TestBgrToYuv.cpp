@@ -118,6 +118,30 @@ namespace Test
 		return result;
 	}
 
+    bool BgrToYuv444pAutoTest()
+    {
+        bool result = true;
+
+        result = result && BgrToYuvAutoTest(FUNC(Simd::Base::BgrToYuv444p), FUNC(SimdBgrToYuv444p), false);
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Ssse3::BgrToYuv444p), FUNC(SimdBgrToYuv444p), false);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Avx2::BgrToYuv444p), FUNC(SimdBgrToYuv444p), false);
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && BgrToYuvAutoTest(FUNC(Simd::Vsx::BgrToYuv444p), FUNC(SimdBgrToYuv444p), false);
+#endif
+
+        return result;
+    }
+
 	//-----------------------------------------------------------------------
 
 	bool BgrToYuvDataTest(bool create, int width, int height, const Func & f, bool is420)
@@ -183,4 +207,13 @@ namespace Test
 
 		return result;
 	}
+
+    bool BgrToYuv444pDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && BgrToYuvDataTest(create, DW, DH, FUNC(SimdBgrToYuv444p), false);
+
+        return result;
+    }
 }
