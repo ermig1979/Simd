@@ -81,19 +81,17 @@ namespace Simd
                     Yuv420pToBgr<align, false>(y + colY, _u, _v, _bgr0);
                     Yuv420pToBgr<align, false>(y + colY + yStride, _u, _v, _bgr1);
                 }
-                _bgr0.Flush();
-                _bgr1.Flush();
+                Flush(_bgr0, _bgr1);
 
                 if(tail)
                 {
-                   size_t offset = width - DA;
+                    size_t offset = width - DA;
                     Storer<false> _bgr0(bgr + 3*offset), _bgr1(bgr + 3*offset + bgrStride);
                     v128_u8 _u = Load<false>(u + offset/2);
                     v128_u8 _v = Load<false>(v + offset/2);
                     Yuv420pToBgr<false, true>(y + offset, _u, _v, _bgr0);
                     Yuv420pToBgr<false, true>(y + offset + yStride, _u, _v, _bgr1);
-                    _bgr0.Flush();
-                    _bgr1.Flush();
+                    Flush(_bgr0, _bgr1);
                 }
                 y += 2*yStride;
                 u += uStride;
@@ -137,13 +135,13 @@ namespace Simd
                 Yuv444pToBgr<align, true>(y, u, v, _bgr);
                 for(size_t col = A; col < bodyWidth; col += A)
                     Yuv444pToBgr<align, false>(y + col, u + col, v + col, _bgr);
-                _bgr.Flush();
+                Flush(_bgr);
                 if(tail)
                 {
                     size_t col = width - A;
                     Storer<false> _bgr(bgr + 3*col);
                     Yuv444pToBgr<false, true>(y + col, u + col, v + col, _bgr);
-                    _bgr.Flush();
+                    Flush(_bgr);
                 }
                 y += yStride;
                 u += uStride;

@@ -67,14 +67,14 @@ namespace Simd
                 BgraToBgr<align, true>(_bgra, _bgr);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BgraToBgr<align, false>(_bgra, _bgr);
-                _bgr.Flush();
+                Flush(_bgr);
 
                 if(width != alignedWidth)
                 {
                     Loader<false> _bgra(bgra + 4*(width - A));
                     Storer<false> _bgr(bgr + 3*(width - A));
                     BgraToBgr<false, true>(_bgra, _bgr);
-                    _bgr.Flush();
+                    Flush(_bgr);
                 }
 
                 bgra += bgraStride;

@@ -67,14 +67,14 @@ namespace Simd
                 GrayToBgra<align, true>(_gray, _alpha, _bgra);
                 for(size_t col = A; col < alignedWidth; col += A)
                     GrayToBgra<align, false>(_gray, _alpha, _bgra);
-                _bgra.Flush();
+                Flush(_bgra);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _gray(gray + width - A);
                     Storer<false> _bgra(bgra + 4*(width - A));
                     GrayToBgra<false, true>(_gray, _alpha, _bgra);
-                    _bgra.Flush();
+                    Flush(_bgra);
                 }
 
                 gray += grayStride;

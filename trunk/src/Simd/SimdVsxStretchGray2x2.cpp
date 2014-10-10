@@ -66,15 +66,13 @@ namespace Simd
                 StretchGray2x2<align, true>(src, even, odd);
                 for(size_t col = A; col < alignedWidth; col += A)
                     StretchGray2x2<align, false>(src + col, even, odd);
-                even.Flush();
-                odd.Flush();
+                Flush(even, odd);
 
                 if(alignedWidth != srcWidth)
                 {
                     Storer<false> even(dst + dstWidth - 2*A), odd(dst + dstStride + dstWidth - 2*A);
                     StretchGray2x2<false, true>(src + srcWidth - A, even, odd);
-                    even.Flush();
-                    odd.Flush();
+                    Flush(even, odd);
                 }
                 src += srcStride;
                 dst += 2*dstStride;

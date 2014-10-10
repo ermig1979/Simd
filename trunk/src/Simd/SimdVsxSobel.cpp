@@ -101,7 +101,7 @@ namespace Simd
                     LoadBody3<align, 1>(src2 + col, a[2]);
                     SobelDx<align, false, abs>(a, _dst);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 {
                     Storer<false> _dst(dst + width - A);
@@ -109,7 +109,7 @@ namespace Simd
                     LoadTail3<false, 1>(src1 + width - A, a[1]);
                     LoadTail3<false, 1>(src2 + width - A, a[2]);
                     SobelDx<false, true, abs>(a, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 dst += dstStride;
@@ -186,14 +186,14 @@ namespace Simd
                     LoadBody3<align, 1>(src2 + col, a[2]);
                     SobelDy<align, false, abs>(a, _dst);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 {
                     Storer<false> _dst(dst + width - A);
                     LoadTail3<false, 1>(src0 + width - A, a[0]);
                     LoadTail3<false, 1>(src2 + width - A, a[2]);
                     SobelDy<false, true, abs>(a, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 dst += dstStride;
@@ -274,7 +274,7 @@ namespace Simd
                     LoadBody3<align, 1>(src2 + col, a[2]);
                     ContourMetrics<align, false>(a, _dst);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 {
                     Storer<false> _dst(dst + width - A);
@@ -282,7 +282,7 @@ namespace Simd
                     LoadTail3<false, 1>(src1 + width - A, a[1]);
                     LoadTail3<false, 1>(src2 + width - A, a[2]);
                     ContourMetrics<false, true>(a, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                }
 
                 dst += dstStride;
@@ -342,7 +342,7 @@ namespace Simd
                     LoadBody3<align, 1>(src2 + col, a[2]);
                     ContourMetricsMasked<align, false>(a, mask + col, _indexMin, _dst);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 {
                     Storer<false> _dst(dst + width - A);
@@ -350,7 +350,7 @@ namespace Simd
                     LoadTail3<false, 1>(src1 + width - A, a[1]);
                     LoadTail3<false, 1>(src2 + width - A, a[2]);
                     ContourMetricsMasked<false, true>(a, mask + width - A, _indexMin, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 dst += dstStride;
@@ -423,7 +423,7 @@ namespace Simd
                     Anchor<align, true>(src + A, srcStride, _threshold, _dst);
                     for(size_t col = DA; col < bodyWidth; col += A)
                         Anchor<align, false>(src + col, srcStride, _threshold, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
                 Anchor<false>(src + width - A - 1, srcStride, _threshold, dst + width - A - 1);
                 dst[width - 1] = 0;

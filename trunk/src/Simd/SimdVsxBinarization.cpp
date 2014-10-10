@@ -63,14 +63,14 @@ namespace Simd
                 Binarization<align, true, compareType>(_src, _value, _positive, _negative, _dst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     Binarization<align, false, compareType>(_src, _value, _positive, _negative, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _src(src + width - A);
                     Storer<false> _dst(dst + width - A);
                     Binarization<false, true, compareType>(_src, _value, _positive, _negative, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
 
                 }
                 src += srcStride;
@@ -189,13 +189,13 @@ namespace Simd
                 AddRows<align, true, true, compareType>(_src, _value, K8_01, saSrc, saDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     AddRows<align, true, false, compareType>(_src, _value, K8_01, saSrc, saDst);
-                saDst.Flush();
+                Flush(saDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> _src(s + width - A), saSrc(buffer.sa + width - A);
                     Storer<false> saDst(buffer.sa + width - A);
                     AddRows<false, false, true, compareType>(_src, _value, tailMask, saSrc, saDst);
-                    saDst.Flush();
+                    Flush(saDst);
                 }
             }
 
@@ -210,13 +210,13 @@ namespace Simd
                     AddRows<align, true, true, compareType>(_src, _value, K8_01, saSrc, saDst);
                     for(size_t col = A; col < alignedWidth; col += A)
                         AddRows<align, true, false, compareType>(_src, _value, K8_01, saSrc, saDst);
-                    saDst.Flush();
+                    Flush(saDst);
                     if(alignedWidth != width)
                     {
                         Loader<false> _src(s + width - A), saSrc(buffer.sa + width - A);
                         Storer<false> saDst(buffer.sa + width - A);
                         AddRows<false, false, true, compareType>(_src, _value, tailMask, saSrc, saDst);
-                        saDst.Flush();
+                        Flush(saDst);
                     }                
                 }
                 if(row > neighborhood)
@@ -228,13 +228,13 @@ namespace Simd
                     SubRows<align, true, true, compareType>(_src, _value, K8_01, saSrc, saDst);
                     for(size_t col = A; col < alignedWidth; col += A)
                         SubRows<align, true, false, compareType>(_src, _value, K8_01, saSrc, saDst);
-                    saDst.Flush();
+                    Flush(saDst);
                     if(alignedWidth != width)
                     {
                         Loader<false> _src(s + width - A), saSrc(buffer.sa + width - A);
                         Storer<false> saDst(buffer.sa + width - A);
                         SubRows<false, false, true, compareType>(_src, _value, tailMask, saSrc, saDst);
-                        saDst.Flush();
+                        Flush(saDst);
                     }                
                 }
 
@@ -262,13 +262,13 @@ namespace Simd
                 CompareSum<true, align, true>(_sum, ff_threshold, _positive, _negative, _dst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     CompareSum<true, align, false>(_sum, ff_threshold, _positive, _negative, _dst);
-                _dst.Flush();
+                Flush(_dst);
                 if(alignedWidth != width)
                 {
                     Loader<false> _sum(buffer.sum + width - A);
                     Storer<false> _dst(dst + width - A);
                     CompareSum<false, false, true>(_sum, ff_threshold, _positive, _negative, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
                 dst += dstStride;
             }

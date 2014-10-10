@@ -60,7 +60,7 @@ namespace Simd
                     Store<align, false>(_dst, bgr1);
                     Store<align, false>(_dst, bgr2);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedWidth != width)
                 {
@@ -68,7 +68,7 @@ namespace Simd
                     Store<false, true>(_dst, bgr0);
                     Store<false, false>(_dst, bgr1);
                     Store<false, false>(_dst, bgr2);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 dst += stride;
@@ -98,7 +98,7 @@ namespace Simd
                 Store<align, true>(_dst, bgra128);
                 for(size_t col = 4; col < alignedWidth; col += 4)
                     Store<align, false>(_dst, bgra128);
-                _dst.Flush();
+                Flush(_dst);
                 if(width != alignedWidth)
                     Store<false>(dst + 4*(width - 4), bgra128);
                 dst += stride;

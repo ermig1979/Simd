@@ -108,7 +108,7 @@ namespace Simd
                 AlphaBlender<align, true, channelCount>()(foreground, background, Load<align>(alpha), _dst);
                 for(size_t col = A, offset = 0; col < alignedWidth; col += A, offset += step)
                     AlphaBlender<align, false, channelCount>()(foreground, background, Load<align>(alpha + col), _dst);
-                _dst.Flush();
+                Flush(_dst);
                 if(alignedWidth != width)
                 {
                     size_t offset = + (width - A)*channelCount;
@@ -116,7 +116,7 @@ namespace Simd
                     Storer<false> _dst(dst + offset);
                     v128_u8 _alpha = vec_and(Load<false>(alpha + width - A), tailMask);
                     AlphaBlender<false, true, channelCount>()(foreground, background, _alpha, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
                 src += srcStride;
                 alpha += alphaStride;

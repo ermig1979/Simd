@@ -99,7 +99,7 @@ namespace Simd
                     PartialSort5(a);
                     _dst.Next(a[2]);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 size_t col = size - A;
                 LoadTailRhomb3x3<align, step>(y, col, a);
@@ -201,7 +201,7 @@ namespace Simd
                     PartialSort9(a);
                     _dst.Next(a[4]);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 size_t col = size - A;
                 LoadTailSquare3x3<align, step>(y, col, a);
@@ -330,7 +330,7 @@ namespace Simd
                     PartialSort13(a);
                     _dst.Next(a[6]);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 size_t col = size - A;
                 LoadTailRhomb5x5<false, step>(y, col, a);
@@ -488,9 +488,8 @@ namespace Simd
                     LoadBodySquare5x5<align, step>(y, col, a);
                     PartialSort25(a);
                     _dst.Next(a[12]);
-                    //Store<align>(dst + col, a[12]);
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 size_t col = size - A;
                 LoadTailSquare5x5<false, step>(y, col, a);

@@ -60,13 +60,13 @@ namespace Simd
                 AbsGradientSaturatedSum<align, true>(src, srcStride, _dst);
                 for (size_t col = A; col < alignedWidth; col += A)
                     AbsGradientSaturatedSum<align, false>(src + col, srcStride, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(width != alignedWidth)
                 {
                     Storer<false> _dst(dst + width - A);
                     AbsGradientSaturatedSum<false, true>(src + width - A, srcStride, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 dst[0] = 0;
