@@ -116,6 +116,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
 
     EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
+    EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
 
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
     EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
@@ -289,6 +290,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
 
     EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
+    EXECUTE_DATA_TEST(BgrToYuv444pDataTest);
 
     EXECUTE_DATA_TEST(BinarizationDataTest);
     EXECUTE_DATA_TEST(AveragingBinarizationDataTest);

@@ -65,6 +65,7 @@ namespace Test
     bool BgrToGrayAutoTest();
 
     bool BgrToYuv420pAutoTest();
+    bool BgrToYuv444pAutoTest();
 
     bool BinarizationAutoTest();
     bool AveragingBinarizationAutoTest();
@@ -209,6 +210,7 @@ namespace Test
     bool BgrToGrayDataTest(bool create);
 
     bool BgrToYuv420pDataTest(bool create);
+    bool BgrToYuv444pDataTest(bool create);
 
     bool BinarizationDataTest(bool create);
     bool AveragingBinarizationDataTest(bool create);

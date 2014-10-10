@@ -218,6 +218,14 @@ namespace Simd
         SimdBgrToYuv420p(bgr.data, bgr.width, bgr.height, bgr.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
     }
 
+    template<class A> SIMD_INLINE void BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
+    {
+        assert(EqualSize(bgr, y) && Compatible(y, u, v));
+        assert(y.format == View<A>::Gray8 && bgr.format == View<A>::Bgr24);
+
+        SimdBgrToYuv444p(bgr.data, bgr.width, bgr.height, bgr.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
+    }
+
     template<class A> SIMD_INLINE void Binarization(const View<A>& src, uint8_t value, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType)
     {
         assert(Compatible(src, dst) && src.format == View<A>::Gray8);
