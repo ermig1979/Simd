@@ -70,15 +70,13 @@ namespace Simd
                 BackgroundGrowRangeSlow<align, true>(_value, _loSrc, _hiSrc, K8_01, _loDst, _hiDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundGrowRangeSlow<align, false>(_value, _loSrc, _hiSrc, K8_01, _loDst, _hiDst);
-                _loDst.Flush();
-                _hiDst.Flush();
+                Flush(_loDst, _hiDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
                     Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
                     BackgroundGrowRangeSlow<false, true>(_value, _loSrc, _hiSrc, tailMask, _loDst, _hiDst);
-                    _loDst.Flush();
-                    _hiDst.Flush();
+                    Flush(_loDst, _hiDst);
                 }
                 value += valueStride;
                 lo += loStride;
@@ -126,15 +124,13 @@ namespace Simd
                 BackgroundGrowRangeFast<align, true>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundGrowRangeFast<align, false>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
-                _loDst.Flush();
-                _hiDst.Flush();
+                Flush(_loDst, _hiDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
                     Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
                     BackgroundGrowRangeFast<false, true>(_value, _loSrc, _hiSrc, _loDst, _hiDst);
-                    _loDst.Flush();
-                    _hiDst.Flush();
+                    Flush(_loDst, _hiDst);
                 }
                 value += valueStride;
                 lo += loStride;
@@ -189,16 +185,14 @@ namespace Simd
                 BackgroundIncrementCount<align, true>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, K8_01, _loCountDst, _hiCountDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundIncrementCount<align, false>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, K8_01, _loCountDst, _hiCountDst);
-                _loCountDst.Flush();
-                _hiCountDst.Flush();
+                Flush(_loCountDst, _hiCountDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _loValue(loValue + width - A), _hiValue(hiValue + width - A), 
                         _loCountSrc(loCount + width - A), _hiCountSrc(hiCount + width - A);
                     Storer<false> _loCountDst(loCount + width - A), _hiCountDst(hiCount + width - A);
                     BackgroundIncrementCount<false, true>(_value, _loValue, _hiValue, _loCountSrc, _hiCountSrc, tailMask, _loCountDst, _hiCountDst);
-                    _loCountDst.Flush();
-                    _hiCountDst.Flush();
+                    Flush(_loCountDst, _hiCountDst);
                 }
                 value += valueStride;
                 loValue += loValueStride;
@@ -275,10 +269,7 @@ namespace Simd
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundAdjustRange<align, false>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc,
                     _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
-                _loValueDst.Flush();
-                _hiValueDst.Flush();
-                _loCountDst.Flush();
-                _hiCountDst.Flush();
+                Flush(_loValueDst, _hiValueDst, _loCountDst, _hiCountDst);
 
                 if(alignedWidth != width)
                 {
@@ -286,10 +277,7 @@ namespace Simd
                     Storer<false> _loCountDst(loCount + width - A), _loValueDst(loValue + width - A), _hiCountDst(hiCount + width - A), _hiValueDst(hiValue + width - A);
                     BackgroundAdjustRange<false, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc,
                         _threshold, tailMask, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
-                    _loValueDst.Flush();
-                    _hiValueDst.Flush();
-                    _loCountDst.Flush();
-                    _hiCountDst.Flush();
+                    Flush(_loValueDst, _hiValueDst, _loCountDst, _hiCountDst);
                 }
 
                 loValue += loValueStride;
@@ -344,10 +332,7 @@ namespace Simd
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundAdjustRangeMasked<align, false>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc, _mask,
                     _threshold, K8_01, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
-                _loValueDst.Flush();
-                _hiValueDst.Flush();
-                _loCountDst.Flush();
-                _hiCountDst.Flush();
+                Flush(_loValueDst, _hiValueDst, _loCountDst, _hiCountDst);
 
                 if(alignedWidth != width)
                 {
@@ -356,10 +341,7 @@ namespace Simd
                     Storer<false> _loCountDst(loCount + width - A), _loValueDst(loValue + width - A), _hiCountDst(hiCount + width - A), _hiValueDst(hiValue + width - A);
                     BackgroundAdjustRangeMasked<false, true>(_loCountSrc, _loValueSrc, _hiCountSrc, _hiValueSrc, _mask,
                         _threshold, tailMask, _loCountDst, _loValueDst, _hiCountDst, _hiValueDst);
-                    _loValueDst.Flush();
-                    _hiValueDst.Flush();
-                    _loCountDst.Flush();
-                    _hiCountDst.Flush();
+                    Flush(_loValueDst, _hiValueDst, _loCountDst, _hiCountDst);
                 }
 
                 loValue += loValueStride;
@@ -419,16 +401,14 @@ namespace Simd
                 BackgroundShiftRange<align, true>(_value, _loSrc, _hiSrc, K8_FF, _loDst, _hiDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundShiftRange<align, false>(_value, _loSrc, _hiSrc, K8_FF, _loDst, _hiDst);
-                _loDst.Flush();
-                _hiDst.Flush();
+                Flush(_loDst, _hiDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A);
                     Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
                     BackgroundShiftRange<false, true>(_value, _loSrc, _hiSrc, tailMask, _loDst, _hiDst);
-                    _loDst.Flush();
-                    _hiDst.Flush();
+                    Flush(_loDst, _hiDst);
                 }
 
                 value += valueStride;
@@ -475,16 +455,14 @@ namespace Simd
                 BackgroundShiftRangeMasked<align, true>(_value, _loSrc, _hiSrc, _mask, K8_FF, _loDst, _hiDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundShiftRangeMasked<align, false>(_value, _loSrc, _hiSrc, _mask, K8_FF, _loDst, _hiDst);
-                _loDst.Flush();
-                _hiDst.Flush();
+                Flush(_loDst, _hiDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _loSrc(lo + width - A), _hiSrc(hi + width - A), _mask(mask + width - A);
                     Storer<false> _loDst(lo + width - A), _hiDst(hi + width - A);
                     BackgroundShiftRangeMasked<false, true>(_value, _loSrc, _hiSrc, _mask, tailMask, _loDst, _hiDst);
-                    _loDst.Flush();
-                    _hiDst.Flush();
+                    Flush(_loDst, _hiDst);
                 }
 
                 value += valueStride;
@@ -533,14 +511,14 @@ namespace Simd
                 BackgroundInitMask<align, true>(_src, _dstSrc, _index, _value, _dstDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BackgroundInitMask<align, false>(_src, _dstSrc, _index, _value, _dstDst);
-                _dstDst.Flush();
+                Flush(_dstDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _src(src + width - A), _dstSrc(dst + width - A);
                     Storer<false> _dstDst(dst + width - A);
                     BackgroundInitMask<false, true>(_src, _dstSrc, _index, _value, _dstDst);
-                    _dstDst.Flush();
+                    Flush(_dstDst);
                 }
 
                 src += srcStride;

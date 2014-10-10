@@ -72,14 +72,14 @@ namespace Simd
                 BgraToBayer<format, 0, align, true>(_bgra0, perm, _bayer0);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BgraToBayer<format, 0, align, false>(_bgra0, perm, _bayer0);
-                _bayer0.Flush();
+                Flush(_bayer0);
 
                 if(width != alignedWidth)
                 {
                     Loader<false> _bgra(bgra + 4*(width - A));
                     Storer<false> _bayer(bayer + width - A);
                     BgraToBayer<format, 0, false, true>(_bgra, perm, _bayer);
-                    _bayer.Flush();
+                    Flush(_bayer);
                 }
 
                 bgra += bgraStride;
@@ -90,14 +90,14 @@ namespace Simd
                 BgraToBayer<format, 1, align, true>(_bgra1, perm, _bayer1);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BgraToBayer<format, 1, align, false>(_bgra1, perm, _bayer1);
-                _bayer1.Flush();
+                Flush(_bayer1);
 
                 if(width != alignedWidth)
                 {
                     Loader<false> _bgra(bgra + 4*(width - A));
                     Storer<false> _bayer(bayer + width - A);
                     BgraToBayer<format, 1, false, true>(_bgra, perm, _bayer);
-                    _bayer.Flush();
+                    Flush(_bayer);
                 }
 
                 bgra += bgraStride;

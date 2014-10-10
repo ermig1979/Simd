@@ -70,7 +70,7 @@ namespace Simd
                 Store<false, true>(_dst, LbpEstimate<align>(src + 1, srcStride));
                 for (size_t col = A + 1; col < alignedWidth; col += A)
                     Store<false, false>(_dst, LbpEstimate<align>(src + col, srcStride));
-                _dst.Flush();
+                Flush(_dst);
                 if(alignedWidth != width - 1)
                     Store<false>(dst + width - 1 - A, LbpEstimate<false>(src + width - 1 - A, srcStride));
                 dst[width - 1] = 0;

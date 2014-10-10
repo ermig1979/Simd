@@ -65,14 +65,14 @@ namespace Simd
                 EdgeBackgroundGrowRangeSlow<align, true>(_value, _backgroundSrc, K8_01, _backgroundDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundGrowRangeSlow<align, false>(_value, _backgroundSrc, K8_01, _backgroundDst);
-                _backgroundDst.Flush();
+                Flush(_backgroundDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _backgroundSrc(background + width - A);
                     Storer<false> _backgroundDst(background + width - A);
                     EdgeBackgroundGrowRangeSlow<false, true>(_value, _backgroundSrc, tailMask, _backgroundDst);
-                    _backgroundDst.Flush();
+                    Flush(_backgroundDst);
                 }
 
                 value += valueStride;
@@ -115,14 +115,14 @@ namespace Simd
                 EdgeBackgroundGrowRangeFast<align, true>(_value, _backgroundSrc, _backgroundDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundGrowRangeFast<align, false>(_value, _backgroundSrc, _backgroundDst);
-                _backgroundDst.Flush();
+                Flush(_backgroundDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _backgroundSrc(background + width - A);
                     Storer<false> _backgroundDst(background + width - A);
                     EdgeBackgroundGrowRangeFast<false, true>(_value, _backgroundSrc, _backgroundDst);
-                    _backgroundDst.Flush();
+                    Flush(_backgroundDst);
                 }
 
                 value += valueStride;
@@ -172,7 +172,7 @@ namespace Simd
                 EdgeBackgroundIncrementCount<align, true>(_value, _backgroundValue, _backgroundCountSrc, K8_01, _backgroundCountDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundIncrementCount<align, false>(_value, _backgroundValue, _backgroundCountSrc, K8_01, _backgroundCountDst);
-                _backgroundCountDst.Flush();
+                Flush(_backgroundCountDst);
 
                 if(alignedWidth != width)
                 {
@@ -180,7 +180,7 @@ namespace Simd
                     Loader<false> _value(value + col), _backgroundValue(backgroundValue + col), _backgroundCountSrc(backgroundCount + col);
                     Storer<false> _backgroundCountDst(backgroundCount + col);
                     EdgeBackgroundIncrementCount<false, true>(_value, _backgroundValue, _backgroundCountSrc, tailMask, _backgroundCountDst);
-                    _backgroundCountDst.Flush();
+                    Flush(_backgroundCountDst);
                 }
 
                 value += valueStride;
@@ -240,8 +240,7 @@ namespace Simd
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundAdjustRange<align, false>(_backgroundCountSrc, _backgroundValueSrc,
                     _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
-                _backgroundValueDst.Flush();
-                _backgroundCountDst.Flush();
+                Flush(_backgroundValueDst, _backgroundCountDst);
 
                 if(alignedWidth != width)
                 {
@@ -250,8 +249,7 @@ namespace Simd
                     Storer<false> _backgroundCountDst(backgroundCount + col), _backgroundValueDst(backgroundValue + col);
                     EdgeBackgroundAdjustRange<false, true>(_backgroundCountSrc, _backgroundValueSrc,
                         _threshold, tailMask, _backgroundCountDst, _backgroundValueDst);
-                    _backgroundValueDst.Flush();
-                    _backgroundCountDst.Flush();
+                    Flush(_backgroundValueDst, _backgroundCountDst);
                 }
 
                 backgroundValue += backgroundValueStride;
@@ -303,8 +301,7 @@ namespace Simd
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundAdjustRangeMasked<align, false>(_backgroundCountSrc, _backgroundValueSrc, _mask,
                     _threshold, K8_01, _backgroundCountDst, _backgroundValueDst);
-                _backgroundValueDst.Flush();
-                _backgroundCountDst.Flush();
+                Flush(_backgroundValueDst, _backgroundCountDst);
 
                 if(alignedWidth != width)
                 {
@@ -313,8 +310,7 @@ namespace Simd
                     Storer<false> _backgroundCountDst(backgroundCount + col), _backgroundValueDst(backgroundValue + col);
                     EdgeBackgroundAdjustRangeMasked<false, true>(_backgroundCountSrc, _backgroundValueSrc, _mask,
                         _threshold, tailMask, _backgroundCountDst, _backgroundValueDst);
-                    _backgroundValueDst.Flush();
-                    _backgroundCountDst.Flush();
+                    Flush(_backgroundValueDst, _backgroundCountDst);
                 }
 
                 backgroundValue += backgroundValueStride;
@@ -362,14 +358,14 @@ namespace Simd
                 EdgeBackgroundShiftRange<align, true>(_value, _backgroundSrc, K8_FF, _backgroundDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundShiftRange<align, false>(_value, _backgroundSrc, K8_FF, _backgroundDst);
-                _backgroundDst.Flush();
+                Flush(_backgroundDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _backgroundSrc(background + width - A);
                     Storer<false> _backgroundDst(background + width - A);
                     EdgeBackgroundShiftRange<false, true>(_value, _backgroundSrc, tailMask, _backgroundDst);
-                    _backgroundDst.Flush();
+                    Flush(_backgroundDst);
                 }
 
                 value += valueStride;
@@ -414,7 +410,7 @@ namespace Simd
                 EdgeBackgroundShiftRangeMasked<align, true>(_value, _backgroundSrc, _mask, K8_FF, _backgroundDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     EdgeBackgroundShiftRangeMasked<align, false>(_value, _backgroundSrc, _mask, K8_FF, _backgroundDst);
-                _backgroundDst.Flush();
+                Flush(_backgroundDst);
 
                 if(alignedWidth != width)
                 {
@@ -422,7 +418,7 @@ namespace Simd
                     Loader<false> _value(value + col), _backgroundSrc(background + col), _mask(mask + col);
                     Storer<false> _backgroundDst(background + col);
                     EdgeBackgroundShiftRangeMasked<false, true>(_value, _backgroundSrc, _mask, tailMask, _backgroundDst);
-                    _backgroundDst.Flush();
+                    Flush(_backgroundDst);
                 }
 
                 value += valueStride;

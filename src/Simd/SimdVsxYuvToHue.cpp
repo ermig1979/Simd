@@ -105,8 +105,7 @@ namespace Simd
                     Yuv420pToHue<align, false>(y + colY, _u, _v, KF_255_DIV_6, _hue0);
                     Yuv420pToHue<align, false>(y + colY + yStride, _u, _v, KF_255_DIV_6, _hue1);
                 }
-                _hue0.Flush();
-                _hue1.Flush();
+                Flush(_hue0, _hue1);
 
                 if(tail)
                 {
@@ -116,8 +115,7 @@ namespace Simd
                     v128_u8 _v = Load<false>(v + offset/2);
                     Yuv420pToHue<false, true>(y + offset, _u, _v, KF_255_DIV_6, _hue0);
                     Yuv420pToHue<false, true>(y + offset + yStride, _u, _v, KF_255_DIV_6, _hue1);
-                    _hue0.Flush();
-                    _hue1.Flush();
+                    Flush(_hue0, _hue1);
                 }
 
                 y += 2*yStride;
@@ -161,14 +159,14 @@ namespace Simd
                 Yuv444pToHue<align, true>(y, u, v, KF_255_DIV_6, _hue);
                 for(size_t col = A; col < bodyWidth; col += A)
                     Yuv444pToHue<align, false>(y + col, u + col, v + col, KF_255_DIV_6, _hue);
-                _hue.Flush();
+                Flush(_hue);
 
                 if(tail)
                 {
                     size_t col = width - A;
                     Storer<false> _hue(hue + col);
                     Yuv444pToHue<false, true>(y + col, u + col, v + col, KF_255_DIV_6, _hue);
-                    _hue.Flush();
+                    Flush(_hue);
                 }
                 y += yStride;
                 u += uStride;

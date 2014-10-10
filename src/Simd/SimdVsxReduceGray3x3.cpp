@@ -108,7 +108,7 @@ namespace Simd
                     ReduceColBody<align>(s, srcCol + A, hi);
                     Store<align, false>(_dst, ReduceRow<compensation>(lo, hi));
                 }
-                _dst.Flush();
+                Flush(_dst);
 
                 if(bodyWidth != srcWidth)
                 {

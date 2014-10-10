@@ -241,6 +241,26 @@ namespace Simd
         {
             Store<align, first>(storer, (v128_u8)value);
         }
+
+        template <bool align> SIMD_INLINE void Flush(Storer<align> & s0)
+        {
+            s0.Flush();
+        }
+
+        template <bool align> SIMD_INLINE void Flush(Storer<align> & s0, Storer<align> & s1)
+        {
+            s0.Flush(); s1.Flush();
+        }
+
+        template <bool align> SIMD_INLINE void Flush(Storer<align> & s0, Storer<align> & s1, Storer<align> & s2)
+        {
+            s0.Flush(); s1.Flush(); s2.Flush();
+        }
+
+        template <bool align> SIMD_INLINE void Flush(Storer<align> & s0, Storer<align> & s1, Storer<align> & s2, Storer<align> & s3)
+        {
+            s0.Flush(); s1.Flush(); s2.Flush(); s3.Flush();
+        }
     }
 #endif//SIMD_VSX_ENABLE
 }

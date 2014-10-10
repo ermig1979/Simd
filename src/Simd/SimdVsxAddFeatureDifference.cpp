@@ -89,14 +89,14 @@ namespace Simd
                 AddFeatureDifference<align, true>(_value, _lo, _hi, _differenceSrc, _weight, K8_FF, _differenceDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     AddFeatureDifference<align, false>(_value, _lo, _hi, _differenceSrc, _weight, K8_FF, _differenceDst);
-                _differenceDst.Flush();
+                Flush(_differenceDst);
 
                 if(alignedWidth != width)
                 {
                     Loader<false> _value(value + width - A), _lo(lo + width - A), _hi(hi + width - A), _differenceSrc(difference + width - A);
                     Storer<false> _differenceDst(difference + width - A);
                     AddFeatureDifference<false, true>(_value, _lo, _hi, _differenceSrc, _weight, tailMask, _differenceDst);
-                    _differenceDst.Flush();
+                    Flush(_differenceDst);
                 }
                 value += valueStride;
                 lo += loStride;

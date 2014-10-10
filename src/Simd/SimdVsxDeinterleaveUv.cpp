@@ -64,16 +64,14 @@ namespace Simd
                 DeinterleavedUv<align, true>(_uv, _u, _v);
                 for(size_t col = A; col < alignedWidth; col += A)
                     DeinterleavedUv<align, false>(_uv, _u, _v);
-                _u.Flush();
-                _v.Flush();
+                Flush(_u, _v);
 
                 if(width != alignedWidth)
                 {
                     Loader<false> _uv(uv + 2*(width - A));
                     Storer<false> _u(u + width - A), _v(v + width - A);
                     DeinterleavedUv<false, true>(_uv, _u, _v);
-                    _u.Flush();
-                    _v.Flush();
+                    Flush(_u, _v);
                 }
 
                 uv += uvStride;

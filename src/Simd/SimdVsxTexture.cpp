@@ -86,15 +86,13 @@ namespace Simd
                 TextureBoostedSaturatedGradient<align, true>(src, srcStride, _saturation, _boost, _dx, _dy);
                 for (size_t col = A; col < alignedWidth; col += A)
                     TextureBoostedSaturatedGradient<align, false>(src + col, srcStride, _saturation, _boost, _dx, _dy);
-                _dx.Flush();
-                _dy.Flush();
+                Flush(_dx, _dy);
 
                 if(width != alignedWidth)
                 {
                     Storer<false> _dx(dx + width - A), _dy(dy + width - A);
                     TextureBoostedSaturatedGradient<false, true>(src + width - A, srcStride, _saturation, _boost, _dx, _dy);
-                    _dx.Flush();
-                    _dy.Flush();
+                    Flush(_dx, _dy);
                 }
 
                 dx[0] = 0;
@@ -150,13 +148,13 @@ namespace Simd
                 TextureBoostedUv<align, true>(src, _min, _max, _boost, _dst);
                 for (size_t col = A; col < alignedWidth; col += A)
                     TextureBoostedUv<align, false>(src + col, _min, _max, _boost, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(width != alignedWidth)
                 {
                     Storer<false> _dst(dst + width - A);
                     TextureBoostedUv<false, true>(src + width - A, _min, _max, _boost, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 src += srcStride;
@@ -245,7 +243,7 @@ namespace Simd
                     _dst.First(vec_adds(Load<align>(src), _shift));
                     for (size_t col = A; col < alignedWidth; col += A)
                         _dst.Next(vec_adds(Load<align>(src + col), _shift));
-                    _dst.Flush();
+                    Flush(_dst);
                     if(width != alignedWidth)
                     {
                         const v128_u8 _src = Load<false>(src + width - A);
@@ -264,7 +262,7 @@ namespace Simd
                     _dst.First(vec_subs(Load<align>(src), _shift));
                     for (size_t col = A; col < alignedWidth; col += A)
                         _dst.Next(vec_subs(Load<align>(src + col), _shift));
-                    _dst.Flush();
+                    Flush(_dst);
                     if(width != alignedWidth)
                     {
                         const v128_u8 _src = Load<false>(src + width - A);

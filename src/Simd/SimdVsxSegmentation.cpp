@@ -171,7 +171,7 @@ namespace Simd
                     _dst.First(FillSingleHoles<align>(mask + A, stride, _index));
                     for(size_t col = DA; col < alignedWidth; col += A)
                         _dst.Next(FillSingleHoles<align>(mask + col, stride, _index));
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 if(alignedWidth != width)
@@ -203,7 +203,7 @@ namespace Simd
                 _dst.First(ChangeIndex(Load<align>(mask), _oldIndex, _newIndex));
                 for(size_t col = A; col < alignedWidth; col += A)
                     _dst.Next(ChangeIndex(Load<align>(mask + col), _oldIndex, _newIndex));
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedWidth != width)
                     Store<false>(mask + width - A, ChangeIndex(Load<false>(mask + width - A), _oldIndex, _newIndex));
@@ -283,8 +283,7 @@ namespace Simd
                 for(size_t parentCol = A, childCol = DA + 1; parentCol < alignedWidth; parentCol += A, childCol += DA)
                     SegmentationPropagate2x2<align, false>(parent0, parent1, parentCol, difference0, difference1, 
                     child0, child1, childCol, index, invalid, empty, threshold, childDst0, childDst1);
-                childDst0.Flush();
-                childDst1.Flush();
+                Flush(childDst0, childDst1);
 
                 if(alignedWidth != width)
                 {
@@ -292,8 +291,7 @@ namespace Simd
                     Storer<false> childDst0(child0 + childCol), childDst1(child1 + childCol);
                     SegmentationPropagate2x2<false, true>(parent0, parent1, width - A, difference0, difference1, 
                     child0, child1, childCol, index, invalid, empty, threshold, childDst0, childDst1);
-                    childDst0.Flush();
-                    childDst1.Flush();
+                    Flush(childDst0, childDst1);
                 }
             }
         }

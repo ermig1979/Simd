@@ -71,14 +71,14 @@ namespace Simd
                 BgrToBgra<align, true>(_bgr, _alpha, _bgra);
                 for(size_t col = A; col < alignedWidth; col += A)
                     BgrToBgra<align, false>(_bgr, _alpha, _bgra);
-                _bgra.Flush();
+                Flush(_bgra);
 
                 if(width != alignedWidth)
                 {
                     Loader<false> _bgr(bgr + 3*(width - A));
                     Storer<false> _bgra(bgra + 4*(width - A));
                     BgrToBgra<false, true>(_bgr, _alpha, _bgra);
-                    _bgra.Flush();
+                    Flush(_bgra);
                 }
 
                 bgra += bgraStride;
@@ -131,13 +131,13 @@ namespace Simd
                 Bgr48pToBgra32<align, true>(blue, green, red, 0, _alpha, _bgra);
                 for(size_t col = HA; col < alignedWidth; col += HA)
                     Bgr48pToBgra32<align, false>(blue, green, red, col*2, _alpha, _bgra);
-                _bgra.Flush();
+                Flush(_bgra);
 
                 if(width != alignedWidth)
                 {
                     Storer<false> _bgra(bgra + (width - HA)*4);
                     Bgr48pToBgra32<false, true>(blue, green, red, (width - HA)*2, _alpha, _bgra);
-                    _bgra.Flush();
+                    Flush(_bgra);
                 }
 
                 blue += blueStride;

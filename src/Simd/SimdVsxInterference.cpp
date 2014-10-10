@@ -74,13 +74,13 @@ namespace Simd
                 InterferenceChange<align, true, increment>(statisticSrc, _value, _saturation, statisticDst);
                 for(size_t col = HA; col < alignedWidth; col += HA)
                     InterferenceChange<align, false, increment>(statisticSrc, _value, _saturation, statisticDst);
-                statisticDst.Flush();
+                Flush(statisticDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> statisticSrc(statistic + width - HA);
                     Storer<false> statisticDst(statistic + width - HA);
                     InterferenceChange<false, true, increment>(statisticSrc, vec_and(_value, tailMask), _saturation, statisticDst);
-                    statisticDst.Flush();
+                    Flush(statisticDst);
                 }
                 statistic += stride;
             }
@@ -135,13 +135,13 @@ namespace Simd
                 InterferenceChangeMasked<align, true, increment>(statisticSrc, _value, _saturation, maskSrc, _index, K8_FF, statisticDst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     InterferenceChangeMasked<align, false, increment>(statisticSrc, _value, _saturation, maskSrc, _index, K8_FF, statisticDst);
-                statisticDst.Flush();
+                Flush(statisticDst);
                 if(alignedWidth != width)
                 {
                     Loader<false> statisticSrc(statistic + width - A), maskSrc(mask + width - A);
                     Storer<false> statisticDst(statistic + width - A);
                     InterferenceChangeMasked<false, true, increment>(statisticSrc, _value, _saturation, maskSrc, _index, tailMask, statisticDst);
-                    statisticDst.Flush();
+                    Flush(statisticDst);
                 }
                 statistic += statisticStride;
                 mask += maskStride;

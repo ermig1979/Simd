@@ -126,7 +126,7 @@ namespace Simd
                 _dst.First(BlurRow<true>(buffer, 0));
                 for(size_t col = A; col < bodySize; col += A)
                     _dst.Next(BlurRow<true>(buffer, col));
-                _dst.Flush();
+                Flush(_dst);
                 Store<align>(dst + size - A, BlurRow<align>(buffer, size - A));
 
                 Swap(buffer.src0, buffer.src2);

@@ -187,7 +187,7 @@ namespace Simd
                 Store<false, true>(_dst, MainRowX5x5<true, compensation>(buffer, 0));
                 for(size_t srcCol = DA; srcCol < alignedWidth; srcCol += DA)
                     Store<false, false>(_dst, MainRowX5x5<true, compensation>(buffer, srcCol));
-                _dst.Flush();
+                Flush(_dst);
                 if(alignedWidth != srcWidth)
                     Store<false>(dst + dstWidth - A, MainRowX5x5<false, compensation>(buffer, bufferDstTail));
             }

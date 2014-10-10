@@ -80,14 +80,14 @@ namespace Simd
                 Average<align, true>(_src0, _src1, _dst);
                 for(size_t srcOffset = DA; srcOffset < alignedWidth; srcOffset += DA)
                     Average<align, false>(_src0, _src1, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedWidth != srcWidth)
                 {
                     Loader<false> _src0(src0 + evenWidth - DA), _src1(src1 + evenWidth - DA);
                     Storer<false> _dst(dst + dstWidth - A - (evenWidth != srcWidth ? 1 : 0));
                     Average<false, true>(_src0, _src1, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
 
                     if(evenWidth != srcWidth)
                     {

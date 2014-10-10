@@ -84,14 +84,14 @@ namespace Simd
                 OperationBinary8u<type, align, true>(_a, _b, _dst);
                 for(size_t offset = A; offset < alignedSize; offset += A)
                     OperationBinary8u<type, align, false>(_a, _b, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedSize != size)
                 {
                     Loader<false> _a(a + size - A), _b(b + size - A);
                     Storer<false> _dst(dst + size - A);
                     OperationBinary8u<type, false, true>(_a, _b, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 a += aStride;
@@ -157,7 +157,7 @@ namespace Simd
                 OperationBinary16i<type, align, true>(_a, _b, _dst);
                 for(size_t col = HA; col < alignedWidth; col += HA)
                     OperationBinary16i<type, align, false>(_a, _b, _dst);
-                _dst.Flush();
+                Flush(_dst);
 
                 if(alignedWidth != width)
                 {
@@ -165,7 +165,7 @@ namespace Simd
                     Loader<false> _a(a + offset), _b(b + offset);
                     Storer<false> _dst(dst + offset);
                     OperationBinary16i<type, false, true>(_a, _b, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
 
                 a += aStride;
@@ -217,12 +217,12 @@ namespace Simd
                 VectorProduct<align, true>(_vertical, horizontal, _dst);
                 for(size_t col = A; col < alignedWidth; col += A)
                     VectorProduct<align, false>(_vertical, horizontal + col, _dst);
-                _dst.Flush();
+                Flush(_dst);
                 if(alignedWidth != width)
                 {
                     Storer<false> _dst(dst + width - A);
                     VectorProduct<false, true>(_vertical, horizontal + width - A, _dst);
-                    _dst.Flush();
+                    Flush(_dst);
                 }
                 dst += stride;
             }

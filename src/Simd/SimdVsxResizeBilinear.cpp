@@ -172,7 +172,7 @@ namespace Simd
                 Store<align, true>(_dst, InterpolateGrayY<true>(buffer, 0, a));
                 for(size_t col = A; col < alignedWidth; col += A)
                     Store<align, false>(_dst, InterpolateGrayY<true>(buffer, col, a));
-                _dst.Flush();
+                Flush(_dst);
                 if(dstWidth != alignedWidth)
                     Store<false>(dst + dstWidth - A, InterpolateGrayY<false>(buffer, dstWidth - A, a));
             }
