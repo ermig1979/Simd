@@ -178,6 +178,16 @@ namespace Simd
         SimdBgraToGray(bgra.data, bgra.width, bgra.height, bgra.stride, gray.data, gray.stride);
     }
 
+    template<class A> SIMD_INLINE void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v)
+    {
+        assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);
+        assert(y.width == 2*v.width && y.height == 2*v.height && y.format == v.format);
+        assert(y.width == bgra.width && y.height == bgra.height);
+        assert(y.format == View<A>::Gray8 && bgra.format == View<A>::Bgra32);
+
+        SimdBgraToYuv420p(bgra.data, bgra.width, bgra.height, bgra.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
+    }
+
     template<class A> SIMD_INLINE void BgrToBayer(const View<A>& bgr, View<A>& bayer)
     {
         assert(EqualSize(bgr, bayer) && bgr.format == View<A>::Bgr24);
