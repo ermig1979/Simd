@@ -580,6 +580,26 @@ extern "C"
     SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /**
+	* \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    *
+    * \short Converts 32-bit BGRA image to YUV444P. 
+    *
+	* The input BGRA and output Y, U and V images must have the same width and height.
+	*
+	* \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+	* \param [in] width - an image width.
+	* \param [in] height - an image height.
+	* \param [in] bgraStride - a row size of the BGRA image.
+	* \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+	* \param [in] yStride - a row size of the y image.
+	* \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+	* \param [in] uStride - a row size of the u image.
+	* \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+	* \param [in] vStride - a row size of the v image.
+	*/
+    SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+
+    /**
     * \fn void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
     *
     * \short Converts 24-bit BGR image to 8-bit Bayer image. 
