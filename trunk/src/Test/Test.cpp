@@ -115,6 +115,7 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
 
+    EXECUTE_AUTO_TEST(BgraToYuv420pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
 
@@ -289,6 +290,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
 
+    EXECUTE_DATA_TEST(BgraToYuv420pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv444pDataTest);
 

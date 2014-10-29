@@ -103,6 +103,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Interference.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgraToYuv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

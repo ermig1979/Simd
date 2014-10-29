@@ -136,6 +136,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgraToYuv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">

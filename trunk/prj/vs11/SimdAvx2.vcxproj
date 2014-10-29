@@ -82,6 +82,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToYuv.cpp" />

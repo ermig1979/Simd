@@ -64,6 +64,7 @@ namespace Test
 
     bool BgrToGrayAutoTest();
 
+    bool BgraToYuv420pAutoTest();
     bool BgrToYuv420pAutoTest();
     bool BgrToYuv444pAutoTest();
 
@@ -209,6 +210,7 @@ namespace Test
 
     bool BgrToGrayDataTest(bool create);
 
+    bool BgraToYuv420pDataTest(bool create);
     bool BgrToYuv420pDataTest(bool create);
     bool BgrToYuv444pDataTest(bool create);
 
