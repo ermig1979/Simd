@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\src\Simd\SimdUtils.h" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.h" />
+    <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdLib.cpp" />
