@@ -88,6 +88,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(AbsDifferenceSums3x3MaskedAutoTest);
     EXECUTE_AUTO_TEST(SquaredDifferenceSumAutoTest);
     EXECUTE_AUTO_TEST(SquaredDifferenceSumMaskedAutoTest);
+    EXECUTE_AUTO_TEST(SquaredDifferenceSum32fAutoTest);
 
     EXECUTE_AUTO_TEST(BackgroundGrowRangeSlowAutoTest);
     EXECUTE_AUTO_TEST(BackgroundGrowRangeFastAutoTest);
@@ -260,6 +261,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(AbsDifferenceSums3x3MaskedDataTest);
     EXECUTE_DATA_TEST(SquaredDifferenceSumDataTest);
     EXECUTE_DATA_TEST(SquaredDifferenceSumMaskedDataTest);
+    EXECUTE_DATA_TEST(SquaredDifferenceSum32fDataTest);
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 

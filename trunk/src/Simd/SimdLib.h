@@ -1965,6 +1965,23 @@ extern "C"
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
     /**
+    * \fn float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+    *
+    * \short Calculates sum of squared differences for two 32-bit float arrays. 
+    *
+    * All arrays must have the same size. 
+    *
+    * For every point: 
+    * \n sum += (a[i] - b[i])*(a[i] - b[i]).
+    *
+    * \param [in] a - a pointer to the first array.
+    * \param [in] b - a pointer to the second array.
+    * \param [in] size - a size of arrays.
+    * \return sum of squared differences.
+    */
+    SIMD_API float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+
+    /**
     * \fn void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t * min, uint8_t * max, uint8_t * average);
     *
     * \short Finds minimal, maximal and average pixel values for given image. 

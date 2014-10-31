@@ -302,6 +302,15 @@ namespace Simd
 #define SIMD_VEC_SETR_EPI32(a0, a1, a2, a3) \
     {a0, a1, a2, a3}
 
+#define SIMD_VEC_SET1_PS(a) \
+    {a, a, a, a}
+
+#define SIMD_VEC_SET2_PS(a0, a1) \
+    {a0, a1, a0, a1}
+
+#define SIMD_VEC_SETR_PS(a0, a1, a2, a3) \
+    {a0, a1, a2, a3}
+
 #endif//SIMD_VSX_ENABLE
 }
 

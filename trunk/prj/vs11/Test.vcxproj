@@ -108,11 +108,17 @@
     <ProjectReference Include="Simd.vcxproj">
       <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
     </ProjectReference>
+    <ProjectReference Include="SimdAvx1.vcxproj">
+      <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
+    </ProjectReference>
     <ProjectReference Include="SimdAvx2.vcxproj">
       <Project>{9b30a102-f407-44ec-987f-209c7b65c836}</Project>
     </ProjectReference>
     <ProjectReference Include="SimdBase.vcxproj">
       <Project>{1ca0c5b9-6a60-4df5-96ea-ba70a0bd0cc6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse1.vcxproj">
+      <Project>{b37e7662-729f-4376-a37c-9e15ddf95ba0}</Project>
     </ProjectReference>
     <ProjectReference Include="SimdSse2.vcxproj">
       <Project>{91831958-6ad7-4126-8056-e2dd3e12a887}</Project>

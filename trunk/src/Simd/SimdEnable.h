@@ -66,6 +66,7 @@ namespace Simd
         {
             //	Ordinary:
             //Edx:
+            SSE = 1 << 25,
             SSE2 = 1 << 26,
 
             //Ecx:
@@ -96,6 +97,35 @@ namespace Simd
         }
     }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                __m128 value = _mm_set1_ps(1.0f);// try to execute of SSE instructions;
+                return true;
+            }
+            __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif// SIMD_SSE_ENABLE
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
@@ -292,4 +322,61 @@ namespace Simd
     }
 #endif// SIMD_VSX_ENABLE
 }
+
+#define SIMD_BASE_FUNC(func) Simd::Base::func
+
+#ifdef SIMD_SSE_ENABLE
+#define SIMD_SSE_FUNC(func) Simd::Sse::Enable ? Simd::Sse::func : 
+#else
+#define SIMD_SSE_FUNC(func) 
+#endif
+
+#ifdef SIMD_SSE2_ENABLE
+#define SIMD_SSE2_FUNC(func) Simd::Sse2::Enable ? Simd::Sse2::func : 
+#else
+#define SIMD_SSE2_FUNC(func) 
+#endif
+
+#ifdef SIMD_SSSE3_ENABLE
+#define SIMD_SSSE3_FUNC(func) Simd::Ssse3::Enable ? Simd::Ssse3::func : 
+#else
+#define SIMD_SSSE3_FUNC(func) 
+#endif
+
+#ifdef SIMD_SSE41_ENABLE
+#define SIMD_SSE41_FUNC(func) Simd::Sse41::Enable ? Simd::Sse41::func : 
+#else
+#define SIMD_SSE41_FUNC(func) 
+#endif
+
+#ifdef SIMD_SSE42_ENABLE
+#define SIMD_SSE42_FUNC(func) Simd::Sse42::Enable ? Simd::Sse42::func : 
+#else
+#define SIMD_SSE42_FUNC(func) 
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+#define SIMD_AVX_FUNC(func) Simd::Avx::Enable ? Simd::Avx::func : 
+#else
+#define SIMD_AVX_FUNC(func)
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+#define SIMD_AVX2_FUNC(func) Simd::Avx2::Enable ? Simd::Avx2::func : 
+#else
+#define SIMD_AVX2_FUNC(func)
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+#define SIMD_VSX_FUNC(func) Simd::Vsx::Enable ? Simd::Vsx::func : 
+#else
+#define SIMD_VSX_FUNC(func)
+#endif
+
+#define SIMD_FUNC0(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC1(func, EXT1) EXT1(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC2(func, EXT1, EXT2) EXT1(func) EXT2(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC3(func, EXT1, EXT2, EXT3) EXT1(func) EXT2(func) EXT3(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC4(func, EXT1, EXT2, EXT3, EXT4) EXT1(func) EXT2(func) EXT3(func) EXT4(func) SIMD_BASE_FUNC(func)
+
 #endif//__SimdEnable_h__

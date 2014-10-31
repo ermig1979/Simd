@@ -35,6 +35,7 @@ namespace Test
     bool AbsDifferenceSums3x3MaskedAutoTest();
     bool SquaredDifferenceSumAutoTest();
     bool SquaredDifferenceSumMaskedAutoTest();
+    bool SquaredDifferenceSum32fAutoTest();
 
     bool AddFeatureDifferenceAutoTest();
 
@@ -182,6 +183,7 @@ namespace Test
     bool AbsDifferenceSums3x3MaskedDataTest(bool create);
     bool SquaredDifferenceSumDataTest(bool create);
     bool SquaredDifferenceSumMaskedDataTest(bool create);
+    bool SquaredDifferenceSum32fDataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
 

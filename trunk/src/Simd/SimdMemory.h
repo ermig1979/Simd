@@ -76,48 +76,61 @@ namespace Simd
 #endif
 	}
 
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m128))
+        {
+            return Simd::Aligned(size, align);
+        }
+
+        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m128))
+        {
+            return Simd::Aligned(p, align);
+        }
+    }
+#endif// SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
-		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m128i))
-		{
-			return Simd::Aligned(size, align);
-		}
-
-		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m128i))
-		{
-			return Simd::Aligned(p, align);
-		}
+        using Sse::Aligned;
 	}
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
-        using namespace Sse2;
+        using Sse::Aligned;
     }
 #endif// SIMD_SSSE3_ENABLE
 
 #ifdef SIMD_SSE42_ENABLE
 	namespace Sse42
 	{
-		using namespace Sse2;
 	}
 #endif// SIMD_SSE42_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m256))
+        {
+            return Simd::Aligned(size, align);
+        }
+
+        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m256))
+        {
+            return Simd::Aligned(p, align);
+        }
+    }
+#endif// SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
 	namespace Avx2
 	{
-		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m256i))
-		{
-			return Simd::Aligned(size, align);
-		}
-
-		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m256i))
-		{
-			return Simd::Aligned(p, align);
-		}
-	}
+        using Avx::Aligned;
+    }
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_VSX_ENABLE

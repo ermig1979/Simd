@@ -28,9 +28,28 @@
 
 namespace Simd
 {
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        template <bool align> SIMD_INLINE __m128 Load(const float * p);
+
+        template <> SIMD_INLINE __m128 Load<false>(const float * p)
+        {
+            return _mm_loadu_ps(p); 
+        }
+
+        template <> SIMD_INLINE __m128 Load<true>(const float * p)
+        {
+            return _mm_load_ps(p); 
+        }
+    }
+#endif//SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
+        using namespace Sse;
+
 		template <bool align> SIMD_INLINE __m128i Load(const __m128i * p);
 
 		template <> SIMD_INLINE __m128i Load<false>(const __m128i * p)
@@ -126,9 +145,28 @@ namespace Simd
 	}
 #endif//SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        template <bool align> SIMD_INLINE __m256 Load(const float * p);
+
+        template <> SIMD_INLINE __m256 Load<false>(const float * p)
+        {
+            return _mm256_loadu_ps(p); 
+        }
+
+        template <> SIMD_INLINE __m256 Load<true>(const float * p)
+        {
+            return _mm256_load_ps(p); 
+        }
+    }
+#endif//SIMD_AVX_ENABLE
+
 #ifdef SIMD_AVX2_ENABLE
 	namespace Avx2
 	{
+        using namespace Avx;
+
 		template <bool align> SIMD_INLINE __m256i Load(const __m256i * p);
 
 		template <> SIMD_INLINE __m256i Load<false>(const __m256i * p)
@@ -305,6 +343,11 @@ namespace Simd
         template <bool align> SIMD_INLINE v128_u32 Load(const uint32_t * p)
         {
             return (v128_u32)Load<align>((const uint8_t*)p);
+        }
+
+        template <bool align> SIMD_INLINE v128_f32 Load(const float * p)
+        {
+            return (v128_f32)Load<align>((const uint8_t*)p);
         }
 
         template <bool align> SIMD_INLINE v128_u8 LoadMaskU8(const uint8_t * p, v128_u8 index)

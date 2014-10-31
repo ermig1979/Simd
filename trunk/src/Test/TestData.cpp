@@ -158,8 +158,6 @@ namespace Test
 
     bool Data::Save(const View & image, const std::string & name) const
     {
-        assert(image.format != View::Float && image.format != View::Double);
-
         if(!CreatePath(_path))
             return false;
 
@@ -178,30 +176,48 @@ namespace Test
             size_t pixelSize = image.PixelSize();
 
             ofs << (int)image.format << " " << image.width << " " << image.height << std::endl;
-            ofs << std::hex;
-            for(size_t row = 0; row < image.height; ++row)
+            if(image.format != View::Float && image.format != View::Double)
             {
-                for(size_t col = 0; col < image.width; ++col)
+                ofs << std::hex;
+                for(size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t channel = 0; channel < channelCount; ++channel)
+                    for(size_t col = 0; col < image.width; ++col)
                     {
-                        const uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
-                        for(size_t i = 0; i < channelSize; ++i)
+                        for(size_t channel = 0; channel < channelCount; ++channel)
                         {
+                            const uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
+                            for(size_t i = 0; i < channelSize; ++i)
+                            {
 #ifdef SIMD_BIG_ENDIAN
-                            ofs << (int)(data[i] >> 4);
-                            ofs << (int)(data[i] & 0xF);
+                                ofs << (int)(data[i] >> 4);
+                                ofs << (int)(data[i] & 0xF);
 #else
-                            ofs << (int)(data[channelSize - i - 1] >> 4);
-                            ofs << (int)(data[channelSize - i - 1] & 0xF);
+                                ofs << (int)(data[channelSize - i - 1] >> 4);
+                                ofs << (int)(data[channelSize - i - 1] & 0xF);
 #endif                    
+                            }
+                            ofs << " ";
                         }
                         ofs << " ";
                     }
-                    ofs << " ";
-                }
-                ofs << std::endl;
-            }        
+                    ofs << std::endl;
+                } 
+            }
+            else
+            {
+                for(size_t row = 0; row < image.height; ++row)
+                {
+                    for(size_t col = 0; col < image.width; ++col)
+                    {
+                        if(image.format == View::Float)
+                            ofs << image.At<float>(col, row);
+                        else
+                            ofs << image.At<double>(col, row);
+                        ofs << " ";
+                    }
+                    ofs << std::endl;
+                } 
+            }
         }
         catch (std::exception e)
         {
@@ -218,8 +234,6 @@ namespace Test
 
     bool Data::Load(View & image, const std::string & name) const
     {
-        assert(image.format != View::Float && image.format != View::Double);
-
         std::string path = Path(name);
         std::ifstream ifs(path);
         if(ifs.bad())
@@ -244,27 +258,43 @@ namespace Test
             ifs >> value;
             if(value != (uint64_t)image.height)
                 throw std::runtime_error("Invalid image height!");
-            
-            ifs >> std::hex;
-            for(size_t row = 0; row < image.height; ++row)
+
+            if(image.format != View::Float && image.format != View::Double)
             {
-                for(size_t col = 0; col < image.width; ++col)
+                ifs >> std::hex;
+                for(size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t channel = 0; channel < channelCount; ++channel)
+                    for(size_t col = 0; col < image.width; ++col)
                     {
-                        uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
-                        ifs >> value;
-                        for(size_t i = 0; i < channelSize; ++i)
+                        for(size_t channel = 0; channel < channelCount; ++channel)
                         {
+                            uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
+                            ifs >> value;
+                            for(size_t i = 0; i < channelSize; ++i)
+                            {
 #ifdef SIMD_BIG_ENDIAN
-                            data[i] = (value >> 8*(channelSize - i - 1))&0xFF;
+                                data[i] = (value >> 8*(channelSize - i - 1))&0xFF;
 #else
-                            data[i] = (value >> 8*i)&0xFF;
+                                data[i] = (value >> 8*i)&0xFF;
 #endif                    
+                            }
                         }
                     }
                 }
-            }        
+            }
+            else
+            {
+                for(size_t row = 0; row < image.height; ++row)
+                {
+                    for(size_t col = 0; col < image.width; ++col)
+                    {
+                        if(image.format == View::Float)
+                            ifs >> image.At<float>(col, row);
+                        else
+                            ifs >> image.At<double>(col, row);
+                    }
+                }
+            }
         }
         catch (std::exception e)
         {
@@ -289,6 +319,11 @@ namespace Test
         return LoadArray(&value, 1, name);
     }
 
+    bool Data::Save(const int64_t & value, const std::string & name) const
+    {
+        return SaveArray(&value, 1, name);
+    }
+
     bool Data::Load(int64_t & value, const std::string & name) const
     {
         uint64_t _value;
@@ -297,9 +332,20 @@ namespace Test
         return result;
     }
 
+    bool Data::Save(const uint32_t & value, const std::string & name) const
+    {
+        return SaveArray(&value, 1, name);
+    }
+
     bool Data::Load(uint32_t & value, const std::string & name) const
     {
         return LoadArray(&value, 1, name);
+    }
+
+    bool Data::Save(const uint8_t & value, const std::string & name) const
+    {
+        uint32_t _value = value;
+        return SaveArray(&_value, 1, name);
     }
 
     bool Data::Load(uint8_t & value, const std::string & name) const
@@ -308,6 +354,26 @@ namespace Test
         bool result = LoadArray(&_value, 1, name);
         value = (uint8_t)_value;
         return result;
+    }
+
+    bool Data::Save(const double & value, const std::string & name) const
+    {
+        return SaveArray(&value, 1, name);
+    }
+
+    bool Data::Load(double & value, const std::string & name) const
+    {
+        return LoadArray(&value, 1, name);
+    }
+
+    bool Data::Save(const float & value, const std::string & name) const
+    {
+        return SaveArray(&value, 1, name);
+    }
+
+    bool Data::Load(float & value, const std::string & name) const
+    {
+        return LoadArray(&value, 1, name);
     }
 
     bool Data::Save(const Sums & sums, const std::string & name) const

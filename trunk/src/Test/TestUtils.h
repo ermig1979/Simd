@@ -33,12 +33,20 @@ namespace Test
 		return ((::rand()&INT16_MAX)*range)/INT16_MAX;
 	}
 
+    SIMD_INLINE double Random()
+    {
+        return ((::rand()&INT16_MAX)*1.0)/INT16_MAX;
+    }
+
     void FillRandom(View & view, uint8_t lo = 0, uint8_t hi = 255);
+
 
 	void FillRandomMask(View & view, uint8_t index);
 
     void FillRhombMask(View & mask, const Rect & rect, uint8_t index);
     
+    void FillRandom32f(View & view, float lo = 0, float hi = 4096.0f);
+
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0, 
 		const std::string & description = "");
@@ -53,6 +61,8 @@ namespace Test
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
+
+    bool Compare(const float & a, const float & b, float relativeDifferenceMax = 0.001, bool printError = false);
 
 	std::string ColorDescription(View::Format format);
 

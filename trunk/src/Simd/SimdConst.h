@@ -79,7 +79,7 @@ namespace Simd
         const size_t A = sizeof(__m128i);
         const size_t DA = 2*A;
         const size_t QA = 4*A;
-		const size_t OA = 8*A;
+        const size_t OA = 8*A;
         const size_t HA = A/2;
 
         const __m128i K_ZERO = SIMD_MM_SET1_EPI8(0);
@@ -346,6 +346,8 @@ namespace Simd
         const v128_u16 K16_FFFF = SIMD_VEC_SET1_EPI16(0xFFFF);
 
         const v128_u32 K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
+
+        const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
 
         const v128_s16 K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST); 
         const v128_s16 K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);

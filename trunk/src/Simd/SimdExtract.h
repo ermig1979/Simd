@@ -28,6 +28,25 @@
 
 namespace Simd
 {
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE float ExtractValue(__m128 a, int i)
+        {
+            float SIMD_ALIGNED(16) _a[4];
+            _mm_store_ps(_a, a);
+            return _a[i];
+        }
+
+        SIMD_INLINE float ExtractSum(__m128 a)
+        {
+            float SIMD_ALIGNED(16) _a[4];
+            _mm_store_ps(_a, a);
+            return _a[0] + _a[1] + _a[2] + _a[3];
+        }
+    }
+#endif//SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
@@ -67,6 +86,25 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE float ExtractValue(__m256 a, int i)
+        {
+            float SIMD_ALIGNED(32) _a[8];
+            _mm256_store_ps(_a, a);
+            return _a[i];
+        }
+
+        SIMD_INLINE float ExtractSum(__m256 a)
+        {
+            float SIMD_ALIGNED(32) _a[8];
+            _mm256_store_ps(_a, _mm256_hadd_ps(a, _mm256_setzero_ps()));
+            return _a[0] + _a[1] + _a[4] + _a[5];
+        }
+    }
+#endif//SIMD_AVX_ENABLE
+
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
@@ -96,6 +134,11 @@ namespace Simd
     namespace Vsx
     {
         SIMD_INLINE uint32_t ExtractSum(v128_u32 a)
+        {
+            return vec_extract(a, 0) + vec_extract(a, 1) + vec_extract(a, 2) + vec_extract(a, 3);
+        }
+
+        SIMD_INLINE float ExtractSum(v128_f32 a)
         {
             return vec_extract(a, 0) + vec_extract(a, 1) + vec_extract(a, 2) + vec_extract(a, 3);
         }

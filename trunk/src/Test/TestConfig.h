@@ -46,10 +46,12 @@
 #define SIMD_STATIC
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
+#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdUtils.h"
@@ -63,12 +65,14 @@ namespace Test
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
 
-#ifdef NDEBUG
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
 	const int W = 1920;
 	const int H = 1080;
+    const int S = 1024*512;
 #else
     const int W = 128;
     const int H = 96;
+    const int S = 128;
 #endif
 
     const int E = 10;
@@ -78,6 +82,7 @@ namespace Test
 
     const int DW = 48;
     const int DH = 64;
+    const int DS = 32;
 }
 
 #endif//__TestConfig_h__

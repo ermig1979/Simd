@@ -172,6 +172,16 @@ namespace Simd
         }
 	}
 
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE __m128 Square(__m128 value)
+        {
+            return _mm_mul_ps(value, value);
+        }
+    }
+#endif//SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{

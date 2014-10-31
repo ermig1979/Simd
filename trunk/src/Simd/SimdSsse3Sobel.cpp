@@ -57,7 +57,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Sse2::Aligned(dstStride, HA));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -127,7 +127,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(dst) && Sse2::Aligned(dstStride, HA));
+                assert(Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -196,7 +196,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Sse2::Aligned(dstStride, HA));
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
@@ -256,7 +256,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Sse2::Aligned(dstStride, HA) && Aligned(mask) && Aligned(maskStride));
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA) && Aligned(mask) && Aligned(maskStride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
