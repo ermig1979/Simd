@@ -47,9 +47,21 @@ namespace Test
 
         bool Save(const uint64_t & value, const std::string & name) const;
         bool Load(uint64_t & value, const std::string & name) const;
+ 
+        bool Save(const int64_t & value, const std::string & name) const;
         bool Load(int64_t & value, const std::string & name) const;
+
+        bool Save(const uint32_t & value, const std::string & name) const;
         bool Load(uint32_t & value, const std::string & name) const;
+
+        bool Save(const uint8_t & value, const std::string & name) const;
         bool Load(uint8_t & value, const std::string & name) const;
+
+        bool Save(const double & value, const std::string & name) const;
+        bool Load(double & value, const std::string & name) const;
+
+        bool Save(const float & value, const std::string & name) const;
+        bool Load(float & value, const std::string & name) const;
 
         bool Save(const Sums & sums, const std::string & name) const;
         bool Load(Sums & sums, const std::string & name) const;

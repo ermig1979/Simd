@@ -231,7 +231,7 @@ namespace Test
                 else
                     s.base.second = *it->second;
             }
-            if(desc.find("Simd::Sse2::") != std::string::npos)
+            if(desc.find("Simd::Sse2::") != std::string::npos || desc.find("Simd::Sse::") != std::string::npos)
             {
                 if(Aligned(desc))
                     s.sse2.first = *it->second;
@@ -260,7 +260,7 @@ namespace Test
                 s.sse42 = *it->second;
                 sse42 = true && sse42_;
             }
-            if(desc.find("Simd::Avx2::") != std::string::npos)
+            if(desc.find("Simd::Avx2::") != std::string::npos || desc.find("Simd::Avx::") != std::string::npos)
             {
                 if(Aligned(desc))
                     s.avx2.first = *it->second;

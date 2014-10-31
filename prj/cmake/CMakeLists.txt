@@ -26,6 +26,10 @@ file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
+file(GLOB_RECURSE SIMD_SSE1_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse1*.cpp)
+add_library(SimdSse1 STATIC ${SIMD_SSE1_SOURCES})
+set_target_properties(SimdSse1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse")
+
 file(GLOB_RECURSE SIMD_SSE2_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
 add_library(SimdSse2 STATIC ${SIMD_SSE2_SOURCES})
 set_target_properties(SimdSse2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2")
@@ -42,13 +46,17 @@ file(GLOB_RECURSE SIMD_SSE42_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse42*.cpp)
 add_library(SimdSse42 STATIC ${SIMD_SSE42_SOURCES})
 set_target_properties(SimdSse42 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
 
+file(GLOB_RECURSE SIMD_AVX1_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx1*.cpp)
+add_library(SimdAvx1 STATIC ${SIMD_AVX1_SOURCES})
+set_target_properties(SimdAvx1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx")
+
 file(GLOB_RECURSE SIMD_AVX2_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx2*.cpp)
 add_library(SimdAvx2 STATIC ${SIMD_AVX2_SOURCES})
 set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd SHARED ${SIMD_SOURCES})
-target_link_libraries(Simd SimdBase SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx2)
+target_link_libraries(Simd SimdBase SimdSse1 SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx1 SimdAvx2)
 set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)

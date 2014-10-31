@@ -67,5 +67,13 @@ namespace Simd
 				mask += maskStride;
 			}
 		}
+
+        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        {
+            float sum = 0;
+            for(size_t i = 0; i < size; ++i)
+                sum += Simd::Square(a[i] - b[i]);
+            return sum;
+        }
     }
 }

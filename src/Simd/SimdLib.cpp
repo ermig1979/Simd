@@ -51,10 +51,12 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdConst.h"
 
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
+#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdVsx.h"
 
@@ -1774,6 +1776,14 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
     else
 #endif
         Base::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+}
+
+typedef float (* SimdSquaredDifferenceSum32fPtr) (const float * a, const float * b, size_t size);
+SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC3(SquaredDifferenceSum32f, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
+
+SIMD_API float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+{
+    return simdSquaredDifferenceSum32f(a, b, size);
 }
 
 SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,

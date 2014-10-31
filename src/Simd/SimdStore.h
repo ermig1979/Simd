@@ -31,9 +31,28 @@
 
 namespace Simd
 {
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        template <bool align> SIMD_INLINE void Store(float  * p, __m128 a);
+
+        template <> SIMD_INLINE void Store<false>(float  * p, __m128 a)
+        {
+            _mm_storeu_ps(p, a);
+        }
+
+        template <> SIMD_INLINE void Store<true>(float  * p, __m128 a)
+        {
+            _mm_store_ps(p, a);
+        }
+    }
+#endif//SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
 	namespace Sse2
 	{
+        using namespace Sse;
+
 		template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
 
 		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)

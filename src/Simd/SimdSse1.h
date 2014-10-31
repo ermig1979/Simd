@@ -21,29 +21,19 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#ifndef __SimdSse_h__
+#define __SimdSse_h__
 
-//#define SIMD_SSE_DEPRECATE
+#include "Simd/SimdTypes.h"
+#include "Simd/SimdDefs.h"
 
-//#define SIMD_SSE2_DEPRECATE
-
-//#define SIMD_SSSE3_DEPRECATE
-
-//#define SIMD_SSE41_DEPRECATE
-
-//#define SIMD_SSE42_DEPRECATE
-
-//#define SIMD_AVX_DEPRECATE
-
-//#define SIMD_AVX2_DEPRECATE
-
-#define SIMD_AVX2_GATHER_DEPRECATE
-
-//#define SIMD_VSX_DEPRECATE
-
-//#define SIMD_STATIC
-
-#define SIMD_LOG_ENABLE
-
-#endif//__SimdConfig_h__
+namespace Simd
+{
+#ifdef SIMD_SSE_ENABLE    
+	namespace Sse
+	{
+        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+    }
+#endif// SIMD_SSE_ENABLE
+}
+#endif//__SimdSse_h__

@@ -73,6 +73,19 @@ namespace Test
         }
     }
 
+    void FillRandom32f(View & view, float lo, float hi)
+    {
+        assert(view.format == View::Float);
+
+        for(size_t row = 0; row < view.height; ++row)
+        {
+            for(size_t col = 0; col < view.width; ++col)
+            {
+                view.At<float>(col, row) = lo + (hi - lo)*(float)Random();
+            }
+        }
+    }
+
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
         const std::string & description)
     {
@@ -205,6 +218,17 @@ namespace Test
         {
             std::cout << "Rectangles is not equal: (" << a.left << ", " << a.top << ", " << a.right  << ", " << a.bottom << ") != (" 
                 << b.left << ", " << b.top << ", " << b.right  << ", " << b.bottom << ") !" << std::endl;
+        }
+        return result;
+    }
+
+    bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError)
+    {
+        float relativeDifference = ::fabs(a - b)/Simd::Max(::fabs(a), ::fabs(b));
+        bool result = (relativeDifference <= relativeDifferenceMax);
+        if(!result && printError)
+        {
+            std::cout << "Values is not equal: " << a << " != " << b << " (relative difference = " << relativeDifference << ")!" << std::endl;
         }
         return result;
     }

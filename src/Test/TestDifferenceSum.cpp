@@ -63,10 +63,27 @@ namespace Test
 				func(a.data, a.stride, b.data, b.stride, mask.data, mask.stride, index, a.width, a.height, sum);
 			}
 		};
+
+        struct FuncF
+        {
+            typedef float (*FuncPtr)(const float * a, const float * b, size_t size);
+
+            FuncPtr func;
+            std::string description;
+
+            FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & a, const View & b, float * sum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                *sum = func((float*)a.data, (float*)b.data, a.width);
+            }
+        };
 	}
 
 #define FUNC_S(function) FuncS(function, #function)
 #define FUNC_M(function) FuncM(function, #function)
+#define FUNC_F(function) FuncF(function, #function)
 
 	bool DifferenceSumsAutoTest(int width, int height, const FuncS & f1, const FuncS & f2, int count)
 	{
@@ -136,6 +153,40 @@ namespace Test
         result = result && DifferenceSumsMaskedAutoTest(W, H, f1, f2, count);
         result = result && DifferenceSumsMaskedAutoTest(W + O, H - O, f1, f2, count);
         result = result && DifferenceSumsMaskedAutoTest(W - O, H + O, f1, f2, count);
+
+        return result;
+    }
+
+    bool DifferenceSum32fAutoTest(int size, const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << size << "]." << std::endl;
+
+        View a(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(a);
+
+        View b(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(b);
+
+        float s1, s2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, &s1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
+
+        result = Compare(s1, s2, 0.001f, true);
+
+        return result;
+    }
+
+    bool DifferenceSum32fAutoTest(const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fAutoTest(S, f1, f2);
+        result = result && DifferenceSum32fAutoTest(S + O, f1, f2);
+        result = result && DifferenceSum32fAutoTest(S - O, f1, f2);
 
         return result;
     }
@@ -284,6 +335,30 @@ namespace Test
         return result;
     }
 
+    bool SquaredDifferenceSum32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if(Simd::Sse::Enable)
+            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Sse::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if(Simd::Avx::Enable)
+            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Avx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Vsx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool DifferenceSumsDataTest(bool create, int width, int height, const FuncS & f, int count)
@@ -426,6 +501,57 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsMaskedDataTest(create, DW, DH, FUNC_M(SimdSquaredDifferenceSumMasked), 1);
+
+        return result;
+    }
+
+    bool DifferenceSum32fDataTest(bool create, int size, const FuncF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "]." << std::endl;
+
+        View a(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View b(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        float s1, s2;
+
+        if(create)
+        {
+            FillRandom32f(a);
+            FillRandom32f(b);
+
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(a, b, &s1);
+
+            TEST_SAVE(s1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+
+            TEST_LOAD(s1);
+
+            f.Call(a, b, &s2);
+
+            TEST_SAVE(s2);
+
+            result = result && Compare(s1, s2, 0.001f, true);
+        }
+
+        return result;
+    }
+
+    bool SquaredDifferenceSum32fDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fDataTest(create, DS, FUNC_F(SimdSquaredDifferenceSum32f));
 
         return result;
     }
