@@ -24,23 +24,23 @@
 #ifndef __SimdConfig_h__
 #define __SimdConfig_h__
 
-//#define SIMD_SSE_DEPRECATE
+//#define SIMD_SSE_DISABLE
 
-//#define SIMD_SSE2_DEPRECATE
+//#define SIMD_SSE2_DISABLE
 
-//#define SIMD_SSSE3_DEPRECATE
+//#define SIMD_SSSE3_DISABLE
 
-//#define SIMD_SSE41_DEPRECATE
+//#define SIMD_SSE41_DISABLE
 
-//#define SIMD_SSE42_DEPRECATE
+//#define SIMD_SSE42_DISABLE
 
-//#define SIMD_AVX_DEPRECATE
+//#define SIMD_AVX_DISABLE
 
-//#define SIMD_AVX2_DEPRECATE
+//#define SIMD_AVX2_DISABLE
 
-#define SIMD_AVX2_GATHER_DEPRECATE
+#define SIMD_AVX2_GATHER_DISABLE
 
-//#define SIMD_VSX_DEPRECATE
+//#define SIMD_VSX_DISABLE
 
 //#define SIMD_STATIC
 
