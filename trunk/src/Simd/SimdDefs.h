@@ -49,31 +49,31 @@
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
-#if !defined(SIMD_SSE_DEPRECATE) && _MSC_VER >= 1200
+#if !defined(SIMD_SSE_DISABLE) && _MSC_VER >= 1200
 #define SIMD_SSE_ENABLE
 #endif
 
-#if !defined(SIMD_SSE2_DEPRECATE) && _MSC_VER >= 1300
+#if !defined(SIMD_SSE2_DISABLE) && _MSC_VER >= 1300
 #define SIMD_SSE2_ENABLE
 #endif
 
-#if !defined(SIMD_SSSE3_DEPRECATE) && _MSC_VER >= 1500
+#if !defined(SIMD_SSSE3_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSSE3_ENABLE
 #endif
 
-#if !defined(SIMD_SSE41_DEPRECATE) && _MSC_VER >= 1500
+#if !defined(SIMD_SSE41_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSE41_ENABLE
 #endif
 
-#if !defined(SIMD_SSE42_DEPRECATE) && _MSC_VER >= 1500
+#if !defined(SIMD_SSE42_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSE42_ENABLE
 #endif
 
-#if !defined(SIMD_AVX_DEPRECATE) && _MSC_FULL_VER >= 160040219
+#if !defined(SIMD_AVX_DISABLE) && _MSC_FULL_VER >= 160040219
 #define SIMD_AVX_ENABLE
 #endif
 
-#if !defined(SIMD_AVX2_DEPRECATE) && _MSC_VER >= 1700
+#if !defined(SIMD_AVX2_DISABLE) && _MSC_VER >= 1700
 #define SIMD_AVX2_ENABLE
 #endif
 
@@ -103,37 +103,37 @@
 
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if !defined(SIMD_SSE_DEPRECATE) && defined(__SSE__)
+#if !defined(SIMD_SSE_DISABLE) && defined(__SSE__)
 #define SIMD_SSE_ENABLE
 #endif
 
-#if !defined(SIMD_SSE2_DEPRECATE) && defined(__SSE2__)
+#if !defined(SIMD_SSE2_DISABLE) && defined(__SSE2__)
 #define SIMD_SSE2_ENABLE
 #endif
 
-#if !defined(SIMD_SSSE3_DEPRECATE) && defined(__SSSE3__)
+#if !defined(SIMD_SSSE3_DISABLE) && defined(__SSSE3__)
 #define SIMD_SSSE3_ENABLE
 #endif
 
-#if !defined(SIMD_SSE41_DEPRECATE) && defined(__SSE4_1__)
+#if !defined(SIMD_SSE41_DISABLE) && defined(__SSE4_1__)
 #define SIMD_SSE41_ENABLE
 #endif
 
-#if !defined(SIMD_SSE42_DEPRECATE) && defined(__SSE4_2__)
+#if !defined(SIMD_SSE42_DISABLE) && defined(__SSE4_2__)
 #define SIMD_SSE42_ENABLE
 #endif
 
-#if !defined(SIMD_AVX_DEPRECATE) && defined(__AVX__)
+#if !defined(SIMD_AVX_DISABLE) && defined(__AVX__)
 #define SIMD_AVX_ENABLE
 #endif
 
-#if !defined(SIMD_AVX2_DEPRECATE) && defined(__AVX2__)
+#if !defined(SIMD_AVX2_DISABLE) && defined(__AVX2__)
 #define SIMD_AVX2_ENABLE
 #endif
 
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if !defined(SIMD_VSX_DEPRECATE) && defined(__VSX__)
+#if !defined(SIMD_VSX_DISABLE) && defined(__VSX__)
 #define SIMD_VSX_ENABLE
 #endif
 

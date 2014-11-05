@@ -170,15 +170,15 @@ namespace Simd
                     short* pb = buffer.pbx[k];
                     const uint8_t* ps = src + (sy + k)*srcStride;
 
-#ifdef SIMD_AVX2_GATHER_DEPRECATE
+#ifdef SIMD_AVX2_GATHER_DISABLE
                     for(size_t x = 0; x < dstWidth; x++)
                         pb[x] = *(short*)(ps + buffer.ix[x]);
-#else//SIMD_AVX2_GATHER_DEPRECATE
+#else//SIMD_AVX2_GATHER_DISABLE
                     for(size_t x = 0; x < alignedWidth; x += HA)
                         Store<true>((__m256i*)(pb + x), GatherGray<true>(ps, buffer.ix + x));
                     Store<false>((__m256i*)(pb + dstWidth - A), GatherGray<false>(ps, buffer.ix + dstWidth - A));
                     Store<false>((__m256i*)(pb + dstWidth - HA), GatherGray<false>(ps, buffer.ix + dstWidth - HA));
-#endif//SIMD_AVX2_GATHER_DEPRECATE
+#endif//SIMD_AVX2_GATHER_DISABLE
 
                     for(size_t i = 0; i < bufferWidth; i += HA)
                     {
