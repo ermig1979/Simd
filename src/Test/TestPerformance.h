@@ -34,7 +34,7 @@ namespace Test
 
     class PerformanceMeasurer
     {
-		std::string	_decription;
+		std::string	_description;
         double _start;
         int _count;
         double _total;
@@ -45,7 +45,7 @@ namespace Test
         long long _size;
 
     public:
-        PerformanceMeasurer(const std::string & decription = "Unnamed");
+        PerformanceMeasurer(const std::string & description = "Unnamed");
         PerformanceMeasurer(const PerformanceMeasurer & pm);
 
         void Enter();
@@ -54,7 +54,7 @@ namespace Test
         double Average() const;
         std::string Statistic() const;
 
-        std::string Description() const { return _decription; }
+        std::string Description() const { return _description; }
 
         void Combine(const PerformanceMeasurer & other);
     };

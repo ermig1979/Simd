@@ -64,8 +64,8 @@ namespace Test
 
 	//-------------------------------------------------------------------------
 
-	PerformanceMeasurer::PerformanceMeasurer(const std::string & decription)
-        : _decription(decription)
+	PerformanceMeasurer::PerformanceMeasurer(const std::string & description)
+        : _description(description)
         , _count(0)
         , _total(0)
         , _entered(false)
@@ -76,7 +76,7 @@ namespace Test
     }
 
     PerformanceMeasurer::PerformanceMeasurer(const PerformanceMeasurer & pm)
-        : _decription(pm._decription)
+        : _description(pm._description)
         , _count(pm._count)
         , _total(pm._total)
         , _entered(pm._entered)
@@ -117,7 +117,7 @@ namespace Test
 	std::string PerformanceMeasurer::Statistic() const
     {
 		std::stringstream ss;
-        ss << _decription << ": ";
+        ss << _description << ": ";
         ss << std::setprecision(0) << std::fixed << _total*1000 << " ms";
         ss << " / " << _count << " = ";
         ss << std::setprecision(3) << std::fixed << Average()*1000.0 << " ms";
