@@ -104,6 +104,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseShiftBilinear.cpp" />

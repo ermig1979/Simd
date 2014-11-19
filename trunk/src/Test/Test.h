@@ -133,6 +133,8 @@ namespace Test
     bool ReduceGray4x4AutoTest();
     bool ReduceGray5x5AutoTest();
 
+    bool Reorder16bitAutoTest();
+
     bool ResizeBilinearAutoTest();
 
     bool SegmentationShrinkRegionAutoTest();
@@ -277,6 +279,8 @@ namespace Test
     bool ReduceGray3x3DataTest(bool create);
     bool ReduceGray4x4DataTest(bool create);
     bool ReduceGray5x5DataTest(bool create);
+
+    bool Reorder16bitDataTest(bool create);
 
     bool ResizeBilinearDataTest(bool create);
 

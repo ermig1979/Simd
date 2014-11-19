@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxShiftBilinear.cpp" />

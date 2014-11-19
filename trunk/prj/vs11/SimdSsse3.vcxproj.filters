@@ -71,5 +71,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgraToYuv.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Reorder.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
