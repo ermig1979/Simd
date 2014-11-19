@@ -170,6 +170,19 @@ namespace Simd
         {
             return DivideBy16<compensation>(s0[x0] + 2*s0[x1] + s0[x2] + (s1[x0] + 2*s1[x1] + s1[x2])*2 + s2[x0] + 2*s2[x1] + s2[x2]);
         }
+
+        SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
+        {
+#if 0
+            uint8_t src0 = src[0];
+            uint8_t src1 = src[1];
+            dst[0] = src1;
+            dst[1] = src0;
+#else
+            uint16_t value = *(uint16_t*)src;
+            *(uint16_t*)dst = value >> 8 | value << 8;
+#endif            
+        }
 	}
 
 #ifdef SIMD_SSE_ENABLE

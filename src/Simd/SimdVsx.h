@@ -206,6 +206,8 @@ namespace Simd
         void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
 
+        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
+
         void ResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 

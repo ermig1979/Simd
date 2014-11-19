@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3ReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp" />
   </ItemGroup>

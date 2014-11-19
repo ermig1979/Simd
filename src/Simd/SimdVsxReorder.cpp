@@ -1,0 +1,68 @@
+/*
+* Simd Library.
+*
+* Copyright (c) 2011-2014 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+* copies of the Software, and to permit persons to whom the Software is 
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in 
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdVsx.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdConst.h"
+#include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdMath.h"
+#include "Simd/SimdLog.h"
+
+namespace Simd
+{
+#ifdef SIMD_VSX_ENABLE  
+    namespace Vsx
+    {
+        const v128_u8 K8_PERM_REORDER_16 = SIMD_VEC_SETR_EPI8(0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
+
+        template <bool align, bool first> SIMD_INLINE void Reorder16bit(const uint8_t * src, Storer<align> & dst)
+        {
+            v128_u8 _src = Load<align>(src);
+            Store<align, first>(dst, vec_perm(_src, _src, K8_PERM_REORDER_16));
+        }
+
+        template <bool align> void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size >= A && size%2 == 0);
+
+            size_t alignedSize = AlignLo(size, A);
+            Storer<align> _dst(dst);
+            Reorder16bit<align, true>(src, _dst);
+            for(size_t i = A; i < alignedSize; i += A)
+                Reorder16bit<align, false>(src + i, _dst);
+            Flush(_dst);
+            for(size_t i = alignedSize; i < size; i += 2)
+                Base::Reorder16bit(src + i, dst + i);
+        }
+
+        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            if(Aligned(src) && Aligned(dst))
+                Reorder16bit<true>(src, size, dst);
+            else
+                Reorder16bit<false>(src, size, dst);
+        }
+    }
+#endif// SIMD_VSX_ENABLE
+}

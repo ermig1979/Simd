@@ -184,6 +184,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(ReduceGray4x4AutoTest);
     EXECUTE_AUTO_TEST(ReduceGray5x5AutoTest);
 
+    EXECUTE_AUTO_TEST(Reorder16bitAutoTest);
+
     EXECUTE_AUTO_TEST(ResizeBilinearAutoTest);
 
     EXECUTE_AUTO_TEST(ShiftBilinearAutoTest);
@@ -358,6 +360,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(ReduceGray3x3DataTest);
     EXECUTE_DATA_TEST(ReduceGray4x4DataTest);
     EXECUTE_DATA_TEST(ReduceGray5x5DataTest);
+
+    EXECUTE_DATA_TEST(Reorder16bitDataTest);
 
     EXECUTE_DATA_TEST(ResizeBilinearDataTest);
 
