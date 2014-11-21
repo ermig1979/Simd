@@ -180,7 +180,19 @@ namespace Simd
         SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
         {
             uint32_t value = *(uint32_t*)src;
-            *(uint32_t*)dst = (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 | (value & 0x00FF0000) >> 8 | (value & 0xFF000000) >> 24;
+            *(uint32_t*)dst = 
+                (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 | 
+                (value & 0x00FF0000) >> 8 | (value & 0xFF000000) >> 24;
+        }
+
+        SIMD_INLINE void Reorder64bit(const uint8_t * src, uint8_t * dst)
+        {
+            uint64_t value = *(uint64_t*)src;
+            *(uint64_t*)dst = 
+                (value & 0x00000000000000FF) << 56 | (value & 0x000000000000FF00) << 40 | 
+                (value & 0x0000000000FF0000) << 24 | (value & 0x00000000FF000000) << 8 | 
+                (value & 0x000000FF00000000) >> 8  | (value & 0x0000FF0000000000) >> 24 | 
+                (value & 0x00FF000000000000) >> 40 | (value & 0xFF00000000000000) >> 56;
         }
 	}
 

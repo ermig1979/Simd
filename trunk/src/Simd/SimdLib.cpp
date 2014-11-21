@@ -1511,6 +1511,31 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         Base::Reorder32bit(src, size, dst);
 }
 
+SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && size >= Avx2::A)
+        Avx2::Reorder64bit(src, size, dst);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && size >= Ssse3::A)
+        Ssse3::Reorder64bit(src, size, dst);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && size >= Sse2::A)
+        Sse2::Reorder64bit(src, size, dst);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && size >= Vsx::A)
+        Vsx::Reorder64bit(src, size, dst);
+    else
+#endif
+        Base::Reorder64bit(src, size, dst);
+}
+
 SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
     uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 {

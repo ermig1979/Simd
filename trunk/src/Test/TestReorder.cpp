@@ -139,6 +139,35 @@ namespace Test
         return result;
     }
 
+    bool Reorder64bitAutoTest()
+    {
+        bool result = true;
+
+        result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder64bit), FUNC(SimdReorder64bit), 8);
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Sse2::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Ssse3::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Vsx::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool ReorderDataTest(bool create, int size, const Func & f)
@@ -181,7 +210,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderDataTest(create, DS*2, FUNC(SimdReorder16bit));
+        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder16bit));
 
         return result;
     }
@@ -190,7 +219,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderDataTest(create, DS*4, FUNC(SimdReorder32bit));
+        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder32bit));
+
+        return result;
+    }
+
+    bool Reorder64bitDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder64bit));
 
         return result;
     }

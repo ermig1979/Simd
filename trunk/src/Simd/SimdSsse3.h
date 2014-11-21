@@ -60,6 +60,8 @@ namespace Simd
 
         void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
+        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
+
         void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

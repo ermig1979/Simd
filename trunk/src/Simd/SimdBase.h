@@ -239,6 +239,8 @@ namespace Simd
 
         void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
+        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
+
         void EstimateAlphaIndex(size_t srcSize, size_t dstSize, int * indexes, int * alphas, size_t channelCount);
 
         void ResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,

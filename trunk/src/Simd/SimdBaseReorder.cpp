@@ -50,12 +50,35 @@ namespace Simd
                 Reorder16bit(src + i, dst + i);
         }
 
+        SIMD_INLINE void Reorder32bitX(const uint8_t * src, uint8_t * dst)
+        {
+#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+            size_t value = *(size_t*)src;
+            *(size_t*)dst = 
+                (value & 0x000000FF000000FF) << 24 | (value & 0x0000FF000000FF00) << 8 | 
+                (value & 0x00FF000000FF0000) >> 8 | (value & 0xFF000000FF000000) >> 24;
+#else
+            Reorder32bit(src, dst);
+#endif
+        }
+
         void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         {
             assert(size%4 == 0);
 
-            for(size_t i = 0; i < size; i += 4)
+            size_t alignedSize = AlignLo(size, sizeof(size_t));
+            for(size_t i = 0; i < alignedSize; i += sizeof(size_t))
+                Reorder32bitX(src + i, dst + i);
+            for(size_t i = alignedSize; i < size; i += 4)
                 Reorder32bit(src + i, dst + i);
+        }
+
+        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size%8 == 0);
+
+            for(size_t i = 0; i < size; i += 8)
+                Reorder64bit(src + i, dst + i);
         }
     }
 }

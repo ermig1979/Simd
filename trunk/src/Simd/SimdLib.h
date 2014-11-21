@@ -1665,10 +1665,10 @@ extern "C"
     * \short Performs bytes reordering for data array. 
     *
     * For every 4 bytes:
-    * \n dst[2*i + 0] = src[2*i + 3];
-    * \n dst[2*i + 1] = src[2*i + 2];
-    * \n dst[2*i + 2] = src[2*i + 1];
-    * \n dst[2*i + 3] = src[2*i + 0];
+    * \n dst[4*i + 0] = src[4*i + 3];
+    * \n dst[4*i + 1] = src[4*i + 2];
+    * \n dst[4*i + 2] = src[4*i + 1];
+    * \n dst[4*i + 3] = src[4*i + 0];
     * 
     * The data size must be a multiple of 4. 
     *
@@ -1677,6 +1677,29 @@ extern "C"
     * \param [out] dst - a pointer to the output data.
     */
     SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
+
+    /**
+    * \fn void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
+    *
+    * \short Performs bytes reordering for data array. 
+    *
+    * For every 8 bytes:
+    * \n dst[8*i + 0] = src[8*i + 7];
+    * \n dst[8*i + 1] = src[8*i + 6];
+    * \n dst[8*i + 2] = src[8*i + 5];
+    * \n dst[8*i + 3] = src[8*i + 4];
+    * \n dst[8*i + 4] = src[8*i + 3];
+    * \n dst[8*i + 5] = src[8*i + 2];
+    * \n dst[8*i + 6] = src[8*i + 1];
+    * \n dst[8*i + 7] = src[8*i + 0];
+    * 
+    * The data size must be a multiple of 8. 
+    *
+    * \param [in] src - a pointer to the input data.
+    * \param [in] size - a size of input and output data.
+    * \param [out] dst - a pointer to the output data.
+    */
+    SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
     /**
     * \fn void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
