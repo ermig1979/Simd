@@ -61,6 +61,35 @@ namespace Simd
             else
                 Reorder16bit<false>(src, size, dst);
         }
+
+        const __m256i K8_SHUFFLE_REORDER_32 = SIMD_MM256_SETR_EPI8(
+            0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC,
+            0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC);
+
+        template <bool align> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
+        {
+            __m256i _src = Load<align>((__m256i*)src);
+            Store<align>((__m256i*)dst, _mm256_shuffle_epi8(_src, K8_SHUFFLE_REORDER_32));
+        }
+
+        template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size >= A && size%4 == 0);
+
+            size_t alignedSize = AlignLo(size, A);
+            for(size_t i = 0; i < alignedSize; i += A)
+                Reorder32bit<align>(src + i, dst + i);
+            for(size_t i = alignedSize; i < size; i += 4)
+                Base::Reorder32bit(src + i, dst + i);
+        }
+
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            if(Aligned(src) && Aligned(dst))
+                Reorder32bit<true>(src, size, dst);
+            else
+                Reorder32bit<false>(src, size, dst);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

@@ -134,6 +134,7 @@ namespace Test
     bool ReduceGray5x5AutoTest();
 
     bool Reorder16bitAutoTest();
+    bool Reorder32bitAutoTest();
 
     bool ResizeBilinearAutoTest();
 
@@ -281,6 +282,7 @@ namespace Test
     bool ReduceGray5x5DataTest(bool create);
 
     bool Reorder16bitDataTest(bool create);
+    bool Reorder32bitDataTest(bool create);
 
     bool ResizeBilinearDataTest(bool create);
 

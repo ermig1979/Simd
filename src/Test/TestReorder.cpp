@@ -74,9 +74,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderAutoTest(W*H*bytes, f1, f2);
-        result = result && ReorderAutoTest((W*H + O)*bytes, f1, f2);
-        result = result && ReorderAutoTest((W*H - O)*bytes, f1, f2);
+        result = result && ReorderAutoTest(W*H, f1, f2);
+        result = result && ReorderAutoTest(W*H + O*bytes, f1, f2);
+        result = result && ReorderAutoTest(W*H - O*bytes, f1, f2);
 
         return result;
     }
@@ -109,6 +109,35 @@ namespace Test
 
 		return result;
 	}
+
+    bool Reorder32bitAutoTest()
+    {
+        bool result = true;
+
+        result = result && ReorderAutoTest(FUNC(Simd::Base::Reorder32bit), FUNC(SimdReorder32bit), 4);
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Sse2::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Ssse3::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Vsx::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif 
+
+        return result;
+    }
 
     //-----------------------------------------------------------------------
 
@@ -153,6 +182,15 @@ namespace Test
         bool result = true;
 
         result = result && ReorderDataTest(create, DS*2, FUNC(SimdReorder16bit));
+
+        return result;
+    }
+
+    bool Reorder32bitDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && ReorderDataTest(create, DS*4, FUNC(SimdReorder32bit));
 
         return result;
     }

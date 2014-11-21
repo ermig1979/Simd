@@ -173,15 +173,14 @@ namespace Simd
 
         SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
         {
-#if 0
-            uint8_t src0 = src[0];
-            uint8_t src1 = src[1];
-            dst[0] = src1;
-            dst[1] = src0;
-#else
             uint16_t value = *(uint16_t*)src;
             *(uint16_t*)dst = value >> 8 | value << 8;
-#endif            
+        }
+
+        SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
+        {
+            uint32_t value = *(uint32_t*)src;
+            *(uint32_t*)dst = (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 | (value & 0x00FF0000) >> 8 | (value & 0xFF000000) >> 24;
         }
 	}
 
