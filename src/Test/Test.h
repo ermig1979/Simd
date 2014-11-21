@@ -135,6 +135,7 @@ namespace Test
 
     bool Reorder16bitAutoTest();
     bool Reorder32bitAutoTest();
+    bool Reorder64bitAutoTest();
 
     bool ResizeBilinearAutoTest();
 
@@ -283,6 +284,7 @@ namespace Test
 
     bool Reorder16bitDataTest(bool create);
     bool Reorder32bitDataTest(bool create);
+    bool Reorder64bitDataTest(bool create);
 
     bool ResizeBilinearDataTest(bool create);
 
