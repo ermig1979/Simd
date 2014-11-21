@@ -29,12 +29,33 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE void Reorder16bitX(const uint8_t * src, uint8_t * dst)
+        {
+            size_t value = *(size_t*)src;
+#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+            *(size_t*)dst = (value & 0xFF00FF00FF00FF00) >> 8 | (value & 0x00FF00FF00FF00FF) << 8;
+#else
+            *(size_t*)dst = (value & 0xFF00FF00) >> 8 | (value & 0x00FF00FF) << 8;
+#endif
+        }
+
         void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         {
             assert(size%2 == 0);
 
-            for(size_t i = 0; i < size; i += 2)
+            size_t alignedSize = AlignLo(size, sizeof(size_t));
+            for(size_t i = 0; i < alignedSize; i += sizeof(size_t))
+                Reorder16bitX(src + i, dst + i);
+            for(size_t i = alignedSize; i < size; i += 2)
                 Reorder16bit(src + i, dst + i);
+        }
+
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size%4 == 0);
+
+            for(size_t i = 0; i < size; i += 4)
+                Reorder32bit(src + i, dst + i);
         }
     }
 }

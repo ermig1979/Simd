@@ -63,6 +63,36 @@ namespace Simd
             else
                 Reorder16bit<false>(src, size, dst);
         }
+
+        const v128_u8 K8_PERM_REORDER_32 = SIMD_VEC_SETR_EPI8(0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC);
+
+        template <bool align, bool first> SIMD_INLINE void Reorder32bit(const uint8_t * src, Storer<align> & dst)
+        {
+            v128_u8 _src = Load<align>(src);
+            Store<align, first>(dst, vec_perm(_src, _src, K8_PERM_REORDER_32));
+        }
+
+        template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size >= A && size%4 == 0);
+
+            size_t alignedSize = AlignLo(size, A);
+            Storer<align> _dst(dst);
+            Reorder32bit<align, true>(src, _dst);
+            for(size_t i = A; i < alignedSize; i += A)
+                Reorder32bit<align, false>(src + i, _dst);
+            Flush(_dst);
+            for(size_t i = alignedSize; i < size; i += 4)
+                Base::Reorder32bit(src + i, dst + i);
+        }
+
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            if(Aligned(src) && Aligned(dst))
+                Reorder32bit<true>(src, size, dst);
+            else
+                Reorder32bit<false>(src, size, dst);
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

@@ -33,10 +33,15 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        SIMD_INLINE __m128i Swap8(__m128i value)
+        {
+            return _mm_or_si128(_mm_srli_epi16(value, 8), _mm_slli_epi16(value, 8));
+        }
+
         template <bool align> SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
         {
             __m128i _src = Load<align>((__m128i*)src);
-            Store<align>((__m128i*)dst, _mm_or_si128(_mm_srli_epi16(_src, 8), _mm_slli_epi16(_src, 8)));
+            Store<align>((__m128i*)dst, Swap8(_src));
         }
 
         template <bool align> void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
@@ -56,6 +61,36 @@ namespace Simd
                 Reorder16bit<true>(src, size, dst);
             else
                 Reorder16bit<false>(src, size, dst);
+        }
+
+        SIMD_INLINE __m128i Swap16(__m128i value)
+        {
+            return _mm_or_si128(_mm_srli_epi32(value, 16), _mm_slli_epi32(value, 16));
+        }
+
+        template <bool align> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
+        {
+            __m128i _src = Load<align>((__m128i*)src);
+            Store<align>((__m128i*)dst, Swap16(Swap8(_src)));
+        }
+
+        template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size >= A && size%4 == 0);
+
+            size_t alignedSize = AlignLo(size, A);
+            for(size_t i = 0; i < alignedSize; i += A)
+                Reorder32bit<align>(src + i, dst + i);
+            for(size_t i = alignedSize; i < size; i += 4)
+                Base::Reorder32bit(src + i, dst + i);
+        }
+
+        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            if(Aligned(src) && Aligned(dst))
+                Reorder32bit<true>(src, size, dst);
+            else
+                Reorder32bit<false>(src, size, dst);
         }
     }
 #endif// SIMD_SSE2_ENABLE
