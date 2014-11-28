@@ -24,7 +24,273 @@
 */
 
 /** \file SimdLib.h
-* This file contains a Simd Library API functions.
+*
+* \short This file contains a Simd Library API functions.
+*/
+
+/**
+*  @defgroup functions API Functions
+*
+*  \short Functions of Simd Library C API.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup info Info
+*
+*  \short Functions with information about library.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup hash Hash Functions
+*
+*  \short Functions for hash estimation.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup reordering Byte Reordering
+*
+*  \short Functions for bytes reordering.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup conversion Conversion
+*
+*  \short Functions for image format conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup bayer_conversion Bayer 
+*
+*  \short Functions for Bayer image conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup bgr_conversion BGR-24 
+*
+*  \short Functions for BGR-24 image conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup bgra_conversion BGRA-32 
+*
+*  \short Functions for BGRA-32 image conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup gray_conversion Gray-8 
+*
+*  \short Functions for Gray-8 image conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup yuv_conversion YUV 
+*
+*  \short Functions for YUV image conversions.
+*/
+
+/** @ingroup conversion
+*
+*  @defgroup other_conversion Other 
+*
+*  \short Functions for other image format conversions.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup drawing Drawing
+*
+*  \short Functions for image drawing.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup correlation Correlation
+*
+*  \short Functions for estimation of correlation.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup histogram Histogram
+*
+*  \short Functions for estimation of image histogram.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup integral Integral
+*
+*  \short Functions for estimation of integral image.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup operation Operations
+*
+*  \short Various mathematical operations with images.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup filter Filters
+*
+*  \short Various image filters.
+*/
+
+/** @ingroup filter
+*
+*  @defgroup median_filter Median Filters
+*
+*  \short Median image filters.
+*/
+
+/** @ingroup filter
+*
+*  @defgroup sobel_filter Sobel Filters
+*
+*  \short Sobel image filters.
+*/
+
+/** @ingroup filter
+*
+*  @defgroup other_filter Other Filters
+*
+*  \short Other image filters.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup resizing Resizing
+*
+*  \short Functions for image resizing.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup shifting Shifting
+*
+*  \short Functions for image shifting.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup copying Copying
+*
+*  \short Functions for image copying.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup filling Filling
+*
+*  \short Functions for image filling.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup binarization Binarization
+*
+*  \short Functions for image binarization.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup statistic Statistic
+*
+*  \short Functions for image statistic estimation.
+*/
+
+/** @ingroup statistic
+*
+*  @defgroup conditional Conditional
+*
+*  \short Functions for conditional estimation of image statistic.
+*/
+
+/** @ingroup statistic
+*
+*  @defgroup col_statistic Columns Statistic
+*
+*  \short Estimation of image statistic for separate columns.
+*/
+
+/** @ingroup statistic
+*
+*  @defgroup row_statistic Rows Statistic
+*
+*  \short Estimation of image statistic for separate rows.
+*/
+
+/** @ingroup statistic
+*
+*  @defgroup other_statistic Other Statistic
+*
+*  \short Estimation of various image statistic.
+*/
+
+/** @ingroup functions
+*
+*  @defgroup motion_detection Motion Detection
+*
+*  \short Functions for motion detection.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup texture_estimation Texture Estimation
+*
+*  \short Functions for estimation of background texture.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup difference_estimation Difference Estimation
+*
+*  \short Functions for estimation of difference between current frame and background.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup segmentation Segmentation
+*
+*  \short Functions for image segmentation.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup interference Interference Detection
+*
+*  \short Functions for detection of interference in motion detection algorithm.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup contour Contour Extraction
+*
+*  \short Functions for contour extraction.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup background Background Updating
+*
+*  \short Functions for background updating.
+*/
+
+/** @ingroup motion_detection
+*
+*  @defgroup edge_background Edge Background Updating
+*
+*  \short Functions for edge background updating.
 */
 
 #ifndef __SimdLib_h__
@@ -47,7 +313,8 @@ extern "C"
 {
 #endif//__cplusplus
 
-    /**
+    /** @ingroup info
+    *
     * \fn const char * SimdVersion();
     *
     * \short Gets version of Simd Library.
@@ -56,7 +323,8 @@ extern "C"
     */
     SIMD_API const char * SimdVersion();
 
-    /**
+    /** @ingroup hash
+    *
     * \fn uint32_t SimdCrc32c(const void * src, size_t size);
     *
     * \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.
@@ -69,7 +337,8 @@ extern "C"
     */
     SIMD_API uint32_t SimdCrc32c(const void * src, size_t size);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of absolute difference of two gray 8-bit images. 
@@ -87,7 +356,8 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of absolute difference of two gray 8-bit images based on gray 8-bit mask. 
@@ -109,7 +379,8 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
     *
     * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3. 
@@ -129,7 +400,8 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
         size_t width, size_t height, uint64_t * sums);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
     *
     * \short Gets 9 sums of absolute difference of two gray 8-bit images with various relative shifts in neighborhood 3x3 based on gray 8-bit mask. 
@@ -153,7 +425,8 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
         const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-    /**
+    /** @ingroup other_filter
+    *
     * \fn void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. 
@@ -175,7 +448,8 @@ extern "C"
     SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup difference_estimation
+    *
     * \fn void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, uint16_t weight, uint8_t * difference, size_t differenceStride);
     *
     * \short Adds feature difference to common difference sum. 
@@ -205,7 +479,8 @@ extern "C"
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
         uint16_t weight, uint8_t * difference, size_t differenceStride);
 
-    /**
+    /** @ingroup drawing
+    *
     * \fn void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
     *
     * \short Performs alpha blending operation. 
@@ -230,7 +505,8 @@ extern "C"
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
     *
     * \short Performs background update (initial grow, slow mode). 
@@ -255,7 +531,8 @@ extern "C"
     SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
     *
     * \short Performs background update (initial grow, fast mode). 
@@ -280,7 +557,8 @@ extern "C"
     SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride, uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
     *
     * \short Performs collection of background statistic. 
@@ -310,7 +588,8 @@ extern "C"
         const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
         uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
     *
     * \short Performs adjustment of background range. 
@@ -343,7 +622,8 @@ extern "C"
         uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
     *
     * \short Performs adjustment of background range with using adjust range mask. 
@@ -378,7 +658,8 @@ extern "C"
         uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
     *
     * \short Shifts background range. 
@@ -413,7 +694,8 @@ extern "C"
     SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
     *
     * \short Shifts background range with using shift range mask. 
@@ -450,7 +732,8 @@ extern "C"
     SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-    /**
+    /** @ingroup background
+    *
     * \fn void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
     *
     * \short Creates background update mask. 
@@ -474,7 +757,8 @@ extern "C"
     SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup bayer_conversion
+    *
     * \fn void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts 8-bit Bayer image to 24-bit BGR. 
@@ -491,7 +775,8 @@ extern "C"
     */
     SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
-    /**
+    /** @ingroup bayer_conversion
+    *
     * \fn void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts 8-bit Bayer image to 32-bit BGRA. 
@@ -509,7 +794,8 @@ extern "C"
     */
     SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup bgra_conversion
+    *
     * \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
     *
     * \short Converts 32-bit BGRA image to 8-bit Bayer image. 
@@ -526,7 +812,8 @@ extern "C"
     */
     SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-    /**
+    /** @ingroup bgra_conversion
+    *
     * \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts 32-bit BGRA image to 24-bit BGR image. 
@@ -542,7 +829,8 @@ extern "C"
     */
     SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
-    /**
+    /** @ingroup bgra_conversion
+    *
     * \fn void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
     *
     * \short Converts 32-bit BGRA image to 8-bit gray image. 
@@ -558,7 +846,8 @@ extern "C"
     */
     SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
-    /**
+    /** @ingroup bgra_conversion
+    *
 	* \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Converts 32-bit BGRA image to YUV420P. 
@@ -579,7 +868,8 @@ extern "C"
 	*/
     SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /**
+    /** @ingroup bgra_conversion
+    *
 	* \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Converts 32-bit BGRA image to YUV444P. 
@@ -599,7 +889,8 @@ extern "C"
 	*/
     SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /**
+    /** @ingroup bgr_conversion
+    *
     * \fn void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
     *
     * \short Converts 24-bit BGR image to 8-bit Bayer image. 
@@ -616,7 +907,8 @@ extern "C"
     */
     SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-    /**
+    /** @ingroup bgr_conversion
+    *
     * \fn void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts 24-bit BGR image to 32-bit BGRA image. 
@@ -633,7 +925,8 @@ extern "C"
     */
     SIMD_API void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup other_conversion
+    *
     * \fn void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height, const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts 48-bit planar BGR image to 32-bit BGRA image. 
@@ -655,7 +948,8 @@ extern "C"
     SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
         const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup bgr_conversion
+    *
     * \fn void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
     *
     * \short Converts 24-bit BGR image to 8-bit gray image. 
@@ -671,7 +965,8 @@ extern "C"
     */
     SIMD_API void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
-	/**
+    /** @ingroup bgr_conversion
+    *
 	* \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Converts 24-bit BGR image to YUV420P. 
@@ -692,7 +987,8 @@ extern "C"
 	*/
     SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-	/**
+    /** @ingroup bgr_conversion
+    *
 	* \fn void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Converts 24-bit BGR image to YUV444P. 
@@ -712,7 +1008,8 @@ extern "C"
 	*/
     SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /**
+    /** @ingroup binarization
+    *
     * \fn void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
     *
     * \short Performs binarization of 8-bit gray image. 
@@ -737,7 +1034,8 @@ extern "C"
     SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    /**
+    /** @ingroup binarization
+    *
     * \fn void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
     *
     * \short Performs averaging binarization of 8-bit gray image. 
@@ -766,7 +1064,8 @@ extern "C"
         uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
         uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    /**
+    /** @ingroup conditional
+    *
     * \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
     *
     * \short Calculates number of points satisfying certain condition for 8-bit gray image. 
@@ -786,8 +1085,9 @@ extern "C"
     SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
         uint8_t value, SimdCompareType compareType, uint32_t * count);
     
-    /**
-    * \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
+    /** @ingroup conditional
+    *
+    * \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t * count);
     *
     * \short Calculates number of points satisfying certain condition for 16-bit signed integer image. 
     *
@@ -806,7 +1106,8 @@ extern "C"
     SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
         int16_t value, SimdCompareType compareType, uint32_t * count);
 
-    /**
+    /** @ingroup conditional
+    *
     * \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
     *
     * \short Calculates sum of image points when mask points satisfying certain condition. 
@@ -830,7 +1131,8 @@ extern "C"
     SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /**
+    /** @ingroup conditional
+    *
     * \fn void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
     *
     * \short Calculates sum of squared image points when mask points satisfying certain condition. 
@@ -854,7 +1156,8 @@ extern "C"
     SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /**
+    /** @ingroup conditional
+    *
     * \fn void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
     *
     * \short Calculates sum of squared gradient of image points when mask points satisfying certain condition. 
@@ -881,7 +1184,8 @@ extern "C"
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /**
+    /** @ingroup copying
+    *
     * \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
     *
     * \short Copies pixels data of image from source to destination. 
@@ -898,7 +1202,8 @@ extern "C"
     */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup copying
+    *
     * \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
     *
     * \short Copies pixels data of image from source to destination except for the portion bounded frame. 
@@ -920,7 +1225,8 @@ extern "C"
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup other_conversion
+    *
     * \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Deinterleaves 16-bit UV interleaved image into separated 8-bit U and V planar images. 
@@ -940,7 +1246,8 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
     *
     * \short Performs edge background update (initial grow, slow mode). 
@@ -962,7 +1269,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
     *
     * \short Performs edge background update (initial grow, fast mode). 
@@ -984,7 +1292,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
     *
     * \short Performs collection of edge background statistic. 
@@ -1008,7 +1317,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
     *
     * \short Performs adjustment of edge background range. 
@@ -1033,7 +1343,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
     *
     * \short Performs adjustment of edge background range with using adjust range mask. 
@@ -1060,7 +1371,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
     *
     * \short Shifts edge background range. 
@@ -1082,7 +1394,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /**
+    /** @ingroup edge_background
+    *
     * \fn void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
     *
     * \short Shifts edge background range with using shift range mask. 
@@ -1106,7 +1419,8 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
-    /**
+    /** @ingroup filling
+    *
     * \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
     *
     * \short Fills pixels data of image by given value. 
@@ -1120,7 +1434,8 @@ extern "C"
     */
     SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-    /**
+    /** @ingroup filling
+    *
     * \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
     *
     * \short Fills pixels data of image except for the portion bounded frame by given value. 
@@ -1139,7 +1454,8 @@ extern "C"
     SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
-    /**
+    /** @ingroup filling
+    *
     * \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
     *
     * \short Fills pixels data of 24-bit BGR image by given color(blue, green, red). 
@@ -1154,7 +1470,8 @@ extern "C"
     */
     SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
-    /**
+    /** @ingroup filling
+    *
     * \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
     *
     * \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha). 
@@ -1171,7 +1488,8 @@ extern "C"
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-    /**
+    /** @ingroup other_filter
+    *
     * \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
     *
     * \short Performs Gaussian blur filtration with window 3x3. 
@@ -1194,7 +1512,8 @@ extern "C"
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup gray_conversion
+    *
     * \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts 8-bit gray image to 24-bit BGR image. 
@@ -1210,7 +1529,8 @@ extern "C"
     */
     SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);
 
-    /**
+    /** @ingroup gray_conversion
+    *
     * \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts 8-bit gray image to 32-bit BGRA image. 
@@ -1228,7 +1548,8 @@ extern "C"
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup histogram
+    *
     * \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);
     *
     * \short Calculates histogram of second derivative for 8-bit gray image. 
@@ -1249,7 +1570,8 @@ extern "C"
     SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
         size_t step, size_t indent, uint32_t * histogram);
 
-    /**
+    /** @ingroup histogram
+    *
     * \fn void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
     *
     * \short Calculates histogram for 8-bit gray image. 
@@ -1265,7 +1587,8 @@ extern "C"
     */
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
-    /**
+    /** @ingroup histogram
+    *
     * \fn void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
     *
     * \short Calculates histogram for 8-bit gray image with using mask. 
@@ -1285,7 +1608,8 @@ extern "C"
     SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
-    /**
+    /** @ingroup integral
+    *
     * \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
     *
     * \short Calculates integral images for input 8-bit gray image. 
@@ -1310,7 +1634,8 @@ extern "C"
         uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
         SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
-    /**
+    /** @ingroup interference
+    *
     * \fn void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
     *
     * \short Increments statistic of interference detector. 
@@ -1329,7 +1654,8 @@ extern "C"
     */
     SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
-    /**
+    /** @ingroup interference
+    *
     * \fn void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
     *
     * \short Increments statistic of interference detector with using segmentation mask. 
@@ -1353,7 +1679,8 @@ extern "C"
     SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
         uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
-    /**
+    /** @ingroup interference
+    *
     * \fn void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
     *
     * \short Decrements statistic of interference detector. 
@@ -1372,7 +1699,8 @@ extern "C"
     */
     SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
 
-    /**
+    /** @ingroup interference
+    *
     * \fn void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
     *
     * \short Decrements statistic of interference detector with using segmentation mask. 
@@ -1396,7 +1724,8 @@ extern "C"
     SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
         uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
-    /**
+    /** @ingroup other_filter
+    *
     * \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates LBP (Local Binary Patterns) for 8-bit gray image. 
@@ -1412,7 +1741,8 @@ extern "C"
     */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup median_filter
+    *
     * \fn void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
     *
     * \short Performs median filtration of input image (filter window is a rhomb 3x3). 
@@ -1430,7 +1760,8 @@ extern "C"
     SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup median_filter
+    *
     * \fn void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
     *
     * \short Performs median filtration of input image (filter window is a rhomb 5x5). 
@@ -1448,7 +1779,8 @@ extern "C"
     SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup median_filter
+    *
     * \fn void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
     *
     * \short Performs median filtration of input image (filter window is a square 3x3). 
@@ -1466,7 +1798,8 @@ extern "C"
     SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup median_filter
+    *
     * \fn void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
     *
     * \short Performs median filtration of input image (filter window is a square 5x5). 
@@ -1484,7 +1817,8 @@ extern "C"
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup operation
+    *
     * \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
     *
     * \short Performs given operation between two images. 
@@ -1505,7 +1839,8 @@ extern "C"
     SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
-    /**
+    /** @ingroup operation
+    *
     * \fn void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
     *
     * \short Performs given operation between two images. 
@@ -1525,7 +1860,8 @@ extern "C"
     SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-    /**
+    /** @ingroup operation
+    *
     * \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
     *
     * \short Calculates result 8-bit gray image as product of two vectors. 
@@ -1543,7 +1879,8 @@ extern "C"
     SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2. 
@@ -1565,7 +1902,8 @@ extern "C"
     SIMD_API void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3. 
@@ -1590,7 +1928,8 @@ extern "C"
     SIMD_API void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 4x4. 
@@ -1615,7 +1954,8 @@ extern "C"
     SIMD_API void SimdReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5. 
@@ -1642,7 +1982,8 @@ extern "C"
     SIMD_API void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
 
-    /**
+    /** @ingroup reordering
+    *
     * \fn void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
     *
     * \short Performs bytes reordering for data array. 
@@ -1659,7 +2000,8 @@ extern "C"
     */
     SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
     
-    /**
+    /** @ingroup reordering
+    *
     * \fn void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
     *
     * \short Performs bytes reordering for data array. 
@@ -1678,7 +2020,8 @@ extern "C"
     */
     SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-    /**
+    /** @ingroup reordering
+    *
     * \fn void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
     *
     * \short Performs bytes reordering for data array. 
@@ -1701,7 +2044,8 @@ extern "C"
     */
     SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
     *
     * \short Performs resizing of input image with using bilinear interpolation. 
@@ -1721,7 +2065,8 @@ extern "C"
     SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
-    /**
+    /** @ingroup segmentation
+    *
     * \fn void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
     *
     * \short Changes certain index in mask. 
@@ -1740,7 +2085,8 @@ extern "C"
     */
     SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
-    /**
+    /** @ingroup segmentation
+    *
     * \fn void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
     *
     * \short Fill single holes in mask. 
@@ -1755,7 +2101,8 @@ extern "C"
     */
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
-    /**
+    /** @ingroup segmentation
+    *
     * \fn void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
     *
     * \short Propagates mask index from parent (upper) to child (lower) level of mask pyramid with using 2x2 scan window. 
@@ -1780,7 +2127,8 @@ extern "C"
         uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
         uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
 
-    /**
+    /** @ingroup segmentation
+    *
     * \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
     *
     * \short Finds actual region of mask index location. 
@@ -1800,7 +2148,8 @@ extern "C"
     SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 
-    /**
+    /** @ingroup shifting
+    *
     * \fn void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
     *
     * \short Performs shifting of input image with using bilinear interpolation. 
@@ -1827,7 +2176,8 @@ extern "C"
         const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY,
         size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup sobel_filter
+    *
     * \fn void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates Sobel's filter along x axis. 
@@ -1846,7 +2196,8 @@ extern "C"
     */
     SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup sobel_filter
+    *
     * \fn void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates absolute value of Sobel's filter along x axis. 
@@ -1865,7 +2216,8 @@ extern "C"
     */
     SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup sobel_filter
+    *
     * \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates Sobel's filter along y axis. 
@@ -1884,7 +2236,8 @@ extern "C"
     */
     SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     
-    /**
+    /** @ingroup sobel_filter
+    *
     * \fn void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates absolute value of Sobel's filter along y axis. 
@@ -1903,7 +2256,8 @@ extern "C"
     */
     SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup contour
+    *
     * \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
     *
     * \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis. 
@@ -1925,7 +2279,8 @@ extern "C"
     */
     SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup contour
+    *
     * \fn void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
     *
     * \short Calculates contour metrics based on absolute value and direction of Sobel's filter along y and y axis with using mask. 
@@ -1951,7 +2306,8 @@ extern "C"
     SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup contour
+    *
     * \fn void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
     *
     * \short Extract contour anchors from contour metrics. 
@@ -1978,7 +2334,8 @@ extern "C"
     */
     SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Calculates sum of squared differences for two 8-bit gray images. 
@@ -1999,7 +2356,8 @@ extern "C"
     SIMD_API void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
     *
     * \short Calculates sum of squared differences for two images with using mask. 
@@ -2023,7 +2381,8 @@ extern "C"
     SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup correlation
+    *
     * \fn float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
     *
     * \short Calculates sum of squared differences for two 32-bit float arrays. 
@@ -2040,7 +2399,8 @@ extern "C"
     */
     SIMD_API float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
 
-    /**
+    /** @ingroup other_statistic
+    *
     * \fn void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t * min, uint8_t * max, uint8_t * average);
     *
     * \short Finds minimal, maximal and average pixel values for given image. 
@@ -2058,7 +2418,8 @@ extern "C"
     SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t * min, uint8_t * max, uint8_t * average);
 
-    /**
+    /** @ingroup other_statistic
+    *
     * \fn void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
     *
     * \short Calculate statistical characteristics (moments) of pixels with given index. 
@@ -2088,7 +2449,8 @@ extern "C"
     SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
-    /**
+    /** @ingroup row_statistic
+    *
     * \fn void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
     *
     * \short Calculate sums of rows for given 8-bit gray image. 
@@ -2105,7 +2467,8 @@ extern "C"
     */
     SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /**
+    /** @ingroup col_statistic
+    *
     * \fn void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
     *
     * \short Calculate sums of columns for given 8-bit gray image. 
@@ -2122,7 +2485,8 @@ extern "C"
     */
     SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /**
+    /** @ingroup row_statistic
+    *
     * \fn void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
     *
     * \short Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. 
@@ -2140,7 +2504,8 @@ extern "C"
     */
     SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /**
+    /** @ingroup col_statistic
+    *
     * \fn void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
     *
     * \short Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image. 
@@ -2158,7 +2523,8 @@ extern "C"
     */
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /**
+    /** @ingroup other_statistic
+    *
     * \fn void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of value of pixels for gray 8-bit image. 
@@ -2171,7 +2537,8 @@ extern "C"
     */
     SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup other_statistic
+    *
     * \fn void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
     *
     * \short Gets sum of squared value of pixels for gray 8-bit image . 
@@ -2184,7 +2551,8 @@ extern "C"
     */
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-    /**
+    /** @ingroup resizing
+    *
     * \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
     *
     * \short Stretches input 8-bit gray image in two times. 
@@ -2201,7 +2569,8 @@ extern "C"
     SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /**
+    /** @ingroup texture_estimation
+    *
     * \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
     *
     * \short Calculates boosted saturated gradients for given input image. 
@@ -2226,7 +2595,8 @@ extern "C"
     SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
-    /**
+    /** @ingroup texture_estimation
+    *
     * \fn void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t boost, uint8_t * dst, size_t dstStride);
     *
     * \short Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format). 
@@ -2248,7 +2618,8 @@ extern "C"
     SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t boost, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup texture_estimation
+    *
     * \fn void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
     *
     * \short Calculates difference between current image and background. 
@@ -2271,7 +2642,8 @@ extern "C"
     SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
-    /**
+    /** @ingroup texture_estimation
+    *
     * \fn void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int32_t shift, uint8_t * dst, size_t dstStride);
     *
     * \short Performs brightness compensation of input image. 
@@ -2292,7 +2664,8 @@ extern "C"
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts YUV420P image to 24-bit BGR image. 
@@ -2314,7 +2687,8 @@ extern "C"
     SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
     *
     * \short Converts YUV444P image to 24-bit BGR image. 
@@ -2335,7 +2709,8 @@ extern "C"
     SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts YUV420P image to 32-bit BGRA image. 
@@ -2358,7 +2733,8 @@ extern "C"
     SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
     *
     * \short Converts YUV444P image to 32-bit BGRA image. 
@@ -2380,7 +2756,8 @@ extern "C"
     SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
     * \short Converts YUV420P image to 8-bit image with Hue component of HSV color space. 
@@ -2402,7 +2779,8 @@ extern "C"
     SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
-    /**
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
     * \short Converts YUV444P image to 8-bit image with Hue component of HSV color space. 

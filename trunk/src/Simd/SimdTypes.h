@@ -23,7 +23,14 @@
 */
 
 /** \file SimdTypes.h
-* This file contains description of basic types of Simd Library.
+*
+* \short This file contains description of basic types of Simd Library.
+*/
+
+/**
+*  @defgroup types API Types
+*
+*  \short Types of Simd Library C API.
 */
 
 #ifndef __SimdTypes_h__
@@ -53,7 +60,8 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
- /**
+ /** @ingroup types
+ *
  * \enum SimdCompareType
  *
  * Describes types of compare operation.
@@ -75,7 +83,8 @@ typedef enum SimdCompareType
     SimdCompareLesserOrEqual,   
 } SimdCompareType;
 
- /**
+ /** @ingroup types
+ *
  * \enum SimdOperationBinary8uType
  *
  * Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
@@ -95,7 +104,8 @@ typedef enum SimdOperationBinary8uType
     SimdOperationBinary8uSaturatedAddition,
 } SimdOperationBinary8uType;
 
- /**
+ /** @ingroup types
+ *
  * \enum SimdOperationBinary16iType
  *
  * Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
@@ -107,7 +117,8 @@ typedef enum SimdOperationBinary16iType
     SimdOperationBinary16iAddition,
 } SimdOperationBinary16iType;
 
- /**
+ /** @ingroup types
+ *
  * \enum SimdPixelFormatType
  *
  * Describes pixel format types of an image.
