@@ -118,7 +118,7 @@ namespace Simd
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
         {
             assert(*left < *right && *top < *bottom);
-            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)width);
+            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
 
             bool search = true;
             for (ptrdiff_t row = *top; search && row < *bottom; ++row)
