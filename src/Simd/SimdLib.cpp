@@ -599,6 +599,11 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 
+SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride)
+{
+    Base::BgrToHsv(bgr, width, height, bgrStride, hsv, hsvStride);
+}
+
 SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
 #ifdef SIMD_AVX2_ENABLE

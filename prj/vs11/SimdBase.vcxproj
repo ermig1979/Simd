@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBgrToHsv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseConditional.cpp" />

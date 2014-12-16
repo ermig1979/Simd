@@ -967,6 +967,23 @@ extern "C"
 
     /** @ingroup bgr_conversion
     *
+    * \fn void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
+    *
+    * \short Converts 24-bit BGR image to 24-bit HSV(Hue, Saturation, Value) image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgrStride - a row size of the bgr image.
+    * \param [out] hsv - a pointer to pixels data of output 24-bit HSV image.
+    * \param [in] hsvStride - a row size of the hsv image.
+    */
+    SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
+
+    /** @ingroup bgr_conversion
+    *
 	* \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
     *
     * \short Converts 24-bit BGR image to YUV420P. 
