@@ -55,24 +55,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\Test.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgraToBayer.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgraToBgr.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgraToGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToBayer.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToGray.cpp" />
-    <ClCompile Include="..\..\src\Test\TestBgrToYuv.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
     <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
     <ClCompile Include="..\..\src\Test\TestData.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
-    <ClCompile Include="..\..\src\Test\TestGrayToBgr.cpp" />
-    <ClCompile Include="..\..\src\Test\TestGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
     <ClCompile Include="..\..\src\Test\TestInterference.cpp" />
     <ClCompile Include="..\..\src\Test\TestReorder.cpp" />
@@ -94,9 +90,8 @@
     <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
     <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
     <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
-    <ClCompile Include="..\..\src\Test\TestYuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp" />
     <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
-    <ClCompile Include="..\..\src\Test\TestYuvToHue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\Test.h" />

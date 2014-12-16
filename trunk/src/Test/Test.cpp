@@ -82,6 +82,22 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(AddFeatureDifferenceAutoTest);
 
+    EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
+    EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
+    EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
+    EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
+
+    EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
+    EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
+
+    EXECUTE_AUTO_TEST(BgrToBgraAutoTest);
+    EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
+
+    EXECUTE_AUTO_TEST(BgraToYuv420pAutoTest);
+    EXECUTE_AUTO_TEST(BgraToYuv444pAutoTest);
+    EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
+    EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
+
     EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
     EXECUTE_AUTO_TEST(AbsDifferenceSumMaskedAutoTest);
     EXECUTE_AUTO_TEST(AbsDifferenceSums3x3AutoTest);
@@ -103,23 +119,7 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(BayerToBgraAutoTest);
 
-    EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
-
-    EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
-
-    EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
-
-    EXECUTE_AUTO_TEST(BgrToBgraAutoTest);
     EXECUTE_AUTO_TEST(Bgr48pToBgra32AutoTest);
-
-    EXECUTE_AUTO_TEST(BgrToBayerAutoTest);
-
-    EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
-
-    EXECUTE_AUTO_TEST(BgraToYuv420pAutoTest);
-    EXECUTE_AUTO_TEST(BgraToYuv444pAutoTest);
-    EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
-    EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
 
     EXECUTE_AUTO_TEST(BinarizationAutoTest);
     EXECUTE_AUTO_TEST(AveragingBinarizationAutoTest);
@@ -151,10 +151,6 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(FillFrameAutoTest);
     EXECUTE_AUTO_TEST(FillBgrAutoTest);
     EXECUTE_AUTO_TEST(FillBgraAutoTest);
-
-    EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
-
-    EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
 
     EXECUTE_AUTO_TEST(HistogramAutoTest);
     EXECUTE_AUTO_TEST(HistogramMaskedAutoTest);
@@ -223,12 +219,11 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
     EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
-
-    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false) << std::endl;
@@ -269,6 +264,22 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(AddFeatureDifferenceDataTest);
 
+    EXECUTE_DATA_TEST(BgraToBgrDataTest);
+    EXECUTE_DATA_TEST(BgraToGrayDataTest);
+    EXECUTE_DATA_TEST(BgrToGrayDataTest);
+    EXECUTE_DATA_TEST(GrayToBgrDataTest);
+
+    EXECUTE_DATA_TEST(BgraToBayerDataTest);
+    EXECUTE_DATA_TEST(BgrToBayerDataTest);
+
+    EXECUTE_DATA_TEST(BgrToBgraDataTest);
+    EXECUTE_DATA_TEST(GrayToBgraDataTest);
+
+    EXECUTE_DATA_TEST(BgraToYuv420pDataTest);
+    EXECUTE_DATA_TEST(BgraToYuv444pDataTest);
+    EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
+    EXECUTE_DATA_TEST(BgrToYuv444pDataTest);
+
     EXECUTE_DATA_TEST(AbsGradientSaturatedSumDataTest);
 
     EXECUTE_DATA_TEST(BackgroundGrowRangeSlowDataTest);
@@ -284,23 +295,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(BayerToBgraDataTest);
 
-    EXECUTE_DATA_TEST(BgraToBayerDataTest);
-
-    EXECUTE_DATA_TEST(BgraToBgrDataTest);
-
-    EXECUTE_DATA_TEST(BgraToGrayDataTest);
-
-    EXECUTE_DATA_TEST(BgrToBayerDataTest);
-
-    EXECUTE_DATA_TEST(BgrToBgraDataTest);
     EXECUTE_DATA_TEST(Bgr48pToBgra32DataTest);
-
-    EXECUTE_DATA_TEST(BgrToGrayDataTest);
-
-    EXECUTE_DATA_TEST(BgraToYuv420pDataTest);
-    EXECUTE_DATA_TEST(BgraToYuv444pDataTest);
-    EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
-    EXECUTE_DATA_TEST(BgrToYuv444pDataTest);
 
     EXECUTE_DATA_TEST(BinarizationDataTest);
     EXECUTE_DATA_TEST(AveragingBinarizationDataTest);
@@ -334,8 +329,6 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(FillBgraDataTest);
 
     EXECUTE_DATA_TEST(GaussianBlur3x3DataTest);
-
-    EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
     EXECUTE_DATA_TEST(HistogramDataTest);
     EXECUTE_DATA_TEST(HistogramMaskedDataTest);
@@ -401,12 +394,11 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(Yuv420pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
+    EXECUTE_DATA_TEST(Yuv420pToHueDataTest);
+    EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgraDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgraDataTest);
-
-    EXECUTE_DATA_TEST(Yuv420pToHueDataTest);
-    EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
 	
 end:
 

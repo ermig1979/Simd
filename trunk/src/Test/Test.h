@@ -39,6 +39,22 @@ namespace Test
 
     bool AddFeatureDifferenceAutoTest();
 
+    bool BgraToBgrAutoTest();
+    bool BgraToGrayAutoTest();
+    bool BgrToGrayAutoTest();
+    bool GrayToBgrAutoTest();
+
+    bool BgraToBayerAutoTest();
+    bool BgrToBayerAutoTest();
+
+    bool BgrToBgraAutoTest();
+    bool GrayToBgraAutoTest();
+
+    bool BgraToYuv420pAutoTest();
+    bool BgraToYuv444pAutoTest();
+    bool BgrToYuv420pAutoTest();
+    bool BgrToYuv444pAutoTest();
+
     bool BackgroundGrowRangeSlowAutoTest();
     bool BackgroundGrowRangeFastAutoTest();
     bool BackgroundIncrementCountAutoTest();
@@ -52,23 +68,7 @@ namespace Test
 
     bool BayerToBgraAutoTest();
 
-    bool BgraToBayerAutoTest();
-
-    bool BgraToBgrAutoTest();
-
-    bool BgraToGrayAutoTest();
-
-    bool BgrToBayerAutoTest();
-
-    bool BgrToBgraAutoTest();
     bool Bgr48pToBgra32AutoTest();
-
-    bool BgrToGrayAutoTest();
-
-    bool BgraToYuv420pAutoTest();
-    bool BgraToYuv444pAutoTest();
-    bool BgrToYuv420pAutoTest();
-    bool BgrToYuv444pAutoTest();
 
     bool BinarizationAutoTest();
     bool AveragingBinarizationAutoTest();
@@ -100,10 +100,6 @@ namespace Test
     bool FillFrameAutoTest();
     bool FillBgraAutoTest();
     bool FillBgrAutoTest();
-
-    bool GrayToBgrAutoTest();
-
-    bool GrayToBgraAutoTest();
 
     bool HistogramAutoTest();
     bool HistogramMaskedAutoTest();
@@ -172,12 +168,11 @@ namespace Test
 
     bool Yuv444pToHueAutoTest();
     bool Yuv420pToHueAutoTest();
+    bool Yuv444pToBgraAutoTest();
+    bool Yuv420pToBgraAutoTest();
 
     bool Yuv444pToBgrAutoTest();
     bool Yuv420pToBgrAutoTest();
-
-    bool Yuv444pToBgraAutoTest();
-    bool Yuv420pToBgraAutoTest();
 
     /***************************** Data Tests: *******************************/
 
@@ -190,6 +185,22 @@ namespace Test
     bool SquaredDifferenceSum32fDataTest(bool create);
 
     bool AddFeatureDifferenceDataTest(bool create);
+
+    bool BgraToBgrDataTest(bool create);
+    bool BgraToGrayDataTest(bool create);
+    bool BgrToGrayDataTest(bool create);
+    bool GrayToBgrDataTest(bool create);
+
+    bool BgraToBayerDataTest(bool create);
+    bool BgrToBayerDataTest(bool create);
+
+    bool BgrToBgraDataTest(bool create);
+    bool GrayToBgraDataTest(bool create);
+
+    bool BgraToYuv420pDataTest(bool create);
+    bool BgraToYuv444pDataTest(bool create);
+    bool BgrToYuv420pDataTest(bool create);
+    bool BgrToYuv444pDataTest(bool create);
 
     bool BackgroundGrowRangeSlowDataTest(bool create);
     bool BackgroundGrowRangeFastDataTest(bool create);
@@ -204,23 +215,7 @@ namespace Test
 
     bool BayerToBgraDataTest(bool create);
 
-    bool BgraToBayerDataTest(bool create);
-
-    bool BgraToBgrDataTest(bool create);
-
-    bool BgraToGrayDataTest(bool create);
-
-    bool BgrToBayerDataTest(bool create);
-
-    bool BgrToBgraDataTest(bool create);
     bool Bgr48pToBgra32DataTest(bool create);
-
-    bool BgrToGrayDataTest(bool create);
-
-    bool BgraToYuv420pDataTest(bool create);
-    bool BgraToYuv444pDataTest(bool create);
-    bool BgrToYuv420pDataTest(bool create);
-    bool BgrToYuv444pDataTest(bool create);
 
     bool BinarizationDataTest(bool create);
     bool AveragingBinarizationDataTest(bool create);
@@ -252,8 +247,6 @@ namespace Test
     bool FillFrameDataTest(bool create);
     bool FillBgrDataTest(bool create);
     bool FillBgraDataTest(bool create);
-
-    bool GrayToBgraDataTest(bool create);
 
     bool HistogramDataTest(bool create);
     bool HistogramMaskedDataTest(bool create);
@@ -320,11 +313,10 @@ namespace Test
 
     bool Yuv420pToBgrDataTest(bool create);
     bool Yuv444pToBgrDataTest(bool create);
+    bool Yuv420pToHueDataTest(bool create);
+    bool Yuv444pToHueDataTest(bool create);
 
     bool Yuv420pToBgraDataTest(bool create);
     bool Yuv444pToBgraDataTest(bool create);
-
-    bool Yuv420pToHueDataTest(bool create);
-    bool Yuv444pToHueDataTest(bool create);
 }
 #endif//__Test_h__
