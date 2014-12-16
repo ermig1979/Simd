@@ -191,6 +191,191 @@ namespace Simd
             dst11[1] = BayerToGreen(src[3][col2], src[2][col3], src[3][col4], src[4][col3], src[3][col1], src[1][col3], src[3][col5], src[5][col3]);
             dst11[2] = src[3][col3];
         }
+
+        SIMD_INLINE void BgrToHsv(int blue, int green, int red, uint8_t * hsv)
+        {
+            int max = Max(red, Max(green, blue));
+            int min = Min(red, Min(green, blue));
+            int range = max - min; 
+
+            if(range)
+            {
+                int dividend;
+
+                if (red == max)
+                    dividend = green - blue + 6*range;
+                else if (green == max)
+                    dividend = blue - red + 2*range;
+                else
+                    dividend = red - green + 4*range;
+
+                hsv[0] = int(KF_255_DIV_6*dividend/range);
+            }
+            else
+                hsv[0] = 0;
+
+            hsv[1] = max ? 255*range/max : 0;
+            
+            hsv[2] = max;
+        }
+
+        SIMD_INLINE void YuvToHsv(int y, int u, int v, uint8_t * hsv)
+        {
+            int blue = YuvToBlue(y, u);
+            int green = YuvToGreen(y, u, v);
+            int red = YuvToRed(y, v);
+            BgrToHsv(blue, green, red, hsv); 
+        }
+
+        SIMD_INLINE void BgrToHsl(int blue, int green, int red, uint8_t * hsl)
+        {
+            int max = Max(red, Max(green, blue));
+            int min = Min(red, Min(green, blue));
+            int range = max - min; 
+            int sum = max + min; 
+
+            if(range)
+            {
+                int dividend;
+
+                if (red == max)
+                    dividend = green - blue + 6*range;
+                else if (green == max)
+                    dividend = blue - red + 2*range;
+                else
+                    dividend = red - green + 4*range;
+
+                hsl[0] = int(KF_255_DIV_6*dividend/range);
+            }
+            else
+                hsl[0] = 0;
+
+            if(sum == 0 || sum == 510)
+                hsl[1] = 0;
+            else if(sum <= 255)
+                hsl[1] = range*255/sum;
+            else
+                hsl[1] = range*255/(510 - sum);
+
+            hsl[2] = sum/2;
+        }
+
+        SIMD_INLINE void YuvToHsl(int y, int u, int v, uint8_t * hsl)
+        {
+            int blue = YuvToBlue(y, u);
+            int green = YuvToGreen(y, u, v);
+            int red = YuvToRed(y, v);
+            BgrToHsl(blue, green, red, hsl); 
+        }
+
+        SIMD_INLINE void HsvToBgr(int hue, int saturation, int value, uint8_t * bgr)
+        {
+            if(saturation)
+            {
+                int sector = hue*6/255;
+                int min = (255 - saturation)*value/255;
+                int delta = (value - min)*(hue*6 - sector*255)/255;
+
+                switch(sector) 
+                {
+                case 0:
+                    bgr[0] = min;
+                    bgr[1] = min + delta;
+                    bgr[2] = value;
+                    break;
+                case 1:
+                    bgr[0] = min;
+                    bgr[1] = value;
+                    bgr[2] = value - delta;
+                    break;
+                case 2:
+                    bgr[0] = min + delta;
+                    bgr[1] = value;
+                    bgr[2] = min;
+                    break;
+                case 3:
+                    bgr[0] = value;
+                    bgr[1] = value - delta;
+                    bgr[2] = min;
+                    break;
+                case 4:
+                    bgr[0] = value;
+                    bgr[1] = min;
+                    bgr[2] = min + delta;
+                    break;
+                case 5:
+                    bgr[0] = value - delta;
+                    bgr[1] = min;
+                    bgr[2] = value;
+                    break;
+                default:
+                    assert(0);
+                }
+            }
+            else
+            {       
+                bgr[0] = value;
+                bgr[1] = value;
+                bgr[2] = value;
+            }
+        }
+
+        SIMD_INLINE void HslToBgr(int hue, int saturation, int lightness, uint8_t * bgr)
+        {
+            if(saturation)
+            {
+                int sector = hue*6/255;
+                int max;
+                if(lightness <= 128)
+                    max = lightness*(255 + saturation)/255;
+                else
+                    max = ((255 - lightness)*saturation + lightness*255)/255;
+                int min = (255 - saturation)*max/255;
+                int delta = (max - min)*(hue*6 - sector*255)/255;
+
+                switch(sector) 
+                {
+                case 0:
+                    bgr[0] = min;
+                    bgr[1] = min + delta;
+                    bgr[2] = max;
+                    break;
+                case 1:
+                    bgr[0] = min;
+                    bgr[1] = max;
+                    bgr[2] = max - delta;
+                    break;
+                case 2:
+                    bgr[0] = min + delta;
+                    bgr[1] = max;
+                    bgr[2] = min;
+                    break;
+                case 3:
+                    bgr[0] = max;
+                    bgr[1] = max - delta;
+                    bgr[2] = min;
+                    break;
+                case 4:
+                    bgr[0] = max;
+                    bgr[1] = min;
+                    bgr[2] = min + delta;
+                    break;
+                case 5:
+                    bgr[0] = max - delta;
+                    bgr[1] = min;
+                    bgr[2] = max;
+                    break;
+                default:
+                    assert(0);
+                }
+            }
+            else
+            {       
+                bgr[0] = lightness;
+                bgr[1] = lightness;
+                bgr[2] = lightness;
+            }
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE    

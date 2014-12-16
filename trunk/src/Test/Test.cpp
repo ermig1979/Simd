@@ -85,6 +85,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BgraToBgrAutoTest);
     EXECUTE_AUTO_TEST(BgraToGrayAutoTest);
     EXECUTE_AUTO_TEST(BgrToGrayAutoTest);
+    EXECUTE_AUTO_TEST(BgrToHsvAutoTest);
     EXECUTE_AUTO_TEST(GrayToBgrAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToBayerAutoTest);
@@ -267,6 +268,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BgraToBgrDataTest);
     EXECUTE_DATA_TEST(BgraToGrayDataTest);
     EXECUTE_DATA_TEST(BgrToGrayDataTest);
+    EXECUTE_DATA_TEST(BgrToHsvDataTest);
     EXECUTE_DATA_TEST(GrayToBgrDataTest);
 
     EXECUTE_DATA_TEST(BgraToBayerDataTest);

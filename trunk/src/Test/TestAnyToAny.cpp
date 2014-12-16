@@ -152,6 +152,15 @@ namespace Test
         return result;    
     }
 
+    bool BgrToHsvAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC(Simd::Base::BgrToHsv), FUNC(SimdBgrToHsv));
+
+        return result;    
+    }
+
     bool GrayToBgrAutoTest()
     {
         bool result = true;
@@ -240,6 +249,15 @@ namespace Test
         bool result = true;
 
         result = result && AnyToAnyDataTest(create, DW, DH, View::Bgr24, View::Gray8, FUNC(SimdBgrToGray));
+
+        return result;
+    }
+
+    bool BgrToHsvDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnyToAnyDataTest(create, DW, DH, View::Bgr24, View::Hsv24, FUNC(SimdBgrToHsv));
 
         return result;
     }
