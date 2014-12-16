@@ -48,6 +48,8 @@ namespace Simd
             BayerGbrg,
             BayerRggb,
             BayerBggr,
+            Hsv24,
+            Hsl24,
         };
 
         enum Position
@@ -353,20 +355,22 @@ namespace Simd
     {
         switch(format)
         {
-        case None:   return 0;
-        case Gray8:  return 1;
-        case Uv16:   return 2;
-        case Bgr24:  return 3;
-        case Bgra32: return 4;
-        case Int16:  return 2;
-        case Int32:  return 4;
-        case Int64:  return 8;
-        case Float:  return 4;
-        case Double: return 8;
-        case BayerGrbg:  return 1;
-        case BayerGbrg:  return 1;
-        case BayerRggb:  return 1;
-        case BayerBggr:  return 1;
+        case None:      return 0;
+        case Gray8:     return 1;
+        case Uv16:      return 2;
+        case Bgr24:     return 3;
+        case Bgra32:    return 4;
+        case Int16:     return 2;
+        case Int32:     return 4;
+        case Int64:     return 8;
+        case Float:     return 4;
+        case Double:    return 8;
+        case BayerGrbg: return 1;
+        case BayerGbrg: return 1;
+        case BayerRggb: return 1;
+        case BayerBggr: return 1;
+        case Hsv24:     return 3;
+        case Hsl24:     return 3;
         default: assert(0); return 0;
         }
     }
@@ -380,20 +384,22 @@ namespace Simd
     {
         switch(format)
         {
-        case None:   return 0;
-        case Gray8:  return 1;
-        case Uv16:   return 1;
-        case Bgr24:  return 1;
-        case Bgra32: return 1;
-        case Int16:  return 2;
-        case Int32:  return 4;
-        case Int64:  return 8;
-        case Float:  return 4;
-        case Double: return 8;
-        case BayerGrbg:  return 1;
-        case BayerGbrg:  return 1;
-        case BayerRggb:  return 1;
-        case BayerBggr:  return 1;
+        case None:      return 0;
+        case Gray8:     return 1;
+        case Uv16:      return 1;
+        case Bgr24:     return 1;
+        case Bgra32:    return 1;
+        case Int16:     return 2;
+        case Int32:     return 4;
+        case Int64:     return 8;
+        case Float:     return 4;
+        case Double:    return 8;
+        case BayerGrbg: return 1;
+        case BayerGbrg: return 1;
+        case BayerRggb: return 1;
+        case BayerBggr: return 1;
+        case Hsv24:     return 1;
+        case Hsl24:     return 1;
         default: assert(0); return 0;
         }
     }
@@ -407,20 +413,22 @@ namespace Simd
     {
         switch(format)
         {
-        case None:   return 0;
-        case Gray8:  return 1;
-        case Uv16:   return 2;
-        case Bgr24:  return 3;
-        case Bgra32: return 4;
-        case Int16:  return 1;
-        case Int32:  return 1;
-        case Int64:  return 1;
-        case Float:  return 1;
-        case Double: return 1;
-        case BayerGrbg:  return 1;
-        case BayerGbrg:  return 1;
-        case BayerRggb:  return 1;
-        case BayerBggr:  return 1;
+        case None:      return 0;
+        case Gray8:     return 1;
+        case Uv16:      return 2;
+        case Bgr24:     return 3;
+        case Bgra32:    return 4;
+        case Int16:     return 1;
+        case Int32:     return 1;
+        case Int64:     return 1;
+        case Float:     return 1;
+        case Double:    return 1;
+        case BayerGrbg: return 1;
+        case BayerGbrg: return 1;
+        case BayerRggb: return 1;
+        case BayerBggr: return 1;
+        case Hsv24:     return 3;
+        case Hsl24:     return 3;
         default: assert(0); return 0;
         }
     }
