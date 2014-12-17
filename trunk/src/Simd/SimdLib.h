@@ -2792,6 +2792,28 @@ extern "C"
 
     /** @ingroup yuv_conversion
     *
+    * \fn void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsl, size_t hslStride);
+    *
+    * \short Converts YUV444P image to 24-bit HSL(Hue, Saturation, Lightness) image. 
+    *
+    * The input Y, U, V and output HSL images must have the same width and height. 
+    *
+    * \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+    * \param [in] yStride - a row size of the y image.
+    * \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+    * \param [in] uStride - a row size of the u image.
+    * \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+    * \param [in] vStride - a row size of the v image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] hsl - a pointer to pixels data of output 24-bit HSL image.
+    * \param [in] hslStride - a row size of the hsl image.
+    */
+    SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * hsl, size_t hslStride);
+
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
     *
     * \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image. 
