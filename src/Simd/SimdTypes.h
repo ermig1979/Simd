@@ -153,6 +153,10 @@ typedef enum SimdPixelFormatType
     SimdPixelFormatBayerRggb,
     /// A 8-bit Bayer pixel format (BGGR).
     SimdPixelFormatBayerBggr,
+    /// A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format.
+    SimdPixelFormatHsv24,
+    /// A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format.
+    SimdPixelFormatHsl24,
 } SimdPixelFormatType;
 
 #endif//__SimdTypes_h__
