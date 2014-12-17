@@ -2792,9 +2792,31 @@ extern "C"
 
     /** @ingroup yuv_conversion
     *
+    * \fn void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
+    *
+    * \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image. 
+    *
+    * The input Y, U, V and output HSV images must have the same width and height. 
+    *
+    * \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+    * \param [in] yStride - a row size of the y image.
+    * \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+    * \param [in] uStride - a row size of the u image.
+    * \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+    * \param [in] vStride - a row size of the v image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [out] hsv - a pointer to pixels data of output 24-bit HSV image.
+    * \param [in] hsvStride - a row size of the hsv image.
+    */
+    SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+        size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
+
+    /** @ingroup yuv_conversion
+    *
     * \fn void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
-    * \short Converts YUV420P image to 8-bit image with Hue component of HSV color space. 
+    * \short Converts YUV420P image to 8-bit image with Hue component of HSV or HSL color space. 
     *
     * The input Y and output Hue images must have the same width and height. 
     * The input U and V images must have the same width and height (half size relative to Y component). 
@@ -2817,7 +2839,7 @@ extern "C"
     *
     * \fn void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
     *
-    * \short Converts YUV444P image to 8-bit image with Hue component of HSV color space. 
+    * \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space. 
     *
     * The input Y, U, V and output Hue images must have the same width and height. 
     *

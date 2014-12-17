@@ -168,13 +168,14 @@ namespace Test
     bool TextureGetDifferenceSumAutoTest();
     bool TexturePerformCompensationAutoTest();
 
-    bool Yuv444pToHueAutoTest();
-    bool Yuv420pToHueAutoTest();
-    bool Yuv444pToBgraAutoTest();
-    bool Yuv420pToBgraAutoTest();
-
     bool Yuv444pToBgrAutoTest();
     bool Yuv420pToBgrAutoTest();
+    bool Yuv444pToHsvAutoTest();
+    bool Yuv444pToHueAutoTest();
+    bool Yuv420pToHueAutoTest();
+
+    bool Yuv444pToBgraAutoTest();
+    bool Yuv420pToBgraAutoTest();
 
     /***************************** Data Tests: *******************************/
 
@@ -317,6 +318,7 @@ namespace Test
 
     bool Yuv420pToBgrDataTest(bool create);
     bool Yuv444pToBgrDataTest(bool create);
+    bool Yuv444pToHsvDataTest(bool create);
     bool Yuv420pToHueDataTest(bool create);
     bool Yuv444pToHueDataTest(bool create);
 

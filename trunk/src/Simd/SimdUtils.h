@@ -840,6 +840,13 @@ namespace Simd
         SimdYuv420pToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
     }
 
+    template<class A> SIMD_INLINE void Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv)
+    {
+        assert(Compatible(y, u, v) && EqualSize(y, hsv) && y.format == View<A>::Gray8 && hsv.format == View<A>::Hsv24);
+
+        SimdYuv444pToHsv(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hsv.data, hsv.stride);
+    }
+
     template<class A> SIMD_INLINE void Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue)
     {
         assert(Compatible(y, u, v, hue) && y.format == View<A>::Gray8);

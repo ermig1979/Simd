@@ -219,13 +219,14 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(TextureGetDifferenceSumAutoTest);
     EXECUTE_AUTO_TEST(TexturePerformCompensationAutoTest);
 
-    EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
-    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
-    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
-
     EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToHsvAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
+
+    EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false) << std::endl;
@@ -398,6 +399,7 @@ int ExecuteDataTest(const Options & options)
 
     EXECUTE_DATA_TEST(Yuv420pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
+    EXECUTE_DATA_TEST(Yuv444pToHsvDataTest);
     EXECUTE_DATA_TEST(Yuv420pToHueDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
 
