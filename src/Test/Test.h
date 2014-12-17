@@ -170,6 +170,7 @@ namespace Test
 
     bool Yuv444pToBgrAutoTest();
     bool Yuv420pToBgrAutoTest();
+    bool Yuv444pToHslAutoTest();
     bool Yuv444pToHsvAutoTest();
     bool Yuv444pToHueAutoTest();
     bool Yuv420pToHueAutoTest();
@@ -318,6 +319,7 @@ namespace Test
 
     bool Yuv420pToBgrDataTest(bool create);
     bool Yuv444pToBgrDataTest(bool create);
+    bool Yuv444pToHslDataTest(bool create);
     bool Yuv444pToHsvDataTest(bool create);
     bool Yuv420pToHueDataTest(bool create);
     bool Yuv444pToHueDataTest(bool create);

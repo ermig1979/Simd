@@ -221,6 +221,7 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv444pToHslAutoTest);
     EXECUTE_AUTO_TEST(Yuv444pToHsvAutoTest);
     EXECUTE_AUTO_TEST(Yuv444pToHueAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
@@ -400,6 +401,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(Yuv420pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHsvDataTest);
+    EXECUTE_DATA_TEST(Yuv444pToHslDataTest);
     EXECUTE_DATA_TEST(Yuv420pToHueDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
 
