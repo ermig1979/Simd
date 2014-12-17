@@ -139,6 +139,15 @@ namespace Test
         return result;
     }
 
+    bool Yuv444pToHsvAutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToAnyAutoTest(false, View::Hsv24, FUNC(Simd::Base::Yuv444pToHsv), FUNC(SimdYuv444pToHsv));
+
+        return result;
+    }
+
     bool Yuv444pToHueAutoTest()
     {
         bool result = true;
@@ -257,6 +266,14 @@ namespace Test
         return result;
     }
 
+    bool Yuv444pToHsvDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && YuvToAnyDataTest(create, DW, DH, false, View::Hsv24, FUNC(SimdYuv444pToHsv));
+
+        return result;
+    }
 
     bool Yuv420pToHueDataTest(bool create)
     {
