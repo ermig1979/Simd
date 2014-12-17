@@ -226,6 +226,20 @@ namespace Simd
         SimdBgrToGray(bgr.data, bgr.width, bgr.height, bgr.stride, gray.data, gray.stride);
     }
 
+    template<class A> SIMD_INLINE void BgrToHsl(const View<A> & bgr, View<A> & hsl)
+    {
+        assert(EqualSize(bgr, hsl) && bgr.format == View<A>::Bgr24 && hsl.format == View<A>::Hsl24);
+
+        SimdBgrToHsl(bgr.data, bgr.width, bgr.height, bgr.stride, hsl.data, hsl.stride);
+    }
+
+    template<class A> SIMD_INLINE void BgrToHsv(const View<A> & bgr, View<A> & hsv)
+    {
+        assert(EqualSize(bgr, hsv) && bgr.format == View<A>::Bgr24 && hsv.format == View<A>::Hsv24);
+
+        SimdBgrToHsv(bgr.data, bgr.width, bgr.height, bgr.stride, hsv.data, hsv.stride);
+    }
+
     template<class A> SIMD_INLINE void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
     {
         assert(y.width == 2*u.width && y.height == 2*u.height && y.format == u.format);

@@ -967,6 +967,23 @@ extern "C"
 
     /** @ingroup bgr_conversion
     *
+    * \fn void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride);
+    *
+    * \short Converts 24-bit BGR image to 24-bit HSL(Hue, Saturation, Lightness) image. 
+    *
+    * All images must have the same width and height. 
+    *
+    * \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+    * \param [in] width - an image width.
+    * \param [in] height - an image height.
+    * \param [in] bgrStride - a row size of the bgr image.
+    * \param [out] hsl - a pointer to pixels data of output 24-bit HSL image.
+    * \param [in] hslStride - a row size of the hsl image.
+    */
+    SIMD_API void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride);
+
+    /** @ingroup bgr_conversion
+    *
     * \fn void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
     *
     * \short Converts 24-bit BGR image to 24-bit HSV(Hue, Saturation, Value) image. 

@@ -42,6 +42,7 @@ namespace Test
     bool BgraToBgrAutoTest();
     bool BgraToGrayAutoTest();
     bool BgrToGrayAutoTest();
+    bool BgrToHslAutoTest();
     bool BgrToHsvAutoTest();
     bool GrayToBgrAutoTest();
 
@@ -190,6 +191,7 @@ namespace Test
     bool BgraToBgrDataTest(bool create);
     bool BgraToGrayDataTest(bool create);
     bool BgrToGrayDataTest(bool create);
+    bool BgrToHslDataTest(bool create);
     bool BgrToHsvDataTest(bool create);
     bool GrayToBgrDataTest(bool create);
 
