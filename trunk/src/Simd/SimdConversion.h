@@ -28,7 +28,6 @@
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdLoad.h"
-#include "Simd/SimdLog.h"
 
 namespace Simd
 {
