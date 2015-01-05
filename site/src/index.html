@@ -1,0 +1,28 @@
+<html> 
+<head> 
+ <script src="help/jquery.js"></script> 
+ <script>
+  $(function(){$("#header").load("head.html");});
+  $(function()
+  {
+   var parameters = location.search.substring(1).split("&");
+   var value = "news.html";
+   for(var i = 0; i < parameters.length; i++)
+   {
+    if(parameters[i].split("=")[0] == "page")
+    {
+     if(parameters[i].split("=")[1].length > 1) 
+      value = parameters[i].split("=")[1];
+     break;
+    }
+   }
+   $("#content").load(value);
+  });
+ </script> 
+</head> 
+
+<body> 
+ <div id="header"></div>
+ <div id="content"></div>
+</body> 
+</html>
