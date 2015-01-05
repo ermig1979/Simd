@@ -1,8 +1,8 @@
 /*
-* Simd Library.
+* Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2014 Yermalayeu Ihar,
-*               2014-2014 Antonenka Mikhail.
+* Copyright (c) 2011-2015 Yermalayeu Ihar,
+*               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
