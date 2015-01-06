@@ -8,6 +8,8 @@ exit 1
 
 call ..\..\prj\cmd\GetVersion.cmd
 
+call ..\..\doc\src\build.cmd
+
 set OUT_DIR=%TRUNK_DIR%\build\out
 set TMP_DIR=%TRUNK_DIR%\build\out\simd
 
@@ -29,6 +31,7 @@ xcopy %TRUNK_DIR%\src\* %TMP_DIR%\src\* /y /i /s
 xcopy %TRUNK_DIR%\prj\* %TMP_DIR%\prj\* /y /i /s
 xcopy %TRUNK_DIR%\doc\* %TMP_DIR%\doc\* /y /i /s
 
+echo Erase temporary files:
 erase %TMP_DIR%\prj\*.user /q /s /f
 erase %TMP_DIR%\prj\*.suo /q /s /f
 erase %TMP_DIR%\prj\*.ncb /q /s /f
@@ -36,19 +39,9 @@ erase %TMP_DIR%\prj\*.depend /q /s /f
 erase %TMP_DIR%\prj\*.layout /q /s /f
 erase %TMP_DIR%\prj\*.cbTemp /q /s /f
 erase %TMP_DIR%\prj\*.pdb /q /s /f
+erase %TMP_DIR%\doc\src\*.lnk /q /s /f
 
-erase %TMP_DIR%\prj\txt\UserConfig.txt /q /s /f
-erase %TMP_DIR%\prj\txt\FullConfig.txt /q /s /f
-erase %TMP_DIR%\prj\cmd\*.txt /q /s /f
-erase %TMP_DIR%\prj\cmd\*.lnk /q /s /f
-erase %TMP_DIR%\prj\cmd\BuildZip.cmd /q /s /f
-erase %TMP_DIR%\prj\cmd\BuildSite.cmd /q /s /f
-erase %TMP_DIR%\prj\cmd\BuildHelp.cmd /q /s /f
-erase %TMP_DIR%\doc\help /q /s /f
-rmdir %TMP_DIR%\doc\help /q /s
-erase %TMP_DIR%\doc\src /q /s /f
-rmdir %TMP_DIR%\doc\src /q /s
-
+echo Create ZIP archive:
 %RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
 
 
