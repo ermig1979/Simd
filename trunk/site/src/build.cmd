@@ -29,6 +29,7 @@ call ..\..\prj\cmd\FindAndReplace.cmd @VERSION@ %FULL_VERSION% %CONFIG_TXT%>%TMP
 erase %TMP_TXT% /q /s /f
 
 xcopy .\*.html %OUT_DIR%\* /y /i /s
+xcopy .\*.png %OUT_DIR%\* /y /i /s
 ::xcopy .\*.js %OUT_DIR%\* /y /i /s
 ::xcopy .\*.css %OUT_DIR%\* /y /i /s
 
