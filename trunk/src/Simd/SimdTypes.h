@@ -22,17 +22,6 @@
 * SOFTWARE.
 */
 
-/** \file SimdTypes.h
-*
-* \short This file contains description of basic types of Simd Library.
-*/
-
-/**
-*  @defgroup types API Types
-*
-*  \short Types of Simd Library C API.
-*/
-
 #ifndef __SimdTypes_h__
 #define __SimdTypes_h__
 
@@ -60,17 +49,15 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
- /** @ingroup types
- *
- * \enum SimdCompareType
+ /** @ingroup c_types
  *
  * Describes types of compare operation.
  * Operation compare(a, b) is 
  */
-typedef enum SimdCompareType
+typedef enum 
 {
     /// equal to: a == b
-    SimdCompareEqual, 
+    SimdCompareEqual,
     /// equal to: a != b          
     SimdCompareNotEqual,   
     /// equal to: a > b     
@@ -83,14 +70,12 @@ typedef enum SimdCompareType
     SimdCompareLesserOrEqual,   
 } SimdCompareType;
 
- /** @ingroup types
- *
- * \enum SimdOperationBinary8uType
+ /** @ingroup c_types
  *
  * Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
  * Images must have the same format (unsigned 8-bit integer for every channel).
  */
-typedef enum SimdOperationBinary8uType
+typedef enum
 {
     /// Computes the average value for every channel of every point of two images. Average(a, b) = (a + b + 1)/2.
     SimdOperationBinary8uAverage,
@@ -104,26 +89,22 @@ typedef enum SimdOperationBinary8uType
     SimdOperationBinary8uSaturatedAddition,
 } SimdOperationBinary8uType;
 
- /** @ingroup types
- *
- * \enum SimdOperationBinary16iType
+ /** @ingroup c_types
  *
  * Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
  * Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
  */
-typedef enum SimdOperationBinary16iType
+typedef enum
 {
     /// Perform addition of two images for every point. 
     SimdOperationBinary16iAddition,
 } SimdOperationBinary16iType;
 
- /** @ingroup types
- *
- * \enum SimdPixelFormatType
+ /** @ingroup c_types
  *
  * Describes pixel format types of an image.
  */
-typedef enum SimdPixelFormatType
+typedef enum
 {
     /// An undefined pixel format.
     SimdPixelFormatNone = 0,

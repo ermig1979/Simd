@@ -64,6 +64,7 @@
     <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCheck.c" />
     <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
     <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
     <ClCompile Include="..\..\src\Test\TestData.cpp" />

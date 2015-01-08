@@ -580,7 +580,7 @@ namespace Simd
     {
         assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
 
-        SimdReduceGray3x3(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
+        SimdReduceGray3x3(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation ? 1 : 0);
     }
 
     template<class A> SIMD_INLINE void ReduceGray4x4(const View<A>& src, View<A>& dst)
@@ -594,7 +594,7 @@ namespace Simd
     {
         assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
 
-        SimdReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation);
+        SimdReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation ? 1 : 0);
     }
 
     template<class A> SIMD_INLINE void ResizeBilinear(const View<A>& src, View<A>& dst)

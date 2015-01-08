@@ -1938,7 +1938,7 @@ extern "C"
 
     /** @ingroup resizing
     *
-    * \fn void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+    * \fn void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3. 
     *
@@ -1960,7 +1960,7 @@ extern "C"
     * \param [in] compensation - a flag of compensation of rounding.
     */
     SIMD_API void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
     /** @ingroup resizing
     *
@@ -1990,7 +1990,7 @@ extern "C"
 
     /** @ingroup resizing
     *
-    * \fn void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+    * \fn void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
     *
     * \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5. 
     *
@@ -2014,7 +2014,7 @@ extern "C"
     * \param [in] compensation - a flag of compensation of rounding.
     */
     SIMD_API void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation);
+        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
     /** @ingroup reordering
     *
