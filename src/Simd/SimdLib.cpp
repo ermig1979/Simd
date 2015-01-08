@@ -1409,7 +1409,7 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
 }
 
 SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-                   uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+                   uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && srcWidth >= Avx2::DA)
@@ -1451,7 +1451,7 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
 }
 
 SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-                   uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, bool compensation)
+                   uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && srcWidth >= Avx2::DA)
