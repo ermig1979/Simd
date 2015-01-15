@@ -54,8 +54,8 @@
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdVsx.h"
-#include "Simd/SimdUtils.h"
-#include "Simd/SimdPixel.h"
+#include "Simd/SimdUtils.hpp"
+#include "Simd/SimdPixel.hpp"
 
 namespace Test
 {

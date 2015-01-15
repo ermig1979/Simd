@@ -71,15 +71,16 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Simd\SimdAllocator.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdHelp.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
-    <ClInclude Include="..\..\src\Simd\SimdPixel.h" />
-    <ClInclude Include="..\..\src\Simd\SimdPoint.h" />
-    <ClInclude Include="..\..\src\Simd\SimdRectangle.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPixel.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdSse.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
@@ -90,9 +91,9 @@
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
-    <ClInclude Include="..\..\src\Simd\SimdUtils.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUtils.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
-    <ClInclude Include="..\..\src\Simd\SimdView.h" />
+    <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>

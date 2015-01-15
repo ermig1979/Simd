@@ -24,7 +24,7 @@
 #ifndef __SimdPixel_h__
 #define __SimdPixel_h__
 
-#include "Simd/SimdView.h"
+#include "Simd/SimdView.hpp"
 
 namespace Simd
 {
