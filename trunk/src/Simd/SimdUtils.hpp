@@ -24,7 +24,7 @@
 */
 
 #include "Simd/SimdLib.h"
-#include "Simd/SimdView.h"
+#include "Simd/SimdView.hpp"
 
 #ifndef __SimdUtils_h__
 #define __SimdUtils_h__

@@ -49,94 +49,91 @@ typedef signed __int64    int64_t;
 typedef unsigned __int64  uint64_t;
 #endif
 
- /** @ingroup c_types
- *
- * Describes types of compare operation.
- * Operation compare(a, b) is 
- */
+/*! @ingroup c_types
+    Describes types of compare operation.
+    Operation compare(a, b) is 
+*/
 typedef enum 
 {
-    /// equal to: a == b
+    /*! equal to: a == b */
     SimdCompareEqual,
-    /// equal to: a != b          
+    /*! equal to: a != b */          
     SimdCompareNotEqual,   
-    /// equal to: a > b     
+    /*! equal to: a > b */    
     SimdCompareGreater,        
-    /// equal to: a >= b 
+    /*! equal to: a >= b */
     SimdCompareGreaterOrEqual,  
-    /// equal to: a < b
+    /*! equal to: a < b */
     SimdCompareLesser,       
-    /// equal to: a <= b   
+    /*! equal to: a <= b */   
     SimdCompareLesserOrEqual,   
 } SimdCompareType;
 
- /** @ingroup c_types
- *
- * Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
- * Images must have the same format (unsigned 8-bit integer for every channel).
- */
+/*! @ingroup c_types
+    Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
+    Images must have the same format (unsigned 8-bit integer for every channel).
+*/
 typedef enum
 {
-    /// Computes the average value for every channel of every point of two images. Average(a, b) = (a + b + 1)/2.
+    /*! Computes the average value for every channel of every point of two images. \n Average(a, b) = (a + b + 1)/2. */
     SimdOperationBinary8uAverage,
-    /// Computes the bitwise AND between two images.
+    /*! Computes the bitwise AND between two images. */
     SimdOperationBinary8uAnd,
-    /// Computes maximal value for every channel of every point of two images.
+    /*! Computes maximal value for every channel of every point of two images. */
     SimdOperationBinary8uMaximum,
-    ///Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
+    /*!Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
     SimdOperationBinary8uSaturatedSubtraction,
-    ///Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images).
+    /*!Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
     SimdOperationBinary8uSaturatedAddition,
 } SimdOperationBinary8uType;
 
- /** @ingroup c_types
- *
- * Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
- * Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
- */
+/*! @ingroup c_types
+    Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
+    Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
+*/
 typedef enum
 {
-    /// Perform addition of two images for every point. 
+    /*! Perform addition of two images for every point.  */
     SimdOperationBinary16iAddition,
 } SimdOperationBinary16iType;
 
- /** @ingroup c_types
- *
- * Describes pixel format types of an image.
- */
+/*! @ingroup c_types
+    Describes pixel format types of an image.
+    In particular this type is used in functions ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
+*/
 typedef enum
 {
-    /// An undefined pixel format.
+    /*! An undefined pixel format. */
     SimdPixelFormatNone = 0,
-    /// A 8-bit gray pixel format.
+    /*! A 8-bit gray pixel format. */
     SimdPixelFormatGray8,
-    /// A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format).
+    /*! A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format). */
     SimdPixelFormatUv16,
-    /// A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format.
+    /*! A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. */
     SimdPixelFormatBgr24,
-    /// A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format.
+    /*! A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. */
     SimdPixelFormatBgra32,
-    /// A single channel 16-bit integer pixel format.
+    /*! A single channel 16-bit integer pixel format. */
     SimdPixelFormatInt16,
-    /// A single channel 32-bit integer pixel format.
+    /*! A single channel 32-bit integer pixel format. */
     SimdPixelFormatInt32,
-    /// A single channel 64-bit integer pixel format.
+    /*! A single channel 64-bit integer pixel format. */
     SimdPixelFormatInt64,
-    /// A single channel 32-bit float point pixel format.
+    /*! A single channel 32-bit float point pixel format. */
     SimdPixelFormatFloat,
-    /// A single channel 64-bit float point pixel format.
+    /*! A single channel 64-bit float point pixel format. */
     SimdPixelFormatDouble,
-    /// A 8-bit Bayer pixel format (GRBG).
+    /*! A 8-bit Bayer pixel format (GRBG). */
     SimdPixelFormatBayerGrbg,
-    /// A 8-bit Bayer pixel format (GBRG).
+    /*! A 8-bit Bayer pixel format (GBRG). */
     SimdPixelFormatBayerGbrg,
-    /// A 8-bit Bayer pixel format (RGGB).
+    /*! A 8-bit Bayer pixel format (RGGB). */
     SimdPixelFormatBayerRggb,
-    /// A 8-bit Bayer pixel format (BGGR).
+    /*! A 8-bit Bayer pixel format (BGGR). */
     SimdPixelFormatBayerBggr,
-    /// A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format.
+    /*! A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. */
     SimdPixelFormatHsv24,
-    /// A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format.
+    /*! A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
     SimdPixelFormatHsl24,
 } SimdPixelFormatType;
 

@@ -24,8 +24,8 @@
 #ifndef __SimdView_h__
 #define __SimdView_h__
 
-#include "Simd/SimdRectangle.h"
-#include "Simd/SimdAllocator.h"
+#include "Simd/SimdRectangle.hpp"
+#include "Simd/SimdAllocator.hpp"
 
 namespace Simd
 {

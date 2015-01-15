@@ -24,7 +24,7 @@
 #ifndef __SimdRectangle_h__
 #define __SimdRectangle_h__
 
-#include "Simd/SimdPoint.h"
+#include "Simd/SimdPoint.hpp"
 #include "Simd/SimdMath.h"
 
 namespace Simd
