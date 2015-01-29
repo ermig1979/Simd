@@ -28,10 +28,36 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_types
+
+        \short Aligned memory allocator.
+
+        Performs allocation and deletion of aligned memory.
+    */
     struct Allocator
     {
+        /*!
+            \fn void * Allocate(size_t size, size_t align);
+
+            \short Allocates aligned memory block.
+
+            \note The memory allocated by this function is must be deleted by function Simd::Allocator::Free.
+
+            \param [in] size - a size of required memory block.
+            \param [in] align - an align of allocated memory address.
+            \return a pointer to allocated memory.
+        */
         static void * Allocate(size_t size, size_t align);
 
+        /*!
+            \fn void Free(void * p);
+
+            \short Frees aligned memory block.
+
+            \note This function frees a memory allocated by function Simd::Allocator::Allocate.
+
+            \param [in] p - a pointer to the memory to be deleted.
+        */
         static void Free(void * p);
     };
 

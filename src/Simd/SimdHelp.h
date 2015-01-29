@@ -47,14 +47,17 @@
     \page foo2
 
     The <b>Simd Library</b> is a high performance image processing library, designed for C and C++ programmers.
-    It provides many useful image processing algorithms.
+    It provides many useful algorithms for image processing  such as: pixel format conversion, image scaling and filtration, 
+    extraction of statistic information from images, motion detection. 
     The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC. 
-    Also the library contains useful C++ classes and functions to facilitate access to C API.
+    The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
+    The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS and G++ compilers, MSVS project and CMake build systems.
 
     \section s1 Library structure
 
-    The Simd Library consists in a ...
+    The source of Simd Library is placed in the 
+    \c simd/src/Simd/ directory.
 
 */
 /*@}*/
@@ -250,6 +253,10 @@
 /*! @ingroup motion_detection
     @defgroup edge_background Edge Background Updating
     \short Functions for edge background updating.
+*/
+
+/*! @defgroup cpp_types C++ Types
+    \short C++ Types of Simd Library.
 */
 
 #ifndef __SimdHelp_h__
