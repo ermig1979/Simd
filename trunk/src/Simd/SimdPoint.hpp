@@ -29,45 +29,282 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_point
+
+        \short The Point structure defines the x- and y-coordinates of a point.
+
+        \ref cpp_point_functions.
+    */
 	template <typename T> 
 	struct Point
 	{
-        typedef T Type;
+        typedef T Type; /*!< Type definition. */
+        
+		T x; /*!< \brief Specifies the x-coordinate of a point. */
+        T y; /*!< \brief Specifies the y-coordinate of a point. */
 
-		T x, y;
-
+        /*!
+            Creates a new Point structure that contains the default (0, 0) coordinates. 
+        */
 		Point();
+
+        /*!
+            Creates a new Point structure that contains the specified coordinates. 
+
+            \param [in] tx - initial X value. 
+            \param [in] ty - initial Y value. 
+        */
 		template <typename TX, typename TY> Point(TX tx, TY ty);
+
+        /*!
+            Creates a new Point structure on the base of another point of arbitrary type.
+
+            \param [in] p - a point of arbitrary type. 
+        */
         template <class TP, template<class> class TPoint> Point(const TPoint<TP> & p);
+
+        /*!
+            A point destructor.
+        */
 		~Point();
 
+        /*!
+            Converts itself to point of arbitrary type.
+
+            \return a point of arbitrary type. 
+        */
         template <class TP, template<class> class TPoint> operator TPoint<TP>() const;
 
+        /*!
+            Performs copying from point of arbitrary type.
+
+            \param [in] p - a point of arbitrary type. 
+            \return a reference to itself. 
+        */
 		template <typename TP> Point & operator = (const Point<TP> & p);
+
+        /*!
+            Adds to itself point of arbitrary type.
+
+            \param [in] p - a point of arbitrary type. 
+            \return a reference to itself. 
+        */
 		template <typename TP> Point & operator += (const Point<TP> & p);
+
+        /*!
+            Subtracts from itself point of arbitrary type.
+
+            \param [in] p - a point of arbitrary type. 
+            \return a reference to itself. 
+        */
 		template <typename TP> Point & operator -= (const Point<TP> & p);
 
-		template <typename TA> Point & operator *= (const TA & a);
-		Point & operator /= (double a);
+        /*!
+            Multiplies itself by value of arbitrary type.
 
-		Point operator << (ptrdiff_t shift) const;
+            \param [in] a - a factor of arbitrary type. 
+            \return a reference to itself. 
+        */
+		template <typename TA> Point & operator *= (const TA & a);
+
+        /*!
+            Divides itself into given value.
+
+            \param [in] a - a value of divider. 
+            \return a reference to itself. 
+        */		
+        Point & operator /= (double a);
+
+        /*!
+            Performs shift bit left for value of point coordinates.
+            
+            \note It function is actual for integer types of Point.
+
+            \param [in] shift - a shift value. 
+            \return a new point with shifted coordinates. 
+        */
+        Point operator << (ptrdiff_t shift) const;
+
+        /*!
+            Performs shift bit right for value of point coordinates.
+            
+            \note It function is actual for integer types of Point.
+
+            \param [in] shift - a shift value. 
+            \return a new point with shifted coordinates. 
+        */
 		Point operator >> (ptrdiff_t shift) const;
 	};
 
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> bool operator == (const Point<T> & p1, const Point<T> & p2);
+
+        \short Compares two points on equality.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of comparison.
+    */
 	template <typename T> bool operator == (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> bool operator != (const Point<T> & p1, const Point<T> & p2);
+
+        \short Compares two points on inequality.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of comparison.
+    */
 	template <typename T> bool operator != (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<T> operator + (const Point<T> & p1, const Point<T> & p2);
+
+        \short Adds two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of addition.
+    */
 	template <typename T> Point<T> operator + (const Point<T> & p1, const Point<T> & p2);
-	template <typename T> Point<T> operator - (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<T> operator - (const Point<T> & p1, const Point<T> & p2);
+
+        \short Subtracts two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of subtraction.
+    */
+    template <typename T> Point<T> operator - (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<T> operator * (const Point<T> & p1, const Point<T> & p2);
+
+        \short Multiplies two points.
+
+        \note Coordinates of the points are multiplied independently.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of multiplication.
+    */
     template <typename T> Point<T> operator * (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<T> operator / (const Point<T> & p1, const Point<T> & p2);
+
+        \short Divides two points.
+
+        \note Coordinates of the points are divided independently.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a result of division.
+    */
     template <typename T> Point<T> operator / (const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<T> operator - (const Point<T> & p);
+
+        \short Returns point with coordinates with the opposite sign.
+
+        \param [in] p - an original point.
+        \return a result of the operation.
+    */
 	template <typename T> Point<T> operator - (const Point<T> & p);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> Point<double> operator / (const Point<T> & p, double a);
+
+        \short Divides the point on the scalar value.
+
+        \param [in] p - a point.
+        \param [in] a - a scalar value.
+        \return a result of division.
+    */
 	template <typename T> Point<double> operator / (const Point<T> & p, double a);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename TP, typename TA> Point<TP> operator * (const Point<TP> & p, const TA & a);
+
+        \short Multiplies the point on the scalar value.
+
+        \param [in] p - a point.
+        \param [in] a - a scalar value.
+        \return a result of multiplication.
+    */
 	template <typename TP, typename TA> Point<TP> operator * (const Point<TP> & p, const TA & a);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename TP, typename TA> Point<TP> operator * (const TA & a, const Point<TP> & p);
+
+        \short Multiplies the scalar value on the point.
+
+        \param [in] a - a scalar value.
+        \param [in] p - a point.
+        \return a result of multiplication.
+    */
 	template <typename TP, typename TA> Point<TP> operator * (const TA & a, const Point<TP> & p);
 
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> T SquaredDistance(const Point<T> & p1, const Point<T> & p2);
+
+        \short Gets squared distance between two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a squared distance between them.
+    */    
     template <typename T> T SquaredDistance(const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> double Distance(const Point<T> & p1, const Point<T> & p2);
+
+        \short Gets distance between two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a distance between them.
+    */
     template <typename T> double Distance(const Point<T> & p1, const Point<T> & p2);
+
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> T DotProduct(const Point<T> & p1, const Point<T> & p2);
+
+        \short Gets dot product of two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a dot product.
+    */
     template <typename T> T DotProduct(const Point<T> & p1, const Point<T> & p2);
+    
+    /*! @ingroup cpp_point_functions
+
+        \fn template <typename T> T CrossProduct(const Point<T> & p1, const Point<T> & p2);
+
+        \short Gets cross product of two points.
+
+        \param [in] p1 - a first point.
+        \param [in] p2 - a second point.
+        \return a cross product.
+    */
     template <typename T> T CrossProduct(const Point<T> & p1, const Point<T> & p2);
 
 	//-------------------------------------------------------------------------

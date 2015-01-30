@@ -1,6 +1,6 @@
 PROJECT_NAME="Simd Library"
 OUTPUT_DIRECTORY=..\..\doc
-INPUT= ..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdTypes.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp
+INPUT= ..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdTypes.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp
 EXTRACT_ALL=NO
 SHOW_INCLUDE_FILES=NO
 SHOW_USED_FILES=NO
@@ -24,7 +24,7 @@ FULL_PATH_NAMES=NO
 EXTRACT_LOCAL_CLASSES=NO
 HIDE_FRIEND_COMPOUNDS=YES
 HIDE_IN_BODY_DOCS=YES
-CASE_SENSE_NAMES=YES
+CASE_SENSE_NAMES=NO
 HIDE_SCOPE_NAMES=YES
 INLINE_INFO=NO
 SORT_MEMBER_DOCS=NO
@@ -40,3 +40,4 @@ HTML_DYNAMIC_SECTIONS=YES
 SUBGROUPING=NO
 SHOW_NAMESPACES=NO
 ENUM_VALUES_PER_LINE=1
+PREDEFINED="SIMD_INLINE="
