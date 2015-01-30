@@ -23,11 +23,10 @@
 * SOFTWARE.
 */
 
-#include "Simd/SimdLib.h"
 #include "Simd/SimdView.hpp"
 
-#ifndef __SimdUtils_h__
-#define __SimdUtils_h__
+#ifndef __SimdUtils_hpp__
+#define __SimdUtils_hpp__
 
 namespace Simd
 {
@@ -871,5 +870,5 @@ namespace Simd
     }
 }
 
-#endif//__SimdUtils_h__
+#endif//__SimdUtils_hpp__
 

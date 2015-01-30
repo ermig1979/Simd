@@ -25,6 +25,7 @@
 #define __SimdDefs_h__
 
 #include "Simd/SimdConfig.h"
+#include "Simd/SimdLib.h"
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -34,8 +35,6 @@
 #include <math.h>
 
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
-
-#define SIMD_INLINE __forceinline
 
 #define SIMD_ALIGNED(x) __declspec(align(x))
 
@@ -80,8 +79,6 @@
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #elif defined(__GNUC__)
-
-#define SIMD_INLINE inline __attribute__ ((always_inline))
 
 #define SIMD_ALIGNED(x) __attribute__ ((aligned(x)))
 

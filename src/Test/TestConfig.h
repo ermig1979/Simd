@@ -44,6 +44,8 @@
 #include <stdexcept>
 
 #define SIMD_STATIC
+#include "Simd/SimdConst.h"
+#include "Simd/SimdMath.h"
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"

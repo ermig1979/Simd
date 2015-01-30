@@ -46,6 +46,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdLib.h"
 
+#include "Simd/SimdMemory.h"
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdVersion.h"
 #include "Simd/SimdConst.h"
@@ -65,6 +66,26 @@ using namespace Simd;
 SIMD_API const char * SimdVersion()
 {
     return SIMD_VERSION;
+}
+
+SIMD_API void * SimdAllocate(size_t size, size_t align)
+{
+    return Allocate(size, align);
+}
+
+SIMD_API void SimdFree(void * ptr)
+{
+    Free(ptr);
+}
+
+SIMD_API size_t SimdAlign(size_t size, size_t align)
+{
+    return AlignHi(size, align);
+}
+
+SIMD_API size_t SimdAlignment()
+{
+    return SIMD_ALIGN;
 }
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)

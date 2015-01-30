@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdPixel_h__
-#define __SimdPixel_h__
+#ifndef __SimdPixel_hpp__
+#define __SimdPixel_hpp__
 
 #include "Simd/SimdView.hpp"
 
@@ -266,4 +266,4 @@ namespace Simd
     }
 }
 
-#endif//__SimdPixel_h__
+#endif//__SimdPixel_hpp__

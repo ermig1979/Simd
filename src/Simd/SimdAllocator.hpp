@@ -21,10 +21,10 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAllocator_h__
-#define __SimdAllocator_h__
+#ifndef __SimdAllocator_hpp__
+#define __SimdAllocator_hpp__
 
-#include "Simd/SimdMemory.h"
+#include "Simd/SimdLib.h"
 
 namespace Simd
 {
@@ -56,9 +56,42 @@ namespace Simd
 
             \note This function frees a memory allocated by function Simd::Allocator::Allocate.
 
-            \param [in] p - a pointer to the memory to be deleted.
+            \param [in] ptr - a pointer to the memory to be deleted.
         */
-        static void Free(void * p);
+        static void Free(void * ptr);
+
+        /*!
+            \fn size_t Align(size_t size, size_t align);
+
+            \short Gets aligned size.
+
+            \param [in] size - an original size.
+            \param [in] align - a required alignment.
+
+            \return an aligned size.
+        */
+        static size_t Align(size_t size, size_t align);
+
+        /*!
+            \fn void * Align(void * ptr, size_t align);
+
+            \short Gets aligned address.
+
+            \param [in] ptr - an original pointer.
+            \param [in] align - a required alignment.
+
+            \return an aligned address.
+        */
+        static void * Align(void * ptr, size_t align);
+
+        /*!
+            \fn size_t Alignment();
+
+            \short Gets default alignment.
+
+            \return default alignment.
+        */
+        static size_t Alignment();
     };
 
     //-------------------------------------------------------------------------
@@ -67,13 +100,28 @@ namespace Simd
 
     SIMD_INLINE void * Allocator::Allocate(size_t size, size_t align)
     {
-        return Simd::Allocate(size, align);
+        return SimdAllocate(size, align);
     }
 
-    SIMD_INLINE void Allocator::Free(void * p)
+    SIMD_INLINE void Allocator::Free(void * ptr)
     {
-        Simd::Free(p);
+        SimdFree(ptr);
+    }
+
+    SIMD_INLINE size_t Allocator::Align(size_t size, size_t align)
+    {
+        return SimdAlign(size, align);
+    }
+
+    SIMD_INLINE void * Allocator::Align(void * ptr, size_t align)
+    {
+        return (void *) SimdAlign((size_t)ptr, align);
+    }
+
+    SIMD_INLINE size_t Allocator::Alignment()
+    {
+        return SimdAlignment();
     }
 }
 
-#endif//__SimdAllocator_h__
+#endif//__SimdAllocator_hpp__

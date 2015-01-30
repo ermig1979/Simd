@@ -27,6 +27,20 @@
 
 #include <stddef.h>
 
+#if defined(_MSC_VER)
+
+#define SIMD_INLINE __forceinline
+
+#elif defined(__GNUC__)
+
+#define SIMD_INLINE inline __attribute__ ((always_inline))
+
+#else
+
+#error This platform is unsupported!
+
+#endif
+
 #if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
 #include <stdint.h>
 #else
