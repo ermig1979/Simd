@@ -259,6 +259,21 @@
     \short C++ Types of Simd Library.
 */
 
+/*! @ingroup cpp_types
+    @defgroup cpp_point struct Point
+    \short Point structure and related functions. 
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_allocator struct Allocator
+    \short Allocator structure and related functions. 
+*/
+
+/*! @ingroup cpp_point
+    @defgroup cpp_point_functions Related Functions 
+    \short Related functions for Point structure. 
+*/
+
 #ifndef __SimdHelp_h__
 #define __SimdHelp_h__
 #endif//__SimdHelp_h__

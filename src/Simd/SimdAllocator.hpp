@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-    /*! @ingroup cpp_types
+    /*! @ingroup cpp_allocator
 
         \short Aligned memory allocator.
 
