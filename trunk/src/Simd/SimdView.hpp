@@ -21,17 +21,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdView_h__
-#define __SimdView_h__
+#ifndef __SimdView_hpp__
+#define __SimdView_hpp__
 
 #include "Simd/SimdRectangle.hpp"
 #include "Simd/SimdAllocator.hpp"
 
+#include <memory.h>
+#include <assert.h>
+
 namespace Simd
 {
-    template <class TAllocator>
+    template <class A>
     struct View
     {
+        typedef A Allocator;
+
         enum Format
         {
             None = 0,
@@ -74,7 +79,7 @@ namespace Simd
         View();
         View(const View & view);
         View(size_t w, size_t h, ptrdiff_t s, Format f, void * d);
-        View(size_t w, size_t h, Format f, void * d = NULL, size_t align = SIMD_ALIGN);
+        View(size_t w, size_t h, Format f, void * d = NULL, size_t align = Allocator::Alignment());
         View(const Point<ptrdiff_t> & size, Format f);
 
         ~View();
@@ -85,7 +90,7 @@ namespace Simd
 
         View & Ref();
 
-        void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = SIMD_ALIGN);
+        void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = Allocator::Alignment());
         void Recreate(const Point<ptrdiff_t> & size, Format f);
 
         View Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const;
@@ -160,7 +165,7 @@ namespace Simd
     {
         if(data == NULL && height && width && stride && format != None)
         {
-            *(void**)&data = A::Allocate(height*stride, SIMD_ALIGN);
+            *(void**)&data = Allocator::Allocate(height*stride, Allocator::Alignment());
             _owner = true;
         }
     }
@@ -191,7 +196,7 @@ namespace Simd
     {
         if(_owner && data)
         {
-            A::Free(data);
+            Allocator::Free(data);
         }
     }
 
@@ -210,7 +215,7 @@ namespace Simd
         {
             if(_owner && data)
             {
-                A::Free(data);
+                Allocator::Free(data);
                 assert(0);
             }
             *(size_t*)&width = view.width;
@@ -232,22 +237,22 @@ namespace Simd
     {
         if(_owner && data)
         {
-            A::Free(data);
+            Allocator::Free(data);
             *(void**)&data = NULL;
             _owner = false;
         }
         *(size_t*)&width = w;
         *(size_t*)&height = h;
         *(Format*)&format = f;
-        *(ptrdiff_t*)&stride = Simd::AlignHi(width*PixelSize(format), align);
+        *(ptrdiff_t*)&stride = Allocator::Align(width*PixelSize(format), align);
         if(d)
         {
-            *(void**)&data = Simd::AlignHi(d, align);
+            *(void**)&data = Allocator::Align(d, align);
             _owner = false;
         }
         else
         {
-            *(void**)&data = A::Allocate(height*stride, align);
+            *(void**)&data = Allocator::Allocate(height*stride, align);
             _owner = true;
         }
     }
@@ -261,10 +266,10 @@ namespace Simd
     {
         if(data != NULL && right >= left && bottom >= top)
         {
-            left = RestrictRange<ptrdiff_t>(left, 0, width);
-            top = RestrictRange<ptrdiff_t>(top, 0, height);
-            right = RestrictRange<ptrdiff_t>(right, 0, width);
-            bottom = RestrictRange<ptrdiff_t>(bottom, 0, height);
+            left = std::min<ptrdiff_t>(std::max<ptrdiff_t>(left, 0), width);
+            top = std::min<ptrdiff_t>(std::max<ptrdiff_t>(top, 0), height);
+            right = std::min<ptrdiff_t>(std::max<ptrdiff_t>(right, 0), width);
+            bottom = std::min<ptrdiff_t>(std::max<ptrdiff_t>(bottom, 0), height);
             return View<A>(right - left, bottom - top, stride, format, data + top*stride + left*PixelSize(format));
         }
         else
@@ -486,4 +491,4 @@ namespace Simd
     }
 }
 
-#endif//__SimdView_h__
+#endif//__SimdView_hpp__

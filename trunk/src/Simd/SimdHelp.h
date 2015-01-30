@@ -76,6 +76,11 @@
 */
 
 /*! @ingroup c_functions
+    @defgroup memory Memory Utilities
+    \short Functions for memory management.
+*/
+
+/*! @ingroup c_functions
     @defgroup hash Hash Functions
     \short Functions for hash estimation.
 */

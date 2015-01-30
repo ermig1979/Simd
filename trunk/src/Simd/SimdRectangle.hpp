@@ -21,11 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdRectangle_h__
-#define __SimdRectangle_h__
+#ifndef __SimdRectangle_hpp__
+#define __SimdRectangle_hpp__
 
 #include "Simd/SimdPoint.hpp"
-#include "Simd/SimdMath.h"
+
+#include <algorithm>
 
 namespace Simd
 {
@@ -382,10 +383,10 @@ namespace Simd
     template <typename T> template <typename TR> 
     SIMD_INLINE Rectangle<T> Rectangle<T>::Intersection(const Rectangle<TR> & rect) const
     {
-        T l = Max<T>(left, rect.left);
-        T t = Max<T>(top, rect.top);
-        T r = Max<T>(l, Min<T>(right, rect.right));
-        T b = Max<T>(t, Min<T>(bottom, rect.bottom));
+        T l = std::max<T>(left, rect.left);
+        T t = std::max<T>(top, rect.top);
+        T r = std::max<T>(l, std::min<T>(right, rect.right));
+        T b = std::max<T>(t, std::min<T>(bottom, rect.bottom));
         return Rectangle(l, t, r, b);
     }
 
@@ -486,4 +487,4 @@ namespace Simd
         return Rectangle<T1>((T1)(rect.left*value), (T1)(rect.top*value), (T1)(rect.right*value), (T1)(rect.bottom*value));
     }
 }
-#endif//__SimdRectangle_h__
+#endif//__SimdRectangle_hpp__

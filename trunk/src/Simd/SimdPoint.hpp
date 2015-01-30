@@ -21,11 +21,12 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdPoint_h__
-#define __SimdPoint_h__
+#ifndef __SimdPoint_hpp__
+#define __SimdPoint_hpp__
 
-#include "Simd/SimdDefs.h"
-#include "Simd/SimdTypes.h"
+#include "Simd/SimdLib.h"
+
+#include <math.h>
 
 namespace Simd
 {
@@ -482,4 +483,4 @@ namespace Simd
         return (p1.x * p2.y - p1.y * p2.x);
     }
 }
-#endif//__SimdPoint_h__
+#endif//__SimdPoint_hpp__
