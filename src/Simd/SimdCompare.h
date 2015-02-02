@@ -24,7 +24,6 @@
 #ifndef __SimdCompare_h__
 #define __SimdCompare_h__
 
-#include "Simd/SimdTypes.h"
 #include "Simd/SimdConst.h"
 
 namespace Simd

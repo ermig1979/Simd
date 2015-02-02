@@ -24,7 +24,6 @@
 #ifndef __SimdEnable_h__
 #define __SimdEnable_h__
 
-#include "Simd/SimdTypes.h"
 #include "Simd/SimdDefs.h"
 
 #if defined(_MSC_VER)

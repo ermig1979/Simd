@@ -27,7 +27,7 @@
 * Description : This file is needed to verify the C++ API of Simd Library.               
 */
 
-#include "Simd/SimdUtils.hpp"
+#include "Simd/SimdLib.hpp"
 
 namespace Test
 {
