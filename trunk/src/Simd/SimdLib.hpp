@@ -24,9 +24,10 @@
 */
 
 #include "Simd/SimdView.hpp"
+#include "Simd/SimdPixel.hpp"
 
-#ifndef __SimdUtils_hpp__
-#define __SimdUtils_hpp__
+#ifndef __SimdLib_hpp__
+#define __SimdLib_hpp__
 
 namespace Simd
 {
@@ -870,5 +871,5 @@ namespace Simd
     }
 }
 
-#endif//__SimdUtils_hpp__
+#endif//__SimdLib_hpp__
 

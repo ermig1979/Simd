@@ -90,8 +90,7 @@
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
-    <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
-    <ClInclude Include="..\..\src\Simd\SimdUtils.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdVersion.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />

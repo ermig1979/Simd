@@ -1,6 +1,6 @@
 PROJECT_NAME="Simd Library"
 OUTPUT_DIRECTORY=..\..\doc
-INPUT= ..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdTypes.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp
+INPUT= ..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp
 EXTRACT_ALL=NO
 SHOW_INCLUDE_FILES=NO
 SHOW_USED_FILES=NO

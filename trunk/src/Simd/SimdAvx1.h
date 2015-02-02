@@ -24,7 +24,6 @@
 #ifndef __SimdAvx_h__
 #define __SimdAvx_h__
 
-#include "Simd/SimdTypes.h"
 #include "Simd/SimdDefs.h"
 
 namespace Simd

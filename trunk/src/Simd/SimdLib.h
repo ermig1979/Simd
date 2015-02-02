@@ -26,7 +26,131 @@
 #ifndef __SimdLib_h__
 #define __SimdLib_h__
 
-#include "Simd/SimdTypes.h"
+#include <stddef.h>
+
+#if defined(_MSC_VER)
+
+#define SIMD_INLINE __forceinline
+
+#elif defined(__GNUC__)
+
+#define SIMD_INLINE inline __attribute__ ((always_inline))
+
+#else
+
+#error This platform is unsupported!
+
+#endif
+
+#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+#include <stdint.h>
+#else
+#  if (_MSC_VER < 1300)
+typedef signed char       int8_t;
+typedef signed short      int16_t;
+typedef signed int        int32_t;
+typedef unsigned char     uint8_t;
+typedef unsigned short    uint16_t;
+typedef unsigned int      uint32_t;
+#  else
+typedef signed __int8     int8_t;
+typedef signed __int16    int16_t;
+typedef signed __int32    int32_t;
+typedef unsigned __int8   uint8_t;
+typedef unsigned __int16  uint16_t;
+typedef unsigned __int32  uint32_t;
+#  endif
+typedef signed __int64    int64_t;
+typedef unsigned __int64  uint64_t;
+#endif
+
+/*! @ingroup c_types
+    Describes types of compare operation.
+    Operation compare(a, b) is 
+*/
+typedef enum 
+{
+    /*! equal to: a == b */
+    SimdCompareEqual,
+    /*! equal to: a != b */          
+    SimdCompareNotEqual,   
+    /*! equal to: a > b */    
+    SimdCompareGreater,        
+    /*! equal to: a >= b */
+    SimdCompareGreaterOrEqual,  
+    /*! equal to: a < b */
+    SimdCompareLesser,       
+    /*! equal to: a <= b */   
+    SimdCompareLesserOrEqual,   
+} SimdCompareType;
+
+/*! @ingroup c_types
+    Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
+    Images must have the same format (unsigned 8-bit integer for every channel).
+*/
+typedef enum
+{
+    /*! Computes the average value for every channel of every point of two images. \n Average(a, b) = (a + b + 1)/2. */
+    SimdOperationBinary8uAverage,
+    /*! Computes the bitwise AND between two images. */
+    SimdOperationBinary8uAnd,
+    /*! Computes maximal value for every channel of every point of two images. */
+    SimdOperationBinary8uMaximum,
+    /*!Subtracts unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
+    SimdOperationBinary8uSaturatedSubtraction,
+    /*!Adds unsigned 8-bit integer b from unsigned 8-bit integer a and saturates (for every channel of every point of the images). */
+    SimdOperationBinary8uSaturatedAddition,
+} SimdOperationBinary8uType;
+
+/*! @ingroup c_types
+    Describes types of binary operation between two images performed by function ::SimdOperationBinary16i.
+    Images must have ::SimdPixelFormatInt16 pixel format (signed 16-bit integer for every point).
+*/
+typedef enum
+{
+    /*! Perform addition of two images for every point.  */
+    SimdOperationBinary16iAddition,
+} SimdOperationBinary16iType;
+
+/*! @ingroup c_types
+    Describes pixel format types of an image.
+    In particular this type is used in functions ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
+*/
+typedef enum
+{
+    /*! An undefined pixel format. */
+    SimdPixelFormatNone = 0,
+    /*! A 8-bit gray pixel format. */
+    SimdPixelFormatGray8,
+    /*! A 16-bit (2 8-bit channels) pixel format (UV plane of NV12 pixel format). */
+    SimdPixelFormatUv16,
+    /*! A 24-bit (3 8-bit channels) BGR (Blue, Green, Red) pixel format. */
+    SimdPixelFormatBgr24,
+    /*! A 32-bit (4 8-bit channels) BGRA (Blue, Green, Red, Alpha) pixel format. */
+    SimdPixelFormatBgra32,
+    /*! A single channel 16-bit integer pixel format. */
+    SimdPixelFormatInt16,
+    /*! A single channel 32-bit integer pixel format. */
+    SimdPixelFormatInt32,
+    /*! A single channel 64-bit integer pixel format. */
+    SimdPixelFormatInt64,
+    /*! A single channel 32-bit float point pixel format. */
+    SimdPixelFormatFloat,
+    /*! A single channel 64-bit float point pixel format. */
+    SimdPixelFormatDouble,
+    /*! A 8-bit Bayer pixel format (GRBG). */
+    SimdPixelFormatBayerGrbg,
+    /*! A 8-bit Bayer pixel format (GBRG). */
+    SimdPixelFormatBayerGbrg,
+    /*! A 8-bit Bayer pixel format (RGGB). */
+    SimdPixelFormatBayerRggb,
+    /*! A 8-bit Bayer pixel format (BGGR). */
+    SimdPixelFormatBayerBggr,
+    /*! A 24-bit (3 8-bit channels) HSV (Hue, Saturation, Value) pixel format. */
+    SimdPixelFormatHsv24,
+    /*! A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
+    SimdPixelFormatHsl24,
+} SimdPixelFormatType;
 
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
@@ -103,7 +227,7 @@ extern "C"
     */
     SIMD_API size_t SimdAlignment();
 
-    /** @ingroup hash
+    /*! @ingroup hash
 
         \fn uint32_t SimdCrc32c(const void * src, size_t size);
 
@@ -117,7 +241,7 @@ extern "C"
     */
     SIMD_API uint32_t SimdCrc32c(const void * src, size_t size);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
@@ -136,7 +260,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
@@ -159,7 +283,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums);
 
@@ -180,7 +304,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
         size_t width, size_t height, uint64_t * sums);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride, const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
@@ -205,7 +329,7 @@ extern "C"
     SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
         const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums);
 
-    /** @ingroup other_filter
+    /*! @ingroup other_filter
 
         \fn void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -228,7 +352,7 @@ extern "C"
     SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t * dst, size_t dstStride);
 
-    /** @ingroup difference_estimation
+    /*! @ingroup difference_estimation
 
         \fn void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, uint16_t weight, uint8_t * difference, size_t differenceStride);
 
@@ -259,7 +383,7 @@ extern "C"
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
         uint16_t weight, uint8_t * difference, size_t differenceStride);
 
-    /** @ingroup drawing
+    /*! @ingroup drawing
 
         \fn void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
@@ -285,7 +409,7 @@ extern "C"
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
@@ -311,7 +435,7 @@ extern "C"
     SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
@@ -337,7 +461,7 @@ extern "C"
     SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride, uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
@@ -368,7 +492,7 @@ extern "C"
         const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
         uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
@@ -402,7 +526,7 @@ extern "C"
         uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height, uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride, uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
@@ -438,7 +562,7 @@ extern "C"
         uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
@@ -474,7 +598,7 @@ extern "C"
     SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
@@ -512,7 +636,7 @@ extern "C"
     SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
-    /** @ingroup background
+    /*! @ingroup background
 
         \fn void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
@@ -537,7 +661,7 @@ extern "C"
     SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup bayer_conversion
+    /*! @ingroup bayer_conversion
 
         \fn void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
@@ -555,7 +679,7 @@ extern "C"
     */
     SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 
-    /** @ingroup bayer_conversion
+    /*! @ingroup bayer_conversion
 
         \fn void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -574,7 +698,7 @@ extern "C"
     */
     SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion
 
         \fn void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
@@ -592,7 +716,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-    /** @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion
 
         \fn void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
@@ -609,7 +733,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride);
 
-    /** @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion
 
         \fn void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
@@ -626,7 +750,7 @@ extern "C"
     */
     SIMD_API void SimdBgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
-    /** @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion
 
 	* \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -648,7 +772,7 @@ extern "C"
 	*/
     SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /** @ingroup bgra_conversion
+    /*! @ingroup bgra_conversion
 
 	* \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -669,7 +793,7 @@ extern "C"
 	*/
     SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
@@ -687,7 +811,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -705,7 +829,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup other_conversion
+    /*! @ingroup other_conversion
 
         \fn void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height, const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -728,7 +852,7 @@ extern "C"
     SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
         const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
@@ -745,7 +869,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride);
 
@@ -762,7 +886,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToHsl(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsl, size_t hslStride);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
         \fn void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
 
@@ -779,7 +903,7 @@ extern "C"
     */
     SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
 	* \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -801,7 +925,7 @@ extern "C"
 	*/
     SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /** @ingroup bgr_conversion
+    /*! @ingroup bgr_conversion
 
 	* \fn void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -822,7 +946,7 @@ extern "C"
 	*/
     SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /** @ingroup binarization
+    /*! @ingroup binarization
 
         \fn void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
@@ -848,7 +972,7 @@ extern "C"
     SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    /** @ingroup binarization
+    /*! @ingroup binarization
 
         \fn void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
@@ -878,7 +1002,7 @@ extern "C"
         uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
         uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
-    /** @ingroup conditional
+    /*! @ingroup conditional
 
         \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);
 
@@ -899,7 +1023,7 @@ extern "C"
     SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, 
         uint8_t value, SimdCompareType compareType, uint32_t * count);
     
-    /** @ingroup conditional
+    /*! @ingroup conditional
 
         \fn void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t * count);
 
@@ -920,7 +1044,7 @@ extern "C"
     SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, 
         int16_t value, SimdCompareType compareType, uint32_t * count);
 
-    /** @ingroup conditional
+    /*! @ingroup conditional
 
         \fn void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
@@ -945,7 +1069,7 @@ extern "C"
     SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /** @ingroup conditional
+    /*! @ingroup conditional
 
         \fn void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
@@ -970,7 +1094,7 @@ extern "C"
     SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /** @ingroup conditional
+    /*! @ingroup conditional
 
         \fn void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
@@ -998,7 +1122,7 @@ extern "C"
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
-    /** @ingroup copying
+    /*! @ingroup copying
 
         \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
@@ -1016,7 +1140,7 @@ extern "C"
     */
     SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup copying
+    /*! @ingroup copying
 
         \fn void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
@@ -1039,7 +1163,7 @@ extern "C"
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup other_conversion
+    /*! @ingroup other_conversion
 
         \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -1060,7 +1184,7 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
 
@@ -1083,7 +1207,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
 
@@ -1106,7 +1230,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height, const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
@@ -1131,7 +1255,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
@@ -1157,7 +1281,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height, uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
@@ -1185,7 +1309,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
         uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
 
@@ -1208,7 +1332,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride);
 
-    /** @ingroup edge_background
+    /*! @ingroup edge_background
 
         \fn void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
@@ -1233,7 +1357,7 @@ extern "C"
     SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
-    /** @ingroup filling
+    /*! @ingroup filling
 
         \fn void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
@@ -1248,7 +1372,7 @@ extern "C"
     */
     SIMD_API void SimdFill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
-    /** @ingroup filling
+    /*! @ingroup filling
 
         \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
@@ -1268,7 +1392,7 @@ extern "C"
     SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
-    /** @ingroup filling
+    /*! @ingroup filling
 
         \fn void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
@@ -1284,7 +1408,7 @@ extern "C"
     */
     SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
-    /** @ingroup filling
+    /*! @ingroup filling
 
         \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
@@ -1302,7 +1426,7 @@ extern "C"
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-    /** @ingroup other_filter
+    /*! @ingroup other_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -1326,7 +1450,7 @@ extern "C"
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup gray_conversion
+    /*! @ingroup gray_conversion
 
         \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);
 
@@ -1343,7 +1467,7 @@ extern "C"
     */
     SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);
 
-    /** @ingroup gray_conversion
+    /*! @ingroup gray_conversion
 
         \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -1362,7 +1486,7 @@ extern "C"
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup histogram
+    /*! @ingroup histogram
 
         \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);
 
@@ -1384,7 +1508,7 @@ extern "C"
     SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride,
         size_t step, size_t indent, uint32_t * histogram);
 
-    /** @ingroup histogram
+    /*! @ingroup histogram
 
         \fn void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
@@ -1401,7 +1525,7 @@ extern "C"
     */
     SIMD_API void SimdHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
-    /** @ingroup histogram
+    /*! @ingroup histogram
 
         \fn void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
@@ -1422,7 +1546,7 @@ extern "C"
     SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
-    /** @ingroup integral
+    /*! @ingroup integral
 
         \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
@@ -1448,7 +1572,7 @@ extern "C"
         uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
         SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
-    /** @ingroup interference
+    /*! @ingroup interference
 
         \fn void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
@@ -1468,7 +1592,7 @@ extern "C"
     */
     SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
-    /** @ingroup interference
+    /*! @ingroup interference
 
         \fn void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
@@ -1493,7 +1617,7 @@ extern "C"
     SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
         uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
-    /** @ingroup interference
+    /*! @ingroup interference
 
         \fn void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
 
@@ -1513,7 +1637,7 @@ extern "C"
     */
     SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
 
-    /** @ingroup interference
+    /*! @ingroup interference
 
         \fn void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
@@ -1538,7 +1662,7 @@ extern "C"
     SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
         uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
-    /** @ingroup other_filter
+    /*! @ingroup other_filter
 
         \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -1555,7 +1679,7 @@ extern "C"
     */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup median_filter
+    /*! @ingroup median_filter
 
         \fn void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -1574,7 +1698,7 @@ extern "C"
     SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup median_filter
+    /*! @ingroup median_filter
 
         \fn void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -1593,7 +1717,7 @@ extern "C"
     SIMD_API void SimdMedianFilterRhomb5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup median_filter
+    /*! @ingroup median_filter
 
         \fn void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -1612,7 +1736,7 @@ extern "C"
     SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup median_filter
+    /*! @ingroup median_filter
 
         \fn void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -1631,7 +1755,7 @@ extern "C"
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup operation
+    /*! @ingroup operation
 
         \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
@@ -1653,7 +1777,7 @@ extern "C"
     SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
-    /** @ingroup operation
+    /*! @ingroup operation
 
         \fn void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
@@ -1674,7 +1798,7 @@ extern "C"
     SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
-    /** @ingroup operation
+    /*! @ingroup operation
 
         \fn void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
@@ -1693,7 +1817,7 @@ extern "C"
     SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
@@ -1716,7 +1840,7 @@ extern "C"
     SIMD_API void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
@@ -1742,7 +1866,7 @@ extern "C"
     SIMD_API void SimdReduceGray3x3(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
@@ -1768,7 +1892,7 @@ extern "C"
     SIMD_API void SimdReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
@@ -1796,7 +1920,7 @@ extern "C"
     SIMD_API void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
-    /** @ingroup reordering
+    /*! @ingroup reordering
 
         \fn void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
 
@@ -1814,7 +1938,7 @@ extern "C"
     */
     SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
     
-    /** @ingroup reordering
+    /*! @ingroup reordering
 
         \fn void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
@@ -1834,7 +1958,7 @@ extern "C"
     */
     SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-    /** @ingroup reordering
+    /*! @ingroup reordering
 
         \fn void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
@@ -1858,7 +1982,7 @@ extern "C"
     */
     SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
@@ -1879,7 +2003,7 @@ extern "C"
     SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
-    /** @ingroup segmentation
+    /*! @ingroup segmentation
 
         \fn void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
@@ -1899,7 +2023,7 @@ extern "C"
     */
     SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
-    /** @ingroup segmentation
+    /*! @ingroup segmentation
 
         \fn void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
@@ -1915,7 +2039,7 @@ extern "C"
     */
     SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 
-    /** @ingroup segmentation
+    /*! @ingroup segmentation
 
         \fn void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parentStride, size_t width, size_t height, uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
 
@@ -1941,7 +2065,7 @@ extern "C"
         uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
         uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
 
-    /** @ingroup segmentation
+    /*! @ingroup segmentation
 
         \fn void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 
@@ -1962,7 +2086,7 @@ extern "C"
     SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 
-    /** @ingroup shifting
+    /*! @ingroup shifting
 
         \fn void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
@@ -1990,7 +2114,7 @@ extern "C"
         const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY,
         size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup sobel_filter
+    /*! @ingroup sobel_filter
 
         \fn void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -2010,7 +2134,7 @@ extern "C"
     */
     SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup sobel_filter
+    /*! @ingroup sobel_filter
 
         \fn void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -2030,7 +2154,7 @@ extern "C"
     */
     SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup sobel_filter
+    /*! @ingroup sobel_filter
 
         \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -2050,7 +2174,7 @@ extern "C"
     */
     SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
     
-    /** @ingroup sobel_filter
+    /*! @ingroup sobel_filter
 
         \fn void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
@@ -2070,7 +2194,7 @@ extern "C"
     */
     SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup contour
+    /*! @ingroup contour
 
         \fn void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 
@@ -2093,7 +2217,7 @@ extern "C"
     */
     SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup contour
+    /*! @ingroup contour
 
         \fn void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride)
 
@@ -2120,7 +2244,7 @@ extern "C"
     SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup contour
+    /*! @ingroup contour
 
         \fn void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
@@ -2148,7 +2272,7 @@ extern "C"
     */
     SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
@@ -2170,7 +2294,7 @@ extern "C"
     SIMD_API void SimdSquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
@@ -2195,7 +2319,7 @@ extern "C"
     SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
         const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup correlation
+    /*! @ingroup correlation
 
         \fn float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
 
@@ -2213,7 +2337,7 @@ extern "C"
     */
     SIMD_API float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
 
-    /** @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t * min, uint8_t * max, uint8_t * average);
 
@@ -2232,7 +2356,7 @@ extern "C"
     SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
         uint8_t * min, uint8_t * max, uint8_t * average);
 
-    /** @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
@@ -2263,7 +2387,7 @@ extern "C"
     SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
-    /** @ingroup row_statistic
+    /*! @ingroup row_statistic
 
         \fn void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -2281,7 +2405,7 @@ extern "C"
     */
     SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /** @ingroup col_statistic
+    /*! @ingroup col_statistic
 
         \fn void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -2299,7 +2423,7 @@ extern "C"
     */
     SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /** @ingroup row_statistic
+    /*! @ingroup row_statistic
 
         \fn void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -2318,7 +2442,7 @@ extern "C"
     */
     SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /** @ingroup col_statistic
+    /*! @ingroup col_statistic
 
         \fn void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
@@ -2337,7 +2461,7 @@ extern "C"
     */
     SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
-    /** @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
@@ -2351,7 +2475,7 @@ extern "C"
     */
     SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
@@ -2365,7 +2489,7 @@ extern "C"
     */
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
-    /** @ingroup resizing
+    /*! @ingroup resizing
 
         \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
@@ -2383,7 +2507,7 @@ extern "C"
     SIMD_API void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
-    /** @ingroup texture_estimation
+    /*! @ingroup texture_estimation
 
         \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
@@ -2409,7 +2533,7 @@ extern "C"
     SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
-    /** @ingroup texture_estimation
+    /*! @ingroup texture_estimation
 
         \fn void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t boost, uint8_t * dst, size_t dstStride);
 
@@ -2432,7 +2556,7 @@ extern "C"
     SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t boost, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup texture_estimation
+    /*! @ingroup texture_estimation
 
         \fn void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
@@ -2456,7 +2580,7 @@ extern "C"
     SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
-    /** @ingroup texture_estimation
+    /*! @ingroup texture_estimation
 
         \fn void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int32_t shift, uint8_t * dst, size_t dstStride);
 
@@ -2478,7 +2602,7 @@ extern "C"
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -2501,7 +2625,7 @@ extern "C"
     SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -2523,7 +2647,7 @@ extern "C"
     SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -2547,7 +2671,7 @@ extern "C"
     SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
@@ -2570,7 +2694,7 @@ extern "C"
     SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsl, size_t hslStride);
 
@@ -2592,7 +2716,7 @@ extern "C"
     SIMD_API void SimdYuv444pToHsl(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hsl, size_t hslStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
 
@@ -2614,7 +2738,7 @@ extern "C"
     SIMD_API void SimdYuv444pToHsv(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hsv, size_t hsvStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
@@ -2637,7 +2761,7 @@ extern "C"
     SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
-    /** @ingroup yuv_conversion
+    /*! @ingroup yuv_conversion
 
         \fn void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * hue, size_t hueStride);
 

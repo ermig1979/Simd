@@ -260,8 +260,8 @@
     \short Functions for edge background updating.
 */
 
-/*! @defgroup cpp_types C++ Types
-    \short C++ Types of Simd Library.
+/*! @defgroup cpp_types C++ API Types
+    \short C++ API Types of Simd Library.
 */
 
 /*! @ingroup cpp_types

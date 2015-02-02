@@ -24,7 +24,6 @@
 #ifndef __SimdSse41_h__
 #define __SimdSse41_h__
 
-#include "Simd/SimdTypes.h"
 #include "Simd/SimdDefs.h"
 
 namespace Simd
