@@ -50,7 +50,7 @@ namespace Simd
         static void * Allocate(size_t size, size_t align);
 
         /*!
-            \fn void Free(void * p);
+            \fn void Free(void * ptr);
 
             \short Frees aligned memory block.
 
