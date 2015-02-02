@@ -265,18 +265,28 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_point struct Point
-    \short Point structure and related functions. 
+    @defgroup cpp_allocator struct Allocator
+    \short Allocator structure and related functions. 
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_allocator struct Allocator
-    \short Allocator structure and related functions. 
+    @defgroup cpp_point struct Point
+    \short Point structure and related functions. 
 */
 
 /*! @ingroup cpp_point
     @defgroup cpp_point_functions Related Functions 
     \short Related functions for Point structure. 
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_rectangle struct Rectangle
+    \short Rectangle structure and related functions. 
+*/
+
+/*! @ingroup cpp_rectangle
+    @defgroup cpp_rectangle_functions Related Functions 
+    \short Related functions for Rectangle structure. 
 */
 
 #ifndef __SimdHelp_h__

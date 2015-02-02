@@ -30,78 +30,409 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_rectangle
+
+        \short The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.
+
+        \ref cpp_rectangle_functions.
+    */
 	template <typename T> 
 	struct Rectangle
 	{
-        typedef T Type;
+        typedef T Type; /*!< Type definition. */
 
-		T left, top, right, bottom;
+		T left; /*!< \brief Specifies the position of left side of a rectangle. */
+        T top; /*!< \brief Specifies the position of top side of a rectangle. */
+        T right; /*!< \brief Specifies the position of right side of a rectangle. */
+        T bottom; /*!< \brief Specifies the position of bottom side of a rectangle. */
 
+        /*!
+            Creates a new Rectangle structure that contains the default (0, 0, 0, 0) positions of its sides. 
+        */
 		Rectangle();
+
+        /*!
+            Creates a new Rectangle structure that contains the specified positions of its sides. 
+
+            \param [in] l - initial left value. 
+            \param [in] t - initial top value. 
+            \param [in] r - initial right value. 
+            \param [in] b - initial bottom value. 
+        */
 		template <typename TL, typename TT, typename TR, typename TB> Rectangle(TL l, TT t, TR r, TB b);
+
+        /*!
+            Creates a new Rectangular structure that contains the specified coordinates of its left-top and right-bottom corners. 
+
+            \param [in] lt - initial coordinates of left-top corner. 
+            \param [in] rb - initial coordinates of right-bottom corner. 
+        */
 		template <typename TLT, typename TRB> Rectangle(const Point<TLT> & lt, const Point<TRB> & rb);
-		template <typename TRB> Rectangle(const Point<TRB> & rb);
+
+        /*!
+            Creates a new Rectangular structure that contains the specified coordinates of its right-bottom corner. 
+            The coordinates of left-top corner is set to (0, 0).
+
+            \param [in] rb - initial coordinates of right-bottom corner. 
+        */
+        template <typename TRB> Rectangle(const Point<TRB> & rb);
+
+        /*!
+            Creates a new Rectangle structure on the base of another rectangle of arbitrary type.
+
+            \param [in] r - a rectangle of arbitrary type. 
+        */
 		template <class TR, template<class> class TRectangle> Rectangle(const TRectangle<TR> & r);
+
+        /*!
+            A rectangle destructor.
+        */
 		~Rectangle();
 
+        /*!
+            Converts itself to rectangle of arbitrary type.
+
+            \return a rectangle of arbitrary type. 
+        */
         template <class TR, template<class> class TRectangle> operator TRectangle<TR>() const;
 
+        /*!
+            Performs copying from rectangle of arbitrary type.
+
+            \param [in] r - a rectangle of arbitrary type. 
+            \return a reference to itself. 
+        */
 		template <typename TR> Rectangle<T> & operator = (const Rectangle<TR> & r);
 
+        /*!
+            Sets position of left side. 
+
+            \param [in] l - a new position of left side. 
+            \return a reference to itself. 
+        */
         template <typename TL> Rectangle<T> & SetLeft(const TL & l);
+
+        /*!
+            Sets position of top side. 
+
+            \param [in] t - a new position of top side. 
+            \return a reference to itself. 
+        */        
         template <typename TT> Rectangle<T> & SetTop(const TT & t);
+
+        /*!
+            Sets position of right side. 
+
+            \param [in] r - a new position of right side. 
+            \return a reference to itself. 
+        */ 
         template <typename TR> Rectangle<T> & SetRight(const TR & r);
+
+        /*!
+            Sets position of bottom side. 
+
+            \param [in] b - a new position of bottom side. 
+            \return a reference to itself. 
+        */ 
         template <typename TB> Rectangle<T> & SetBottom(const TB & b);
 
-		template <typename TP> Rectangle<T> & SetTopLeft(const Point<TP> & topLeft);
-		template <typename TP> Rectangle<T> & SetTopRight(const Point<TP> & topRight);
-		template <typename TP> Rectangle<T> & SetBottomLeft(const Point<TP> & bottomLeft);
-		template <typename TP> Rectangle<T> & SetBottomRight(const Point<TP> & bottomRight);
+        /*!
+            Sets coordinates of top-left corner. 
 
+            \param [in] topLeft - a new coordinates of top-left corner. 
+            \return a reference to itself. 
+        */ 
+        template <typename TP> Rectangle<T> & SetTopLeft(const Point<TP> & topLeft);
+
+        /*!
+            Sets coordinates of top-right corner. 
+
+            \param [in] topRight - a new coordinates of top-right corner. 
+            \return a reference to itself. 
+        */ 
+		template <typename TP> Rectangle<T> & SetTopRight(const Point<TP> & topRight);
+
+        /*!
+            Sets coordinates of bottom-left corner. 
+
+            \param [in] bottomLeft - a new coordinates of bottom-left corner. 
+            \return a reference to itself. 
+        */ 
+        template <typename TP> Rectangle<T> & SetBottomLeft(const Point<TP> & bottomLeft);
+
+        /*!
+            Sets coordinates of bottom-right corner. 
+
+            \param [in] bottomRight - a new coordinates of bottom-right corner. 
+            \return a reference to itself. 
+        */
+        template <typename TP> Rectangle<T> & SetBottomRight(const Point<TP> & bottomRight);
+
+        /*!
+            Gets position of left side. 
+
+            \return a position of left side. 
+        */
         T Left() const;
+
+        /*!
+            Gets position of top side. 
+
+            \return a position of top side. 
+        */
         T Top() const;
+
+        /*!
+            Gets position of right side. 
+
+            \return a position of right side. 
+        */
         T Right() const;
+
+        /*!
+            Gets position of bottom side. 
+
+            \return a position of bottom side. 
+        */
         T Bottom() const; 
 
+        /*!
+            Gets coordinates of top-left corner. 
+
+            \return a point with coordinates of top-left corner. 
+        */ 
         Point<T> TopLeft() const;
+
+        /*!
+            Gets coordinates of top-right corner. 
+
+            \return a point with coordinates of top-right corner. 
+        */ 
 		Point<T> TopRight() const;
+
+        /*!
+            Gets coordinates of bottom-left corner. 
+
+            \return a point with coordinates of bottom-left corner. 
+        */ 
 		Point<T> BottomLeft() const;
+
+        /*!
+            Gets coordinates of bottom-right corner. 
+
+            \return a point with coordinates of bottom-right corner. 
+        */ 
 		Point<T> BottomRight() const; 
 
+        /*!
+            Gets rectangle width. 
+
+            \return a rectangle width. 
+        */ 
 		T Width() const;
-		T Height() const;
+
+        /*!
+            Gets rectangle height. 
+
+            \return a rectangle height. 
+        */
+        T Height() const;
+
+        /*!
+            Gets rectangle area. 
+
+            \return a rectangle area. 
+        */
 		T Area() const;
+
+        /*!
+            Returns true if rectangle area is equal to zero. 
+
+            \return a boolean value. 
+        */
 		bool Empty() const;
 
-		Point<T> Size() const;
-		Point<T> Center() const;
+        /*!
+            Gets size (width and height) of the rectangle. 
 
+            \return a point with rectangle size. 
+        */ 
+		Point<T> Size() const;
+
+        /*!
+            Gets coordinates of rectangle center. 
+
+            \return a point with coordinates of rectangle center. 
+        */
+        Point<T> Center() const;
+
+        /*!
+            Checks on the point with specified coordinates to belonging to the rectangle. 
+
+            \param [in] x - x-coordinate of checked point. 
+            \param [in] y - y-coordinate of checked point. 
+            \return a result of checking. 
+        */
 		template <typename TX, typename TY> bool Contains(TX x, TY y) const;
-		template <typename TP> bool Contains(const Point<TP> & p) const;
-		template <typename TL, typename TT, typename TR, typename TB> bool Contains(TL l, TT t, TR r, TB b) const;
+
+        /*!
+            Checks on the point to belonging to the rectangle. 
+
+            \param [in] p - a checked point. 
+            \return a result of checking. 
+        */
+        template <typename TP> bool Contains(const Point<TP> & p) const;
+
+        /*!
+            Checks on the rectangle with specified coordinates to belonging to the rectangle. 
+
+            \param [in] l - a left side of checked rectangle. 
+            \param [in] t - a top side of checked rectangle. 
+            \param [in] r - a right side of checked rectangle. 
+            \param [in] b - a bottom side of checked rectangle. 
+            \return a result of checking. 
+        */
+        template <typename TL, typename TT, typename TR, typename TB> bool Contains(TL l, TT t, TR r, TB b) const;
+        
+        /*!
+            Checks on the rectangle to belonging to the rectangle. 
+
+            \param [in] r - a checked rectangle. 
+            \return a result of checking. 
+        */
 		template <typename TR> bool Contains(const Rectangle <TR> & r) const;
 
-		template <typename TP> Rectangle<T> & Shift(const Point<TP> & shift);
-		template <typename TX, typename TY> Rectangle<T> & Shift(TX shiftX, TY shiftY);
+        /*!
+            Shifts a rectangle on the specific value. 
 
+            \param [in] shift - a point with shift value. 
+            \return a reference to itself. 
+        */
+        template <typename TP> Rectangle<T> & Shift(const Point<TP> & shift);
+
+        /*!
+            Shifts a rectangle on the specific value. 
+
+            \param [in] shiftX - x-coordinate of the shift. 
+            \param [in] shiftY - y-coordinate of the shift. 
+            \return a reference to itself. 
+        */
+        template <typename TX, typename TY> Rectangle<T> & Shift(TX shiftX, TY shiftY);
+
+        /*!
+            Gets a rectangle with shifted coordinates. 
+
+            \param [in] shift - a point with shift value. 
+            \return a shifted rectangle. 
+        */
         template <typename TP> Rectangle<T> Shifted(const Point<TP> & shift) const;
+
+        /*!
+            Gets a rectangle with shifted coordinates. 
+
+            \param [in] shiftX - x-coordinate of the shift. 
+            \param [in] shiftY - y-coordinate of the shift. 
+            \return a shifted rectangle. 
+        */        
         template <typename TX, typename TY> Rectangle<T> Shifted(TX shiftX, TY shiftY) const;
 
+        /*!
+            Adds border to rectangle. 
+            
+            \note The value of border can be negative.
+
+            \param [in] border - a width of added border. 
+            \return a reference to itself. 
+        */
         template <typename TB> Rectangle<T> & AddBorder(TB border);
 
+        /*!
+            Gets an intersection of the two rectangles (current and specified). 
+
+            \param [in] r - specified rectangle. 
+            \return a rectangle with result of intersection. 
+        */ 
         template <typename TR> Rectangle<T> Intersection(const Rectangle<TR> & r) const;
 
+        /*!
+            Sets to the rectangle results of the intersection of the rectangle and specified point.
+
+            \param [in] p - specified point. 
+            \return a reference to itself. 
+        */ 
         template <typename TP> Rectangle<T> & operator &= (const Point<TP> & p);
+
+        /*!
+            Sets to the rectangle results of the intersection of the rectangle and specified rectangle.
+
+            \param [in] r - specified rectangle. 
+            \return a reference to itself. 
+        */
         template <typename TR> Rectangle<T> & operator &= (const Rectangle<TR> & r);
+
+        /*!
+            Sets to the rectangle results of the union of the rectangle and specified point.
+
+            \param [in] p - specified point. 
+            \return a reference to itself. 
+        */
         template <typename TP> Rectangle<T> & operator |= (const Point<TP> & p);
 
+        /*!
+            Checks on overlapping of current rectangle and specified rectangle.
+
+            \param [in] r - specified rectangle. 
+            \return a result of checking. 
+        */
         bool Overlaps(const Rectangle<T> & r) const;
 	};
 
-	template <typename T> bool operator == (const Rectangle<T> & r1, const Rectangle<T> & r2);
-	template <typename T> bool operator != (const Rectangle<T> & r1, const Rectangle<T> & r2);
+    /*! @ingroup cpp_rectangle_functions
 
+        \fn template <typename T> bool operator == (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
+        \short Compares two rectangles on equality.
+
+        \param [in] r1 - a first rectangle.
+        \param [in] r2 - a second rectangle.
+        \return a result of comparison.
+    */
+    template <typename T> bool operator == (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
+    /*! @ingroup cpp_rectangle_functions
+
+        \fn template <typename T> bool operator != (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
+        \short Compares two rectangles on inequality.
+
+        \param [in] r1 - a first rectangle.
+        \param [in] r2 - a second rectangle.
+        \return a result of comparison.
+    */
+    template <typename T> bool operator != (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
+    /*! @ingroup cpp_rectangle_functions
+
+        \fn template<class T1, class T2> Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value);
+
+        \short Multiplies the rectangle on the scalar value.
+
+        \param [in] rect - a rectangle.
+        \param [in] value - a scalar value.
+        \return a result of multiplication.
+    */
     template<class T1, class T2> Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value);
+
+    /*! @ingroup cpp_rectangle_functions
+
+        \fn template<class T1, class T2> Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect);
+
+        \short Multiplies the scalar value on the rectangle.
+
+        \param [in] value - a scalar value.
+        \param [in] rect - a rectangle.
+        \return a result of multiplication.
+    */
     template<class T1, class T2> Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect);
 
 	//-------------------------------------------------------------------------
