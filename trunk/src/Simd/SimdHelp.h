@@ -289,6 +289,16 @@
     \short Related functions for Rectangle structure. 
 */
 
+/*! @ingroup cpp_types
+    @defgroup cpp_view struct View
+    \short View structure and related functions. 
+*/
+
+/*! @ingroup cpp_view
+    @defgroup cpp_view_functions Related Functions 
+    \short Related functions for View structure. 
+*/
+
 #ifndef __SimdHelp_h__
 #define __SimdHelp_h__
 #endif//__SimdHelp_h__
