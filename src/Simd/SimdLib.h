@@ -115,6 +115,7 @@ typedef enum
 /*! @ingroup c_types
     Describes pixel format types of an image.
     In particular this type is used in functions ::SimdBayerToBgr, ::SimdBayerToBgra, ::SimdBgraToBayer and ::SimdBgrToBayer.
+    \note This type is corresponds to C++ type Simd::View::Format.
 */
 typedef enum
 {
@@ -221,7 +222,7 @@ extern "C"
 
         \fn size_t SimdAlignment();
 
-        \short Gets required alignment for Simd Library.
+        \short Gets alignment required for the most productive work of the Simd Library.
 
         \return a required alignment.
     */

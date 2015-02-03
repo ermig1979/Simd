@@ -87,9 +87,9 @@ namespace Simd
         /*!
             \fn size_t Alignment();
 
-            \short Gets default alignment.
+            \short Gets memory alignment required for the most productive work.
 
-            \return default alignment.
+            \return a required memory alignment.
         */
         static size_t Alignment();
     };
