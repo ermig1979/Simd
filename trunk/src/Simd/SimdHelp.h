@@ -33,8 +33,8 @@
     This is the reference documentation of <a href="http://simd.sourceforge.net">Simd Library</a>,
     the C++ image processing library.
     This documentation have been generated using the tool <a href="http://www.doxygen.org">doxygen</a>.
-    It contains a detailed description of all classes and functions of the Simd Library.
-    If you have downloaded the Simd Library package, you actually have a local copy of these pages in the
+    It contains a detailed description of all classes and functions of the %Simd Library.
+    If you have downloaded the %Simd Library package, you actually have a local copy of these pages in the
     \c simd/doc/help/ directory.
 
     Use the menu above to navigate through the documentation pages.
@@ -46,28 +46,27 @@
 /*!
     \page foo2
 
-    The <b>Simd Library</b> is a high performance image processing library, designed for C and C++ programmers.
+    The <b>%Simd Library</b> is a high performance image processing library, designed for C and C++ programmers.
     It provides many useful algorithms for image processing  such as: pixel format conversion, image scaling and filtration, 
     extraction of statistic information from images, motion detection. 
     The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC. 
-    The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
+    The <b>%Simd Library</b> has C API and also contains useful C++ classes and functions to facilitate access to C API.
     The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS and G++ compilers, MSVS project and CMake build systems.
 
     \section s1 Library structure
 
-    The source of Simd Library is placed in the 
-    \c simd/src/Simd/ directory.
+    The source of %Simd Library is placed in the \c simd/src/Simd/ directory, its test framework is placed in the \c simd/src/Test/ directory.
 
 */
 /*@}*/
 
 /*! @defgroup c_types C Types
-    \short Types of Simd Library C API.
+    \short Types of %Simd Library C API.
 */
 
 /*! @defgroup cpp_types C++ Types
-    \short C++ API Types of Simd Library.
+    \short C++ API Types of %Simd Library.
 */
 
 /*! @ingroup cpp_types
@@ -106,7 +105,7 @@
 */
 
 /*! @defgroup functions Functions
-    \short Functions of Simd Library API.
+    \short Functions of %Simd Library API.
 */
 
 /*! @ingroup functions
