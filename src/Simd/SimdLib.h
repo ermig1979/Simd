@@ -250,6 +250,8 @@ extern "C"
 
         Both images must have the same width and height.
 
+        \note This function has a C++ wrapper Simd::AbsDifferenceSum(const View<A> & a, const View<A> & b, uint64_t & sum).
+
         \param [in] a - a pointer to pixels data of first image.
         \param [in] aStride - a row size of first image.
         \param [in] b - a pointer to pixels data of second image.
@@ -269,6 +271,8 @@ extern "C"
 
         Gets the absolute difference sum for all points when mask[i] == index.
         Both images and mask must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::AbsDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum).
 
         \param [in] a - a pointer to pixels data of first image.
         \param [in] aStride - a row size of first image.
@@ -294,6 +298,8 @@ extern "C"
         The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
         The shifts are lain in the range [-1, 1] for axis x and y.
 
+        \note This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View<A>& current, const View<A>& background, uint64_t * sums).
+
         \param [in] current - a pointer to pixels data of current image.
         \param [in] currentStride - a row size of the current image.
         \param [in] background - a pointer to pixels data of the background image.
@@ -315,6 +321,8 @@ extern "C"
         Both images and mask must have the same width and height. The image height and width must be equal or greater 3.
         The sums are calculated with central part (indent width = 1) of current image and with part of background image with corresponding shift.
         The shifts are lain in the range [-1, 1] for axis x and y.
+
+        \note This function has a C++ wrapper Simd::AbsDifferenceSums3x3(const View<A>& current, const View<A>& background, const View<A>& mask, uint8_t index, uint64_t * sums).
 
         \param [in] current - a pointer to pixels data of current image.
         \param [in] currentStride - a row size of the current image.
@@ -343,6 +351,8 @@ extern "C"
         \n dx[x, y] = abs(src[x + 1, y] - src[x - 1, y]), 
         \n dy[x, y] = abs(src[x, y + 1] - src[x, y - 1]).
 
+        \note This function has a C++ wrapper Simd::AbsGradientSaturatedSum(const View<A>& src, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of source 8-bit gray image.
         \param [in] srcStride - a row size of source image.
         \param [in] width - an image width.
@@ -367,6 +377,8 @@ extern "C"
         \n excess[i] = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0).
 
         This function is used for difference estimation in algorithm of motion detection.
+
+        \note This function has a C++ wrapper Simd::AddFeatureDifference(const View<A>& value, const View<A>& lo, const View<A>& hi, uint16_t weight, View<A>& difference).
 
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
@@ -397,6 +409,8 @@ extern "C"
 
         This function is used for image drawing.
 
+        \note This function has a C++ wrapper Simd::AlphaBlending(const View<A>& src, const View<A>& alpha, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of foreground image.
         \param [in] srcStride - a row size of the foreground image.
         \param [in] width - an image width.
@@ -424,14 +438,16 @@ extern "C"
 
         This function is used for background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::BackgroundGrowRangeSlow(const View<A>& value, View<A>& lo, View<A>& hi).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
         \param [in] loStride - a row size of the lo image.
-        \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
-        \param [in, out] hiStride - a row size of the hi image.
+        \param [in, out] hi - a pointer to pixels data of feature upper bound of dynamic background.
+        \param [in] hiStride - a row size of the hi image.
     */
     SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
@@ -450,14 +466,16 @@ extern "C"
 
         This function is used for background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::BackgroundGrowRangeFast(const View<A>& value, View<A>& lo, View<A>& hi).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
         \param [in] loStride - a row size of the lo image.
-        \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
-        \param [in, out] hiStride - a row size of the hi image.
+        \param [in, out] hi - a pointer to pixels data of feature upper bound of dynamic background.
+        \param [in] hiStride - a row size of the hi image.
     */
     SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
@@ -475,6 +493,8 @@ extern "C"
         \n hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
 
         This function is used for background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::BackgroundIncrementCount(const View<A>& value, const View<A>& loValue, const View<A>& hiValue, View<A>& loCount, View<A>& hiCount).
 
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
@@ -511,6 +531,8 @@ extern "C"
 
         This function is used for background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold).
+
         \param [in, out] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
         \param [in] loCountStride - a row size of the loCount image.
         \param [in] width - an image width.
@@ -545,8 +567,10 @@ extern "C"
 
         This function is used for background updating in motion detection algorithm.
 
-        \param [in] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
-        \param [in, out] loCountStride - a row size of the loCount image.
+        \note This function has a C++ wrapper Simd::BackgroundAdjustRange(View<A>& loCount, View<A>& loValue, View<A>& hiCount, View<A>& hiValue, uint8_t threshold, const View<A>& mask).
+
+        \param [in, out] loCount - a pointer to pixels data of count of feature lower bound of dynamic background.
+        \param [in] loCountStride - a row size of the loCount image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in, out] hiCount - a pointer to pixels data of count of feature upper bound of dynamic background.
@@ -572,20 +596,22 @@ extern "C"
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-    \verbatim
-    if (value[i] > hi[i])
-    {
-        lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
-        hi[i] = value[i];
-    }
-    if (lo[i] > value[i])
-    {
-        lo[i] = value[i];
-        hi[i] = max(hi[i] - lo[i] + value[i], 0);
-    }
-    \endverbatim
+        \verbatim
+        if (value[i] > hi[i])
+        {
+            lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
+            hi[i] = value[i];
+        }
+        if (lo[i] > value[i])
+        {
+            lo[i] = value[i];
+            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+        }
+        \endverbatim
 
         This function is used for fast background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi).
 
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
@@ -593,8 +619,8 @@ extern "C"
         \param [in] height - an image height.
         \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
         \param [in] loStride - a row size of the lo image.
-        \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
-        \param [in, out] hiStride - a row size of the hi image.
+        \param [in, out] hi - a pointer to pixels data of feature upper bound of dynamic background.
+        \param [in] hiStride - a row size of the hi image.
     */
     SIMD_API void SimdBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
         uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
@@ -608,20 +634,22 @@ extern "C"
         All images must have the same width, height and format (8-bit gray). 
 
         For every point when mask[i] != 0 : 
-    \verbatim
-    if (value[i] > hi[i])
-    {
-        lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
-        hi[i] = value[i];
-    }
-    if (lo[i] > value[i])
-    {
-        lo[i] = value[i];
-        hi[i] = max(hi[i] - lo[i] + value[i], 0);
-    }
-    \endverbatim
+        \verbatim
+        if (value[i] > hi[i])
+        {
+            lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
+            hi[i] = value[i];
+        }
+        if (lo[i] > value[i])
+        {
+            lo[i] = value[i];
+            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+        }
+        \endverbatim
 
         This function is used for fast background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::BackgroundShiftRange(const View<A>& value, View<A>& lo, View<A>& hi, const View<A>& mask).
 
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
@@ -629,8 +657,8 @@ extern "C"
         \param [in] height - an image height.
         \param [in, out] lo - a pointer to pixels data of feature lower bound of dynamic background.
         \param [in] loStride - a row size of the lo image.
-        \param [in] hi - a pointer to pixels data of feature upper bound of dynamic background.
-        \param [in, out] hiStride - a row size of the hi image.
+        \param [in, out] hi - a pointer to pixels data of feature upper bound of dynamic background.
+        \param [in] hiStride - a row size of the hi image.
         \param [in] mask - a pointer to pixels data of shift range mask.
         \param [in] maskStride - a row size of the mask image.
     */
@@ -649,6 +677,8 @@ extern "C"
         \n dst[i] = value; 
 
         This function is used for background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::BackgroundInitMask(const View<A>& src, uint8_t index, uint8_t value, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of input mask image.
         \param [in] srcStride - a row size of input mask image.
@@ -670,7 +700,9 @@ extern "C"
 
         All images must have the same width and height. The width and the height must be even.
 
-        \param [in] bayer - a pointer to pixels data of output 8-bit Bayer image.
+        \note This function has a C++ wrapper Simd::BayerToBgr(const View<A>& bayer, View<A>& bgr).
+
+        \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] bayerStride - a row size of the bayer image.
@@ -688,7 +720,9 @@ extern "C"
 
         All images must have the same width and height. The width and the height must be even.
 
-        \param [in] bayer - a pointer to pixels data of output 8-bit Bayer image.
+        \note This function has a C++ wrapper Simd::BayerToBgra(const View<A>& bayer, View<A>& bgra, uint8_t alpha).
+
+        \param [in] bayer - a pointer to pixels data of input 8-bit Bayer image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] bayerStride - a row size of the bayer image.
@@ -706,6 +740,8 @@ extern "C"
         \short Converts 32-bit BGRA image to 8-bit Bayer image. 
 
         All images must have the same width and height. The width and the height must be even.
+
+        \note This function has a C++ wrapper Simd::BgraToBayer(const View<A>& bgra, View<A>& bayer).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
@@ -725,6 +761,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::BgraToBgr(const View<A>& bgra, View<A>& bgr).
+
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -742,6 +780,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::BgraToGray(const View<A>& bgra, View<A>& gray).
+
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -753,44 +793,48 @@ extern "C"
 
     /*! @ingroup bgra_conversion
 
-	* \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+	    \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         \short Converts 32-bit BGRA image to YUV420P. 
 
-	* The input BGRA and output Y images must have the same width and height.
+	    The input BGRA and output Y images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component). 
-	*
-	* \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
-	* \param [in] width - an image width.
-	* \param [in] height - an image height.
-	* \param [in] bgraStride - a row size of the BGRA image.
-	* \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
-	* \param [in] yStride - a row size of the y image.
-	* \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
-	* \param [in] uStride - a row size of the u image.
-	* \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
-	* \param [in] vStride - a row size of the v image.
+
+        \note This function has a C++ wrapper Simd::BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v).
+
+	    \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+	    \param [in] width - an image width.
+	    \param [in] height - an image height.
+	    \param [in] bgraStride - a row size of the BGRA image.
+	    \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+	    \param [in] yStride - a row size of the y image.
+	    \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+	    \param [in] uStride - a row size of the u image.
+	    \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+	    \param [in] vStride - a row size of the v image.
 	*/
     SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgra_conversion
 
-	* \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+	    \fn void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         \short Converts 32-bit BGRA image to YUV444P. 
 
-	* The input BGRA and output Y, U and V images must have the same width and height.
-	*
-	* \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
-	* \param [in] width - an image width.
-	* \param [in] height - an image height.
-	* \param [in] bgraStride - a row size of the BGRA image.
-	* \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
-	* \param [in] yStride - a row size of the y image.
-	* \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
-	* \param [in] uStride - a row size of the u image.
-	* \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
-	* \param [in] vStride - a row size of the v image.
+	    The input BGRA and output Y, U and V images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgraToYuv444p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v).
+
+	    \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+	    \param [in] width - an image width.
+	    \param [in] height - an image height.
+	    \param [in] bgraStride - a row size of the BGRA image.
+	    \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+	    \param [in] yStride - a row size of the y image.
+	    \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+	    \param [in] uStride - a row size of the u image.
+	    \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+	    \param [in] vStride - a row size of the v image.
 	*/
     SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -801,6 +845,8 @@ extern "C"
         \short Converts 24-bit BGR image to 8-bit Bayer image. 
 
         All images must have the same width and height. The width and the height must be even.
+
+        \note This function has a C++ wrapper Simd::BgrToBayer(const View<A>& bgr, View<A>& bayer).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
@@ -820,6 +866,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::BgrToBgra(const View<A>& bgr, View<A>& bgra, uint8_t alpha).
+
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -837,6 +885,8 @@ extern "C"
         \short Converts 48-bit planar BGR image to 32-bit BGRA image. 
 
         All images must have the same width and height. 
+
+        \note This function has a C++ wrapper Simd::Bgr48pToBgra32(const View<A>& blue, const View<A>& green, const View<A>& red, View<A>& bgra, uint8_t alpha).
 
         \param [in] blue - a pointer to pixels data of input 16-bit image with blue color plane.
         \param [in] blueStride - a row size of the blue image.
@@ -861,6 +911,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::BgrToGray(const View<A>& bgr, View<A>& gray).
+
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -877,6 +929,8 @@ extern "C"
         \short Converts 24-bit BGR image to 24-bit HSL(Hue, Saturation, Lightness) image. 
 
         All images must have the same width and height. 
+
+        \note This function has a C++ wrapper Simd::BgrToHsl(const View<A>& bgr, View<A>& hsl).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
@@ -895,6 +949,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::BgrToHsv(const View<A>& bgr, View<A>& hsv).
+
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -906,44 +962,48 @@ extern "C"
 
     /*! @ingroup bgr_conversion
 
-	* \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+	    \fn void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         \short Converts 24-bit BGR image to YUV420P. 
 
-	* The input BGR and output Y images must have the same width and height.
+	    The input BGR and output Y images must have the same width and height.
         The input U and V images must have the same width and height (half size relative to Y component). 
-	*
-	* \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
-	* \param [in] width - an image width.
-	* \param [in] height - an image height.
-	* \param [in] bgrStride - a row size of the BGR image.
-	* \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
-	* \param [in] yStride - a row size of the y image.
-	* \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
-	* \param [in] uStride - a row size of the u image.
-	* \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
-	* \param [in] vStride - a row size of the v image.
+
+        \note This function has a C++ wrapper Simd::BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
+
+	    \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+	    \param [in] width - an image width.
+	    \param [in] height - an image height.
+	    \param [in] bgrStride - a row size of the BGR image.
+	    \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+	    \param [in] yStride - a row size of the y image.
+	    \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+	    \param [in] uStride - a row size of the u image.
+	    \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+	    \param [in] vStride - a row size of the v image.
 	*/
     SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
     /*! @ingroup bgr_conversion
 
-	* \fn void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+	    \fn void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         \short Converts 24-bit BGR image to YUV444P. 
 
-	* The input BGR and output Y, U and V images must have the same width and height.
-	*
-	* \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
-	* \param [in] width - an image width.
-	* \param [in] height - an image height.
-	* \param [in] bgrStride - a row size of the BGR image.
-	* \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
-	* \param [in] yStride - a row size of the y image.
-	* \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
-	* \param [in] uStride - a row size of the u image.
-	* \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
-	* \param [in] vStride - a row size of the v image.
+	    The input BGR and output Y, U and V images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v).
+
+	    \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+	    \param [in] width - an image width.
+	    \param [in] height - an image height.
+	    \param [in] bgrStride - a row size of the BGR image.
+	    \param [out] y - a pointer to pixels data of output 8-bit image with Y color plane.
+	    \param [in] yStride - a row size of the y image.
+	    \param [out] u - a pointer to pixels data of output 8-bit image with U color plane.
+	    \param [in] uStride - a row size of the u image.
+	    \param [out] v - a pointer to pixels data of output 8-bit image with V color plane.
+	    \param [in] vStride - a row size of the v image.
 	*/
     SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -958,6 +1018,8 @@ extern "C"
         For every point:
         \n dst[i] = compare(src[i], value) ? positive : negative,
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
+
+        \note This function has a C++ wrapper Simd::Binarization(const View<A>& src, uint8_t value, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
         \param [in] srcStride - a row size of the src image.
@@ -986,6 +1048,8 @@ extern "C"
         \n where sum[i] is a sum of positive compare(src[i], value) operation (see ::SimdCompareType) in the point neighborhood (from -neighborhood to neighborhood for x and y),
         \n area[i] - an area of the point neighborhood ( (2*neighborhood + 1)^2 for central part of the image).
 
+        \note This function has a C++ wrapper Simd::AveragingBinarization(const View<A>& src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View<A>& dst, SimdCompareType compareType).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
         \param [in] srcStride - a row size of the src image.
         \param [in] width - an image width.
@@ -1013,6 +1077,8 @@ extern "C"
         \n count += compare(src[i], value) ? 1 : 0,
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
 
+        \note This function has a C++ wrapper Simd::ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image (first value for compare operation).
         \param [in] stride - a row size of the src image.
         \param [in] width - an image width.
@@ -1033,6 +1099,8 @@ extern "C"
         For every point:
         \n count += compare(src[i], value) ? 1 : 0,
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
+
+        \note This function has a C++ wrapper Simd::ConditionalCount16i(const View<A> & src, int16_t value, SimdCompareType compareType, uint32_t & count).
 
         \param [in] src - a pointer to pixels data of input 16-bit signed integer image (first value for compare operation).
         \param [in] stride - a row size of the src image.
@@ -1056,6 +1124,8 @@ extern "C"
         For every point:
         \n sum += compare(mask[i], value) ? src[i] : 0,
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
+
+        \note This function has a C++ wrapper Simd::ConditionalSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of the src image.
@@ -1081,6 +1151,8 @@ extern "C"
         For every point:
         \n sum += compare(mask[i], value) ? src[i]*src[i] : 0,
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
+
+        \note This function has a C++ wrapper Simd::ConditionalSquareSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of the src image.
@@ -1110,6 +1182,8 @@ extern "C"
         \n dy[x, y] = src[x, y + 1] - src[x, y - 1];
         \n compare(a, b) depends from compareType (see ::SimdCompareType).
 
+        \note This function has a C++ wrapper Simd::ConditionalSquareGradientSum(const View<A> & src, const View<A> & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of the src image.
         \param [in] width - an image width.
@@ -1131,6 +1205,8 @@ extern "C"
 
         All images must have the same width, height and format.
 
+        \note This function has a C++ wrapper Simd::Copy(const View<A> & src, View<B> & dst).
+
         \param [in] src - a pointer to pixels data of source image.
         \param [in] srcStride - a row size of the src image.
         \param [in] width - an image width.
@@ -1148,6 +1224,8 @@ extern "C"
         \short Copies pixels data of image from source to destination except for the portion bounded frame. 
 
         All images must have the same width, height and format.
+
+        \note This function has a C++ wrapper Simd::CopyFrame(const View<A>& src, const Rectangle<ptrdiff_t> & frame, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of source image.
         \param [in] srcStride - a row size of the src image.
@@ -1172,6 +1250,8 @@ extern "C"
 
         All images must have the same width and height.
         This function used for NV12 to YUV420P conversion.
+
+        \note This function has a C++ wrapper Simd::DeinterleaveUv(const View<A>& uv, View<A>& u, View<A>& v).
 
         \param [in] uv - a pointer to pixels data of input 16-bit UV interleaved image.
         \param [in] uvStride - a row size of the uv image.
@@ -1198,6 +1278,8 @@ extern "C"
 
         This function is used for edge background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::EdgeBackgroundGrowRangeSlow(const View<A>& value, View<A>& background).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -1221,6 +1303,8 @@ extern "C"
 
         This function is used for edge background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::EdgeBackgroundGrowRangeFast(const View<A>& value, View<A>& background).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -1243,6 +1327,8 @@ extern "C"
         \n backgroundCount[i] += (value[i] > backgroundValue[i] && backgroundCount[i] < 255) ? 1 : 0;
 
         This function is used for edge background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::EdgeBackgroundIncrementCount(const View<A>& value, const View<A>& backgroundValue, View<A>& backgroundCount).
 
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
@@ -1271,6 +1357,8 @@ extern "C"
 
         This function is used for edge background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold).
+
         \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
         \param [in] backgroundCountStride - a row size of the backgroundCount image.
         \param [in] width - an image width.
@@ -1296,6 +1384,8 @@ extern "C"
         \n backgroundCount[i] = 0;
 
         This function is used for edge background updating in motion detection algorithm.
+
+        \note This function has a C++ wrapper Simd::EdgeBackgroundAdjustRange(View<A>& backgroundCount, View<A>& backgroundValue, uint8_t threshold, const View<A>& mask).
 
         \param [in, out] backgroundCount - a pointer to pixels data of count of feature of edge dynamic background.
         \param [in] backgroundCountStride - a row size of the backgroundCount image.
@@ -1323,6 +1413,8 @@ extern "C"
 
         This function is used for fast edge background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::EdgeBackgroundShiftRange(const View<A>& value, View<A>& background).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -1346,6 +1438,8 @@ extern "C"
 
         This function is used for fast edge background updating in motion detection algorithm.
 
+        \note This function has a C++ wrapper Simd::EdgeBackgroundShiftRange(const View<A>& value, View<A>& background, const View<A>& mask).
+
         \param [in] value - a pointer to pixels data of current feature value.
         \param [in] valueStride - a row size of the value image.
         \param [in] width - an image width.
@@ -1364,6 +1458,8 @@ extern "C"
 
         \short Fills pixels data of image by given value. 
 
+        \note This function has a C++ wrapper Simd::Fill(View<A>& dst, uint8_t value).
+
         \param [out] dst - a pointer to pixels data of destination image.
         \param [in] stride - a row size of the dst image.
         \param [in] width - an image width.
@@ -1378,6 +1474,8 @@ extern "C"
         \fn void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
         \short Fills pixels data of image except for the portion bounded frame by given value. 
+
+        \note This function has a C++ wrapper Simd::FillFrame(View<A>& dst, const Rectangle<ptrdiff_t> & frame, uint8_t value).
 
         \param [out] dst - a pointer to pixels data of destination image.
         \param [in] stride - a row size of the dst image.
@@ -1399,6 +1497,8 @@ extern "C"
 
         \short Fills pixels data of 24-bit BGR image by given color(blue, green, red). 
 
+        \note This function has a C++ wrapper Simd::FillBgr(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red).
+
         \param [out] dst - a pointer to pixels data of destination image.
         \param [in] stride - a row size of the dst image.
         \param [in] width - an image width.
@@ -1413,7 +1513,9 @@ extern "C"
 
         \fn void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha). 
+        \short Fills pixels data of 32-bit BGRA image by given color(blue, green, red, alpha).
+
+        \note This function has a C++ wrapper Simd::FillBgra(View<A>& dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha).
 
         \param [out] dst - a pointer to pixels data of destination image.
         \param [in] stride - a row size of the dst image.
@@ -1440,6 +1542,8 @@ extern "C"
 
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
 
+        \note This function has a C++ wrapper Simd::GaussianBlur3x3(const View<A>& src, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of source image.
         \param [in] srcStride - a row size of the src image.
         \param [in] width - an image width.
@@ -1459,6 +1563,8 @@ extern "C"
 
         All images must have the same width and height. 
 
+        \note This function has a C++ wrapper Simd::GrayToBgr(const View<A>& gray, View<A>& bgr).
+
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -1475,6 +1581,8 @@ extern "C"
         \short Converts 8-bit gray image to 32-bit BGRA image. 
 
         All images must have the same width and height. 
+
+        \note This function has a C++ wrapper Simd::GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha).
 
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
@@ -1498,6 +1606,8 @@ extern "C"
         \n dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y])),
         \n dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step])).
 
+        \note This function has a C++ wrapper Simd::AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -1518,6 +1628,8 @@ extern "C"
         For all points: 
         \n histogram[src(i)]++.
 
+        \note This function has a C++ wrapper Simd::Histogram(const View<A>& src, uint32_t * histogram).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -1534,6 +1646,8 @@ extern "C"
 
         For every point where mask[i] == index: 
         \n histogram[src(i)]++.
+
+        \note This function has a C++ wrapper Simd::HistogramMasked(const View<A> & src, const View<A> & mask, uint8_t index, uint32_t * histogram).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of the image.
@@ -1556,16 +1670,21 @@ extern "C"
         The function can calculates sum integral image, square sum integral image (optionally) and tilted sum integral image (optionally). 
         A integral images must have width and height per unit greater than that of the input image. 
 
+        \note This function has a C++ wrappers: 
+        \n Simd::Integral(const View<A>& src, View<A>& sum),
+        \n Simd::Integral(const View<A>& src, View<A>& sum, View<A>& sqsum),
+        \n Simd::Integral(const View<A>& src, View<A>& sum, View<A>& sqsum, View<A>& tilted).
+
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of src image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] sum - a pointer to pixels data of sum image. 
+        \param [out] sum - a pointer to pixels data of 32-bit integer sum image. 
         \param [in] sumStride - a row size of sum image (in bytes).
-        \param [out] sqsum - a pointer to pixels data of square sum image. It can be NULL.
+        \param [out] sqsum - a pointer to pixels data of 32-bit integer or 64-bit float point square sum image. It can be NULL.
         \param [in] sqsumStride - a row size of sqsum image (in bytes).
-        \param [out] tilted - a pointer to pixels data of tilted sum image.
-        \param [in] tiltedStride - a row size of tilted image (in bytes). It can be NULL.
+        \param [out] tilted - a pointer to pixels data of 32-bit integer tilted sum image. It can be NULL.
+        \param [in] tiltedStride - a row size of tilted image (in bytes).
         \param [in] sumFormat - a format of sum image and tilted image. It can be equal to ::SimdPixelFormatInt32.
         \param [in] sqsumFormat - a format of sqsum image. It can be equal to ::SimdPixelFormatInt32 or ::SimdPixelFormatDouble.
     */
@@ -1583,6 +1702,8 @@ extern "C"
         \n statistic[i] = min(statistic[i] + increment, saturation); 
 
         This function is used for interference detection in motion detection algorithm.
+
+        \note This function has a C++ wrappers: Simd::InterferenceIncrement(View<A> & dst, uint8_t increment, int16_t saturation).
 
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] stride - a row size of statistic image.
@@ -1604,6 +1725,8 @@ extern "C"
 
         All images must have the same width, height. 
         This function is used for interference detection in motion detection algorithm.
+
+        \note This function has a C++ wrappers: Simd::InterferenceIncrementMasked(View<A> & dst, uint8_t increment, int16_t saturation, const View<A>& mask, uint8_t index).
 
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] statisticStride - a row size of statistic image.
@@ -1629,12 +1752,14 @@ extern "C"
 
         This function is used for interference detection in motion detection algorithm.
 
+        \note This function has a C++ wrappers: Simd::InterferenceDecrement(View<A> & dst, uint8_t decrement, int16_t saturation).
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] stride - a row size of statistic image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] decrement - an decrement of statistic.
-        \param [in] saturation - an lower saturation of statistic.
+        \param [in] decrement - a decrement of statistic.
+        \param [in] saturation - a lower saturation of statistic.
     */
     SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
 
@@ -1650,12 +1775,14 @@ extern "C"
         All images must have the same width, height. 
         This function is used for interference detection in motion detection algorithm.
 
+        \note This function has a C++ wrappers: Simd::InterferenceDecrementMasked(View<A> & dst, uint8_t decrement, int16_t saturation, const View<A>& mask, uint8_t index).
+
         \param [in, out] statistic - a pointer to pixels data of 16-bit signed integer image with statistic.
         \param [in] statisticStride - a row size of statistic image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] decrement - an decrement of statistic.
-        \param [in] saturation - an lower saturation of statistic.
+        \param [in] decrement - a decrement of statistic.
+        \param [in] saturation - a lower saturation of statistic.
         \param [in] mask - a pointer to pixels data of 8-bit gray image with mask.
         \param [in] maskStride - a row size of mask image.
         \param [in] index - an index of mask.
@@ -1669,7 +1796,9 @@ extern "C"
 
         \short Calculates LBP (Local Binary Patterns) for 8-bit gray image. 
 
-        All images must have the same width and height. 
+        All images must have the same width and height.
+
+        \note This function has a C++ wrappers: Simd::LbpEstimate(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of input 8-bit gray image.
         \param [in] srcStride - a row size of src image.
@@ -1686,7 +1815,9 @@ extern "C"
 
         \short Performs median filtration of input image (filter window is a rhomb 3x3). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::MedianFilterRhomb3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
         \param [in] srcStride - a row size of src image.
@@ -1707,6 +1838,8 @@ extern "C"
 
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
 
+        \note This function has a C++ wrappers: Simd::MedianFilterRhomb5x5(const View<A>& src, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of original input image.
         \param [in] srcStride - a row size of src image.
         \param [in] width - an image width.
@@ -1725,6 +1858,8 @@ extern "C"
         \short Performs median filtration of input image (filter window is a square 3x3). 
 
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+
+        \note This function has a C++ wrappers: Simd::MedianFilterSquare3x3(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of original input image.
         \param [in] srcStride - a row size of src image.
@@ -1745,6 +1880,8 @@ extern "C"
 
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
 
+        \note This function has a C++ wrappers: Simd::MedianFilterSquare5x5(const View<A>& src, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of original input image.
         \param [in] srcStride - a row size of src image.
         \param [in] width - an image width.
@@ -1762,7 +1899,9 @@ extern "C"
 
         \short Performs given operation between two images. 
 
-        All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV (UV plane of NV12 pixel format), 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::OperationBinary8u(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary8uType type).
 
         \param [in] a - a pointer to pixels data of the first input image.
         \param [in] aStride - a row size of the first image.
@@ -1771,7 +1910,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] channelCount - a channel count.
-        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [out] dst - a pointer to pixels data of output image.
         \param [in] dstStride - a row size of dst image.
         \param [in] type - a type of operation (see ::SimdOperationBinary8uType).
     */
@@ -1786,13 +1925,15 @@ extern "C"
 
         All images must have the same width, height and ::SimdPixelFormatInt16 pixel format. 
 
+        \note This function has a C++ wrappers: Simd::OperationBinary16i(const View<A>& a, const View<A>& b, View<A>& dst, SimdOperationBinary16iType type).
+
         \param [in] a - a pointer to pixels data of the first input image.
         \param [in] aStride - a row size of the first image.
         \param [in] b - a pointer to pixels data of the second input image.
         \param [in] bStride - a row size of the second image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] dst - a pointer to pixels data of filtered output image.
+        \param [out] dst - a pointer to pixels data of output image.
         \param [in] dstStride - a row size of dst image.
         \param [in] type - a type of operation (see ::SimdOperationBinary16iType).
     */
@@ -1807,6 +1948,8 @@ extern "C"
 
         For all points: 
         \n dst[x, y] = horizontal[x]*vertical[y]/255.
+
+        \note This function has a C++ wrappers: Simd::VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, View<A>& dst).
 
         \param [in] vertical - a pointer to pixels data of vertical vector. It length is equal to result image height.
         \param [in] horizontal - a pointer to pixels data of horizontal vector. It length is equal to result image width.
@@ -1828,6 +1971,8 @@ extern "C"
 
         For all points: 
         \n dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4.
+
+        \note This function has a C++ wrappers: Simd::ReduceGray2x2(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -1853,6 +1998,8 @@ extern "C"
         \n dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] + 
         \n 2*(src[2*x-1, 2*y] + 2*src[2*x, 2*y] + src[2*x+1, 2*y]) +
         \n src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16; 
+
+        \note This function has a C++ wrappers: Simd::ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -1881,6 +2028,8 @@ extern "C"
         \n 3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
         \n src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64; 
 
+        \note This function has a C++ wrappers: Simd::ReduceGray4x4(const View<A>& src, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
         \param [in] srcHeight - a height of the input image.
@@ -1907,6 +2056,8 @@ extern "C"
         \n 6*(src[2*x-2, 2*y] + 4*src[2*x-1, 2*y] + 6*src[2*x, 2*y] + 4*src[2*x+1, 2*y] + src[2*x+2, 2*y]) +
         \n 4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
         \n src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + compensation ? 128 : 0) / 256; 
+
+        \note This function has a C++ wrappers: Simd::ReduceGray5x5(const Viewc<A>& src, View<A>& dst, bool compensation).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -1989,7 +2140,9 @@ extern "C"
 
         \short Performs resizing of input image with using bilinear interpolation. 
 
-        All images must have the same format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+
+        \note This function has a C++ wrappers: Simd::ResizeBilinear(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -2015,6 +2168,8 @@ extern "C"
         For every point:
         \n mask[i] = mask[i] == oldIndex ? newIndex : mask[i]. 
 
+        \note This function has a C++ wrappers: Simd::SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex).
+
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
         \param [in] width - a mask width.
@@ -2032,6 +2187,8 @@ extern "C"
 
         Mask must has 8-bit gray pixel format. 
 
+        \note This function has a C++ wrappers: Simd::SegmentationFillSingleHoles(View<A> & mask, uint8_t index).
+
         \param [in, out] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
         \param [in] width - an mask width.
@@ -2048,6 +2205,8 @@ extern "C"
 
         For parent and child image must be performed: parentWidth = (childWidth + 1)/2, parentHeight = (childHeight + 1)/2.
         All images must have 8-bit gray pixel format. Size of different image is equal to child image.
+
+        \note This function has a C++ wrappers: Simd::SegmentationPropagate2x2(const View<A> & parent, View<A> & child, const View<A> & difference, uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t thresholdDifference).
 
         \param [in] parent - a pointer to pixels data of 8-bit gray parent mask image.
         \param [in] parentStride - a row size of the parent mask image.
@@ -2074,6 +2233,8 @@ extern "C"
 
         Mask must has 8-bit gray pixel format. 
 
+        \note This function has a C++ wrappers: Simd::SegmentationShrinkRegion(const View<A> & mask, uint8_t index, Rectangle<ptrdiff_t> & rect).
+
         \param [in] mask - a pointer to pixels data of 8-bit gray mask image.
         \param [in] stride - a row size of the mask image.
         \param [in] width - an mask width.
@@ -2094,6 +2255,8 @@ extern "C"
         \short Performs shifting of input image with using bilinear interpolation. 
 
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+
+        \note This function has a C++ wrappers: Simd::ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst).
 
         \param [in] src - a pointer to pixels data of the foreground input image.
         \param [in] srcStride - a row size of the input image.
@@ -2126,7 +2289,9 @@ extern "C"
         For every point: 
         \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
 
-        \param [in] src - a pointer to pixels data of the foreground input image.
+        \note This function has a C++ wrappers: Simd::SobelDx(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -2146,7 +2311,9 @@ extern "C"
         For every point: 
         \n dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
 
-        \param [in] src - a pointer to pixels data of the foreground input image.
+        \note This function has a C++ wrappers: Simd::SobelDxAbs(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -2166,7 +2333,9 @@ extern "C"
         For every point: 
         \n dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]).
 
-        \param [in] src - a pointer to pixels data of the foreground input image.
+        \note This function has a C++ wrappers: Simd::SobelDy(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -2186,7 +2355,9 @@ extern "C"
         For every point: 
         \n dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
 
-        \param [in] src - a pointer to pixels data of the foreground input image.
+        \note This function has a C++ wrappers: Simd::SobelDyAbs(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
         \param [in] height - an image height.
@@ -2208,6 +2379,8 @@ extern "C"
         \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
         \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
         \n dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1).
+
+        \note This function has a C++ wrappers: Simd::ContourMetrics(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the gray 8-bit input image.
         \param [in] srcStride - a row size of the input image.
@@ -2231,6 +2404,8 @@ extern "C"
         \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
         \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
         \n dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1).
+
+        \note This function has a C++ wrappers: Simd::ContourMetrics(const View<A>& src, const View<A>& mask, uint8_t indexMin, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the gray 8-bit input image.
         \param [in] srcStride - a row size of the input image.
@@ -2262,6 +2437,8 @@ extern "C"
         \n else
         \n dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x, y + 1] >= threshold) && (a[x, y] - a[x, y - 1] >= threshold) ? 255 : 0;
 
+        \note This function has a C++ wrappers: Simd::ContourAnchors(const View<A>& src, size_t step, int16_t threshold, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of the 16-bit input image.
         \param [in] srcStride - a row size of the input image.
         \param [in] width - an image width.
@@ -2284,6 +2461,8 @@ extern "C"
         For every point: 
         \n sum += (a[i] - b[i])*(a[i] - b[i]).
 
+        \note This function has a C++ wrappers: Simd::SquaredDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum).
+
         \param [in] a - a pointer to pixels data of the first image.
         \param [in] aStride - a row size of the first image.
         \param [in] b - a pointer to pixels data of the second image.
@@ -2305,6 +2484,8 @@ extern "C"
 
         For every point where mask[i] == index: 
         \n sum += (a[i] - b[i])*(a[i] - b[i]).
+
+        \note This function has a C++ wrappers: Simd::SquaredDifferenceSum(const View<A>& a, const View<A>& b, const View<A>& mask, uint8_t index, uint64_t & sum).
 
         \param [in] a - a pointer to pixels data of the first image.
         \param [in] aStride - a row size of the first image.
@@ -2344,7 +2525,9 @@ extern "C"
 
         \short Finds minimal, maximal and average pixel values for given image. 
 
-        The image must has 8-bit gray format. 
+        The image must has 8-bit gray format.
+
+        \note This function has a C++ wrappers: Simd::GetStatistic(const View<A>& src, uint8_t & min, uint8_t & max, uint8_t & average).
 
         \param [in] src - a pointer to pixels data of the input image.
         \param [in] stride - a row size of the image.
@@ -2373,11 +2556,13 @@ extern "C"
         \n xy += X*Y.
         \n yy += Y*Y.
 
+        \note This function has a C++ wrappers: Simd::GetMoments(const View<A>& mask, uint8_t index, uint64_t & area, uint64_t & x, uint64_t & y, uint64_t & xx, uint64_t & xy, uint64_t & yy).
+
         \param [in] mask - a pointer to pixels data of the mask image.
         \param [in] stride - a row size of the mask image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [in] index - an mask index.
+        \param [in] index - a mask index.
         \param [out] area - a pointer to unsigned 64-bit integer value with found area (number of pixels with given index).
         \param [out] x - a pointer to unsigned 64-bit integer value with found first-order moment x.
         \param [out] y - a pointer to unsigned 64-bit integer value with found first-order moment y.
@@ -2398,6 +2583,8 @@ extern "C"
         \n sums[y] += src[x, y]; 
         \n where x changes from 0 to width.
 
+        \note This function has a C++ wrappers: Simd::GetRowSums(const View<A>& src, uint32_t * sums).
+
         \param [in] src - a pointer to pixels data of the input image.
         \param [in] stride - a row size of the input image.
         \param [in] width - an image width.
@@ -2415,6 +2602,8 @@ extern "C"
         For all columns: 
         \n sums[x] += src[x, y]; 
         \n where y changes from 0 to height.
+
+        \note This function has a C++ wrappers: Simd::GetColSums(const View<A>& src, uint32_t * sums).
 
         \param [in] src - a pointer to pixels data of the input image.
         \param [in] stride - a row size of the input image.
@@ -2435,6 +2624,8 @@ extern "C"
         \n where x changes from 0 to width.
         \n For the last row sums[height-1] = 0; 
 
+        \note This function has a C++ wrappers: Simd::GetAbsDyRowSums(const View<A>& src, uint32_t * sums).
+
         \param [in] src - a pointer to pixels data of the input image.
         \param [in] stride - a row size of the input image.
         \param [in] width - an image width.
@@ -2454,6 +2645,8 @@ extern "C"
         \n where y changes from 0 to height.
         \n For the last column sums[width-1] = 0; 
 
+        \note This function has a C++ wrappers: Simd::GetAbsDxColSums(const View<A>& src, uint32_t * sums).
+
         \param [in] src - a pointer to pixels data of the input image.
         \param [in] stride - a row size of the input image.
         \param [in] width - an image width.
@@ -2467,6 +2660,8 @@ extern "C"
         \fn void SimdValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
         \short Gets sum of value of pixels for gray 8-bit image. 
+
+        \note This function has a C++ wrappers: Simd::ValueSum(const View<A>& src, uint64_t & sum).
 
         \param [in] src - a pointer to pixels data of the image.
         \param [in] stride - a row size of the image.
@@ -2482,6 +2677,8 @@ extern "C"
 
         \short Gets sum of squared value of pixels for gray 8-bit image . 
 
+        \note This function has a C++ wrappers: Simd::SquareSum(const View<A>& src, uint64_t & sum).
+
         \param [in] src - a pointer to pixels data of the image.
         \param [in] stride - a row size of the image.
         \param [in] width - an image width.
@@ -2495,6 +2692,8 @@ extern "C"
         \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
         \short Stretches input 8-bit gray image in two times. 
+
+        \note This function has a C++ wrappers: Simd::StretchGray2x2(const View<A>& src, View<A>& dst).
 
         \param [in] src - a pointer to pixels data of the original input image.
         \param [in] srcWidth - a width of the input image.
@@ -2519,6 +2718,8 @@ extern "C"
         For border pixels dx[x, y] = 0 and dy[x, y] = 0, for other pixels: 
         \n dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost, 
         \n dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost.
+
+        \note This function has a C++ wrappers: Simd::TextureBoostedSaturatedGradient(const View<A>& src, uint8_t saturation, uint8_t boost, View<A>& dx, View<A>& dy).
 
         \param [in] src - a pointer to pixels data of source 8-bit gray image.
         \param [in] srcStride - a row size of source image.
@@ -2546,6 +2747,8 @@ extern "C"
         \n dst[x, y] = max(lo, min(hi, src[i]))*boost, 
         \n where lo = 128 - (128/boost), hi = 255 - lo. 
 
+        \note This function has a C++ wrappers: Simd::TextureBoostedUv(const View<A>& src, uint8_t boost, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of source 8-bit gray image.
         \param [in] srcStride - a row size of source image.
         \param [in] width - an image width.
@@ -2567,6 +2770,8 @@ extern "C"
 
         For every pixel: 
         \n sum += current - average(lo[i], hi[i]);
+
+        \note This function has a C++ wrappers: Simd::TextureGetDifferenceSum(const View<A>& src, const View<A>& lo, const View<A>& hi, int64_t & sum).
 
         \param [in] src - a pointer to pixels data of current image.
         \param [in] srcStride - a row size of current image.
@@ -2592,6 +2797,8 @@ extern "C"
         For every pixel: 
         \n dst[i] = max(0, min(255, src[i] + shift));
 
+        \note This function has a C++ wrappers: Simd::TexturePerformCompensation(const View<A>& src, int shift, View<A>& dst).
+
         \param [in] src - a pointer to pixels data of input image.
         \param [in] srcStride - a row size of input image.
         \param [in] width - an image width.
@@ -2611,6 +2818,8 @@ extern "C"
 
         The input Y and output BGR images must have the same width and height. 
         The input U and V images must have the same width and height (half size relative to Y component). 
+
+        \note This function has a C++ wrappers: Simd::Yuv420pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -2633,6 +2842,8 @@ extern "C"
         \short Converts YUV444P image to 24-bit BGR image. 
 
         The input Y, U, V and output BGR images must have the same width and height. 
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToBgr(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgr);
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -2657,6 +2868,8 @@ extern "C"
         The input Y and output BGRA images must have the same width and height. 
         The input U and V images must have the same width and height (half size relative to Y component). 
 
+        \note This function has a C++ wrappers: Simd::Yuv420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha).
+
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
         \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
@@ -2679,6 +2892,8 @@ extern "C"
         \short Converts YUV444P image to 32-bit BGRA image. 
 
         The input Y, U, V and output BGRA images must have the same width and height. 
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -2703,6 +2918,8 @@ extern "C"
 
         The input Y, U, V and output HSL images must have the same width and height. 
 
+        \note This function has a C++ wrappers: Simd::Yuv444pToHsl(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsl).
+
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
         \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
@@ -2724,6 +2941,8 @@ extern "C"
         \short Converts YUV444P image to 24-bit HSV(Hue, Saturation, Value) image. 
 
         The input Y, U, V and output HSV images must have the same width and height. 
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToHsv(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hsv).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
@@ -2748,6 +2967,8 @@ extern "C"
         The input Y and output Hue images must have the same width and height. 
         The input U and V images must have the same width and height (half size relative to Y component). 
 
+        \note This function has a C++ wrappers: Simd::Yuv420pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
+
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
         \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
@@ -2769,6 +2990,8 @@ extern "C"
         \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space. 
 
         The input Y, U, V and output Hue images must have the same width and height. 
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue).
 
         \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
         \param [in] yStride - a row size of the y image.
