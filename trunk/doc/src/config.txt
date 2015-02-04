@@ -1,6 +1,6 @@
 PROJECT_NAME="Simd Library"
 OUTPUT_DIRECTORY=..\..\doc
-INPUT=..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp ..\..\src\Simd\SimdRectangle.hpp ..\..\src\Simd\SimdView.hpp ..\..\src\Simd\SimdPixel.hpp
+INPUT=..\..\src\Simd\SimdHelp.h ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp ..\..\src\Simd\SimdRectangle.hpp ..\..\src\Simd\SimdView.hpp ..\..\src\Simd\SimdPixel.hpp ..\..\src\Simd\SimdLib.hpp
 EXTRACT_ALL=NO
 SHOW_INCLUDE_FILES=NO
 SHOW_USED_FILES=NO
@@ -36,7 +36,7 @@ HTML_COLORSTYLE_HUE=220
 HTML_COLORSTYLE_SAT=100
 HTML_COLORSTYLE_GAMMA=80
 HTML_DYNAMIC_SECTIONS=YES
-SUBGROUPING=NO
+SUBGROUPING=YES
 SHOW_NAMESPACES=NO
 ENUM_VALUES_PER_LINE=1
 PREDEFINED="SIMD_INLINE="

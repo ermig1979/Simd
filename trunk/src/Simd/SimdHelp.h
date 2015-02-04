@@ -62,35 +62,74 @@
 */
 /*@}*/
 
-/*! @defgroup c_types C API Types
+/*! @defgroup c_types C Types
     \short Types of Simd Library C API.
 */
 
-/*! @defgroup c_functions C API Functions
-    \short Functions of Simd Library C API.
+/*! @defgroup cpp_types C++ Types
+    \short C++ API Types of Simd Library.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup cpp_types
+    @defgroup cpp_allocator struct Allocator
+    \short Allocator structure and related functions. 
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_point struct Point
+    \short Point structure and related functions. 
+*/
+
+/*! @ingroup cpp_point
+    @defgroup cpp_point_functions Related Functions 
+    \short Related functions for Point structure. 
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_rectangle struct Rectangle
+    \short Rectangle structure and related functions. 
+*/
+
+/*! @ingroup cpp_rectangle
+    @defgroup cpp_rectangle_functions Related Functions 
+    \short Related functions for Rectangle structure. 
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_view struct View
+    \short View structure and related functions. 
+*/
+
+/*! @ingroup cpp_view
+    @defgroup cpp_view_functions Related Functions 
+    \short Related functions for View structure. 
+*/
+
+/*! @defgroup functions Functions
+    \short Functions of Simd Library API.
+*/
+
+/*! @ingroup functions
     @defgroup info Info
     \short Functions with information about library.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup memory Memory Utilities
     \short Functions for memory management.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup hash Hash Functions
     \short Functions for hash estimation.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup reordering Byte Reordering
     \short Functions for bytes reordering.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup conversion Conversion
     \short Functions for image format conversions.
 */
@@ -125,32 +164,32 @@
     \short Functions for other image format conversions.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup drawing Drawing
     \short Functions for image drawing.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup correlation Correlation
     \short Functions for estimation of correlation.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup histogram Histogram
     \short Functions for estimation of image histogram.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup integral Integral
     \short Functions for estimation of integral image.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup operation Operations
     \short Various mathematical operations with images.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup filter Filters
     \short Various image filters.
 */
@@ -170,32 +209,32 @@
     \short Other image filters.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup resizing Resizing
     \short Functions for image resizing.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup shifting Shifting
     \short Functions for image shifting.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup copying Copying
     \short Functions for image copying.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup filling Filling
     \short Functions for image filling.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup binarization Binarization
     \short Functions for image binarization.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup statistic Statistic
     \short Functions for image statistic estimation.
 */
@@ -220,7 +259,7 @@
     \short Estimation of various image statistic.
 */
 
-/*! @ingroup c_functions
+/*! @ingroup functions
     @defgroup motion_detection Motion Detection
     \short Functions for motion detection.
 */
@@ -258,45 +297,6 @@
 /*! @ingroup motion_detection
     @defgroup edge_background Edge Background Updating
     \short Functions for edge background updating.
-*/
-
-/*! @defgroup cpp_types C++ API Types
-    \short C++ API Types of Simd Library.
-*/
-
-/*! @ingroup cpp_types
-    @defgroup cpp_allocator struct Allocator
-    \short Allocator structure and related functions. 
-*/
-
-/*! @ingroup cpp_types
-    @defgroup cpp_point struct Point
-    \short Point structure and related functions. 
-*/
-
-/*! @ingroup cpp_point
-    @defgroup cpp_point_functions Related Functions 
-    \short Related functions for Point structure. 
-*/
-
-/*! @ingroup cpp_types
-    @defgroup cpp_rectangle struct Rectangle
-    \short Rectangle structure and related functions. 
-*/
-
-/*! @ingroup cpp_rectangle
-    @defgroup cpp_rectangle_functions Related Functions 
-    \short Related functions for Rectangle structure. 
-*/
-
-/*! @ingroup cpp_types
-    @defgroup cpp_view struct View
-    \short View structure and related functions. 
-*/
-
-/*! @ingroup cpp_view
-    @defgroup cpp_view_functions Related Functions 
-    \short Related functions for View structure. 
 */
 
 #ifndef __SimdHelp_h__

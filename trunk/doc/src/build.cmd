@@ -22,6 +22,6 @@ mkdir %HELP_DIR%
 
 %DOXYGEN% ..\..\doc\src\config.txt
 
-call %HELP_DIR%\group__cpp__types.html
+call %HELP_DIR%\group__functions.html
 
-::pause
+pause
