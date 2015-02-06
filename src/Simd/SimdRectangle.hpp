@@ -413,6 +413,18 @@ namespace Simd
 
     /*! @ingroup cpp_rectangle_functions
 
+        \fn template<class T1, class T2> Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value);
+
+        \short Divides the rectangle on the scalar value.
+
+        \param [in] rect - a rectangle.
+        \param [in] value - a scalar value.
+        \return a result of division.
+    */
+    template<class T1, class T2> Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value);
+
+    /*! @ingroup cpp_rectangle_functions
+
         \fn template<class T1, class T2> Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value);
 
         \short Multiplies the rectangle on the scalar value.
@@ -805,6 +817,12 @@ namespace Simd
 	{
 		return r1.left != r2.left || r1.top != r2.top || r1.right != r2.right || r1.bottom != r2.bottom;
 	}
+
+    template<class T1, class T2>
+    SIMD_INLINE Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value)
+    {
+        return Rectangle<T1>((T1)(rect.left/value), (T1)(rect.top/value), (T1)(rect.right/value), (T1)(rect.bottom/value));
+    }
 
     template<class T1, class T2>
     SIMD_INLINE Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value)
