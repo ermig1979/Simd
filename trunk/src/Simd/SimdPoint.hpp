@@ -226,7 +226,7 @@ namespace Simd
 
     /*! @ingroup cpp_point_functions
 
-        \fn template <typename T> Point<double> operator / (const Point<T> & p, double a);
+        \fn template <typename TP, typename TA> Point<TP> operator / (const Point<TP> & p, const TA & a);
 
         \short Divides the point on the scalar value.
 
@@ -234,7 +234,7 @@ namespace Simd
         \param [in] a - a scalar value.
         \return a result of division.
     */
-	template <typename T> Point<double> operator / (const Point<T> & p, double a);
+    template <typename TP, typename TA> Point<TP> operator / (const Point<TP> & p, const TA & a);
 
     /*! @ingroup cpp_point_functions
 
@@ -440,11 +440,11 @@ namespace Simd
 		return Point<T>(-p.x, -p.y);
 	}
 
-	template <typename T> 
-	SIMD_INLINE Point<double> operator / (const Point<T> & p, double a)
-	{
-		return Point<double>(p.x/a, p.y/a);
-	}
+    template <typename TP, typename TA> 
+    SIMD_INLINE Point<TP> operator / (const Point<TP> & p, const TA & a)
+    {
+        return Point<TP>(p.x/a, p.y/a);
+    }
 
 	template <typename TP, typename TA> 
 	SIMD_INLINE Point<TP> operator * (const Point<TP> & p, const TA & a)
