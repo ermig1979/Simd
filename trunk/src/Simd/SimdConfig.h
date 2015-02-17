@@ -46,4 +46,6 @@
 
 #define SIMD_LOG_ENABLE
 
+#define SIMD_ALLOCATE_ASSERT
+
 #endif//__SimdConfig_h__
