@@ -25,6 +25,7 @@
 #define __SimdMemory_h__
 
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -63,8 +64,14 @@ namespace Simd
 #if defined(_MSC_VER) 
         return _aligned_malloc(size, align);
 #elif defined(__GNUC__)
+        align = AlignHi(align, sizeof(void*));
+        size = AlignHi(size, align);
         void * ptr;
-        return posix_memalign(&ptr, align, size) ? NULL : ptr;
+        int result = ::posix_memalign(&ptr, align, size);
+#ifdef SIMD_ALLOCATE_ASSERT
+        assert(result == 0);
+#endif
+        return result ? NULL : ptr;
 #else
 		return malloc(size);
 #endif
