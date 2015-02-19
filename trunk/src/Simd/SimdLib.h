@@ -2322,6 +2322,27 @@ extern "C"
     */
     SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup sobel_statistic
+
+        \fn void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+        \short Calculates sum of absolute value of Sobel's filter along x axis. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \n sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+
+        \note This function has a C++ wrappers: Simd::SobelDxAbsSum(const View<A>& src, uint64_t & sum).
+
+        \param [in] src - a pointer to pixels data of the input image.
+        \param [in] stride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
+    */
+    SIMD_API void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
     /*! @ingroup sobel_filter
 
         \fn void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
@@ -2365,6 +2386,27 @@ extern "C"
         \param [in] dstStride - a row size of the output image (in bytes).
     */
     SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup sobel_statistic
+
+        \fn void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+        \short Calculates sum of absolute value of Sobel's filter along y axis. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \n sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+
+        \note This function has a C++ wrappers: Simd::SobelDyAbsSum(const View<A>& src, uint64_t & sum).
+
+        \param [in] src - a pointer to pixels data of the input image.
+        \param [in] stride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] sum - a pointer to unsigned 64-bit integer value with result sum.
+    */
+    SIMD_API void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
     /*! @ingroup contour
 

@@ -120,7 +120,7 @@ namespace Simd
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
-            if(Aligned(dst) && Aligned(dstStride))
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 SobelDx<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
                 SobelDx<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
@@ -130,10 +130,84 @@ namespace Simd
         {
             assert(dstStride%sizeof(int16_t) == 0);
 
-            if(Aligned(dst) && Aligned(dstStride))
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 SobelDx<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
                 SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        SIMD_INLINE void SobelDxAbsSum(v128_u8 a[3][3], v128_u32 & sum)
+        {
+            v128_u16 lo, hi;
+            SobelDx<true>(a, lo, hi);
+            sum = vec_msum(lo, K16_0001, sum);
+            sum = vec_msum(hi, K16_0001, sum);
+        }
+
+        SIMD_INLINE void SetMask3(v128_u8 a[3], v128_u8 mask)
+        {
+            a[0] = vec_and(a[0], mask);
+            a[1] = vec_and(a[1], mask);
+            a[2] = vec_and(a[2], mask);
+        }
+
+        SIMD_INLINE void SetMask3x3(v128_u8 a[3][3], v128_u8 mask)
+        {
+            SetMask3(a[0], mask);
+            SetMask3(a[1], mask);
+            SetMask3(a[2], mask);
+        }
+
+        template <bool align> void SobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > A);
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+
+            v128_u8 a[3][3];
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+            *sum = 0;
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                v128_u32 rowSum = K32_00000000;
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                SobelDxAbsSum(a, rowSum);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    SobelDxAbsSum(a, rowSum);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src1 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                SetMask3x3(a, tailMask);
+                SobelDxAbsSum(a, rowSum);
+
+                *sum += ExtractSum(rowSum);
+            }
+        }
+
+        void SobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                SobelDxAbsSum<true>(src, stride, width, height, sum);
+            else
+                SobelDxAbsSum<false>(src, stride, width, height, sum);
         }
 
         template <bool abs> SIMD_INLINE void SobelDy(v128_u8 a[3][3], v128_u16 & lo, v128_u16 & hi)
@@ -218,6 +292,63 @@ namespace Simd
                 SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
                 SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        SIMD_INLINE void SobelDyAbsSum(v128_u8 a[3][3], v128_u32 & sum)
+        {
+            v128_u16 lo, hi;
+            SobelDy<true>(a, lo, hi);
+            sum = vec_msum(lo, K16_0001, sum);
+            sum = vec_msum(hi, K16_0001, sum);
+        }
+
+        template <bool align> void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > A);
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+
+            v128_u8 a[3][3];
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+            *sum = 0;
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                v128_u32 rowSum = K32_00000000;
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                SobelDyAbsSum(a, rowSum);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    SobelDyAbsSum(a, rowSum);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                SetMask3x3(a, tailMask);
+                SobelDyAbsSum(a, rowSum);
+
+                *sum += ExtractSum(rowSum);
+            }
+        }
+
+        void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                SobelDyAbsSum<true>(src, stride, width, height, sum);
+            else
+                SobelDyAbsSum<false>(src, stride, width, height, sum);
         }
 
         SIMD_INLINE v128_u16 ContourMetrics(v128_u16 dx, v128_u16 dy)

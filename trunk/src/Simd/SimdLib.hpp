@@ -2089,6 +2089,29 @@ namespace Simd
         SimdSobelDxAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    /*! @ingroup sobel_statistic
+
+        \fn void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
+
+        \short Calculates sum of absolute value of Sobel's filter along x axis. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \n sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+
+        \note This function is a C++ wrapper for function ::SimdSobelDxAbsSum.
+
+        \param [in] src - an input image.
+        \param [out] sum - an unsigned 64-bit integer value with result sum.
+    */
+    template<class A> SIMD_INLINE void SobelDxAbsSum(const View<A>& src, uint64_t & sum)
+    {
+        assert(src.format == View<A>::Gray8);
+
+        SimdSobelDxAbsSum(src.data, src.stride, src.width, src.height, &sum);
+    }
+
     /*! @ingroup sobel_filter
 
         \fn void SobelDy(const View<A>& src, View<A>& dst)
@@ -2133,6 +2156,29 @@ namespace Simd
         assert(EqualSize(src, dst) && src.format == View<A>::Gray8 && dst.format == View<A>::Int16);
 
         SimdSobelDyAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
+    /*! @ingroup sobel_statistic
+
+        \fn void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
+
+        \short Calculates sum of absolute value of Sobel's filter along y axis. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \n sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+
+        \note This function is a C++ wrapper for function ::SimdSobelDyAbsSum.
+
+        \param [in] src - an input image.
+        \param [out] sum - an unsigned 64-bit integer value with result sum.
+    */
+    template<class A> SIMD_INLINE void SobelDyAbsSum(const View<A>& src, uint64_t & sum)
+    {
+        assert(src.format == View<A>::Gray8);
+
+        SimdSobelDyAbsSum(src.data, src.stride, src.width, src.height, &sum);
     }
 
     /*! @ingroup contour

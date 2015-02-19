@@ -254,6 +254,11 @@
 */
 
 /*! @ingroup statistic
+    @defgroup sobel_statistic Sobel Statistic
+    \short Getting of statistic related with Sobel filters.
+*/
+
+/*! @ingroup statistic
     @defgroup other_statistic Other Statistic
     \short Estimation of various image statistic.
 */
