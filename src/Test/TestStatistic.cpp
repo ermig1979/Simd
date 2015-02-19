@@ -461,6 +461,54 @@ namespace Test
         return result;
     }
 
+    bool SobelDxAbsSumAutoTest()
+    {
+        bool result = true;
+
+        result = result && SumAutoTest(FUNC4(Simd::Base::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx2::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Vsx::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+#endif
+
+        return result;
+    }
+
+    bool SobelDyAbsSumAutoTest()
+    {
+        bool result = true;
+
+        result = result && SumAutoTest(FUNC4(Simd::Base::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx2::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Vsx::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool GetStatisticDataTest(bool create, int width, int height, const Func1 & f)
@@ -716,6 +764,24 @@ namespace Test
         bool result = true;
 
         result = result && SumDataTest(create, DW, DH, FUNC4(SimdSquareSum));
+
+        return result;
+    }
+
+    bool SobelDxAbsSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SumDataTest(create, DW, DH, FUNC4(SimdSobelDxAbsSum));
+
+        return result;
+    }
+
+    bool SobelDyAbsSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SumDataTest(create, DW, DH, FUNC4(SimdSobelDyAbsSum));
 
         return result;
     }

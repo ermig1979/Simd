@@ -160,6 +160,8 @@ namespace Test
     bool GetAbsDxColSumsAutoTest();
     bool ValueSumAutoTest();
     bool SquareSumAutoTest();
+    bool SobelDxAbsSumAutoTest();
+    bool SobelDyAbsSumAutoTest();
 
     bool StretchGray2x2AutoTest();
 
@@ -309,6 +311,8 @@ namespace Test
     bool GetAbsDxColSumsDataTest(bool create);
     bool ValueSumDataTest(bool create);
     bool SquareSumDataTest(bool create);
+    bool SobelDxAbsSumDataTest(bool create);
+    bool SobelDyAbsSumDataTest(bool create);
 
     bool StretchGray2x2DataTest(bool create);
 

@@ -1776,6 +1776,26 @@ SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width
         Base::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::SobelDxAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::SobelDxAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A)
+        Vsx::SobelDxAbsSum(src, stride, width, height, sum);
+    else
+#endif
+        Base::SobelDxAbsSum(src, stride, width, height, sum);
+}
+
 SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1814,6 +1834,26 @@ SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width
     else
 #endif
         Base::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::SobelDyAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::SobelDyAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width > Vsx::A)
+        Vsx::SobelDyAbsSum(src, stride, width, height, sum);
+    else
+#endif
+        Base::SobelDyAbsSum(src, stride, width, height, sum);
 }
 
 SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)

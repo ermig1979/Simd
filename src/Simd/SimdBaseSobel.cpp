@@ -81,6 +81,40 @@ namespace Simd
             SobelDx<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
+        void SobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > 1);
+
+            const uint8_t *src0, *src1, *src2;
+
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+#ifdef __GNUC__
+                size_t rowSum = 0;
+#else
+                uint32_t rowSum = 0;
+#endif
+
+                rowSum += SobelDx<true>(src0, src1, src2, 0, 1);
+
+                for(size_t col = 1; col < width - 1; ++col)
+                    rowSum += SobelDx<true>(src0, src1, src2, col - 1, col + 1);
+
+                rowSum += SobelDx<true>(src0, src1, src2, width - 2, width - 1);
+
+                *sum += rowSum;
+            }
+        }
+
         template <bool abs> SIMD_INLINE int SobelDy(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2);
 
         template <> SIMD_INLINE int SobelDy<false>(const uint8_t *s0, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
@@ -132,6 +166,40 @@ namespace Simd
             assert(dstStride%sizeof(int16_t) == 0);
 
             SobelDy<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
+
+        void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > 1);
+
+            const uint8_t *src0, *src1, *src2;
+
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+#ifdef __GNUC__
+                size_t rowSum = 0;
+#else
+                uint32_t rowSum = 0;
+#endif
+                
+                rowSum += SobelDy<true>(src0, src2, 0, 0, 1);
+
+                for(size_t col = 1; col < width - 1; ++col)
+                    rowSum += SobelDy<true>(src0, src2, col - 1, col, col + 1);
+
+                rowSum += SobelDy<true>(src0, src2, width - 2, width - 1, width - 1);
+
+                *sum += rowSum;
+            }
         }
 
         SIMD_INLINE int ContourMetrics(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
