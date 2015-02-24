@@ -130,6 +130,13 @@ namespace Simd
             return vec_splat(vec_ld(0, t), 0);
         }
 
+        SIMD_INLINE v128_s32 SetI32(int32_t a)
+        {
+            SIMD_ALIGNED(16) int32_t t[4];
+            t[0] = a;
+            return vec_splat(vec_ld(0, t), 0);
+        }
+
         SIMD_INLINE v128_f32 SetF32(float a)
         {
             SIMD_ALIGNED(16) float t[4];

@@ -78,6 +78,9 @@ namespace Test
         bool Save(const std::vector<uint8_t> & data, const std::string & name) const;
         bool Load(std::vector<uint8_t> & data, const std::string & name) const;
 
+        bool Save(const Buffer32f & buffer, const std::string & name) const;
+        bool Load(Buffer32f & buffer, const std::string & name) const;
+
         static std::string Description(SimdCompareType type);
         static std::string Description(SimdOperationBinary8uType type);
         static std::string Description(SimdOperationBinary16iType type);

@@ -426,6 +426,16 @@ namespace Test
         return LoadArray(data.data(), data.size(), name);
     }
 
+    bool Data::Save(const Buffer32f & buffer, const std::string & name) const
+    {
+        return SaveArray(buffer.data(), buffer.size(), name);
+    }
+
+    bool Data::Load(Buffer32f & buffer, const std::string & name) const
+    {
+        return LoadArray(buffer.data(), buffer.size(), name);
+    }
+
     std::string Data::Description(SimdCompareType type)
     {
         switch(type)

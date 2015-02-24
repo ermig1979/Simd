@@ -107,6 +107,8 @@ namespace Test
     bool HistogramMaskedAutoTest();
     bool AbsSecondDerivativeHistogramAutoTest();
 
+    bool HogDirectionHistogramsAutoTest();
+
     bool IntegralAutoTest();
 
     bool InterferenceIncrementAutoTest();
@@ -259,6 +261,8 @@ namespace Test
     bool HistogramDataTest(bool create);
     bool HistogramMaskedDataTest(bool create);
     bool AbsSecondDerivativeHistogramDataTest(bool create);
+
+    bool HogDirectionHistogramsDataTest(bool create);
 
     bool IntegralDataTest(bool create);
 

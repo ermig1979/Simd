@@ -203,6 +203,11 @@ namespace Simd
         {
             return _mm_mul_ps(value, value);
         }
+
+        SIMD_INLINE __m128 Combine(__m128 mask, __m128 positive, __m128 negative)
+        {
+            return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
+        }
     }
 #endif//SIMD_SSE_ENABLE
 

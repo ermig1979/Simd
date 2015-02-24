@@ -82,9 +82,28 @@ namespace Simd
 	}
 #endif//SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        template <bool align> SIMD_INLINE void Store(float * p, __m256 a);
+
+        template <> SIMD_INLINE void Store<false>(float * p, __m256 a)
+        {
+            _mm256_storeu_ps(p, a);
+        }
+
+        template <> SIMD_INLINE void Store<true>(float * p, __m256 a)
+        {
+            _mm256_store_ps(p, a);
+        }
+    }
+#endif
+
 #ifdef SIMD_AVX2_ENABLE
 	namespace Avx2
 	{
+        using namespace Avx;
+
 		template <bool align> SIMD_INLINE void Store(__m256i * p, __m256i a);
 
 		template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
@@ -159,6 +178,16 @@ namespace Simd
         }
 
         template <bool align> SIMD_INLINE void Store(uint32_t * p, v128_u32 a)
+        {
+            Store<align>((uint8_t*)p, (v128_u8)a);
+        }
+
+        template <bool align> SIMD_INLINE void Store(int32_t * p, v128_s32 a)
+        {
+            Store<align>((uint8_t*)p, (v128_u8)a);
+        }
+
+        template <bool align> SIMD_INLINE void Store(float * p, v128_f32 a)
         {
             Store<align>((uint8_t*)p, (v128_u8)a);
         }

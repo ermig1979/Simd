@@ -175,7 +175,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
 
-        result = Compare(s1, s2, 0.001f, true);
+        result = Compare(s1, s2, EPS, true);
 
         return result;
     }
@@ -541,7 +541,7 @@ namespace Test
 
             TEST_SAVE(s2);
 
-            result = result && Compare(s1, s2, 0.001f, true);
+            result = result && Compare(s1, s2, EPS, true);
         }
 
         return result;
