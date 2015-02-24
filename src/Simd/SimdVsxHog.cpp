@@ -131,7 +131,7 @@ namespace Simd
                 for (size_t col = 1; col < alignedWidth; col += A)
                     HogDirectionHistograms<true>(s, stride, buffer, col);
                 HogDirectionHistograms<false>(s, stride, buffer, width - 1 - A);
-                Base::AddRowToHistograms(buffer.index, buffer.value, row, width, height, cellX, cellY, histograms);
+                Base::AddRowToHistograms(buffer.index, buffer.value, row, width, height, cellX, cellY, quantization, histograms);
             }
         }
 	}
