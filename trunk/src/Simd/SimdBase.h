@@ -191,7 +191,7 @@ namespace Simd
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
         void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height, 
-            size_t cellX, size_t cellY, float * histograms);
+            size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
