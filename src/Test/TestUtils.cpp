@@ -222,15 +222,39 @@ namespace Test
         return result;
     }
 
+    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, int errorCountMax)
+    {
+        int errorCount = 0;
+        for(size_t i = 0; i < size; ++i)
+        {
+            float relativeDifference = ::fabs(a[i] - b[i])/Simd::Max(::fabs(a[i]), ::fabs(b[i]));
+            if(relativeDifference >= relativeDifferenceMax)
+            {
+                errorCount++;
+                if(printError)
+                {
+                    std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
+                }
+                if(errorCount > errorCountMax)
+                {
+                    if(printError)
+                        std::cout << "Stop comparison." << std::endl;
+                    return false;
+                }
+            }
+        }
+        return errorCount == 0;
+    }
+
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax)
+    {
+        assert(a.size() == b.size());
+        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax);
+    }
+
     bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError)
     {
-        float relativeDifference = ::fabs(a - b)/Simd::Max(::fabs(a), ::fabs(b));
-        bool result = (relativeDifference <= relativeDifferenceMax);
-        if(!result && printError)
-        {
-            std::cout << "Values is not equal: " << a << " != " << b << " (relative difference = " << relativeDifference << ")!" << std::endl;
-        }
-        return result;
+        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0);
     }
     
 	std::string ColorDescription(View::Format format)

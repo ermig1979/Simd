@@ -211,6 +211,26 @@ namespace Simd
             return _mm256_cmpeq_epi8(Load<align>(p), index);
         }
 
+        SIMD_INLINE __m256i PermutedUnpackLoU8(__m256i a, __m256i b = K_ZERO)
+        {
+            return _mm256_permute4x64_epi64(_mm256_unpacklo_epi8(a, b), 0xD8);
+        }
+
+        SIMD_INLINE __m256i PermutedUnpackHiU8(__m256i a, __m256i b = K_ZERO)
+        {
+            return _mm256_permute4x64_epi64(_mm256_unpackhi_epi8(a, b), 0xD8);
+        }
+
+        SIMD_INLINE __m256i PermutedUnpackLoU16(__m256i a, __m256i b = K_ZERO)
+        {
+            return _mm256_permute4x64_epi64(_mm256_unpacklo_epi16(a, b), 0xD8);
+        }
+
+        SIMD_INLINE __m256i PermutedUnpackHiU16(__m256i a, __m256i b = K_ZERO)
+        {
+            return _mm256_permute4x64_epi64(_mm256_unpackhi_epi16(a, b), 0xD8);
+        }
+
         template <bool align, size_t step> SIMD_INLINE __m256i LoadBeforeFirst(const uint8_t * p)
         {
             __m128i lo = LoadHalfBeforeFirst<step>(LoadHalf<align>((__m128i*)p));

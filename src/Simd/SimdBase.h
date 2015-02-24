@@ -190,6 +190,12 @@ namespace Simd
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
+        void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height, 
+            size_t cellX, size_t cellY, float * histograms);
+
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            size_t cellX, size_t cellY, size_t quantization, float * histograms);
+
         void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
             SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);

@@ -155,6 +155,9 @@ namespace Simd
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
 
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            size_t cellX, size_t cellY, size_t quantization, float * histograms);
+
         void InterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
         void InterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 

@@ -66,6 +66,7 @@ namespace Test
 	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
+    typedef std::vector<float> Buffer32f;
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	const int W = 1920;
@@ -85,6 +86,8 @@ namespace Test
     const int DW = 48;
     const int DH = 64;
     const int DS = 32;
+
+    const float EPS = 0.0001f;
 }
 
 #endif//__TestConfig_h__

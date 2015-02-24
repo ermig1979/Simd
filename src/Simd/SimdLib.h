@@ -1661,6 +1661,28 @@ extern "C"
     SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
+    /*! @ingroup face_recognition
+
+        \fn void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
+
+        \short Calculates HOG direction histograms for 8-bit gray image. 
+
+        Calculates HOG direction histogram for every cell of 8-bit gray image. This function is useful for face recognition.
+
+        \note This function has a C++ wrapper Simd::HogDirectionHistograms(const View<A> & src, const Point<ptrdiff_t> & cell, size_t quantization, float * histograms).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] stride - a row size of the image.
+        \param [in] width - an image width. It must be a multiple of cellX.
+        \param [in] height - an image height. It must be a multiple of cellY.
+        \param [in] cellX - a width of cell. 
+        \param [in] cellY - a height of cell.
+        \param [in] quantization - a direction quantization. Must be even.
+        \param [out] histograms - a pointer to buffer with histograms. Array must has size grater or equal to (width/cellX)*(height/cellY)*quantization.
+    */
+    SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        size_t cellX, size_t cellY, size_t quantization, float * histograms);
+
     /*! @ingroup integral
 
         \fn void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);

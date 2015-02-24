@@ -158,6 +158,8 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(HistogramMaskedAutoTest);
     EXECUTE_AUTO_TEST(AbsSecondDerivativeHistogramAutoTest);
 
+    EXECUTE_AUTO_TEST(HogDirectionHistogramsAutoTest);
+
     EXECUTE_AUTO_TEST(IntegralAutoTest);
 
     EXECUTE_AUTO_TEST(InterferenceIncrementAutoTest);
@@ -341,6 +343,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(HistogramDataTest);
     EXECUTE_DATA_TEST(HistogramMaskedDataTest);
     EXECUTE_DATA_TEST(AbsSecondDerivativeHistogramDataTest);
+
+    EXECUTE_DATA_TEST(HogDirectionHistogramsDataTest);
 
     EXECUTE_DATA_TEST(IntegralDataTest);
 

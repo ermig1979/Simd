@@ -303,6 +303,11 @@
     \short Functions for edge background updating.
 */
 
+/*! @ingroup functions
+    @defgroup face_recognition Face Recognition
+    \short Functions for face recognition.
+*/
+
 #ifndef __SimdHelp_h__
 #define __SimdHelp_h__
 #endif//__SimdHelp_h__
