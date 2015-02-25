@@ -175,7 +175,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
 
-        result = Compare(s1, s2, EPS, true);
+        result = Compare(s1, s2, EPS*10, true);
 
         return result;
     }
