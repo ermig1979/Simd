@@ -222,5 +222,21 @@ namespace Simd
                 src += stride;
             }
         }
+
+        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width < 0x10000);
+
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                int rowSum = 0;
+                for(size_t col = 0; col < width; ++col)
+                    rowSum += a[col]*b[col];
+                *sum += rowSum;
+                a += aStride;
+                b += bStride;
+            }
+        }
     }
 }

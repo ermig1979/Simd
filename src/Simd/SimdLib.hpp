@@ -2506,18 +2506,42 @@ namespace Simd
 
         \fn void SquareSum(const View<A>& src, uint64_t & sum)
 
-        \short Gets sum of squared value of pixels for gray 8-bit image . 
+        \short Gets sum of squared value of pixels for gray 8-bit image. 
 
         \note This function is a C++ wrapper for function ::SimdSquareSum.
 
         \param [in] src - an input image.
         \param [out] sum - a result sum.
     */
-    template<class A> SIMD_INLINE void SquareSum(const View<A>& src, uint64_t & sum)
+    template<class A> SIMD_INLINE void SquareSum(const View<A> & src, uint64_t & sum)
     {
         assert(src.format == View<A>::Gray8);
 
         SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
+    }
+    
+    /*! @ingroup other_statistic
+
+        \fn void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
+
+        \short Gets sum of pixel correlation for two gray 8-bit images. 
+
+        For all points: 
+        \n sum += a[i]*b[i]; 
+        
+        All images must have the same width and height and 8-bit gray pixel format. 
+
+        \note This function is a C++ wrapper for function ::SimdCorrelationSum.
+
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [out] sum - a result sum.
+    */
+    template<class A> SIMD_INLINE void CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum)
+    {
+        assert(Compatible(a, b) && a.format == View<A>::Gray8);
+
+        SimdCorrelationSum(a.data, a.stride, b.data, b.stride, a.width, a.height, &sum);
     }
 
     /*! @ingroup resizing
@@ -2531,7 +2555,7 @@ namespace Simd
         \param [in] src - an original input image.
         \param [out] dst - a stretched output image.
     */
-    template<class A> SIMD_INLINE void StretchGray2x2(const View<A>& src, View<A>& dst)
+    template<class A> SIMD_INLINE void StretchGray2x2(const View<A> & src, View<A> & dst)
     {
         assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
         assert(src.width*2 == dst.width && src.height*2 == dst.height);

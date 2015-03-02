@@ -67,7 +67,7 @@ namespace Simd
         {
             int blockX = int(width/cellX);
             int blockY = int(height/cellY);
-            int blockStride = quantization*blockX;
+            int blockStride = int(quantization*blockX);
 
             float yp = ((float)row + 0.5f)/(float)cellY - 0.5f;
             int iyp = (int)floor(yp);

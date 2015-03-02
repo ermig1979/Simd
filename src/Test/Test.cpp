@@ -215,6 +215,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(SquareSumAutoTest);
     EXECUTE_AUTO_TEST(SobelDxAbsSumAutoTest);
     EXECUTE_AUTO_TEST(SobelDyAbsSumAutoTest);
+    EXECUTE_AUTO_TEST(CorrelationSumAutoTest);
 
     EXECUTE_AUTO_TEST(StretchGray2x2AutoTest);
 
@@ -398,6 +399,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(SquareSumDataTest);
     EXECUTE_DATA_TEST(SobelDxAbsSumDataTest);
     EXECUTE_DATA_TEST(SobelDyAbsSumDataTest);
+    EXECUTE_DATA_TEST(CorrelationSumDataTest);
     
     EXECUTE_DATA_TEST(StretchGray2x2DataTest);
 

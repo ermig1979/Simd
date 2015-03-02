@@ -526,6 +526,52 @@ namespace Simd
             else
                 SquareSum<false>(src, stride, width, height, sum);
         }
+
+        SIMD_INLINE __m128i Correlation(__m128i a, __m128i b)
+        {
+            const __m128i lo = _mm_madd_epi16(_mm_unpacklo_epi8(a, _mm_setzero_si128()), _mm_unpacklo_epi8(b, _mm_setzero_si128()));
+            const __m128i hi = _mm_madd_epi16(_mm_unpackhi_epi8(a, _mm_setzero_si128()), _mm_unpackhi_epi8(b, _mm_setzero_si128()));
+            return _mm_add_epi32(lo, hi);
+        }
+
+        template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
+
+            size_t bodyWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+            __m128i fullSum = _mm_setzero_si128();
+            for(size_t row = 0; row < height; ++row)
+            {
+                __m128i rowSum = _mm_setzero_si128();
+                for(size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const __m128i a_ = Load<align>((__m128i*)(a + col));
+                    const __m128i b_ = Load<align>((__m128i*)(b + col));
+                    rowSum = _mm_add_epi32(rowSum, Correlation(a_, b_));
+                }
+                if(width - bodyWidth)
+                {
+                    const __m128i a_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(a + width - A)));
+                    const __m128i b_ = _mm_and_si128(tailMask, Load<false>((__m128i*)(b + width - A)));
+                    rowSum = _mm_add_epi32(rowSum, Correlation(a_, b_));
+                }
+                fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
+                a += aStride;
+                b += bStride;
+            }
+            *sum = ExtractInt64Sum(fullSum);
+        }
+
+        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
+            else
+                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }
