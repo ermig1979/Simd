@@ -2751,6 +2751,29 @@ extern "C"
     */
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
+    /*! @ingroup other_statistic
+
+        \fn void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+
+        \short Gets sum of pixel correlation for two gray 8-bit images. 
+
+        For all points: 
+        \n sum += a[i]*b[i]; 
+        
+        All images must have the same width and height and 8-bit gray pixel format. 
+
+        \note This function has a C++ wrappers: Simd::CorrelationSum(const View<A> & a, const View<A> & b, uint64_t & sum).
+
+        \param [in] a - a pointer to pixels data of the first image.
+        \param [in] aStride - a row size of the first image.
+        \param [in] b - a pointer to pixels data of the second image.
+        \param [in] bStride - a row size of the second image.
+        \param [in] width - an images width.
+        \param [in] height - an images height.
+        \param [out] sum - a pointer to result sum.
+    */
+    SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+
     /*! @ingroup resizing
 
         \fn void SimdStretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);

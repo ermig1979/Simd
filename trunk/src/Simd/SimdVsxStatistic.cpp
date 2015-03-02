@@ -429,7 +429,6 @@ namespace Simd
                 ValueSum<false>(src, stride, width, height, sum);
         }
 
-
         template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
@@ -463,6 +462,44 @@ namespace Simd
                 SquareSum<true>(src, stride, width, height, sum);
             else
                 SquareSum<false>(src, stride, width, height, sum);
+        }
+
+        template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                v128_u32 _sum = K32_00000000;
+                for(size_t col = 0; col < alignedWidth; col += A)
+                {
+                    const v128_u8 _a = Load<align>(a + col);
+                    const v128_u8 _b = Load<align>(b + col);
+                    _sum = vec_msum(_a, _b, _sum);
+                }
+                if(alignedWidth != width)
+                {
+                    const v128_u8 _a = vec_and(Load<false>(a + width - A), tailMask);
+                    const v128_u8 _b = vec_and(Load<false>(b + width - A), tailMask);
+                    _sum = vec_msum(_a, _b, _sum);
+                }
+                *sum += ExtractSum(_sum);
+                a += aStride;
+                b += bStride;
+            }
+        }
+
+        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
+            else
+                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
         }
     }
 #endif// SIMD_VSX_ENABLE

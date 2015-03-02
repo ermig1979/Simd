@@ -2150,6 +2150,26 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
         Base::SquareSum(src, stride, width, height, sum);
 }
 
+SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable && width >= Vsx::A)
+        Vsx::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+    else
+#endif
+        Base::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+}
+
 SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                     uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {

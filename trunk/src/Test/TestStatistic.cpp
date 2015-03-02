@@ -509,6 +509,85 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct Func5
+        {
+            typedef void (*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+
+            FuncPtr func;
+            std::string description;
+
+            Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+            void Call(const View & a, const View & b, uint64_t * sum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(a.data, a.stride, b.data, b.stride, a.width, a.height, sum);
+            }
+        };
+    }
+
+#define FUNC5(function) Func5(function, #function)
+
+    bool CorrelationSumAutoTest(int width, int height, const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(a);
+        View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(b);
+
+        uint64_t sum1;
+        uint64_t sum2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, &sum1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &sum2));
+
+        TEST_CHECK_VALUE(sum);
+
+        return result;
+    }
+
+    bool CorrelationSumAutoTest(const Func5 & f1, const Func5 & f2)
+    {
+        bool result = true;
+
+        result = result && CorrelationSumAutoTest(W, H, f1, f2);
+        result = result && CorrelationSumAutoTest(W + O, H - O, f1, f2);
+        result = result && CorrelationSumAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
+    bool CorrelationSumAutoTest()
+    {
+        bool result = true;
+
+        result = result && CorrelationSumAutoTest(FUNC5(Simd::Base::CorrelationSum), FUNC5(SimdCorrelationSum));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Sse2::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx2::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Vsx::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool GetStatisticDataTest(bool create, int width, int height, const Func1 & f)
@@ -782,6 +861,57 @@ namespace Test
         bool result = true;
 
         result = result && SumDataTest(create, DW, DH, FUNC4(SimdSobelDyAbsSum));
+
+        return result;
+    }
+
+    bool CorrelationSumDataTest(bool create, int width, int height, const Func5 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint64_t sum1, sum2;
+
+        if(create)
+        {
+            FillRandom(a);
+            FillRandom(b);
+
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(a, b, &sum1);
+
+            TEST_SAVE(sum1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+
+            TEST_LOAD(sum1);
+
+            f.Call(a, b, &sum2);
+
+            TEST_SAVE(sum2);
+
+            TEST_CHECK_VALUE(sum);
+        }
+
+        return result;
+    }
+
+    bool CorrelationSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && CorrelationSumDataTest(create, DW, DH, FUNC5(SimdCorrelationSum));
 
         return result;
     }
