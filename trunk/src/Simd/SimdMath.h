@@ -305,6 +305,21 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE __m256 Square(__m256 value)
+        {
+            return _mm256_mul_ps(value, value);
+        }
+
+        SIMD_INLINE __m256 Combine(__m256 mask, __m256 positive, __m256 negative)
+        {
+            return _mm256_or_ps(_mm256_and_ps(mask, positive), _mm256_andnot_ps(mask, negative));
+        }
+    }
+#endif//SIMD_AVX_ENABLE
+
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
