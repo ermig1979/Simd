@@ -2062,7 +2062,7 @@ namespace Simd
         assert(Compatible(src, bkg, dst) && src.ChannelSize() == 1);
 
         SimdShiftBilinear(src.data, src.stride, src.width, src.height, src.ChannelCount(), bkg.data, bkg.stride,
-            shift.x, shift.y, crop.left, crop.top, crop.right, crop.bottom, dst.data, dst.stride);
+            &shift.x, &shift.y, crop.left, crop.top, crop.right, crop.bottom, dst.data, dst.stride);
     }
 
     /*! @ingroup sobel_filter

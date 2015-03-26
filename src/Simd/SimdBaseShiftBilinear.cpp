@@ -173,7 +173,7 @@ namespace Simd
 
         void CommonShiftAction(
             const uint8_t * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
-            const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * & dst, size_t dstStride,
             int & fDx, int & fDy)
         {
@@ -188,10 +188,10 @@ namespace Simd
             width = cropRight - cropLeft;
             height = cropBottom - cropTop;
 
-            ptrdiff_t iDx = (ptrdiff_t)floor(shiftX + FRACTION_ROUND_TERM);
-            ptrdiff_t iDy = (ptrdiff_t)floor(shiftY + FRACTION_ROUND_TERM);
-            fDx = (int)floor((shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
-            fDy = (int)floor((shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
+            ptrdiff_t iDx = (ptrdiff_t)floor(*shiftX + FRACTION_ROUND_TERM);
+            ptrdiff_t iDy = (ptrdiff_t)floor(*shiftY + FRACTION_ROUND_TERM);
+            fDx = (int)floor((*shiftX + FRACTION_ROUND_TERM - iDx)*FRACTION_RANGE);
+            fDy = (int)floor((*shiftY + FRACTION_ROUND_TERM - iDy)*FRACTION_RANGE);
 
             ptrdiff_t left = (iDx < 0 ? (-iDx - (fDx ? 1 : 0)) : 0);
             ptrdiff_t top = (iDy < 0 ? (-iDy - (fDy ? 1 : 0)) : 0);
@@ -279,7 +279,7 @@ namespace Simd
 
 		void ShiftBilinear(
 			const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			const uint8_t * bkg, size_t bkgStride, double shiftX, double shiftY, 
+			const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
 			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 		{
 			int fDx, fDy;
