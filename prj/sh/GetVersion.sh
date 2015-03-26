@@ -10,12 +10,23 @@ if [ -e "$FULL_VERSION_TXT" ]
 then
 	LAST_VERSION=`cat $FULL_VERSION_TXT`
 else
-	LAST_VERSION="0.0.0.0"
+	LAST_VERSION="UNKNOWN"
 fi
 
 cp $USER_VERSION_TXT $FULL_VERSION_TXT
-printf . >>$FULL_VERSION_TXT
-svn info $TRUNK_DIR | grep Revision: | cut -c11->>$FULL_VERSION_TXT
+which svn > /dev/null
+if [ $? -eq 0 ];
+then
+	SVN_INFO=`svn info $TRUNK_DIR`
+	error=$?
+	if [ $error -eq 0 ]; 
+	then
+		printf . >>$FULL_VERSION_TXT
+		svn info $TRUNK_DIR | grep Revision: | cut -c11->>$FULL_VERSION_TXT
+	fi
+else
+	echo "Subversion is not installed!"
+fi
 FULL_VERSION=`cat $FULL_VERSION_TXT`
 
 NEED_TO_UPDATE="0"
