@@ -59,7 +59,7 @@ add_library(Simd SHARED ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdSse1 SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx1 SimdAvx2)
 set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
-add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheck.c)
+add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
