@@ -178,7 +178,7 @@ namespace Simd
             int & fDx, int & fDy)
         {
             assert(cropLeft <= cropRight && cropTop <= cropBottom && cropRight <= width && cropBottom <= height);
-            assert(shiftX < cropRight - cropLeft && shiftY < cropBottom - cropTop);
+            assert(*shiftX < cropRight - cropLeft && *shiftY < cropBottom - cropTop);
 
             Base::CopyFrame(src, srcStride, width, height, channelCount, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 
