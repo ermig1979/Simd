@@ -4,6 +4,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse1SquaredDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Svm.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdSse1.h">

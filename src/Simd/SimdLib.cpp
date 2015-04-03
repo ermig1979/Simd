@@ -2191,6 +2191,26 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
         Base::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
 }
 
+SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
+{
+#ifdef SIMD_AVX_ENABLE
+    if(Avx::Enable)
+        Avx::SvmSumLinear(x, svs, weights, length, count, sum);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if(Sse::Enable)
+        Sse::SvmSumLinear(x, svs, weights, length, count, sum);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if(Vsx::Enable)
+        Vsx::SvmSumLinear(x, svs, weights, length, count, sum);
+    else
+#endif
+        Base::SvmSumLinear(x, svs, weights, length, count, sum);
+}
+
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 {

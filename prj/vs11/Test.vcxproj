@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\Test\TestReorder.cpp" />
     <ClCompile Include="..\..\src\Test\TestSegmentation.cpp" />
     <ClCompile Include="..\..\src\Test\TestSobel.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSvm.cpp" />
     <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
     <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
     <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />

@@ -168,6 +168,8 @@ namespace Test
 
     bool StretchGray2x2AutoTest();
 
+    bool SvmSumLinearAutoTest();
+
     bool TextureBoostedSaturatedGradientAutoTest();
     bool TextureBoostedUvAutoTest();
     bool TextureGetDifferenceSumAutoTest();
@@ -321,6 +323,8 @@ namespace Test
     bool CorrelationSumDataTest(bool create);
 
     bool StretchGray2x2DataTest(bool create);
+
+    bool SvmSumLinearDataTest(bool create);
 
     bool TextureBoostedSaturatedGradientDataTest(bool create);
     bool TextureGetDifferenceSumDataTest(bool create);

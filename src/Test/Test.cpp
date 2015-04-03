@@ -219,6 +219,8 @@ int ExecuteAutoTest(const Options & options)
 
     EXECUTE_AUTO_TEST(StretchGray2x2AutoTest);
 
+    EXECUTE_AUTO_TEST(SvmSumLinearAutoTest);
+
     EXECUTE_AUTO_TEST(TextureBoostedSaturatedGradientAutoTest);
     EXECUTE_AUTO_TEST(TextureBoostedUvAutoTest);
     EXECUTE_AUTO_TEST(TextureGetDifferenceSumAutoTest);
@@ -402,6 +404,8 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(CorrelationSumDataTest);
     
     EXECUTE_DATA_TEST(StretchGray2x2DataTest);
+
+    EXECUTE_DATA_TEST(SvmSumLinearDataTest);
 
     EXECUTE_DATA_TEST(TextureBoostedSaturatedGradientDataTest);
     EXECUTE_DATA_TEST(TextureGetDifferenceSumDataTest);

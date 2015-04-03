@@ -59,5 +59,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SquaredDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Svm.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

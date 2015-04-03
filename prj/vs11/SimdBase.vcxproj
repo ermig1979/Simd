@@ -115,6 +115,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgra.cpp" />

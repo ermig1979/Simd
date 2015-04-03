@@ -308,6 +308,11 @@
     \short Functions for face recognition.
 */
 
+/*! @ingroup functions
+    @defgroup svm SVM
+    \short Support Vector Machine's functions.
+*/
+
 #ifndef __SimdHelp_h__
 #define __SimdHelp_h__
 #endif//__SimdHelp_h__
