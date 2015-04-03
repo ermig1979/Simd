@@ -96,7 +96,9 @@
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdLib.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdLib.cpp">
+      <AssemblerOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">All</AssemblerOutput>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="SimdAvx1.vcxproj">

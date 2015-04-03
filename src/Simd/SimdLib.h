@@ -2567,7 +2567,7 @@ extern "C"
 
     /*! @ingroup correlation
 
-        \fn float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+        \fn void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
         \short Calculates sum of squared differences for two 32-bit float arrays. 
 
@@ -2579,9 +2579,9 @@ extern "C"
         \param [in] a - a pointer to the first array.
         \param [in] b - a pointer to the second array.
         \param [in] size - a size of arrays.
-        \return sum of squared differences.
+        \param [out] sum - a sum of squared differences.
     */
-    SIMD_API float SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+    SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
     /*! @ingroup other_statistic
 

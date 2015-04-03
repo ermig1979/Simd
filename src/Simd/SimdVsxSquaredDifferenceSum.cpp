@@ -129,12 +129,12 @@ namespace Simd
                 SquaredDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
         }
 
-        template <bool align> SIMD_INLINE float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
 
-            float sum = 0;
+            *sum = 0;
             size_t i = 0;
             size_t alignedSize = AlignLo(size, 4);
             if(alignedSize)
@@ -147,19 +147,18 @@ namespace Simd
                     v128_f32 _d = vec_sub(_a, _b);
                     _sum = vec_add(_sum, vec_mul(_d, _d));
                 }
-                sum += ExtractSum(_sum);
+                *sum += ExtractSum(_sum);
             }
             for(; i < size; ++i)
-                sum += Simd::Square(a[i] - b[i]);
-            return sum;
+                *sum += Simd::Square(a[i] - b[i]);
         }
 
-        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(Aligned(a) && Aligned(b))
-                return SquaredDifferenceSum32f<true>(a, b, size);
+                SquaredDifferenceSum32f<true>(a, b, size, sum);
             else
-                return SquaredDifferenceSum32f<false>(a, b, size);
+                SquaredDifferenceSum32f<false>(a, b, size, sum);
         }
     }
 #endif// SIMD_VSX_ENABLE

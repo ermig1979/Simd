@@ -31,7 +31,7 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size);
+        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
     }

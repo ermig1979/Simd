@@ -66,7 +66,7 @@ namespace Test
 
         struct FuncF
         {
-            typedef float (*FuncPtr)(const float * a, const float * b, size_t size);
+            typedef void (*FuncPtr)(const float * a, const float * b, size_t size, float * sum);
 
             FuncPtr func;
             std::string description;
@@ -76,7 +76,7 @@ namespace Test
             void Call(const View & a, const View & b, float * sum) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                *sum = func((float*)a.data, (float*)b.data, a.width);
+                func((float*)a.data, (float*)b.data, a.width, sum);
             }
         };
 	}

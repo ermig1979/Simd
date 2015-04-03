@@ -68,12 +68,12 @@ namespace Simd
 			}
 		}
 
-        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
-            float sum = 0;
+            float _sum = 0;
             for(size_t i = 0; i < size; ++i)
-                sum += Simd::Square(a[i] - b[i]);
-            return sum;
+                _sum += Simd::Square(a[i] - b[i]);
+            *sum = _sum;
         }
     }
 }

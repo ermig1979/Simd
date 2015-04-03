@@ -36,12 +36,12 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        template <bool align> SIMD_INLINE float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
 
-            float sum = 0;
+            *sum = 0;
             size_t i = 0;
             size_t alignedSize = AlignLo(size, 8);
             if(alignedSize)
@@ -54,19 +54,18 @@ namespace Simd
                     __m256 _d = _mm256_sub_ps(_a, _b);
                     _sum = _mm256_add_ps(_sum, _mm256_mul_ps(_d, _d));
                 }
-                sum += Avx::ExtractSum(_sum);
+                *sum += Avx::ExtractSum(_sum);
             }
             for(; i < size; ++i)
-                sum += Simd::Square(a[i] - b[i]);
-            return sum;
+                *sum += Simd::Square(a[i] - b[i]);
         }
 
-        float SquaredDifferenceSum32f(const float * a, const float * b, size_t size)
+        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(Aligned(a) && Aligned(b))
-                return SquaredDifferenceSum32f<true>(a, b, size);
+                SquaredDifferenceSum32f<true>(a, b, size, sum);
             else
-                return SquaredDifferenceSum32f<false>(a, b, size);
+                SquaredDifferenceSum32f<false>(a, b, size, sum);
         }
     }
 #endif// SIMD_AVX_ENABLE
