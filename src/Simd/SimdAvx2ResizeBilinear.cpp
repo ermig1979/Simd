@@ -30,7 +30,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSsse3.h"
 #include "Simd/SimdAvx2.h"
 
 namespace Simd
@@ -200,10 +200,8 @@ namespace Simd
         {
             if(channelCount == 1)
                 ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else if(channelCount == 2)
-                Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
             else
-                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+                Ssse3::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
         }	
     }
 #endif//SIMD_AVX2_ENABLE

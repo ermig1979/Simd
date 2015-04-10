@@ -1631,6 +1631,11 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
         Avx2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && dstWidth >= Ssse3::A)
+        Ssse3::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && dstWidth >= Sse2::A)
         Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
