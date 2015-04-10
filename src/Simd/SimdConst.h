@@ -106,6 +106,7 @@ namespace Simd
         const __m128i K16_00FF = SIMD_MM_SET1_EPI16(0x00FF);
         
 		const __m128i K32_000000FF = SIMD_MM_SET1_EPI32(0x000000FF);
+        const __m128i K32_0000FFFF = SIMD_MM_SET1_EPI32(0x0000FFFF);
         const __m128i K32_00010000 = SIMD_MM_SET1_EPI32(0x00010000);
         const __m128i K32_01000000 = SIMD_MM_SET1_EPI32(0x01000000);
 
