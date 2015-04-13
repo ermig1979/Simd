@@ -27,6 +27,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -65,7 +66,7 @@ namespace Simd
             {
                 size_t i = 0;
                 float v = x[j];
-                v128_f32 _v = K_0_0f;
+                v128_f32 _v = SetF32(v);
                 for(; i < alignedCount; i += 4)
                 {
                     v128_f32 sums = Load<true>(buffer.sums + i);
