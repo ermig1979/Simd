@@ -30,7 +30,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSsse3.h"
 #include "Simd/SimdAvx2.h"
 
 namespace Simd
@@ -42,14 +41,14 @@ namespace Simd
         {
             struct Buffer
             {
-                Buffer(size_t width, size_t height)
+                Buffer(size_t size, size_t width, size_t height)
                 {
-                    _p = Allocate(sizeof(int)*(2*height + width) + sizeof(short)*4*width);
-                    ix = (int*)_p;
-                    ax = (short*)(ix + width);
-                    pbx[0] = (short*)(ax + 2*width);
-                    pbx[1] = pbx[0] + width;
-                    iy = (int*)(pbx[1] + width);
+                    _p = Allocate(3*size + sizeof(int)*(2*height + width));
+                    bx[0] = (uint8_t*)_p;
+                    bx[1] = bx[0] + size;
+                    ax = bx[1] + size;
+                    ix = (int*)(ax + size);
+                    iy = ix + width;
                     ay = iy + height;
                 }
 
@@ -58,19 +57,17 @@ namespace Simd
                     Free(_p);
                 }
 
+                uint8_t * bx[2];
+                uint8_t * ax;
                 int * ix;
-                short * ax;
-                int * iy;
                 int * ay;
-                short * pbx[2];
+                int * iy;
             private:
                 void *_p;
             };
         }
 
-        const __m256i K16_FRACTION_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
-
-        void EstimateAlphaIndexGrayX(size_t srcSize, size_t dstSize, int * indexes, short * alphas)
+        template <size_t channelCount> void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, int * indexes, uint8_t * alphas)
         {
             float scale = (float)srcSize/dstSize;
 
@@ -93,56 +90,136 @@ namespace Simd
                 }
 
                 indexes[i] = (int)index;
-                alphas[1] = (short)(alpha * Base::FRACTION_RANGE + 0.5);
-                alphas[0] = (short)(Base::FRACTION_RANGE - alphas[1]);
-                alphas += 2;
+                alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
+                alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
+                for(size_t channel = 1; channel < channelCount; channel++)
+                    ((uint16_t*)alphas)[channel] = *(uint16_t*)alphas;
+                alphas += 2*channelCount;
             }
         }
 
-        SIMD_INLINE void InterpolateGrayX(const short* src, const short * alpha, short* dst)
+        template <size_t channelCount> void InterpolateX(const __m256i * alpha, __m256i * buffer);
+
+        template <> SIMD_INLINE void InterpolateX<1>(const __m256i * alpha, __m256i * buffer)
         {
-            __m256i s = LoadPermuted<true>((const __m256i*)src);
-            __m256i lo = _mm256_madd_epi16(_mm256_unpacklo_epi8(s, K_ZERO), _mm256_load_si256((const __m256i*)alpha + 0));
-            __m256i hi = _mm256_madd_epi16(_mm256_unpackhi_epi8(s, K_ZERO), _mm256_load_si256((const __m256i*)alpha + 1));
-            _mm256_store_si256((__m256i*)dst, PackI32ToI16(lo, hi));
+#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
+            __m256i _buffer = _mm256_or_si256(K_ZERO, _mm256_load_si256(buffer));
+#else
+            __m256i _buffer = _mm256_load_si256(buffer);
+#endif
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(_buffer, _mm256_load_si256(alpha)));
         }
 
-        template <bool align> SIMD_INLINE __m256i InterpolateGrayY16(const Buffer & buffer, size_t offset, __m256i a[2])
+        const __m256i K8_SHUFFLE_X2 = SIMD_MM256_SETR_EPI8(0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+                                                           0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
+
+        SIMD_INLINE void InterpolateX2(const __m256i * alpha, __m256i * buffer)
         {
-            __m256i s0 = Load<align>((__m256i*)(buffer.pbx[0] + offset));
-            __m256i s1 = Load<align>((__m256i*)(buffer.pbx[1] + offset));
-            __m256i sum = _mm256_add_epi16(_mm256_mullo_epi16(s0, a[0]), _mm256_mullo_epi16(s1, a[1]));
+            __m256i src = _mm256_shuffle_epi8(_mm256_load_si256(buffer), K8_SHUFFLE_X2);
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(src, _mm256_load_si256(alpha)));
+        }
+
+        template <> SIMD_INLINE void InterpolateX<2>(const __m256i * alpha, __m256i * buffer)
+        {
+            InterpolateX2(alpha + 0, buffer + 0);
+            InterpolateX2(alpha + 1, buffer + 1);
+        }
+
+        const __m256i K8_SHUFFLE_X3_00 = SIMD_MM256_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 
+                                                              0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+        const __m256i K8_SHUFFLE_X3_01 = SIMD_MM256_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD,  -1,
+                                                               -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE,  -1);
+        const __m256i K8_SHUFFLE_X3_02 = SIMD_MM256_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0,
+                                                               -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1);
+
+        const __m256i K8_SHUFFLE_X3_10 = SIMD_MM256_SETR_EPI8(0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 
+                                                               -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+        const __m256i K8_SHUFFLE_X3_11 = SIMD_MM256_SETR_EPI8( -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
+                                                              0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD,  -1);
+        const __m256i K8_SHUFFLE_X3_12 = SIMD_MM256_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
+                                                               -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0);
+
+        const __m256i K8_SHUFFLE_X3_20 = SIMD_MM256_SETR_EPI8(0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 
+                                                              0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+        const __m256i K8_SHUFFLE_X3_21 = SIMD_MM256_SETR_EPI8( -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE,  -1,
+                                                               -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
+        const __m256i K8_SHUFFLE_X3_22 = SIMD_MM256_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1,
+                                                               -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+
+        template <> SIMD_INLINE void InterpolateX<3>(const __m256i * alpha, __m256i * buffer)
+        {
+            __m256i src[3], shuffled;
+            src[0] = _mm256_load_si256(buffer + 0);
+            src[1] = _mm256_load_si256(buffer + 1);
+            src[2] = _mm256_load_si256(buffer + 2);
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[0], 0x21), K8_SHUFFLE_X3_00);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[0], K8_SHUFFLE_X3_01));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[1], 0x21), K8_SHUFFLE_X3_02));
+            _mm256_store_si256(buffer + 0, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 0)));
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[1], 0x21), K8_SHUFFLE_X3_10);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[1], src[2], 0x21), K8_SHUFFLE_X3_12));
+            _mm256_store_si256(buffer + 1, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 1)));
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[1], src[2], 0x21), K8_SHUFFLE_X3_20);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[2], K8_SHUFFLE_X3_21));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[2], src[2], 0x21), K8_SHUFFLE_X3_22));
+            _mm256_store_si256(buffer + 2, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 2)));
+        }        
+
+        const __m256i K8_SHUFFLE_X4 = SIMD_MM256_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                                                           0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+        SIMD_INLINE void InterpolateX4(const __m256i * alpha, __m256i * buffer)
+        {
+            __m256i src = _mm256_shuffle_epi8(_mm256_load_si256(buffer), K8_SHUFFLE_X4);
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(src, _mm256_load_si256(alpha)));
+        }
+
+        template <> SIMD_INLINE void InterpolateX<4>(const __m256i * alpha, __m256i * buffer)
+        {
+            InterpolateX4(alpha + 0, buffer + 0);
+            InterpolateX4(alpha + 1, buffer + 1);
+            InterpolateX4(alpha + 2, buffer + 2);
+            InterpolateX4(alpha + 3, buffer + 3);
+        }
+
+        const __m256i K16_FRACTION_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
+
+        template<bool align> SIMD_INLINE __m256i InterpolateY(const __m256i * pbx0, const __m256i * pbx1, __m256i alpha[2])
+        {
+            __m256i sum = _mm256_add_epi16(_mm256_mullo_epi16(Load<align>(pbx0), alpha[0]), _mm256_mullo_epi16(Load<align>(pbx1), alpha[1]));
             return _mm256_srli_epi16(_mm256_add_epi16(sum, K16_FRACTION_ROUND_TERM), Base::BILINEAR_SHIFT);
         }
 
-        template <bool align> SIMD_INLINE void InterpolateGrayY(const Buffer & buffer, size_t offset, __m256i a[2], uint8_t *dst)
+        template<bool align> SIMD_INLINE void InterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m256i alpha[2], uint8_t * dst)
         {
-            __m256i lo = InterpolateGrayY16<align>(buffer, offset, a);
-            __m256i hi = InterpolateGrayY16<align>(buffer, offset + HA, a);
-            _mm256_storeu_si256((__m256i*)(dst + offset), PackU16ToU8(lo, hi));
+            __m256i lo = InterpolateY<align>((__m256i*)bx0 + 0, (__m256i*)bx1 + 0, alpha); 
+            __m256i hi = InterpolateY<align>((__m256i*)bx0 + 1, (__m256i*)bx1 + 1, alpha); 
+            Store<false>((__m256i*)dst, PackU16ToU8(lo, hi));
         }
 
-        template <bool align> SIMD_INLINE __m256i GatherGray(const uint8_t * src, const int * index)
-        {
-            __m256i lo = _mm256_and_si256(_mm256_i32gather_epi32((int*)src, Load<align>((__m256i*)(index + 0)), 1), K32_0000FFFF);
-            __m256i hi = _mm256_and_si256(_mm256_i32gather_epi32((int*)src, Load<align>((__m256i*)(index + 8)), 1), K32_0000FFFF);
-            return PackU32ToI16(lo, hi);
-        }
-
-        void ResizeBilinearGray(
+        template <size_t channelCount> void ResizeBilinear(
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert(dstWidth >= A);
 
-            size_t bufferWidth = AlignHi(dstWidth, A);
-            size_t alignedWidth = bufferWidth - A;
+            struct One { uint8_t channels[channelCount]; };
+            struct Two { uint8_t channels[channelCount*2]; };
 
-            Buffer buffer(bufferWidth, dstHeight);
+            size_t size = 2*dstWidth*channelCount;
+            size_t bufferSize = AlignHi(dstWidth, A)*channelCount*2;
+            size_t alignedSize = AlignHi(size, DA) - DA;
+            const size_t step = A*channelCount;
+
+            Buffer buffer(bufferSize, dstWidth, dstHeight);
 
             Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
 
-            EstimateAlphaIndexGrayX(srcWidth, dstWidth, buffer.ix, buffer.ax);
+            EstimateAlphaIndexX<channelCount>(srcWidth, dstWidth, buffer.ix, buffer.ax);
 
             ptrdiff_t previous = -2;
 
@@ -150,8 +227,8 @@ namespace Simd
 
             for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
-                a[0] = _mm256_set1_epi16(short(Base::FRACTION_RANGE - buffer.ay[yDst]));
-                a[1] = _mm256_set1_epi16(short(buffer.ay[yDst]));
+                a[0] = _mm256_set1_epi16(int16_t(Base::FRACTION_RANGE - buffer.ay[yDst]));
+                a[1] = _mm256_set1_epi16(int16_t(buffer.ay[yDst]));
 
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
@@ -160,7 +237,7 @@ namespace Simd
                     k = 2;
                 else if(sy == previous + 1)
                 {
-                    Swap(buffer.pbx[0], buffer.pbx[1]);
+                    Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
                 }
 
@@ -168,29 +245,20 @@ namespace Simd
 
                 for(; k < 2; k++)
                 {
-                    short* pb = buffer.pbx[k];
-                    const uint8_t* ps = src + (sy + k)*srcStride;
-
-#ifdef SIMD_AVX2_GATHER_DISABLE
+                    Two * pb = (Two *)buffer.bx[k];
+                    const One * psrc = (const One *)(src + (sy + k)*srcStride);
                     for(size_t x = 0; x < dstWidth; x++)
-                        pb[x] = *(short*)(ps + buffer.ix[x]);
-#else//SIMD_AVX2_GATHER_DISABLE
-                    for(size_t x = 0; x < alignedWidth; x += HA)
-                        Store<true>((__m256i*)(pb + x), GatherGray<true>(ps, buffer.ix + x));
-                    Store<false>((__m256i*)(pb + dstWidth - A), GatherGray<false>(ps, buffer.ix + dstWidth - A));
-                    Store<false>((__m256i*)(pb + dstWidth - HA), GatherGray<false>(ps, buffer.ix + dstWidth - HA));
-#endif//SIMD_AVX2_GATHER_DISABLE
+                        pb[x] = *(Two *)(psrc + buffer.ix[x]);
 
-                    for(size_t i = 0; i < bufferWidth; i += HA)
-                    {
-                        InterpolateGrayX(pb + i, buffer.ax + 2*i, pb + i);
-                    }
+                    uint8_t * pbx = buffer.bx[k];
+                    for(size_t i = 0; i < bufferSize; i += step)
+                        InterpolateX<channelCount>((__m256i*)(buffer.ax + i), (__m256i*)(pbx + i));
                 }
 
-                for(size_t i = 0; i < alignedWidth; i += A)
-                    InterpolateGrayY<true>(buffer, i, a, dst);
-
-                InterpolateGrayY<false>(buffer, dstWidth - A, a, dst);
+                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                    InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
+                size_t i = size - DA;
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
             }
         }
 
@@ -198,10 +266,23 @@ namespace Simd
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            if(channelCount == 1)
-                ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-            else
-                Ssse3::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+            switch(channelCount)
+            {
+            case 1: 
+                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
+            case 2: 
+                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
+            case 3: 
+                ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
+            case 4: 
+                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
+            default: 
+                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount); 
+            }
         }	
     }
 #endif//SIMD_AVX2_ENABLE
