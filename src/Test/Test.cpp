@@ -235,6 +235,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(Yuv420pToHueAutoTest);
 
     EXECUTE_AUTO_TEST(Yuv444pToBgraAutoTest);
+    EXECUTE_AUTO_TEST(Yuv422pToBgraAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToBgraAutoTest);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
@@ -422,6 +423,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(Yuv444pToHueDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgraDataTest);
+    EXECUTE_DATA_TEST(Yuv422pToBgraDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgraDataTest);
 	
 end:

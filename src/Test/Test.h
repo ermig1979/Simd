@@ -184,6 +184,7 @@ namespace Test
     bool Yuv420pToHueAutoTest();
 
     bool Yuv444pToBgraAutoTest();
+    bool Yuv422pToBgraAutoTest();
     bool Yuv420pToBgraAutoTest();
 
     /***************************** Data Tests: *******************************/
@@ -341,6 +342,7 @@ namespace Test
     bool Yuv444pToHueDataTest(bool create);
 
     bool Yuv420pToBgraDataTest(bool create);
+    bool Yuv422pToBgraDataTest(bool create);
     bool Yuv444pToBgraDataTest(bool create);
 }
 #endif//__Test_h__

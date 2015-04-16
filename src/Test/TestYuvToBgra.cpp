@@ -50,14 +50,14 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool YuvToBgraAutoTest(int width, int height, const Func & f1, const Func & f2, bool is420)
+	bool YuvToBgraAutoTest(int width, int height, const Func & f1, const Func & f2, int dx, int dy)
 	{
 		bool result = true;
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-		const int uvWidth = is420 ? width/2 : width;
-		const int uvHeight = is420 ? height/2 : height;
+		const int uvWidth = width/dx;
+		const int uvHeight = height/dy;
 
 		View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(y);
@@ -78,15 +78,13 @@ namespace Test
 		return result;
 	}
 
-    bool YuvToBgraAutoTest(const Func & f1, const Func & f2, bool is420)
+    bool YuvToBgraAutoTest(const Func & f1, const Func & f2, int dx, int dy)
     {
         bool result = true;
 
-        int step = is420 ? E : O;
-
-        result = result && YuvToBgraAutoTest(W, H, f1, f2, is420);
-        result = result && YuvToBgraAutoTest(W + step, H - step, f1, f2, is420);
-        result = result && YuvToBgraAutoTest(W - step, H + step, f1, f2, is420);
+        result = result && YuvToBgraAutoTest(W, H, f1, f2, dx, dy);
+        result = result && YuvToBgraAutoTest(W + O*dx, H - O*dy, f1, f2, dx, dy);
+        result = result && YuvToBgraAutoTest(W - O*dx, H + O*dy, f1, f2, dx, dy);
 
         return result;
     }
@@ -95,45 +93,69 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && YuvToBgraAutoTest(FUNC(Simd::Base::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+		result = result && YuvToBgraAutoTest(FUNC(Simd::Base::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Sse2::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Sse2::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), false);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 #endif 
 
         return result;
 	}
 
-	bool Yuv420pToBgraAutoTest()
-	{
-		bool result = true;
+    bool Yuv422pToBgraAutoTest()
+    {
+        bool result = true;
 
-		result = result && YuvToBgraAutoTest(FUNC(Simd::Base::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+        result = result && YuvToBgraAutoTest(FUNC(Simd::Base::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Sse2::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Sse2::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), true);
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
+#endif 
+
+        return result;
+    }
+
+	bool Yuv420pToBgraAutoTest()
+	{
+		bool result = true;
+
+		result = result && YuvToBgraAutoTest(FUNC(Simd::Base::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Sse2::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
+#endif 
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
 #endif 
 
         return result;
@@ -141,7 +163,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool YuvToBgraDataTest(bool create, int width, int height, const Func & f, bool is420)
+    bool YuvToBgraDataTest(bool create, int width, int height, const Func & f, int dx, int dy)
     {
         bool result = true;
 
@@ -149,8 +171,8 @@ namespace Test
 
         std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
 
-        const int uvWidth = is420 ? width/2 : width;
-        const int uvHeight = is420 ? height/2 : height;
+        const int uvWidth = width/dx;
+        const int uvHeight = height/dy;
 
         View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
@@ -195,7 +217,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgraDataTest(create, DW, DH, FUNC(SimdYuv420pToBgra), true);
+        result = result && YuvToBgraDataTest(create, DW, DH, FUNC(SimdYuv420pToBgra), 2, 2);
+
+        return result;
+    }
+
+    bool Yuv422pToBgraDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && YuvToBgraDataTest(create, DW, DH, FUNC(SimdYuv422pToBgra), 2, 1);
 
         return result;
     }
@@ -204,7 +235,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToBgraDataTest(create, DW, DH, FUNC(SimdYuv444pToBgra), false);
+        result = result && YuvToBgraDataTest(create, DW, DH, FUNC(SimdYuv444pToBgra), 1, 1);
 
         return result;
     }

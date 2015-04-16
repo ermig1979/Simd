@@ -2767,6 +2767,33 @@ namespace Simd
 
     /*! @ingroup yuv_conversion
 
+        \fn void Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF)
+
+        \short Converts YUV422P image to 32-bit BGRA image. 
+
+        The input Y and output BGRA images must have the same width and height. 
+        The input U and V images must have the same width and height (their width is equal to half width of Y component). 
+
+        \note This function is a C++ wrapper for function ::SimdYuv422pToBgra.
+
+        \param [in] y - an input 8-bit image with Y color plane.
+        \param [in] u - an input 8-bit image with U color plane.
+        \param [in] v - an input 8-bit image with V color plane.
+        \param [out] bgra - an output 32-bit BGRA image.
+        \param [in] alpha - a value of alpha channel. It is equal to 255 by default.
+    */
+    template<class A> SIMD_INLINE void Yuv422pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF)
+    {
+        assert(y.width == 2*u.width && y.height == u.height && y.format == u.format);
+        assert(y.width == 2*v.width && y.height == v.height && y.format == v.format);
+        assert(y.width == bgra.width && y.height == bgra.height);
+        assert(y.format == View<A>::Gray8 && bgra.format == View<A>::Bgra32);
+
+        SimdYuv422pToBgra(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha);
+    }
+
+    /*! @ingroup yuv_conversion
+
         \fn void Yuv444pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& bgra, uint8_t alpha = 0xFF)
 
         \short Converts YUV444P image to 32-bit BGRA image. 

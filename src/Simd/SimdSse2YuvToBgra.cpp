@@ -96,7 +96,17 @@ namespace Simd
 			}
 		}
 
-		template <bool align> SIMD_INLINE void Yuv420pToBgra(const uint8_t * y, const __m128i & u, const __m128i & v, 
+        void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+            else
+                Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+        }
+
+		template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const __m128i & u, const __m128i & v, 
 			const __m128i & a_0, uint8_t * bgra)
 		{
 			Yuv8ToBgra<align>(Load<align>((__m128i*)y + 0), _mm_unpacklo_epi8(u, u), _mm_unpacklo_epi8(v, v), a_0, (__m128i*)bgra + 0);
@@ -122,16 +132,16 @@ namespace Simd
 				{
 					__m128i u_ = Load<align>((__m128i*)(u + colUV));
 					__m128i v_ = Load<align>((__m128i*)(v + colUV));
-					Yuv420pToBgra<align>(y + colY, u_, v_, a_0, bgra + colBgra);
-					Yuv420pToBgra<align>(y + colY + yStride, u_, v_, a_0, bgra + colBgra + bgraStride);
+					Yuv422pToBgra<align>(y + colY, u_, v_, a_0, bgra + colBgra);
+					Yuv422pToBgra<align>(y + colY + yStride, u_, v_, a_0, bgra + colBgra + bgraStride);
 				}
 				if(tail)
 				{
 					size_t offset = width - DA;
 					__m128i u_ = Load<false>((__m128i*)(u + offset/2));
-					__m128i v_ = Load<false>((__m128i*)(v + offset/2));
-					Yuv420pToBgra<false>(y + offset, u_, v_, a_0, bgra + 4*offset);
-					Yuv420pToBgra<false>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
+                    __m128i v_ = Load<false>((__m128i*)(v + offset/2));
+					Yuv422pToBgra<false>(y + offset, u_, v_, a_0, bgra + 4*offset);
+					Yuv422pToBgra<false>(y + offset + yStride, u_, v_, a_0, bgra + 4*offset + bgraStride);
 				}
 				y += 2*yStride;
 				u += uStride;
@@ -150,15 +160,50 @@ namespace Simd
 				Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
 
-		void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
-			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
-		{
-			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
-				Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-			else
-				Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-		}
+
+        template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const uint8_t * u, const uint8_t * v, const __m128i & a_0, uint8_t * bgra)
+        {
+            Yuv422pToBgra<align>(y, Load<align>((__m128i*)u), Load<align>((__m128i*)v), a_0, bgra);
+        }
+
+        template <bool align> void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert((width%2 == 0) && (width >= DA));
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            __m128i a_0 = _mm_slli_si128(_mm_set1_epi16(alpha), 1);
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+                    Yuv422pToBgra<align>(y + colY, u + colUV, v + colUV, a_0, bgra + colBgra);
+                if(tail)
+                {
+                    size_t offset = width - DA;
+                    Yuv422pToBgra<false>(y + offset, u + offset/2, v + offset/2, a_0, bgra + 4*offset);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuv422pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+            else
+                Yuv422pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }
