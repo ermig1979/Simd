@@ -49,7 +49,7 @@ namespace Simd
         }
 
         template <bool align, bool first> 
-        SIMD_INLINE void Yuv420pToBgr(const uint8_t * y, const v128_u8 & u, const v128_u8 & v, Storer<align> & bgr)
+        SIMD_INLINE void Yuv422pToBgr(const uint8_t * y, const v128_u8 & u, const v128_u8 & v, Storer<align> & bgr)
         {
             YuvToBgr<align, first>(Load<align>(y + 0), (v128_u8)UnpackLoU8(u, u), (v128_u8)UnpackLoU8(v, v), bgr);
             YuvToBgr<align, false>(Load<align>(y + A), (v128_u8)UnpackHiU8(u, u), (v128_u8)UnpackHiU8(v, v), bgr);
@@ -72,14 +72,14 @@ namespace Simd
                 Storer<align> _bgr0(bgr), _bgr1(bgr + bgrStride);
                 v128_u8 _u = Load<align>(u);
                 v128_u8 _v = Load<align>(v);
-                Yuv420pToBgr<align, true>(y, _u, _v, _bgr0);
-                Yuv420pToBgr<align, true>(y + yStride, _u, _v, _bgr1);
+                Yuv422pToBgr<align, true>(y, _u, _v, _bgr0);
+                Yuv422pToBgr<align, true>(y + yStride, _u, _v, _bgr1);
                 for(size_t colUV = A, colY = DA; colY < bodyWidth; colY += DA, colUV += A)
                 {
                     v128_u8 _u = Load<align>(u + colUV);
                     v128_u8 _v = Load<align>(v + colUV);
-                    Yuv420pToBgr<align, false>(y + colY, _u, _v, _bgr0);
-                    Yuv420pToBgr<align, false>(y + colY + yStride, _u, _v, _bgr1);
+                    Yuv422pToBgr<align, false>(y + colY, _u, _v, _bgr0);
+                    Yuv422pToBgr<align, false>(y + colY + yStride, _u, _v, _bgr1);
                 }
                 Flush(_bgr0, _bgr1);
 
@@ -89,8 +89,8 @@ namespace Simd
                     Storer<false> _bgr0(bgr + 3*offset), _bgr1(bgr + 3*offset + bgrStride);
                     v128_u8 _u = Load<false>(u + offset/2);
                     v128_u8 _v = Load<false>(v + offset/2);
-                    Yuv420pToBgr<false, true>(y + offset, _u, _v, _bgr0);
-                    Yuv420pToBgr<false, true>(y + offset + yStride, _u, _v, _bgr1);
+                    Yuv422pToBgr<false, true>(y + offset, _u, _v, _bgr0);
+                    Yuv422pToBgr<false, true>(y + offset + yStride, _u, _v, _bgr1);
                     Flush(_bgr0, _bgr1);
                 }
                 y += 2*yStride;
@@ -108,6 +108,55 @@ namespace Simd
                 Yuv420pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
             else
                 Yuv420pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+        }
+
+        template <bool align, bool first> 
+        SIMD_INLINE void Yuv422pToBgr(const uint8_t * y, const uint8_t * u, const uint8_t * v, Storer<align> & bgr)
+        {
+            Yuv422pToBgr<align, first>(y, Load<align>(u), Load<align>(v), bgr);
+        }
+
+        template <bool align> void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            assert((width%2 == 0) && (width >= DA));
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _bgr(bgr);
+                Yuv422pToBgr<align, true>(y, u, v, _bgr);
+                for(size_t colUV = A, colY = DA; colY < bodyWidth; colY += DA, colUV += A)
+                    Yuv422pToBgr<align, false>(y + colY, u + colUV, v + colUV, _bgr);
+                Flush(_bgr);
+                if(tail)
+                {
+                    size_t offset = width - DA;
+                    Storer<false> _bgr(bgr + 3*offset);
+                    Yuv422pToBgr<false, true>(y + offset, u + offset/2, v + offset/2, _bgr);
+                    Flush(_bgr);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+                Yuv422pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+            else
+                Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
         }
 
         template <bool align, bool first> 

@@ -176,6 +176,7 @@ namespace Test
     bool TexturePerformCompensationAutoTest();
 
     bool Yuv444pToBgrAutoTest();
+    bool Yuv422pToBgrAutoTest();
     bool Yuv420pToBgrAutoTest();
     bool Yuv444pToHslAutoTest();
     bool Yuv444pToHsvAutoTest();
@@ -332,6 +333,7 @@ namespace Test
     bool TextureBoostedUvDataTest(bool create);
 
     bool Yuv420pToBgrDataTest(bool create);
+    bool Yuv422pToBgrDataTest(bool create);
     bool Yuv444pToBgrDataTest(bool create);
     bool Yuv444pToHslDataTest(bool create);
     bool Yuv444pToHsvDataTest(bool create);

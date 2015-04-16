@@ -227,6 +227,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(TexturePerformCompensationAutoTest);
 
     EXECUTE_AUTO_TEST(Yuv444pToBgrAutoTest);
+    EXECUTE_AUTO_TEST(Yuv422pToBgrAutoTest);
     EXECUTE_AUTO_TEST(Yuv420pToBgrAutoTest);
     EXECUTE_AUTO_TEST(Yuv444pToHslAutoTest);
     EXECUTE_AUTO_TEST(Yuv444pToHsvAutoTest);
@@ -413,6 +414,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(TextureBoostedUvDataTest);
 
     EXECUTE_DATA_TEST(Yuv420pToBgrDataTest);
+    EXECUTE_DATA_TEST(Yuv422pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToBgrDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHsvDataTest);
     EXECUTE_DATA_TEST(Yuv444pToHslDataTest);
