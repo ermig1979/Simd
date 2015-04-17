@@ -111,9 +111,9 @@ namespace Test
             result = result && BinarizationAutoTest(FUNC1(Simd::Avx2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && BinarizationAutoTest(FUNC1(Simd::Vsx::Binarization), FUNC1(SimdBinarization));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && BinarizationAutoTest(FUNC1(Simd::Vmx::Binarization), FUNC1(SimdBinarization));
 #endif 
 
         return result;
@@ -205,9 +205,9 @@ namespace Test
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Vsx::AveragingBinarization), FUNC2(SimdAveragingBinarization));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Vmx::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
         return result;

@@ -55,6 +55,7 @@
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdLib.hpp"
 

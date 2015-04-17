@@ -115,9 +115,9 @@ namespace Test
             result = result && ResizeBilinearAutoTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ResizeBilinearAutoTest(FUNC(Simd::Vsx::ResizeBilinear), FUNC(SimdResizeBilinear));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ResizeBilinearAutoTest(FUNC(Simd::Vmx::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
         return result;

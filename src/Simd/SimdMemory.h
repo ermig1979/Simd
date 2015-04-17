@@ -143,8 +143,8 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(vec_uchar16))
         {
@@ -155,6 +155,13 @@ namespace Simd
         {
             return Simd::Aligned(p, align);
         }
+    }
+#endif// SIMD_VMX_ENABLE
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        using Vmx::Aligned;
     }
 #endif// SIMD_VSX_ENABLE
 }

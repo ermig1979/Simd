@@ -130,8 +130,8 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         SIMD_INLINE uint32_t ExtractSum(v128_u32 a)
         {
@@ -143,7 +143,7 @@ namespace Simd
             return vec_extract(a, 0) + vec_extract(a, 1) + vec_extract(a, 2) + vec_extract(a, 3);
         }
     }
-#endif// SIMD_VSX_ENABLE
+#endif// SIMD_VMX_ENABLE
 }
 
 #endif//__SimdExtract_h__

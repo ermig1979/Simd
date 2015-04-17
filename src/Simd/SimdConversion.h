@@ -803,8 +803,8 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_VSX_ENABLE    
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE    
+    namespace Vmx
     {
         SIMD_INLINE v128_s16 AdjustY(v128_u16 y)
         {
@@ -962,6 +962,6 @@ namespace Simd
             return vec_perm(vec_perm(bgr[0], bgr[1], K8_PERM_BGR_TO_RED_0), bgr[2], K8_PERM_BGR_TO_RED_1);
         }
     }
-#endif// SIMD_VSX_ENABLE
+#endif// SIMD_VMX_ENABLE
 }
 #endif//__SimdConversion_h__

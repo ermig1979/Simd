@@ -7,11 +7,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if((CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR))
- set(EXECUTABLE_OUTPUT_PATH ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
- set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${TRUNK_DIR}/bin/${CMAKE_BUILD_TYPE})
-endif()
-
 include_directories(${TRUNK_DIR}/src)
 
 execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
@@ -68,11 +63,15 @@ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
-set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -mcpu=power7")
+set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
+
+file(GLOB_RECURSE SIMD_VMX_SOURCES ${TRUNK_DIR}/src/Simd/SimdVmx*.cpp)
+add_library(SimdVmx STATIC ${SIMD_VMX_SOURCES})
+set_target_properties(SimdVmx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -maltivec -std=c++03")
 
 file(GLOB_RECURSE SIMD_VSX_SOURCES ${TRUNK_DIR}/src/Simd/SimdVsx*.cpp)
 add_library(SimdVsx STATIC ${SIMD_VSX_SOURCES})
@@ -80,15 +79,15 @@ set_target_properties(SimdVsx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvs
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd SHARED ${SIMD_SOURCES})
-target_link_libraries(Simd SimdBase SimdVsx)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+target_link_libraries(Simd SimdBase SimdVmx SimdVsx)
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++03")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++11")
 
 endif()
 

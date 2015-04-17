@@ -38,7 +38,7 @@
 
 //#define SIMD_AVX2_DISABLE
 
-#define SIMD_AVX2_GATHER_DISABLE
+//#define SIMD_VMX_DISABLE
 
 //#define SIMD_VSX_DISABLE
 

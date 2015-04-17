@@ -125,6 +125,9 @@
     <ProjectReference Include="SimdSsse3.vcxproj">
       <Project>{2ca34bf2-043b-40fd-b58c-ec2e29fac263}</Project>
     </ProjectReference>
+    <ProjectReference Include="SimdVmx.vcxproj">
+      <Project>{6bec7276-995d-4fde-84b5-2e2072cf9758}</Project>
+    </ProjectReference>
     <ProjectReference Include="SimdVsx.vcxproj">
       <Project>{00cbfe2a-935b-449f-a0e0-cdfd8ac93bb3}</Project>
     </ProjectReference>

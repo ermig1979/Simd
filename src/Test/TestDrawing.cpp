@@ -113,9 +113,9 @@ namespace Test
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Avx2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Vsx::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Vmx::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif
 
         return result;    

@@ -105,9 +105,9 @@ namespace Test
             result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vmx::Yuv444pToBgra), FUNC(SimdYuv444pToBgra), 1, 1);
 #endif 
 
         return result;
@@ -129,9 +129,9 @@ namespace Test
             result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vmx::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
         return result;
@@ -153,9 +153,9 @@ namespace Test
             result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && YuvToBgraAutoTest(FUNC(Simd::Vsx::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && YuvToBgraAutoTest(FUNC(Simd::Vmx::Yuv420pToBgra), FUNC(SimdYuv420pToBgra), 2, 2);
 #endif 
 
         return result;

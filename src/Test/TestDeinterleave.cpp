@@ -101,9 +101,9 @@ namespace Test
             result = result && DeinterleaveUvAutoTest(FUNC(Simd::Avx2::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && DeinterleaveUvAutoTest(FUNC(Simd::Vsx::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC(Simd::Vmx::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
 #endif 
 
 		return result;

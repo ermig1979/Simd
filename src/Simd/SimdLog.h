@@ -31,8 +31,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
         {
@@ -88,7 +88,7 @@ namespace Simd
             std::cout << "} " << std::endl;    
         }
     }
-#endif//SIMD_VSX_ENABLE
+#endif//SIMD_VMX_ENABLE
 }
 
 #define SIMD_LOG(value) Log(value, #value)

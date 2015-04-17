@@ -38,6 +38,13 @@
 #include <cpuid.h>
 #endif
 
+#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#include <unistd.h>
+#include <fcntl.h>
+#include <linux/auxvec.h>
+#include <asm/cputable.h>
+#endif
+
 #else
 # error Do not know how to detect CPU info
 #endif
@@ -47,6 +54,7 @@ namespace Simd
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
     namespace Cpuid
     {
+        // See http://www.sandpile.org/x86/cpuid.htm for additional information.
         enum Level
         {
             Ordinary = 1,
@@ -63,21 +71,26 @@ namespace Simd
 
         enum Bit
         {
-            //	Ordinary:
-            //Edx:
+            // Ordinary:
+            // Edx:
             SSE = 1 << 25,
             SSE2 = 1 << 26,
 
-            //Ecx:
+            // Ecx:
             SSSE3 =	1 << 9,
             SSE41 = 1 << 19,
             SSE42 = 1 << 20,
             OSXSAVE = 1 << 27,
             AVX = 1 << 28,
 
-            //	Extended:
-            //Ebx:
+            // Extended:
+            // Ebx:
             AVX2 = 1 << 5,
+            AVX512F = 1 << 16,
+            AVX512BW = 1 << 30,
+
+            // Ecx:
+            AVX512VBMI = 1 << 1,
         };
 
         SIMD_INLINE bool CheckBit(Level level, Register index, Bit bit)
@@ -96,6 +109,37 @@ namespace Simd
         }
     }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+
+#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
+    namespace CpuInfo
+    {
+        SIMD_INLINE bool CheckBit(int at, int bit)
+        {
+            bool result = false;
+            int file = ::open("/proc/self/auxv", O_RDONLY);
+            if (file < 0) 
+                return false;
+            const ssize_t size = 64;
+            unsigned long buffer[size];
+            for(ssize_t count = size; count == size;)
+            {
+                count = ::read(file, buffer, sizeof(buffer))/sizeof(unsigned long);
+                for (int i = 0; i < count; i += 2) 
+                {                                                                                                           
+                    if (buffer[i] == at) 
+                    {                                                                                                                                      
+                        result = !!(buffer[i + 1] & bit);                                                                                                           
+                        count = 0;
+                    } 
+                    if (buffer[i] == AT_NULL)
+                        count = 0;
+                }
+            }
+            ::close(file);
+            return result;
+        }
+    }
+#endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) 
 
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
@@ -124,7 +168,7 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_SSE_ENABLE
+#endif
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
@@ -153,7 +197,7 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
@@ -182,7 +226,7 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
@@ -211,7 +255,7 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
@@ -240,7 +284,7 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_SSE42_ENABLE
+#endif
 
 #ifdef SIMD_AVX_ENABLE
 	namespace Avx
@@ -271,7 +315,7 @@ namespace Simd
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
-#endif// SIMD_AVX_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
 	namespace Avx2
@@ -302,14 +346,14 @@ namespace Simd
 
 		const bool Enable = SupportedByCPU() && SupportedByOS();
 	}
-#endif// SIMD_AVX2_ENABLE
+#endif
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return true;
+            return CpuInfo::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_ALTIVEC);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -319,7 +363,24 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
-#endif// SIMD_VSX_ENABLE
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+    namespace Vsx
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return CpuInfo::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_VSX);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+            return true;
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
@@ -364,6 +425,12 @@ namespace Simd
 #define SIMD_AVX2_FUNC(func) Simd::Avx2::Enable ? Simd::Avx2::func : 
 #else
 #define SIMD_AVX2_FUNC(func)
+#endif
+
+#ifdef SIMD_VMX_ENABLE
+#define SIMD_VMX_FUNC(func) Simd::Vmx::Enable ? Simd::Vmx::func : 
+#else
+#define SIMD_VMX_FUNC(func)
 #endif
 
 #ifdef SIMD_VSX_ENABLE

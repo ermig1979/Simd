@@ -97,9 +97,9 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDx), FUNC_S(SimdSobelDx));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDx), FUNC_S(SimdSobelDx));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vmx::SobelDx), FUNC_S(SimdSobelDx));
 #endif 
 
         return result;
@@ -121,9 +121,9 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vmx::SobelDxAbs), FUNC_S(SimdSobelDxAbs));
 #endif
 
         return result;
@@ -145,9 +145,9 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDy), FUNC_S(SimdSobelDy));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDy), FUNC_S(SimdSobelDy));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vmx::SobelDy), FUNC_S(SimdSobelDy));
 #endif
 
         return result;
@@ -169,9 +169,9 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vmx::SobelDyAbs), FUNC_S(SimdSobelDyAbs));
 #endif
 
         return result;
@@ -193,9 +193,9 @@ namespace Test
             result = result && SobelAutoTest(FUNC_S(Simd::Avx2::ContourMetrics), FUNC_S(SimdContourMetrics));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && SobelAutoTest(FUNC_S(Simd::Vsx::ContourMetrics), FUNC_S(SimdContourMetrics));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SobelAutoTest(FUNC_S(Simd::Vmx::ContourMetrics), FUNC_S(SimdContourMetrics));
 #endif
 
         return result;
@@ -275,9 +275,9 @@ namespace Test
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx2::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vsx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vmx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
         return result;
@@ -356,9 +356,9 @@ namespace Test
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vsx::ContourAnchors), FUNC_A(SimdContourAnchors));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vmx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
         return result;

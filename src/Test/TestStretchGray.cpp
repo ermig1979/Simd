@@ -101,9 +101,9 @@ namespace Test
             result = result && StretchGrayAutoTest(FUNC(Simd::Avx2::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && StretchGrayAutoTest(FUNC(Simd::Vsx::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && StretchGrayAutoTest(FUNC(Simd::Vmx::StretchGray2x2), FUNC(SimdStretchGray2x2), 2);
 #endif 
 
 		return result;

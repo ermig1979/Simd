@@ -131,9 +131,9 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx2::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ReduceGrayAutoTest(FUNC1(Simd::Vsx::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Vmx::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
 #endif 
 
 		return result;
@@ -162,11 +162,11 @@ namespace Test
         }
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
         {
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray3x3, true), FUNC2(SimdReduceGray3x3, true));
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray3x3, false), FUNC2(SimdReduceGray3x3, false));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vmx::ReduceGray3x3, true), FUNC2(SimdReduceGray3x3, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vmx::ReduceGray3x3, false), FUNC2(SimdReduceGray3x3, false));
         }
 #endif 
 
@@ -189,9 +189,9 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ReduceGrayAutoTest(FUNC1(Simd::Vsx::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Vmx::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
 		return result;
@@ -220,11 +220,11 @@ namespace Test
         }
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
         {
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
-            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vsx::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vmx::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+            result = result && ReduceGrayAutoTest(FUNC2(Simd::Vmx::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
         }
 #endif 
 

@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdSse1", "SimdSse1.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdAvx1", "SimdAvx1.vcxproj", "{1622C4EF-06A4-4DAA-9631-5D71B32858A2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SimdVmx", "SimdVmx.vcxproj", "{6BEC7276-995D-4FDE-84B5-2E2072CF9758}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -119,6 +121,14 @@ Global
 		{1622C4EF-06A4-4DAA-9631-5D71B32858A2}.Release|Win32.Build.0 = Release|Win32
 		{1622C4EF-06A4-4DAA-9631-5D71B32858A2}.Release|x64.ActiveCfg = Release|x64
 		{1622C4EF-06A4-4DAA-9631-5D71B32858A2}.Release|x64.Build.0 = Release|x64
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Debug|Win32.Build.0 = Debug|Win32
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Debug|x64.ActiveCfg = Debug|x64
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Debug|x64.Build.0 = Debug|x64
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Release|Win32.ActiveCfg = Release|Win32
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Release|Win32.Build.0 = Release|Win32
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Release|x64.ActiveCfg = Release|x64
+		{6BEC7276-995D-4FDE-84B5-2E2072CF9758}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

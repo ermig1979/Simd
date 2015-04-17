@@ -103,9 +103,9 @@ namespace Test
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Vsx::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Vmx::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
         return result;    

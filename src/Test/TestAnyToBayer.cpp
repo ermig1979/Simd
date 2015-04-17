@@ -94,9 +94,9 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vsx::BgrToBayer), FUNC(SimdBgrToBayer));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
         return result;    
     }
@@ -112,9 +112,9 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Vsx::BgraToBayer), FUNC(SimdBgraToBayer));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Vmx::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
         return result;    
     }

@@ -91,9 +91,9 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Vsx::BgraToBgr), FUNC(SimdBgraToBgr));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Vmx::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
         return result;    
@@ -115,9 +115,9 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Avx2::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Vsx::BgraToGray), FUNC(SimdBgraToGray));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Vmx::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
         return result;    
@@ -144,9 +144,9 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Avx2::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Vsx::BgrToGray), FUNC(SimdBgrToGray));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Vmx::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
         return result;    
@@ -186,9 +186,9 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Avx2::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Vsx::GrayToBgr), FUNC(SimdGrayToBgr));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Vmx::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
         return result;    

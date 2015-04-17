@@ -102,9 +102,9 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ReorderAutoTest(FUNC(Simd::Vsx::Reorder16bit), FUNC(SimdReorder16bit), 2);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder16bit), FUNC(SimdReorder16bit), 2);
 #endif 
 
 		return result;
@@ -131,9 +131,9 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ReorderAutoTest(FUNC(Simd::Vsx::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif 
 
         return result;
@@ -160,9 +160,9 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && ReorderAutoTest(FUNC(Simd::Vsx::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif 
 
         return result;

@@ -115,9 +115,9 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Avx2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Vsx::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Vmx::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
         return result;
@@ -139,9 +139,9 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Avx2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Vsx::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Vmx::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
         return result;
@@ -163,9 +163,9 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Avx2::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Vsx::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Vmx::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
 		return result;
@@ -187,9 +187,9 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Avx2::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Vsx::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Vmx::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
         return result;

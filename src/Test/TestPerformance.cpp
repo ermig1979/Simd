@@ -204,6 +204,7 @@ namespace Test
             std::pair<Pm, Pm> ssse3;
             std::pair<Pm, Pm> sse41;
             std::pair<Pm, Pm> avx2;
+            std::pair<Pm, Pm> vmx;
             std::pair<Pm, Pm> vsx;
         };
         typedef std::map<std::string, Statistic> StatisticMap;
@@ -211,7 +212,7 @@ namespace Test
         StatisticMap statistic;
         double timeMax = 0;
         size_t sizeMax = 8;
-        bool sse2 = false, ssse3 = false, sse41 = false, sse42 = false, avx2 = false, vsx = false;
+        bool sse2 = false, ssse3 = false, sse41 = false, sse42 = false, avx2 = false, vmx = false, vsx = false;
         for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
             const std::string & desc = it->second->Description();
@@ -268,6 +269,14 @@ namespace Test
                     s.avx2.second = *it->second;
                 avx2 = true;
             }
+            if(desc.find("Simd::Vmx::") != std::string::npos)
+            {
+                if(Aligned(desc))
+                    s.vmx.first = *it->second;
+                else
+                    s.vmx.second = *it->second;
+                vmx = true;
+            }
             if(desc.find("Simd::Vsx::") != std::string::npos)
             {
                 if(Aligned(desc))
@@ -299,16 +308,18 @@ namespace Test
             if(sse41) ss << ToString(s.sse41.first.Average()*1000.0, ic, fc) << " ";
             if(sse42) ss << ToString(s.sse42.Average()*1000.0, ic, fc) << " ";
             if(avx2) ss << ToString(s.avx2.first.Average()*1000.0, ic, fc) << " ";
+            if(vmx) ss << ToString(s.vmx.first.Average()*1000.0, ic, fc) << " ";
             if(vsx) ss << ToString(s.vsx.first.Average()*1000.0, ic, fc) << " ";
             ss << "| ";
 
-            if(sse2 || ssse3 || sse41 || sse42 || avx2 || vsx)
+            if(sse2 || ssse3 || sse41 || sse42 || avx2 || vmx || vsx)
             {
                 if(sse2) ss << ToString(Relation(s.base.first, s.sse2.first), ir, fc) << " ";
                 if(ssse3) ss << ToString(Relation(s.base.first, s.ssse3.first), ir, fc) << " ";
                 if(sse41) ss << ToString(Relation(s.base.first, s.sse41.first), ir, fc) << " ";
                 if(sse42) ss << ToString(Relation(s.base.first, s.sse42), ir, fc) << " ";
                 if(avx2) ss << ToString(Relation(s.base.first, s.avx2.first), ir, fc) << " ";
+                if(vmx) ss << ToString(Relation(s.base.first, s.vmx.first), ir, fc) << " ";
                 if(vsx) ss << ToString(Relation(s.base.first, s.vsx.first), ir, fc) << " ";
                 ss << "| ";
             }
@@ -335,6 +346,7 @@ namespace Test
                 if(ssse3) ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ir, fc) << " ";
                 if(sse41) ss << ToString(Relation(s.sse41.second, s.sse41.first), ir, fc) << " ";
                 if(avx2) ss << ToString(Relation(s.avx2.second, s.avx2.first), ir, fc) << " ";
+                if(vmx) ss << ToString(Relation(s.vmx.second, s.vmx.first), ir, fc) << " ";
                 if(vsx) ss << ToString(Relation(s.vsx.second, s.vsx.first), ir, fc) << " ";
                 ss << "| ";
             }
@@ -353,16 +365,18 @@ namespace Test
         if(sse41) header << ExpandToLeft("Sse41", ic + fc + 1) << " ";
         if(sse42) header << ExpandToLeft("Sse42", ic + fc + 1) << " ";
         if(avx2) header << ExpandToLeft("Avx2", ic + fc + 1) << " ";
+        if(vmx) header << ExpandToLeft("Vmx", ic + fc + 1) << " ";
         if(vsx) header << ExpandToLeft("Vsx", ic + fc + 1) << " ";
         header << "| ";
 
-        if(sse2 || ssse3 || sse41 || sse42 || avx2 || vsx)
+        if(sse2 || ssse3 || sse41 || sse42 || avx2 || vmx || vsx)
         {
             if(sse2) header << ExpandToLeft("B/S2", ir + fc + 1) << " ";
             if(ssse3) header << ExpandToLeft("B/S3", ir + fc + 1) << " ";
             if(sse41) header << ExpandToLeft("B/S41", ir + fc + 1) << " ";
             if(sse42) header << ExpandToLeft("B/S42", ir + fc + 1) << " ";
             if(avx2) header << ExpandToLeft("B/A2", ir + fc + 1) << " ";
+            if(vmx) header << ExpandToLeft("B/Vm", ir + fc + 1) << " ";
             if(vsx) header << ExpandToLeft("B/Vs", ir + fc + 1) << " ";
             header << "| ";
         }
@@ -389,6 +403,7 @@ namespace Test
             if(ssse3) header << ExpandToLeft("S3:U/A", ir + fc + 1) << " ";
             if(sse41) header << ExpandToLeft("S41:U/A", ir + fc + 1) << " ";
             if(avx2) header << ExpandToLeft("A2:U/A", ir + fc + 1) << " ";
+            if(vmx) header << ExpandToLeft("Vm:U/A", ir + fc + 1) << " ";
             if(vsx) header << ExpandToLeft("Vs:U/A", ir + fc + 1) << " ";
             header << "| ";
         }

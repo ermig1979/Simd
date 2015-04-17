@@ -151,8 +151,8 @@ namespace Simd
     }
 #endif//SIMD_SAVX2_ENABLE
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         template <bool align> SIMD_INLINE void Store(uint8_t * p, v128_u8 a);
 
@@ -310,6 +310,6 @@ namespace Simd
             s0.Flush(); s1.Flush(); s2.Flush(); s3.Flush();
         }
     }
-#endif//SIMD_VSX_ENABLE
+#endif//SIMD_VMX_ENABLE
 }
 #endif//__SimdStore_h__

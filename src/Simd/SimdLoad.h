@@ -333,8 +333,8 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_VSX_ENABLE
-    namespace Vsx
+#ifdef SIMD_VMX_ENABLE
+    namespace Vmx
     {
         template <bool align> SIMD_INLINE v128_u8 Load(const uint8_t * p);
 
@@ -557,6 +557,6 @@ namespace Simd
             return (v128_u32)vec_perm(a, b, K8_PERM_UNPACK_HI_U16);
         }
     }
-#endif//SIMD_VSX_ENABLE
+#endif//SIMD_VMX_ENABLE
 }
 #endif//__SimdLoad_h__

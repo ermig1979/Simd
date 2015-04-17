@@ -122,9 +122,9 @@ namespace Test
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx2::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vsx::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
         return result;
@@ -146,9 +146,9 @@ namespace Test
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx2::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vsx::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
         return result;
@@ -208,9 +208,9 @@ namespace Test
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx2::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vsx::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
         return result;
@@ -232,9 +232,9 @@ namespace Test
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx2::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
-#ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
-            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vsx::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
         return result;
