@@ -51,14 +51,14 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool AnyToYuvAutoTest(int width, int height, View::Format srcType, bool is420, const Func & f1, const Func & f2)
+	bool AnyToYuvAutoTest(int width, int height, View::Format srcType, int dx, int dy, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
 		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
 
-        const int uvWidth = is420 ? width/2 : width;
-        const int uvHeight = is420 ? height/2 : height;
+        const int uvWidth = width/dx;
+        const int uvHeight = height/dy;
 
 		View src(width, height, srcType, NULL, TEST_ALIGN(width));
 		FillRandom(src);
@@ -81,15 +81,13 @@ namespace Test
 		return result;
 	}
 
-	bool AnyToYuvAutoTest(View::Format srcType, bool is420, const Func & f1, const Func & f2)
+	bool AnyToYuvAutoTest(View::Format srcType, int dx, int dy, const Func & f1, const Func & f2)
 	{
 		bool result = true;
 
-        int step = is420 ? E : O;
-		
-		result = result && AnyToYuvAutoTest(W, H, srcType, is420, f1, f2);
-		result = result && AnyToYuvAutoTest(W + step, H - step, srcType, is420, f1, f2);
-		result = result && AnyToYuvAutoTest(W - step, H + step, srcType, is420, f1, f2);
+		result = result && AnyToYuvAutoTest(W, H, srcType, dx, dy, f1, f2);
+		result = result && AnyToYuvAutoTest(W + O*dx, H - O*dy, srcType, dx, dy, f1, f2);
+		result = result && AnyToYuvAutoTest(W - O*dx, H + O*dy, srcType, dx, dy, f1, f2);
 		
 		return result;
 	}
@@ -98,26 +96,55 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Base::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+        result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Base::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Sse2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Sse2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
         if(Simd::Ssse3::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Ssse3::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Ssse3::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Avx2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Avx2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, true, FUNC(Simd::Vmx::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Vmx::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
+#endif
+
+        return result;
+    }
+
+    bool BgraToYuv422pAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Base::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
+
+#ifdef SIMD_SSE2_ENABLE
+        if(Simd::Sse2::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Sse2::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Ssse3::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Avx2::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
+#endif
+
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Vmx::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
         return result;
@@ -127,21 +154,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Base::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
+        result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Base::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Sse2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Sse2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Avx2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Avx2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgra32, false, FUNC(Simd::Vmx::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Vmx::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
         return result;
@@ -151,21 +178,21 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+		result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 
 #ifdef SIMD_SSSE3_ENABLE
         if(Simd::Ssse3::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Ssse3::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Ssse3::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Avx2::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Avx2::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, true, FUNC(Simd::Vmx::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Vmx::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
 		return result;
@@ -175,21 +202,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Base::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
+        result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Base::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 
 #ifdef SIMD_SSSE3_ENABLE
         if(Simd::Ssse3::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Ssse3::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Ssse3::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Avx2::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Avx2::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
-            result = result && AnyToYuvAutoTest(View::Bgr24, false, FUNC(Simd::Vmx::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
+            result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Vmx::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
         return result;
@@ -197,7 +224,7 @@ namespace Test
 
 	//-----------------------------------------------------------------------
 
-	bool AnyToYuvDataTest(bool create, int width, int height, View::Format srcType, bool is420, const Func & f)
+	bool AnyToYuvDataTest(bool create, int width, int height, View::Format srcType, int dx, int dy, const Func & f)
 	{
 		bool result = true;
 
@@ -205,8 +232,8 @@ namespace Test
 
 		std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
 
-        const int uvWidth = is420 ? width/2 : width;
-        const int uvHeight = is420 ? height/2 : height;
+        const int uvWidth = width/dx;
+        const int uvHeight = height/dy;
 
 		View src(width, height, srcType, NULL, TEST_ALIGN(width));
 
@@ -256,7 +283,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, true, FUNC(SimdBgraToYuv420p));
+        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 2, 2, FUNC(SimdBgraToYuv420p));
+
+        return result;
+    }
+
+    bool BgraToYuv422pDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 2, 1, FUNC(SimdBgraToYuv422p));
 
         return result;
     }
@@ -265,7 +301,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, false, FUNC(SimdBgraToYuv444p));
+        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgra32, 1, 1, FUNC(SimdBgraToYuv444p));
 
         return result;
     }
@@ -274,7 +310,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, true, FUNC(SimdBgrToYuv420p));
+		result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 2, 2, FUNC(SimdBgrToYuv420p));
 
 		return result;
 	}
@@ -283,7 +319,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, false, FUNC(SimdBgrToYuv444p));
+        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 1, 1, FUNC(SimdBgrToYuv444p));
 
         return result;
     }

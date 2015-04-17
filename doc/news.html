@@ -25,10 +25,12 @@
 <h5>New features</h5>
 <ul>
  <li>Base implementation, SSE, AVX and VSX optimization of function SvmSumLinear.</li>
- <li>SSE2, SSSE3, AVX2 and VSX optimization of function ResizeBilinear for Uv16, Bgr24 and Bgra32 images.</li>
- <li>Base implementation, SSSE3, AVX2 and VSX optimization of function Yuv422pToBgr.</li>
- <li>Base implementation, SSE2, AVX2 and VSX optimization of function Yuv422pToBgra.</li>
- </ul>
+ <li>SSE2, SSSE3, AVX2 and VMX optimization of function ResizeBilinear for Uv16, Bgr24 and Bgra32 images.</li>
+ <li>Base implementation, SSSE3, AVX2 and VMX optimization of function Yuv422pToBgr.</li>
+ <li>Base implementation, SSE2, AVX2 and VMX optimization of function Yuv422pToBgra.</li>
+ <li>Runtime detection of VMX and VSX extensions for PowerPC.</li>
+ <li>Base implementation, SSE2, SSSE3, AVX2 and VMX optimization of function BgraToYuv422p.</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>A potential program crash in function SimdSquaredDifferenceSum32f.</li>
@@ -40,6 +42,7 @@
  <li>Tests for verifying functionality of function SvmSumLinear.</li>
  <li>Tests for verifying functionality of function Yuv422pToBgr.</li>
  <li>Tests for verifying functionality of function Yuv422pToBgra.</li>
+ <li>Tests for verifying functionality of function BgraToYuv422p.</li>
 </ul>
 
 <h4>Documentation</h4>
@@ -48,10 +51,17 @@
  <li>A description of function SvmSumLinear.</li>
  <li>A description of function Yuv422pToBgr.</li>
  <li>A description of function Yuv422pToBgra.</li>
+ <li>A description of function BgraToYuv422p.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>A small inaccuracy in description of SimdShiftBilinear.</li>
+</ul>
+
+<h4>Infrastructure</h4>
+<h5>New features</h5>
+<ul>
+ <li>Vmx project for PowerPC VMX(AltiVec) extension.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

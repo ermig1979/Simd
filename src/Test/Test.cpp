@@ -96,6 +96,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(GrayToBgraAutoTest);
 
     EXECUTE_AUTO_TEST(BgraToYuv420pAutoTest);
+    EXECUTE_AUTO_TEST(BgraToYuv422pAutoTest);
     EXECUTE_AUTO_TEST(BgraToYuv444pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
@@ -291,6 +292,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(GrayToBgraDataTest);
 
     EXECUTE_DATA_TEST(BgraToYuv420pDataTest);
+    EXECUTE_DATA_TEST(BgraToYuv422pDataTest);
     EXECUTE_DATA_TEST(BgraToYuv444pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv444pDataTest);

@@ -133,6 +133,65 @@ namespace Simd
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        SIMD_INLINE void Average16(__m256i a[2][2])
+        {
+            a[0][0] = _mm256_srli_epi16(_mm256_add_epi16(a[0][0], K16_0001), 1);
+            a[0][1] = _mm256_srli_epi16(_mm256_add_epi16(a[0][1], K16_0001), 1);
+            a[1][0] = _mm256_srli_epi16(_mm256_add_epi16(a[1][0], K16_0001), 1);
+            a[1][1] = _mm256_srli_epi16(_mm256_add_epi16(a[1][1], K16_0001), 1);
+        }
+
+        template <bool align> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
+        {
+            __m256i _b16_r16[2][2], _g16_1[2][2];
+            Store<align>((__m256i*)y + 0, LoadAndConvertY8<align>((__m256i*)bgra + 0, _b16_r16[0], _g16_1[0]));
+            Store<align>((__m256i*)y + 1, LoadAndConvertY8<align>((__m256i*)bgra + 4, _b16_r16[1], _g16_1[1]));
+
+            Average16(_b16_r16);
+            Average16(_g16_1);
+
+            Store<align>((__m256i*)u, PackU16ToU8(ConvertU16(_b16_r16[0], _g16_1[0]), ConvertU16(_b16_r16[1], _g16_1[1])));
+            Store<align>((__m256i*)v, PackU16ToU8(ConvertV16(_b16_r16[0], _g16_1[0]), ConvertV16(_b16_r16[1], _g16_1[1])));
+        }
+
+        template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            assert((width%2 == 0) && (width >= DA));
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, DA);
+            const size_t A8 = A*8;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t colUV = 0, colY = 0, colBgra = 0; colY < alignedWidth; colY += DA, colUV += A, colBgra += A8)
+                    BgraToYuv422p<align>(bgra + colBgra, y + colY, u + colUV, v + colUV);
+                if(width != alignedWidth)
+                {
+                    size_t offset = width - DA;
+                    BgraToYuv422p<false>(bgra + offset*4, y + offset, u + offset/2, v + offset/2);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            else
+                BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+        }
+
         SIMD_INLINE __m256i ConvertY16(__m256i b16_r16[2], __m256i g16_1[2])
         {
             return SaturateI16ToU8(_mm256_add_epi16(K16_Y_ADJUST, PackI32ToI16(BgrToY32(b16_r16[0], g16_1[0]), BgrToY32(b16_r16[1], g16_1[1]))));

@@ -55,15 +55,42 @@ namespace Simd
 			for(size_t row = 0; row < height; row += 2)
 			{
 				for(size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
-				{
 					BgraToYuv420p(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
-				}
 				y += 2*yStride;
 				u += uStride;
 				v += vStride;
 				bgra += 2*bgraStride;
 			}
 		}
+
+        SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
+        {
+            y[0] = BgrToY(bgra[0], bgra[1], bgra[2]);
+            y[1] = BgrToY(bgra[4], bgra[5], bgra[6]);
+
+            int blue = Average(bgra[0], bgra[4]);
+            int green = Average(bgra[1], bgra[5]);
+            int red = Average(bgra[2], bgra[6]);
+
+            u[0] = BgrToU(blue, green, red);
+            v[0] = BgrToV(blue, green, red);
+        }
+
+        void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            assert((width%2 == 0) && (width >= 2));
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
+                    BgraToYuv422p(bgra + colBgra, y + colY, u + colUV, v + colUV);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
 
         SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
         {

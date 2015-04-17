@@ -152,6 +152,70 @@ namespace Simd
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
 
+        SIMD_INLINE void Average(v128_s16 a[2][2])
+        {
+            a[0][0] = (v128_s16)vec_sr(vec_add(a[0][0], (v128_s16)K16_0001), K16_0001); 
+            a[0][1] = (v128_s16)vec_sr(vec_add(a[0][1], (v128_s16)K16_0001), K16_0001); 
+            a[1][0] = (v128_s16)vec_sr(vec_add(a[1][0], (v128_s16)K16_0001), K16_0001); 
+            a[1][1] = (v128_s16)vec_sr(vec_add(a[1][1], (v128_s16)K16_0001), K16_0001); 
+        }
+
+        template <bool align, bool first> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, Storer<align> & y, Storer<align> & u, Storer<align> & v)
+        {
+            v128_s16 _b_r[2][2], _g_1[2][2];
+            Store<align, first>(y, LoadAndConvertY<align>(bgra, _b_r[0], _g_1[0]));
+            Store<align, false>(y, LoadAndConvertY<align>(bgra + QA, _b_r[1], _g_1[1]));
+
+            Average(_b_r);
+            Average(_g_1);
+
+            Store<align, first>(u, vec_pack(ConvertU(_b_r[0], _g_1[0]), ConvertU(_b_r[1], _g_1[1])));
+            Store<align, first>(v, vec_pack(ConvertV(_b_r[0], _g_1[0]), ConvertV(_b_r[1], _g_1[1])));
+        }
+
+        template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            assert((width%2 == 0) && (width >= DA));
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, DA);
+            const size_t A8 = A*8;
+            for(size_t row = 0; row < height; ++row)
+            {
+                Storer<align> _y(y), _u(u), _v(v);
+                BgraToYuv422p<align, true>(bgra, _y, _u, _v);
+                for(size_t col = DA, colBgra = A8; col < alignedWidth; col += DA, colBgra += A8)
+                    BgraToYuv422p<align, false>(bgra + colBgra, _y, _u, _v);
+                Flush(_y, _u, _v);
+                if(width != alignedWidth)
+                {
+                    size_t offset = width - DA;
+                    Storer<false> _y(y + offset), _u(u + offset/2), _v(v + offset/2);
+                    BgraToYuv422p<false, true>(bgra + offset*4, _y, _u, _v);
+                    Flush(_y, _u, _v);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            else
+                BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+        }
+
         SIMD_INLINE v128_u16 ConvertY(v128_s16 b_r[2], v128_s16 g_1[2])
         {
             return SaturateI16ToU8(vec_add((v128_s16)K16_Y_ADJUST, vec_pack(BgrToY(b_r[0], g_1[0]), BgrToY(b_r[1], g_1[1]))));

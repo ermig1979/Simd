@@ -560,6 +560,31 @@ SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t heigh
         Base::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
 }
 
+SIMD_API void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::DA)
+        Avx2::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::DA)
+        Ssse3::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::DA)
+        Sse2::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+    else
+#endif
+#ifdef SIMD_VMX_ENABLE
+    if(Vmx::Enable && width >= Vmx::DA)
+        Vmx::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+    else
+#endif
+        Base::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+}
+
 SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
 #ifdef SIMD_AVX2_ENABLE
