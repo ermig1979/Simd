@@ -24,7 +24,6 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
-#include "Test/Test.h"
 
 namespace Test
 {
@@ -466,6 +465,15 @@ namespace Test
 
             result = result && Compare(d1, d2, 0, true, 64);
         }
+
+        return result;
+    }
+
+    bool VectorProductDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && VectorProductDataTest(create, DW, DH, ARGS_VP(SimdVectorProduct));
 
         return result;
     }
