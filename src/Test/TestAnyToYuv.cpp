@@ -198,6 +198,30 @@ namespace Test
 		return result;
 	}
 
+    bool BgrToYuv422pAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Base::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Ssse3::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Avx2::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
+#endif
+
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Vmx::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
+#endif
+
+        return result;
+    }
+
     bool BgrToYuv444pAutoTest()
     {
         bool result = true;
@@ -314,6 +338,15 @@ namespace Test
 
 		return result;
 	}
+
+    bool BgrToYuv422pDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnyToYuvDataTest(create, DW, DH, View::Bgr24, 2, 1, FUNC(SimdBgrToYuv422p));
+
+        return result;
+    }
 
     bool BgrToYuv444pDataTest(bool create)
     {

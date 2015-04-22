@@ -56,6 +56,7 @@ namespace Test
     bool BgraToYuv422pAutoTest();
     bool BgraToYuv444pAutoTest();
     bool BgrToYuv420pAutoTest();
+    bool BgrToYuv422pAutoTest();
     bool BgrToYuv444pAutoTest();
 
     bool BackgroundGrowRangeSlowAutoTest();
@@ -217,6 +218,7 @@ namespace Test
     bool BgraToYuv422pDataTest(bool create);
     bool BgraToYuv444pDataTest(bool create);
     bool BgrToYuv420pDataTest(bool create);
+    bool BgrToYuv422pDataTest(bool create);
     bool BgrToYuv444pDataTest(bool create);
 
     bool BackgroundGrowRangeSlowDataTest(bool create);

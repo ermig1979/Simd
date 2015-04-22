@@ -99,6 +99,7 @@ int ExecuteAutoTest(const Options & options)
     EXECUTE_AUTO_TEST(BgraToYuv422pAutoTest);
     EXECUTE_AUTO_TEST(BgraToYuv444pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv420pAutoTest);
+    EXECUTE_AUTO_TEST(BgrToYuv422pAutoTest);
     EXECUTE_AUTO_TEST(BgrToYuv444pAutoTest);
 
     EXECUTE_AUTO_TEST(AbsDifferenceSumAutoTest);
@@ -295,6 +296,7 @@ int ExecuteDataTest(const Options & options)
     EXECUTE_DATA_TEST(BgraToYuv422pDataTest);
     EXECUTE_DATA_TEST(BgraToYuv444pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv420pDataTest);
+    EXECUTE_DATA_TEST(BgrToYuv422pDataTest);
     EXECUTE_DATA_TEST(BgrToYuv444pDataTest);
 
     EXECUTE_DATA_TEST(AbsGradientSaturatedSumDataTest);

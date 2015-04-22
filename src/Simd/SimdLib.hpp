@@ -803,6 +803,32 @@ namespace Simd
 
     /*! @ingroup bgr_conversion
 
+	    \fn void BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
+
+        \short Converts 24-bit BGR image to YUV422P. 
+
+	    The input BGR and output Y images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half width of Y component). 
+
+        \note This function is a C++ wrapper for function ::SimdBgrToYuv422p.
+
+	    \param [in] bgr - an input 24-bit BGR image.
+	    \param [out] y - an output 8-bit image with Y color plane.
+	    \param [out] u - an output 8-bit image with U color plane.
+	    \param [out] v - an output 8-bit image with V color plane.
+	*/
+    template<class A> SIMD_INLINE void BgrToYuv422p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
+    {
+        assert(y.width == 2*u.width && y.height == u.height && y.format == u.format);
+        assert(y.width == 2*v.width && y.height == v.height && y.format == v.format);
+        assert(y.width == bgr.width && y.height == bgr.height);
+        assert(y.format == View<A>::Gray8 && bgr.format == View<A>::Bgr24);
+
+        SimdBgrToYuv422p(bgr.data, bgr.width, bgr.height, bgr.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
+    }
+
+    /*! @ingroup bgr_conversion
+
 	    \fn void BgrToYuv444p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
 
         \short Converts 24-bit BGR image to YUV444P. 

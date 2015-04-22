@@ -126,6 +126,77 @@ namespace Simd
                 BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
         }
 
+#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
+        SIMD_INLINE void Average16(__m256i & a)
+        {
+            a = _mm256_srli_epi16(_mm256_add_epi16(_mm256_hadd_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpackhi_epi8(a, K_ZERO)), K16_0001), 1); 
+        }
+#else
+        SIMD_INLINE void Average16(__m256i & a)
+        {
+            a = _mm256_srli_epi16(_mm256_add_epi16(_mm256_maddubs_epi16(a, K8_01), K16_0001), 1); 
+        }
+#endif
+
+        template <bool align> SIMD_INLINE void BgrToYuv422p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
+        {
+            __m256i blue[2], green[2], red[2];
+
+            LoadBgr<align>((__m256i*)bgr + 0, blue[0], green[0], red[0]);
+            Store<align>((__m256i*)y + 0, BgrToY8(blue[0], green[0], red[0]));
+
+            LoadBgr<align>((__m256i*)bgr + 3, blue[1], green[1], red[1]);
+            Store<align>((__m256i*)y + 1, BgrToY8(blue[1], green[1], red[1]));
+
+            Average16(blue[0]);
+            Average16(blue[1]);
+            Average16(green[0]);
+            Average16(green[1]);
+            Average16(red[0]);
+            Average16(red[1]);
+
+            Store<align>((__m256i*)u, PackU16ToU8(BgrToU16(blue[0], green[0], red[0]), BgrToU16(blue[1], green[1], red[1])));
+            Store<align>((__m256i*)v, PackU16ToU8(BgrToV16(blue[0], green[0], red[0]), BgrToV16(blue[1], green[1], red[1])));
+        }
+
+        template <bool align> void BgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            assert((width%2 == 0) && (width >= DA));
+            if(align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, DA);
+            const size_t A6 = A*6;
+            for(size_t row = 0; row < height; ++row)
+            {
+                for(size_t colUV = 0, colY = 0, colBgr = 0; colY < alignedWidth; colY += DA, colUV += A, colBgr += A6)
+                    BgrToYuv422p<align>(bgr + colBgr, y + colY, u + colUV, v + colUV);
+                if(width != alignedWidth)
+                {
+                    size_t offset = width - DA;
+                    BgrToYuv422p<false>(bgr + offset*3, y + offset, u + offset/2, v + offset/2);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void BgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+        {
+            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+                BgrToYuv422p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            else
+                BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+        }
+
         template <bool align> SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
             __m256i blue, green, red;
