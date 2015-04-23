@@ -22,8 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdConst.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 

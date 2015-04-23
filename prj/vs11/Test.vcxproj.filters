@@ -138,9 +138,6 @@
     <ClInclude Include="..\..\src\Test\TestUtils.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Test\Test.h">
-      <Filter>Test</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Test\TestData.h">
       <Filter>Sys</Filter>
     </ClInclude>

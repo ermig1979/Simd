@@ -23,11 +23,8 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdMath.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdSsse3.h"
 
 namespace Simd
 {

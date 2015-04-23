@@ -22,8 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
-#include "Simd/SimdCompare.h"
-#include "Simd/SimdBase.h"
 
 namespace Simd
 {

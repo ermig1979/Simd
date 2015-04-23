@@ -23,7 +23,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdBase.h"
 
 namespace Simd
 {

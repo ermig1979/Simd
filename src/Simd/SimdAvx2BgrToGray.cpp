@@ -22,12 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdInit.h"
-#include "Simd/SimdConst.h"
-#include "Simd/SimdBase.h"
-#include "Simd/SimdAvx2.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdLoad.h"
 
 namespace Simd
 {

@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdBase.h"
 
 namespace Simd
 {

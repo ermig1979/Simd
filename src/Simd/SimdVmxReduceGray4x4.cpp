@@ -21,13 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdVmx.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdConst.h"
-#include "Simd/SimdLoad.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdMath.h"
-#include "Simd/SimdLog.h"
 
 namespace Simd
 {
