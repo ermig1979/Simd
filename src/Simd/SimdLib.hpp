@@ -135,10 +135,17 @@ namespace Simd
 
         Both images must have the same width and height.
 
-        For border pixels dst[x, y] = 0, for other pixels: 
-        \n dst[x, y] = min(dx[x, y] + dy[x, y], 255), where 
-        \n dx[x, y] = abs(src[x + 1, y] - src[x - 1, y]), 
-        \n dy[x, y] = abs(src[x, y + 1] - src[x, y - 1]).
+        For border pixels:
+        \verbatim
+        dst[x, y] = 0; 
+        \endverbatim
+
+        For other pixels: 
+        \verbatim
+        dx = abs(src[x + 1, y] - src[x - 1, y]); 
+        dy = abs(src[x, y + 1] - src[x, y - 1]);
+        dst[x, y] = min(dx + dy, 255);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdAbsGradientSaturatedSum.
 
@@ -161,9 +168,10 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray).
 
         For every point: 
-        \n difference[i] += (weight * excess[i]*excess[i]) >> 16, 
-        \n where 
-        \n excess[i] = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0).
+        \verbatim
+        excess = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0);
+        difference[i] += (weight * excess*excess) >> 16; 
+        \endverbatim
 
         This function is used for difference estimation in algorithm of motion detection.
 
@@ -192,7 +200,9 @@ namespace Simd
         All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
 
         For every point: 
-        \n dst[i] = (src[i]*alpha[i] + dst[i]*(255 - alpha[i]))/255.
+        \verbatim
+        dst[i] = (src[i]*alpha[i] + dst[i]*(255 - alpha[i]))/255;
+        \endverbatim
 
         This function is used for image drawing.
 
@@ -218,8 +228,10 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-        \n lo[i] -= value[i] < lo[i] ? 1 : 0; 
-        \n hi[i] += value[i] > hi[i] ? 1 : 0.
+        \verbatim
+        lo[i] -= value[i] < lo[i] ? 1 : 0; 
+        hi[i] += value[i] > hi[i] ? 1 : 0;
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -245,8 +257,10 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-        \n lo[i] = value[i] < lo[i] ? value[i] : lo[i]; 
-        \n hi[i] = value[i] > hi[i] ? value[i] : hi[i].
+        \verbatim
+        lo[i] = value[i] < lo[i] ? value[i] : lo[i]; 
+        hi[i] = value[i] > hi[i] ? value[i] : hi[i];
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -272,8 +286,10 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         Updates background statistic counters for every point: 
-        \n loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0; 
-        \n hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
+        \verbatim
+        loCount[i] += (value[i] < loValue[i] && loCount[i] < 255) ? 1 : 0; 
+        hiCount[i] += (value[i] > hiValue[i] && hiCount[i] < 255) ? 1 : 0;
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -303,12 +319,14 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         Adjusts background range for every point: 
-        \n loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
-        \n loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0; 
-        \n loCount[i] = 0;
-        \n hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
-        \n hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0; 
-        \n hiCount[i] = 0;
+        \verbatim
+        loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
+        loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0; 
+        loCount[i] = 0;
+        hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
+        hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0; 
+        hiCount[i] = 0;
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -336,13 +354,18 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        Adjusts background range for every point when mask[i] != 0 : 
-        \n loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
-        \n loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0; 
-        \n loCount[i] = 0;
-        \n hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
-        \n hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0; 
-        \n hiCount[i] = 0;
+        Adjusts background range for every point:
+        \verbatim
+        if(mask[i])
+        { 
+            loValue[i] -= (loCount[i] > threshold && loValue[i] > 0) ? 1 : 0;
+            loValue[i] += (loCount[i] < threshold && loValue[i] < 255) ? 1 : 0; 
+            loCount[i] = 0;
+            hiValue[i] += (hiCount[i] > threshold && hiValue[i] < 255) ? 1 : 0;
+            hiValue[i] -= (hiCount[i] < threshold && hiValue[i] > 0) ? 1 : 0; 
+            hiCount[i] = 0;
+        }
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -376,7 +399,7 @@ namespace Simd
         \verbatim
         if (value[i] > hi[i])
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
+            lo[i] = min(lo[i] + value[i] - hi[i], 255);
             hi[i] = value[i];
         }
         if (lo[i] > value[i])
@@ -409,17 +432,20 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        For every point when mask[i] != 0 : 
+        For every point: 
         \verbatim
-        if (value[i] > hi[i])
+        if(mask[i])
         {
-            lo[i] = min(lo[i] + value[i] - hi[i], 0xFF);
-            hi[i] = value[i];
-        }
-        if (lo[i] > value[i])
-        {
-            lo[i] = value[i];
-            hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            if (value[i] > hi[i])
+            {
+                lo[i] = min(lo[i] + value[i] - hi[i], 255);
+                hi[i] = value[i];
+            }
+            if (lo[i] > value[i])
+            {
+                lo[i] = value[i];
+                hi[i] = max(hi[i] - lo[i] + value[i], 0);
+            }
         }
         \endverbatim
 
@@ -448,8 +474,11 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        For every point when mask[i] == index: 
-        \n dst[i] = value; 
+        For every point:
+        \verbatim
+        if(mask[i] == index) 
+            dst[i] = value; 
+        \endverbatim
 
         This function is used for background updating in motion detection algorithm.
 
@@ -859,8 +888,10 @@ namespace Simd
         All images must have 8-bit gray format and must have the same width and height.
 
         For every point:
-        \n dst[i] = compare(src[i], value) ? positive : negative,
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        \verbatim
+        dst[i] = compare(src[i], value) ? positive : negative;
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdBinarization.
 
@@ -887,9 +918,23 @@ namespace Simd
         All images must have 8-bit gray format and must have the same width and height.
 
         For every point:
-        \n dst[i] = sum[i]*255 > area[i]*threshold ? positive : negative,
-        \n where sum[i] is a sum of positive compare(src[i], value) operation (see ::SimdCompareType) in the point neighborhood (from -neighborhood to neighborhood for x and y),
-        \n area[i] - an area of the point neighborhood ( (2*neighborhood + 1)^2 for central part of the image).
+        \verbatim
+        sum = 0; area = 0;
+        for(dy = -neighborhood; dy <= neighborhood; ++dy) 
+        {
+            for(dx = -neighborhood; dx <= neighborhood; ++dx) 
+            {
+                if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height) 
+                {
+                    area++;
+                    if(compare(src[x + dx, x + dy], value))
+                        sum++;
+                }
+            }
+        }
+        dst[x, y] = sum*255 > area*threshold ? positive : negative;
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdAveragingBinarization.
 
@@ -917,8 +962,11 @@ namespace Simd
         \short Calculates number of points satisfying certain condition for 8-bit gray image. 
 
         For every point:
-        \n count += compare(src[i], value) ? 1 : 0,
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        \verbatim
+        if(compare(src[i], value))
+            count++;
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdConditionalCount8u.
 
@@ -941,8 +989,11 @@ namespace Simd
         \short Calculates number of points satisfying certain condition for 16-bit signed integer image. 
 
         For every point:
-        \n count += compare(src[i], value) ? 1 : 0,
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        \verbatim
+        if(compare(src[i], value))
+            count++;
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdConditionalCount16i.
 
@@ -967,8 +1018,11 @@ namespace Simd
         All images must have 8-bit gray format and must have the same width and height.
 
         For every point:
-        \n sum += compare(mask[i], value) ? src[i] : 0,
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        \verbatim
+        if(compare(mask[i], value))
+            sum += src[i];
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdConditionalSum.
 
@@ -994,8 +1048,11 @@ namespace Simd
         All images must have 8-bit gray format and must have the same width and height.
 
         For every point:
-        \n sum += compare(mask[i], value) ? src[i]*src[i] : 0,
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        \verbatim
+        if(compare(mask[i], value))
+            sum += src[i]*src[i];
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdConditionalSquareSum.
 
@@ -1020,12 +1077,16 @@ namespace Simd
 
         All images must have 8-bit gray format and must have the same width and height. The image height and width must be equal or greater 3.
 
-        For every point:
-        \n sum += compare(mask[x, y], value) ? dx[x, y]*dx[x, y] + dy[x, y]*dy[x, y] : 0, 
-        \n where for border pixels dx[x, y] = 0 and dy[x, y] = 0, for other pixels: 
-        \n dx[x, y] = src[x + 1, y] - src[x - 1, y], 
-        \n dy[x, y] = src[x, y + 1] - src[x, y - 1];
-        \n compare(a, b) depends from compareType (see ::SimdCompareType).
+        For every point except border:
+        \verbatim
+        if(compare(mask[x, y], value))
+        {
+            dx = src[x + 1, y] - src[x - 1, y]; 
+            dy = src[x, y + 1] - src[x, y - 1];
+            sum += dx*dx + dy*dy;
+        }
+        \endverbatim 
+        where compare(a, b) depends from compareType (see ::SimdCompareType).
 
         \note This function is a C++ wrapper for function ::SimdConditionalSquareGradientSum.
 
@@ -1116,7 +1177,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-        \n background[i] += value[i] > background[i] ? 1 : 0; 
+        \verbatim
+        background[i] += value[i] > background[i] ? 1 : 0; 
+        \endverbatim 
 
         This function is used for edge background updating in motion detection algorithm.
 
@@ -1141,7 +1204,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-        \n background[i] = value[i] > background[i] ? value[i] : background[i]; 
+        \verbatim
+        background[i] = value[i] > background[i] ? value[i] : background[i]; 
+        \endverbatim
 
         This function is used for edge background updating in motion detection algorithm.
 
@@ -1166,7 +1231,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         Updates background statistic counters for every point: 
-        \n backgroundCount[i] += (value[i] > backgroundValue[i] && backgroundCount[i] < 255) ? 1 : 0;
+        \verbatim
+        backgroundCount[i] += (value[i] > backgroundValue[i] && backgroundCount[i] < 255) ? 1 : 0;
+        \endverbatim
 
         This function is used for edge background updating in motion detection algorithm.
 
@@ -1192,10 +1259,12 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        Adjusts edge background range for every point: 
-        \n backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
-        \n backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
-        \n backgroundCount[i] = 0;
+        Adjusts edge background range for every point:
+        \verbatim
+        backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
+        backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
+        backgroundCount[i] = 0;
+        \endverbatim
 
         This function is used for edge background updating in motion detection algorithm.
 
@@ -1221,10 +1290,15 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        Adjusts edge background range for every point when mask[i] != 0: 
-        \n backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
-        \n backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
-        \n backgroundCount[i] = 0;
+        Adjusts edge background range for every point:
+        \verbatim
+        if(mask[i])
+        {
+            backgroundValue[i] += (backgroundCount[i] > threshold && backgroundValue[i] < 255) ? 1 : 0;
+            backgroundValue[i] -= (backgroundCount[i] < threshold && backgroundValue[i] > 0) ? 1 : 0; 
+            backgroundCount[i] = 0;
+        }
+        \endverbatim
 
         This function is used for edge background updating in motion detection algorithm.
 
@@ -1252,7 +1326,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray). 
 
         For every point: 
-        \n background[i] = value[i];
+        \verbatim
+        background[i] = value[i];
+        \endverbatim
 
         This function is used for fast edge background updating in motion detection algorithm.
 
@@ -1276,8 +1352,11 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        For every point when mask[i] != 0 : 
-        \n background[i] = value[i];
+        For every point:
+        \verbatim
+        if(mask[i]])
+            background[i] = value[i];
+        \endverbatim
 
         This function is used for fast edge background updating in motion detection algorithm.
 
@@ -1377,10 +1456,11 @@ namespace Simd
         \short Performs Gaussian blur filtration with window 3x3. 
 
         For every point:
-        \n dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] + 
-        \n 2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-        \n src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
-
+        \verbatim
+        dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] + 
+                    2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
+                    src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
+        \endverbatim
         All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
 
         \note This function is a C++ wrapper for function ::SimdGaussianBlur3x3.
@@ -1443,9 +1523,11 @@ namespace Simd
         \short Calculates histogram of second derivative for 8-bit gray image. 
 
         For all points except the boundary (defined by parameter indent): 
-        \n histogram[max(dx, dy)]++, where
-        \n dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y])),
-        \n dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step])).
+        \verbatim
+        dx = abs(src[x, y] - average(src[x+step, y], src[x-step, y]));
+        dy = abs(src[x, y] - average(src[x, y+step], src[x, y-step]));
+        histogram[max(dx, dy)]++;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdAbsSecondDerivativeHistogram.
 
@@ -1468,7 +1550,9 @@ namespace Simd
         \short Calculates histogram for 8-bit gray image. 
 
         For all points: 
-        \n histogram[src(i)]++.
+        \verbatim
+        histogram[src[i]]++.
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdHistogram.
 
@@ -1488,8 +1572,11 @@ namespace Simd
 
         \short Calculates histogram for 8-bit gray image with using mask. 
 
-        For every point where mask[i] == index: 
-        \n histogram[src(i)]++.
+        For every point:
+        \verbatim
+        if(mask[i] == index)
+            histogram[src[i]]++.
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdHistogramMasked.
 
@@ -1606,7 +1693,9 @@ namespace Simd
         \short Increments statistic of interference detector. 
 
         For every point: 
-        \n statistic[i] = min(statistic[i] + increment, saturation); 
+        \verbatim
+        statistic[i] = min(statistic[i] + increment, saturation); 
+        \endverbatim
 
         This function is used for interference detection in motion detection algorithm.
 
@@ -1629,8 +1718,11 @@ namespace Simd
 
         \short Increments statistic of interference detector with using segmentation mask. 
 
-        For every point when mask[i] == index: 
-        \n statistic[i] = min(statistic[i] + increment, saturation); 
+        For every point: 
+        \verbatim
+        if(mask[i] == index)
+            statistic[i] = min(statistic[i] + increment, saturation); 
+        \endverbatim
 
         All images must have the same width, height. 
         This function is used for interference detection in motion detection algorithm.
@@ -1657,7 +1749,9 @@ namespace Simd
         \short Decrements statistic of interference detector. 
 
         For every point: 
-        \n statistic[i] = max(statistic[i] - decrement, saturation); 
+        \verbatim
+        statistic[i] = max(statistic[i] - decrement, saturation); 
+        \endverbatim
 
         This function is used for interference detection in motion detection algorithm.
 
@@ -1680,8 +1774,11 @@ namespace Simd
 
         \short Decrements statistic of interference detector with using segmentation mask. 
 
-        For every point when mask[i] == index: 
-        \n statistic[i] = max(statistic[i] - decrement, saturation); 
+        For every point:
+        \verbatim
+        if(mask[i] == index)
+            statistic[i] = max(statistic[i] - decrement, saturation); 
+        \endverbatim
 
         All images must have the same width, height. 
         This function is used for interference detection in motion detection algorithm.
@@ -1851,8 +1948,10 @@ namespace Simd
 
         \short Calculates result 8-bit gray image as product of two vectors. 
 
-        For all points: 
-        \n dst[x, y] = horizontal[x]*vertical[y]/255.
+        For all points:
+        \verbatim
+        dst[x, y] = horizontal[x]*vertical[y]/255;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdVectorProduct.
 
@@ -1876,7 +1975,9 @@ namespace Simd
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
         For all points: 
-        \n dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4.
+        \verbatim
+        dst[x, y] = (src[2*x, 2*y] + src[2*x, 2*y + 1] + src[2*x + 1, 2*y] + src[2*x + 1, 2*y + 1] + 2)/4;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray2x2.
 
@@ -1899,9 +2000,11 @@ namespace Simd
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
         For every point:
-        \n dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] + 
-        \n 2*(src[2*x-1, 2*y] + 2*src[2*x, 2*y] + src[2*x+1, 2*y]) +
-        \n src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16; 
+        \verbatim
+        dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] + 
+                  2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
+                     src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray3x3.
 
@@ -1925,10 +2028,12 @@ namespace Simd
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
         For every point:
-        \n dst[x, y] = (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
-        \n 3*(src[2*x-1, 2*y] + 3*src[2*x, 2*y] + 3*src[2*x+1, 2*y] + src[2*x+2, 2*y]) +
-        \n 3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-        \n src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64; 
+        \verbatim
+        dst[x, y] =   (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
+                    3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
+                    3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
+                       src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray4x4.
 
@@ -1951,11 +2056,13 @@ namespace Simd
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
         For every point:
-        \n dst[x, y] = (src[2*x-2, 2*y-2] + 4*src[2*x-1, 2*y-2] + 6*src[2*x, 2*y-2] + 4*src[2*x+1, 2*y-2] + src[2*x+2, 2*y-2] +
-        \n 4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
-        \n 6*(src[2*x-2, 2*y] + 4*src[2*x-1, 2*y] + 6*src[2*x, 2*y] + 4*src[2*x+1, 2*y] + src[2*x+2, 2*y]) +
-        \n 4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-        \n src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + compensation ? 128 : 0) / 256; 
+        \verbatim
+        dst[x, y] = (src[2*x-2, 2*y-2] + 4*src[2*x-1, 2*y-2] + 6*src[2*x, 2*y-2] + 4*src[2*x+1, 2*y-2] + src[2*x+2, 2*y-2] +
+                  4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
+                  6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
+                  4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
+                     src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + compensation ? 128 : 0) / 256; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdReduceGray5x5.
 
@@ -2007,7 +2114,10 @@ namespace Simd
         Mask must has 8-bit gray pixel format. 
 
         For every point:
-        \n mask[i] = mask[i] == oldIndex ? newIndex : mask[i]. 
+        \verbatim
+        if(mask[i] == oldIndex)
+            mask[i] = newIndex;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSegmentationChangeIndex.
 
@@ -2126,7 +2236,9 @@ namespace Simd
         All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
 
         For every point: 
-        \n dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        \verbatim
+        dst[x, y] = (src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]).
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDx.
 
@@ -2149,7 +2261,9 @@ namespace Simd
         All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
 
         For every point: 
-        \n dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        \verbatim
+        dst[x, y] = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbs.
 
@@ -2172,7 +2286,9 @@ namespace Simd
         Input image must has 8-bit gray format. 
 
         For every point: 
-        \n sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
+        \verbatim
+        sum += abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDxAbsSum.
 
@@ -2195,7 +2311,9 @@ namespace Simd
         All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
 
         For every point: 
-        \n dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]).
+        \verbatim
+        dst[x, y] = (src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDy.
 
@@ -2218,7 +2336,9 @@ namespace Simd
         All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
 
         For every point: 
-        \n dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+        \verbatim
+        dst[x, y] = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbs.
 
@@ -2241,7 +2361,9 @@ namespace Simd
         Input image must has 8-bit gray format. 
 
         For every point: 
-        \n sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
+        \verbatim
+        sum += abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSobelDyAbsSum.
 
@@ -2265,9 +2387,11 @@ namespace Simd
         This function is used for contour extraction. 
 
         For every point: 
-        \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
-        \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
-        \n dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1).
+        \verbatim
+        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        dst[x, y] = (dx + dy)*2 + (dx >= dy ? 0 : 1);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetrics.
 
@@ -2291,9 +2415,11 @@ namespace Simd
         This function is used for contour extraction. 
 
         For every point: 
-        \n dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1])).
-        \n dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1])).
-        \n dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1).
+        \verbatim
+        dy = abs((src[x-1,y+1] + 2*src[x, y+1] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x, y-1] + src[x+1, y-1]));
+        dx = abs((src[x+1,y-1] + 2*src[x+1, y] + src[x+1, y+1]) - (src[x-1,y-1] + 2*src[x-1, y] + src[x-1, y+1]));
+        dst[x, y] = mask[x, y] < indexMin ? 0 : (dx + dy)*2 + (dx >= dy ? 0 : 1);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourMetricsMasked.
 
@@ -2320,11 +2446,13 @@ namespace Simd
         This function is used for contour extraction. 
 
         For every point (except border): 
-        \n a[x, y] = src[x, y] >> 1.
-        \n if(src[x, y] & 1)
-        \n dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
-        \n else
-        \n dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x, y + 1] >= threshold) && (a[x, y] - a[x, y - 1] >= threshold) ? 255 : 0;
+        \verbatim
+        a[x, y] = src[x, y] >> 1.
+        if(src[x, y] & 1)
+            dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x + 1, y] >= threshold) && (a[x, y] - a[x - 1, y] >= threshold) ? 255 : 0;
+        else
+            dst[x, y] = a[x, y] > 0 && (a[x, y] - a[x, y + 1] >= threshold) && (a[x, y] - a[x, y - 1] >= threshold) ? 255 : 0;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdContourAnchors.
 
@@ -2349,7 +2477,9 @@ namespace Simd
         All images must have the same width and height. 
 
         For every point: 
-        \n sum += (a[i] - b[i])*(a[i] - b[i]).
+        \verbatim
+        sum += (a[i] - b[i])*(a[i] - b[i]);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSum.
 
@@ -2372,8 +2502,11 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray). 
 
-        For every point where mask[i] == index: 
-        \n sum += (a[i] - b[i])*(a[i] - b[i]).
+        For every point:
+        \verbatim
+        if(mask[i] == index) 
+            sum += (a[i] - b[i])*(a[i] - b[i]);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdSquaredDifferenceSumMasked.
 
@@ -2420,13 +2553,18 @@ namespace Simd
 
         The image must has 8-bit gray format.
 
-        For every point where mask[X, Y] == index: 
-        \n area += 1.
-        \n x += X.
-        \n y += Y.
-        \n xx += X*X.
-        \n xy += X*Y.
-        \n yy += Y*Y.
+        For every point:
+        \verbatim
+        if(mask[X, Y] == index)
+        {
+            area += 1.
+            x += X.
+            y += Y.
+            xx += X*X.
+            xy += X*Y.
+            yy += Y*Y.         
+        }
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetMoments.
 
@@ -2453,8 +2591,10 @@ namespace Simd
         \short Calculate sums of rows for given 8-bit gray image. 
 
         For all rows: 
-        \n sums[y] += src[x, y]; 
-        \n where x changes from 0 to width.
+        \verbatim
+        for(x = 0; x < width; ++x)
+            sums[y] += src[x, y]; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetRowSums.
 
@@ -2475,8 +2615,10 @@ namespace Simd
         \short Calculate sums of columns for given 8-bit gray image. 
 
         For all columns: 
-        \n sums[x] += src[x, y]; 
-        \n where y changes from 0 to height.
+        \verbatim
+        for(y = 0; y < height; ++y)
+            sums[x] += src[x, y]; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetColSums.
 
@@ -2496,10 +2638,15 @@ namespace Simd
 
         \short Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. 
 
-        For all rows except the last: 
-        \n sums[y] += abs::(src[x, y+1] - src[x, y]); 
-        \n where x changes from 0 to width.
-        \n For the last row sums[height-1] = 0; 
+        For all rows except the last:
+        \verbatim
+        for(x = 0; x < width; ++x)
+            sums[y] += abs(src[x, y+1] - src[x, y]); 
+        \endverbatim
+        For the last row: 
+        \verbatim
+        sums[height-1] = 0; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDyRowSums.
 
@@ -2519,10 +2666,15 @@ namespace Simd
 
         \short Calculate sums of absolute derivate along x axis for columns for given 8-bit gray image. 
 
-        For all columns except the last: 
-        \n sums[x] += abs::(src[x+1, y] - src[x, y]); 
-        \n where y changes from 0 to height.
-        \n For the last column sums[width-1] = 0; 
+        For all columns except the last:
+        \verbatim
+        for(y = 0; y < height; ++y)
+            sums[y] += abs(src[x+1, y] - src[x, y]); 
+        \endverbatim
+        For the last column: 
+        \verbatim
+        sums[width-1] = 0; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdGetAbsDxColSums.
 
@@ -2579,7 +2731,9 @@ namespace Simd
         \short Gets sum of pixel correlation for two gray 8-bit images. 
 
         For all points: 
-        \n sum += a[i]*b[i]; 
+        \verbatim
+        sum += a[i]*b[i]; 
+        \endverbatim
         
         All images must have the same width and height and 8-bit gray pixel format. 
 
@@ -2623,9 +2777,16 @@ namespace Simd
 
         All images must have the same width, height and format (8-bit gray).
 
-        For border pixels dx[x, y] = 0 and dy[x, y] = 0, for other pixels: 
-        \n dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost, 
-        \n dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost.
+        For border pixels:
+        \verbatim
+        dx[x, y] = 0;
+        dy[x, y] = 0;  
+        \endverbatim
+        For other pixels:
+        \verbatim
+        dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost; 
+        dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedSaturatedGradient.
 
@@ -2651,8 +2812,11 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel: 
-        \n dst[x, y] = max(lo, min(hi, src[i]))*boost, 
-        \n where lo = 128 - (128/boost), hi = 255 - lo. 
+        \verbatim
+        lo = 128 - (128/boost);
+        hi = 255 - lo; 
+        dst[x, y] = max(lo, min(hi, src[i]))*boost; 
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTextureBoostedUv.
 
@@ -2676,7 +2840,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel: 
-        \n sum += current - average(lo[i], hi[i]);
+        \verbatim
+        sum += current - average(lo[i], hi[i]);
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTextureGetDifferenceSum.
 
@@ -2701,7 +2867,9 @@ namespace Simd
         All images must have the same width, height and format (8-bit gray).
 
         For every pixel: 
-        \n dst[i] = max(0, min(255, src[i] + shift));
+        \verbatim
+        dst[i] = max(0, min(255, src[i] + shift));
+        \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdTexturePerformCompensation.
 
