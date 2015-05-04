@@ -49,15 +49,41 @@
     The <b>%Simd Library</b> is a free open source image processing library, designed for C and C++ programmers.
     It provides many useful high performance algorithms for image processing such as: pixel format conversion, image scaling and filtration, 
     extraction of statistic information from images, motion detection.
-    The algorithms are optimized with using of different SIMD CPU extensions. 
-    In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC. 
-    The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
+    
+    \n\n The algorithms are optimized with using of different SIMD CPU extensions. 
+    In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC.
+
+    \n\n The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
     The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS and G++ compilers, MSVS project and CMake build systems.
 
-    \section s1 Library structure
+    \section s1 Library folder's structure
 
-    The source of %Simd Library is placed in the \c simd/src/Simd/ directory, its test framework is placed in the \c simd/src/Test/ directory.
+    The %Simd Library has next folder's structure:
+     - \c simd/src/Simd/ - contains source codes of the library.
+     - \c simd/src/Test/ - contains test framework of the library.
+     - \c simd/prj/vs11/ - contains project files of Microsoft Visual Studio 2012.
+     - \c simd/prj/cmd/ - contains additional scripts needed for building of the library in Windows.
+     - \c simd/prj/cmake/ - contains files of CMake build systems.
+     - \c simd/prj/sh/ - contains additional scripts needed for building of the library in Linux.
+     - \c simd/prj/txt/ - contains text files needed for building of the library.
+     - \c simd/doc/ - contains documentation of the library.
+     - \c simd/doc/src/ - contains scripts for generation of this documentation by <a href="http://www.doxygen.org">doxygen</a>.
 
+     \section s2 The library using
+
+     If you use the library from C code you must include:
+     \code
+     #include "Simd/Simd.h"
+     \endcode
+
+     And to use the library from C++ code you must include:
+     \code
+     #include "Simd/Simd.hpp"
+     \endcode
+
+     \section s3 Test Framework
+
+     The test suite is needed for testing of correctness of work of the library and also for performance testing of the library.
 */
 /*@}*/
 
