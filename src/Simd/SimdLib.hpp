@@ -1449,7 +1449,7 @@ namespace Simd
         SimdFillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
     }
 
-    /*! @ingroup gray_conversion
+    /*! @ingroup other_filter
 
         \fn void GaussianBlur3x3(const View<A>& src, View<A>& dst)
 
