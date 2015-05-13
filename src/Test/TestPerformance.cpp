@@ -188,228 +188,236 @@ namespace Test
         return description[description.size() - 2] == 'a';
     }
 
-    static double Relation(const PerformanceMeasurer & a, const PerformanceMeasurer & b)
+    template <class Measurer> double Relation(const Measurer & a, const Measurer & b)
     {
         return b.Average() > 0 ? a.Average()/b.Average() : 0;
     }
 
+    class TotalPerformanceMeasurer
+    {
+        int _count;
+        double _value;
+
+    public:
+        TotalPerformanceMeasurer()
+            : _count(0)
+            , _value(0)
+        {
+        }
+
+        void Add(const PerformanceMeasurer & pm)
+        {
+            if(pm.Average() > 0)
+            {
+                _count++;
+                _value += ::log(pm.Average());
+            }
+        }
+
+        double Average() const
+        {
+            return _count > 0 ? ::exp(_value/_count) : 0;
+        }
+    };
+
+    struct Name
+    {
+        const char * full;
+        const char * brief;
+    };
+
+    template <class T> struct Statistic
+    {
+        T simd;
+        T base;
+        T sse2;
+        T ssse3;
+        T sse41;
+        T sse42;
+        T avx2;
+        T vmx;
+        T vsx;
+    };
+    typedef std::pair<PerformanceMeasurer, PerformanceMeasurer> Function;
+    typedef Statistic<Function> FunctionStatistic; 
+    typedef std::map<std::string, FunctionStatistic> FunctionStatisticMap; 
+    typedef std::pair<TotalPerformanceMeasurer, TotalPerformanceMeasurer> Total;
+    typedef Statistic<Total> TotalStatistic;
+    typedef Statistic<bool> StatisticEnable;
+    typedef Statistic<Name> StatisticNames;
+
+    template<class Printer> 
+    static std::string Print(const std::string & name, const Printer & printer, const StatisticEnable & enable, bool align)
+    {
+        std::stringstream ss;
+
+        ss << name << " | ";
+
+        ss << printer.Average(printer.data.simd) << " ";
+        ss << printer.Average(printer.data.base) << " ";
+        if(enable.sse2) ss << printer.Average(printer.data.sse2) << " ";
+        if(enable.ssse3) ss << printer.Average(printer.data.ssse3) << " ";
+        if(enable.sse41) ss << printer.Average(printer.data.sse41) << " ";
+        if(enable.sse42) ss << printer.Average(printer.data.sse42) << " ";
+        if(enable.avx2) ss << printer.Average(printer.data.avx2) << " ";
+        if(enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
+        if(enable.vsx) ss << printer.Average(printer.data.vsx) << " ";
+        ss << "| ";
+
+        if(enable.sse2 || enable.ssse3 || enable.sse41 || enable.sse42 || enable.avx2 || enable.vmx || enable.vsx)
+        {
+            if(enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2) << " ";
+            if(enable.ssse3) ss << printer.Relation(printer.data.base, printer.data.ssse3) << " ";
+            if(enable.sse41) ss << printer.Relation(printer.data.base, printer.data.sse41) << " ";
+            if(enable.sse42) ss << printer.Relation(printer.data.base, printer.data.sse42) << " ";
+            if(enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2) << " ";
+            if(enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
+            if(enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx) << " ";
+            ss << "| ";
+        }
+
+        if(enable.sse2 && (enable.ssse3 || enable.sse41))
+        {
+            if(enable.ssse3) ss << printer.Relation(printer.data.sse2, printer.data.ssse3) << " ";
+            if(enable.sse41) ss << printer.Relation(printer.data.sse2, printer.data.sse41) << " ";
+            ss << "| ";
+        }
+
+        if((enable.sse2 || enable.ssse3 || enable.sse41) && enable.avx2)
+        {
+            if(enable.sse2) ss << printer.Relation(printer.data.sse2, printer.data.avx2) << " ";
+            if(enable.ssse3) ss << printer.Relation(printer.data.ssse3, printer.data.avx2) << " ";
+            if(enable.sse41) ss << printer.Relation(printer.data.sse41, printer.data.avx2) << " ";
+            ss << "| ";
+        }
+
+        if(align)
+        {
+            ss << printer.Alignment(printer.data.base) << " ";
+            if(enable.sse2) ss << printer.Alignment(printer.data.sse2) << " ";
+            if(enable.ssse3) ss << printer.Alignment(printer.data.ssse3) << " ";
+            if(enable.sse41) ss << printer.Alignment(printer.data.sse41) << " ";
+            if(enable.avx2) ss << printer.Alignment(printer.data.avx2) << " ";
+            if(enable.vmx) ss << printer.Alignment(printer.data.vmx) << " ";
+            if(enable.vsx) ss << printer.Alignment(printer.data.vsx) << " ";
+            ss << "| ";
+        }
+
+        return ss.str();
+    }
+
+    struct HeaderPrinter 
+    {
+        const StatisticNames & data;
+        size_t average, relation, fraction;
+
+        HeaderPrinter(const StatisticNames & d, size_t a, size_t r, size_t f) 
+            : data(d), average(a), relation(r), fraction(f) {}
+
+        std::string Average(const Name & a) const
+        {
+            return ExpandToLeft(std::string(a.full), average + fraction + 1);
+        }
+
+        std::string Relation(const Name & a, const Name & b) const
+        {
+            return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction + 1);
+        }
+
+        std::string Alignment(const Name & a) const
+        {
+            return ExpandToLeft(std::string(a.brief) + ":U/A", relation + fraction + 1);
+        }
+    };
+
+    template<class Value> struct ValuePrinter 
+    {
+        const Statistic<Value> & data;
+        size_t average, relation, fraction;
+
+        ValuePrinter(const Statistic<Value> & d, size_t a, size_t r, size_t f) 
+            : data(d), average(a), relation(r), fraction(f) {}
+
+        std::string Average(const Value & a) const
+        {
+            return ToString(a.first.Average()*1000.0, average, fraction);
+        }
+
+        std::string Relation(const Value & a, const Value & b) const
+        {
+            return ToString(Test::Relation(a.first, b.first), relation, fraction);
+        }
+
+        std::string Alignment(const Value & a) const
+        {
+            return ToString(Test::Relation(a.second, a.first), relation, fraction);
+        }
+    };
+
+#define TEST_ADD_FUNC(name) \
+    { \
+        if(Aligned(desc)) \
+        { \
+            func.name.first = *it->second; \
+            total.name.first.Add(*it->second); \
+        } \
+        else \
+        { \
+            func.name.second = *it->second; \
+            total.name.second.Add(*it->second); \
+        } \
+        enable.name = true; \
+    }
+
     std::string PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
     {
-        struct Statistic
-        {
-            std::pair<Pm, Pm> simd;
-            std::pair<Pm, Pm> base;
-            Pm sse42;
-            std::pair<Pm, Pm> sse2;
-            std::pair<Pm, Pm> ssse3;
-            std::pair<Pm, Pm> sse41;
-            std::pair<Pm, Pm> avx2;
-            std::pair<Pm, Pm> vmx;
-            std::pair<Pm, Pm> vsx;
-        };
-        typedef std::map<std::string, Statistic> StatisticMap;
-
-        StatisticMap statistic;
+        FunctionStatisticMap functions;
+        TotalStatistic total;
+        StatisticEnable enable = {false, false, false, false, false, false, false, false, false};
+        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sss41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}};
         double timeMax = 0;
         size_t sizeMax = 8;
-        bool sse2 = false, ssse3 = false, sse41 = false, sse42 = false, avx2 = false, vmx = false, vsx = false;
         for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
             const std::string & desc = it->second->Description();
             std::string name = FunctionShortName(desc);
-            Statistic & s = statistic[name];
+            FunctionStatistic & func = functions[name];
             if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
-            {
-                if(Aligned(desc))
-                    s.simd.first = *it->second;
-                else
-                    s.simd.second = *it->second;
-            }
+                TEST_ADD_FUNC(simd);
             if(desc.find("Simd::Base::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.base.first = *it->second;
-                else
-                    s.base.second = *it->second;
-            }
+                TEST_ADD_FUNC(base);
             if(desc.find("Simd::Sse2::") != std::string::npos || desc.find("Simd::Sse::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.sse2.first = *it->second;
-                else
-                    s.sse2.second = *it->second;
-                sse2 = true;
-            }
+                TEST_ADD_FUNC(sse2);
             if(desc.find("Simd::Ssse3::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.ssse3.first = *it->second;
-                else
-                    s.ssse3.second = *it->second;
-                ssse3 = true;
-            }
+                TEST_ADD_FUNC(ssse3);
             if(desc.find("Simd::Sse41::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.sse41.first = *it->second;
-                else
-                    s.sse41.second = *it->second;
-                sse41 = true;
-            }
+                TEST_ADD_FUNC(sse41);
             if(desc.find("Simd::Sse42::") != std::string::npos)
-            {
-                s.sse42 = *it->second;
-                sse42 = true && sse42_;
-            }
+                TEST_ADD_FUNC(sse42);
             if(desc.find("Simd::Avx2::") != std::string::npos || desc.find("Simd::Avx::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.avx2.first = *it->second;
-                else
-                    s.avx2.second = *it->second;
-                avx2 = true;
-            }
+                TEST_ADD_FUNC(avx2);
             if(desc.find("Simd::Vmx::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.vmx.first = *it->second;
-                else
-                    s.vmx.second = *it->second;
-                vmx = true;
-            }
+                TEST_ADD_FUNC(vmx);
             if(desc.find("Simd::Vsx::") != std::string::npos)
-            {
-                if(Aligned(desc))
-                    s.vsx.first = *it->second;
-                else
-                    s.vsx.second = *it->second;
-                vsx = true;
-            }
+                TEST_ADD_FUNC(vsx);
 
             timeMax = std::max(timeMax, it->second->Average());
             sizeMax = std::max(name.size(), sizeMax);
         }
 
-        const size_t ic = 1 + (size_t)::log10(std::max(timeMax*1000, 1.0));
-        const size_t ir = 3;
-        const size_t fc = 3;
+        const size_t average = 1 + (size_t)::log10(std::max(timeMax*1000, 1.0));
+        const size_t relative = 3;
+        const size_t fraction = 3;
+
+        std::string header = Print(ExpandToRight("Function", sizeMax), HeaderPrinter(names, average, relative, fraction), enable, align);
 
         std::vector<std::string> statistics;
-        for(StatisticMap::const_iterator it = statistic.begin(); it != statistic.end(); ++it)
-        {
-            const Statistic & s = it->second;
-            std::stringstream ss;
-            ss << ExpandToRight(it->first, sizeMax) << " | ";
-
-            ss << ToString(s.simd.first.Average()*1000.0, ic, fc) << " ";
-            ss << ToString(s.base.first.Average()*1000.0, ic, fc) << " ";
-            if(sse2) ss << ToString(s.sse2.first.Average()*1000.0, ic, fc) << " ";
-            if(ssse3) ss << ToString(s.ssse3.first.Average()*1000.0, ic, fc) << " ";
-            if(sse41) ss << ToString(s.sse41.first.Average()*1000.0, ic, fc) << " ";
-            if(sse42) ss << ToString(s.sse42.Average()*1000.0, ic, fc) << " ";
-            if(avx2) ss << ToString(s.avx2.first.Average()*1000.0, ic, fc) << " ";
-            if(vmx) ss << ToString(s.vmx.first.Average()*1000.0, ic, fc) << " ";
-            if(vsx) ss << ToString(s.vsx.first.Average()*1000.0, ic, fc) << " ";
-            ss << "| ";
-
-            if(sse2 || ssse3 || sse41 || sse42 || avx2 || vmx || vsx)
-            {
-                if(sse2) ss << ToString(Relation(s.base.first, s.sse2.first), ir, fc) << " ";
-                if(ssse3) ss << ToString(Relation(s.base.first, s.ssse3.first), ir, fc) << " ";
-                if(sse41) ss << ToString(Relation(s.base.first, s.sse41.first), ir, fc) << " ";
-                if(sse42) ss << ToString(Relation(s.base.first, s.sse42), ir, fc) << " ";
-                if(avx2) ss << ToString(Relation(s.base.first, s.avx2.first), ir, fc) << " ";
-                if(vmx) ss << ToString(Relation(s.base.first, s.vmx.first), ir, fc) << " ";
-                if(vsx) ss << ToString(Relation(s.base.first, s.vsx.first), ir, fc) << " ";
-                ss << "| ";
-            }
-
-            if(sse2 && (ssse3 || sse41))
-            {
-                if(ssse3) ss << ToString(Relation(s.sse2.first, s.ssse3.first), ir, fc) << " ";
-                if(sse41) ss << ToString(Relation(s.sse2.first, s.sse41.first), ir, fc) << " ";
-                ss << "| ";
-            }
-
-            if((sse2 || ssse3 || sse41) && avx2)
-            {
-                if(sse2) ss << ToString(Relation(s.sse2.first, s.avx2.first), ir, fc) << " ";
-                if(ssse3) ss << ToString(Relation(s.ssse3.first, s.avx2.first), ir, fc) << " ";
-                if(sse41) ss << ToString(Relation(s.sse41.first, s.avx2.first), ir, fc) << " ";
-                ss << "| ";
-            }
-
-            if(align)
-            {
-                ss << ToString(Relation(s.base.second, s.base.first), ir, fc) << " ";
-                if(sse2) ss << ToString(Relation(s.sse2.second, s.sse2.first), ir, fc) << " ";
-                if(ssse3) ss << ToString(Relation(s.ssse3.second, s.ssse3.first), ir, fc) << " ";
-                if(sse41) ss << ToString(Relation(s.sse41.second, s.sse41.first), ir, fc) << " ";
-                if(avx2) ss << ToString(Relation(s.avx2.second, s.avx2.first), ir, fc) << " ";
-                if(vmx) ss << ToString(Relation(s.vmx.second, s.vmx.first), ir, fc) << " ";
-                if(vsx) ss << ToString(Relation(s.vsx.second, s.vsx.first), ir, fc) << " ";
-                ss << "| ";
-            }
-            statistics.push_back(ss.str());
-        }
-
+        for(FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
+            statistics.push_back(Print(ExpandToRight(it->first, sizeMax), ValuePrinter<Function>(it->second, average, relative, fraction), enable, align));
         std::sort(statistics.begin(), statistics.end());
 
-        std::stringstream header;
-        header << ExpandToRight("Function", sizeMax) << " | ";
-
-        header << ExpandToLeft("Simd", ic + fc + 1) << " ";
-        header << ExpandToLeft("Base", ic + fc + 1) << " ";
-        if(sse2) header << ExpandToLeft("Sse2", ic + fc + 1) << " ";
-        if(ssse3) header << ExpandToLeft("Ssse3", ic + fc + 1) << " ";
-        if(sse41) header << ExpandToLeft("Sse41", ic + fc + 1) << " ";
-        if(sse42) header << ExpandToLeft("Sse42", ic + fc + 1) << " ";
-        if(avx2) header << ExpandToLeft("Avx2", ic + fc + 1) << " ";
-        if(vmx) header << ExpandToLeft("Vmx", ic + fc + 1) << " ";
-        if(vsx) header << ExpandToLeft("Vsx", ic + fc + 1) << " ";
-        header << "| ";
-
-        if(sse2 || ssse3 || sse41 || sse42 || avx2 || vmx || vsx)
-        {
-            if(sse2) header << ExpandToLeft("B/S2", ir + fc + 1) << " ";
-            if(ssse3) header << ExpandToLeft("B/S3", ir + fc + 1) << " ";
-            if(sse41) header << ExpandToLeft("B/S41", ir + fc + 1) << " ";
-            if(sse42) header << ExpandToLeft("B/S42", ir + fc + 1) << " ";
-            if(avx2) header << ExpandToLeft("B/A2", ir + fc + 1) << " ";
-            if(vmx) header << ExpandToLeft("B/Vm", ir + fc + 1) << " ";
-            if(vsx) header << ExpandToLeft("B/Vs", ir + fc + 1) << " ";
-            header << "| ";
-        }
-
-        if(sse2 && (ssse3 || sse41))
-        {
-            if(ssse3) header << ExpandToLeft("S2/S3", ir + fc + 1) << " ";
-            if(sse41) header << ExpandToLeft("S2/S41", ir + fc + 1) << " ";
-            header << "| ";
-        }
-
-        if((sse2 || ssse3 || sse41) && avx2)
-        {
-            if(sse2) header << ExpandToLeft("S2/A2", ir + fc + 1) << " ";
-            if(ssse3) header << ExpandToLeft("S3/A2", ir + fc + 1) << " ";
-            if(sse41) header << ExpandToLeft("S41/A2", ir + fc + 1) << " ";
-            header << "| ";
-        }
-
-        if(align)
-        {
-            header << ExpandToLeft("B:U/A", ir + fc + 1) << " ";
-            if(sse2) header << ExpandToLeft("S2:U/A", ir + fc + 1) << " ";
-            if(ssse3) header << ExpandToLeft("S3:U/A", ir + fc + 1) << " ";
-            if(sse41) header << ExpandToLeft("S41:U/A", ir + fc + 1) << " ";
-            if(avx2) header << ExpandToLeft("A2:U/A", ir + fc + 1) << " ";
-            if(vmx) header << ExpandToLeft("Vm:U/A", ir + fc + 1) << " ";
-            if(vsx) header << ExpandToLeft("Vs:U/A", ir + fc + 1) << " ";
-            header << "| ";
-        }
-
         std::stringstream separator;
-        for(size_t i = 0; i < header.str().size(); ++i)
+        for(size_t i = 0; i < header.size(); ++i)
             separator << "-";
 
         std::stringstream report;
@@ -423,7 +431,9 @@ namespace Test
 
         report << std::endl << "Performance report:" << std::endl << std::endl;
         report << separator.str() << std::endl;
-        report << header.str() << std::endl;
+        report << header << std::endl;
+        report << separator.str() << std::endl;
+        report << Print(ExpandToRight("Total", sizeMax), ValuePrinter<Total>(total, average, relative, fraction), enable, align) << std::endl;
         report << separator.str() << std::endl;
         for(size_t i = 0; i < statistics.size(); ++i)
             report << statistics[i] << std::endl;

@@ -58,7 +58,7 @@ namespace Test
     {
         bool result = true;
 
-        std::vector<unsigned char> src(W*H - 1);
+        std::vector<unsigned char> src(size);
         TEST_ALIGN(size);
 
         std::cout << "Test " << f1.description << " & " << f2.description << " for size = " << size << "." << std::endl;
