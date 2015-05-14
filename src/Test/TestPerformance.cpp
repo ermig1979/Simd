@@ -183,23 +183,18 @@ namespace Test
         }
     }
 
-    static bool Aligned(const std::string & description)
-    {
-        return description[description.size() - 2] == 'a';
-    }
-
     template <class Measurer> double Relation(const Measurer & a, const Measurer & b)
     {
         return b.Average() > 0 ? a.Average()/b.Average() : 0;
     }
 
-    class TotalPerformanceMeasurer
+    class CommonPerformance
     {
         int _count;
         double _value;
 
     public:
-        TotalPerformanceMeasurer()
+        CommonPerformance()
             : _count(0)
             , _value(0)
         {
@@ -241,8 +236,8 @@ namespace Test
     typedef std::pair<PerformanceMeasurer, PerformanceMeasurer> Function;
     typedef Statistic<Function> FunctionStatistic; 
     typedef std::map<std::string, FunctionStatistic> FunctionStatisticMap; 
-    typedef std::pair<TotalPerformanceMeasurer, TotalPerformanceMeasurer> Total;
-    typedef Statistic<Total> TotalStatistic;
+    typedef std::pair<CommonPerformance, CommonPerformance> Common;
+    typedef Statistic<Common> CommonStatistic;
     typedef Statistic<bool> StatisticEnable;
     typedef Statistic<Name> StatisticNames;
 
@@ -293,6 +288,7 @@ namespace Test
 
         if(align)
         {
+            ss << printer.Alignment(printer.data.simd) << " ";
             ss << printer.Alignment(printer.data.base) << " ";
             if(enable.sse2) ss << printer.Alignment(printer.data.sse2) << " ";
             if(enable.ssse3) ss << printer.Alignment(printer.data.ssse3) << " ";
@@ -354,56 +350,81 @@ namespace Test
         }
     };
 
-#define TEST_ADD_FUNC(name) \
-    { \
-        if(Aligned(desc)) \
-        { \
-            func.name.first = *it->second; \
-            total.name.first.Add(*it->second); \
-        } \
-        else \
-        { \
-            func.name.second = *it->second; \
-            total.name.second.Add(*it->second); \
-        } \
-        enable.name = true; \
+    static inline bool AddToFunction(const PerformanceMeasurer & src, Function & dst)
+    {
+        const std::string & desc = src.Description();
+        bool align = desc[desc.size() - 2] == 'a';
+        (align ? dst.first : dst.second) = src; 
+        return true;
+    }
+
+    static inline void AddToFunction(const PerformanceMeasurer & src, FunctionStatistic & dst, StatisticEnable & enable)
+    {
+        const std::string & desc = src.Description();
+        if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
+            enable.simd = AddToFunction(src, dst.simd);
+        if(desc.find("Simd::Base::") != std::string::npos)
+            enable.base = AddToFunction(src, dst.base);
+        if(desc.find("Simd::Sse2::") != std::string::npos || desc.find("Simd::Sse::") != std::string::npos)
+            enable.sse2 = AddToFunction(src, dst.sse2);
+        if(desc.find("Simd::Ssse3::") != std::string::npos)
+            enable.ssse3 = AddToFunction(src, dst.ssse3);
+        if(desc.find("Simd::Sse41::") != std::string::npos)
+            enable.sse41 = AddToFunction(src, dst.sse41);
+        if(desc.find("Simd::Sse42::") != std::string::npos)
+            enable.sse42 = AddToFunction(src, dst.sse42);
+        if(desc.find("Simd::Avx2::") != std::string::npos || desc.find("Simd::Avx::") != std::string::npos)
+            enable.avx2 = AddToFunction(src, dst.avx2);
+        if(desc.find("Simd::Vmx::") != std::string::npos)
+            enable.vmx = AddToFunction(src, dst.vmx);
+        if(desc.find("Simd::Vsx::") != std::string::npos)
+            enable.vsx = AddToFunction(src, dst.vsx);
+    }
+
+    static inline const Function & Cond(const Function & a, const Function & b)
+    {
+        return a.first.Average() > 0 ? a : b;
+    }
+
+    static inline void Add(const Function & src, Common & dst)
+    {
+        dst.first.Add(src.first);
+        dst.second.Add(src.second);
+    }
+
+    static void AddToCommon(const FunctionStatistic & s, const StatisticEnable & enable, CommonStatistic & d)
+    {
+        Add(s.simd, d.simd);
+        Add(s.base, d.base);
+        if(enable.sse2) Add(Cond(s.sse2, s.base), d.sse2);
+        if(enable.ssse3) Add(Cond(s.ssse3, Cond(s.sse2, s.base)), d.ssse3);
+        if(enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))), d.sse41);
+        if(enable.sse42) Add(Cond(s.sse42, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))), d.sse42);
+        if(enable.avx2) Add(Cond(s.avx2, Cond(s.sse42, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))))), d.avx2);
+        if(enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
+        if(enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
     }
 
     std::string PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
     {
         FunctionStatisticMap functions;
-        TotalStatistic total;
+        CommonStatistic common;
         StatisticEnable enable = {false, false, false, false, false, false, false, false, false};
         StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sss41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}};
         double timeMax = 0;
         size_t sizeMax = 8;
         for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
         {
-            const std::string & desc = it->second->Description();
-            std::string name = FunctionShortName(desc);
-            FunctionStatistic & func = functions[name];
-            if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
-                TEST_ADD_FUNC(simd);
-            if(desc.find("Simd::Base::") != std::string::npos)
-                TEST_ADD_FUNC(base);
-            if(desc.find("Simd::Sse2::") != std::string::npos || desc.find("Simd::Sse::") != std::string::npos)
-                TEST_ADD_FUNC(sse2);
-            if(desc.find("Simd::Ssse3::") != std::string::npos)
-                TEST_ADD_FUNC(ssse3);
-            if(desc.find("Simd::Sse41::") != std::string::npos)
-                TEST_ADD_FUNC(sse41);
-            if(desc.find("Simd::Sse42::") != std::string::npos)
-                TEST_ADD_FUNC(sse42);
-            if(desc.find("Simd::Avx2::") != std::string::npos || desc.find("Simd::Avx::") != std::string::npos)
-                TEST_ADD_FUNC(avx2);
-            if(desc.find("Simd::Vmx::") != std::string::npos)
-                TEST_ADD_FUNC(vmx);
-            if(desc.find("Simd::Vsx::") != std::string::npos)
-                TEST_ADD_FUNC(vsx);
-
-            timeMax = std::max(timeMax, it->second->Average());
+            const PerformanceMeasurer & pm = *it->second;
+            std::string name = FunctionShortName(pm.Description());
+            AddToFunction(pm, functions[name], enable);
+            timeMax = std::max(timeMax, pm.Average());
             sizeMax = std::max(name.size(), sizeMax);
         }
+        enable.sse42 = enable.sse42 && sse42_;
+
+        for(FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
+            AddToCommon(it->second, enable, common);
 
         const size_t average = 1 + (size_t)::log10(std::max(timeMax*1000, 1.0));
         const size_t relative = 3;
@@ -433,7 +454,7 @@ namespace Test
         report << separator.str() << std::endl;
         report << header << std::endl;
         report << separator.str() << std::endl;
-        report << Print(ExpandToRight("Total", sizeMax), ValuePrinter<Total>(total, average, relative, fraction), enable, align) << std::endl;
+        report << Print(ExpandToRight("Common", sizeMax), ValuePrinter<Common>(common, average, relative, fraction), enable, align) << std::endl;
         report << separator.str() << std::endl;
         for(size_t i = 0; i < statistics.size(); ++i)
             report << statistics[i] << std::endl;
