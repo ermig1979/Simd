@@ -147,17 +147,23 @@ namespace Test
     {
     }
 
+    PerformanceMeasurerStorage::Thread & PerformanceMeasurerStorage::ThisThread()
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        return _map[std::this_thread::get_id()];
+    }
+
     PerformanceMeasurer* PerformanceMeasurerStorage::Get(std::string name)
     {
-        name = name + (_align ? "{a}" : "{u}");
-
-        PerformanceMeasurer *pm = NULL;
-        Map::iterator it = _map.find(name);
-        if(it == _map.end())
+        Thread & thread = ThisThread();
+        name = name + (thread.align ? "{a}" : "{u}");
+        PerformanceMeasurer * pm = NULL;
+        FunctionMap::iterator it = thread.map.find(name);
+        if(it == thread.map.end())
         {
             pm = new PerformanceMeasurer(name);
-            _map[name].reset(pm);
-       }
+            thread.map[name].reset(pm);
+        }
         else
             pm = it->second.get();
         return pm;
@@ -165,8 +171,9 @@ namespace Test
 
     size_t PerformanceMeasurerStorage::Align(size_t size)
     {
-        s_storage._align = size%SIMD_ALIGN == 0;
-        return s_storage._align ? SIMD_ALIGN : sizeof(void*);
+        Thread & thread = ThisThread();
+        thread.align = size%SIMD_ALIGN == 0;
+        return thread.align ? SIMD_ALIGN : sizeof(void*);
     }
 
     static std::string FunctionShortName(const std::string & description)
@@ -407,13 +414,27 @@ namespace Test
 
     std::string PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
     {
+        FunctionMap map;
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            for (ThreadMap::const_iterator thread = _map.begin(); thread != _map.end(); ++thread)
+            {
+                for (FunctionMap::const_iterator function = thread->second.map.begin(); function != thread->second.map.end(); ++function)
+                {
+                    if(map.find(function->first) == map.end())
+                        map[function->first].reset(new PerformanceMeasurer(function->first));
+                    map[function->first]->Combine(*function->second);
+                }
+            }
+        }
+
         FunctionStatisticMap functions;
         CommonStatistic common;
         StatisticEnable enable = {false, false, false, false, false, false, false, false, false};
-        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sss41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}};
+        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}};
         double timeMax = 0;
         size_t sizeMax = 8;
-        for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
+        for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
             const PerformanceMeasurer & pm = *it->second;
             std::string name = FunctionShortName(pm.Description());
@@ -445,12 +466,12 @@ namespace Test
 
         if(raw)
         {
-            report << std::endl << "Raw performance report:" << std::endl << std::endl;
-            for(Map::const_iterator it = _map.begin(); it != _map.end(); ++it)
+            report << std::endl << std::endl << "Raw performance report:" << std::endl << std::endl;
+            for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
                 report << it->second->Statistic() << std::endl;
         }
 
-        report << std::endl << "Performance report:" << std::endl << std::endl;
+        report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
         report << separator.str() << std::endl;
         report << header << std::endl;
         report << separator.str() << std::endl;

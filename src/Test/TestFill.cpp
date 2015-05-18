@@ -53,8 +53,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t value = Random(256);
 
@@ -127,8 +126,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t value = Random(256);
         Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
@@ -202,8 +200,7 @@ namespace Test
 	{
 		bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t blue = Random(256);
         uint8_t green = Random(256);
@@ -283,8 +280,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t blue = Random(256);
         uint8_t green = Random(256);
@@ -346,7 +342,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
@@ -396,7 +392,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
 
@@ -452,7 +448,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View bgr1(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
         View bgr2(width, height, View::Bgr24, NULL, TEST_ALIGN(width));
@@ -496,7 +492,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));

@@ -53,8 +53,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t value = Random(256);
 
@@ -130,8 +129,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description
-            << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
@@ -190,7 +188,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View s(width, height, format, NULL, TEST_ALIGN(width));
 
@@ -246,7 +244,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View s(width, height, format, NULL, TEST_ALIGN(width));
 

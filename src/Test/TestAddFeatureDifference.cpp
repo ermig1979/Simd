@@ -56,7 +56,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << weight/256 << "*256)." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << weight/256 << "*256).");
 
 		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(value);
@@ -126,7 +126,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));

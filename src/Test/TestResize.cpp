@@ -61,8 +61,8 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description
-			<< " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description
+			<< " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "].");
 
 		View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
 		FillRandom(s);
@@ -130,7 +130,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
 
         const double k = 0.7;

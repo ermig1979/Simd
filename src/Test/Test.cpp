@@ -23,36 +23,63 @@
 * SOFTWARE.
 */
 #include "Test/TestPerformance.h"
+#include "Test/TestLog.h"
 
 namespace Test
 {
     struct Options
     {
-        enum Type
+        enum Mode
         {
             Auto,
             Create, 
             Verify,
-        } type;
+        } mode;
+
         std::string filter;
 
+        std::string output;
+
+        size_t threads;
+
         Options(int argc, char* argv[])
-            : type(Auto)
+            : mode(Auto)
+            , threads(1)
         {
-            if(argc > 1)
+            for(int i = 1; i < argc; ++i)
             {
-                std::string first(argv[1]); 
-                if(first == "a" || first == "c" || first == "v")
+                std::string arg = argv[i];
+                if(arg.find("-m=") == 0)
                 {
-                    if(first == "c")
-                        type = Create;
-                    if(first == "v")
-                        type = Verify;
-                    if(argc > 2)
-                        filter = argv[2];
+                    switch(arg[3])
+                    {
+                    case 'a': mode = Auto; break;
+                    case 'c': mode = Create; break;
+                    case 'v': mode = Verify; break;
+                    default:
+                        TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl); 
+                        exit(1);
+                    }
+                }
+                else if(arg.find("-t=") == 0)
+                {
+                    std::stringstream ss(arg.substr(3, arg.size() - 3));
+                    ss >> threads; 
+                    threads = std::max<size_t>(1, threads);
+                }
+                else if(arg.find("-f=") == 0)
+                {
+                    filter = arg.substr(3, arg.size() - 3);
+                }
+                else if(arg.find("-o=") == 0)
+                {
+                    output = arg.substr(3, arg.size() - 3);
                 }
                 else
-                    filter = first;
+                {
+                    TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl); 
+                    exit(1);
+                }
             }
         }
 
@@ -65,226 +92,312 @@ namespace Test
     typedef bool (*AutoTestPtr)(); 
     typedef bool (*DataTestPtr)(bool create); 
 
-    struct Test
+    struct Group
     {
         std::string name;
         AutoTestPtr autoTest;
         DataTestPtr dataTest;
-        Test(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d)
+        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d)
             : name(n)
             , autoTest(a)
             , dataTest(d)
         {
         }
     };
-    std::list<Test> g_tests;
+    typedef std::vector<Group> Groups;
+    Groups g_groups;
 
-#define ADD_TEST(name) \
+#define TEST_ADD_GROUP(name) \
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
-    bool name##AddToList(){ g_tests.push_back(Test(#name, name##AutoTest, name##DataTest)); return true; } \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest)); return true; } \
     bool name##AtList = name##AddToList();
 
-    ADD_TEST(AbsDifferenceSum);
-    ADD_TEST(AbsDifferenceSumMasked);
-    ADD_TEST(AbsDifferenceSums3x3);
-    ADD_TEST(AbsDifferenceSums3x3Masked);
-    ADD_TEST(SquaredDifferenceSum);
-    ADD_TEST(SquaredDifferenceSumMasked);
-    ADD_TEST(SquaredDifferenceSum32f);
+    TEST_ADD_GROUP(AbsDifferenceSum);
+    TEST_ADD_GROUP(AbsDifferenceSumMasked);
+    TEST_ADD_GROUP(AbsDifferenceSums3x3);
+    TEST_ADD_GROUP(AbsDifferenceSums3x3Masked);
+    TEST_ADD_GROUP(SquaredDifferenceSum);
+    TEST_ADD_GROUP(SquaredDifferenceSumMasked);
+    TEST_ADD_GROUP(SquaredDifferenceSum32f);
 
-    ADD_TEST(AddFeatureDifference);
+    TEST_ADD_GROUP(AddFeatureDifference);
 
-    ADD_TEST(BgraToBgr);
-    ADD_TEST(BgraToGray);
-    ADD_TEST(BgrToGray);
-    ADD_TEST(BgrToHsl);
-    ADD_TEST(BgrToHsv);
-    ADD_TEST(GrayToBgr);
+    TEST_ADD_GROUP(BgraToBgr);
+    TEST_ADD_GROUP(BgraToGray);
+    TEST_ADD_GROUP(BgrToGray);
+    TEST_ADD_GROUP(BgrToHsl);
+    TEST_ADD_GROUP(BgrToHsv);
+    TEST_ADD_GROUP(GrayToBgr);
 
-    ADD_TEST(BgraToBayer);
-    ADD_TEST(BgrToBayer);
+    TEST_ADD_GROUP(BgraToBayer);
+    TEST_ADD_GROUP(BgrToBayer);
 
-    ADD_TEST(BgrToBgra);
-    ADD_TEST(GrayToBgra);
+    TEST_ADD_GROUP(BgrToBgra);
+    TEST_ADD_GROUP(GrayToBgra);
 
-    ADD_TEST(BgraToYuv420p);
-    ADD_TEST(BgraToYuv422p);
-    ADD_TEST(BgraToYuv444p);
-    ADD_TEST(BgrToYuv420p);
-    ADD_TEST(BgrToYuv422p);
-    ADD_TEST(BgrToYuv444p);
+    TEST_ADD_GROUP(BgraToYuv420p);
+    TEST_ADD_GROUP(BgraToYuv422p);
+    TEST_ADD_GROUP(BgraToYuv444p);
+    TEST_ADD_GROUP(BgrToYuv420p);
+    TEST_ADD_GROUP(BgrToYuv422p);
+    TEST_ADD_GROUP(BgrToYuv444p);
 
-    ADD_TEST(BackgroundGrowRangeSlow);
-    ADD_TEST(BackgroundGrowRangeFast);
-    ADD_TEST(BackgroundIncrementCount);
-    ADD_TEST(BackgroundAdjustRange);
-    ADD_TEST(BackgroundAdjustRangeMasked);
-    ADD_TEST(BackgroundShiftRange);
-    ADD_TEST(BackgroundShiftRangeMasked);
-    ADD_TEST(BackgroundInitMask);
+    TEST_ADD_GROUP(BackgroundGrowRangeSlow);
+    TEST_ADD_GROUP(BackgroundGrowRangeFast);
+    TEST_ADD_GROUP(BackgroundIncrementCount);
+    TEST_ADD_GROUP(BackgroundAdjustRange);
+    TEST_ADD_GROUP(BackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP(BackgroundShiftRange);
+    TEST_ADD_GROUP(BackgroundShiftRangeMasked);
+    TEST_ADD_GROUP(BackgroundInitMask);
 
-    ADD_TEST(BayerToBgr);
+    TEST_ADD_GROUP(BayerToBgr);
 
-    ADD_TEST(BayerToBgra);
+    TEST_ADD_GROUP(BayerToBgra);
 
-    ADD_TEST(Bgr48pToBgra32);
+    TEST_ADD_GROUP(Bgr48pToBgra32);
 
-    ADD_TEST(Binarization);
-    ADD_TEST(AveragingBinarization);
+    TEST_ADD_GROUP(Binarization);
+    TEST_ADD_GROUP(AveragingBinarization);
 
-    ADD_TEST(ConditionalCount8u);
-    ADD_TEST(ConditionalCount16i);
-    ADD_TEST(ConditionalSum);
-    ADD_TEST(ConditionalSquareSum);
-    ADD_TEST(ConditionalSquareGradientSum);
+    TEST_ADD_GROUP(ConditionalCount8u);
+    TEST_ADD_GROUP(ConditionalCount16i);
+    TEST_ADD_GROUP(ConditionalSum);
+    TEST_ADD_GROUP(ConditionalSquareSum);
+    TEST_ADD_GROUP(ConditionalSquareGradientSum);
 
-    ADD_TEST(Copy);
-    ADD_TEST(CopyFrame);
+    TEST_ADD_GROUP(Copy);
+    TEST_ADD_GROUP(CopyFrame);
 
-    ADD_TEST(Crc32c);
+    TEST_ADD_GROUP(Crc32c);
 
-    ADD_TEST(DeinterleaveUv);
+    TEST_ADD_GROUP(DeinterleaveUv);
 
-    ADD_TEST(AlphaBlending);
+    TEST_ADD_GROUP(AlphaBlending);
 
-    ADD_TEST(EdgeBackgroundGrowRangeSlow);
-    ADD_TEST(EdgeBackgroundGrowRangeFast);
-    ADD_TEST(EdgeBackgroundIncrementCount);
-    ADD_TEST(EdgeBackgroundAdjustRange);
-    ADD_TEST(EdgeBackgroundAdjustRangeMasked);
-    ADD_TEST(EdgeBackgroundShiftRange);
-    ADD_TEST(EdgeBackgroundShiftRangeMasked);
+    TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);
+    TEST_ADD_GROUP(EdgeBackgroundGrowRangeFast);
+    TEST_ADD_GROUP(EdgeBackgroundIncrementCount);
+    TEST_ADD_GROUP(EdgeBackgroundAdjustRange);
+    TEST_ADD_GROUP(EdgeBackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP(EdgeBackgroundShiftRange);
+    TEST_ADD_GROUP(EdgeBackgroundShiftRangeMasked);
 
-    ADD_TEST(Fill);
-    ADD_TEST(FillFrame);
-    ADD_TEST(FillBgra);
-    ADD_TEST(FillBgr);
+    TEST_ADD_GROUP(Fill);
+    TEST_ADD_GROUP(FillFrame);
+    TEST_ADD_GROUP(FillBgra);
+    TEST_ADD_GROUP(FillBgr);
 
-    ADD_TEST(Histogram);
-    ADD_TEST(HistogramMasked);
-    ADD_TEST(AbsSecondDerivativeHistogram);
+    TEST_ADD_GROUP(Histogram);
+    TEST_ADD_GROUP(HistogramMasked);
+    TEST_ADD_GROUP(AbsSecondDerivativeHistogram);
 
-    ADD_TEST(HogDirectionHistograms);
+    TEST_ADD_GROUP(HogDirectionHistograms);
 
-    ADD_TEST(Integral);
+    TEST_ADD_GROUP(Integral);
 
-    ADD_TEST(InterferenceIncrement);
-    ADD_TEST(InterferenceIncrementMasked);
-    ADD_TEST(InterferenceDecrement);
-    ADD_TEST(InterferenceDecrementMasked);
+    TEST_ADD_GROUP(InterferenceIncrement);
+    TEST_ADD_GROUP(InterferenceIncrementMasked);
+    TEST_ADD_GROUP(InterferenceDecrement);
+    TEST_ADD_GROUP(InterferenceDecrementMasked);
 
-    ADD_TEST(MedianFilterRhomb3x3);
-    ADD_TEST(MedianFilterRhomb5x5);
-    ADD_TEST(MedianFilterSquare3x3);
-    ADD_TEST(MedianFilterSquare5x5);
-    ADD_TEST(GaussianBlur3x3);
-    ADD_TEST(AbsGradientSaturatedSum);
-    ADD_TEST(LbpEstimate);
+    TEST_ADD_GROUP(MedianFilterRhomb3x3);
+    TEST_ADD_GROUP(MedianFilterRhomb5x5);
+    TEST_ADD_GROUP(MedianFilterSquare3x3);
+    TEST_ADD_GROUP(MedianFilterSquare5x5);
+    TEST_ADD_GROUP(GaussianBlur3x3);
+    TEST_ADD_GROUP(AbsGradientSaturatedSum);
+    TEST_ADD_GROUP(LbpEstimate);
 
-    ADD_TEST(OperationBinary8u);
-    ADD_TEST(OperationBinary16i);
-    ADD_TEST(VectorProduct);
+    TEST_ADD_GROUP(OperationBinary8u);
+    TEST_ADD_GROUP(OperationBinary16i);
+    TEST_ADD_GROUP(VectorProduct);
 
-    ADD_TEST(ReduceGray2x2);
-    ADD_TEST(ReduceGray3x3);
-    ADD_TEST(ReduceGray4x4);
-    ADD_TEST(ReduceGray5x5);
+    TEST_ADD_GROUP(ReduceGray2x2);
+    TEST_ADD_GROUP(ReduceGray3x3);
+    TEST_ADD_GROUP(ReduceGray4x4);
+    TEST_ADD_GROUP(ReduceGray5x5);
 
-    ADD_TEST(Reorder16bit);
-    ADD_TEST(Reorder32bit);
-    ADD_TEST(Reorder64bit);
+    TEST_ADD_GROUP(Reorder16bit);
+    TEST_ADD_GROUP(Reorder32bit);
+    TEST_ADD_GROUP(Reorder64bit);
 
-    ADD_TEST(ResizeBilinear);
+    TEST_ADD_GROUP(ResizeBilinear);
 
-    ADD_TEST(SegmentationShrinkRegion);
-    ADD_TEST(SegmentationFillSingleHoles);
-    ADD_TEST(SegmentationChangeIndex);
-    ADD_TEST(SegmentationPropagate2x2);
+    TEST_ADD_GROUP(SegmentationShrinkRegion);
+    TEST_ADD_GROUP(SegmentationFillSingleHoles);
+    TEST_ADD_GROUP(SegmentationChangeIndex);
+    TEST_ADD_GROUP(SegmentationPropagate2x2);
 
-    ADD_TEST(ShiftBilinear);
+    TEST_ADD_GROUP(ShiftBilinear);
 
-    ADD_TEST(SobelDx);
-    ADD_TEST(SobelDxAbs);
-    ADD_TEST(SobelDy);
-    ADD_TEST(SobelDyAbs);
-    ADD_TEST(ContourMetrics);
-    ADD_TEST(ContourMetricsMasked);
-    ADD_TEST(ContourAnchors);
+    TEST_ADD_GROUP(SobelDx);
+    TEST_ADD_GROUP(SobelDxAbs);
+    TEST_ADD_GROUP(SobelDy);
+    TEST_ADD_GROUP(SobelDyAbs);
+    TEST_ADD_GROUP(ContourMetrics);
+    TEST_ADD_GROUP(ContourMetricsMasked);
+    TEST_ADD_GROUP(ContourAnchors);
 
-    ADD_TEST(GetStatistic);
-    ADD_TEST(GetMoments);
-    ADD_TEST(GetRowSums);
-    ADD_TEST(GetColSums);
-    ADD_TEST(GetAbsDyRowSums);
-    ADD_TEST(GetAbsDxColSums);
-    ADD_TEST(ValueSum);
-    ADD_TEST(SquareSum);
-    ADD_TEST(SobelDxAbsSum);
-    ADD_TEST(SobelDyAbsSum);
-    ADD_TEST(CorrelationSum);
+    TEST_ADD_GROUP(GetStatistic);
+    TEST_ADD_GROUP(GetMoments);
+    TEST_ADD_GROUP(GetRowSums);
+    TEST_ADD_GROUP(GetColSums);
+    TEST_ADD_GROUP(GetAbsDyRowSums);
+    TEST_ADD_GROUP(GetAbsDxColSums);
+    TEST_ADD_GROUP(ValueSum);
+    TEST_ADD_GROUP(SquareSum);
+    TEST_ADD_GROUP(SobelDxAbsSum);
+    TEST_ADD_GROUP(SobelDyAbsSum);
+    TEST_ADD_GROUP(CorrelationSum);
 
-    ADD_TEST(StretchGray2x2);
+    TEST_ADD_GROUP(StretchGray2x2);
 
-    ADD_TEST(SvmSumLinear);
+    TEST_ADD_GROUP(SvmSumLinear);
 
-    ADD_TEST(TextureBoostedSaturatedGradient);
-    ADD_TEST(TextureBoostedUv);
-    ADD_TEST(TextureGetDifferenceSum);
-    ADD_TEST(TexturePerformCompensation);
+    TEST_ADD_GROUP(TextureBoostedSaturatedGradient);
+    TEST_ADD_GROUP(TextureBoostedUv);
+    TEST_ADD_GROUP(TextureGetDifferenceSum);
+    TEST_ADD_GROUP(TexturePerformCompensation);
 
-    ADD_TEST(Yuv444pToBgr);
-    ADD_TEST(Yuv422pToBgr);
-    ADD_TEST(Yuv420pToBgr);
-    ADD_TEST(Yuv444pToHsl);
-    ADD_TEST(Yuv444pToHsv);
-    ADD_TEST(Yuv444pToHue);
-    ADD_TEST(Yuv420pToHue);
+    TEST_ADD_GROUP(Yuv444pToBgr);
+    TEST_ADD_GROUP(Yuv422pToBgr);
+    TEST_ADD_GROUP(Yuv420pToBgr);
+    TEST_ADD_GROUP(Yuv444pToHsl);
+    TEST_ADD_GROUP(Yuv444pToHsv);
+    TEST_ADD_GROUP(Yuv444pToHue);
+    TEST_ADD_GROUP(Yuv420pToHue);
 
-    ADD_TEST(Yuv444pToBgra);
-    ADD_TEST(Yuv422pToBgra);
-    ADD_TEST(Yuv420pToBgra);
+    TEST_ADD_GROUP(Yuv444pToBgra);
+    TEST_ADD_GROUP(Yuv422pToBgra);
+    TEST_ADD_GROUP(Yuv420pToBgra);
+
+    class Task
+    {
+        typedef std::thread Thread;
+        typedef std::shared_ptr<Thread> ThreadPtr;
+
+        const Groups & _groups;
+        ThreadPtr _thread;
+        volatile double _progress;
+    public:
+        static volatile bool s_stopped;
+
+        Task(const Groups & groups)
+            : _groups(groups)
+            , _progress(0)
+        {
+            _thread.reset(new Thread(std::bind(&Task::Run, this)));
+        }
+
+        ~Task()
+        {
+            if(_thread->joinable())
+            {
+                _thread->join();
+            }
+        }
+
+        double Progress() const
+        {
+            return _progress;
+        }
+
+        void Run()
+        {
+            for(size_t i = 0; i < _groups.size() && !s_stopped; ++i)
+            {
+                _progress = double(i)/double(_groups.size());
+                const Group & group = _groups[i];
+                TEST_LOG_SS(Info, group.name << "AutoTest is started :"); 
+                bool result = group.autoTest(); 
+                TEST_LOG_SS(Info, group.name << "AutoTest - is finished " << (result ? "successfully." : "with errors!") << std::endl);
+                if(!result) 
+                { 
+                    s_stopped = true;
+                    TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl); 
+                    return;
+                }
+            }
+            _progress = 1.0;
+            TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl); 
+        }
+    };
+    volatile bool Task::s_stopped = false;
+    typedef std::shared_ptr<Task> TaskPtr;
+    typedef std::vector<TaskPtr> TaskPtrs;
+
+    inline void Sleep(unsigned int miliseconds)
+    {
+        std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
+    }
 }
 
 int main(int argc, char* argv[])
 {
     Test::Options options(argc, argv);
-    if(options.type == Test::Options::Auto)
+    if(!options.output.empty())
+        Test::Log::s_log.SetLogFile(options.output);
+
+    Test::Groups groups;
+    for(const Test::Group & group : Test::g_groups)
+        if(options.NeedToPerform(group.name))
+            groups.push_back(group);
+    if(groups.empty())
     {
-        for(const Test::Test & test : Test::g_tests)
+        TEST_LOG_SS(Error, "There are not any suitable tests for current filter '" << options.filter <<"'!" << std::endl); 
+        return 1;
+    }
+
+    if(options.mode == Test::Options::Auto)
+    {
+        TEST_LOG_SS(Info, "Test threads count = " << options.threads);
+
+        Test::Log::s_log.SetLevel(Test::Log::Error);
+
+        Test::TaskPtrs tasks;
+        for(size_t i = 0; i < options.threads; ++i)
+            tasks.push_back(Test::TaskPtr(new Test::Task(groups)));
+
+        std::cout << std::endl;
+        double progress;
+        do 
         {
-            if(options.NeedToPerform(test.name)) 
-            {
-                std::cout << test.name << "AutoTest is started :" << std::endl; 
-                bool result = test.autoTest(); 
-                std::cout << test.name << "AutoTest  is finished "  << (result ? "successfully." : "with errors!") << std::endl << std::endl; 
-                if(!result) 
-                { 
-                    std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; 
-                    return 1;
-                } 
-            }
-        }
+            progress = 0;
+            for(size_t i = 0; i < tasks.size(); ++i)
+                progress += tasks[i]->Progress();
+            progress /= double(tasks.size());
+            std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
+            Test::Sleep(1000);
+        } while (progress < 1.0);
+        std::cout << std::endl << std::endl;
+
+        Test::Log::s_log.SetLevel(Test::Log::Info); 
+
+        if(Test::Task::s_stopped)
+            return 1;
+        
+        TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
+
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        std::cout << Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false) << std::endl;
+        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false));
 #endif
     }
     else
     {
-        for(const Test::Test & test : Test::g_tests)
+        for(const Test::Group & group : groups)
         {
-            if(options.NeedToPerform(test.name)) 
-            {
-                bool create = options.type == Test::Options::Create;
-                std::cout << test.name << "DataTest - data " << (create ? "creation" : "verification") << " is started :" << std::endl; 
-                bool result = test.dataTest(create); 
-                std::cout << test.name << "DataTest - data " << (create ? "creation" : "verification") << " is finished " << (result ? "successfully." : "with errors!") << std::endl << std::endl;
-                if(!result) 
-                { 
-                    std::cout << "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl << std::endl; 
-                    return 1;
-                } 
-            }
+            bool create = options.mode == Test::Options::Create;
+            TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is started :"); 
+            bool result = group.dataTest(create); 
+            TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is finished " << (result ? "successfully." : "with errors!") << std::endl);
+            if(!result) 
+            { 
+                TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl); 
+                return 1;
+            }            
         }
+        TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl); 
     }
 }

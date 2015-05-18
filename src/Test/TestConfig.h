@@ -43,6 +43,8 @@
 #include <memory>
 #include <exception>
 #include <stdexcept>
+#include <thread>
+#include <mutex>
 
 #define SIMD_STATIC
 #include "Simd/SimdConst.h"

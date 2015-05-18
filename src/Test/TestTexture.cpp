@@ -52,8 +52,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description 
-            << " [" << width << ", " << height << "] <" << saturation << ", " << boost << ">." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] <" << saturation << ", " << boost << ">.");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -144,8 +143,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description 
-            << " [" << width << ", " << height << "] <" << boost << ">." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] <" << boost << ">.");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -233,7 +231,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -313,8 +311,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description 
-            << " [" << width << ", " << height << "] <" << shift << ">." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] <" << shift << ">.");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -387,7 +384,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View dx1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -442,7 +439,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -491,7 +488,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -546,7 +543,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);

@@ -24,7 +24,7 @@
 #ifndef __TestUtils_h__
 #define __TestUtils_h__
 
-#include "Test/TestConfig.h"
+#include "Test/TestLog.h"
 
 namespace Test
 {
@@ -83,7 +83,7 @@ namespace Test
 #define TEST_CHECK_VALUE(name) \
     if(name##1 != name##2) \
     { \
-        std::cout << "Error " << #name << ": (" << name##1  << " != " << name##2 << ")! " << std::endl; \
+        TEST_LOG_SS(Error, "Error " << #name << ": (" << name##1  << " != " << name##2 << ")! "); \
         return false; \
     } 
 

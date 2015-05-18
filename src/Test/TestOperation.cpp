@@ -132,7 +132,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View a(width, height, format, NULL, TEST_ALIGN(width));
 		FillRandom(a);
@@ -197,7 +197,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View a(width, height, View::Int16, NULL, TEST_ALIGN(width));
         FillRandom(a);
@@ -259,7 +259,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View v(height, 1, View::Gray8, NULL, TEST_ALIGN(height));
         FillRandom(v);
@@ -321,7 +321,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View a(width, height, format, NULL, TEST_ALIGN(width));
         View b(width, height, format, NULL, TEST_ALIGN(width));
@@ -378,7 +378,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View a(width, height, View::Int16, NULL, TEST_ALIGN(width));
         View b(width, height, View::Int16, NULL, TEST_ALIGN(width));
@@ -432,7 +432,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View v(height, 1, View::Gray8, NULL, TEST_ALIGN(height));
         View h(width, 1, View::Gray8, NULL, TEST_ALIGN(width));

@@ -54,7 +54,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(value);
@@ -113,7 +113,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(value);
@@ -175,7 +175,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(backgroundCountSrc);
@@ -238,7 +238,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(backgroundCountSrc);
@@ -300,7 +300,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(value);
@@ -508,7 +508,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View backgroundSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -578,7 +578,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View backgroundValue(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -634,7 +634,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View backgroundValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -692,7 +692,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View backgroundCountSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View backgroundValueSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -754,7 +754,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View backgroundSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));

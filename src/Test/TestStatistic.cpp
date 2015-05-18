@@ -53,7 +53,7 @@ namespace Test
 	{
 		bool result = true;
 
-		std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(src);
@@ -137,7 +137,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         const uint8_t index = 7;
         View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -234,7 +234,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -384,7 +384,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
@@ -533,7 +533,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(a);
@@ -595,7 +595,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
@@ -651,7 +651,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         const uint8_t index = 7;
         View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -720,7 +720,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
@@ -796,7 +796,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
@@ -870,7 +870,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));

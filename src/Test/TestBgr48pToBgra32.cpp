@@ -52,7 +52,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
 
         View blue(width, height, View::Int16, NULL, TEST_ALIGN(width));
         FillRandom(blue);
@@ -118,7 +118,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View blue(width, height, View::Int16, NULL, TEST_ALIGN(width));
         View green(width, height, View::Int16, NULL, TEST_ALIGN(width));

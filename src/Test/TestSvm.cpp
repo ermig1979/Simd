@@ -52,7 +52,7 @@ namespace Test
     {
         bool result = true;
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " [" << length << ", " << count << "]." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << length << ", " << count << "].");
 
         View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View weights(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -116,7 +116,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << length<< ", " << count << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << length<< ", " << count << "].");
 
         View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View weights(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));

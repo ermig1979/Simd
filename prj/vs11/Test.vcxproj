@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\src\Test\TestHog.cpp" />
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
     <ClCompile Include="..\..\src\Test\TestInterference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestLog.cpp" />
     <ClCompile Include="..\..\src\Test\TestReorder.cpp" />
     <ClCompile Include="..\..\src\Test\TestSegmentation.cpp" />
     <ClCompile Include="..\..\src\Test\TestSobel.cpp" />
@@ -100,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
     <ClInclude Include="..\..\src\Test\TestData.h" />
+    <ClInclude Include="..\..\src\Test\TestLog.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />
     <ClInclude Include="..\..\src\Test\TestUtils.h" />
   </ItemGroup>

@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestData.h"
+#include "Test/TestLog.h"
 
 #ifdef _MSC_VER
 #include <filesystem>
@@ -43,7 +44,7 @@ namespace Test
         {
             if(!std::tr2::sys::create_directories(std::tr2::sys::path(path)))
             {
-                std::cout << "Can't create path '" << path << "'!" << std::endl;
+                TEST_LOG_SS(Error, "Can't create path '" << path << "'!");
                 return false;
             }
         }
@@ -63,7 +64,7 @@ namespace Test
         std::ofstream ofs(path);
         if(ofs.bad())
         {
-            std::cout << "Can't create file '" << path << "'!" << std::endl; 
+            TEST_LOG_SS(Error, "Can't create file '" << path << "'!"); 
             return false;
         }
 
@@ -84,8 +85,7 @@ namespace Test
         }
         catch (std::exception e)
         {
-            std::cout << "Can't save array to file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
+            TEST_LOG_SS(Error, "Can't save array to file '" << path << "', because there is an exception: " << e.what()); 
             ofs.close();
             return false;
         }
@@ -101,7 +101,7 @@ namespace Test
         std::ifstream ifs(path);
         if(ifs.bad())
         {
-            std::cout << "Can't open file '" << path << "'!" << std::endl; 
+            TEST_LOG_SS(Error, "Can't open file '" << path << "'!"); 
             return false;
         }
 
@@ -129,8 +129,7 @@ namespace Test
         }
         catch (std::exception e)
         {
-            std::cout << "Can't load array from file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
+            TEST_LOG_SS(Error, "Can't load array from file '" << path << "', because there is an exception: " << e.what()); 
             ifs.close();
             return false;
         }
@@ -165,7 +164,7 @@ namespace Test
         std::ofstream ofs(path);
         if(ofs.bad())
         {
-            std::cout << "Can't create file '" << path << "'!" << std::endl; 
+            TEST_LOG_SS(Error, "Can't create file '" << path << "'!"); 
             return false;
         }
 
@@ -221,8 +220,7 @@ namespace Test
         }
         catch (std::exception e)
         {
-            std::cout << "Can't save image to file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
+            TEST_LOG_SS(Error, "Can't save image to file '" << path << "', because there is an exception: " << e.what()); 
             ofs.close();
             return false;
         }
@@ -238,7 +236,7 @@ namespace Test
         std::ifstream ifs(path);
         if(ifs.bad())
         {
-            std::cout << "Can't open file '" << path << "'!" << std::endl; 
+            TEST_LOG_SS(Error, "Can't open file '" << path << "'!"); 
             return false;
         }
 
@@ -298,8 +296,7 @@ namespace Test
         }
         catch (std::exception e)
         {
-            std::cout << "Can't load image from file '" << path << "'!" << std::endl; 
-            std::cout << "There is an exception: " << e.what() << std::endl; 
+            TEST_LOG_SS(Error, "Can't load image from file '" << path << "', because there is an exception: " << e.what()); 
             ifs.close();
             return false;
         }

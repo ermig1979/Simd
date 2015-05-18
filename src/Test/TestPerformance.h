@@ -94,9 +94,18 @@ namespace Test
     {
         typedef PerformanceMeasurer Pm;
         typedef std::shared_ptr<Pm> PmPtr;
-        typedef std::map<std::string, PmPtr> Map;
-        Map _map;
-        bool _align;
+        typedef std::map<std::string, PmPtr> FunctionMap;
+        struct Thread
+        {
+            FunctionMap map;
+            bool align;
+        };
+        typedef std::map<std::thread::id, Thread> ThreadMap;
+
+        ThreadMap _map;
+        mutable std::recursive_mutex _mutex;
+
+        Thread & ThisThread();
 
     public:
         static PerformanceMeasurerStorage s_storage;
@@ -105,7 +114,7 @@ namespace Test
 
         PerformanceMeasurer* Get(std::string name);
 
-        static size_t Align(size_t size);
+        size_t Align(size_t size);
 
         std::string Report(bool sse42 = false, bool align = false, bool raw = false) const;
     };
@@ -141,6 +150,6 @@ namespace Test
 #endif
 
 #define TEST_ALIGN(size) \
-    Test::PerformanceMeasurerStorage::Align(size)
+    Test::PerformanceMeasurerStorage::s_storage.Align(size)
 
 #endif//__TestPerformance_h__

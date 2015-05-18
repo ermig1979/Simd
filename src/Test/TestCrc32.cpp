@@ -61,7 +61,7 @@ namespace Test
         std::vector<unsigned char> src(size);
         TEST_ALIGN(size);
 
-        std::cout << "Test " << f1.description << " & " << f2.description << " for size = " << size << "." << std::endl;
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size = " << size << ".");
 
         SetRandom(src.data(), src.size());
 
@@ -108,7 +108,7 @@ namespace Test
 
         Data data(f.description);
 
-        std::cout << (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "]." << std::endl;
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
 
         std::vector<uint8_t> src(size);
 

@@ -89,10 +89,11 @@ namespace Test
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
         const std::string & description)
     {
+        std::stringstream message;
         int errorCount = 0;
         size_t channelCount = a.ChannelCount();
         size_t width = channelCount*a.width;
-        for(size_t row = 0; row < a.height; ++row)
+        for(size_t row = 0; row < a.height && errorCount < errorCountMax; ++row)
         {
             const Channel * pA = (const Channel*)(a.data + row*a.stride);
             const Channel * pB = (const Channel*)(b.data + row*b.stride);
@@ -112,27 +113,27 @@ namespace Test
                     if(printError)
                     {
                         if(errorCount == 1 && description.length() > 0)
-                        {
-                            std::cout << "Fail comparison: " << description << std::endl;
-                        }
+                            message << std::endl << "Fail comparison: " << description << std::endl;
                         size_t col = offset/channelCount;
-                        std::cout << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];
+                        message << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];
                         for(size_t channel = 1; channel < channelCount; ++channel)
-                            std::cout << "," << (int)pA[col*channelCount + channel]; 
-                        std::cout << ") != (" << (int)pB[col*channelCount];
+                            message << "," << (int)pA[col*channelCount + channel]; 
+                        message << ") != (" << (int)pB[col*channelCount];
                         for(size_t channel = 1; channel < channelCount; ++channel)
-                            std::cout << "," << (int)pB[col*channelCount + channel]; 
-                        std::cout << ")." << std::endl;
+                            message << "," << (int)pB[col*channelCount + channel]; 
+                        message << ")." << std::endl;
                     }
                     if(errorCount >= errorCountMax)
                     {
                         if(printError)
-                            std::cout << "Stop comparison." << std::endl;
-                        return false;
+                            message << "Stop comparison." << std::endl;
+                        break;
                     }
                 }
             }
         }
+        if(printError && errorCount > 0)
+            TEST_LOG_SS(Error, message.str());
         return errorCount == 0;
     }
 
@@ -167,6 +168,7 @@ namespace Test
 
     template <class T> bool Compare(const T * a, const T * b, size_t size, int64_t differenceMax, bool printError, int errorCountMax)
     {
+        std::stringstream message;
         int errorCount = 0;
         for(size_t i = 0; i < size; ++i)
         {
@@ -181,16 +183,20 @@ namespace Test
                 errorCount++;
                 if(printError)
                 {
-                    std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
+                    if(errorCount == 1)
+                        message << std::endl << "Fail comparison: " << std::endl;
+                    message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
                 }
                 if(errorCount > errorCountMax)
                 {
                     if(printError)
-                        std::cout << "Stop comparison." << std::endl;
-                    return false;
+                        message << "Stop comparison." << std::endl;
+                    break;
                 }
             }
         }
+        if(printError && errorCount > 0)
+            TEST_LOG_SS(Error, message.str());
         return errorCount == 0;
     }
 
@@ -216,14 +222,15 @@ namespace Test
         bool result(a == b);
         if(!result && printError)
         {
-            std::cout << "Rectangles is not equal: (" << a.left << ", " << a.top << ", " << a.right  << ", " << a.bottom << ") != (" 
-                << b.left << ", " << b.top << ", " << b.right  << ", " << b.bottom << ") !" << std::endl;
+            TEST_LOG_SS(Error, "Rectangles is not equal: (" << a.left << ", " << a.top << ", " << a.right  << ", " << a.bottom << ") != (" 
+                << b.left << ", " << b.top << ", " << b.right  << ", " << b.bottom << ") !");
         }
         return result;
     }
 
     bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, int errorCountMax)
     {
+        std::stringstream message;
         int errorCount = 0;
         for(size_t i = 0; i < size; ++i)
         {
@@ -233,16 +240,20 @@ namespace Test
                 errorCount++;
                 if(printError)
                 {
-                    std::cout << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
+                    if(errorCount == 1)
+                        message << std::endl << "Fail comparison: " << std::endl;
+                    message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
                 }
                 if(errorCount > errorCountMax)
                 {
                     if(printError)
-                        std::cout << "Stop comparison." << std::endl;
-                    return false;
+                        message << "Stop comparison." << std::endl;
+                    break;
                 }
             }
         }
+        if(printError && errorCount > 0)
+            TEST_LOG_SS(Error, message.str());
         return errorCount == 0;
     }
 
