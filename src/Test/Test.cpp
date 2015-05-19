@@ -275,11 +275,8 @@ namespace Test
 
     class Task
     {
-        typedef std::thread Thread;
-        typedef std::shared_ptr<Thread> ThreadPtr;
-
         const Groups & _groups;
-        ThreadPtr _thread;
+        std::thread _thread;
         volatile double _progress;
     public:
         static volatile bool s_stopped;
@@ -288,14 +285,14 @@ namespace Test
             : _groups(groups)
             , _progress(0)
         {
-            _thread.reset(new Thread(std::bind(&Task::Run, this)));
+            _thread = std::thread(&Task::Run, this);
         }
 
         ~Task()
         {
-            if(_thread->joinable())
+            if(_thread.joinable())
             {
-                _thread->join();
+                _thread.join();
             }
         }
 

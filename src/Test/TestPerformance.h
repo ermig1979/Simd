@@ -110,6 +110,7 @@ namespace Test
     public:
         static PerformanceMeasurerStorage s_storage;
 
+        PerformanceMeasurerStorage();
         ~PerformanceMeasurerStorage();
 
         PerformanceMeasurer* Get(std::string name);

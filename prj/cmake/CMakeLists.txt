@@ -7,6 +7,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
+#set(CMAKE_CXX_COMPILER /opt/synesis/VA_SDK_power7/toolchain/usr/bin/powerpc-linux-g++)
+#set(CMAKE_SYSTEM_PROCESSOR "ppc64")
+
 include_directories(${TRUNK_DIR}/src)
 
 execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
@@ -58,7 +61,7 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
-target_link_libraries(Test Simd TestCheckC)
+target_link_libraries(Test Simd TestCheckC -lpthread)
 set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
@@ -86,7 +89,7 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
-target_link_libraries(Test Simd TestCheckC)
+target_link_libraries(Test Simd TestCheckC -lpthread)
 set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++11")
 
 endif()

@@ -141,7 +141,11 @@ namespace Test
 
     //-------------------------------------------------------------------------
 
-    PerformanceMeasurerStorage PerformanceMeasurerStorage::s_storage = PerformanceMeasurerStorage();
+    PerformanceMeasurerStorage PerformanceMeasurerStorage::s_storage;
+
+    PerformanceMeasurerStorage::PerformanceMeasurerStorage()
+    {
+    }
 
     PerformanceMeasurerStorage::~PerformanceMeasurerStorage()
     {
