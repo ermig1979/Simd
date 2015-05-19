@@ -32,16 +32,16 @@ namespace Simd
     {
         namespace
         {
-            template<class Two> struct Buffer
+            struct Buffer
             {
-                Buffer(size_t width, size_t height)
+                Buffer(size_t size, size_t width, size_t height)
                 {
-                    _p = Allocate(sizeof(int)*(2*height + width) + sizeof(int16_t)*2*width + sizeof(Two)*2*width);
-                    ix = (int*)_p;
-                    ax = (int16_t*)(ix + width);
-                    pbx[0] = (Two*)(ax + 2*width);
-                    pbx[1] = pbx[0] + width;
-                    iy = (int*)(pbx[1] + width);
+                    _p = Allocate(2*size + sizeof(int16_t)*2*width + sizeof(int)*(2*height + width));
+                    bx[0] = (uint8_t*)_p;
+                    bx[1] = bx[0] + size;
+                    ax = (int16_t*)(bx[1] + size);
+                    ix = (int*)(ax + 2*width);
+                    iy = ix + width;
                     ay = iy + height;
                 }
 
@@ -50,11 +50,11 @@ namespace Simd
                     Free(_p);
                 }
 
-                int * ix;
+                uint8_t * bx[2];
                 int16_t * ax;
-                int * iy;
+                int * ix;
                 int * ay;
-                Two * pbx[2];
+                int * iy;
             private:
                 void *_p;
             };
@@ -128,10 +128,10 @@ namespace Simd
             return _mm_srli_epi16(_mm_add_epi16(sum, K16_FRACTION_ROUND_TERM), Base::BILINEAR_SHIFT);
         }
 
-        template<class Two, class One, bool align> SIMD_INLINE void InterpolateY(const Two * pbx0, const Two * pbx1, __m128i alpha[2], One * dst)
+        template<bool align> SIMD_INLINE void InterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m128i alpha[2], uint8_t * dst)
         {
-            __m128i lo = InterpolateY<align>((__m128i*)pbx0 + 0, (__m128i*)pbx1 + 0, alpha); 
-            __m128i hi = InterpolateY<align>((__m128i*)pbx0 + 1, (__m128i*)pbx1 + 1, alpha); 
+            __m128i lo = InterpolateY<align>((__m128i*)bx0 + 0, (__m128i*)bx1 + 0, alpha); 
+            __m128i hi = InterpolateY<align>((__m128i*)bx0 + 1, (__m128i*)bx1 + 1, alpha); 
             Store<false>((__m128i*)dst, _mm_packus_epi16(lo, hi));
         }
 
@@ -144,13 +144,14 @@ namespace Simd
             struct One { uint8_t channels[channelCount]; };
             struct Two { uint8_t channels[channelCount*2]; };
 
+            size_t size = 2*dstWidth*channelCount;
+            size_t bufferSize = AlignHi(dstWidth, A)*channelCount*2;
+            size_t alignedSize = AlignHi(size, DA) - DA;
+            Buffer buffer(bufferSize, dstWidth, dstHeight);
+
             const size_t stepB = A/channelCount;
             const size_t stepA = DA/channelCount;
-
             size_t bufferWidth = AlignHi(dstWidth, stepB);
-            size_t alignedWidth = bufferWidth - stepB;
-
-            Buffer<Two> buffer(bufferWidth, dstHeight);
 
             Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
 
@@ -172,7 +173,7 @@ namespace Simd
                     k = 2;
                 else if(sy == previous + 1)
                 {
-                    Swap(buffer.pbx[0], buffer.pbx[1]);
+                    Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
                 }
 
@@ -180,7 +181,7 @@ namespace Simd
 
                 for(; k < 2; k++)
                 {
-                    Two * pb = buffer.pbx[k];
+                    Two * pb = (Two *)buffer.bx[k];
                     const One * ps = (const One *)(src + (sy + k)*srcStride);
                     for(size_t x = 0; x < dstWidth; x++)
                         pb[x] = *(Two *)(ps + buffer.ix[x]);
@@ -189,10 +190,10 @@ namespace Simd
                         InterpolateX<channelCount>((__m128i*)(buffer.ax + ia), (__m128i*)(pb + ib));
                 }
 
-                for(size_t i = 0; i < alignedWidth; i += stepB)
-                    InterpolateY<Two, One, true>(buffer.pbx[0] + i, buffer.pbx[1] + i, a, (One*)dst + i);
-                size_t i = dstWidth - stepB;
-                InterpolateY<Two, One, false>(buffer.pbx[0] + i, buffer.pbx[1] + i, a, (One*)dst + i);
+                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                    InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
+                size_t i = size - DA;
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
             }
         }
 

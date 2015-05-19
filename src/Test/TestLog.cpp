@@ -60,10 +60,8 @@ namespace Test
         _enablePrefix = enable;
     }
 
-    void Log::Write(Level level, const std::string & message) const
+    void Log::Write(Level level, const std::string & message)
     {
-        if(level > _level)
-            return;
         std::stringstream ss;
         if (_enableThreadId)
             ss << "[" << std::this_thread::get_id() << "] ";
@@ -72,15 +70,29 @@ namespace Test
             switch (level)
             {
             case Log::Error : ss << "ERROR: "; break;
-            case Log::Warning: ss << "WARNING: "; break; 
             case Log::Info: ss << "INFO: "; break;
             default:
                 assert(0);
             }        
         }
         ss << message << std::endl;
+        if(level > _level)
+        {
+            _lastSkippedMessages[std::this_thread::get_id()] = ss.str();
+        }
+        else
         {
             std::lock_guard<std::mutex> lock(_mutex);
+            if(_level == Error)
+            {
+                const std::string last = _lastSkippedMessages[std::this_thread::get_id()];
+                if(last.size())
+                {
+                    std::cout << last;
+                    if(_file.is_open())
+                        _file << last;
+                }
+            }
             std::cout << ss.str();
             if(_file.is_open())
                 _file << ss.str();

@@ -44,7 +44,7 @@ namespace Test
 
         Options(int argc, char* argv[])
             : mode(Auto)
-            , threads(1)
+            , threads(0)
         {
             for(int i = 1; i < argc; ++i)
             {
@@ -63,9 +63,10 @@ namespace Test
                 }
                 else if(arg.find("-t=") == 0)
                 {
+#ifdef NDEBUG
                     std::stringstream ss(arg.substr(3, arg.size() - 3));
                     ss >> threads; 
-                    threads = std::max<size_t>(1, threads);
+#endif
                 }
                 else if(arg.find("-f=") == 0)
                 {
@@ -281,11 +282,12 @@ namespace Test
     public:
         static volatile bool s_stopped;
 
-        Task(const Groups & groups)
+        Task(const Groups & groups, bool start)
             : _groups(groups)
             , _progress(0)
         {
-            _thread = std::thread(&Task::Run, this);
+            if(start)
+                _thread = std::thread(&Task::Run, this);
         }
 
         ~Task()
@@ -318,7 +320,6 @@ namespace Test
                 }
             }
             _progress = 1.0;
-            TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl); 
         }
     };
     volatile bool Task::s_stopped = false;
@@ -349,28 +350,36 @@ int main(int argc, char* argv[])
 
     if(options.mode == Test::Options::Auto)
     {
-        TEST_LOG_SS(Info, "Test threads count = " << options.threads);
-
-        Test::Log::s_log.SetLevel(Test::Log::Error);
-
-        Test::TaskPtrs tasks;
-        for(size_t i = 0; i < options.threads; ++i)
-            tasks.push_back(Test::TaskPtr(new Test::Task(groups)));
-
-        std::cout << std::endl;
-        double progress;
-        do 
+        if(options.threads > 0)
         {
-            progress = 0;
-            for(size_t i = 0; i < tasks.size(); ++i)
-                progress += tasks[i]->Progress();
-            progress /= double(tasks.size());
-            std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
-            Test::Sleep(1000);
-        } while (progress < 1.0);
-        std::cout << std::endl << std::endl;
+            TEST_LOG_SS(Info, "Test threads count = " << options.threads);
 
-        Test::Log::s_log.SetLevel(Test::Log::Info); 
+            Test::Log::s_log.SetLevel(Test::Log::Error);
+
+            Test::TaskPtrs tasks;
+            for(size_t i = 0; i < options.threads; ++i)
+                tasks.push_back(Test::TaskPtr(new Test::Task(groups, true)));
+
+            std::cout << std::endl;
+            double progress;
+            do 
+            {
+                progress = 0;
+                for(size_t i = 0; i < tasks.size(); ++i)
+                    progress += tasks[i]->Progress();
+                progress /= double(tasks.size());
+                std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
+                Test::Sleep(1000);
+            } while (progress < 1.0);
+            std::cout << std::endl << std::endl;
+
+            Test::Log::s_log.SetLevel(Test::Log::Info); 
+        }
+        else
+        {
+            Test::Task task(groups, false);
+            task.Run();
+        }
 
         if(Test::Task::s_stopped)
             return 1;

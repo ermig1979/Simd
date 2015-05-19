@@ -24,7 +24,7 @@
 #include "Test/TestData.h"
 #include "Test/TestLog.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #include <filesystem>
 #else
 
@@ -39,7 +39,7 @@ namespace Test
 
     bool Data::CreatePath(const std::string & path) const
     {
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
         if(!std::tr2::sys::exists(std::tr2::sys::path(path)))
         {
             if(!std::tr2::sys::create_directories(std::tr2::sys::path(path)))
@@ -49,9 +49,14 @@ namespace Test
             }
         }
         return true;
-#else
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
         system((std::string("mkdir -p ") + path).c_str());
         return true;
+#pragma GCC diagnostic pop
+#else
+#error This platform is unsupported!
 #endif
     }
 

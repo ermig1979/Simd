@@ -34,7 +34,6 @@ namespace Test
         enum Level
         {
             Error = 0,
-            Warning,
             Info,
         };
 
@@ -46,16 +45,19 @@ namespace Test
         void SetEnableThreadId(bool enable);
         void SetEnablePrefix(bool enable);
 
-        void Write(Level level, const std::string & message) const;
+        void Write(Level level, const std::string & message);
 
         static Log s_log;
     private:
-        mutable std::mutex _mutex;
-        mutable std::ofstream _file;
+        std::mutex _mutex;
+        std::ofstream _file;
         Level _level;
         bool _hasError;
         bool _enableThreadId;
         bool _enablePrefix;
+
+        typedef std::map<std::thread::id, std::string> Messages;
+        Messages _lastSkippedMessages;
     };
 }
 
