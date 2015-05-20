@@ -30,25 +30,33 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE  
     namespace Vsx
     {
+        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t offset, v128_f32 & sum)
+        {
+            v128_f32 _a = Load<align>(a + offset);
+            v128_f32 _b = Load<align>(b + offset);
+            v128_f32 _d = vec_sub(_a, _b);
+            sum = vec_add(sum, vec_mul(_d, _d));
+        }
+
         template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
+            size_t alignedSize = AlignLo(size, 16);
             size_t i = 0;
-            size_t alignedSize = AlignLo(size, 4);
             if(alignedSize)
             {
-                v128_f32 _sum = K_0_0f;
-                for(; i < alignedSize; i += 4)
+                v128_f32 sums[4] = {K_0_0f, K_0_0f, K_0_0f, K_0_0f};
+                for(; i < alignedSize; i += 16)
                 {
-                    v128_f32 _a = Load<align>(a + i);
-                    v128_f32 _b = Load<align>(b + i);
-                    v128_f32 _d = vec_sub(_a, _b);
-                    _sum = vec_add(_sum, vec_mul(_d, _d));
+                    SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                    SquaredDifferenceSum32f<align>(a, b, i + 4, sums[1]);
+                    SquaredDifferenceSum32f<align>(a, b, i + 8, sums[2]);
+                    SquaredDifferenceSum32f<align>(a, b, i + 12, sums[3]);
                 }
-                *sum += ExtractSum(_sum);
+                *sum += ExtractSum(sums[0]) + ExtractSum(sums[1]) + ExtractSum(sums[2]) + ExtractSum(sums[3]);
             }
             for(; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);

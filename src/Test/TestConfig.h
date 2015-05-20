@@ -91,7 +91,7 @@ namespace Test
     const int DH = 64;
     const int DS = 32;
 
-    const float EPS = 0.0001f;
+    const float EPS = 0.001f;
 }
 
 #endif//__TestConfig_h__
