@@ -31,6 +31,22 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
+        template <bool align> void SquaredDifferenceSum(const uint8_t * a, const uint8_t *b, size_t offset, v128_u32 & sum)
+        {
+            const v128_u8 _a = Load<align>(a + offset);
+            const v128_u8 _b = Load<align>(b + offset);
+            const v128_u8 d = AbsDifferenceU8(_a, _b);
+            sum = vec_msum(d, d, sum);
+        }
+
+        template <bool align> void SquaredDifferenceSumMasked(const uint8_t * a, const uint8_t *b, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _a = vec_and(Load<align>(a + offset), mask);
+            const v128_u8 _b = vec_and(Load<align>(b + offset), mask);
+            const v128_u8 d = AbsDifferenceU8(_a, _b);
+            sum = vec_msum(d, d, sum);
+        }
+
         template <bool align> void SquaredDifferenceSum(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             size_t width, size_t height, uint64_t * sum)
@@ -39,27 +55,27 @@ namespace Simd
             if(align)
                 assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
+            size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 rowSum = K32_00000000;
-                for(size_t col = 0; col < bodyWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 _a = Load<align>(a + col);
-                    const v128_u8 _b = Load<align>(b + col);
-                    const v128_u8 d = AbsDifferenceU8(_a, _b);
-                    rowSum = vec_msum(d, d, rowSum);
+                    SquaredDifferenceSum<align>(a, b, col, sums[0]);
+                    SquaredDifferenceSum<align>(a, b, col + A, sums[1]);
+                    SquaredDifferenceSum<align>(a, b, col + 2*A, sums[2]);
+                    SquaredDifferenceSum<align>(a, b, col + 3*A, sums[3]);
                 }
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    SquaredDifferenceSum<align>(a, b, col, sums[0]);
                 if(width - bodyWidth)
-                {
-                    const v128_u8 _a = vec_and(tailMask, Load<false>(a + width - A));
-                    const v128_u8 _b = vec_and(tailMask, Load<false>(b + width - A)); 
-                    const v128_u8 d = AbsDifferenceU8(_a, _b);
-                    rowSum = vec_msum(d, d, rowSum);
-                }
-                *sum += ExtractSum(rowSum);
+                    SquaredDifferenceSumMasked<false>(a, b, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
                 a += aStride;
                 b += bStride;
             }
