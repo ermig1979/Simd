@@ -183,9 +183,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSum32fAutoTest(S, f1, f2);
-        result = result && DifferenceSum32fAutoTest(S + O, f1, f2);
-        result = result && DifferenceSum32fAutoTest(S - O, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H + O, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H - O, f1, f2);
 
         return result;
     }
@@ -550,7 +550,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSum32fDataTest(create, DS, FUNC_F(SimdSquaredDifferenceSum32f));
+        result = result && DifferenceSum32fDataTest(create, DH, FUNC_F(SimdSquaredDifferenceSum32f));
 
         return result;
     }

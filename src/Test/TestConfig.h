@@ -75,11 +75,9 @@ namespace Test
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	const int W = 1920;
 	const int H = 1080;
-    const int S = 1024*512;
 #else
     const int W = 128;
     const int H = 96;
-    const int S = 128;
 #endif
 
     const int E = 10;
@@ -89,7 +87,6 @@ namespace Test
 
     const int DW = 48;
     const int DH = 64;
-    const int DS = 32;
 
     const float EPS = 0.001f;
 }

@@ -55,7 +55,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << length << ", " << count << "].");
 
         View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View weights(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View weights(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View x(length, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         FillRandom32f(svs, -10.0, 10.0);
@@ -119,7 +119,7 @@ namespace Test
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << length<< ", " << count << "].");
 
         View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View weights(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View weights(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View x(length, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         float s1, s2;

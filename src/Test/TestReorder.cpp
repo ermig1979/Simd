@@ -209,7 +209,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder16bit));
+        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder16bit));
 
         return result;
     }
@@ -218,7 +218,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder32bit));
+        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder32bit));
 
         return result;
     }
@@ -227,7 +227,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ReorderDataTest(create, DS, FUNC(SimdReorder64bit));
+        result = result && ReorderDataTest(create, DH, FUNC(SimdReorder64bit));
 
         return result;
     }

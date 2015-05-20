@@ -44,19 +44,26 @@ namespace Simd
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
-            size_t alignedSize = AlignLo(size, 16);
+            size_t partialAlignedSize = AlignLo(size, 4);
+            size_t fullAlignedSize = AlignLo(size, 16);
             size_t i = 0;
-            if(alignedSize)
+            if(partialAlignedSize)
             {
                 v128_f32 sums[4] = {K_0_0f, K_0_0f, K_0_0f, K_0_0f};
-                for(; i < alignedSize; i += 16)
+                if(fullAlignedSize)
                 {
-                    SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
-                    SquaredDifferenceSum32f<align>(a, b, i + 4, sums[1]);
-                    SquaredDifferenceSum32f<align>(a, b, i + 8, sums[2]);
-                    SquaredDifferenceSum32f<align>(a, b, i + 12, sums[3]);
+                    for(; i < fullAlignedSize; i += 16)
+                    {
+                        SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 4, sums[1]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 8, sums[2]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 12, sums[3]);
+                    }
+                    sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
                 }
-                *sum += ExtractSum(sums[0]) + ExtractSum(sums[1]) + ExtractSum(sums[2]) + ExtractSum(sums[3]);
+                for(; i < partialAlignedSize; i += 4)
+                    SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                *sum += ExtractSum(sums[0]);
             }
             for(; i < size; ++i)
                 *sum += Simd::Square(a[i] - b[i]);
