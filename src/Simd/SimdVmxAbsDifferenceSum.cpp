@@ -88,6 +88,12 @@ namespace Simd
                 AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
         }
 
+        template <bool align> void AbsDifferenceSumMasked(const uint8_t * a, const uint8_t *b, const uint8_t * mask, size_t offset, const v128_u8 & index, v128_u32 & sum)
+        {
+            const v128_u8 _mask = LoadMaskU8<align>(mask + offset, index);
+            AbsDifferenceSumMasked<align>(a, b, offset, _mask, sum);
+        }
+
         template <bool align> void AbsDifferenceSumMasked(
             const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, 
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
@@ -99,28 +105,31 @@ namespace Simd
                 assert(Aligned(mask) && Aligned(maskStride));
             }
 
+            size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
             v128_u8 _index = SetU8(index);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 rowSum = K32_00000000;
-                for(size_t col = 0; col < bodyWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 _mask = LoadMaskU8<align>(mask + col, _index);
-                    const v128_u8 _a = vec_and(_mask, Load<align>(a + col));
-                    const v128_u8 _b = vec_and(_mask, Load<align>(b + col)); 
-                    rowSum = vec_msum(AbsDifferenceU8(_a, _b), K8_01, rowSum);
+                    AbsDifferenceSumMasked<align>(a, b, mask, col, _index, sums[0]);
+                    AbsDifferenceSumMasked<align>(a, b, mask, col + A, _index, sums[1]);
+                    AbsDifferenceSumMasked<align>(a, b, mask, col + 2*A, _index, sums[2]);
+                    AbsDifferenceSumMasked<align>(a, b, mask, col + 3*A, _index, sums[3]);
                 }
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    AbsDifferenceSumMasked<align>(a, b, mask, col, _index, sums[0]);
                 if(width - bodyWidth)
                 {
                     const v128_u8 _mask = vec_and(tailMask, LoadMaskU8<false>(mask + width - A, _index));
-                    const v128_u8 _a = vec_and(_mask, Load<false>(a + width - A));
-                    const v128_u8 _b = vec_and(_mask, Load<false>(b + width - A)); 
-                    rowSum = vec_msum(AbsDifferenceU8(_a, _b), K8_01, rowSum);
+                    AbsDifferenceSumMasked<false>(a, b, width - A, _mask, sums[0]);
                 }
-                *sum += ExtractSum(rowSum);
+                *sum += ExtractSum(sums[0]);
                 a += aStride;
                 b += bStride;
                 mask += maskStride;
