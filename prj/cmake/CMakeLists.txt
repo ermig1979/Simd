@@ -7,8 +7,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-#set(CMAKE_CXX_COMPILER /opt/synesis/VA_SDK_power7/toolchain/usr/bin/powerpc-linux-g++)
-#set(CMAKE_SYSTEM_PROCESSOR "ppc64")
+if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
+ message("Using crossplatform toolchain '${TOOLCHAIN}' for '${TARGET}' platform.")
+ set(CMAKE_CXX_COMPILER ${TOOLCHAIN})
+ set(CMAKE_SYSTEM_PROCESSOR ${TARGET})
+endif()
 
 include_directories(${TRUNK_DIR}/src)
 
@@ -53,7 +56,7 @@ add_library(SimdAvx2 STATIC ${SIMD_AVX2_SOURCES})
 set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
-add_library(Simd SHARED ${SIMD_SOURCES})
+add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdSse1 SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx1 SimdAvx2)
 set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
@@ -81,7 +84,7 @@ add_library(SimdVsx STATIC ${SIMD_VSX_SOURCES})
 set_target_properties(SimdVsx PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++03")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
-add_library(Simd SHARED ${SIMD_SOURCES})
+add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdVmx SimdVsx)
 set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++03")
 
