@@ -388,29 +388,45 @@ namespace Simd
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
 
+        template <bool align> void ValueSum(const uint8_t * src, size_t offset, v128_u32 & sum)
+        {
+            const v128_u8 _src = Load<align>(src + offset);
+            sum = vec_msum(_src, K8_01, sum);
+        }
+
+        template <bool align> void ValueSumMasked(const uint8_t * src, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _src = vec_and(Load<align>(src + offset), mask);
+            sum = vec_msum(_src, K8_01, sum);
+        }
+
         template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
             if(align)
                 assert(Aligned(src) && Aligned(stride));
 
-            size_t alignedWidth = AlignLo(width, A);
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 _sum = K32_00000000;
-                for(size_t col = 0; col < alignedWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 _src = Load<align>(src + col);
-                    _sum = vec_msum(_src, K8_01, _sum);
+                    ValueSum<align>(src, col, sums[0]);
+                    ValueSum<align>(src, col + A, sums[1]);
+                    ValueSum<align>(src, col + 2*A, sums[2]);
+                    ValueSum<align>(src, col + 3*A, sums[3]);
                 }
-                if(alignedWidth != width)
-                {
-                    const v128_u8 _src = vec_and(Load<false>(src + width - A), tailMask);
-                    _sum = vec_msum(_src, K8_01, _sum);
-                }
-                *sum += ExtractSum(_sum);
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    ValueSum<align>(src, col, sums[0]);
+                if(width - bodyWidth)
+                    ValueSumMasked<false>(src, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
                 src += stride;
             }
         }
