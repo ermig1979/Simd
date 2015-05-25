@@ -30,28 +30,43 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t offset, __m256 & sum)
+        {
+            __m256 _a = Load<align>(a + offset);
+            __m256 _b = Load<align>(b + offset);
+            __m256 _d = _mm256_sub_ps(_a, _b);
+            sum = _mm256_add_ps(sum, _mm256_mul_ps(_d, _d));
+        }
+
         template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
+            size_t partialAlignedSize = AlignLo(size, 8);
+            size_t fullAlignedSize = AlignLo(size, 32);
             size_t i = 0;
-            size_t alignedSize = AlignLo(size, 8);
-            if(alignedSize)
+            if(partialAlignedSize)
             {
-                __m256 _sum = _mm256_setzero_ps();
-                for(; i < alignedSize; i += 8)
+                __m256 sums[4] = {_mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps()};
+                if(fullAlignedSize)
                 {
-                    __m256 _a = Avx::Load<align>(a + i);
-                    __m256 _b = Avx::Load<align>(b + i);
-                    __m256 _d = _mm256_sub_ps(_a, _b);
-                    _sum = _mm256_add_ps(_sum, _mm256_mul_ps(_d, _d));
+                    for(; i < fullAlignedSize; i += 32)
+                    {
+                        SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 8, sums[1]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 16, sums[2]);
+                        SquaredDifferenceSum32f<align>(a, b, i + 24, sums[3]);
+                    }
+                    sums[0] = _mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3]));
                 }
-                *sum += Avx::ExtractSum(_sum);
+                for(; i < partialAlignedSize; i += 8)
+                    SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
+                *sum += ExtractSum(sums[0]);
+                for(; i < size; ++i)
+                    *sum += Simd::Square(a[i] - b[i]);
             }
-            for(; i < size; ++i)
-                *sum += Simd::Square(a[i] - b[i]);
         }
 
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)

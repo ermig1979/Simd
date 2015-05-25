@@ -90,7 +90,6 @@ namespace Simd
                 SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
         }
 
-
         template <bool align> void SquaredDifferenceSumMasked(const uint8_t * a, const uint8_t *b, const uint8_t * mask, size_t offset, const v128_u8 & index, v128_u32 & sum)
         {
             const v128_u8 _mask = LoadMaskU8<align>(mask + offset, index);
