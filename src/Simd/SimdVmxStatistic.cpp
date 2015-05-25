@@ -490,31 +490,47 @@ namespace Simd
                 SquareSum<false>(src, stride, width, height, sum);
         }
 
+        template <bool align> void CorrelationSum(const uint8_t * a, const uint8_t * b, size_t offset, v128_u32 & sum)
+        {
+            const v128_u8 _a = Load<align>(a + offset);
+            const v128_u8 _b = Load<align>(b + offset);
+            sum = vec_msum(_a, _b, sum);
+        }
+
+        template <bool align> void CorrelationSumMasked(const uint8_t * a, const uint8_t * b, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _a = vec_and(Load<align>(a + offset), mask);
+            const v128_u8 _b = vec_and(Load<align>(b + offset), mask);
+            sum = vec_msum(_a, _b, sum);
+        }
+
         template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
             if(align)
                 assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
-            size_t alignedWidth = AlignLo(width, A);
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 _sum = K32_00000000;
-                for(size_t col = 0; col < alignedWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 _a = Load<align>(a + col);
-                    const v128_u8 _b = Load<align>(b + col);
-                    _sum = vec_msum(_a, _b, _sum);
+                    CorrelationSum<align>(a, b, col, sums[0]);
+                    CorrelationSum<align>(a, b, col + A, sums[1]);
+                    CorrelationSum<align>(a, b, col + 2*A, sums[2]);
+                    CorrelationSum<align>(a, b, col + 3*A, sums[3]);
                 }
-                if(alignedWidth != width)
-                {
-                    const v128_u8 _a = vec_and(Load<false>(a + width - A), tailMask);
-                    const v128_u8 _b = vec_and(Load<false>(b + width - A), tailMask);
-                    _sum = vec_msum(_a, _b, _sum);
-                }
-                *sum += ExtractSum(_sum);
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    CorrelationSum<align>(a, b, col, sums[0]);
+                if(width - bodyWidth)
+                    CorrelationSumMasked<false>(a, b, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
                 a += aStride;
                 b += bStride;
             }
