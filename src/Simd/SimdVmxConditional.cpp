@@ -179,6 +179,13 @@ namespace Simd
             }
         }
 
+        template <bool align, SimdCompareType compareType> void ConditionalSum(const uint8_t * src, const uint8_t * mask, size_t offset, const v128_u8 & value, v128_u32 & sum)
+        {
+            const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + offset), value);
+            const v128_u8 _src = vec_and(Load<align>(src + offset), _mask);
+            sum = vec_msum(_src, K8_01, sum);
+        }
+
         template <bool align, SimdCompareType compareType> 
         void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
@@ -187,27 +194,32 @@ namespace Simd
             if(align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
 
-            size_t alignedWidth = Simd::AlignLo(width, A);
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-
             v128_u8 _value = SetU8(value);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 rowSum = K32_00000000;
-                for(size_t col = 0; col < alignedWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
-                    const v128_u8 _src = vec_and(Load<align>(src + col), _mask);
-                    rowSum = vec_msum(_src, K8_01, rowSum);
+                    ConditionalSum<align, compareType>(src, mask, col, _value, sums[0]);
+                    ConditionalSum<align, compareType>(src, mask, col + A, _value, sums[1]);
+                    ConditionalSum<align, compareType>(src, mask, col + 2*A, _value, sums[2]);
+                    ConditionalSum<align, compareType>(src, mask, col + 3*A, _value, sums[3]);
                 }
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    ConditionalSum<align, compareType>(src, mask, col, _value, sums[0]);
                 if(alignedWidth != width)
                 {
                     const v128_u8 _mask = Compare8u<compareType>(Load<false>(mask + width - A), _value);
                     const v128_u8 _src = vec_and(vec_and(Load<false>(src + width - A), _mask), tailMask);
-                    rowSum = vec_msum(_src, K8_01, rowSum);
+                    sums[0] = vec_msum(_src, K8_01, sums[0]);
                 }
-                *sum += ExtractSum(rowSum);
+                *sum += ExtractSum(sums[0]);
                 src += srcStride;
                 mask += maskStride;
             }
