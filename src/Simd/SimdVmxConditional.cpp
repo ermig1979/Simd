@@ -338,10 +338,18 @@ namespace Simd
         template <bool align>
         SIMD_INLINE void AddSquareDifference(const uint8_t * src, ptrdiff_t step, const v128_u8 & mask, v128_u32 & sum)
         {
-            const v128_u8 a = vec_and(Load<align>(src - step), mask);
-            const v128_u8 b = vec_and(Load<align>(src + step), mask);
-            const v128_u8 d = AbsDifferenceU8(a, b);
+            const v128_u8 a = Load<align>(src - step);
+            const v128_u8 b = Load<align>(src + step);
+            const v128_u8 d = vec_and(AbsDifferenceU8(a, b), mask);
             sum = vec_msum(d, d, sum);
+        }
+
+        template <bool align, SimdCompareType compareType>
+        SIMD_INLINE void ConditionalSquareGradientSum(const uint8_t * src, ptrdiff_t stride, const uint8_t * mask, size_t offset, const v128_u8 & value, v128_u32 sums[2])
+        {
+            const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + offset), value);
+            AddSquareDifference<false>(src + offset, 1, _mask, sums[0]);
+            AddSquareDifference<align>(src + offset, stride, _mask, sums[1]);
         }
 
         template <bool align, SimdCompareType compareType> 
@@ -356,34 +364,38 @@ namespace Simd
             mask += maskStride;
             height -= 2;
 
-            size_t alignedWidth = Simd::AlignLo(width - 1, A);
+            size_t bodyWidth = Simd::AlignLo(width - 1, A);
             v128_u8 noseMask = ShiftRight(K8_FF, 1);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + 1 + alignedWidth);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + 1 + bodyWidth);
+            size_t alignedWidth = Simd::AlignLo(bodyWidth - A, DA);
 
             v128_u8 _value = SetU8(value);
             *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 rowSum = K32_00000000;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
                 {
                     const v128_u8 _mask = vec_and(Compare8u<compareType>(Load<false>(mask + 1), _value), noseMask);
-                    AddSquareDifference<false>(src + 1, 1, _mask, rowSum);
-                    AddSquareDifference<false>(src + 1, srcStride, _mask, rowSum);
+                    AddSquareDifference<false>(src + 1, 1, _mask, sums[0]);
+                    AddSquareDifference<false>(src + 1, srcStride, _mask, sums[1]);
                 }
-                for(size_t col = A; col < alignedWidth; col += A)
+                size_t col = A;
+                for(; col < alignedWidth; col += DA)
                 {
-                    const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
-                    AddSquareDifference<false>(src + col, 1, _mask, rowSum);
-                    AddSquareDifference<align>(src + col, srcStride, _mask, rowSum);
+                    ConditionalSquareGradientSum<align, compareType>(src, srcStride, mask, col, _value, sums);
+                    ConditionalSquareGradientSum<align, compareType>(src, srcStride, mask, col + A, _value, sums + 2);
                 }
-                if(alignedWidth != width - 1)
+                for(; col < bodyWidth; col += A)
+                    ConditionalSquareGradientSum<align, compareType>(src, srcStride, mask, col, _value, sums);
+                if(bodyWidth != width - 1)
                 {
                     size_t offset = width - A - 1;
                     const v128_u8 _mask = vec_and(Compare8u<compareType>(Load<false>(mask + offset), _value), tailMask);
-                    AddSquareDifference<false>(src + offset, 1, _mask, rowSum);
-                    AddSquareDifference<false>(src + offset, srcStride, _mask, rowSum);
+                    AddSquareDifference<false>(src + offset, 1, _mask, sums[0]);
+                    AddSquareDifference<false>(src + offset, srcStride, _mask, sums[1]);
                 }
-                *sum += ExtractSum(rowSum);
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                *sum += ExtractSum(sums[0]);
                 src += srcStride;
                 mask += maskStride;
             }
