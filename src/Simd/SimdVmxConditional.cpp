@@ -105,6 +105,13 @@ namespace Simd
             }
         }
 
+        template <bool align, SimdCompareType compareType> void ConditionalCount16i(const int16_t * src, size_t offset, const v128_s16 & value, v128_u32 & count)
+        {
+            const v128_s16 _src = Load<align>(src + offset);
+            const v128_u16 mask = vec_and((v128_u16)Compare16i<compareType>(_src, value), K16_0001);
+            count = vec_msum(mask, K16_0001, count);
+        }
+
         template <bool align, SimdCompareType compareType> 
         void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
         {
@@ -112,27 +119,33 @@ namespace Simd
             if(align)
                 assert(Aligned(src) && Aligned(stride));
 
-            size_t alignedWidth = Simd::AlignLo(width, HA);
+            size_t alignedWidth = AlignLo(width, DA);
+            size_t bodyWidth = Simd::AlignLo(width, HA);
             v128_u16 tailMask = ShiftLeft(K16_0001, HA - width + alignedWidth);
-
             v128_s16 _value = SIMD_VEC_SET1_EPI16(value);
-            v128_u32 _count = K32_00000000;
+            v128_u32 counts[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
             for(size_t row = 0; row < height; ++row)
             {
                 const int16_t * s = (const int16_t *)src;
-                for(size_t col = 0; col < alignedWidth; col += HA)
+                size_t col = 0;
+                for(; col < alignedWidth; col += DA)
                 {
-                    const v128_u16 mask = vec_and((v128_u16)Compare16i<compareType>(Load<align>(s + col), _value), K16_0001);
-                    _count = vec_msum(mask, K16_0001, _count);
+                    ConditionalCount16i<align, compareType>(s, col, _value, counts[0]);
+                    ConditionalCount16i<align, compareType>(s, col + HA, _value, counts[1]);
+                    ConditionalCount16i<align, compareType>(s, col + 2*HA, _value, counts[2]);
+                    ConditionalCount16i<align, compareType>(s, col + 3*HA, _value, counts[3]);
                 }
+                for(; col < bodyWidth; col += HA)
+                    ConditionalCount16i<align, compareType>(s, col, _value, counts[0]);
                 if(alignedWidth != width)
                 {
                     const v128_u16 mask = vec_and((v128_u16)Compare16i<compareType>(Load<false>(s + width - HA), _value), tailMask);
-                    _count = vec_msum(mask, K16_0001, _count);
-                }
+                    counts[0] = vec_msum(mask, K16_0001, counts[0]);
+                }               
                 src += stride;
             }
-            *count = ExtractSum(_count);
+            counts[0] = vec_add(vec_add(counts[0], counts[1]), vec_add(counts[2], counts[3]));
+            *count = ExtractSum(counts[0]);
         }
 
         template <SimdCompareType compareType> 

@@ -369,8 +369,8 @@ int main(int argc, char* argv[])
                     progress += tasks[i]->Progress();
                 progress /= double(tasks.size());
                 std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
-                Test::Sleep(1000);
-            } while (progress < 1.0);
+                Test::Sleep(40);
+            } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;
 
             Test::Log::s_log.SetLevel(Test::Log::Info); 
