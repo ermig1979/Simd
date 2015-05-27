@@ -31,6 +31,14 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
+        template <bool align> void GetStatistic(const uint8_t * src, size_t offset, v128_u8 & min, v128_u8 & max, v128_u32 & sum)
+        {
+            const v128_u8 _src = Load<align>(src + offset);
+            min = vec_min(min, _src);
+            max = vec_max(max, _src);
+            sum = vec_msum(_src, K8_01, sum);
+        }
+
         template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
             uint8_t * min, uint8_t * max, uint8_t * average)
         {
@@ -38,38 +46,44 @@ namespace Simd
             if(align)
                 assert(Aligned(src) && Aligned(stride));
 
+            size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             uint64_t sum = 0;
-            v128_u8 min_ = K8_FF;
-            v128_u8 max_ = K8_00;
+            v128_u8 mins[4] = {K8_FF, K8_FF, K8_FF, K8_FF};
+            v128_u8 maxs[4] = {K8_00, K8_00, K8_00, K8_00};
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 rowSum = K32_00000000;
-                for(size_t col = 0; col < bodyWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    const v128_u8 value = Load<align>(src + col);
-                    min_ = vec_min(min_, value);
-                    max_ = vec_max(max_, value);
-                    rowSum = vec_msum(value, K8_01, rowSum);
+                    GetStatistic<align>(src, col, mins[0], maxs[0], sums[0]);
+                    GetStatistic<align>(src, col + A, mins[1], maxs[1], sums[1]);
+                    GetStatistic<align>(src, col + 2*A, mins[2], maxs[2], sums[2]);
+                    GetStatistic<align>(src, col + 3*A, mins[3], maxs[3], sums[3]);
                 }
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    GetStatistic<align>(src, col, mins[0], maxs[0], sums[0]);
                 if(width - bodyWidth)
                 {
-                    const v128_u8 value = Load<false>(src + width - A);
-                    min_ = vec_min(min_, value);
-                    max_ = vec_max(max_, value);
-                    rowSum = vec_msum(vec_and(value, tailMask), K8_01, rowSum);
+                    const v128_u8 _src = Load<false>(src + width - A);
+                    mins[0] = vec_min(mins[0], _src);
+                    maxs[0] = vec_max(maxs[0], _src);
+                    sums[0] = vec_msum(vec_and(_src, tailMask), K8_01, sums[0]);
                 }
-                sum += ExtractSum(rowSum);
+                sum += ExtractSum(sums[0]);
                 src += stride;
             }
-
+            maxs[0] = vec_max(vec_max(maxs[0], maxs[1]), vec_max(maxs[2], maxs[3]));
+            mins[0] = vec_min(vec_min(mins[0], mins[1]), vec_min(mins[2], mins[3]));
             *min = UCHAR_MAX;
             *max = 0;
             for (size_t i = 0; i < A; ++i)
             {
-                *min = Base::MinU8(vec_extract(min_, i), *min);
-                *max = Base::MaxU8(vec_extract(max_, i), *max);
+                *min = Base::MinU8(vec_extract(mins[0], i), *min);
+                *max = Base::MaxU8(vec_extract(maxs[0], i), *max);
             }
             *average = (uint8_t)((sum + width*height/2)/(width*height));
         }
