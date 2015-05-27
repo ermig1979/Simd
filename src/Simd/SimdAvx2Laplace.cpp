@@ -130,7 +130,7 @@ namespace Simd
             SetMask3(a[2], mask);
         }
 
-        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint64_t * sum)
+        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width > A);
             if(align)
@@ -145,9 +145,9 @@ namespace Simd
 
             for(size_t row = 0; row < height; ++row)
             {
-                src0 = src + srcStride*(row - 1);
-                src1 = src0 + srcStride;
-                src2 = src1 + srcStride;
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
                 if(row == 0)
                     src0 = src1;
                 if(row == height - 1)

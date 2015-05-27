@@ -120,7 +120,7 @@ namespace Simd
         {
             assert(width > A);
             if(align)
-                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(src) && Aligned(stride));
 
             size_t bodyWidth = Simd::AlignHi(width, A) - A;
             const uint8_t *src0, *src1, *src2;
