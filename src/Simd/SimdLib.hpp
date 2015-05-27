@@ -1854,6 +1854,34 @@ namespace Simd
         SimdLaplaceAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    /*! @ingroup other_statistic
+
+        \fn void LaplaceAbsSum(const View<A>& src, uint64_t & sum)
+
+        \short Calculates sum of absolute value of Laplace's filter. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \verbatim
+        sum += abs(
+            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
+            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
+            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdLaplaceAbsSum.
+
+        \param [in] src - an input image.
+        \param [out] sum - a result sum.
+    */
+    template<class A> SIMD_INLINE void LaplaceAbsSum(const View<A> & src, uint64_t & sum)
+    {
+        assert(src.format == View<A>::Gray8);
+
+        SimdLaplaceAbsSum(src.data, src.stride, src.width, src.height, &sum);
+    }
+
     /*! @ingroup other_filter
 
         \fn void LbpEstimate(const View<A>& src, View<A>& dst)

@@ -2012,6 +2012,32 @@ extern "C"
     */
     SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup other_statistic
+
+        \fn void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+        \short Calculates sum of absolute value of Laplace's filter. 
+
+        Input image must has 8-bit gray format. 
+
+        For every point: 
+        \verbatim
+        sum += abs(
+            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
+            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
+            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::LaplaceAbsSum(const View<A>& src, uint64_t & sum).
+
+        \param [in] src - a pointer to pixels data of the input image.
+        \param [in] stride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] sum - a pointer to result sum.
+    */
+    SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
     /*! @ingroup other_filter
 
         \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

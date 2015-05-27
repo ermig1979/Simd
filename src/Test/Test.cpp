@@ -253,6 +253,7 @@ namespace Test
     TEST_ADD_GROUP(SquareSum);
     TEST_ADD_GROUP(SobelDxAbsSum);
     TEST_ADD_GROUP(SobelDyAbsSum);
+    TEST_ADD_GROUP(LaplaceAbsSum);
     TEST_ADD_GROUP(CorrelationSum);
 
     TEST_ADD_GROUP(StretchGray2x2);

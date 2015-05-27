@@ -508,6 +508,30 @@ namespace Test
         return result;
     }
 
+    bool LaplaceAbsSumAutoTest()
+    {
+        bool result = true;
+
+        result = result && SumAutoTest(FUNC4(Simd::Base::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Ssse3::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx2::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+#endif 
+
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Vmx::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+#endif
+
+        return result;
+    }
+
     namespace
     {
         struct Func5
@@ -860,6 +884,15 @@ namespace Test
         bool result = true;
 
         result = result && SumDataTest(create, DW, DH, FUNC4(SimdSobelDyAbsSum));
+
+        return result;
+    }
+
+    bool LaplaceAbsSumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && SumDataTest(create, DW, DH, FUNC4(SimdLaplaceAbsSum));
 
         return result;
     }

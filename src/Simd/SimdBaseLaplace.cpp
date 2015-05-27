@@ -79,5 +79,39 @@ namespace Simd
 
             Laplace<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
+
+        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > 1);
+
+            const uint8_t *src0, *src1, *src2;
+
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+#ifdef __GNUC__
+                size_t rowSum = 0;
+#else
+                uint32_t rowSum = 0;
+#endif
+
+                rowSum += Laplace<true>(src0, src1, src2, 0, 0, 1);
+
+                for(size_t col = 1; col < width - 1; ++col)
+                    rowSum += Laplace<true>(src0, src1, src2, col - 1, col, col + 1);
+
+                rowSum += Laplace<true>(src0, src1, src2, width - 2, width - 1, width - 1);
+
+                *sum += rowSum;
+            }
+        }
     }
 }

@@ -109,6 +109,81 @@ namespace Simd
             else
                 Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
+
+        SIMD_INLINE void LaplaceAbsSum(__m256i a[3][3], __m256i & sum)
+        {
+            sum = _mm256_add_epi32(sum, _mm256_madd_epi16(ConditionalAbs<true>(Laplace<0>(a)), K16_0001));
+            sum = _mm256_add_epi32(sum, _mm256_madd_epi16(ConditionalAbs<true>(Laplace<1>(a)), K16_0001));
+        }
+
+        SIMD_INLINE void SetMask3(__m256i a[3], __m256i mask)
+        {
+            a[0] = _mm256_and_si256(a[0], mask);
+            a[1] = _mm256_and_si256(a[1], mask);
+            a[2] = _mm256_and_si256(a[2], mask);
+        }
+
+        SIMD_INLINE void SetMask3x3(__m256i a[3][3], __m256i mask)
+        {
+            SetMask3(a[0], mask);
+            SetMask3(a[1], mask);
+            SetMask3(a[2], mask);
+        }
+
+        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+
+            __m256i a[3][3];
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
+            __m256i fullSum = _mm256_setzero_si256();
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + srcStride*(row - 1);
+                src1 = src0 + srcStride;
+                src2 = src1 + srcStride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                __m256i rowSum = _mm256_setzero_si256();
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                LaplaceAbsSum(a, rowSum);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    LaplaceAbsSum(a, rowSum);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src1 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                SetMask3x3(a, tailMask);
+                LaplaceAbsSum(a, rowSum);
+
+                fullSum = _mm256_add_epi64(fullSum, HorizontalSum32(rowSum));
+            }
+            *sum = ExtractSum<uint64_t>(fullSum);
+        }
+
+        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                LaplaceAbsSum<true>(src, stride, width, height, sum);
+            else
+                LaplaceAbsSum<false>(src, stride, width, height, sum);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

@@ -1388,6 +1388,26 @@ SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width
         Base::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::LaplaceAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::LaplaceAbsSum(src, stride, width, height, sum);
+    else
+#endif
+#ifdef SIMD_VMX_ENABLE
+    if(Vmx::Enable && width > Vmx::A)
+        Vmx::LaplaceAbsSum(src, stride, width, height, sum);
+    else
+#endif
+        Base::LaplaceAbsSum(src, stride, width, height, sum);
+}
+
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

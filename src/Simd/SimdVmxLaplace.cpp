@@ -116,6 +116,79 @@ namespace Simd
             else
                 Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
+
+        SIMD_INLINE void LaplaceAbsSum(v128_u8 a[3][3], v128_u32 sums[2])
+        {
+            sums[0] = vec_msum(ConditionalAbs<true>(Laplace<0>(a)), K16_0001, sums[0]);
+            sums[1] = vec_msum(ConditionalAbs<true>(Laplace<1>(a)), K16_0001, sums[1]);
+        }
+
+        SIMD_INLINE void SetMask3(v128_u8 a[3], v128_u8 mask)
+        {
+            a[0] = vec_and(a[0], mask);
+            a[1] = vec_and(a[1], mask);
+            a[2] = vec_and(a[2], mask);
+        }
+
+        SIMD_INLINE void SetMask3x3(v128_u8 a[3][3], v128_u8 mask)
+        {
+            SetMask3(a[0], mask);
+            SetMask3(a[1], mask);
+            SetMask3(a[2], mask);
+        }
+
+        template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width > A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            const uint8_t *src0, *src1, *src2;
+            v128_u8 a[3][3];
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+            *sum = 0;
+
+            for(size_t row = 0; row < height; ++row)
+            {
+                src0 = src + stride*(row - 1);
+                src1 = src0 + stride;
+                src2 = src1 + stride;
+                if(row == 0)
+                    src0 = src1;
+                if(row == height - 1)
+                    src2 = src1;
+
+                v128_u32 sums[2] = {K32_00000000, K32_00000000};
+
+                LoadNose3<align, 1>(src0 + 0, a[0]);
+                LoadNose3<align, 1>(src1 + 0, a[1]);
+                LoadNose3<align, 1>(src2 + 0, a[2]);
+                LaplaceAbsSum(a, sums);
+                for(size_t col = A; col < bodyWidth; col += A)
+                {
+                    LoadBody3<align, 1>(src0 + col, a[0]);
+                    LoadBody3<align, 1>(src1 + col, a[1]);
+                    LoadBody3<align, 1>(src2 + col, a[2]);
+                    LaplaceAbsSum(a, sums);
+                }
+                LoadTail3<false, 1>(src0 + width - A, a[0]);
+                LoadTail3<false, 1>(src1 + width - A, a[1]);
+                LoadTail3<false, 1>(src2 + width - A, a[2]);
+                SetMask3x3(a, tailMask);
+                LaplaceAbsSum(a, sums);
+
+                *sum += ExtractSum(vec_add(sums[0], sums[1]));
+            }
+        }
+
+        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                LaplaceAbsSum<true>(src, stride, width, height, sum);
+            else
+                LaplaceAbsSum<false>(src, stride, width, height, sum);
+        }
     }
 #endif// SIMD_VMX_ENABLE
 }
