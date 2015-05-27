@@ -1969,9 +1969,9 @@ extern "C"
         For every point: 
         \verbatim
         dst[x, y] = 
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1].
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::Laplace(const View<A>& src, View<A>& dst).
@@ -1996,9 +1996,9 @@ extern "C"
         For every point: 
         \verbatim
         dst[x, y] = abs(
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::LaplaceAbs(const View<A>& src, View<A>& dst).
@@ -2023,9 +2023,9 @@ extern "C"
         For every point: 
         \verbatim
         sum += abs(
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
         \endverbatim
 
         \note This function has a C++ wrappers: Simd::LaplaceAbsSum(const View<A>& src, uint64_t & sum).

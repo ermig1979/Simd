@@ -1809,9 +1809,9 @@ namespace Simd
         For every point: 
         \verbatim
         dst[x, y] = 
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1].
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLaplace.
@@ -1837,9 +1837,9 @@ namespace Simd
         For every point: 
         \verbatim
         dst[x, y] = abs(
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbs.
@@ -1865,9 +1865,9 @@ namespace Simd
         For every point: 
         \verbatim
         sum += abs(
-            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
-            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
-            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+            - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
+            - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
+            - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1]).
         \endverbatim
 
         \note This function is a C++ wrapper for function ::SimdLaplaceAbsSum.

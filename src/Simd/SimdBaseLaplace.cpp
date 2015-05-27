@@ -31,7 +31,7 @@ namespace Simd
 
         template <> SIMD_INLINE int Laplace<false>(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
         {
-            return s0[x0] + s0[x1] + s0[x2] + s1[x0] - 8*s1[x1] + s1[x2] + s2[x0] + s2[x1] + s2[x2];
+            return 8*s1[x1] - (s0[x0] + s0[x1] + s0[x2] + s1[x0] + s1[x2] + s2[x0] + s2[x1] + s2[x2]);
         }
 
         template <> SIMD_INLINE int Laplace<true>(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x1, size_t x2)

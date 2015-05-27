@@ -34,12 +34,11 @@ namespace Simd
     {
         template <int part> SIMD_INLINE v128_u16 Laplace(v128_u8 a[3][3])
         {
-            return vec_sub(    
+            return vec_sub(vec_mladd(K16_0008, UnpackU8<part>(a[1][1]), K16_0000),     
                 vec_add(vec_add(vec_add(UnpackU8<part>(a[0][0]), UnpackU8<part>(a[0][1])), 
                 vec_add(UnpackU8<part>(a[0][2]), UnpackU8<part>(a[1][0]))),
                 vec_add(vec_add(UnpackU8<part>(a[1][2]), UnpackU8<part>(a[2][0])), 
-                vec_add(UnpackU8<part>(a[2][1]), UnpackU8<part>(a[2][2])))),
-                vec_mladd(K16_0008, UnpackU8<part>(a[1][1]), K16_0000));
+                vec_add(UnpackU8<part>(a[2][1]), UnpackU8<part>(a[2][2])))));
         }
 
         template<bool align, bool first, bool abs> SIMD_INLINE void Laplace(v128_u8 a[3][3], Storer<align> & dst)
