@@ -1958,6 +1958,33 @@ extern "C"
     SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
         uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
+    /*! @ingroup laplace_filter
+
+        \fn void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        \short Calculates Laplace's filter. 
+
+        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+
+        For every point: 
+        \verbatim
+        dst[x, y] = 
+            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
+            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
+            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1].
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::Laplace(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
+        \param [in] srcStride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to pixels data of the output image.
+        \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
     /*! @ingroup other_filter
 
         \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

@@ -376,6 +376,18 @@ namespace Simd
         {
             return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
         }
+
+        template <bool abs> __m256i ConditionalAbs(__m256i a);
+
+        template <> SIMD_INLINE __m256i ConditionalAbs<true>(__m256i a)
+        {
+            return _mm256_abs_epi16(a);
+        }
+
+        template <> SIMD_INLINE __m256i ConditionalAbs<false>(__m256i a)
+        {
+            return a;
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 
@@ -437,6 +449,18 @@ namespace Simd
         template<class T> SIMD_INLINE T Min(const T & a, const T & b, const T & c)
         {
             return vec_min(a, vec_min(b, c));
+        }
+
+        template <bool abs> v128_u16 ConditionalAbs(v128_u16 a);
+
+        template <> SIMD_INLINE v128_u16 ConditionalAbs<true>(v128_u16 a)
+        {
+            return (v128_u16)vec_abs((v128_s16)a);
+        }
+
+        template <> SIMD_INLINE v128_u16 ConditionalAbs<false>(v128_u16 a)
+        {
+            return a;
         }
     }
 #endif//SIMD_VMX_ENABLE

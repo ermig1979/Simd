@@ -142,6 +142,18 @@ namespace Simd
             a[0] = _mm_loadu_si128((__m128i*)(p - 1));
             a[2] = LoadAfterLast<1>(_mm_loadu_si128((__m128i*)p));
         }
+
+        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
+
+        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi8(a, b); 
+        }
+
+        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi8(a, b); 
+        }
 	}
 #endif//SIMD_SSE2_ENABLE
 
@@ -329,6 +341,18 @@ namespace Simd
         {
             a[0] = _mm256_loadu_si256((__m256i*)(p - 1));
             a[2] = LoadAfterLast<false, 1>(p);
+        }
+
+        template <int part> SIMD_INLINE __m256i UnpackU8(__m256i a, __m256i b = K_ZERO);
+
+        template <> SIMD_INLINE __m256i UnpackU8<0>(__m256i a, __m256i b)
+        {
+            return _mm256_unpacklo_epi8(a, b); 
+        }
+
+        template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
+        {
+            return _mm256_unpackhi_epi8(a, b); 
         }
     }
 #endif//SIMD_AVX2_ENABLE
@@ -535,6 +559,18 @@ namespace Simd
             a[2] = Load<align>(p);
             a[3] = LoadAfterLast<step>(a[2]);
             a[4] = LoadAfterLast<step>(a[3]);
+        }
+
+        template <int part> v128_u16 UnpackU8(v128_u8 a, v128_u8 b = K8_00);
+
+        template <> SIMD_INLINE v128_u16 UnpackU8<0>(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u16)vec_perm(a, b, K8_PERM_UNPACK_LO_U8);
+        }
+
+        template <> SIMD_INLINE v128_u16 UnpackU8<1>(v128_u8 a, v128_u8 b)
+        {
+            return (v128_u16)vec_perm(a, b, K8_PERM_UNPACK_HI_U8);
         }
 
         SIMD_INLINE v128_u16 UnpackLoU8(v128_u8 a, v128_u8 b = K8_00)

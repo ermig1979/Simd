@@ -230,6 +230,11 @@
 */
 
 /*! @ingroup filter
+    @defgroup laplace_filter Laplace Filters
+    \short Laplace image filters.
+*/
+
+/*! @ingroup filter
     @defgroup other_filter Other Filters
     \short Other image filters.
 */

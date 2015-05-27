@@ -32,18 +32,6 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
-        template <bool abs> v128_u16 ConditionalAbs(v128_u16 a);
-
-        template <> SIMD_INLINE v128_u16 ConditionalAbs<true>(v128_u16 a)
-        {
-            return (v128_u16)vec_abs((v128_s16)a);
-        }
-
-        template <> SIMD_INLINE v128_u16 ConditionalAbs<false>(v128_u16 a)
-        {
-            return a;
-        }
-
         template <bool abs> SIMD_INLINE void SobelDx(v128_u8 a[3][3], v128_u16 & lo, v128_u16 & hi)
         {
             lo = ConditionalAbs<abs>(BinomialSum(

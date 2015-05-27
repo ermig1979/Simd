@@ -1348,6 +1348,27 @@ SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statis
         Base::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
 }
 
+
+SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width > Avx2::A)
+        Avx2::Laplace(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width > Sse2::A)
+        Sse2::Laplace(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_VMX_ENABLE
+    if(Vmx::Enable && width > Vmx::A)
+        Vmx::Laplace(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::Laplace(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

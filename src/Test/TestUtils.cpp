@@ -112,7 +112,7 @@ namespace Test
                     errorCount++;
                     if(printError)
                     {
-                        if(errorCount == 1 && description.length() > 0)
+                        if(errorCount == 1)
                             message << std::endl << "Fail comparison: " << description << std::endl;
                         size_t col = offset/channelCount;
                         message << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];

@@ -32,18 +32,6 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <bool abs> __m256i ConditionalAbs(__m256i a);
-
-        template <> SIMD_INLINE __m256i ConditionalAbs<true>(__m256i a)
-        {
-            return _mm256_abs_epi16(a);
-        }
-
-        template <> SIMD_INLINE __m256i ConditionalAbs<false>(__m256i a)
-        {
-            return a;
-        }
-
         template<bool abs> SIMD_INLINE void SobelDx(__m256i a[3][3], __m256i & lo, __m256i & hi)
         {
             lo = ConditionalAbs<abs>(BinomialSum16(

@@ -168,6 +168,9 @@ namespace Test
     TEST_ADD_GROUP(ConditionalSquareSum);
     TEST_ADD_GROUP(ConditionalSquareGradientSum);
 
+    TEST_ADD_GROUP(ContourMetricsMasked);
+    TEST_ADD_GROUP(ContourAnchors);
+
     TEST_ADD_GROUP(Copy);
     TEST_ADD_GROUP(CopyFrame);
 
@@ -210,6 +213,12 @@ namespace Test
     TEST_ADD_GROUP(GaussianBlur3x3);
     TEST_ADD_GROUP(AbsGradientSaturatedSum);
     TEST_ADD_GROUP(LbpEstimate);
+    TEST_ADD_GROUP(SobelDx);
+    TEST_ADD_GROUP(SobelDxAbs);
+    TEST_ADD_GROUP(SobelDy);
+    TEST_ADD_GROUP(SobelDyAbs);
+    TEST_ADD_GROUP(ContourMetrics);
+    TEST_ADD_GROUP(Laplace);
 
     TEST_ADD_GROUP(OperationBinary8u);
     TEST_ADD_GROUP(OperationBinary16i);
@@ -232,14 +241,6 @@ namespace Test
     TEST_ADD_GROUP(SegmentationPropagate2x2);
 
     TEST_ADD_GROUP(ShiftBilinear);
-
-    TEST_ADD_GROUP(SobelDx);
-    TEST_ADD_GROUP(SobelDxAbs);
-    TEST_ADD_GROUP(SobelDy);
-    TEST_ADD_GROUP(SobelDyAbs);
-    TEST_ADD_GROUP(ContourMetrics);
-    TEST_ADD_GROUP(ContourMetricsMasked);
-    TEST_ADD_GROUP(ContourAnchors);
 
     TEST_ADD_GROUP(GetStatistic);
     TEST_ADD_GROUP(GetMoments);
