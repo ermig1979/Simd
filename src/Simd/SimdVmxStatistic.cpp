@@ -195,26 +195,184 @@ namespace Simd
                 GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
         }
 
-        template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        template <bool align> void ValueSum(const uint8_t * src, size_t offset, v128_u32 & sum)
         {
-            size_t alignedWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+            const v128_u8 _src = Load<align>(src + offset);
+            sum = vec_msum(_src, K8_01, sum);
+        }
 
-            memset(sums, 0, sizeof(uint32_t)*height);
+        template <bool align> void ValueSumMasked(const uint8_t * src, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _src = vec_and(Load<align>(src + offset), mask);
+            sum = vec_msum(_src, K8_01, sum);
+        }
+
+        template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            *sum = 0;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 sum = K32_00000000;
-                for(size_t col = 0; col < alignedWidth; col += A)
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    v128_u8 _src = Load<align>(src + col);
-                    sum = vec_msum(_src, K8_01, sum);
+                    ValueSum<align>(src, col, sums[0]);
+                    ValueSum<align>(src, col + A, sums[1]);
+                    ValueSum<align>(src, col + 2*A, sums[2]);
+                    ValueSum<align>(src, col + 3*A, sums[3]);
                 }
-                if(alignedWidth != width)
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    ValueSum<align>(src, col, sums[0]);
+                if(width - bodyWidth)
+                    ValueSumMasked<false>(src, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
+                src += stride;
+            }
+        }
+
+        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                ValueSum<true>(src, stride, width, height, sum);
+            else
+                ValueSum<false>(src, stride, width, height, sum);
+        }
+
+        template <bool align> void SquareSum(const uint8_t * src, size_t offset, v128_u32 & sum)
+        {
+            const v128_u8 _src = Load<align>(src + offset);
+            sum = vec_msum(_src, _src, sum);
+        }
+
+        template <bool align> void SquareSumMasked(const uint8_t * src, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _src = vec_and(Load<align>(src + offset), mask);
+            sum = vec_msum(_src, _src, sum);
+        }
+
+        template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    v128_u8 _src = Load<false>(src + width - A);
-                    sum = vec_msum(_src, tailMask, sum);
+                    SquareSum<align>(src, col, sums[0]);
+                    SquareSum<align>(src, col + A, sums[1]);
+                    SquareSum<align>(src, col + 2*A, sums[2]);
+                    SquareSum<align>(src, col + 3*A, sums[3]);
                 }
-                sums[row] = ExtractSum(sum);
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    SquareSum<align>(src, col, sums[0]);
+                if(width - bodyWidth)
+                    SquareSumMasked<false>(src, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
+                src += stride;
+            }
+        }
+
+        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(src) && Aligned(stride))
+                SquareSum<true>(src, stride, width, height, sum);
+            else
+                SquareSum<false>(src, stride, width, height, sum);
+        }
+
+        template <bool align> void CorrelationSum(const uint8_t * a, const uint8_t * b, size_t offset, v128_u32 & sum)
+        {
+            const v128_u8 _a = Load<align>(a + offset);
+            const v128_u8 _b = Load<align>(b + offset);
+            sum = vec_msum(_a, _b, sum);
+        }
+
+        template <bool align> void CorrelationSumMasked(const uint8_t * a, const uint8_t * b, size_t offset, const v128_u8 & mask, v128_u32 & sum)
+        {
+            const v128_u8 _a = vec_and(Load<align>(a + offset), mask);
+            const v128_u8 _b = vec_and(Load<align>(b + offset), mask);
+            sum = vec_msum(_a, _b, sum);
+        }
+
+        template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            assert(width >= A);
+            if(align)
+                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
+
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            *sum = 0;
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
+                {
+                    CorrelationSum<align>(a, b, col, sums[0]);
+                    CorrelationSum<align>(a, b, col + A, sums[1]);
+                    CorrelationSum<align>(a, b, col + 2*A, sums[2]);
+                    CorrelationSum<align>(a, b, col + 3*A, sums[3]);
+                }
+                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
+                for(; col < bodyWidth; col += A)
+                    CorrelationSum<align>(a, b, col, sums[0]);
+                if(width - bodyWidth)
+                    CorrelationSumMasked<false>(a, b, width - A, tailMask, sums[0]);
+                *sum += ExtractSum(sums[0]);
+                a += aStride;
+                b += bStride;
+            }
+        }
+
+        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+        {
+            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
+            else
+                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
+        }
+
+        template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+        {
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
+            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                v128_u32 _sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
+                {
+                    ValueSum<align>(src, col, _sums[0]);
+                    ValueSum<align>(src, col + A, _sums[1]);
+                    ValueSum<align>(src, col + 2*A, _sums[2]);
+                    ValueSum<align>(src, col + 3*A, _sums[3]);
+                }
+                _sums[0] = vec_add(vec_add(_sums[0], _sums[1]), vec_add(_sums[2], _sums[3]));
+                for(; col < bodyWidth; col += A)
+                    ValueSum<align>(src, col, _sums[0]);
+                if(width - bodyWidth)
+                    ValueSumMasked<false>(src, width - A, tailMask, _sums[0]);
+                sums[row] = ExtractSum(_sums[0]);
                 src += stride;
             }
         }
@@ -400,162 +558,6 @@ namespace Simd
                 GetAbsDxColSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
-        }
-
-        template <bool align> void ValueSum(const uint8_t * src, size_t offset, v128_u32 & sum)
-        {
-            const v128_u8 _src = Load<align>(src + offset);
-            sum = vec_msum(_src, K8_01, sum);
-        }
-
-        template <bool align> void ValueSumMasked(const uint8_t * src, size_t offset, const v128_u8 & mask, v128_u32 & sum)
-        {
-            const v128_u8 _src = vec_and(Load<align>(src + offset), mask);
-            sum = vec_msum(_src, K8_01, sum);
-        }
-
-        template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            assert(width >= A);
-            if(align)
-                assert(Aligned(src) && Aligned(stride));
-
-            size_t alignedWidth = AlignLo(width, QA);
-            size_t bodyWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            *sum = 0;
-            for(size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
-                {
-                    ValueSum<align>(src, col, sums[0]);
-                    ValueSum<align>(src, col + A, sums[1]);
-                    ValueSum<align>(src, col + 2*A, sums[2]);
-                    ValueSum<align>(src, col + 3*A, sums[3]);
-                }
-                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
-                    ValueSum<align>(src, col, sums[0]);
-                if(width - bodyWidth)
-                    ValueSumMasked<false>(src, width - A, tailMask, sums[0]);
-                *sum += ExtractSum(sums[0]);
-                src += stride;
-            }
-        }
-
-        void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            if(Aligned(src) && Aligned(stride))
-                ValueSum<true>(src, stride, width, height, sum);
-            else
-                ValueSum<false>(src, stride, width, height, sum);
-        }
-
-        template <bool align> void SquareSum(const uint8_t * src, size_t offset, v128_u32 & sum)
-        {
-            const v128_u8 _src = Load<align>(src + offset);
-            sum = vec_msum(_src, _src, sum);
-        }
-
-        template <bool align> void SquareSumMasked(const uint8_t * src, size_t offset, const v128_u8 & mask, v128_u32 & sum)
-        {
-            const v128_u8 _src = vec_and(Load<align>(src + offset), mask);
-            sum = vec_msum(_src, _src, sum);
-        }
-
-        template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            assert(width >= A);
-            if(align)
-                assert(Aligned(src) && Aligned(stride));
-
-            size_t alignedWidth = AlignLo(width, QA);
-            size_t bodyWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            *sum = 0;
-            for(size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
-                {
-                    SquareSum<align>(src, col, sums[0]);
-                    SquareSum<align>(src, col + A, sums[1]);
-                    SquareSum<align>(src, col + 2*A, sums[2]);
-                    SquareSum<align>(src, col + 3*A, sums[3]);
-                }
-                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
-                    SquareSum<align>(src, col, sums[0]);
-                if(width - bodyWidth)
-                    SquareSumMasked<false>(src, width - A, tailMask, sums[0]);
-                *sum += ExtractSum(sums[0]);
-                src += stride;
-            }
-        }
-
-        void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
-        {
-            if(Aligned(src) && Aligned(stride))
-                SquareSum<true>(src, stride, width, height, sum);
-            else
-                SquareSum<false>(src, stride, width, height, sum);
-        }
-
-        template <bool align> void CorrelationSum(const uint8_t * a, const uint8_t * b, size_t offset, v128_u32 & sum)
-        {
-            const v128_u8 _a = Load<align>(a + offset);
-            const v128_u8 _b = Load<align>(b + offset);
-            sum = vec_msum(_a, _b, sum);
-        }
-
-        template <bool align> void CorrelationSumMasked(const uint8_t * a, const uint8_t * b, size_t offset, const v128_u8 & mask, v128_u32 & sum)
-        {
-            const v128_u8 _a = vec_and(Load<align>(a + offset), mask);
-            const v128_u8 _b = vec_and(Load<align>(b + offset), mask);
-            sum = vec_msum(_a, _b, sum);
-        }
-
-        template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
-        {
-            assert(width >= A);
-            if(align)
-                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
-
-            size_t alignedWidth = AlignLo(width, QA);
-            size_t bodyWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            *sum = 0;
-            for(size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
-                {
-                    CorrelationSum<align>(a, b, col, sums[0]);
-                    CorrelationSum<align>(a, b, col + A, sums[1]);
-                    CorrelationSum<align>(a, b, col + 2*A, sums[2]);
-                    CorrelationSum<align>(a, b, col + 3*A, sums[3]);
-                }
-                sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
-                    CorrelationSum<align>(a, b, col, sums[0]);
-                if(width - bodyWidth)
-                    CorrelationSumMasked<false>(a, b, width - A, tailMask, sums[0]);
-                *sum += ExtractSum(sums[0]);
-                a += aStride;
-                b += bStride;
-            }
-        }
-
-        void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
-        {
-            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
         }
     }
 #endif// SIMD_VMX_ENABLE
