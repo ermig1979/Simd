@@ -385,34 +385,46 @@ namespace Simd
                 GetRowSums<false>(src, stride, width, height, sums);
         }
 
+        template <bool align> void GetAbsDyRowSums(const uint8_t * src0, const uint8_t * src1, size_t offset, v128_u32 & sum)
+        {
+            v128_u8 _src0 = Load<align>(src0 + offset);
+            v128_u8 _src1 = Load<align>(src1 + offset);
+            sum = vec_msum(AbsDifferenceU8(_src0, _src1), K8_01, sum);
+        }
+
         template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            size_t alignedWidth = AlignLo(width, A);
+            size_t alignedWidth = AlignLo(width, QA);
+            size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-
-            memset(sums, 0, sizeof(uint32_t)*height);
             const uint8_t * src0 = src;
             const uint8_t * src1 = src + stride;
             height--;
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 sum = K32_00000000;
-                for(size_t col = 0; col < alignedWidth; col += A)
+                size_t col = 0;
+                v128_u32 _sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
+                for(; col < alignedWidth; col += QA)
                 {
-                    v128_u8 _src0 = Load<align>(src0 + col);
-                    v128_u8 _src1 = Load<align>(src1 + col);
-                    sum = vec_msum(AbsDifferenceU8(_src0, _src1), K8_01, sum);
+                    GetAbsDyRowSums<align>(src0, src1, col, _sums[0]);
+                    GetAbsDyRowSums<align>(src0, src1, col + A, _sums[1]);
+                    GetAbsDyRowSums<align>(src0, src1, col + 2*A, _sums[2]);
+                    GetAbsDyRowSums<align>(src0, src1, col + 3*A, _sums[3]);
                 }
+                _sums[0] = vec_add(vec_add(_sums[0], _sums[1]), vec_add(_sums[2], _sums[3]));
+                for(; col < bodyWidth; col += A)
+                    GetAbsDyRowSums<align>(src0, src1, col, _sums[0]);
                 if(alignedWidth != width)
                 {
                     v128_u8 _src0 = Load<false>(src0 + width - A);
                     v128_u8 _src1 = Load<false>(src1 + width - A);
-                    sum = vec_msum(AbsDifferenceU8(_src0, _src1), tailMask, sum);
+                    _sums[0] = vec_msum(AbsDifferenceU8(_src0, _src1), tailMask, _sums[0]);
                 }
-                sums[row] = ExtractSum(sum);
+                sums[row] = ExtractSum(_sums[0]);
                 src0 += stride;
                 src1 += stride;
             }
+            sums[height] = 0;
         }
 
         void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
