@@ -1826,6 +1826,34 @@ namespace Simd
         SimdLaplace(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    /*! @ingroup laplace_filter
+
+        \fn void LaplaceAbs(const View<A>& src, View<A>& dst)
+
+        \short Calculates absolute value of Laplace's filter. 
+
+        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+
+        For every point: 
+        \verbatim
+        dst[x, y] = abs(
+            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
+            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
+            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdLaplaceAbs.
+
+        \param [in] src - an input image.
+        \param [out] dst - an output image.
+    */
+    template<class A> SIMD_INLINE void LaplaceAbs(const View<A>& src, View<A>& dst)
+    {
+        assert(EqualSize(src, dst) && src.format == View<A>::Gray8 && dst.format == View<A>::Int16);
+
+        SimdLaplaceAbs(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
     /*! @ingroup other_filter
 
         \fn void LbpEstimate(const View<A>& src, View<A>& dst)

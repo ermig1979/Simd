@@ -106,6 +106,16 @@ namespace Simd
             else
                 Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
+
+        void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+        }
     }
 #endif// SIMD_VMX_ENABLE
 }

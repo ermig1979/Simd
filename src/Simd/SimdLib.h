@@ -1985,6 +1985,33 @@ extern "C"
     */
     SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup laplace_filter
+
+        \fn void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        \short Calculates absolute value of Laplace's filter. 
+
+        All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format. 
+
+        For every point: 
+        \verbatim
+        dst[x, y] = abs(
+            + src[x-1, y-1] +   src[x, y-1] + src[x+1, y-1]
+            + src[x-1, y]   - 8*src[x, y]   + src[x+1, y]
+            + src[x-1, y+1] +   src[x, y+1] + src[x+1, y+1]).
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::LaplaceAbs(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of the input image.
+        \param [in] srcStride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to pixels data of the output image.
+        \param [in] dstStride - a row size of the output image (in bytes).
+    */
+    SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
     /*! @ingroup other_filter
 
         \fn void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

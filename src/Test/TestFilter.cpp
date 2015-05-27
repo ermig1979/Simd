@@ -455,6 +455,30 @@ namespace Test
         return result;
     }
 
+    bool LaplaceAbsAutoTest()
+    {
+        bool result = true;
+
+        result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if(Simd::Avx2::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+#endif 
+
+#ifdef SIMD_VMX_ENABLE
+        if(Simd::Vmx::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool ColorFilterDataTest(bool create, int width, int height, View::Format format, const FuncC & f)
@@ -660,6 +684,15 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterDataTest(create, DW, DH, View::Int16, FUNC_G(SimdLaplace));
+
+        return result;
+    }
+
+    bool LaplaceAbsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GrayFilterDataTest(create, DW, DH, View::Int16, FUNC_G(SimdLaplaceAbs));
 
         return result;
     }

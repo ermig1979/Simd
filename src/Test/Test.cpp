@@ -219,6 +219,7 @@ namespace Test
     TEST_ADD_GROUP(SobelDyAbs);
     TEST_ADD_GROUP(ContourMetrics);
     TEST_ADD_GROUP(Laplace);
+    TEST_ADD_GROUP(LaplaceAbs);
 
     TEST_ADD_GROUP(OperationBinary8u);
     TEST_ADD_GROUP(OperationBinary16i);
