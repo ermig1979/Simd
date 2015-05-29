@@ -188,33 +188,37 @@ namespace Simd
             }
         }
 
-        template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
-            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        template <SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+            size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            switch(type)
-            {
-            case SimdOperationBinary16iAddition:
-                return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
-            default:
-                assert(0);
-            }
+            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+                OperationBinary16i<true, type>(a, aStride, b, bStride, width, height, dst, dstStride);
+            else
+                OperationBinary16i<false, type>(a, aStride, b, bStride, width, height, dst, dstStride);
         }
 
         void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
             size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
         {
-            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
-                OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
-            else
-                OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+            switch(type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+            default:
+                assert(0);
+            }            
         }
 
-        template <bool align, bool first> SIMD_INLINE void VectorProduct(const v128_u16 & vertical, const uint8_t * horizontal, Storer<align> & dst)
+        SIMD_INLINE v128_u8 VectorProduct(const v128_u16 & vertical, const v128_u8 & horizontal)
         {
-            v128_u8 _horizontal = Load<align>(horizontal);
-            v128_u16 lo = DivideBy255(vec_mladd(vertical, UnpackLoU8(_horizontal), K16_0000));
-            v128_u16 hi = DivideBy255(vec_mladd(vertical, UnpackHiU8(_horizontal), K16_0000));
-            Store<align, first>(dst, vec_pack(lo, hi));
+            v128_u16 lo = DivideBy255(vec_mladd(vertical, UnpackU8<0>(horizontal), K16_0000));
+            v128_u16 hi = DivideBy255(vec_mladd(vertical, UnpackU8<1>(horizontal), K16_0000));
+            return vec_pack(lo, hi);
+        } 
+
+        template <bool align> SIMD_INLINE void VectorProduct(const v128_u16 & vertical, const uint8_t * horizontal, size_t offset, uint8_t * dst)
+        {
+            Store<align>(dst + offset, VectorProduct(vertical, Load<align>(horizontal + offset)));
         } 
 
         template <bool align> void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
@@ -224,20 +228,33 @@ namespace Simd
                 assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
 
             size_t alignedWidth = Simd::AlignLo(width, A);
+            size_t fullAlignedWidth = Simd::AlignLo(width, QA);
             for(size_t row = 0; row < height; ++row)
             {
                 v128_u16 _vertical = SetU16(vertical[row]);
-                Storer<align> _dst(dst);
-                VectorProduct<align, true>(_vertical, horizontal, _dst);
-                for(size_t col = A; col < alignedWidth; col += A)
-                    VectorProduct<align, false>(_vertical, horizontal + col, _dst);
-                Flush(_dst);
-                if(alignedWidth != width)
+                if(align)
                 {
-                    Storer<false> _dst(dst + width - A);
-                    VectorProduct<false, true>(_vertical, horizontal + width - A, _dst);
+                    size_t col = 0;
+                    for(; col < alignedWidth; col += QA)
+                    {
+                        VectorProduct<true>(_vertical, horizontal, col, dst);
+                        VectorProduct<true>(_vertical, horizontal, col + A, dst);
+                        VectorProduct<true>(_vertical, horizontal, col + 2*A, dst);
+                        VectorProduct<true>(_vertical, horizontal, col + 3*A, dst);
+                    }
+                    for(; col < alignedWidth; col += A)
+                        VectorProduct<true>(_vertical, horizontal, col, dst);
+                }
+                else
+                {
+                    Storer<align> _dst(dst);
+                    _dst.First(VectorProduct(_vertical, Load<align>(horizontal)));
+                    for(size_t col = A; col < alignedWidth; col += A)
+                        _dst.Next(VectorProduct(_vertical, Load<align>(horizontal + col)));
                     Flush(_dst);
                 }
+                if(alignedWidth != width)
+                    VectorProduct<false>(_vertical, horizontal, width - A, dst);
                 dst += stride;
             }
         }
