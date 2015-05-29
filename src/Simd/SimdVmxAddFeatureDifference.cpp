@@ -41,23 +41,38 @@ namespace Simd
 
         SIMD_INLINE v128_u8 ShiftedWeightedSquare8(v128_u8 difference, v128_u16 weight)
         {
-            const v128_u16 lo = ShiftedWeightedSquare16(UnpackLoU8(difference), weight);
-            const v128_u16 hi = ShiftedWeightedSquare16(UnpackHiU8(difference), weight);
+            const v128_u16 lo = ShiftedWeightedSquare16(UnpackU8<0>(difference), weight);
+            const v128_u16 hi = ShiftedWeightedSquare16(UnpackU8<1>(difference), weight);
             return vec_packsu(lo, hi);
         }
 
-        template <bool align, bool first> 
-        SIMD_INLINE void AddFeatureDifference(const Loader<align> & value, const Loader<align> & lo, const Loader<align> & hi, 
-            const Loader<align> & differenceSrc, v128_u16 weight, v128_u8 mask, Storer<align> & differenceDst)
+        template <bool align> SIMD_INLINE v128_u8 FeatureDifferenceInc(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, size_t offset, v128_u16 weight)
         {
-            const v128_u8 _value = Load<align, first>(value);
-            const v128_u8 _lo = Load<align, first>(lo);
-            const v128_u8 _hi = Load<align, first>(hi);
-            v128_u8 _difference = Load<align, first>(differenceSrc);
+            const v128_u8 _value = Load<align>(value + offset);
+            const v128_u8 _lo = Load<align>(lo + offset);
+            const v128_u8 _hi = Load<align>(hi + offset);
+            return ShiftedWeightedSquare8(FeatureDifference(_value, _lo, _hi), weight);
+        } 
 
-            const v128_u8 featureDifference = FeatureDifference(_value, _lo, _hi);
-            const v128_u8 inc = vec_and(mask, ShiftedWeightedSquare8(featureDifference, weight));
-            Store<align, first>(differenceDst, vec_adds(_difference, inc));
+        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, size_t offset, v128_u16 weight, uint8_t * difference)
+        {
+            const v128_u8 _increase = FeatureDifferenceInc<align>(value, lo, hi, offset, weight);
+            const v128_u8 _difference = Load<align>(difference + offset);
+            Store<align>(difference + offset, vec_adds(_difference, _increase));
+        } 
+
+        SIMD_INLINE void AddFeatureDifferenceMasked(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, size_t offset, v128_u16 weight, v128_u8 mask, uint8_t * difference)
+        {
+            const v128_u8 _increase = FeatureDifferenceInc<false>(value, lo, hi, offset, weight);
+            const v128_u8 _difference = Load<false>(difference + offset);
+            Store<false>(difference + offset, vec_adds(_difference, vec_and(_increase, mask)));
+        }
+        
+        template <bool align> SIMD_INLINE v128_u8 AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, const uint8_t * difference, size_t offset, v128_u16 weight)
+        {
+            const v128_u8 _increase = FeatureDifferenceInc<align>(value, lo, hi, offset, weight);
+            const v128_u8 _difference = Load<align>(difference + offset);
+            return vec_adds(_difference, _increase);
         }
 
         template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
@@ -74,25 +89,35 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
+            size_t fullAlignedWidth = AlignLo(width, QA);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             const v128_u16 _weight = SIMD_VEC_SET1_EPI16(weight);
 
             for(size_t row = 0; row < height; ++row)
             {
-                Loader<align> _value(value), _lo(lo), _hi(hi), _differenceSrc(difference);
-                Storer<align> _differenceDst(difference);
-                AddFeatureDifference<align, true>(_value, _lo, _hi, _differenceSrc, _weight, K8_FF, _differenceDst);
-                for(size_t col = A; col < alignedWidth; col += A)
-                    AddFeatureDifference<align, false>(_value, _lo, _hi, _differenceSrc, _weight, K8_FF, _differenceDst);
-                Flush(_differenceDst);
-
-                if(alignedWidth != width)
+                if(align)
                 {
-                    Loader<false> _value(value + width - A), _lo(lo + width - A), _hi(hi + width - A), _differenceSrc(difference + width - A);
-                    Storer<false> _differenceDst(difference + width - A);
-                    AddFeatureDifference<false, true>(_value, _lo, _hi, _differenceSrc, _weight, tailMask, _differenceDst);
-                    Flush(_differenceDst);
+                    size_t col = 0;
+                    for(; col < fullAlignedWidth; col += QA)
+                    {
+                        AddFeatureDifference<align>(value, lo, hi, col, _weight, difference);
+                        AddFeatureDifference<align>(value, lo, hi, col + A, _weight, difference);
+                        AddFeatureDifference<align>(value, lo, hi, col + 2*A, _weight, difference);
+                        AddFeatureDifference<align>(value, lo, hi, col + 3*A, _weight, difference);
+                    }
+                    for(; col < alignedWidth; col += A)
+                        AddFeatureDifference<align>(value, lo, hi, col, _weight, difference);
                 }
+                else
+                {
+                    Storer<align> _difference(difference);
+                    _difference.First(AddFeatureDifference<align>(value, lo, hi, difference, 0, _weight));
+                    for(size_t col = A; col < alignedWidth; col += A)
+                        _difference.Next(AddFeatureDifference<align>(value, lo, hi, difference, col, _weight));
+                    Flush(_difference);
+                }
+                if(alignedWidth != width)
+                    AddFeatureDifferenceMasked(value, lo, hi, width - A, _weight, tailMask, difference);
                 value += valueStride;
                 lo += loStride;
                 hi += hiStride;
