@@ -85,17 +85,27 @@ namespace Simd
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
         {
-            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
+            uint32_t histograms[4][HISTOGRAM_SIZE + 4];
+            memset(histograms, 0, sizeof(uint32_t)*(HISTOGRAM_SIZE + 4)*4);
+            size_t alignedWidth = Simd::AlignLo(width, 4);
             for(size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < width; ++col)
+                size_t col = 0;
+                for(; col < alignedWidth; col += 4)
                 {
-                    if(mask[col] == index)
-                        ++histogram[src[col]];
+                    ++histograms[0][(4 + src[col + 0])*(mask[col + 0] == index)];
+                    ++histograms[1][(4 + src[col + 1])*(mask[col + 1] == index)];
+                    ++histograms[2][(4 + src[col + 2])*(mask[col + 2] == index)];
+                    ++histograms[3][(4 + src[col + 3])*(mask[col + 3] == index)];
                 }
+                for(; col < width; ++col)
+                    ++histograms[0][(4 + src[col + 0])*(mask[col + 0] == index)];
+
                 src += srcStride;
                 mask += maskStride;
             }
+            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+                histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
         }
 	}
 }
