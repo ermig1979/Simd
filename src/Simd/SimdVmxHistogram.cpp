@@ -70,7 +70,8 @@ namespace Simd
         template<bool align> void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram)
         {
-            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
+            uint32_t SIMD_ALIGNED(16) histograms[4][HISTOGRAM_SIZE];
+            memset(histograms, 0, sizeof(uint32_t)*HISTOGRAM_SIZE*4);
 
             Buffer buffer(stride);
             buffer.p += indent;
@@ -81,6 +82,7 @@ namespace Simd
             ptrdiff_t bodyStart = (uint8_t*)AlignHi(buffer.p, A) - buffer.p;
             ptrdiff_t bodyEnd = bodyStart + AlignLo(width - bodyStart, A);
             size_t rowStep = step*stride;
+            size_t alignedWidth = Simd::AlignLo(width, 4);
             for(size_t row = 0; row < height; ++row)
             {
                 if(bodyStart)
@@ -90,11 +92,26 @@ namespace Simd
                 if(width != (size_t)bodyEnd)
                     AbsSecondDerivative<false>(src + width - A, step, rowStep, buffer.p + width - A);
 
-                for(size_t i = 0; i < width; ++i)
-                    ++histogram[buffer.p[i]];
-
+                size_t col = 0;
+                for(; col < alignedWidth; col += 4)
+                {
+                    ++histograms[0][buffer.p[col + 0]];
+                    ++histograms[1][buffer.p[col + 1]];
+                    ++histograms[2][buffer.p[col + 2]];
+                    ++histograms[3][buffer.p[col + 3]];
+                }
+                for(; col < width; ++col)
+                    ++histograms[0][buffer.p[col + 0]];
                 src += stride;
             }
+
+            for(size_t i = 0; i < HISTOGRAM_SIZE; i += 4)
+            {
+                Store<true>(histograms[0] + i, vec_add(
+                    vec_add(Load<true>(histograms[0] + i), Load<true>(histograms[1] + i)), 
+                    vec_add(Load<true>(histograms[2] + i), Load<true>(histograms[3] + i))));
+            }
+            memcpy(histogram, histograms[0], sizeof(uint32_t)*HISTOGRAM_SIZE);
         }
 
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
