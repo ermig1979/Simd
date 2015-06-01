@@ -29,28 +29,18 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
-        SIMD_INLINE v128_u16 Average16(const v128_u16 & s00, const v128_u16 & s01, const v128_u16 & s10, const v128_u16 & s11)
+        SIMD_INLINE v128_u16 Average16(const v128_u8 & s0, const v128_u8 & s1)
         {
-            return vec_sr(vec_add(vec_add(vec_add(s00, s01), vec_add(s10, s11)), K16_0002), K16_0002); 
+            v128_u32 lo = vec_msum((v128_u8)UnpackLoU16((v128_u16)s0, (v128_u16)s1), K8_01, K32_00000000);
+            v128_u32 hi = vec_msum((v128_u8)UnpackHiU16((v128_u16)s0, (v128_u16)s1), K8_01, K32_00000000);
+            return vec_sr(vec_add(vec_pack(lo, hi), K16_0002), K16_0002); 
         }
 
-        SIMD_INLINE v128_u8 Average8(const v128_u8 & s00, const v128_u8 & s01, const v128_u8 & s10, const v128_u8 & s11)
+        template<bool align> SIMD_INLINE v128_u8 Average(const uint8_t * src0, const uint8_t * src1, size_t offset)
         {
-            v128_u16 lo = Average16(
-                vec_mule(s00, K8_01), vec_mulo(s00, K8_01), 
-                vec_mule(s10, K8_01), vec_mulo(s10, K8_01)); 
-            v128_u16 hi = Average16(
-                vec_mule(s01, K8_01), vec_mulo(s01, K8_01), 
-                vec_mule(s11, K8_01), vec_mulo(s11, K8_01)); 
+            v128_u16 lo = Average16(Load<align>(src0 + offset + 0), Load<align>(src1 + offset + 0));
+            v128_u16 hi = Average16(Load<align>(src0 + offset + A), Load<align>(src1 + offset + A));
             return vec_pack(lo, hi);
-        }
-
-        template<bool align, bool first> 
-        SIMD_INLINE void Average(const Loader<align> & src0, const Loader<align> & src1, Storer<align> & dst)
-        {
-            Store<align, first>(dst, Average8(
-                Load<align, first>(src0), Load<align, false>(src0), 
-                Load<align, first>(src1), Load<align, false>(src1)));
         }
 
         template<bool align> void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
@@ -60,9 +50,10 @@ namespace Simd
             if(align)
             {
                 assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride) && Aligned(dstWidth));
+                assert(Aligned(dst) && Aligned(dstStride));
             }
 
+            size_t fullAlignedWidth = AlignLo(srcWidth, QA);
             size_t alignedWidth = AlignLo(srcWidth, DA);
             size_t evenWidth = AlignLo(srcWidth, 2);
             for(size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
@@ -70,24 +61,31 @@ namespace Simd
                 const uint8_t *src0 = src;
                 const uint8_t *src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
 
-                Loader<align> _src0(src0), _src1(src1);
-                Storer<align> _dst(dst);
-                Average<align, true>(_src0, _src1, _dst);
-                for(size_t srcOffset = DA; srcOffset < alignedWidth; srcOffset += DA)
-                    Average<align, false>(_src0, _src1, _dst);
-                Flush(_dst);
+                if(align)
+                {
+                    size_t srcOffset = 0, dstOffset = 0;
+                    for(; srcOffset < fullAlignedWidth; srcOffset += QA, dstOffset += DA)
+                    {
+                        Store<align>(dst + dstOffset, Average<align>(src0, src1, srcOffset));
+                        Store<align>(dst + dstOffset + A, Average<align>(src0, src1, srcOffset + DA));
+                    }
+                    for(; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
+                        Store<align>(dst + dstOffset, Average<align>(src0, src1, srcOffset));
+                }
+                else
+                {
+                    Storer<align> _dst(dst);
+                    _dst.First(Average<align>(src0, src1, 0));
+                    for(size_t srcOffset = DA; srcOffset < alignedWidth; srcOffset += DA)
+                        _dst.Next(Average<align>(src0, src1, srcOffset));
+                    Flush(_dst);
+                }
 
                 if(alignedWidth != srcWidth)
                 {
-                    Loader<false> _src0(src0 + evenWidth - DA), _src1(src1 + evenWidth - DA);
-                    Storer<false> _dst(dst + dstWidth - A - (evenWidth != srcWidth ? 1 : 0));
-                    Average<false, true>(_src0, _src1, _dst);
-                    Flush(_dst);
-
+                    Store<false>(dst + dstWidth - A - (evenWidth != srcWidth ? 1 : 0), Average<false>(src0, src1, evenWidth - DA));
                     if(evenWidth != srcWidth)
-                    {
                         dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
-                    }
                 }
                 src += 2*srcStride;
                 dst += dstStride;
@@ -97,7 +95,7 @@ namespace Simd
         void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
-            if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
             else
                 ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);

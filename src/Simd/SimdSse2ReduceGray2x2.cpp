@@ -57,7 +57,7 @@ namespace Simd
             if(align)
             {
                 assert(Aligned(src) && Aligned(srcStride));
-                assert(Aligned(dst) && Aligned(dstStride) && Aligned(dstWidth));
+                assert(Aligned(dst) && Aligned(dstStride));
             }
 
             size_t alignedWidth = AlignLo(srcWidth, DA);
@@ -93,7 +93,7 @@ namespace Simd
         void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
              uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
-            if(Aligned(src) && Aligned(srcWidth) && Aligned(srcStride) && Aligned(dst) && Aligned(dstWidth) && Aligned(dstStride))
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst)&& Aligned(dstStride))
                 ReduceGray2x2<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
             else
                 ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
