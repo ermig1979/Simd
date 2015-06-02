@@ -66,18 +66,27 @@ namespace Simd
             return vec_mladd(vec_add(b, c), K16_0003, vec_add(a, d));
         }
 
+        const v128_u8 K8_BENOMIAL = SIMD_VEC_SETR_EPI8(0x1, 0x3, 0x3, 0x1, 0x1, 0x3, 0x3, 0x1, 0x1, 0x3, 0x3, 0x1, 0x1, 0x3, 0x3, 0x1);
+
+        SIMD_INLINE v128_u16 BinomialSum16(const v128_u8 & ab, const v128_u8 & cd)
+        {
+            v128_u32 lo = vec_msum((v128_u8)UnpackLoU16((v128_u16)cd, (v128_u16)ab), K8_BENOMIAL, K32_00000000);
+            v128_u32 hi = vec_msum((v128_u8)UnpackHiU16((v128_u16)cd, (v128_u16)ab), K8_BENOMIAL, K32_00000000);
+            return vec_pack(lo, hi);        
+        }
+
         SIMD_INLINE v128_u16 ReduceColNose(const uint8_t * src)
         {
             const v128_u8 t1 = LoadBeforeFirst<1>(Load<false>(src));
             const v128_u8 t2 = Load<false>(src + 1);
-            return BinomialSum16(vec_mule(t1, K8_01), vec_mulo(t1, K8_01), vec_mule(t2, K8_01), vec_mulo(t2, K8_01));
+            return BinomialSum16(t1, t2);
         }
 
         SIMD_INLINE v128_u16 ReduceColBody(const uint8_t * src)
         {
             const v128_u8 t1 = Load<false>(src - 1);
             const v128_u8 t2 = Load<false>(src + 1);
-            return BinomialSum16(vec_mule(t1, K8_01), vec_mulo(t1, K8_01), vec_mule(t2, K8_01), vec_mulo(t2, K8_01));
+            return BinomialSum16(t1, t2);
         }
 
         template <bool even> SIMD_INLINE v128_u16 ReduceColTail(const uint8_t * src);
@@ -86,14 +95,14 @@ namespace Simd
         {
             const v128_u8 t1 = Load<false>(src - 1);
             const v128_u8 t2 = LoadAfterLast<1>(Load<false>(src));
-            return BinomialSum16(vec_mule(t1, K8_01), vec_mulo(t1, K8_01), vec_mule(t2, K8_01), vec_mulo(t2, K8_01));
+            return BinomialSum16(t1, t2);
         }
 
         template <> SIMD_INLINE v128_u16 ReduceColTail<false>(const uint8_t * src)
         {
             const v128_u8 t1 = Load<false>(src - 1);
             const v128_u8 t2 = LoadAfterLast<1>(LoadAfterLast<1>(t1));
-            return BinomialSum16(vec_mule(t1, K8_01), vec_mulo(t1, K8_01), vec_mule(t2, K8_01), vec_mulo(t2, K8_01));
+            return BinomialSum16(t1, t2);
         }
 
         template <bool align> SIMD_INLINE v128_u16 ReduceRow16(const Buffer & buffer, size_t offset)
