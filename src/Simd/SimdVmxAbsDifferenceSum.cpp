@@ -185,31 +185,33 @@ namespace Simd
             current += 1 + currentStride;
             background += 1 + backgroundStride;
 
+            size_t alignedWidth = AlignLo(width, DA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
 
-            for(size_t i = 0; i < 9; ++i)
-                sums[i] = 0;
+            memset(sums, 0, 9*sizeof(uint64_t));
 
             for(size_t row = 0; row < height; ++row)
             {
-                v128_u32 _sums[9];
-                for(size_t i = 0; i < 9; ++i)
-                    _sums[i] = K32_00000000;
+                v128_u32 _sums[2][9];
+                memset(_sums, 0, 18*sizeof(v128_u32));
 
-                for(size_t col = 0; col < bodyWidth; col += A)
+                size_t col = 0;
+                for(; col < alignedWidth; col += DA)
                 {
-                    const v128_u8 _current = Load<false>(current + col);
-                    AbsDifferenceSums3x3<align>(_current, background + col, backgroundStride, _sums);
+                    AbsDifferenceSums3x3<align>(Load<false>(current + col), background + col, backgroundStride, _sums[0]);
+                    AbsDifferenceSums3x3<align>(Load<false>(current + col + A), background + col + A, backgroundStride, _sums[0]);
                 }
+                for(; col < bodyWidth; col += A)
+                    AbsDifferenceSums3x3<align>(Load<false>(current + col), background + col, backgroundStride, _sums[0]);
                 if(width - bodyWidth)
                 {
                     const v128_u8 _current = vec_and(tailMask, Load<false>(current + width - A));
-                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, _sums);
+                    AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, _sums[0]);
                 }
 
                 for(size_t i = 0; i < 9; ++i)
-                    sums[i] += ExtractSum(_sums[i]);
+                    sums[i] += ExtractSum(vec_add(_sums[0][i], _sums[1][i]));
 
                 current += currentStride;
                 background += backgroundStride;
