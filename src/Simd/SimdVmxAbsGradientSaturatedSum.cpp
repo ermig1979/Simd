@@ -29,38 +29,51 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
-        template<bool align, bool first> 
-        SIMD_INLINE void AbsGradientSaturatedSum(const uint8_t * src, size_t stride, Storer<align> & dst)
+        template<bool align> SIMD_INLINE v128_u8 AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
         {
-            const v128_u8 s10 = Load<false>(src - 1);
-            const v128_u8 s12 = Load<false>(src + 1);
-            const v128_u8 s01 = Load<align>(src - stride);
-            const v128_u8 s21 = Load<align>(src + stride);
-            const v128_u8 dx = AbsDifferenceU8(s10, s12);
-            const v128_u8 dy = AbsDifferenceU8(s01, s21);
-            Store<align, first>(dst, vec_adds(dx, dy));
+            const v128_u8 dx = AbsDifferenceU8(Load<false>(src - 1), Load<false>(src + 1));
+            const v128_u8 dy = AbsDifferenceU8(Load<align>(src - stride), Load<align>(src + stride));
+            return vec_adds(dx, dy);
+        }
+
+        template<bool align> SIMD_INLINE void AbsGradientSaturatedSum(const uint8_t * src, size_t stride, uint8_t * dst, size_t offset)
+        {
+            Store<align>(dst + offset, AbsGradientSaturatedSum<align>(src + offset, stride));
         }
 
         template<bool align> void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, A);
+            size_t fullAlignedWidth = AlignLo(width, QA);
             memset(dst, 0, width);
             src += srcStride;
             dst += dstStride;
             for (size_t row = 2; row < height; ++row)
             {
-                Storer<align> _dst(dst);
-                AbsGradientSaturatedSum<align, true>(src, srcStride, _dst);
-                for (size_t col = A; col < alignedWidth; col += A)
-                    AbsGradientSaturatedSum<align, false>(src + col, srcStride, _dst);
-                Flush(_dst);
-
-                if(width != alignedWidth)
+                if(align)
                 {
-                    Storer<false> _dst(dst + width - A);
-                    AbsGradientSaturatedSum<false, true>(src + width - A, srcStride, _dst);
+                    size_t col = 0;
+                    for (; col < fullAlignedWidth; col += QA)
+                    {
+                        AbsGradientSaturatedSum<align>(src, srcStride, dst, col);
+                        AbsGradientSaturatedSum<align>(src, srcStride, dst, col + A);
+                        AbsGradientSaturatedSum<align>(src, srcStride, dst, col + 2*A);
+                        AbsGradientSaturatedSum<align>(src, srcStride, dst, col + 3*A);
+                    }
+                    for (; col < alignedWidth; col += A)
+                        AbsGradientSaturatedSum<align>(src, srcStride, dst, col);
+                }
+                else
+                {
+                    Storer<align> _dst(dst);
+                    _dst.First(AbsGradientSaturatedSum<align>(src, srcStride));
+                    for (size_t col = A; col < alignedWidth; col += A)
+                        _dst.Next(AbsGradientSaturatedSum<align>(src + col, srcStride));
                     Flush(_dst);
                 }
+
+                if(width != alignedWidth)
+                    AbsGradientSaturatedSum<false>(src, srcStride, dst, width - A);
 
                 dst[0] = 0;
                 dst[width - 1] = 0;
