@@ -61,6 +61,9 @@ namespace Simd
         void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void ReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
         void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
 
         void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);

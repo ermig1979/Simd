@@ -293,6 +293,11 @@ namespace Simd
             return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
         }
 
+        SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c, const __m128i & d)
+        {
+            return _mm_add_epi16(_mm_add_epi16(a, d), _mm_mullo_epi16(_mm_add_epi16(b, c), K16_0003));
+        }
+
         SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
         {
             return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));

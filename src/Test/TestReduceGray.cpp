@@ -181,6 +181,11 @@ namespace Test
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
+#endif
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && ReduceGrayAutoTest(FUNC1(Simd::Ssse3::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

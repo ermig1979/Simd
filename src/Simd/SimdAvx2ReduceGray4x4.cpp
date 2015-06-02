@@ -66,26 +66,36 @@ namespace Simd
             return _mm256_add_epi16(_mm256_add_epi16(a, d), _mm256_mullo_epi16(_mm256_add_epi16(b, c), K16_0003));
         }
 
+#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
+        SIMD_INLINE __m256i BinomialSum16(const __m256i & ab, const __m256i & cd)
+        {
+            return BinomialSum16(
+                _mm256_and_si256(ab, K16_00FF),
+                _mm256_and_si256(_mm256_srli_si256(ab, 1), K16_00FF),
+                _mm256_and_si256(cd, K16_00FF),
+                _mm256_and_si256(_mm256_srli_si256(cd, 1), K16_00FF));
+        }
+#else
+        const __m256i K8_01_03 = SIMD_MM256_SET2_EPI8(1, 3);
+        const __m256i K8_03_01 = SIMD_MM256_SET2_EPI8(3, 1);
+
+        SIMD_INLINE __m256i BinomialSum16(const __m256i & ab, const __m256i & cd)
+        {
+            return _mm256_add_epi16(_mm256_maddubs_epi16(ab, K8_01_03), _mm256_maddubs_epi16(cd, K8_03_01));
+        }
+#endif
+
         SIMD_INLINE __m256i ReduceColNose(const uint8_t * src)
         {
-            const __m256i t1 = _mm256_loadu_si256((__m256i*)src);
             const __m256i t2 = _mm256_loadu_si256((__m256i*)(src + 1));
-            return BinomialSum16(
-                _mm256_and_si256(LoadBeforeFirst<false, 1>(src), K16_00FF),
-                _mm256_and_si256(t1, K16_00FF),
-                _mm256_and_si256(t2, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t2, 1), K16_00FF));
+            return BinomialSum16(LoadBeforeFirst<false, 1>(src), t2);
         }
 
         SIMD_INLINE __m256i ReduceColBody(const uint8_t * src)
         {
             const __m256i t0 = _mm256_loadu_si256((__m256i*)(src - 1));
             const __m256i t2 = _mm256_loadu_si256((__m256i*)(src + 1));
-            return BinomialSum16(
-                _mm256_and_si256(t0, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t0, 1), K16_00FF),
-                _mm256_and_si256(t2, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t2, 1), K16_00FF));
+            return BinomialSum16(t0, t2);
         }
 
         template <bool even> SIMD_INLINE __m256i ReduceColTail(const uint8_t * src);
@@ -93,13 +103,8 @@ namespace Simd
         template <> SIMD_INLINE __m256i ReduceColTail<true>(const uint8_t * src)
         {
             const __m256i t0 = _mm256_loadu_si256((__m256i*)(src - 1));
-            const __m256i t1 = _mm256_loadu_si256((__m256i*)src);
             const __m256i t2 = LoadAfterLast<false, 1>(src);
-            return BinomialSum16(
-                _mm256_and_si256(t0, K16_00FF),
-                _mm256_and_si256(t1, K16_00FF),
-                _mm256_and_si256(t2, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t2, 1), K16_00FF));
+            return BinomialSum16(t0, t2);
         }
 
         template <> SIMD_INLINE __m256i ReduceColTail<false>(const uint8_t * src)
@@ -107,11 +112,7 @@ namespace Simd
             const __m256i t0 = _mm256_loadu_si256((__m256i*)(src - 1));
             __m256i t1, t2;
             LoadAfterLast<false, 1>(src - 1, t1, t2);
-            return BinomialSum16(
-                _mm256_and_si256(t0, K16_00FF),
-                _mm256_and_si256(t1, K16_00FF),
-                _mm256_and_si256(t2, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t2, 1), K16_00FF));
+            return BinomialSum16(t0, t2);
         }
 
         template <bool align> SIMD_INLINE __m256i ReduceRow16(const Buffer & buffer, size_t offset)

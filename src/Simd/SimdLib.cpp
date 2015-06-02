@@ -1640,6 +1640,11 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
         Avx2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && srcWidth > Ssse3::A)
+        Ssse3::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && srcWidth > Sse2::A)
         Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
