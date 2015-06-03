@@ -48,12 +48,17 @@ namespace Simd
         SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, size_t stride, const v128_s16 & saturation, const v128_s16 & boost,
             Storer<align> & dx, Storer<align> & dy)
         {
-            const v128_u8 s10 = Load<false>(src - 1);
-            const v128_u8 s12 = Load<false>(src + 1);
-            const v128_u8 s01 = Load<align>(src - stride);
-            const v128_u8 s21 = Load<align>(src + stride);
-            Store<align, first>(dx, TextureBoostedSaturatedGradient8(s10, s12, saturation, boost));
-            Store<align, first>(dy, TextureBoostedSaturatedGradient8(s01, s21, saturation, boost));
+            Store<align, first>(dx, TextureBoostedSaturatedGradient8(Load<false>(src - 1), Load<false>(src + 1), saturation, boost));
+            Store<align, first>(dy, TextureBoostedSaturatedGradient8(Load<align>(src - stride), Load<align>(src + stride), saturation, boost));
+        }
+
+        template<bool align> 
+        SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, size_t stride, const v128_s16 & saturation, const v128_s16 & boost,
+            uint8_t * dx, uint8_t * dy, size_t offset)
+        {
+            const uint8_t * s = src + offset;
+            Store<align>(dx + offset, TextureBoostedSaturatedGradient8(Load<false>(s - 1), Load<false>(s + 1), saturation, boost));
+            Store<align>(dy + offset, TextureBoostedSaturatedGradient8(Load<align>(s - stride), Load<align>(s + stride), saturation, boost));
         }
 
         template<bool align> void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
@@ -66,6 +71,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
+            size_t fullAlignedWidth = AlignLo(width, DA);
             v128_s16 _saturation = SIMD_VEC_SET1_EPI16(saturation);
             v128_s16 _boost = SIMD_VEC_SET1_EPI16(boost);
 
@@ -76,18 +82,29 @@ namespace Simd
             dy += dyStride;
             for (size_t row = 2; row < height; ++row)
             {
-                Storer<align> _dx(dx), _dy(dy);
-                TextureBoostedSaturatedGradient<align, true>(src, srcStride, _saturation, _boost, _dx, _dy);
-                for (size_t col = A; col < alignedWidth; col += A)
-                    TextureBoostedSaturatedGradient<align, false>(src + col, srcStride, _saturation, _boost, _dx, _dy);
-                Flush(_dx, _dy);
-
-                if(width != alignedWidth)
+                if(align)
                 {
-                    Storer<false> _dx(dx + width - A), _dy(dy + width - A);
-                    TextureBoostedSaturatedGradient<false, true>(src + width - A, srcStride, _saturation, _boost, _dx, _dy);
+                    size_t col = 0;
+                    for (; col < fullAlignedWidth; col += DA)
+                    {
+                        TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col);
+                        TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + A);
+                        //TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + 2*A);
+                        //TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + 3*A);
+                    }
+                    for (; col < alignedWidth; col += A)
+                        TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col);
+                }
+                else
+                {
+                    Storer<align> _dx(dx), _dy(dy);
+                    TextureBoostedSaturatedGradient<align, true>(src, srcStride, _saturation, _boost, _dx, _dy);
+                    for (size_t col = A; col < alignedWidth; col += A)
+                        TextureBoostedSaturatedGradient<align, false>(src + col, srcStride, _saturation, _boost, _dx, _dy);
                     Flush(_dx, _dy);
                 }
+                if(width != alignedWidth)
+                    TextureBoostedSaturatedGradient<false>(src, srcStride, _saturation, _boost, dx, dy, width - A);
 
                 dx[0] = 0;
                 dy[0] = 0;
