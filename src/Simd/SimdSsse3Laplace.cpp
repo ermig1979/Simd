@@ -30,22 +30,22 @@ namespace Simd
 #ifdef SIMD_SSSE3_ENABLE    
     namespace Ssse3
     {
-        template<int part> SIMD_INLINE __m128i LaplaceAbs(__m128i a[3][3])
+        template<int part> SIMD_INLINE __m128i Laplace(__m128i a[3][3])
         {
-            return _mm_abs_epi16(_mm_sub_epi16(_mm_mullo_epi16(K16_0008, UnpackU8<part>(a[1][1])),    
-                _mm_add_epi16(_mm_add_epi16(_mm_add_epi16(UnpackU8<part>(a[0][0]), UnpackU8<part>(a[0][1])), 
-                _mm_add_epi16(UnpackU8<part>(a[0][2]), UnpackU8<part>(a[1][0]))),
-                _mm_add_epi16(_mm_add_epi16(UnpackU8<part>(a[1][2]), UnpackU8<part>(a[2][0])), 
-                _mm_add_epi16(UnpackU8<part>(a[2][1]), UnpackU8<part>(a[2][2]))))));
+            return _mm_sub_epi16(_mm_mullo_epi16(K16_0008, UnpackU8<part>(a[1][1])),
+                _mm_add_epi16(_mm_add_epi16(_mm_maddubs_epi16(UnpackU8<part>(a[0][0], a[0][1]), K8_01),
+                _mm_maddubs_epi16(UnpackU8<part>(a[0][2], a[1][0]), K8_01)),
+                _mm_add_epi16(_mm_maddubs_epi16(UnpackU8<part>(a[1][2], a[2][0]), K8_01),
+                _mm_maddubs_epi16(UnpackU8<part>(a[2][1], a[2][2]), K8_01))));
         }
 
-        template<bool align> SIMD_INLINE void LaplaceAbs(__m128i a[3][3], int16_t * dst)
+        template<bool align, bool abs> SIMD_INLINE void Laplace(__m128i a[3][3], int16_t * dst)
         {
-            Store<align>((__m128i*)dst + 0, LaplaceAbs<0>(a));
-            Store<align>((__m128i*)dst + 1, LaplaceAbs<1>(a));
+            Store<align>((__m128i*)dst + 0, ConditionalAbs<abs>(Laplace<0>(a)));
+            Store<align>((__m128i*)dst + 1, ConditionalAbs<abs>(Laplace<1>(a)));
         }
 
-        template <bool align> void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool align, bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width > A);
             if(align)
@@ -68,21 +68,31 @@ namespace Simd
                 LoadNose3<align, 1>(src0 + 0, a[0]);
                 LoadNose3<align, 1>(src1 + 0, a[1]);
                 LoadNose3<align, 1>(src2 + 0, a[2]);
-                LaplaceAbs<align>(a, dst + 0);
+                Laplace<align, abs>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBody3<align, 1>(src0 + col, a[0]);
                     LoadBody3<align, 1>(src1 + col, a[1]);
                     LoadBody3<align, 1>(src2 + col, a[2]);
-                    LaplaceAbs<align>(a, dst + col);
+                    Laplace<align, abs>(a, dst + col);
                 }
                 LoadTail3<false, 1>(src0 + width - A, a[0]);
                 LoadTail3<false, 1>(src1 + width - A, a[1]);
                 LoadTail3<false, 1>(src2 + width - A, a[2]);
-                LaplaceAbs<false>(a, dst + width - A);
+                Laplace<false, abs>(a, dst + width - A);
 
                 dst += dstStride;
             }
+        }
+
+        void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(dstStride%sizeof(int16_t) == 0);
+
+            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                Laplace<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+            else
+                Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
         void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
@@ -90,15 +100,15 @@ namespace Simd
             assert(dstStride%sizeof(int16_t) == 0);
 
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                LaplaceAbs<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
-                LaplaceAbs<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
         SIMD_INLINE void LaplaceAbsSum(__m128i a[3][3], __m128i & sum)
         {
-            sum = _mm_add_epi32(sum, _mm_madd_epi16(LaplaceAbs<0>(a), K16_0001));
-            sum = _mm_add_epi32(sum, _mm_madd_epi16(LaplaceAbs<1>(a), K16_0001));
+            sum = _mm_add_epi32(sum, _mm_madd_epi16(ConditionalAbs<true>(Laplace<0>(a)), K16_0001));
+            sum = _mm_add_epi32(sum, _mm_madd_epi16(ConditionalAbs<true>(Laplace<1>(a)), K16_0001));
         }
 
         SIMD_INLINE void SetMask3(__m128i a[3], __m128i mask)

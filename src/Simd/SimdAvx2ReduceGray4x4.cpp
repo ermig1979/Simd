@@ -66,24 +66,17 @@ namespace Simd
             return _mm256_add_epi16(_mm256_add_epi16(a, d), _mm256_mullo_epi16(_mm256_add_epi16(b, c), K16_0003));
         }
 
-#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
-        SIMD_INLINE __m256i BinomialSum16(const __m256i & ab, const __m256i & cd)
-        {
-            return BinomialSum16(
-                _mm256_and_si256(ab, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(ab, 1), K16_00FF),
-                _mm256_and_si256(cd, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(cd, 1), K16_00FF));
-        }
-#else
         const __m256i K8_01_03 = SIMD_MM256_SET2_EPI8(1, 3);
         const __m256i K8_03_01 = SIMD_MM256_SET2_EPI8(3, 1);
 
         SIMD_INLINE __m256i BinomialSum16(const __m256i & ab, const __m256i & cd)
         {
+#ifdef SIMD_MADDUBS_ERROR
+            return _mm256_add_epi16(_mm256_maddubs_epi16(_mm256_or_si256(K_ZERO, ab), K8_01_03), _mm256_maddubs_epi16(_mm256_or_si256(K_ZERO, cd), K8_03_01));
+#else
             return _mm256_add_epi16(_mm256_maddubs_epi16(ab, K8_01_03), _mm256_maddubs_epi16(cd, K8_03_01));
+#endif        
         }
-#endif
 
         SIMD_INLINE __m256i ReduceColNose(const uint8_t * src)
         {

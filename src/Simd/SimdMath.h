@@ -310,6 +310,23 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSSE3_ENABLE
+    namespace Ssse3
+    {
+        template <bool abs> __m128i ConditionalAbs(__m128i a);
+
+        template <> SIMD_INLINE __m128i ConditionalAbs<true>(__m128i a)
+        {
+            return _mm_abs_epi16(a);
+        }
+
+        template <> SIMD_INLINE __m128i ConditionalAbs<false>(__m128i a)
+        {
+            return a;
+        }
+    }
+#endif// SIMD_SSSE3_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {

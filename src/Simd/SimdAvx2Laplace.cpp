@@ -34,11 +34,11 @@ namespace Simd
     {
         template<int part> SIMD_INLINE __m256i Laplace(__m256i a[3][3])
         {
-            return _mm256_sub_epi16(_mm256_mullo_epi16(K16_0008, UnpackU8<part>(a[1][1])),    
-                _mm256_add_epi16(_mm256_add_epi16(_mm256_add_epi16(UnpackU8<part>(a[0][0]), UnpackU8<part>(a[0][1])), 
-                _mm256_add_epi16(UnpackU8<part>(a[0][2]), UnpackU8<part>(a[1][0]))),
-                _mm256_add_epi16(_mm256_add_epi16(UnpackU8<part>(a[1][2]), UnpackU8<part>(a[2][0])), 
-                _mm256_add_epi16(UnpackU8<part>(a[2][1]), UnpackU8<part>(a[2][2])))));
+            return _mm256_sub_epi16(_mm256_mullo_epi16(K16_0008, UnpackU8<part>(a[1][1])),
+                _mm256_add_epi16(_mm256_add_epi16(_mm256_maddubs_epi16(UnpackU8<part>(a[0][0], a[0][1]), K8_01),
+                _mm256_maddubs_epi16(UnpackU8<part>(a[0][2], a[1][0]), K8_01)),
+                _mm256_add_epi16(_mm256_maddubs_epi16(UnpackU8<part>(a[1][2], a[2][0]), K8_01),
+                _mm256_maddubs_epi16(UnpackU8<part>(a[2][1], a[2][2]), K8_01))));
         }
 
         template<bool align, bool abs> SIMD_INLINE void Laplace(__m256i a[3][3], int16_t * dst)

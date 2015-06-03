@@ -1370,6 +1370,11 @@ SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, s
         Avx2::Laplace(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::Laplace(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A)
         Sse2::Laplace(src, srcStride, width, height, dst, dstStride);

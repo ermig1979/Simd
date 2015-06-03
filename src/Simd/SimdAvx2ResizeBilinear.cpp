@@ -95,7 +95,7 @@ namespace Simd
 
         template <> SIMD_INLINE void InterpolateX<1>(const __m256i * alpha, __m256i * buffer)
         {
-#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
+#ifdef SIMD_MADDUBS_ERROR
             __m256i _buffer = _mm256_or_si256(K_ZERO, _mm256_load_si256(buffer));
 #else
             __m256i _buffer = _mm256_load_si256(buffer);

@@ -25,12 +25,20 @@
 <h5>New features</h5>
 <ul>
  <li>SSE2, AVX2 and VMX optimizations of function HistogramMasked.</li>
+ <li>SSSE3 optimization of function ReduceGray4x4.</li>
+ <li>SSSE3 optimization of function Laplace.</li>
+</ul>
+
+<h5>Improving</h5>
+<ul>
  <li>Improving of VMX optimization of function ReduceGray2x2.</li>
  <li>Loop unrolling of VMX optimization of function AbsDifferenceSums3x3.</li>
  <li>Loop unrolling of VMX optimization of function AbsGradientSaturatedSum.</li>
  <li>Improving of AVX2 and VMX optimizations of function ReduceGray4x4.</li>
- <li>SSSE3 optimization of function ReduceGray4x4.</li>
  <li>Loop unrolling of VMX optimization of function TextureBoostedSaturatedGradient.</li>
+ <li>Improving of AVX2 optimization of function Laplace.</li>
+ <li>Improving of SSSE3 and AVX2 optimizations of function LaplaceAbs.</li>
+ <li>Improving of SSSE3 and AVX2 optimizations of function LaplaceAbsSum.</li>
 </ul>
 
 <h4>Infrastructure</h4>
@@ -45,6 +53,16 @@
 
 <h4>Algorithms</h4>
 <h5>New features</h5>
+<ul>
+ <li>Base implementation, SSE2, AVX2 and VMX optimizations of function Laplace.</li>
+ <li>Base implementation, SSSE3, AVX2 and VMX optimizations of function LaplaceAbs.</li>
+ <li>Base implementation, SSSE3, AVX2 and VMX optimizations of function LaplaceAbsSum.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>A GCC compiler error in function Simd::Sse2::ResizeBilinear.</li>
+</ul>
+<h5>Improving</h5>
 <ul>
  <li>Loop unrolling of SSE, AVX and VSX optimizations of function SquaredDifferenceSum32f.</li>
  <li>Loop unrolling of VSX optimization of function SvmSumLinear.</li>
@@ -63,17 +81,10 @@
  <li>Loop unrolling of VMX optimization of function GetStatistic.</li>
  <li>Loop unrolling of VMX optimization of function GetRowSums.</li>
  <li>Loop unrolling of VMX optimization of function GetAbsDyRowSums.</li>
- <li>Base implementation, SSE2, AVX2 and VMX optimizations of function Laplace.</li>
- <li>Base implementation, SSSE3, AVX2 and VMX optimizations of function LaplaceAbs.</li>
- <li>Base implementation, SSSE3, AVX2 and VMX optimizations of function LaplaceAbsSum.</li>
  <li>Loop unrolling of VMX optimization of function OperationBinary8u.</li>
  <li>Loop unrolling of VMX optimization of function VectorProduct.</li>
  <li>Loop unrolling of VMX optimization of function AddFeatureDifference.</li>
  <li>Loop unrolling of SSE2, AVX2 and VMX optimizations of function AbsSecondDerivativeHistogram.</li>
-</ul>
-<h5>Bug fixing</h5>
-<ul>
- <li>A GCC compiler error in function Simd::Sse2::ResizeBilinear.</li>
 </ul>
 
 <h4>Test framework</h4>

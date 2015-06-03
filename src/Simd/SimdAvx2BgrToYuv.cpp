@@ -123,17 +123,14 @@ namespace Simd
                 BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
         }
 
-#if defined(_MSC_VER) // Workaround for Visual Studio 2012 compiler bug in release mode:
         SIMD_INLINE void Average16(__m256i & a)
         {
+#ifdef SIMD_MADDUBS_ERROR
             a = _mm256_srli_epi16(_mm256_add_epi16(_mm256_hadd_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpackhi_epi8(a, K_ZERO)), K16_0001), 1); 
-        }
 #else
-        SIMD_INLINE void Average16(__m256i & a)
-        {
             a = _mm256_srli_epi16(_mm256_add_epi16(_mm256_maddubs_epi16(a, K8_01), K16_0001), 1); 
-        }
 #endif
+        }
 
         template <bool align> SIMD_INLINE void BgrToYuv422p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
