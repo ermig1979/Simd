@@ -33,15 +33,9 @@ namespace Simd
     {
         SIMD_INLINE __m256i SquaredDifference(__m256i a, __m256i b)
         {
-            const __m256i aLo = _mm256_unpacklo_epi8(a, _mm256_setzero_si256());
-            const __m256i bLo = _mm256_unpacklo_epi8(b, _mm256_setzero_si256());
-            const __m256i dLo = _mm256_sub_epi16(aLo, bLo);
-
-            const __m256i aHi = _mm256_unpackhi_epi8(a, _mm256_setzero_si256());
-            const __m256i bHi = _mm256_unpackhi_epi8(b, _mm256_setzero_si256());
-            const __m256i dHi = _mm256_sub_epi16(aHi, bHi);
-
-            return _mm256_add_epi32(_mm256_madd_epi16(dLo, dLo), _mm256_madd_epi16(dHi, dHi));
+            const __m256i lo = SubUnpackedU8<0>(a, b);
+            const __m256i hi = SubUnpackedU8<1>(a, b);
+            return _mm256_add_epi32(_mm256_madd_epi16(lo, lo), _mm256_madd_epi16(hi, hi));
         }
 
 		template <bool align> void SquaredDifferenceSum(
