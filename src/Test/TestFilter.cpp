@@ -322,6 +322,11 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDx), FUNC_G(SimdSobelDx));
+#endif 
+
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::SobelDx), FUNC_G(SimdSobelDx));
@@ -368,6 +373,11 @@ namespace Test
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDy), FUNC_G(SimdSobelDy));
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if(Simd::Ssse3::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

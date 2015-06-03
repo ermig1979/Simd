@@ -32,15 +32,15 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
-        SIMD_INLINE __m256i TextureBoostedSaturatedGradient16(__m256i a, __m256i b, __m256i saturation, const __m256i & boost)
+        SIMD_INLINE __m256i TextureBoostedSaturatedGradient16(__m256i difference, __m256i saturation, const __m256i & boost)
         {
-            return _mm256_mullo_epi16(_mm256_max_epi16(K_ZERO, _mm256_add_epi16(saturation, _mm256_min_epi16(_mm256_sub_epi16(b, a), saturation))), boost);
+            return _mm256_mullo_epi16(_mm256_max_epi16(K_ZERO, _mm256_add_epi16(saturation, _mm256_min_epi16(difference, saturation))), boost);
         }
 
         SIMD_INLINE __m256i TextureBoostedSaturatedGradient8(__m256i a, __m256i b, __m256i saturation, const __m256i & boost) 
         {
-            __m256i lo = TextureBoostedSaturatedGradient16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO), saturation, boost);
-            __m256i hi = TextureBoostedSaturatedGradient16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO), saturation, boost);
+            __m256i lo = TextureBoostedSaturatedGradient16(SubUnpackedU8<0>(b, a), saturation, boost);
+            __m256i hi = TextureBoostedSaturatedGradient16(SubUnpackedU8<1>(b, a), saturation, boost);
             return _mm256_packus_epi16(lo, hi);
         }
 

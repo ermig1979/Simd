@@ -324,6 +324,11 @@ namespace Simd
         {
             return a;
         }
+
+        template<int part> SIMD_INLINE __m128i SubUnpackedU8(__m128i a, __m128i b)
+        {
+            return _mm_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
+        }
     }
 #endif// SIMD_SSSE3_ENABLE
 
@@ -409,6 +414,11 @@ namespace Simd
         template <> SIMD_INLINE __m256i ConditionalAbs<false>(__m256i a)
         {
             return a;
+        }
+
+        template<int part> SIMD_INLINE __m256i SubUnpackedU8(__m256i a, __m256i b)
+        {
+            return _mm256_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
         }
     }
 #endif// SIMD_AVX2_ENABLE

@@ -34,14 +34,8 @@ namespace Simd
     {
         template<bool abs> SIMD_INLINE void SobelDx(__m256i a[3][3], __m256i & lo, __m256i & hi)
         {
-            lo = ConditionalAbs<abs>(BinomialSum16(
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[0][2], K_ZERO), _mm256_unpacklo_epi8(a[0][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[1][2], K_ZERO), _mm256_unpacklo_epi8(a[1][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[2][2], K_ZERO), _mm256_unpacklo_epi8(a[2][0], K_ZERO))));
-            hi = ConditionalAbs<abs>(BinomialSum16(
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[0][2], K_ZERO), _mm256_unpackhi_epi8(a[0][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[1][2], K_ZERO), _mm256_unpackhi_epi8(a[1][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[2][2], K_ZERO), _mm256_unpackhi_epi8(a[2][0], K_ZERO))));
+            lo = ConditionalAbs<abs>(BinomialSum16(SubUnpackedU8<0>(a[0][2], a[0][0]), SubUnpackedU8<0>(a[1][2], a[1][0]), SubUnpackedU8<0>(a[2][2], a[2][0])));
+            hi = ConditionalAbs<abs>(BinomialSum16(SubUnpackedU8<1>(a[0][2], a[0][0]), SubUnpackedU8<1>(a[1][2], a[1][0]), SubUnpackedU8<1>(a[2][2], a[2][0])));
         }
 
         template<bool align, bool abs> SIMD_INLINE void SobelDx(__m256i a[3][3], int16_t * dst)
@@ -181,14 +175,8 @@ namespace Simd
 
         template<bool abs> SIMD_INLINE void SobelDy(__m256i a[3][3], __m256i & lo, __m256i & hi)
         {
-            lo = ConditionalAbs<abs>(BinomialSum16(
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[2][0], K_ZERO), _mm256_unpacklo_epi8(a[0][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[2][1], K_ZERO), _mm256_unpacklo_epi8(a[0][1], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpacklo_epi8(a[2][2], K_ZERO), _mm256_unpacklo_epi8(a[0][2], K_ZERO))));
-            hi = ConditionalAbs<abs>(BinomialSum16(
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[2][0], K_ZERO), _mm256_unpackhi_epi8(a[0][0], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[2][1], K_ZERO), _mm256_unpackhi_epi8(a[0][1], K_ZERO)),
-                _mm256_sub_epi16(_mm256_unpackhi_epi8(a[2][2], K_ZERO), _mm256_unpackhi_epi8(a[0][2], K_ZERO))));
+            lo = ConditionalAbs<abs>(BinomialSum16(SubUnpackedU8<0>(a[2][0], a[0][0]), SubUnpackedU8<0>(a[2][1], a[0][1]), SubUnpackedU8<0>(a[2][2], a[0][2])));
+            hi = ConditionalAbs<abs>(BinomialSum16(SubUnpackedU8<1>(a[2][0], a[0][0]), SubUnpackedU8<1>(a[2][1], a[0][1]), SubUnpackedU8<1>(a[2][2], a[0][2])));
         }
 
         template<bool align, bool abs> SIMD_INLINE void SobelDy(__m256i a[3][3], int16_t * dst)
@@ -385,7 +373,6 @@ namespace Simd
             else
                 ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
-
 
         template<bool align> SIMD_INLINE void ContourMetricsMasked(__m256i a[3][3], const uint8_t * mask, const __m256i & indexMin, int16_t * dst)
         {

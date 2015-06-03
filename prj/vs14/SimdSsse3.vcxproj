@@ -82,6 +82,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

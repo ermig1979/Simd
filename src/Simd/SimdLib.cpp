@@ -1905,6 +1905,11 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
         Avx2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::SobelDx(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width > Sse2::A)
         Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
@@ -1963,6 +1968,11 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDy(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width > Ssse3::A)
+        Ssse3::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -2358,6 +2368,11 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
