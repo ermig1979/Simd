@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Properties.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{91831958-6AD7-4126-8056-E2DD3E12A887}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>SimdSse2</RootNamespace>
+    <ProjectName>SimdSse2</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2AddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2AlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Background.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgraToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Binarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Conditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2DeinterleaveUv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2EdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Fill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Hog.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Interference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Laplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Reorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ShiftBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Sobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2SquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Statistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2StretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Texture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2YuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2YuvToHue.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

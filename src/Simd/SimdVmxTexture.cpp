@@ -89,8 +89,6 @@ namespace Simd
                     {
                         TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col);
                         TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + A);
-                        //TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + 2*A);
-                        //TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col + 3*A);
                     }
                     for (; col < alignedWidth; col += A)
                         TextureBoostedSaturatedGradient<align>(src, srcStride, _saturation, _boost, dx, dy, col);

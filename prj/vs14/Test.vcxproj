@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Properties.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{423128F2-9D4E-408D-9123-49CE57A32B0A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Test</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Test\Test.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCheckC.c" />
+    <ClCompile Include="..\..\src\Test\TestCheckCpp.cpp" />
+    <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
+    <ClCompile Include="..\..\src\Test\TestData.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFill.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHog.cpp" />
+    <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
+    <ClCompile Include="..\..\src\Test\TestInterference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestLog.cpp" />
+    <ClCompile Include="..\..\src\Test\TestReorder.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSegmentation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestContour.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSvm.cpp" />
+    <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
+    <ClCompile Include="..\..\src\Test\TestReduceGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestResize.cpp" />
+    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestData.h" />
+    <ClInclude Include="..\..\src\Test\TestLog.h" />
+    <ClInclude Include="..\..\src\Test\TestPerformance.h" />
+    <ClInclude Include="..\..\src\Test\TestUtils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Simd.vcxproj">
+      <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdAvx1.vcxproj">
+      <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdAvx2.vcxproj">
+      <Project>{9b30a102-f407-44ec-987f-209c7b65c836}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdBase.vcxproj">
+      <Project>{1ca0c5b9-6a60-4df5-96ea-ba70a0bd0cc6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse1.vcxproj">
+      <Project>{b37e7662-729f-4376-a37c-9e15ddf95ba0}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse2.vcxproj">
+      <Project>{91831958-6ad7-4126-8056-e2dd3e12a887}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse41.vcxproj">
+      <Project>{2397c4ee-3030-42e9-b16b-eb074d491887}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSse42.vcxproj">
+      <Project>{ca3044c1-147b-4884-b3fd-15ece7a24337}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdSsse3.vcxproj">
+      <Project>{2ca34bf2-043b-40fd-b58c-ec2e29fac263}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdVmx.vcxproj">
+      <Project>{6bec7276-995d-4fde-84b5-2e2072cf9758}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SimdVsx.vcxproj">
+      <Project>{00cbfe2a-935b-449f-a0e0-cdfd8ac93bb3}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

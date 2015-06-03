@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVmxSquaredDifferenceSum.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxAbsDifferenceSum.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxAbsGradientSaturatedSum.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxAddFeatureDifference.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxAlphaBlending.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBackground.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToBayer.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToBgr.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToGray.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgraToYuv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBayer.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToBgra.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToGray.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBgrToYuv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleaveUv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxEdgeBackground.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxFill.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxGaussianBlur3x3.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgr.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxGrayToBgra.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxHistogram.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxInterference.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxLbp.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxMedianFilter.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxOperation.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray2x2.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray3x3.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray4x4.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxReduceGray5x5.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxReorder.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxResizeBilinear.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxSegmentation.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxShiftBilinear.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxSobel.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxStatistic.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxStretchGray2x2.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxTexture.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgr.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgra.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxLaplace.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdVmx.h">
+      <Filter>Alg</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Sys">
+      <UniqueIdentifier>{36dddc90-aff0-42aa-924d-84acce9671f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Alg">
+      <UniqueIdentifier>{3c2a82be-429c-4c13-8387-7cf54449b106}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
