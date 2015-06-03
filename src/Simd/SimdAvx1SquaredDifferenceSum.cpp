@@ -22,8 +22,8 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {

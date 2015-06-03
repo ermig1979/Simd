@@ -307,12 +307,26 @@ namespace Simd
         {
             return DivideI16By255(_mm_add_epi16(_mm_mullo_epi16(src, alpha), _mm_mullo_epi16(dst, _mm_sub_epi16(K16_00FF, alpha))));
         }
+
+        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
+
+        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi8(a, b); 
+        }
+
+        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi8(a, b); 
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
+        using namespace Sse2;
+
         template <bool abs> __m128i ConditionalAbs(__m128i a);
 
         template <> SIMD_INLINE __m128i ConditionalAbs<true>(__m128i a)
@@ -414,6 +428,18 @@ namespace Simd
         template <> SIMD_INLINE __m256i ConditionalAbs<false>(__m256i a)
         {
             return a;
+        }
+
+        template <int part> SIMD_INLINE __m256i UnpackU8(__m256i a, __m256i b = K_ZERO);
+
+        template <> SIMD_INLINE __m256i UnpackU8<0>(__m256i a, __m256i b)
+        {
+            return _mm256_unpacklo_epi8(a, b); 
+        }
+
+        template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
+        {
+            return _mm256_unpackhi_epi8(a, b); 
         }
 
         template<int part> SIMD_INLINE __m256i SubUnpackedU8(__m256i a, __m256i b)

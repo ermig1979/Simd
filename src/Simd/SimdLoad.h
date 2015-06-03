@@ -142,18 +142,6 @@ namespace Simd
             a[0] = _mm_loadu_si128((__m128i*)(p - 1));
             a[2] = LoadAfterLast<1>(_mm_loadu_si128((__m128i*)p));
         }
-
-        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
-
-        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
-        {
-            return _mm_unpacklo_epi8(a, b); 
-        }
-
-        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
-        {
-            return _mm_unpackhi_epi8(a, b); 
-        }
 	}
 #endif//SIMD_SSE2_ENABLE
 
@@ -341,18 +329,6 @@ namespace Simd
         {
             a[0] = _mm256_loadu_si256((__m256i*)(p - 1));
             a[2] = LoadAfterLast<false, 1>(p);
-        }
-
-        template <int part> SIMD_INLINE __m256i UnpackU8(__m256i a, __m256i b = K_ZERO);
-
-        template <> SIMD_INLINE __m256i UnpackU8<0>(__m256i a, __m256i b)
-        {
-            return _mm256_unpacklo_epi8(a, b); 
-        }
-
-        template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
-        {
-            return _mm256_unpackhi_epi8(a, b); 
         }
     }
 #endif//SIMD_AVX2_ENABLE
