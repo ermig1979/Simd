@@ -213,6 +213,7 @@ namespace Test
     TEST_ADD_GROUP(GaussianBlur3x3);
     TEST_ADD_GROUP(AbsGradientSaturatedSum);
     TEST_ADD_GROUP(LbpEstimate);
+    TEST_ADD_GROUP(NormalizeHistogram);
     TEST_ADD_GROUP(SobelDx);
     TEST_ADD_GROUP(SobelDxAbs);
     TEST_ADD_GROUP(SobelDy);

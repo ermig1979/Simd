@@ -311,6 +311,15 @@ namespace Test
         return result;
     }
 
+    bool NormalizeHistogramAutoTest()
+    {
+        bool result = true;
+
+        result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::NormalizeHistogram), FUNC_G(SimdNormalizeHistogram));
+
+        return result;
+    }
+
     bool SobelDxAutoTest()
     {
         bool result = true;
@@ -645,6 +654,15 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterDataTest(create, DW, DH, View::Gray8, FUNC_G(SimdLbpEstimate));
+
+        return result;
+    }
+
+    bool NormalizeHistogramDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && GrayFilterDataTest(create, DW, DH, View::Gray8, FUNC_G(SimdNormalizeHistogram));
 
         return result;
     }

@@ -1796,6 +1796,25 @@ extern "C"
     */
     SIMD_API void SimdHistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
+    
+    /*! @ingroup histogram
+
+        \fn void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        \short Normalizes histogram for 8-bit gray image. 
+
+        The input and output 8-bit gray images must have the same size.
+
+        \note This function has a C++ wrapper Simd::NormalizeHistogram(const View<A> & src, View<A> & dst).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] srcStride - a row size of the image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to pixels data of output 8-bit image with normalized histogram.
+        \param [in] dstStride - a row size of the output image.
+    */
+    SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup face_recognition
 

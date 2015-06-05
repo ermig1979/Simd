@@ -107,5 +107,46 @@ namespace Simd
             for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
                 histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
         }
+
+        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            uint32_t histogram[HISTOGRAM_SIZE]; 
+            Histogram(src, width, height, srcStride, histogram);
+
+            uint32_t integral[HISTOGRAM_SIZE], sum = 0, minCount = 0, minColor = 0; 
+            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+            {
+                if (sum == 0 && histogram[i] != 0)
+                {
+                    minCount = histogram[i]; 
+                    minColor = i;
+                }
+                sum += histogram[i];
+                integral[i] = sum;
+            }
+
+            uint32_t norm = sum - minCount, term = (sum - minCount)/2;
+            uint8_t colors[HISTOGRAM_SIZE];
+            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+                colors[i] = i < minColor ? 0 : (norm ? (255*(integral[i] - minCount) + term)/norm : minColor); 
+
+            size_t alignedWidth = Simd::AlignLo(width, 4);
+            for(size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for(; col < alignedWidth; col += 4)
+                {
+                    dst[col + 0] = colors[src[col + 0]];
+                    dst[col + 1] = colors[src[col + 1]];
+                    dst[col + 2] = colors[src[col + 2]];
+                    dst[col + 3] = colors[src[col + 3]];
+                }
+                for(; col < width; ++col)
+                    dst[col] = colors[src[col]];
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
 	}
 }

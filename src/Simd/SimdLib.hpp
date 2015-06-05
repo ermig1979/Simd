@@ -1592,6 +1592,26 @@ namespace Simd
         SimdHistogramMasked(src.data, src.stride, src.width, src.height, mask.data, mask.stride, index, histogram);
     }
 
+    /*! @ingroup histogram
+
+        \fn void NormalizeHistogram(const View<A> & src, View<A> & dst)
+
+        \short Normalizes histogram for 8-bit gray image. 
+
+        The input and output 8-bit gray images must have the same size.
+
+        \note This function is a C++ wrapper for function ::SimdNormalizeHistogram.
+
+        \param [in] src - an input 8-bit gray image.
+        \param [out] dst - an output 8-bit image with normalized histogram.
+    */
+    template<class A> SIMD_INLINE void NormalizeHistogram(const View<A> & src, View<A> & dst)
+    {
+        assert(Compatible(src, dst) && src.format == View<A>::Gray8);
+
+        SimdNormalizeHistogram(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+    }
+
     /*! @ingroup face_recognition
 
         \fn void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
