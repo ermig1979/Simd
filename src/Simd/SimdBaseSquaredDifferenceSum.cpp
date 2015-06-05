@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
+#include "Simd/SimdMemory.h"
 
 namespace Simd
 {
@@ -69,10 +70,45 @@ namespace Simd
 
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
-            float _sum = 0;
-            for(size_t i = 0; i < size; ++i)
-                _sum += Simd::Square(a[i] - b[i]);
-            *sum = _sum;
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            float sums[4] = {0, 0, 0, 0};
+            size_t i = 0;
+            for(; i < alignedSize; i += 4)
+            {
+                sums[0] += Simd::Square(a[i + 0] - b[i + 0]);
+                sums[1] += Simd::Square(a[i + 1] - b[i + 1]);
+                sums[2] += Simd::Square(a[i + 2] - b[i + 2]);
+                sums[3] += Simd::Square(a[i + 3] - b[i + 3]);
+            }
+            for(; i < size; ++i)
+                sums[0] += Simd::Square(a[i] - b[i]);
+            *sum = sums[0] + sums[1] + sums[2] + sums[3];
+        }
+
+        SIMD_INLINE void KahanSum(float value, float & sum, float & correction)
+        {
+            float term = value - correction;
+            float temp = sum + term;
+            correction = (temp - sum) - term;
+            sum = temp; 
+        }
+
+        void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            float sums[4] = {0, 0, 0, 0};
+            float corrections[4] = {0, 0, 0, 0};
+            size_t i = 0;
+            for(; i < alignedSize; i += 4)
+            {
+                KahanSum(Simd::Square(a[i + 0] - b[i + 0]), sums[0], corrections[0]);
+                KahanSum(Simd::Square(a[i + 1] - b[i + 1]), sums[1], corrections[1]);
+                KahanSum(Simd::Square(a[i + 2] - b[i + 2]), sums[2], corrections[2]);
+                KahanSum(Simd::Square(a[i + 3] - b[i + 3]), sums[3], corrections[3]);
+            }
+            for(; i < size; ++i)
+                KahanSum(Simd::Square(a[i + 0] - b[i + 0]), sums[0], corrections[0]);
+            *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
     }
 }

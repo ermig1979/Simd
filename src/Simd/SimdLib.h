@@ -2871,6 +2871,33 @@ extern "C"
         \param [out] sum - a sum of squared differences.
     */
     SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
+    
+    /*! @ingroup correlation
+
+        \fn void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
+
+        \short Calculates sum of squared differences for two 32-bit float arrays with using Kahan summation algorithm. 
+
+        All arrays must have the same size. 
+
+        Algorithm pseudo code: 
+        \verbatim
+        sum = 0; corr = 0;
+        for(i = 0; i < size; ++i)
+        {
+            diff = (a[i] - b[i])*(a[i] - b[i]) - corr;
+            temp = sum + diff;
+            corr = (temp - sum) - diff;
+            sum = temp; 
+        }
+        \endverbatim
+
+        \param [in] a - a pointer to the first array.
+        \param [in] b - a pointer to the second array.
+        \param [in] size - a size of arrays.
+        \param [out] sum - a sum of squared differences.
+    */
+    SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 
     /*! @ingroup other_statistic
 

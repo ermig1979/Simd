@@ -156,7 +156,7 @@ namespace Test
         return result;
     }
 
-    bool DifferenceSum32fAutoTest(int size, const FuncF & f1, const FuncF & f2)
+    bool DifferenceSum32fAutoTest(int size, float eps, const FuncF & f1, const FuncF & f2)
     {
         bool result = true;
 
@@ -174,18 +174,18 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
 
-        result = Compare(s1, s2, EPS*10, true);
+        result = Compare(s1, s2, eps, true);
 
         return result;
     }
 
-    bool DifferenceSum32fAutoTest(const FuncF & f1, const FuncF & f2)
+    bool DifferenceSum32fAutoTest(float eps, const FuncF & f1, const FuncF & f2)
     {
         bool result = true;
 
-        result = result && DifferenceSum32fAutoTest(W*H, f1, f2);
-        result = result && DifferenceSum32fAutoTest(W*H + O, f1, f2);
-        result = result && DifferenceSum32fAutoTest(W*H - O, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H, eps, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H + O, eps, f1, f2);
+        result = result && DifferenceSum32fAutoTest(W*H - O, eps, f1, f2);
 
         return result;
     }
@@ -348,21 +348,45 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+        result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 
 #ifdef SIMD_SSE_ENABLE
         if(Simd::Sse::Enable)
-            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Sse::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if(Simd::Avx::Enable)
-            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Avx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
-            result = result && DifferenceSum32fAutoTest(FUNC_F(Simd::Vsx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Vsx::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#endif 
+
+        return result;
+    }
+
+    bool SquaredDifferenceKahanSum32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Base::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if(Simd::Sse::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Sse::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if(Simd::Avx::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+        if(Simd::Vsx::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Vsx::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif 
 
         return result;
@@ -514,7 +538,7 @@ namespace Test
         return result;
     }
 
-    bool DifferenceSum32fDataTest(bool create, int size, const FuncF & f)
+    bool DifferenceSum32fDataTest(bool create, int size, float eps, const FuncF & f)
     {
         bool result = true;
 
@@ -550,7 +574,7 @@ namespace Test
 
             TEST_SAVE(s2);
 
-            result = result && Compare(s1, s2, EPS, true);
+            result = result && Compare(s1, s2, eps, true);
         }
 
         return result;
@@ -560,7 +584,17 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSum32fDataTest(create, DH, FUNC_F(SimdSquaredDifferenceSum32f));
+        result = result && DifferenceSum32fDataTest(create, DH, EPS, FUNC_F(SimdSquaredDifferenceSum32f));
+
+        return result;
+    }
+
+
+    bool SquaredDifferenceKahanSum32fDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fDataTest(create, DH, EPS*EPS, FUNC_F(SimdSquaredDifferenceKahanSum32f));
 
         return result;
     }

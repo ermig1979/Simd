@@ -2154,6 +2154,14 @@ SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size
     simdSquaredDifferenceSum32f(a, b, size, sum);
 }
 
+typedef void (* SimdSquaredDifferenceKahanSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
+SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC3(SquaredDifferenceKahanSum32f, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
+
+SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+{
+    simdSquaredDifferenceKahanSum32f(a, b, size, sum);
+}
+
 SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
                   uint8_t * min, uint8_t * max, uint8_t * average)
 {

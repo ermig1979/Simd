@@ -64,9 +64,9 @@ namespace Simd
                 for(; i < partialAlignedSize; i += 4)
                     SquaredDifferenceSum32f<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
-                for(; i < size; ++i)
-                    *sum += Simd::Square(a[i] - b[i]);
             }
+            for(; i < size; ++i)
+                *sum += Simd::Square(a[i] - b[i]);
         }
 
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
@@ -75,6 +75,56 @@ namespace Simd
                 SquaredDifferenceSum32f<true>(a, b, size, sum);
             else
                 SquaredDifferenceSum32f<false>(a, b, size, sum);
+        }
+
+        template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t offset, __m128 & sum, __m128 & correction)
+        {
+            __m128 _a = Load<align>(a + offset);
+            __m128 _b = Load<align>(b + offset);
+            __m128 _d = _mm_sub_ps(_a, _b);
+            __m128 term = _mm_sub_ps(_mm_mul_ps(_d, _d), correction);
+            __m128 temp = _mm_add_ps(sum, term);
+            correction = _mm_sub_ps(_mm_sub_ps(temp, sum), term);
+            sum = temp; 
+        }
+
+        template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+        {
+            if(align)
+                assert(Aligned(a) && Aligned(b));
+
+            *sum = 0;
+            size_t partialAlignedSize = AlignLo(size, 4);
+            size_t fullAlignedSize = AlignLo(size, 16);
+            size_t i = 0;
+            if(partialAlignedSize)
+            {
+                __m128 sums[4] = {_mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps()};
+                __m128 corrections[4] = {_mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps()};
+                if(fullAlignedSize)
+                {
+                    for(; i < fullAlignedSize; i += 16)
+                    {
+                        SquaredDifferenceKahanSum32f<align>(a, b, i, sums[0], corrections[0]);
+                        SquaredDifferenceKahanSum32f<align>(a, b, i + 4, sums[1], corrections[1]);
+                        SquaredDifferenceKahanSum32f<align>(a, b, i + 8, sums[2], corrections[2]);
+                        SquaredDifferenceKahanSum32f<align>(a, b, i + 12, sums[3], corrections[3]);
+                    }
+                }
+                for(; i < partialAlignedSize; i += 4)
+                    SquaredDifferenceKahanSum32f<align>(a, b, i, sums[0], corrections[0]);
+                *sum += ExtractSum(_mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3])));
+            }
+            for(; i < size; ++i)
+                *sum += Simd::Square(a[i] - b[i]);
+        }
+
+        void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+        {
+            if(Aligned(a) && Aligned(b))
+                SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
+            else
+                SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
         }
     }
 #endif// SIMD_SSE_ENABLE

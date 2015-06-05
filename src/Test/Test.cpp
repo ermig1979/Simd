@@ -121,6 +121,7 @@ namespace Test
     TEST_ADD_GROUP(SquaredDifferenceSum);
     TEST_ADD_GROUP(SquaredDifferenceSumMasked);
     TEST_ADD_GROUP(SquaredDifferenceSum32f);
+    TEST_ADD_GROUP(SquaredDifferenceKahanSum32f);
 
     TEST_ADD_GROUP(AddFeatureDifference);
 
