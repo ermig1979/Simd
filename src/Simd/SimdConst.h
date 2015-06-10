@@ -94,7 +94,7 @@ namespace Simd
         const __m128i K8_40 = SIMD_MM_SET1_EPI8(0x40);
         const __m128i K8_80 = SIMD_MM_SET1_EPI8(0x80);
 
-        const __m128i K8_01_FF = SIMD_MM_SET2_EPI8(1, 0xFF);
+        const __m128i K8_01_FF = SIMD_MM_SET2_EPI8(0x01, 0xFF);
 
 		const __m128i K16_0001 = SIMD_MM_SET1_EPI16(0x0001);
 		const __m128i K16_0002 = SIMD_MM_SET1_EPI16(0x0002);
@@ -201,7 +201,7 @@ namespace Simd
         const __m256i K8_40 = SIMD_MM256_SET1_EPI8(0x40);
         const __m256i K8_80 = SIMD_MM256_SET1_EPI8(0x80);
 
-        const __m256i K8_01_FF = SIMD_MM256_SET2_EPI8(1, 0xFF);
+        const __m256i K8_01_FF = SIMD_MM256_SET2_EPI8(0x01, 0xFF);
 
 		const __m256i K16_0001 = SIMD_MM256_SET1_EPI16(0x0001);
         const __m256i K16_0002 = SIMD_MM256_SET1_EPI16(0x0002);

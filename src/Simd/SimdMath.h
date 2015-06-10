@@ -319,6 +319,11 @@ namespace Simd
         {
             return _mm_unpackhi_epi8(a, b); 
         }
+
+        SIMD_INLINE __m128i DivideBy16(__m128i value)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 

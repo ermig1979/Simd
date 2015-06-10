@@ -1154,6 +1154,11 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Avx2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if(Ssse3::Enable && width*channelCount >= Ssse3::A)
+        Ssse3::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width*channelCount >= Sse2::A)
         Sse2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);

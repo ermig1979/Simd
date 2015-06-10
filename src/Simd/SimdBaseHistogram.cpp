@@ -119,7 +119,7 @@ namespace Simd
                 if (sum == 0 && histogram[i] != 0)
                 {
                     minCount = histogram[i]; 
-                    minColor = i;
+                    minColor = (uint32_t)i;
                 }
                 sum += histogram[i];
                 integral[i] = sum;

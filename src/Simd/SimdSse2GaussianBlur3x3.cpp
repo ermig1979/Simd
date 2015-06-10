@@ -54,11 +54,6 @@ namespace Simd
             };	
         }
 
-        SIMD_INLINE __m128i DivideBy16(__m128i value)
-        {
-            return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
-        }
-
         template<bool align> SIMD_INLINE void BlurCol(__m128i a[3], uint16_t * b)
         {
             Store<align>((__m128i*)(b + 0), BinomialSum16(_mm_unpacklo_epi8(a[0], K_ZERO), 
