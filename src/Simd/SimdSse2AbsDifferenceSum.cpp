@@ -87,7 +87,7 @@ namespace Simd
 				}
 				if(width - bodyWidth)
 				{
-					const __m128i mask_ = _mm_and_si128(tailMask, LoadMaskI8<align>((__m128i*)(mask + width - A), index_));
+					const __m128i mask_ = _mm_and_si128(tailMask, LoadMaskI8<false>((__m128i*)(mask + width - A), index_));
 					const __m128i a_ = _mm_and_si128(mask_, Load<false>((__m128i*)(a + width - A)));
 					const __m128i b_ = _mm_and_si128(mask_, Load<false>((__m128i*)(b + width - A))); 
 					fullSum = _mm_add_epi64(_mm_sad_epu8(a_, b_), fullSum);
