@@ -115,8 +115,8 @@ namespace Simd
 
 #else
             bgrs[0] = Fill32(blue, green, red);
-            bgrs[2] = Fill32(green, red, blue);
-            bgrs[1] = Fill32(red, blue, green);
+            bgrs[1] = Fill32(green, red, blue);
+            bgrs[2] = Fill32(red, blue, green);
 #endif
             for(size_t row = 0; row < height; ++row)
             {
