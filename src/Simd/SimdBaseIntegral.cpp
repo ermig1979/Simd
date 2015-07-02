@@ -129,21 +129,14 @@ namespace Simd
             }
 
             if(width == 1)
-                buffer[0] = 0;
-
-            src++;
-            sum++;
-            sqsum++;
-            tilted++; 
-            buffer++;
+                buffer[1] = 0;
 
             for(size_t row = 1; row < height; ++row)
             {
-                src += srcStride - 1;
-                sum += sumStride - 1;
-                tilted += tiltedStride - 1;
-                buffer += -1;
-                sqsum += sqsumStride - 1;
+                src += srcStride;
+                sum += sumStride;
+                tilted += tiltedStride;
+                sqsum += sqsumStride;
 
                 TSum value = src[0];
                 TSum t0 = s = value;
@@ -185,12 +178,6 @@ namespace Simd
                     tilted[col] = t0 + t1 + tilted[col - tiltedStride - 1];
                     buffer[col] = t0;
                 }
-
-                src++;
-                sum++;
-                tilted++; 
-                buffer++;
-                sqsum++;
             }
         }
 
@@ -220,19 +207,13 @@ namespace Simd
             }
 
             if(width == 1)
-                buffer[0] = 0;
-
-            src++;
-            sum++;
-            tilted++; 
-            buffer++;
+                buffer[1] = 0;
 
             for(size_t row = 1; row < height; ++row)
             {
-                src += srcStride - 1;
-                sum += sumStride - 1;
-                tilted += tiltedStride - 1;
-                buffer += -1;
+                src += srcStride;
+                sum += sumStride;
+                tilted += tiltedStride;
 
                 TSum value = src[0];
                 TSum t0 = s = value;
@@ -265,11 +246,6 @@ namespace Simd
                     tilted[col] = t0 + t1 + tilted[col - tiltedStride - 1];
                     buffer[col] = t0;
                 }
-
-                src++;
-                sum++;
-                tilted++; 
-                buffer++;
             }
         }
 
