@@ -62,7 +62,7 @@ namespace Simd
                 for(size_t col = 0, srcOffset = 0, dstOffset = 0; col < alignedWidth; col += HA, srcOffset += A, dstOffset += DA)
                     Bgr48pToBgra32<align>(bgra + dstOffset, blue, green, red, srcOffset, _alpha);
                 if(width != alignedWidth)
-                    Bgr48pToBgra32<align>(bgra + (width - HA)*4, blue, green, red, (width - HA)*2, _alpha);
+                    Bgr48pToBgra32<false>(bgra + (width - HA)*4, blue, green, red, (width - HA)*2, _alpha);
                 blue += blueStride;
                 green += greenStride;
                 red += redStride;

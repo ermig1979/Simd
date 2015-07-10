@@ -100,7 +100,7 @@ namespace Simd
 				}
 				if(width - bodyWidth)
 				{
-					const __m256i mask_ = _mm256_and_si256(tailMask, LoadMaskI8<align>((__m256i*)(mask + width - A), index_));
+					const __m256i mask_ = _mm256_and_si256(tailMask, LoadMaskI8<false>((__m256i*)(mask + width - A), index_));
 					const __m256i a_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(a + width - A)));
 					const __m256i b_ = _mm256_and_si256(mask_, Load<false>((__m256i*)(b + width - A))); 
 					rowSum = _mm256_add_epi32(rowSum, SquaredDifference(a_, b_));

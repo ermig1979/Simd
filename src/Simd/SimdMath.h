@@ -266,9 +266,7 @@ namespace Simd
 
 		SIMD_INLINE __m128i HorizontalSum32(__m128i a)
 		{
-			return _mm_add_epi64(
-				_mm_and_si128(a, K64_00000000FFFFFFFF),
-				_mm_and_si128(_mm_srli_si128(a, 4), K64_00000000FFFFFFFF));
+            return _mm_add_epi64(_mm_unpacklo_epi32(a, K_ZERO), _mm_unpackhi_epi32(a, K_ZERO));
 		}
 
 		SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
@@ -393,7 +391,7 @@ namespace Simd
 
         SIMD_INLINE __m256i HorizontalSum32(__m256i a)
         {
-            return _mm256_unpacklo_epi32(_mm256_hadd_epi32(a, K_ZERO), K_ZERO);
+            return _mm256_add_epi64(_mm256_unpacklo_epi32(a, K_ZERO), _mm256_unpackhi_epi32(a, K_ZERO));
         }
 
         SIMD_INLINE __m256i AbsDifferenceU8(__m256i a, __m256i b)
