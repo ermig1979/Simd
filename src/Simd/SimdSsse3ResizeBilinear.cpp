@@ -124,12 +124,12 @@ namespace Simd
             }
         }
 
-        void EstimateAlphaIndexX(int srcSize, int dstSize, Index * indexes, uint8_t * alphas)
+        void EstimateAlphaIndexX(int srcSize, int dstSize, Index * indexes, uint8_t * alphas, size_t & blockCount)
         {
             float scale = (float)srcSize/dstSize;
 
             int srcNext = 0, dstNext = 0;
-            int block = -1, blockLast = std::max((int)::ceil(float(srcSize)/A), (int)::ceil(float(dstSize)/HA)) - 1;
+            int block = -1, blockLast = blockCount - 1;
             for(int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
             {
                 float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
@@ -173,6 +173,7 @@ namespace Simd
                 alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
                 alphas += 2;
             }
+            blockCount = block + 1;
         }
 
         template <size_t channelCount> void InterpolateX(const __m128i * alpha, __m128i * buffer);
@@ -334,7 +335,7 @@ namespace Simd
 
             Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
 
-            EstimateAlphaIndexX((int)srcWidth, (int)dstWidth, buffer.ix, buffer.ax);
+            EstimateAlphaIndexX((int)srcWidth, (int)dstWidth, buffer.ix, buffer.ax, blockCount);
 
             ptrdiff_t previous = -2;
 
