@@ -46,6 +46,11 @@ namespace Simd
 			return _mm_max_epu8(a, b);
 		}
 
+        template <> SIMD_INLINE __m128i OperationBinary8u<SimdOperationBinary8uMinimum>(const __m128i & a, const __m128i & b)
+        {
+            return _mm_min_epu8(a, b);
+        }
+
         template <> SIMD_INLINE __m128i OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(const __m128i & a, const __m128i & b)
         {
             return _mm_subs_epu8(a, b);
@@ -96,6 +101,8 @@ namespace Simd
 				return OperationBinary8u<align, SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case SimdOperationBinary8uMaximum:
 				return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMinimum:
+                return OperationBinary8u<align, SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
                 return OperationBinary8u<align, SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedAddition:

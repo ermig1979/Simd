@@ -90,6 +90,8 @@ namespace Test
             return "<And>";
         case SimdOperationBinary8uMaximum:
             return "<Max>";
+        case SimdOperationBinary8uMinimum:
+            return "<Min>";
         case SimdOperationBinary8uSaturatedSubtraction:
             return "<Subs>";
         case SimdOperationBinary8uSaturatedAddition:

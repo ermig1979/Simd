@@ -47,6 +47,11 @@ namespace Simd
             return vec_max(a, b);
         }
 
+        template <> SIMD_INLINE v128_u8 OperationBinary8u<SimdOperationBinary8uMinimum>(const v128_u8 & a, const v128_u8 & b)
+        {
+            return vec_min(a, b);
+        }
+
         template <> SIMD_INLINE v128_u8 OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(const v128_u8 & a, const v128_u8 & b)
         {
             return vec_subs(a, b);
@@ -134,6 +139,8 @@ namespace Simd
                 return OperationBinary8u<SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uMaximum:
                 return OperationBinary8u<SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMinimum:
+                return OperationBinary8u<SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedSubtraction:
                 return OperationBinary8u<SimdOperationBinary8uSaturatedSubtraction>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uSaturatedAddition:
