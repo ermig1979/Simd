@@ -367,7 +367,7 @@ namespace Simd
 
             size_t size = 2*dstWidth;
             size_t bufferWidth = AlignHi(dstWidth, A)*2;
-            size_t blockCount = std::max((int)::ceil(float(srcWidth)/A), (int)::ceil(float(dstWidth)/HA));
+            size_t blockCount = Simd::Max((int)::ceil(float(srcWidth)/A), (int)::ceil(float(dstWidth)/HA));
             size_t alignedSize = AlignHi(size, DA) - DA;
 
             BufferG buffer(bufferWidth, blockCount, dstHeight);

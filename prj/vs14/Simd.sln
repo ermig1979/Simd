@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 13.00
-# Visual Studio 2013
+Microsoft Visual Studio Solution File, Format Version 14.00
+# Visual Studio 2015
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test.vcxproj", "{423128F2-9D4E-408D-9123-49CE57A32B0A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Simd", "Simd.vcxproj", "{C809D7A3-6C52-4E36-8582-00CED929317D}"

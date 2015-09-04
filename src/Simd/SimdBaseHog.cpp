@@ -182,7 +182,7 @@ namespace Simd
                 {
                     float dy = (float)(src2[col] - src0[col]);
                     float dx = (float)(src1[col + 1] - src1[col - 1]);
-                    float value = ::sqrt(dx*dx + dy*dy);
+                    float value = (float)::sqrt(dx*dx + dy*dy);
 
                     float bestDot = 0;
                     int index = 0;
