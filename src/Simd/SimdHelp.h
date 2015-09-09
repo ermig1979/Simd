@@ -130,6 +130,16 @@
     \short Related functions for View structure. 
 */
 
+/*! @ingroup cpp_types
+@defgroup cpp_frame struct Frame
+\short Frame structure and related functions.
+*/
+
+/*! @ingroup cpp_frame
+@defgroup cpp_frame_functions Related Functions
+\short Related functions for Frame structure.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */

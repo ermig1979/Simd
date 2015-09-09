@@ -28,6 +28,7 @@
 */
 
 #include "Simd/SimdLib.hpp"
+#include "Simd/SimdFrame.hpp"
 
 namespace Test
 {
@@ -36,6 +37,10 @@ namespace Test
         typedef Simd::View<Simd::Allocator> View;
 
         View v(1, 1, View::Gray8);
+
+		typedef Simd::Frame<Simd::Allocator> Frame;
+
+		Frame f(2, 2, Frame::Yuv420p);
     }
 }
 

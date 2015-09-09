@@ -116,7 +116,7 @@ namespace Simd
         /*!
             Creates a new View structure on the base of the image view.
 
-            \note This constructor is not create new image view! It only create a reference to the same image. If you want to create a copy then must use method Simd::View::Clone.
+            \note This constructor is not create new image view! It only creates a reference to the same image. If you want to create a copy then must use method Simd::View::Clone.
 
             \param [in] view - an original image view. 
         */
