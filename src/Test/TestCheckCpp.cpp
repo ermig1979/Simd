@@ -36,7 +36,9 @@ namespace Test
     {
         typedef Simd::View<Simd::Allocator> View;
 
-        View v(1, 1, View::Gray8);
+        View vs(6, 6, View::Bgra32);
+		View vd(6, 6, View::Hsl24);
+		Simd::Convert(vs, vd);
 
 		typedef Simd::Frame<Simd::Allocator> Frame;
 

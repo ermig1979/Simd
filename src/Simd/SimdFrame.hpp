@@ -284,7 +284,7 @@ namespace Simd
 
 		\fn template <class A, class B> void Copy(const Frame<A> & src, Frame<B> & dst);
 
-		\shorts Copies one frame to another frame.
+		\short Copies one frame to another frame.
 
 		The frames must have the same width, height and format.
 
@@ -297,7 +297,7 @@ namespace Simd
 
 		\fn template <class A> void Convert(const Frame<A> & src, Frame<A> & dst);
 
-		\shorts Converts one frame to another frame.
+		\short Converts one frame to another frame.
 
 		The frames must have the same width and height.
 
@@ -443,10 +443,10 @@ namespace Simd
 
 			if (format == Nv12 || format == Yuv420p)
 			{
-				left = Simd::AlignLo(left, 2);
-				top = Simd::AlignLo(top, 2);
-				right = Simd::AlignHi(right, 2);
-				bottom = Simd::AlignHi(bottom, 2);
+				left = left & ~1;
+				top = top & ~1;
+				right = (right + 1) & ~1;
+				bottom = (bottom + 1) & ~1;
 			}
 
 			Frame frame;

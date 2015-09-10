@@ -3215,7 +3215,7 @@ namespace Simd
 
     /*! @ingroup yuv_conversion
 
-        \fn void Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue)
+        \fn void Yuv444pToHue(const View<A> & y, const View<A> & u, const View<A> & v, View<A> & hue)
 
         \short Converts YUV444P image to 8-bit image with Hue component of HSV or HSL color space. 
 
@@ -3228,12 +3228,84 @@ namespace Simd
         \param [in] v - an input 8-bit image with V color plane.
         \param [out] hue - an output 8-bit Hue image.
     */
-    template<class A> SIMD_INLINE void Yuv444pToHue(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& hue)
+    template<class A> SIMD_INLINE void Yuv444pToHue(const View<A> & y, const View<A> & u, const View<A> & v, View<A> & hue)
     {
         assert(Compatible(y, u, v, hue) && y.format == View<A>::Gray8);
 
         SimdYuv444pToHue(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, hue.data, hue.stride);
     }
+
+	/*! @ingroup universal_conversion
+
+		\fn void Convert(const View<A> & src, View<A> & dst)
+
+		\short Converts an image of one format to an image of another format.
+
+		The input and output images must have the same width and height.
+
+		\note This function supports conversion between Gray8, Bgr24 and Bgra32 image formats.
+
+		\param [in] src - an input image.
+		\param [out] dst - an output image.
+	*/
+	template<class A> SIMD_INLINE void Convert(const View<A> & src, View<A> & dst)
+	{
+		assert(EqualSize(src, dst) && src.format && dst.format);
+
+		if (src.format == dst.format)
+		{
+			Copy(src, dst);
+			return;
+		}
+
+		switch (src.format)
+		{
+		case View<A>::Gray8:
+			switch (dst.format)
+			{
+			case View<A>::Bgra32:
+				GrayToBgra(src, dst);
+				break;
+			case View<A>::Bgr24:
+				GrayToBgr(src, dst);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case View<A>::Bgr24:
+			switch (dst.format)
+			{
+			case View<A>::Bgra32:
+				BgrToBgra(src, dst);
+				break;
+			case View<A>::Gray8:
+				BgrToGray(src, dst);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case View<A>::Bgra32:
+			switch (dst.format)
+			{
+			case View<A>::Bgr24:
+				BgraToBgr(src, dst);
+				break;
+			case View<A>::Gray8:
+				BgraToGray(src, dst);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		default:
+			assert(0);
+		}
+	}
 }
 
 #endif//__SimdLib_hpp__

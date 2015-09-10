@@ -170,6 +170,11 @@
 */
 
 /*! @ingroup conversion
+	@defgroup universal_conversion Universal
+	\short Universal functions for image format conversions.
+*/
+
+/*! @ingroup conversion
     @defgroup bayer_conversion Bayer 
     \short Functions for Bayer image conversions.
 */
