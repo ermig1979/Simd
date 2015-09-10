@@ -280,6 +280,32 @@ namespace Simd
     */
     template <class A, class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
 
+	/*! @ingroup cpp_frame_functions
+
+		\fn template <class A, class B> void Copy(const Frame<A> & src, Frame<B> & dst);
+
+		\shorts Copies one frame to another frame.
+
+		The frames must have the same width, height and format.
+
+		\param [in] src - an input frame.
+		\param [out] dst - an output frame.
+	*/
+	template <class A, class B> void Copy(const Frame<A> & src, Frame<B> & dst);
+
+	/*! @ingroup cpp_frame_functions
+
+		\fn template <class A> void Convert(const Frame<A> & src, Frame<A> & dst);
+
+		\shorts Converts one frame to another frame.
+
+		The frames must have the same width and height.
+
+		\param [in] src - an input frame.
+		\param [out] dst - an output frame.
+	*/
+	template <class A> void Convert(const Frame<A> & src, Frame<A> & dst);
+
     //-------------------------------------------------------------------------
 
     // struct Frame implementation:
@@ -338,10 +364,9 @@ namespace Simd
 
     template <class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
     {
-        Frame<A> * frame = new Frame<A>(width, height, format);
-		for (size_t i = 0, n = PlaneCount(); i < n; ++i)
-			Simd::Copy(planes[i], frame->planes[i]);
-        return frame;
+        Frame<A> * clone = new Frame<A>(width, height, format);
+		Copy(*this, *clone);
+        return clone;
     }
 
     template <class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
@@ -526,6 +551,122 @@ namespace Simd
         return
             (a.width == b.width && a.height == b.height && a.format == (Format)b.format);
     }
+
+	template <class A, class B> SIMD_INLINE void Copy(const Frame<A> & src, Frame<B> & dst)
+	{
+		assert(Compatible(src, dst));
+
+		if (src.format)
+		{
+			for (size_t i = 0, n = src.PlaneCount(); i < n; ++i)
+				Simd::Copy(src.planes[i], dst.planes[i]);
+		}
+	}
+
+	template <class A> SIMD_INLINE void Convert(const Frame<A> & src, Frame<A> & dst)
+	{
+		assert(EqualSize(src, dst) && src.format && dst.format);
+
+		if (src.format == dst.format)
+		{
+			Copy(src, dst);
+			return;
+		}
+
+		switch (src.format)
+		{
+		case Frame<A>::Nv12:
+			switch (dst.format)
+			{
+			case Frame<A>::Yuv420p:
+				Copy(src.planes[0], dst.planes[0]);
+				DeinterleaveUv(src.planes[1], dst.planes[1], dst.planes[2]);
+				break;
+			case Frame<A>::Gray8:
+				Copy(src.planes[0], dst.planes[0]);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case Frame<A>::Yuv420p:
+			switch (dst.format)
+			{
+			case Frame<A>::Bgra32:
+				Yuv420pToBgra(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
+				break;
+			case Frame<A>::Bgr24:
+				Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
+				break;
+			case Frame<A>::Gray8:
+				Copy(src.planes[0], dst.planes[0]);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case Frame<A>::Bgra32:
+			switch (dst.format)
+			{
+			case Frame<A>::Yuv420p:
+				BgraToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2]);
+				break;
+			case Frame<A>::Bgr24:
+				BgraToBgr(src.planes[0], dst.planes[0]);
+				break;
+			case Frame<A>::Gray8:
+				BgraToGray(src.planes[0], dst.planes[0]);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case Frame<A>::Bgr24:
+			switch (dst.format)
+			{
+			case Frame<A>::Yuv420p:
+				BgrToYuv420p(src.planes[0], dst.planes[0], dst.planes[1], dst.planes[2]);
+				break;
+			case Frame<A>::Bgra32:
+				BgrToBgra(src.planes[0], dst.planes[0]);
+				break;
+			case Frame<A>::Gray8:
+				BgrToGray(src.planes[0], dst.planes[0]);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		case Frame<A>::Gray8:
+			switch (dst.format)
+			{
+			case Frame<A>::Nv12:
+				Copy(src.planes[0], dst.planes[0]);
+				Fill(dst.planes[1], 128);
+			case Frame<A>::Yuv420p:
+				Copy(src.planes[0], dst.planes[0]);
+				Fill(dst.planes[1], 128);
+				Fill(dst.planes[2], 128);
+				break;
+			case Frame<A>::Bgra32:
+				GrayToBgra(src.planes[0], dst.planes[0]);
+				break;
+			case Frame<A>::Bgr24:
+				GrayToBgr(src.planes[0], dst.planes[0]);
+				break;
+			default:
+				assert(0);
+			}
+			break;
+
+		default:
+			assert(0);
+		}
+	}
 }
 
 #endif//__SimdFrame_hpp__

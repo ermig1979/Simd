@@ -40,8 +40,10 @@ namespace Test
 
 		typedef Simd::Frame<Simd::Allocator> Frame;
 
-		Frame f(2, 2, Frame::Yuv420p);
-    }
+		Frame fs(2, 2, Frame::Yuv420p);
+		Frame fd(2, 2, Frame::Bgr24);
+		Simd::Convert(fs, fd);
+	}
 }
 
 

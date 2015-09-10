@@ -1120,8 +1120,10 @@ namespace Simd
     {
         assert(Compatible(src, dst));
 
-		if(src.format)
+		if (src.format)
+		{
 			SimdCopy(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
+		}
     }
 
     /*! @ingroup copying
