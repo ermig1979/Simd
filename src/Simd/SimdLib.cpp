@@ -1373,6 +1373,26 @@ SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statis
         Base::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
 }
 
+SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+	if (Avx2::Enable && width >= Avx2::A)
+		Avx2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+	else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+	if (Sse2::Enable && width >= Sse2::A)
+		Sse2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+	else
+#endif
+#ifdef SIMD_VMX_ENABLE
+	if (Vmx::Enable && width >= Vmx::A)
+		Vmx::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+	else
+#endif
+		Base::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+}
+
 SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

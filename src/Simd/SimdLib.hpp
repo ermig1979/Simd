@@ -1821,6 +1821,28 @@ namespace Simd
         SimdInterferenceDecrementMasked(dst.data, dst.stride, dst.width, dst.height, decrement, saturation, mask.data, mask.stride, index);
     }
 
+	/*! @ingroup other_conversion
+
+		\fn void InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv)
+
+		\short Interleaves 8-bit U and V planar images into one 16-bit UV interleaved image.
+
+		All images must have the same width and height.
+		This function used for YUV420P to NV12 conversion.
+
+		\note This function is a C++ wrapper for function ::SimdInterleaveUv.
+
+		\param [in] u - an input 8-bit U planar image.
+		\param [in] v - an input 8-bit V planar image.
+		\param [out] uv - an output 16-bit UV interleaved image.
+	*/
+	template<class A> SIMD_INLINE void InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv)
+	{
+		assert(EqualSize(uv, u, v) && uv.format == View<A>::Uv16 && u.format == View<A>::Gray8 && v.format == View<A>::Gray8);
+
+		SimdInterleaveUv(u.data, u.stride, v.data, v.stride, u.width, u.height, uv.data, uv.stride);
+	}
+
     /*! @ingroup laplace_filter
 
         \fn void Laplace(const View<A>& src, View<A>& dst)

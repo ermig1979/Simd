@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Interference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2InterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilter.cpp" />

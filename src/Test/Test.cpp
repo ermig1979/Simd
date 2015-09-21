@@ -207,6 +207,8 @@ namespace Test
     TEST_ADD_GROUP(InterferenceDecrement);
     TEST_ADD_GROUP(InterferenceDecrementMasked);
 
+	TEST_ADD_GROUP(InterleaveUv);
+
     TEST_ADD_GROUP(MedianFilterRhomb3x3);
     TEST_ADD_GROUP(MedianFilterRhomb5x5);
     TEST_ADD_GROUP(MedianFilterSquare3x3);

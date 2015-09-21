@@ -373,9 +373,9 @@ namespace Simd
     {
         if(this != &frame)
         {
-            *(size_t*)&width = view.width;
-            *(size_t*)&height = view.height;
-            *(Format*)&format = view.format;
+            *(size_t*)&width = frame.width;
+            *(size_t*)&height = frame.height;
+            *(Format*)&format = frame.format;
 			for (size_t i = 0, n = PlaneCount(); i < n; ++i)
 				planes[i] = frame.planes[i];
 		}

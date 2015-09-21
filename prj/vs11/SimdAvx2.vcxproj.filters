@@ -124,6 +124,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2InterleaveUv.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
