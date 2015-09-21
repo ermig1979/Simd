@@ -338,6 +338,95 @@ namespace Test
         return result;
     }
 
+	namespace
+	{
+		struct FuncF
+		{
+			typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height,
+				uint8_t threshold, SimdCompareType compareType, uint8_t value);
+
+			FuncPtr func;
+			std::string description;
+
+			FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & src, View & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value) const
+			{
+				Simd::Copy(src, dst);
+				TEST_PERFORMANCE_TEST(description);
+				func(dst.data, dst.stride, dst.width, dst.height, threshold, compareType, value);
+			}
+		};
+	}
+
+#define ARGS_F(width, height, type, function1, function2) \
+    width, height, type, \
+    FuncF(function1.func, function1.description + CompareTypeDescription(type)), \
+    FuncF(function2.func, function2.description + CompareTypeDescription(type))
+
+#define FUNC_F(function) \
+    FuncF(function, std::string(#function))
+
+	bool ConditionalFillAutoTest(int width, int height, SimdCompareType type, const FuncF & f1, const FuncF & f2)
+	{
+		bool result = true;
+
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(src);
+		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+		uint8_t threshold = 127, value = 63;
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, threshold, type, value));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, threshold, type, value));
+
+		result = result && Compare(dst1, dst2, 0, true, 32);
+
+		return result;
+	}
+
+	bool ConditionalFillAutoTest(const FuncF & f1, const FuncF & f2)
+	{
+		bool result = true;
+
+		for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+		{
+			result = result && ConditionalFillAutoTest(ARGS_F(W, H, type, f1, f2));
+			result = result && ConditionalFillAutoTest(ARGS_F(W + O, H - O, type, f1, f2));
+			result = result && ConditionalFillAutoTest(ARGS_F(W - O, H + O, type, f1, f2));
+		}
+
+		return result;
+	}
+
+	bool ConditionalFillAutoTest()
+	{
+		bool result = true;
+
+		result = result && ConditionalFillAutoTest(FUNC_F(Simd::Base::ConditionalFill), FUNC_F(SimdConditionalFill));
+
+#ifdef SIMD_SSE2_ENABLE
+		if (Simd::Sse2::Enable)
+			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sse2::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+		if (Simd::Avx2::Enable)
+			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx2::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif 
+
+#ifdef SIMD_VMX_ENABLE
+		if (Simd::Vmx::Enable)
+			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Vmx::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif 
+
+		return result;
+	}
+
     //-----------------------------------------------------------------------
 
     bool ConditionalCount8uDataTest(bool create, int width, int height, SimdCompareType type, const FuncC8U & f)
@@ -522,4 +611,56 @@ namespace Test
 
         return result;
     }
+
+	bool ConditionalFillDataTest(bool create, int width, int height, SimdCompareType type, const FuncF & f)
+	{
+		bool result = true;
+
+		Data data(f.description);
+
+		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		uint8_t threshold = 127, value = 63;
+
+		if (create)
+		{
+			FillRandom(src);
+
+			TEST_SAVE(src);
+
+			f.Call(src, dst1, threshold, type, value);
+
+			TEST_SAVE(dst1);
+		}
+		else
+		{
+			TEST_LOAD(src);
+
+			TEST_LOAD(dst1);
+
+			f.Call(src, dst2, threshold, type, value);
+
+			TEST_SAVE(dst2);
+
+			result = result && Compare(dst1, dst2, 0, true, 32);
+		}
+
+		return result;
+	}
+
+	bool ConditionalFillDataTest(bool create)
+	{
+		bool result = true;
+
+		FuncF f = FUNC_F(SimdConditionalFill);
+		for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+		{
+			result = result && ConditionalFillDataTest(create, DW, DH, type, FuncF(f.func, f.description + Data::Description(type)));
+		}
+
+		return result;
+	}
 }

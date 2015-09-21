@@ -1103,6 +1103,33 @@ namespace Simd
         SimdConditionalSquareGradientSum(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, &sum);
     }
 
+	/*! @ingroup conditional
+
+		\fn void ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value);
+
+		\short Fills pixels satisfying certain condition of 8-bit gray image by given value.
+
+		For every point:
+		\verbatim
+		if(compare(dst[i], threshold))
+			dst[i] = value;
+		\endverbatim
+		where compare(a, b) depends from compareType (see ::SimdCompareType).
+
+		\note This function is a C++ wrapper for function ::SimdConditionalFill
+
+		\param [in, out] dst - a 8-bit gray image.
+		\param [in] threshold - a second value for compare operation.
+		\param [in] compareType - a compare operation type (see ::SimdCompareType).
+		\param [in] value - a value for fill operation.
+	*/
+	template<class A> SIMD_INLINE void ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value)
+	{
+		assert(dst.format == View<A>::Gray8);
+
+		SimdConditionalFill(dst.data, dst.stride, dst.width, dst.height, threshold, compareType, value);
+	}
+
     /*! @ingroup copying
 
         \fn void Copy(const View<A> & src, View<B> & dst)

@@ -904,6 +904,26 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
         Base::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
+SIMD_API void SimdConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value)
+{
+#ifdef SIMD_AVX2_ENABLE
+	if (Avx2::Enable && width >= Avx2::A)
+		Avx2::ConditionalFill(dst, stride, width, height, threshold, compareType, value);
+	else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+	if (Sse2::Enable && width >= Sse2::A)
+		Sse2::ConditionalFill(dst, stride, width, height, threshold, compareType, value);
+	else
+#endif
+#ifdef SIMD_VMX_ENABLE
+	if (Vmx::Enable && width >= Vmx::A)
+		Vmx::ConditionalFill(dst, stride, width, height, threshold, compareType, value);
+	else
+#endif
+		Base::ConditionalFill(dst, stride, width, height, threshold, compareType, value);
+}
+
 SIMD_API void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride)
 {
     Base::Copy(src, srcStride, width, height, pixelSize, dst, dstStride);

@@ -1308,6 +1308,32 @@ extern "C"
     SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
         const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+	/*! @ingroup conditional
+
+		\fn void SimdConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value);
+
+		\short Fills pixels satisfying certain condition of 8-bit gray image by given value.
+
+		For every point:
+		\verbatim
+		if(compare(dst[i], threshold))
+			dst[i] = value;
+		\endverbatim
+		where compare(a, b) depends from compareType (see ::SimdCompareType).
+
+		\note This function has a C++ wrapper Simd::ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value).
+
+		\param [in, out] dst - a pointer to pixels data of the 8-bit gray image.
+		\param [in] stride - a row size of the image.
+		\param [in] width - an image width.
+		\param [in] height - an image height.
+		\param [in] threshold - a second value for compare operation.
+		\param [in] compareType - a compare operation type (see ::SimdCompareType).
+		\param [in] value - a value for fill operation.
+	*/
+	SIMD_API void SimdConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height,
+		uint8_t threshold, SimdCompareType compareType, uint8_t value);
+
     /*! @ingroup copying
 
         \fn void SimdCopy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);

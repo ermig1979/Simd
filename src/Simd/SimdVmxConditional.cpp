@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoad.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
@@ -257,12 +258,12 @@ namespace Simd
             }
         }
 
-        template <bool align, SimdCompareType compareType> void ConditionalSquareSum(const uint8_t * src, const uint8_t * mask, size_t offset, const v128_u8 & value, v128_u32 & sum)
-        {
-            const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + offset), value);
-            const v128_u8 _src = vec_and(Load<align>(src + offset), _mask);
-            sum = vec_msum(_src, _src, sum);
-        }
+		template <bool align, SimdCompareType compareType> void ConditionalSquareSum(const uint8_t * src, const uint8_t * mask, size_t offset, const v128_u8 & value, v128_u32 & sum)
+		{
+			const v128_u8 _mask = Compare8u<compareType>(Load<align>(mask + offset), value);
+			const v128_u8 _src = vec_and(Load<align>(src + offset), _mask);
+			sum = vec_msum(_src, _src, sum);
+		}
 
         template <bool align, SimdCompareType compareType> 
         void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
@@ -432,6 +433,68 @@ namespace Simd
                 assert(0);
             }
         }
+
+		template <bool align, SimdCompareType compareType> void ConditionalFill(uint8_t * dst, const v128_u8 & threshold, const v128_u8 & value)
+		{
+			const v128_u8 _dst = Load<align>(dst);
+			Store<align>(dst, vec_sel(_dst, value, Compare8u<compareType>(_dst, threshold)));
+		}
+
+		template <bool align, SimdCompareType compareType>
+		void ConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, uint8_t value)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(dst) && Aligned(stride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+
+			v128_u8 _value = SetU8(value);
+			v128_u8 _threshold = SetU8(threshold);
+			for (size_t row = 0; row < height; ++row)
+			{
+				ConditionalFill<align, compareType>(dst, _threshold, _value);
+				for (size_t col = A; col < alignedWidth; col += A)
+					ConditionalFill<true, compareType>(dst + col, _threshold, _value);
+				if(!align)
+					ConditionalFill<false, compareType>(dst + alignedWidth - A, _threshold, _value);
+				if (alignedWidth != width)
+				{
+					ConditionalFill<false, compareType>(dst + width - A, _threshold, _value);
+				}
+				dst += stride;
+			}
+		}
+
+		template <SimdCompareType compareType>
+		void ConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, uint8_t value)
+		{
+			if (Aligned(dst) && Aligned(stride))
+				ConditionalFill<true, compareType>(dst, stride, width, height, threshold, value);
+			else
+				ConditionalFill<false, compareType>(dst, stride, width, height, threshold, value);
+		}
+
+		void ConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalFill<SimdCompareEqual>(dst, stride, width, height, threshold, value);
+			case SimdCompareNotEqual:
+				return ConditionalFill<SimdCompareNotEqual>(dst, stride, width, height, threshold, value);
+			case SimdCompareGreater:
+				return ConditionalFill<SimdCompareGreater>(dst, stride, width, height, threshold, value);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalFill<SimdCompareGreaterOrEqual>(dst, stride, width, height, threshold, value);
+			case SimdCompareLesser:
+				return ConditionalFill<SimdCompareLesser>(dst, stride, width, height, threshold, value);
+			case SimdCompareLesserOrEqual:
+				return ConditionalFill<SimdCompareLesserOrEqual>(dst, stride, width, height, threshold, value);
+			default:
+				assert(0);
+			}
+		}
     }
 #endif// SIMD_VMX_ENABLE
 }
