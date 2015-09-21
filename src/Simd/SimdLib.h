@@ -1310,29 +1310,33 @@ extern "C"
 
 	/*! @ingroup conditional
 
-		\fn void SimdConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value);
+		\fn void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-		\short Fills pixels satisfying certain condition of 8-bit gray image by given value.
+		\short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+
+		All images must have the same width and height.
 
 		For every point:
 		\verbatim
-		if(compare(dst[i], threshold))
+		if(compare(src[i], threshold))
 			dst[i] = value;
 		\endverbatim
 		where compare(a, b) depends from compareType (see ::SimdCompareType).
 
-		\note This function has a C++ wrapper Simd::ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value).
+		\note This function has a C++ wrapper Simd::ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst).
 
-		\param [in, out] dst - a pointer to pixels data of the 8-bit gray image.
-		\param [in] stride - a row size of the image.
+		\param [in] src - a pointer to pixels data of input 8-bit gray image.
+		\param [in] srcStride - a row size of input image.
 		\param [in] width - an image width.
 		\param [in] height - an image height.
 		\param [in] threshold - a second value for compare operation.
 		\param [in] compareType - a compare operation type (see ::SimdCompareType).
 		\param [in] value - a value for fill operation.
+		\param [in, out] dst - a pointer to pixels data of the output 8-bit gray image.
+		\param [in] dstStride - a row size of output image.
 	*/
-	SIMD_API void SimdConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height,
-		uint8_t threshold, SimdCompareType compareType, uint8_t value);
+	SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+		uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup copying
 

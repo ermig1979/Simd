@@ -342,19 +342,18 @@ namespace Test
 	{
 		struct FuncF
 		{
-			typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height,
-				uint8_t threshold, SimdCompareType compareType, uint8_t value);
+			typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+				uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
 			std::string description;
 
 			FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value) const
+			void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View & dst) const
 			{
-				Simd::Copy(src, dst);
 				TEST_PERFORMANCE_TEST(description);
-				func(dst.data, dst.stride, dst.width, dst.height, threshold, compareType, value);
+				func(src.data, src.stride, src.width, src.height, threshold, compareType, value, dst.data, dst.stride);
 			}
 		};
 	}
@@ -380,9 +379,9 @@ namespace Test
 
 		uint8_t threshold = 127, value = 63;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, threshold, type, value));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, type, value, dst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, threshold, type, value));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, type, value, dst2));
 
 		result = result && Compare(dst1, dst2, 0, true, 32);
 
@@ -631,7 +630,7 @@ namespace Test
 
 			TEST_SAVE(src);
 
-			f.Call(src, dst1, threshold, type, value);
+			f.Call(src, threshold, type, value, dst1);
 
 			TEST_SAVE(dst1);
 		}
@@ -641,7 +640,7 @@ namespace Test
 
 			TEST_LOAD(dst1);
 
-			f.Call(src, dst2, threshold, type, value);
+			f.Call(src, threshold, type, value, dst2);
 
 			TEST_SAVE(dst2);
 

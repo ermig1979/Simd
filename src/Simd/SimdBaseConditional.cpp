@@ -235,35 +235,38 @@ namespace Simd
         }
 
 		template <SimdCompareType compareType>
-		void ConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, uint8_t value)
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, uint8_t value, uint8_t * dst, size_t dstStride)
 		{
 			for (size_t row = 0; row < height; ++row)
 			{
 				for (size_t col = 0; col < width; ++col)
 				{
-					if (Compare8u<compareType>(dst[col], threshold))
+					if (Compare8u<compareType>(src[col], threshold))
 						dst[col] = value;
 				}
-				dst += stride;
+				src += srcStride;
+				dst += dstStride;
 			}
 		}
 
-		void ConditionalFill(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value)
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride)
 		{
 			switch (compareType)
 			{
 			case SimdCompareEqual:
-				return ConditionalFill<SimdCompareEqual>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareNotEqual:
-				return ConditionalFill<SimdCompareNotEqual>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareNotEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareGreater:
-				return ConditionalFill<SimdCompareGreater>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareGreater>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareGreaterOrEqual:
-				return ConditionalFill<SimdCompareGreaterOrEqual>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareGreaterOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareLesser:
-				return ConditionalFill<SimdCompareLesser>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareLesser>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareLesserOrEqual:
-				return ConditionalFill<SimdCompareLesserOrEqual>(dst, stride, width, height, threshold, value);
+				return ConditionalFill<SimdCompareLesserOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			default:
 				assert(0);
 			}

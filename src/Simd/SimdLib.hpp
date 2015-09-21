@@ -1105,29 +1105,32 @@ namespace Simd
 
 	/*! @ingroup conditional
 
-		\fn void ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value);
+		\fn void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst);
 
-		\short Fills pixels satisfying certain condition of 8-bit gray image by given value.
+		\short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.
+
+		All images must have the same width and height.
 
 		For every point:
 		\verbatim
-		if(compare(dst[i], threshold))
+		if(compare(src[i], threshold))
 			dst[i] = value;
 		\endverbatim
 		where compare(a, b) depends from compareType (see ::SimdCompareType).
 
 		\note This function is a C++ wrapper for function ::SimdConditionalFill
 
-		\param [in, out] dst - a 8-bit gray image.
+		\param [in] src - an input 8-bit gray image.
 		\param [in] threshold - a second value for compare operation.
 		\param [in] compareType - a compare operation type (see ::SimdCompareType).
 		\param [in] value - a value for fill operation.
-	*/
-	template<class A> SIMD_INLINE void ConditionalFill(View<A> & dst, uint8_t threshold, SimdCompareType compareType, uint8_t value)
+		\param [in, out] dst - an output 8-bit gray image.
+		*/
+	template<class A> SIMD_INLINE void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst)
 	{
-		assert(dst.format == View<A>::Gray8);
+		assert(Compatible(src, dst) && src.format == View<A>::Gray8);
 
-		SimdConditionalFill(dst.data, dst.stride, dst.width, dst.height, threshold, compareType, value);
+		SimdConditionalFill(src.data, src.stride, src.width, src.height, threshold, compareType, value, dst.data, dst.stride);
 	}
 
     /*! @ingroup copying
