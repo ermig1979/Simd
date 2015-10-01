@@ -61,7 +61,7 @@
     The %Simd Library has next folder's structure:
      - \c simd/src/Simd/ - contains source codes of the library.
      - \c simd/src/Test/ - contains test framework of the library.
-     - \c simd/prj/vs11/ - contains project files of Microsoft Visual Studio 2012.
+     - \c simd/prj/vs14/ - contains project files of Microsoft Visual Studio 2015.
      - \c simd/prj/cmd/ - contains additional scripts needed for building of the library in Windows.
      - \c simd/prj/cmake/ - contains files of CMake build systems.
      - \c simd/prj/sh/ - contains additional scripts needed for building of the library in Linux.
@@ -69,21 +69,65 @@
      - \c simd/doc/ - contains documentation of the library.
      - \c simd/doc/src/ - contains scripts for generation of this documentation by <a href="http://www.doxygen.org">doxygen</a>.
 
-     \section s2 The library using
+	\section s2 The library building for Windows
 
-     If you use the library from C code you must include:
-     \code
-     #include "Simd/Simd.h"
-     \endcode
+	To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2015. 
+	These project files are in the directory: 
+	\c simd/prj/vs14/.
+	\n By default the library is built as	a DLL (Dynamic Linked Library).
+	You also may build it as a static library. 
+	To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also uncomment \#define SIMD_STATIC in file:
+	\c simd/src/Simd/SimdConfig.h.
 
-     And to use the library from C++ code you must include:
-     \code
-     #include "Simd/Simd.hpp"
-     \endcode
+	\section s3 The library building for Linux
+	To build the library and test application for Linux 32/64 you need to use CMake build systems.
+	Files of CMake build systems are placed in the directory:
+	\c simd/prj/cmake/.
+	The library can be built for x86/x64 and for PowerPC platform.
+	With using of native compiler (g++) for current platform it is simple:
+	\code
+	cd ./prj/cmake
+	cmake . 
+	make
+	\endcode
+	To build the library for PowePC platform you can also use toolchain for cross compilation.
+	There is an example of using:
+	\code
+	cd ./prj/cmake
+	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	make
+	\endcode
+	As result the library and the test application will be built in the current directory.
 
-     \section s3 Test Framework
+    \section s4 The library using
 
-     The test suite is needed for testing of correctness of work of the library and also for performance testing of the library.
+    If you use the library from C code you must include:
+    \code
+    #include "Simd/Simd.h"
+    \endcode
+
+    And to use the library from C++ code you must include:
+    \code
+    #include "Simd/Simd.hpp"
+    \endcode
+
+    \section s5 Test Framework
+
+    The test suite is needed for testing of correctness of work of the library and also for its performance testing.
+	There is a set of tests for every function from API of the library. 
+	There is an example of test application using:
+	\code
+	./Test -m=a -t=1 -f=Sobel -o=log.txt
+	\endcode
+	Where next parameters were used:
+	 - \c -m=a - a auto checking mode which includes performance testing (only for library built in Release mode). 
+	In this case different implementations of each functions will be compared between themselves 
+	(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
+	Also it can be -m=c (creation of test data for cross-platform testing) and -m=v (cross-platform testing with using of early prepared test data). 
+	 - \c -t=1 - a number of used threads (every thread run all tests) for simulation of multi-thread loading.
+	 - \c -f=Sobel - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
+	If you miss this parameter then full testing will be performed.
+	 - \c -o=log.txt - a file name with test report. The test's report also will be output to console.
 */
 /*@}*/
 
