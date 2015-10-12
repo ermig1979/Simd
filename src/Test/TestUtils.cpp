@@ -116,7 +116,7 @@ namespace Test
                             message << std::endl << "Fail comparison: " << description << std::endl;
                         size_t col = offset/channelCount;
                         message << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];
-                        for(size_t channel = 1; channel < channelCount; ++channel)
+						for(size_t channel = 1; channel < channelCount; ++channel)
                             message << "," << (int)pA[col*channelCount + channel]; 
                         message << ") != (" << (int)pB[col*channelCount];
                         for(size_t channel = 1; channel < channelCount; ++channel)

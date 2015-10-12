@@ -350,10 +350,11 @@ namespace Test
 
 			FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
 
-			void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View & dst) const
+			void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, const View & dstSrc, View & dstDst) const
 			{
+				Simd::Copy(dstSrc, dstDst);
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, threshold, compareType, value, dst.data, dst.stride);
+				func(src.data, src.stride, src.width, src.height, threshold, compareType, value, dstDst.data, dstDst.stride);
 			}
 		};
 	}
@@ -374,14 +375,16 @@ namespace Test
 
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		FillRandom(src);
+		View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(dst);
 		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
 		uint8_t threshold = 127, value = 63;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, type, value, dst1));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, type, value, dst, dst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, type, value, dst2));
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, type, value, dst, dst2));
 
 		result = result && Compare(dst1, dst2, 0, true, 32);
 
@@ -620,6 +623,7 @@ namespace Test
 		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
 		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 		uint8_t threshold = 127, value = 63;
@@ -627,20 +631,23 @@ namespace Test
 		if (create)
 		{
 			FillRandom(src);
+			FillRandom(dst);
 
 			TEST_SAVE(src);
+			TEST_SAVE(dst);
 
-			f.Call(src, threshold, type, value, dst1);
+			f.Call(src, threshold, type, value, dst, dst1);
 
 			TEST_SAVE(dst1);
 		}
 		else
 		{
 			TEST_LOAD(src);
+			TEST_LOAD(dst);
 
 			TEST_LOAD(dst1);
 
-			f.Call(src, threshold, type, value, dst2);
+			f.Call(src, threshold, type, value, dst, dst2);
 
 			TEST_SAVE(dst2);
 
