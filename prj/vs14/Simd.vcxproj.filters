@@ -73,6 +73,9 @@
     <ClInclude Include="..\..\src\Simd\SimdFrame.hpp">
       <Filter>Hpp</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPyramid.hpp">
+      <Filter>Hpp</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Lib">

@@ -29,6 +29,7 @@
 
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdFrame.hpp"
+#include "Simd/SimdPyramid.hpp"
 
 namespace Test
 {
@@ -45,6 +46,12 @@ namespace Test
 		Frame fs(2, 2, Frame::Yuv420p);
 		Frame fd(2, 2, Frame::Bgr24);
 		Simd::Convert(fs, fd);
+
+		typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+
+		Pyramid p(16, 16, 3);
+		p.Fill(1);
+		p.Build(Pyramid::ReduceGray2x2);
 	}
 }
 

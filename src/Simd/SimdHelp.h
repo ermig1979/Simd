@@ -184,6 +184,16 @@
 \short Related functions for Frame structure.
 */
 
+/*! @ingroup cpp_types
+@defgroup cpp_pyramid struct Pyramid
+\short Pyramid structure and related functions.
+*/
+
+/*! @ingroup cpp_pyramid
+@defgroup cpp_pyramid_functions Related Functions
+\short Related functions for Pyramid structure.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */
