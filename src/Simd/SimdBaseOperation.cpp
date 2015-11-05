@@ -102,6 +102,11 @@ namespace Simd
             return a + b;
         }
 
+		template <> SIMD_INLINE int16_t OperationBinary16i<SimdOperationBinary16iSubtraction>(const int16_t & a, const int16_t & b)
+		{
+			return a - b;
+		}
+
         template <SimdOperationBinary16iType type> void OperationBinary16i(const int16_t * a, size_t aStride, const int16_t * b, size_t bStride, 
             size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
@@ -125,7 +130,10 @@ namespace Simd
             case SimdOperationBinary16iAddition:
                 return OperationBinary16i<SimdOperationBinary16iAddition>(
                     (const int16_t*)a, aStride/sizeof(int16_t), (const int16_t*)b, bStride/sizeof(int16_t), width, height, (int16_t*)dst, dstStride/sizeof(int16_t));
-            default:
+			case SimdOperationBinary16iSubtraction:
+				return OperationBinary16i<SimdOperationBinary16iSubtraction>(
+					(const int16_t*)a, aStride / sizeof(int16_t), (const int16_t*)b, bStride / sizeof(int16_t), width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+			default:
                 assert(0);
             }
         }

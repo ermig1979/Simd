@@ -107,7 +107,9 @@ namespace Test
         {
         case SimdOperationBinary16iAddition:
             return "<Add>";
-        }
+		case SimdOperationBinary16iSubtraction:
+			return "<Sub>";
+		}
         assert(0);
         return "<Unknown";
     }
@@ -223,7 +225,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iAddition && result; type = SimdOperationBinary16iType(type + 1))
+        for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iSubtraction && result; type = SimdOperationBinary16iType(type + 1))
         {
             result = result && OperationBinary16iAutoTest(ARGS_OB16I(W, H, type, f1, f2));
             result = result && OperationBinary16iAutoTest(ARGS_OB16I(W + O, H - O, type, f1, f2));
@@ -419,7 +421,7 @@ namespace Test
         bool result = true;
 
         FuncOB16I f = FUNC_OB16I(SimdOperationBinary16i);
-        for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iAddition && result; type = SimdOperationBinary16iType(type + 1))
+        for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iSubtraction && result; type = SimdOperationBinary16iType(type + 1))
         {
             std::string description = f.description + Data::Description(type);
             result = result && OperationBinary16iDataTest(create, DW, DH, type, FuncOB16I(f.func, description));

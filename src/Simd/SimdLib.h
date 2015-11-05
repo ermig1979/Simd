@@ -112,8 +112,10 @@ typedef enum
 */
 typedef enum
 {
-    /*! Perform addition of two images for every point.  */
+    /*! Performs addition of two images for every point.  */
     SimdOperationBinary16iAddition,
+	/*! Performs subtraction of two images for every point.  */
+	SimdOperationBinary16iSubtraction,
 } SimdOperationBinary16iType;
 
 /*! @ingroup c_types

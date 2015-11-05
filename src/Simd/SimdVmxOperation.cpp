@@ -157,6 +157,11 @@ namespace Simd
             return vec_add(a, b);
         }
 
+		template <> SIMD_INLINE v128_s16 OperationBinary16i<SimdOperationBinary16iSubtraction>(const v128_s16 & a, const v128_s16 & b)
+		{
+			return vec_sub(a, b);
+		}
+
         template <SimdOperationBinary16iType type, bool align, bool first> 
         SIMD_INLINE void OperationBinary16i(const Loader<align> & a, const Loader<align> & b, Storer<align> & dst)
         {
@@ -211,7 +216,9 @@ namespace Simd
             {
             case SimdOperationBinary16iAddition:
                 return OperationBinary16i<SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
-            default:
+			case SimdOperationBinary16iSubtraction:
+				return OperationBinary16i<SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+			default:
                 assert(0);
             }            
         }

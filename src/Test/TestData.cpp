@@ -484,7 +484,9 @@ namespace Test
         {
         case SimdOperationBinary16iAddition:
             return "_Addition";
-        }
+		case SimdOperationBinary16iSubtraction:
+			return "_Subtraction";
+		}
         assert(0);
         return "_Unknown";
     }

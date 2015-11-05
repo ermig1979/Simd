@@ -128,6 +128,11 @@ namespace Simd
             return _mm256_add_epi16(a, b);
         }
 
+		template <> SIMD_INLINE __m256i OperationBinary16i<SimdOperationBinary16iSubtraction>(const __m256i & a, const __m256i & b)
+		{
+			return _mm256_sub_epi16(a, b);
+		}
+
         template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
             size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
@@ -164,7 +169,9 @@ namespace Simd
             {
             case SimdOperationBinary16iAddition:
                 return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
-            default:
+			case SimdOperationBinary16iSubtraction:
+				return OperationBinary16i<align, SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+			default:
                 assert(0);
             }
         }
