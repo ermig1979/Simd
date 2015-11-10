@@ -92,5 +92,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3GaussianBlur3x3.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3MeanFilter3x3.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

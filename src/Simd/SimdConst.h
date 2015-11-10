@@ -71,6 +71,9 @@ namespace Simd
 		const int BLUE_TO_V_WEIGHT = -int(0.071*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
 		const int GREEN_TO_V_WEIGHT = -int(0.368*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
 		const int RED_TO_V_WEIGHT = int(0.439*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+
+		const int DIVISION_BY_9_SHIFT = 16;
+		const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -88,7 +91,7 @@ namespace Simd
 		const __m128i K8_01 = SIMD_MM_SET1_EPI8(0x01);
         const __m128i K8_02 = SIMD_MM_SET1_EPI8(0x02);
         const __m128i K8_04 = SIMD_MM_SET1_EPI8(0x04);
-        const __m128i K8_08 = SIMD_MM_SET1_EPI8(0x08);
+		const __m128i K8_08 = SIMD_MM_SET1_EPI8(0x08);
         const __m128i K8_10 = SIMD_MM_SET1_EPI8(0x10);
         const __m128i K8_20 = SIMD_MM_SET1_EPI8(0x20);
         const __m128i K8_40 = SIMD_MM_SET1_EPI8(0x40);
@@ -128,6 +131,8 @@ namespace Simd
         const __m128i K16_GU_RT = SIMD_MM_SET2_EPI16(Base::GREEN_TO_U_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
         const __m128i K16_BV_RV = SIMD_MM_SET2_EPI16(Base::BLUE_TO_V_WEIGHT, Base::RED_TO_V_WEIGHT);
         const __m128i K16_GV_RT = SIMD_MM_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
+
+		const __m128i K16_DIVISION_BY_9_FACTOR = SIMD_MM_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -235,6 +240,8 @@ namespace Simd
         const __m256i K16_GU_RT = SIMD_MM256_SET2_EPI16(Base::GREEN_TO_U_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
         const __m256i K16_BV_RV = SIMD_MM256_SET2_EPI16(Base::BLUE_TO_V_WEIGHT, Base::RED_TO_V_WEIGHT);
         const __m256i K16_GV_RT = SIMD_MM256_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
+
+		const __m256i K16_DIVISION_BY_9_FACTOR = SIMD_MM256_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
 
         const __m256i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM256_SETR_EPI8(
             0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5,
@@ -352,8 +359,6 @@ namespace Simd
 
         const v128_u32 K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
 
-        const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
-
         const v128_s16 K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST); 
         const v128_s16 K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);
 
@@ -372,6 +377,8 @@ namespace Simd
         const v128_s16 K16_GV_RT = SIMD_VEC_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
 
         const v128_u32 K32_BGR_TO_YUV_AVERAGING_SHIFT = SIMD_VEC_SET1_EPI32(Base::BGR_TO_YUV_AVERAGING_SHIFT);
+
+		const v128_u16 K16_DIVISION_BY_9_FACTOR = SIMD_VEC_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
 
         //(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
         const v128_u8 K8_PERM_LOAD_BEFORE_FIRST_1 = SIMD_VEC_SETR_EPI8(0x0, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE);
@@ -416,6 +423,8 @@ namespace Simd
     namespace Vsx
     {
         using namespace Vmx;
+
+		const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
     }
 #endif//SIMD_VSX_ENABLE
 }

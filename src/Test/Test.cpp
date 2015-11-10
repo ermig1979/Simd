@@ -210,7 +210,8 @@ namespace Test
 
 	TEST_ADD_GROUP(InterleaveUv);
 
-    TEST_ADD_GROUP(MedianFilterRhomb3x3);
+	TEST_ADD_GROUP(MeanFilter3x3);
+	TEST_ADD_GROUP(MedianFilterRhomb3x3);
     TEST_ADD_GROUP(MedianFilterRhomb5x5);
     TEST_ADD_GROUP(MedianFilterSquare3x3);
     TEST_ADD_GROUP(MedianFilterSquare5x5);

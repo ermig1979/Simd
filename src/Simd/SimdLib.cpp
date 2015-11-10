@@ -1498,6 +1498,31 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 
+SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+	if (Avx2::Enable && width*channelCount >= Avx2::A)
+		Avx2::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+	if (Ssse3::Enable && width*channelCount >= Ssse3::A)
+		Ssse3::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+	if (Sse2::Enable && width*channelCount >= Sse2::A)
+		Sse2::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
+#ifdef SIMD_VMX_ENABLE
+	if (Vmx::Enable && width*channelCount >= Vmx::A)
+		Vmx::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
+		Base::MeanFilter3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
 SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

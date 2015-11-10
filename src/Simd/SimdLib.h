@@ -1705,7 +1705,7 @@ extern "C"
                     src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
         \endverbatim
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function has a C++ wrapper Simd::GaussianBlur3x3(const View<A>& src, View<A>& dst).
 
@@ -2134,13 +2134,41 @@ extern "C"
     */
     SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+	/*! @ingroup other_filter
+
+		\fn void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+
+		\short Performs an averaging with window 3x3.
+
+		For every point:
+		\verbatim
+		dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
+			         src[x-1, y] + src[x, y] + src[x+1, y] +
+			         src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
+		\endverbatim
+
+		All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+		\note This function has a C++ wrapper Simd::MeanFilter3x3(const View<A>& src, View<A>& dst).
+
+		\param [in] src - a pointer to pixels data of source image.
+		\param [in] srcStride - a row size of the src image.
+		\param [in] width - an image width.
+		\param [in] height - an image height.
+		\param [in] channelCount - a channel count.
+		\param [out] dst - a pointer to pixels data of destination image.
+		\param [in] dstStride - a row size of the dst image.
+	*/
+	SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+		size_t channelCount, uint8_t * dst, size_t dstStride);
+
     /*! @ingroup median_filter
 
         \fn void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
         \short Performs median filtration of input image (filter window is a rhomb 3x3). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function has a C++ wrappers: Simd::MedianFilterRhomb3x3(const View<A>& src, View<A>& dst).
 
@@ -2161,7 +2189,7 @@ extern "C"
 
         \short Performs median filtration of input image (filter window is a rhomb 5x5). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function has a C++ wrappers: Simd::MedianFilterRhomb5x5(const View<A>& src, View<A>& dst).
 
@@ -2182,7 +2210,7 @@ extern "C"
 
         \short Performs median filtration of input image (filter window is a square 3x3). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function has a C++ wrappers: Simd::MedianFilterSquare3x3(const View<A>& src, View<A>& dst).
 
@@ -2203,7 +2231,7 @@ extern "C"
 
         \short Performs median filtration of input image (filter window is a square 5x5). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function has a C++ wrappers: Simd::MedianFilterSquare5x5(const View<A>& src, View<A>& dst).
 
@@ -2483,7 +2511,7 @@ extern "C"
 
         \short Performs resizing of input image with using bilinear interpolation. 
 
-        All images must have the same format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+        All images must have the same format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function has a C++ wrappers: Simd::ResizeBilinear(const View<A>& src, View<A>& dst).
 
@@ -2600,7 +2628,7 @@ extern "C"
 
         \short Performs shifting of input image with using bilinear interpolation. 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function has a C++ wrappers: Simd::ShiftBilinear(const View<A> & src, const View<A> & bkg, const Point<double> & shift, const Rectangle<ptrdiff_t> & crop, View<A> & dst).
 

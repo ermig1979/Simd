@@ -103,6 +103,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseInterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseLaplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseReduceGray2x2.cpp" />

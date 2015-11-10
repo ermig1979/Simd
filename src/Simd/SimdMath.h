@@ -151,7 +151,7 @@ namespace Simd
 
         SIMD_INLINE int DivideBy255(int value)
         {
-            return (value + 1 + (value >> 8)) >> 8;
+			return (value + 1 + (value >> 8)) >> 8;
         }
 
         template <bool compensation> SIMD_INLINE int DivideBy16(int value);

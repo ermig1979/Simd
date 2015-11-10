@@ -1494,7 +1494,7 @@ namespace Simd
                     2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
                     src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
         \endverbatim
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA).
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
 
         \note This function is a C++ wrapper for function ::SimdGaussianBlur3x3.
 
@@ -1977,13 +1977,39 @@ namespace Simd
         SimdLbpEstimate(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+	/*! @ingroup other_filter
+
+		\fn void MeanFilter3x3(const View<A>& src, View<A>& dst)
+
+		\short Performs an averaging with window 3x3.
+
+		For every point:
+		dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
+					 src[x-1, y] + src[x, y] + src[x+1, y] +
+					 src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
+		\endverbatim
+
+		All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).
+
+		\note This function is a C++ wrapper for function ::SimdMeanFilter3x3.
+
+		\param [in] src - a source image.
+		\param [out] dst - a destination image.
+	*/
+	template<class A> SIMD_INLINE void MeanFilter3x3(const View<A>& src, View<A>& dst)
+	{
+		assert(Compatible(src, dst) && src.ChannelSize() == 1);
+
+		SimdMeanFilter3x3(src.data, src.stride, src.width, src.height, src.ChannelCount(), dst.data, dst.stride);
+	}
+
     /*! @ingroup median_filter
 
         \fn void MedianFilterRhomb3x3(const View<A>& src, View<A>& dst)
 
         \short Performs median filtration of input image (filter window is a rhomb 3x3). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb3x3.
 
@@ -2003,7 +2029,7 @@ namespace Simd
 
         \short Performs median filtration of input image (filter window is a rhomb 5x5). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterRhomb5x5.
 
@@ -2023,7 +2049,7 @@ namespace Simd
 
         \short Performs median filtration of input image (filter window is a square 3x3). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare3x3.
 
@@ -2043,7 +2069,7 @@ namespace Simd
 
         \short Performs median filtration of input image (filter window is a square 5x5). 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdMedianFilterSquare5x5.
 
@@ -2244,7 +2270,7 @@ namespace Simd
 
         \short Performs resizing of input image with using bilinear interpolation. 
 
-        All images must have the same format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdResizeBilinear.
 
@@ -2370,7 +2396,7 @@ namespace Simd
 
         \short Performs shifting of input image with using bilinear interpolation. 
 
-        All images must have the same width, height and format (8-bit gray, 24-bit BGR or 32-bit BGRA). 
+        All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA). 
 
         \note This function is a C++ wrapper for function ::SimdShiftBilinear.
 

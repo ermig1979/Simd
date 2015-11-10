@@ -368,7 +368,7 @@ namespace Test
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
-#ifdef SIMD_AVX_ENABLE
+#ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 

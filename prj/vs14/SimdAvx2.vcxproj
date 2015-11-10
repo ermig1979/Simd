@@ -100,6 +100,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2InterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Lbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray2x2.cpp" />

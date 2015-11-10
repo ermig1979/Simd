@@ -89,6 +89,35 @@ namespace Test
         return result;
     }
 
+	bool MeanFilter3x3AutoTest()
+	{
+		bool result = true;
+
+		result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+
+#ifdef SIMD_SSE2_ENABLE
+		if (Simd::Sse2::Enable)
+			result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+		if (Simd::Ssse3::Enable)
+			result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+		if (Simd::Avx2::Enable)
+			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif 
+
+#ifdef SIMD_VMX_ENABLE
+		if (Simd::Vmx::Enable)
+			result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif
+
+		return result;
+	}
+
     bool MedianFilterRhomb3x3AutoTest()
     {
         bool result = true;
@@ -560,6 +589,15 @@ namespace Test
 
         return result;
     }
+
+	bool MeanFilter3x3DataTest(bool create)
+	{
+		bool result = true;
+
+		result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMeanFilter3x3));
+
+		return result;
+	}
 
     bool MedianFilterRhomb3x3DataTest(bool create)
     {
