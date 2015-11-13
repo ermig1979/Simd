@@ -67,7 +67,7 @@ add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
 set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
 
-elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
+elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
 set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
 
@@ -94,6 +94,26 @@ file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
 set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++11")
+
+elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
+
+set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
+
+file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
+add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
+
+file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
+add_library(Simd STATIC ${SIMD_SOURCES})
+target_link_libraries(Simd SimdBase)
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
+
+add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
+
+file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
+add_executable(Test ${TEST_SOURCES})
+target_link_libraries(Test Simd TestCheckC -lpthread)
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 
 endif()
 
