@@ -43,8 +43,12 @@
 #define SIMD_X86_ENABLE
 #endif
 
-#ifdef _M_X64
+#if defined(_M_X64) || defined(_M_AMD64)
 #define SIMD_X64_ENABLE
+#endif
+
+#if defined(_M_ARM)
+#define SIMD_ARM_ENABLE
 #endif
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
@@ -81,7 +85,16 @@
 #define SIMD_MADDUBS_ERROR // Visual Studio 2012/2013 release mode compiler bug in function _mm256_maddubs_epi16:
 #endif
 
+
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+
+#if defined(SIMD_ARM_ENABLE)
+
+#if !defined(SIMD_NEON_DISABLE) && _MSC_VER >= 1700
+#define SIMD_NEON_ENABLE
+#endif
+
+#endif
 
 #elif defined(__GNUC__)
 
@@ -91,7 +104,7 @@
 #define SIMD_X86_ENABLE
 #endif
 
-#ifdef __x86_64__
+#if defined(__x86_64__) || defined(__amd64__)
 #define SIMD_X64_ENABLE
 #endif
 
@@ -105,6 +118,14 @@
 
 #ifdef __powerpc64__
 #define SIMD_PPC64_ENABLE
+#endif
+
+#if defined __arm__
+#define SIMD_ARM_ENABLE
+#endif
+
+#if defined __aarch64__
+#define SIMD_ARM64_ENABLE
 #endif
 
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
@@ -151,6 +172,14 @@
 
 #endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) 
 
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+
+#if !defined(SIMD_NEON_DISABLE) && defined(__ARM_NEON__)
+#define SIMD_NEON_ENABLE
+#endif
+
+#endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+
 #else
 
 #error This platform is unsupported!
@@ -191,12 +220,17 @@
 #endif
 #endif
 
+#if defined(SIMD_NEON_ENABLE)
+#include <arm_neon.h>
+#endif
+
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE_ENABLE) || defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) \
-    || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE)
+    || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
+	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16
-#elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #define SIMD_ALIGN 8
 #else
 #define SIMD_ALIGN 4

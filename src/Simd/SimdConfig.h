@@ -42,6 +42,8 @@
 
 //#define SIMD_VSX_DISABLE
 
+//#define SIMD_NEON_DISABLE
+
 //#define SIMD_STATIC
 
 #define SIMD_LOG_ENABLE
