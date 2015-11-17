@@ -38,11 +38,10 @@
 #include <cpuid.h>
 #endif
 
-#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #include <unistd.h>
 #include <fcntl.h>
-#include <linux/auxvec.h>
-#include <asm/cputable.h>
+#include <sys/auxv.h>
 #endif
 
 #else
@@ -110,7 +109,7 @@ namespace Simd
     }
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
     namespace CpuInfo
     {
         SIMD_INLINE bool CheckBit(int at, int bit)
@@ -139,7 +138,7 @@ namespace Simd
             return result;
         }
     }
-#endif//defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) 
+#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
 
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
@@ -381,6 +380,29 @@ namespace Simd
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		SIMD_INLINE bool SupportedByCPU()
+		{
+#if defined(_MSC_VER)
+			return true;
+#elif defined(__GNUC__)
+			return CpuInfo::CheckBit(AT_HWCAP, HWCAP_NEON);
+#else
+#error Do not know how to detect NEON support!
+#endif
+		}
+
+		SIMD_INLINE bool SupportedByOS()
+		{
+			return true;
+		}
+
+		const bool Enable = SupportedByCPU() && SupportedByOS();
+	}
+#endif
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
@@ -437,6 +459,12 @@ namespace Simd
 #define SIMD_VSX_FUNC(func) Simd::Vsx::Enable ? Simd::Vsx::func : 
 #else
 #define SIMD_VSX_FUNC(func)
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+#define SIMD_NEON_FUNC(func) Simd::Neon::Enable ? Simd::Neon::func : 
+#else
+#define SIMD_NEON_FUNC(func)
 #endif
 
 #define SIMD_FUNC0(func) SIMD_BASE_FUNC(func)
