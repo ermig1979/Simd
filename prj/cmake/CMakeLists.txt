@@ -103,17 +103,21 @@ file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
 
+file(GLOB_RECURSE SIMD_NEON_SOURCES ${TRUNK_DIR}/src/Simd/SimdNeon*.cpp)
+add_library(SimdNeon STATIC ${SIMD_NEON_SOURCES})
+set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv7-a -mtune=cortex-a7 -mfpu=neon -std=c++03")
+
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
-target_link_libraries(Simd SimdBase)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
+target_link_libraries(Simd SimdBase SimdNeon)
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv7-a -mtune=cortex-a7 -mfpu=neon -std=c++03")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=armv7-a -mtune=cortex-a7 -mfpu=neon -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 
 endif()
 

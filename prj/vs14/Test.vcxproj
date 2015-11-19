@@ -119,6 +119,9 @@
     <ProjectReference Include="SimdBase.vcxproj">
       <Project>{1ca0c5b9-6a60-4df5-96ea-ba70a0bd0cc6}</Project>
     </ProjectReference>
+    <ProjectReference Include="SimdNeon.vcxproj">
+      <Project>{b435f21c-afcc-4de3-871c-dca6b68b2018}</Project>
+    </ProjectReference>
     <ProjectReference Include="SimdSse1.vcxproj">
       <Project>{b37e7662-729f-4376-a37c-9e15ddf95ba0}</Project>
     </ProjectReference>

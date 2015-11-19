@@ -61,6 +61,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
+#include "Simd/SimdNeon.h"
 
 using namespace Simd;
 
@@ -125,6 +126,11 @@ SIMD_API size_t SimdAlignment()
     if(Vmx::Enable)
         return Vmx::A;
     else
+#endif
+#ifdef SIMD_NEON_ENABLE
+		if (Neon::Enable)
+			return Neon::A;
+		else
 #endif
         return sizeof(void *);
 }
@@ -1642,7 +1648,12 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Vmx::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
-        Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::HA)
+		Neon::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+	else
+#endif
+		Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
 }
 
 SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)

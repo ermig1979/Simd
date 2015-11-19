@@ -427,5 +427,16 @@ namespace Simd
 		const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
     }
 #endif//SIMD_VSX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+	namespace Neon
+	{
+		const size_t A = sizeof(uint8x16_t);
+		const size_t DA = 2*A;
+		const size_t QA = 4*A;
+		const size_t OA = 8*A;
+		const size_t HA = A/2;
+	}
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdConst_h__

@@ -243,6 +243,7 @@ namespace Test
         T avx2;
         T vmx;
         T vsx;
+		T neon;
     };
     typedef std::pair<PerformanceMeasurer, PerformanceMeasurer> Function;
     typedef Statistic<Function> FunctionStatistic; 
@@ -268,9 +269,10 @@ namespace Test
         if(enable.avx2) ss << printer.Average(printer.data.avx2) << " ";
         if(enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
         if(enable.vsx) ss << printer.Average(printer.data.vsx) << " ";
-        ss << "| ";
+		if(enable.neon) ss << printer.Average(printer.data.neon) << " ";
+		ss << "| ";
 
-        if(enable.sse2 || enable.ssse3 || enable.sse41 || enable.sse42 || enable.avx2 || enable.vmx || enable.vsx)
+        if(enable.sse2 || enable.ssse3 || enable.sse41 || enable.sse42 || enable.avx2 || enable.vmx || enable.vsx || enable.neon)
         {
             if(enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2) << " ";
             if(enable.ssse3) ss << printer.Relation(printer.data.base, printer.data.ssse3) << " ";
@@ -279,7 +281,8 @@ namespace Test
             if(enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2) << " ";
             if(enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
             if(enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx) << " ";
-            ss << "| ";
+			if(enable.neon) ss << printer.Relation(printer.data.base, printer.data.neon) << " ";
+			ss << "| ";
         }
 
         if(enable.sse2 && (enable.ssse3 || enable.sse41))
@@ -307,7 +310,8 @@ namespace Test
             if(enable.avx2) ss << printer.Alignment(printer.data.avx2) << " ";
             if(enable.vmx) ss << printer.Alignment(printer.data.vmx) << " ";
             if(enable.vsx) ss << printer.Alignment(printer.data.vsx) << " ";
-            ss << "| ";
+			if(enable.neon) ss << printer.Alignment(printer.data.neon) << " ";
+			ss << "| ";
         }
 
         return ss.str();
@@ -390,7 +394,9 @@ namespace Test
             enable.vmx = AddToFunction(src, dst.vmx);
         if(desc.find("Simd::Vsx::") != std::string::npos)
             enable.vsx = AddToFunction(src, dst.vsx);
-    }
+		if(desc.find("Simd::Neon::") != std::string::npos)
+			enable.neon = AddToFunction(src, dst.neon);
+	}
 
     static inline const Function & Cond(const Function & a, const Function & b)
     {
@@ -414,7 +420,8 @@ namespace Test
         if(enable.avx2) Add(Cond(s.avx2, Cond(s.sse42, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))))), d.avx2);
         if(enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if(enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
-    }
+		if(enable.neon) Add(Cond(s.neon, s.base), d.neon);
+	}
 
     std::string PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
     {
@@ -435,7 +442,7 @@ namespace Test
         FunctionStatisticMap functions;
         CommonStatistic common;
         StatisticEnable enable = {false, false, false, false, false, false, false, false, false};
-        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}};
+        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}, { "Neon", "N"}};
         double timeMax = 0;
         size_t sizeMax = 8;
         for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
