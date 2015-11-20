@@ -436,6 +436,10 @@ namespace Simd
 		const size_t QA = 4*A;
 		const size_t OA = 8*A;
 		const size_t HA = A/2;
+
+		const uint8x16_t K8_00 = SIMD_VEC_SET1_EPI8(0x00);
+
+		const uint16x8_t K16_0001 = SIMD_VEC_SET1_EPI16(0x0001);
 	}
 #endif//SIMD_NEON_ENABLE
 }

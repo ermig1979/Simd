@@ -185,6 +185,40 @@ namespace Simd
 			else
 				OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
 		}
+
+		template <bool align> SIMD_INLINE void VectorProduct(const uint16x8_t & vertical, const uint8_t * horizontal, uint8_t * dst)
+		{
+			uint8x16x2_t _horizontal = vzipq_u8(Load<align>(horizontal), K8_00);
+			_horizontal.val[0] = (uint8x16_t)DivideI16By255(vmulq_u16(vertical, (uint16x8_t)_horizontal.val[0]));
+			_horizontal.val[1] = (uint8x16_t)DivideI16By255(vmulq_u16(vertical, (uint16x8_t)_horizontal.val[1]));
+			Store<align>(dst, vuzpq_u8(_horizontal.val[0], _horizontal.val[1]).val[0]);
+		}
+
+		template <bool align> void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				uint16x8_t _vertical = vmovq_n_u16(vertical[row]);
+				for (size_t col = 0; col < alignedWidth; col += A)
+					VectorProduct<align>(_vertical, horizontal + col, dst + col);
+				if (alignedWidth != width)
+					VectorProduct<false>(_vertical, horizontal + width - A, dst + width - A);
+				dst += stride;
+			}
+		}
+
+		void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+		{
+			if (Aligned(horizontal) && Aligned(dst) && Aligned(stride))
+				VectorProduct<true>(vertical, horizontal, dst, stride, width, height);
+			else
+				VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

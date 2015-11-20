@@ -1678,6 +1678,11 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Vmx::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::VectorProduct(vertical, horizontal, dst, stride, width, height);
+	else
+#endif
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 

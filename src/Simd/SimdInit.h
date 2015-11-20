@@ -272,7 +272,7 @@ namespace Simd
 
 #endif// SIMD_AVX2_ENABLE
 
-#if defined(SIMD_VMX_ENABLE)
+#if defined(SIMD_VMX_ENABLE) || defined(SIMD_NEON_ENABLE)
 
 #define SIMD_VEC_SET1_EPI8(a) \
     {a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a}
@@ -310,7 +310,7 @@ namespace Simd
 #define SIMD_VEC_SETR_PS(a0, a1, a2, a3) \
     {a0, a1, a2, a3}
 
-#endif//SIMD_VMX_ENABLE
+#endif//defined(SIMD_VMX_ENABLE) || defined(SIMD_NEON_ENABLE)
 }
 
 #endif//__SimdInit_h__

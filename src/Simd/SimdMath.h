@@ -525,5 +525,15 @@ namespace Simd
         }
     }
 #endif//SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		SIMD_INLINE uint16x8_t DivideI16By255(uint16x8_t value)
+		{
+			return vshrq_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
+		}
+	}
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdMath_h__
