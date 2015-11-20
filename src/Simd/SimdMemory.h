@@ -164,6 +164,21 @@ namespace Simd
         using Vmx::Aligned;
     }
 #endif// SIMD_VSX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(uint8x16_t))
+		{
+			return Simd::Aligned(size, align);
+		}
+
+		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(uint8x16_t))
+		{
+			return Simd::Aligned(p, align);
+		}
+	}
+#endif// SIMD_NEON_ENABLE
 }
 
 #endif//__SimdMemory_h__

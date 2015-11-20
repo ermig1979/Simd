@@ -311,5 +311,22 @@ namespace Simd
         }
     }
 #endif//SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		template <bool align> SIMD_INLINE void Store(uint8_t  * p, uint8x16_t a);
+
+		template <> SIMD_INLINE void Store<false>(uint8_t  * p, uint8x16_t a)
+		{
+			vst1q_u8(p, a);
+		}
+
+		template <> SIMD_INLINE void Store<true>(uint8_t  * p, uint8x16_t a)
+		{
+			vst1q_u8(p, a);
+		}
+	}
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdStore_h__

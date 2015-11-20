@@ -30,47 +30,68 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE  
     namespace Neon
     {
-		template <SimdOperationBinary16iType type> SIMD_INLINE int16_t OperationBinary16i(const int16_t & a, const int16_t & b);
+		template <SimdOperationBinary16iType type> SIMD_INLINE int16x8_t OperationBinary16i(const int16x8_t & a, const int16x8_t & b);
 
-		template <> SIMD_INLINE int16_t OperationBinary16i<SimdOperationBinary16iAddition>(const int16_t & a, const int16_t & b)
+		template <> SIMD_INLINE int16x8_t OperationBinary16i<SimdOperationBinary16iAddition>(const int16x8_t & a, const int16x8_t & b)
 		{
-			return a + b;
+			return vaddq_s16(a, b);
 		}
 
-		template <> SIMD_INLINE int16_t OperationBinary16i<SimdOperationBinary16iSubtraction>(const int16_t & a, const int16_t & b)
+		template <> SIMD_INLINE int16x8_t OperationBinary16i<SimdOperationBinary16iSubtraction>(const int16x8_t & a, const int16x8_t & b)
 		{
-			return a - b;
+			return vsubq_s16(a, b);
 		}
 
-		template <SimdOperationBinary16iType type> void OperationBinary16i(const int16_t * a, size_t aStride, const int16_t * b, size_t bStride,
-			size_t width, size_t height, int16_t * dst, size_t dstStride)
+		template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint8_t * dst, size_t dstStride)
 		{
+			assert(width*sizeof(uint16_t) >= A);
+			if (align)
+				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t size = width*sizeof(int16_t);
+			size_t alignedSize = Simd::AlignLo(size, A);
 			for (size_t row = 0; row < height; ++row)
 			{
-				for (size_t col = 0; col < width; ++col)
-					dst[col] = OperationBinary16i<type>(a[col], b[col]);
+				for (size_t offset = 0; offset < alignedSize; offset += A)
+				{
+					const int16x8_t a_ = (int16x8_t)Load<align>(a + offset);
+					const int16x8_t b_ = (int16x8_t)Load<align>(b + offset);
+					Store<align>(dst + offset, (uint8x16_t)OperationBinary16i<type>(a_, b_));
+				}
+				if (alignedSize != size)
+				{
+					const int16x8_t a_ = (int16x8_t)Load<false>(a + size - A);
+					const int16x8_t b_ = (int16x8_t)Load<false>(b + size - A);
+					Store<false>(dst + size - A, (uint8x16_t)OperationBinary16i<type>(a_, b_));
+				}
 				a += aStride;
 				b += bStride;
 				dst += dstStride;
 			}
 		}
 
-		void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+		template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
 			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
 		{
-			assert(aStride%sizeof(int16_t) == 0 && bStride%sizeof(int16_t) == 0 && dstStride%sizeof(int16_t) == 0);
-
 			switch (type)
 			{
 			case SimdOperationBinary16iAddition:
-				return OperationBinary16i<SimdOperationBinary16iAddition>(
-					(const int16_t*)a, aStride / sizeof(int16_t), (const int16_t*)b, bStride / sizeof(int16_t), width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+				return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
 			case SimdOperationBinary16iSubtraction:
-				return OperationBinary16i<SimdOperationBinary16iSubtraction>(
-					(const int16_t*)a, aStride / sizeof(int16_t), (const int16_t*)b, bStride / sizeof(int16_t), width, height, (int16_t*)dst, dstStride / sizeof(int16_t));
+				return OperationBinary16i<align, SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
 			default:
 				assert(0);
 			}
+		}
+
+		void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+		{
+			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+				OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+			else
+				OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
 		}
     }
 #endif// SIMD_NEON_ENABLE

@@ -570,5 +570,27 @@ namespace Simd
         }
     }
 #endif//SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		template <bool align> SIMD_INLINE uint8x16_t Load(const uint8_t * p);
+
+		template <> SIMD_INLINE uint8x16_t Load<false>(const uint8_t * p)
+		{
+			return vld1q_u8(p);
+		}
+
+		template <> SIMD_INLINE uint8x16_t Load<true>(const uint8_t * p)
+		{
+			return vld1q_u8(p);
+		}
+
+		template <bool align> SIMD_INLINE int16x8_t Load(const int16_t * p)
+		{
+			return (int16x8_t)Load<align>((const uint8_t*)p);
+		}
+	}
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdLoad_h__

@@ -51,7 +51,7 @@
     extraction of statistic information from images, motion detection.
     
     \n\n The algorithms are optimized with using of different SIMD CPU extensions. 
-    In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC.
+    In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
 
     \n\n The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
     The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS and G++ compilers, MSVS project and CMake build systems.
@@ -83,18 +83,24 @@
 	To build the library and test application for Linux 32/64 you need to use CMake build systems.
 	Files of CMake build systems are placed in the directory:
 	\c simd/prj/cmake/.
-	The library can be built for x86/x64 and for PowerPC platform.
+	The library can be built for x86/x64, PowerPC and ARM platforms.
 	With using of native compiler (g++) for current platform it is simple:
 	\code
 	cd ./prj/cmake
 	cmake . 
 	make
 	\endcode
-	To build the library for PowePC platform you can also use toolchain for cross compilation.
-	There is an example of using:
+	To build the library for PowePC and ARM platforms you can also use toolchain for cross compilation.
+	There is an example of using for PowerPC:
 	\code
 	cd ./prj/cmake
 	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	make
+	\endcode
+	And for ARM:
+	\code
+	cd ./prj/cmake
+	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release"
 	make
 	\endcode
 	As result the library and the test application will be built in the current directory.
