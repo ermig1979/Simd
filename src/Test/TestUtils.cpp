@@ -137,10 +137,24 @@ namespace Test
         return errorCount == 0;
     }
 
+	bool FullEqual(const View & a, const View & b)
+	{
+		size_t size = a.PixelSize()*a.width;
+		for (size_t row = 0; row < a.height; ++row)
+		{
+			if (::memcmp(a.data + row*a.stride, b.data + row*b.stride, size))
+				return false;
+		}
+		return true;
+	}
+
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
 		const std::string & description)
     {
         assert(Simd::Compatible(a, b));
+
+		if (FullEqual(a, b))
+			return true;
 
         if(a.format == View::Float)
             return Compare<float>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);

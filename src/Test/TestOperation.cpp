@@ -194,6 +194,11 @@ namespace Test
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Vmx::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Neon::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
+#endif 
+
 		return result;
 	}
 
