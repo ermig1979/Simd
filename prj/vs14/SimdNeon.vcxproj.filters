@@ -62,5 +62,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

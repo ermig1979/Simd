@@ -590,6 +590,25 @@ namespace Simd
 		{
 			return (int16x8_t)Load<align>((const uint8_t*)p);
 		}
+
+		template <bool align> SIMD_INLINE uint8x16x2_t Load2(const uint8_t * p);
+
+		template <> SIMD_INLINE uint8x16x2_t Load2<false>(const uint8_t * p)
+		{
+			return vld2q_u8(p);
+		}
+
+		template <> SIMD_INLINE uint8x16x2_t Load2<true>(const uint8_t * p)
+		{
+			return vld2q_u8(p);
+		}
+
+#ifdef __GNUC__		
+		SIMD_INLINE uint8x16_t Shuffle(uint8x16_t a, uint8x16_t b)
+		{
+			return __builtin_shuffle(a, b);
+		}
+#endif	
 	}
 #endif//SIMD_NEON_ENABLE
 }

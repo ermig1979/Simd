@@ -31,19 +31,19 @@
 
 namespace Simd
 {
+	template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
+	{
+		std::cout << name << " = { ";
+		for (int i = 0; i < size; i++)
+		{
+			std::cout << int(data[i]) << " ";
+		}
+		std::cout << "} " << std::endl;
+	}
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
-        template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
-        {
-            std::cout << name << " = { ";
-            for(int i = 0; i < size; i++)
-            {
-                std::cout << int(data[i]) << " ";
-            }
-            std::cout << "} " << std::endl;    
-        }
-
         SIMD_INLINE void Log(const v128_u8 & value, const std::string & name)
         {
             std::cout << name << " = { ";
@@ -89,6 +89,25 @@ namespace Simd
         }
     }
 #endif//SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		SIMD_INLINE void Log(const uint8x16_t & value, const std::string & name)
+		{
+			uint8_t buffer[16];
+			vst1q_u8(buffer, value);
+			Simd::Log(buffer, 16, name);
+		}
+
+		SIMD_INLINE void Log(const uint16x8_t & value, const std::string & name)
+		{
+			uint16_t buffer[8];
+			vst1q_u16(buffer, value);
+			Simd::Log(buffer, 8, name);
+		}
+	}
+#endif//SIMD_NEON_ENABLE
 }
 
 #define SIMD_LOG(value) Log(value, #value)
