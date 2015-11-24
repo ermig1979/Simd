@@ -31,21 +31,20 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template<int part> SIMD_INLINE uint8x16_t Average(const uint8x16x2_t & s00, const uint8x16x2_t & s01, const uint8x16x2_t & s10, const uint8x16x2_t & s11)
-        {
-            return (uint8x16_t)vshrq_n_u16(vaddq_u16(vaddq_u16(vaddq_u16((uint16x8_t)s00.val[part], (uint16x8_t)s01.val[part]), 
-				vaddq_u16((uint16x8_t)s10.val[part], (uint16x8_t)s11.val[part])), K16_0002), 2);
-        }
+		SIMD_INLINE uint8x16_t Average(const uint8x16_t & s0, const uint8x16_t & s1)
+		{
+			uint16x8_t s00 = (uint16x8_t)vandq_u8(s0, (uint8x16_t)K16_00FF);
+			uint16x8_t s01 = (uint16x8_t)vandq_u8(vrev16q_u8(s0), (uint8x16_t)K16_00FF);
+			uint16x8_t s10 = (uint16x8_t)vandq_u8(s1, (uint8x16_t)K16_00FF);
+			uint16x8_t s11 = (uint16x8_t)vandq_u8(vrev16q_u8(s1), (uint8x16_t)K16_00FF);
+			return (uint8x16_t)vshrq_n_u16(vaddq_u16(vaddq_u16(vaddq_u16(s00, s01), vaddq_u16(s10, s11)), K16_0002), 2);
+		}
 
 		template <bool align> SIMD_INLINE uint8x16_t Average(const uint8_t * src0, const uint8_t * src1)
 		{
-			uint8x16x2_t s0 = Load2<align>(src0);
-			uint8x16x2_t s1 = Load2<align>(src1);
-			uint8x16x2_t s00 = vzipq_u8(s0.val[0], K8_00);
-			uint8x16x2_t s01 = vzipq_u8(s0.val[1], K8_00);
-			uint8x16x2_t s10 = vzipq_u8(s1.val[0], K8_00);
-			uint8x16x2_t s11 = vzipq_u8(s1.val[1], K8_00);
-			return vuzpq_u8(Average<0>(s00, s01, s10, s11), Average<1>(s00, s01, s10, s11)).val[0];
+			uint8x16_t lo = Average(Load<align>(src0 + 0), Load<align>(src1 + 0));
+			uint8x16_t hi = Average(Load<align>(src0 + A), Load<align>(src1 + A));
+			return vuzpq_u8(lo, hi).val[0];
 		}
 
         template <bool align> void ReduceGray2x2(
