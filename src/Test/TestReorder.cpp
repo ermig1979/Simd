@@ -140,6 +140,11 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder32bit), FUNC(SimdReorder32bit), 4);
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder32bit), FUNC(SimdReorder32bit), 4);
+#endif
+
         return result;
     }
 

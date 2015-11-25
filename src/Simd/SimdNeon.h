@@ -43,6 +43,8 @@ namespace Simd
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
 		void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
+
+		void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
 	}
 #endif// SIMD_NEON_ENABLE
 }

@@ -53,6 +53,31 @@ namespace Simd
             else
                 Reorder16bit<false>(src, size, dst);
         }
+
+		template <bool align> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
+		{
+			uint8x16_t _src = Load<align>(src);
+			Store<align>(dst, vrev32q_u8(_src));
+		}
+
+		template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+		{
+			assert(size >= A && size % 4 == 0);
+
+			size_t alignedSize = AlignLo(size, A);
+			for (size_t i = 0; i < alignedSize; i += A)
+				Reorder32bit<align>(src + i, dst + i);
+			for (size_t i = alignedSize; i < size; i += 4)
+				Base::Reorder32bit(src + i, dst + i);
+		}
+
+		void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				Reorder32bit<true>(src, size, dst);
+			else
+				Reorder32bit<false>(src, size, dst);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
