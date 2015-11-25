@@ -1867,6 +1867,11 @@ SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
         Vmx::Reorder64bit(src, size, dst);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && size >= Neon::A)
+		Neon::Reorder64bit(src, size, dst);
+	else
+#endif
         Base::Reorder64bit(src, size, dst);
 }
 
