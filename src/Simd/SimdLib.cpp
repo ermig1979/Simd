@@ -1807,6 +1807,11 @@ SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         Vmx::Reorder16bit(src, size, dst);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && size >= Neon::A)
+		Neon::Reorder16bit(src, size, dst);
+	else
+#endif
         Base::Reorder16bit(src, size, dst);
 }
 

@@ -24,8 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 
-#include "Simd/SimdLog.h"
-
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    

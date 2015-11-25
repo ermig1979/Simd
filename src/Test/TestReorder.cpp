@@ -104,7 +104,12 @@ namespace Test
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder16bit), FUNC(SimdReorder16bit), 2);
-#endif 
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ReorderAutoTest(FUNC(Simd::Neon::Reorder16bit), FUNC(SimdReorder16bit), 2);
+#endif
 
 		return result;
 	}

@@ -21,29 +21,38 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdNeon_h__
-#define __SimdNeon_h__
-
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE
+#ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
+        template <bool align> SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
+        {
+			uint8x16_t _src = Load<align>(src);
+            Store<align>(dst, vrev16q_u8(_src));
+        }
 
-		void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
+        template <bool align> void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            assert(size >= A && size%2 == 0);
 
-		void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+            size_t alignedSize = AlignLo(size, A);
+            for(size_t i = 0; i < alignedSize; i += A)
+                Reorder16bit<align>(src + i, dst + i);
+            for(size_t i = alignedSize; i < size; i += 2)
+                Base::Reorder16bit(src + i, dst + i);
+        }
 
-		void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-		void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
-	}
+        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
+        {
+            if(Aligned(src) && Aligned(dst))
+                Reorder16bit<true>(src, size, dst);
+            else
+                Reorder16bit<false>(src, size, dst);
+        }
+    }
 #endif// SIMD_NEON_ENABLE
 }
-#endif//__SimdNeon_h__
