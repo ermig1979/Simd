@@ -31,11 +31,7 @@ namespace Simd
     {
 		SIMD_INLINE uint8x16_t Average(const uint8x16_t & s0, const uint8x16_t & s1)
 		{
-			uint16x8_t s00 = (uint16x8_t)vandq_u8(s0, (uint8x16_t)K16_00FF);
-			uint16x8_t s01 = (uint16x8_t)vandq_u8(vrev16q_u8(s0), (uint8x16_t)K16_00FF);
-			uint16x8_t s10 = (uint16x8_t)vandq_u8(s1, (uint8x16_t)K16_00FF);
-			uint16x8_t s11 = (uint16x8_t)vandq_u8(vrev16q_u8(s1), (uint8x16_t)K16_00FF);
-			return (uint8x16_t)vshrq_n_u16(vaddq_u16(vaddq_u16(vaddq_u16(s00, s01), vaddq_u16(s10, s11)), K16_0002), 2);
+			return (uint8x16_t)vshrq_n_u16(vaddq_u16(vaddq_u16(vpaddlq_u8(s0), vpaddlq_u8(s1)), K16_0002), 2);
 		}
 
 		template <bool align> SIMD_INLINE uint8x16_t Average(const uint8_t * src0, const uint8_t * src1)

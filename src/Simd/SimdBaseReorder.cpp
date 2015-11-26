@@ -30,7 +30,7 @@ namespace Simd
         SIMD_INLINE void Reorder16bitX(const uint8_t * src, uint8_t * dst)
         {
             size_t value = *(size_t*)src;
-#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined (SIMD_ARM64_ENABLE)
             *(size_t*)dst = (value & 0xFF00FF00FF00FF00) >> 8 | (value & 0x00FF00FF00FF00FF) << 8;
 #else
             *(size_t*)dst = (value & 0xFF00FF00) >> 8 | (value & 0x00FF00FF) << 8;
@@ -50,7 +50,7 @@ namespace Simd
 
         SIMD_INLINE void Reorder32bitX(const uint8_t * src, uint8_t * dst)
         {
-#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined (SIMD_ARM64_ENABLE)
             size_t value = *(size_t*)src;
             *(size_t*)dst = 
                 (value & 0x000000FF000000FF) << 24 | (value & 0x0000FF000000FF00) << 8 | 
