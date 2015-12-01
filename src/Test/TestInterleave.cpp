@@ -103,6 +103,11 @@ namespace Test
             result = result && InterleaveUvAutoTest(FUNC(Simd::Vmx::InterleaveUv), FUNC(SimdInterleaveUv));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && InterleaveUvAutoTest(FUNC(Simd::Neon::InterleaveUv), FUNC(SimdInterleaveUv));
+#endif
+
 		return result;
 	}
 

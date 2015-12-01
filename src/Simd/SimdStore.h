@@ -326,6 +326,18 @@ namespace Simd
 		{
 			vst1q_u8(p, a);
 		}
+
+		template <bool align> SIMD_INLINE void Store2(uint8_t  * p, uint8x16x2_t a);
+
+		template <> SIMD_INLINE void Store2<false>(uint8_t  * p, uint8x16x2_t a)
+		{
+			vst2q_u8(p, a);
+		}
+
+		template <> SIMD_INLINE void Store2<true>(uint8_t  * p, uint8x16x2_t a)
+		{
+			vst2q_u8(p, a);
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }
