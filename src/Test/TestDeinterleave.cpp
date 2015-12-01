@@ -105,6 +105,11 @@ namespace Test
             result = result && DeinterleaveUvAutoTest(FUNC(Simd::Vmx::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && DeinterleaveUvAutoTest(FUNC(Simd::Neon::DeinterleaveUv), FUNC(SimdDeinterleaveUv));
+#endif 
+
 		return result;
 	}
 
