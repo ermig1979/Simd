@@ -529,6 +529,13 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
 	namespace Neon
 	{
+		SIMD_INLINE void SortU8(uint8x16_t & a, uint8x16_t & b)
+		{
+			uint8x16_t t = a;
+			a = vminq_u8(t, b);
+			b = vmaxq_u8(t, b);
+		}
+
 		SIMD_INLINE uint16x8_t DivideI16By255(uint16x8_t value)
 		{
 			return vshrq_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);

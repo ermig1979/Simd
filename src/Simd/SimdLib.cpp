@@ -1556,6 +1556,11 @@ SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, si
         Vmx::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width*channelCount >= Neon::A)
+		Neon::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
         Base::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
