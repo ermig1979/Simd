@@ -78,7 +78,7 @@ namespace Simd
         template <bool align, size_t step> void GaussianBlur3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            assert(step*width >= A);
+            assert(step*(width - 1) >= A);
             if(align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(step*width) && Aligned(dst) && Aligned(dstStride));
 

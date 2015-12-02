@@ -65,7 +65,7 @@ namespace Simd
         template <bool align, size_t step> void MedianFilterRhomb3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            assert(step*width >= A);
+            assert(step*(width - 1) >= A);
 
             const uint8_t * y[3];
             __m256i a[5];
@@ -165,7 +165,7 @@ namespace Simd
         template <bool align, size_t step> void MedianFilterSquare3x3(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            assert(step*width >= A);
+            assert(step*(width - 1) >= A);
 
             const uint8_t * y[3];
             __m256i a[9];
@@ -282,7 +282,7 @@ namespace Simd
         template <bool align, size_t step> void MedianFilterRhomb5x5(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            assert(step*width >= A);
+            assert(step*(width - 2) >= A);
 
             const uint8_t * y[5];
             __m256i a[13];
@@ -438,7 +438,7 @@ namespace Simd
         template <bool align, size_t step> void MedianFilterSquare5x5(
             const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            assert(step*width >= A);
+            assert(step*(width - 2) >= A);
 
             const uint8_t * y[5];
             __m256i a[25];
