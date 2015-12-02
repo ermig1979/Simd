@@ -634,6 +634,33 @@ namespace Simd
 			a[2] = LoadAfterLast<step>(a[1]);
 		}
 
+		template <bool align, size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, uint8x16_t a[5])
+		{
+			a[2] = Load<align>(p);
+			a[1] = LoadBeforeFirst<step>(a[2]);
+			a[0] = LoadBeforeFirst<step>(a[1]);
+			a[3] = vld1q_u8(p + step);
+			a[4] = vld1q_u8(p + 2 * step);
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, uint8x16_t a[5])
+		{
+			a[0] = vld1q_u8(p - 2 * step);
+			a[1] = vld1q_u8(p - step);
+			a[2] = Load<align>(p);
+			a[3] = vld1q_u8(p + step);
+			a[4] = vld1q_u8(p + 2 * step);
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, uint8x16_t a[5])
+		{
+			a[0] = vld1q_u8(p - 2 * step);
+			a[1] = vld1q_u8(p - step);
+			a[2] = Load<align>(p);
+			a[3] = LoadAfterLast<step>(a[2]);
+			a[4] = LoadAfterLast<step>(a[3]);
+		}
+
 #ifdef __GNUC__		
 		SIMD_INLINE uint8x16_t Shuffle(uint8x16_t a, uint8x16_t b)
 		{
