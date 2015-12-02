@@ -1631,6 +1631,11 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Vmx::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && (width - 2)*channelCount >= Neon::A)
+		Neon::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
