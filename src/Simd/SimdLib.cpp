@@ -128,11 +128,11 @@ SIMD_API size_t SimdAlignment()
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
-		if (Neon::Enable)
-			return Neon::A;
-		else
+	if (Neon::Enable)
+		return Neon::A;
+	else
 #endif
-        return sizeof(void *);
+		return sizeof(void *);
 }
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
@@ -1200,7 +1200,12 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Vmx::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
-        Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && (width - 1)*channelCount >= Neon::A)
+		Neon::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
+		Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
 SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)

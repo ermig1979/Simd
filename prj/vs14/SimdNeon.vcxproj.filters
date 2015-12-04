@@ -77,5 +77,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -540,6 +540,33 @@ namespace Simd
 		{
 			return vshrq_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
 		}
+
+		SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c)
+		{
+			return vaddq_u16(vaddq_u16(a, c), vaddq_u16(b, b));
+		}
+
+		SIMD_INLINE uint16x8_t DivideBy16(uint16x8_t value)
+		{
+			return vshrq_n_u16(vaddq_u16(value, K16_0008), 4);
+		}
+
+		template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a);
+
+		template <> SIMD_INLINE uint16x8_t UnpackU8<0>(uint8x16_t a)
+		{
+			return vmovl_u8(vget_low_u8(a));
+		}
+
+		template <> SIMD_INLINE uint16x8_t UnpackU8<1>(uint8x16_t a)
+		{
+			return vmovl_u8(vget_high_u8(a));
+		}
+
+		SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
+		{
+			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }
