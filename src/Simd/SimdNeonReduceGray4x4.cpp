@@ -61,16 +61,9 @@ namespace Simd
 			return vshrq_n_u16(vaddq_u16(value, K16_0020), 6);
 		}
 
-		SIMD_INLINE uint8x8x2_t Interleave(uint8x16_t value)
-		{
-			uint8_t buffer[A];
-			vst1q_u8(buffer, value);
-			return vld2_u8(buffer);
-		}
-
 		SIMD_INLINE uint16x8_t ReduceColNose(const uint8_t * src)
 		{
-			const uint8x8x2_t t01 = Interleave(LoadBeforeFirst<1>(vld1q_u8(src)));
+			const uint8x8x2_t t01 = Deinterleave(LoadBeforeFirst<1>(vld1q_u8(src)));
 			const uint8x8x2_t t23 = vld2_u8(src + 1);
 			return BinomialSum16(vmovl_u8(t01.val[0]), vmovl_u8(t01.val[1]), vmovl_u8(t23.val[0]), vmovl_u8(t23.val[1]));
 		}
@@ -87,14 +80,14 @@ namespace Simd
 		template <> SIMD_INLINE uint16x8_t ReduceColTail<true>(const uint8_t *src)
 		{
 			const uint8x8x2_t t01 = vld2_u8(src - 1);
-			const uint8x8x2_t t23 = Interleave(LoadAfterLast<1>(vld1q_u8(src)));
+			const uint8x8x2_t t23 = Deinterleave(LoadAfterLast<1>(vld1q_u8(src)));
 			return BinomialSum16(vmovl_u8(t01.val[0]), vmovl_u8(t01.val[1]), vmovl_u8(t23.val[0]), vmovl_u8(t23.val[1]));
 		}
 
 		template <> SIMD_INLINE uint16x8_t ReduceColTail<false>(const uint8_t *src)
 		{
 			const uint8x8x2_t t01 = vld2_u8(src - 1);
-			const uint8x8x2_t t23 = Interleave(LoadAfterLast<1>(LoadAfterLast<1>(vld1q_u8(src - 1))));
+			const uint8x8x2_t t23 = Deinterleave(LoadAfterLast<1>(LoadAfterLast<1>(vld1q_u8(src - 1))));
 			return BinomialSum16(vmovl_u8(t01.val[0]), vmovl_u8(t01.val[1]), vmovl_u8(t23.val[0]), vmovl_u8(t23.val[1]));
 		}
 

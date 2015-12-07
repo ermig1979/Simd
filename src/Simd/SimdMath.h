@@ -572,6 +572,13 @@ namespace Simd
 		{
 			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
 		}
+
+		SIMD_INLINE uint8x8x2_t Deinterleave(uint8x16_t value)
+		{
+			uint8_t buffer[A];
+			vst1q_u8(buffer, value);
+			return vld2_u8(buffer);
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }
