@@ -441,7 +441,9 @@ namespace Simd
 
 		const uint16x8_t K16_0001 = SIMD_VEC_SET1_EPI16(0x0001);
 		const uint16x8_t K16_0002 = SIMD_VEC_SET1_EPI16(0x0002);
+		const uint16x8_t K16_0003 = SIMD_VEC_SET1_EPI16(0x0003);
 		const uint16x8_t K16_0008 = SIMD_VEC_SET1_EPI16(0x0008);
+		const uint16x8_t K16_0020 = SIMD_VEC_SET1_EPI16(0x0020);
 		const uint16x8_t K16_00FF = SIMD_VEC_SET1_EPI16(0x00FF);
 	}
 #endif//SIMD_NEON_ENABLE

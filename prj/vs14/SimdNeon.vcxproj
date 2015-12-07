@@ -94,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray4x4.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

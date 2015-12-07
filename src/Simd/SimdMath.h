@@ -546,6 +546,11 @@ namespace Simd
 			return vaddq_u16(vaddq_u16(a, c), vaddq_u16(b, b));
 		}
 
+		SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c, const uint16x8_t & d)
+		{
+			return vaddq_u16(vaddq_u16(a, d), vmulq_u16(vaddq_u16(b, c), K16_0003));
+		}
+
 		SIMD_INLINE uint16x8_t DivideBy16(uint16x8_t value)
 		{
 			return vshrq_n_u16(vaddq_u16(value, K16_0008), 4);
