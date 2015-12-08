@@ -67,16 +67,16 @@ namespace Simd
 
             struct BufferG
             {
-                BufferG(size_t width, size_t blocks, size_t height)
-                {
-                    _p = Allocate(3*width + sizeof(int)*2*height + blocks*sizeof(Index));
-                    bx[0] = (uint8_t*)_p;
-                    bx[1] = bx[0] + width;
-                    ax = bx[1] + width;
-                    ix = (Index*)(ax + width);
-                    iy = (int*)(ix + blocks);
-                    ay = iy + height;
-                }
+				BufferG(size_t width, size_t blocks, size_t height)
+				{
+					_p = Allocate(3*width + sizeof(int)*2*height + blocks*sizeof(Index) + 2*A);
+					bx[0] = (uint8_t*)_p;
+					bx[1] = bx[0] + width + A;
+					ax = bx[1] + width + A;
+					ix = (Index*)(ax + width);
+					iy = (int*)(ix + blocks);
+					ay = iy + height;
+				}
 
                 ~BufferG()
                 {
@@ -148,22 +148,22 @@ namespace Simd
                     alpha = 1;
                 }
 
-                if((srcIndex >= srcNext || dstIndex >= dstNext) && block < blockLast)
-                {
-                    block++;
-                    indexes[block].src = srcIndex;
-                    indexes[block].dst = 2*dstIndex;
-                    if(block < blockLast)
-                    {
-                        srcNext += (int)A;
-                        dstNext += (int)HA;
-                    }
-                    else
-                    {
-                        srcNext = srcSize - (int)A;
-                        dstNext = dstSize - (int)HA;
-                    }
-                }
+				if ((srcIndex >= srcNext - 1 || dstIndex >= dstNext) && block < blockLast)
+				{
+					block++;
+					indexes[block].src = srcIndex;
+					indexes[block].dst = 2 * dstIndex;
+					if (block < blockLast)
+					{
+						srcNext = srcIndex + (int)A;
+						dstNext = dstIndex + (int)HA;
+					}
+					else
+					{
+						srcNext = srcSize - (int)A;
+						dstNext = dstSize - (int)HA;
+					}
+				}
                 
                 int dst = 2*dstIndex - indexes[block].dst, src = srcIndex - indexes[block].src;
                 indexes[block].shuffle[dst] = src;
