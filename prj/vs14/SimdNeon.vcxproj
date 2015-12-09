@@ -88,6 +88,7 @@
     <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleaveUv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInterleaveUv.cpp" />

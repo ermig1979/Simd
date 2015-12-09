@@ -608,6 +608,18 @@ namespace Simd
 			return vld2q_u8(p);
 		}
 
+		template <bool align> SIMD_INLINE uint8x8x4_t LoadHalf4(const uint8_t * p);
+
+		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<false>(const uint8_t * p)
+		{
+			return vld4_u8(p);
+		}
+
+		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<true>(const uint8_t * p)
+		{
+			return vld4_u8(p);
+		}
+
 		template <size_t count> SIMD_INLINE uint8x16_t LoadBeforeFirst(uint8x16_t first)
 		{
 			return vextq_u8(vextq_u8(first, first, count), first, 16 - count);
