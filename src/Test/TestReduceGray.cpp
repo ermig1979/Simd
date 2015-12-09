@@ -250,6 +250,14 @@ namespace Test
         }
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+		{
+			result = result && ReduceGrayAutoTest(FUNC2(Simd::Neon::ReduceGray5x5, true), FUNC2(SimdReduceGray5x5, true));
+			result = result && ReduceGrayAutoTest(FUNC2(Simd::Neon::ReduceGray5x5, false), FUNC2(SimdReduceGray5x5, false));
+		}
+#endif
+
         return result;
     }
 
