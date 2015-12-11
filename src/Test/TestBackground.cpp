@@ -463,6 +463,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vmx::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::BackgroundGrowRangeSlow), FUNC1(SimdBackgroundGrowRangeSlow));
+#endif 
+
 		return result;
 	}
 

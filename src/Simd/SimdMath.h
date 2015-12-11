@@ -529,6 +529,19 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
 	namespace Neon
 	{
+		SIMD_INLINE uint8x16_t ShiftLeft(uint8x16_t value, size_t shift)
+		{
+			if (shift & 8)
+				value = vextq_u8(K8_00, value, 8);
+			if (shift & 4)
+				value = vextq_u8(K8_00, value, 12);
+			if (shift & 2)
+				value = vextq_u8(K8_00, value, 14);
+			if (shift & 1)
+				value = vextq_u8(K8_00, value, 15);
+			return value;
+		}
+
 		SIMD_INLINE void SortU8(uint8x16_t & a, uint8x16_t & b)
 		{
 			uint8x16_t t = a;
