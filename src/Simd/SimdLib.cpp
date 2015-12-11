@@ -356,24 +356,25 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::BackgroundIncrementCount(value, valueStride, width, height,
-        loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+        Avx2::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BackgroundIncrementCount(value, valueStride, width, height,
-        loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+        Sse2::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
-        Vmx::BackgroundIncrementCount(value, valueStride, width, height,
-        loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+        Vmx::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif
-        Base::BackgroundIncrementCount(value, valueStride, width, height,
-        loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+	else
+#endif
+        Base::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 }
 
 SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,

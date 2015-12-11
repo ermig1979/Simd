@@ -118,6 +118,64 @@ namespace Simd
 			else
 				BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundIncrementCount(const uint8_t * value,
+			const uint8_t * loValue, const uint8_t * hiValue, uint8_t * loCount, uint8_t * hiCount, size_t offset, uint8x16_t mask)
+		{
+			const uint8x16_t _value = Load<align>(value + offset);
+			const uint8x16_t _loValue = Load<align>(loValue + offset);
+			const uint8x16_t _loCount = Load<align>(loCount + offset);
+			const uint8x16_t _hiValue = Load<align>(hiValue + offset);
+			const uint8x16_t _hiCount = Load<align>(hiCount + offset);
+
+			const uint8x16_t incLo = vandq_u8(mask, vcltq_u8(_value, _loValue));
+			const uint8x16_t incHi = vandq_u8(mask, vcgtq_u8(_value, _hiValue));
+
+			Store<align>(loCount + offset, vqaddq_u8(_loCount, incLo));
+			Store<align>(hiCount + offset, vqaddq_u8(_hiCount, incHi));
+		}
+
+		template <bool align> void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+			uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					BackgroundIncrementCount<align>(value, loValue, hiValue, loCount, hiCount, col, K8_01);
+				if (alignedWidth != width)
+					BackgroundIncrementCount<false>(value, loValue, hiValue, loCount, hiCount, width - A, tailMask);
+				value += valueStride;
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+			uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) &&
+				Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) &&
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+				BackgroundIncrementCount<true>(value, valueStride, width, height,
+					loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+			else
+				BackgroundIncrementCount<false>(value, valueStride, width, height,
+					loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

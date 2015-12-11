@@ -520,6 +520,11 @@ namespace Test
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Vmx::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Neon::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+#endif 
+
 		return result;
 	}
 
