@@ -295,6 +295,53 @@ namespace Simd
 				BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride,
 					hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundShiftRange(const uint8_t * value, uint8_t * lo, uint8_t * hi, size_t offset, uint8x16_t mask)
+		{
+			const uint8x16_t _value = Load<align>(value + offset);
+			const uint8x16_t _lo = Load<align>(lo + offset);
+			const uint8x16_t _hi = Load<align>(hi + offset);
+
+			const uint8x16_t add = vandq_u8(mask, vqsubq_u8(_value, _hi));
+			const uint8x16_t sub = vandq_u8(mask, vqsubq_u8(_lo, _value));
+
+			Store<align>(lo + offset, vqsubq_u8(vqaddq_u8(_lo, add), sub));
+			Store<align>(hi + offset, vqsubq_u8(vqaddq_u8(_hi, add), sub));
+		}
+
+		template <bool align> void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					BackgroundShiftRange<align>(value, lo, hi, col, K8_FF);
+				if (alignedWidth != width)
+					BackgroundShiftRange<false>(value, lo, hi, width - A, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
+
+		void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+			else
+				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
