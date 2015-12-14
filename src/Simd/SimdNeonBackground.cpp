@@ -342,6 +342,51 @@ namespace Simd
 			else
 				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
+
+
+		template <bool align> SIMD_INLINE void BackgroundShiftRangeMasked(const uint8_t * value, uint8_t * lo, uint8_t * hi, const uint8_t * mask,
+			size_t offset, uint8x16_t tailMask)
+		{
+			const uint8x16_t _mask = Load<align>(mask + offset);
+			BackgroundShiftRange<align>(value, lo, hi, offset, vandq_u8(_mask, tailMask));
+		}
+
+		template <bool align> void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					BackgroundShiftRangeMasked<align>(value, lo, hi, mask, col, K8_FF);
+				if (alignedWidth != width)
+					BackgroundShiftRangeMasked<false>(value, lo, hi, mask, width - A, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+				mask += maskStride;
+			}
+		}
+
+		void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
+				Aligned(hi) && Aligned(hiStride) && Aligned(mask) && Aligned(maskStride))
+				BackgroundShiftRangeMasked<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+			else
+				BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

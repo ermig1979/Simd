@@ -485,6 +485,11 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
         Vmx::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+	else
+#endif
         Base::BackgroundShiftRangeMasked(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
 }
 

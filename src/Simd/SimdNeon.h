@@ -52,6 +52,9 @@ namespace Simd
 		void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
 			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
+		void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
+
 		void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
 		void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
