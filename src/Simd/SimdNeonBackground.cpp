@@ -387,6 +387,46 @@ namespace Simd
 			else
 				BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
 		}
+
+		template <bool align> SIMD_INLINE void BackgroundInitMask(const uint8_t * src, uint8_t * dst, const uint8x16_t & index, const uint8x16_t & value)
+		{
+			uint8x16_t _mask = vceqq_u8(Load<align>(src), index);
+			uint8x16_t _old = Load<align>(dst);
+			Store<align>(dst, vbslq_u8(_mask, value, _old));
+		}
+
+		template <bool align> void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(src) && Aligned(srcStride));
+				assert(Aligned(dst) && Aligned(dstStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t _index = vld1q_dup_u8(&index);
+			uint8x16_t _value = vld1q_dup_u8(&value);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					BackgroundInitMask<align>(src + col, dst + col, _index, _value);
+				if (alignedWidth != width)
+					BackgroundInitMask<false>(src + width - A, dst + width - A, _index, _value);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
+			else
+				BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

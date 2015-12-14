@@ -511,6 +511,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
         Vmx::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+	else
+#endif
         Base::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
 }
 

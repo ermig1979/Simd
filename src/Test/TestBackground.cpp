@@ -664,6 +664,11 @@ namespace Test
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Vmx::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Neon::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+#endif 
+
 		return result;
 	}
 
