@@ -577,7 +577,12 @@ namespace Test
             result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Vmx::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
 #endif 
 
-        return result;
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Neon::BackgroundAdjustRangeMasked), FUNC4(SimdBackgroundAdjustRangeMasked));
+#endif 
+		
+		return result;
     }
 
 	bool BackgroundShiftRangeAutoTest()
