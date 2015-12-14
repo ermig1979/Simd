@@ -178,14 +178,14 @@ namespace Simd
                 loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
         }
 
-        SIMD_INLINE __m128i AdjustLo(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
+        SIMD_INLINE __m128i AdjustLo(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
             const __m128i dec = _mm_and_si128(mask, Greater8u(count, threshold));
             const __m128i inc = _mm_and_si128(mask, Lesser8u(count, threshold));
             return _mm_subs_epu8(_mm_adds_epu8(value, inc), dec);
         }
 
-        SIMD_INLINE __m128i AdjustHi(const __m128i &count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
+        SIMD_INLINE __m128i AdjustHi(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
             const __m128i inc = _mm_and_si128(mask, Greater8u(count, threshold));
             const __m128i dec = _mm_and_si128(mask, Lesser8u(count, threshold));

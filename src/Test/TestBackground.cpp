@@ -549,6 +549,10 @@ namespace Test
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Vmx::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Neon::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+#endif
 		return result;
 	}
 

@@ -176,6 +176,74 @@ namespace Simd
 				BackgroundIncrementCount<false>(value, valueStride, width, height,
 					loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 		}
+
+		SIMD_INLINE uint8x16_t AdjustLo(const uint8x16_t & count, const uint8x16_t & value, const uint8x16_t & mask, const uint8x16_t & threshold)
+		{
+			const uint8x16_t dec = vandq_u8(mask, vcgtq_u8(count, threshold));
+			const uint8x16_t inc = vandq_u8(mask, vcltq_u8(count, threshold));
+			return vqsubq_u8(vqaddq_u8(value, inc), dec);
+		}
+
+		SIMD_INLINE uint8x16_t AdjustHi(const uint8x16_t & count, const uint8x16_t & value, const uint8x16_t & mask, const uint8x16_t & threshold)
+		{
+			const uint8x16_t inc = vandq_u8(mask, vcgtq_u8(count, threshold));
+			const uint8x16_t dec = vandq_u8(mask, vcltq_u8(count, threshold));
+			return vqsubq_u8(vqaddq_u8(value, inc), dec);
+		}
+
+		template <bool align> SIMD_INLINE void BackgroundAdjustRange(uint8_t * loCount, uint8_t * loValue,
+			uint8_t * hiCount, uint8_t * hiValue, size_t offset, const uint8x16_t & threshold, const uint8x16_t & mask)
+		{
+			const uint8x16_t _loCount = Load<align>(loCount + offset);
+			const uint8x16_t _loValue = Load<align>(loValue + offset);
+			const uint8x16_t _hiCount = Load<align>(hiCount + offset);
+			const uint8x16_t _hiValue = Load<align>(hiValue + offset);
+
+			Store<align>(loValue + offset, AdjustLo(_loCount, _loValue, mask, threshold));
+			Store<align>(hiValue + offset, AdjustHi(_hiCount, _hiValue, mask, threshold));
+			Store<align>(loCount + offset, K8_00);
+			Store<align>(hiCount + offset, K8_00);
+		}
+
+		template <bool align> void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+			uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+			uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+			}
+
+			const uint8x16_t _threshold = vld1q_dup_u8(&threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					BackgroundAdjustRange<align>(loCount, loValue, hiCount, hiValue, col, _threshold, K8_01);
+				if (alignedWidth != width)
+					BackgroundAdjustRange<false>(loCount, loValue, hiCount, hiValue, width - A, _threshold, tailMask);
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+			uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+			uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+		{
+			if (Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) &&
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+				BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride,
+					hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+			else
+				BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride,
+					hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
