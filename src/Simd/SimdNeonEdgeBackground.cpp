@@ -106,6 +106,52 @@ namespace Simd
 			else
 				EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
 		}
+
+
+		template <bool align> SIMD_INLINE void EdgeBackgroundIncrementCount(const uint8_t * value,
+			const uint8_t * backgroundValue, uint8_t * backgroundCount, size_t offset, uint8x16_t mask)
+		{
+			const uint8x16_t _value = Load<align>(value + offset);
+			const uint8x16_t _backgroundValue = Load<align>(backgroundValue + offset);
+			const uint8x16_t _backgroundCount = Load<align>(backgroundCount + offset);
+
+			const uint8x16_t inc = vandq_u8(mask, vcgtq_u8(_value, _backgroundValue));
+
+			Store<align>(backgroundCount + offset, vqaddq_u8(_backgroundCount, inc));
+		}
+
+		template <bool align> void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundIncrementCount<align>(value, backgroundValue, backgroundCount, col, K8_01);
+				if (alignedWidth != width)
+					EdgeBackgroundIncrementCount<false>(value, backgroundValue, backgroundCount, width - A, tailMask);
+				value += valueStride;
+				backgroundValue += backgroundValueStride;
+				backgroundCount += backgroundCountStride;
+			}
+		}
+
+		void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride))
+				EdgeBackgroundIncrementCount<true>(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+			else
+				EdgeBackgroundIncrementCount<false>(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

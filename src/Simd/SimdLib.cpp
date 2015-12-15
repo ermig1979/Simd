@@ -1067,24 +1067,25 @@ SIMD_API void SimdEdgeBackgroundIncrementCount(const uint8_t * value, size_t val
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
-        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        Avx2::EdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundIncrementCount(value, valueStride, width, height,
-        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        Sse2::EdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
-        Vmx::EdgeBackgroundIncrementCount(value, valueStride, width, height,
-        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+        Vmx::EdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
     else
 #endif
-        Base::EdgeBackgroundIncrementCount(value, valueStride, width, height,
-        backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::EdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+	else
+#endif
+        Base::EdgeBackgroundIncrementCount(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
 }
 
 SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,

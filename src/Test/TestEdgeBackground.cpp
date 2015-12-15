@@ -411,6 +411,11 @@ namespace Test
             result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Vmx::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Neon::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
+#endif 
+
 		return result;
 	}
 
