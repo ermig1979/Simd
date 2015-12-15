@@ -1054,6 +1054,11 @@ SIMD_API void SimdEdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valu
         Vmx::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
+	else
+#endif
         Base::EdgeBackgroundGrowRangeFast(value, valueStride, width, height, background, backgroundStride);
 }
 

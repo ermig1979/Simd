@@ -68,6 +68,44 @@ namespace Simd
             else
                 EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
         }
+
+		template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uint8_t * value, uint8_t * background)
+		{
+			const uint8x16_t _value = Load<align>(value);
+			const uint8x16_t _background = Load<align>(background);
+			Store<align>(background, vmaxq_u8(_background, _value));
+		}
+
+		template <bool align> void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(background) && Aligned(backgroundStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundGrowRangeFast<align>(value + col, background + col);
+				if (alignedWidth != width)
+					EdgeBackgroundGrowRangeFast<false>(value + width - A, background + width - A);
+				value += valueStride;
+				background += backgroundStride;
+			}
+		}
+
+		void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+				EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
+			else
+				EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

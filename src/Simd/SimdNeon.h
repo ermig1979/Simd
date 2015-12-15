@@ -65,6 +65,9 @@ namespace Simd
 		void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
 			uint8_t * background, size_t backgroundStride);
 
+		void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride);
+
 		void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			size_t channelCount, uint8_t * dst, size_t dstStride);
 
