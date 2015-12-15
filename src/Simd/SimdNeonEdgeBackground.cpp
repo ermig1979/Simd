@@ -202,6 +202,51 @@ namespace Simd
 			else
 				EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
 		}
+
+		template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, uint8_t * backgroundValue,
+			const uint8_t * mask, size_t offset, const uint8x16_t & threshold, const uint8x16_t & tailMask)
+		{
+			const uint8x16_t _mask = Load<align>(mask + offset);
+			EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, offset, threshold, vandq_u8(_mask, tailMask));
+		}
+
+		template <bool align> void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+				assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			const uint8x16_t _threshold = vld1q_dup_u8(&threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundAdjustRangeMasked<align>(backgroundCount, backgroundValue, mask, col, _threshold, K8_01);
+				if (alignedWidth != width)
+					EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundValue, mask, width - A, _threshold, tailMask);
+				backgroundValue += backgroundValueStride;
+				backgroundCount += backgroundCountStride;
+				mask += maskStride;
+			}
+		}
+
+		void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride) &&
+				Aligned(mask) && Aligned(maskStride))
+				EdgeBackgroundAdjustRangeMasked<true>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride,
+					threshold, mask, maskStride);
+			else
+				EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride,
+					threshold, mask, maskStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
