@@ -1093,24 +1093,25 @@ SIMD_API void SimdEdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t ba
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
-        backgroundValue, backgroundValueStride, threshold);
+        Avx2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
-        backgroundValue, backgroundValueStride, threshold);
+        Sse2::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
-        Vmx::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
-        backgroundValue, backgroundValueStride, threshold);
+        Vmx::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
     else
 #endif
-        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height,
-        backgroundValue, backgroundValueStride, threshold);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
+	else
+#endif
+        Base::EdgeBackgroundAdjustRange(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
 }
 
 SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,

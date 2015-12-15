@@ -440,6 +440,11 @@ namespace Test
             result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Vmx::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Neon::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
+#endif 
+
 		return result;
 	}
 

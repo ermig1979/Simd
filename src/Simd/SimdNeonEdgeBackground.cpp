@@ -152,6 +152,56 @@ namespace Simd
 			else
 				EdgeBackgroundIncrementCount<false>(value, valueStride, width, height, backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
 		}
+
+		SIMD_INLINE uint8x16_t AdjustEdge(const uint8x16_t & count, const uint8x16_t & value, const uint8x16_t & mask, const uint8x16_t & threshold)
+		{
+			const uint8x16_t inc = vandq_u8(mask, vcgtq_u8(count, threshold));
+			const uint8x16_t dec = vandq_u8(mask, vcltq_u8(count, threshold));
+			return vqsubq_u8(vqaddq_u8(value, inc), dec);
+		}
+
+		template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, uint8_t * backgroundValue,
+			size_t offset, const uint8x16_t & threshold, const uint8x16_t & mask)
+		{
+			const uint8x16_t _backgroundCount = Load<align>(backgroundCount + offset);
+			const uint8x16_t _backgroundValue = Load<align>(backgroundValue + offset);
+
+			Store<align>(backgroundValue + offset, AdjustEdge(_backgroundCount, _backgroundValue, mask, threshold));
+			Store<align>(backgroundCount + offset, K8_00);
+		}
+
+		template <bool align> void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride));
+			}
+
+			const uint8x16_t _threshold = vld1q_dup_u8(&threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundAdjustRange<align>(backgroundCount, backgroundValue, col, _threshold, K8_01);
+				if (alignedWidth != width)
+					EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundValue, width - A, _threshold, tailMask);
+				backgroundValue += backgroundValueStride;
+				backgroundCount += backgroundCountStride;
+			}
+		}
+
+		void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold)
+		{
+			if (Aligned(backgroundValue) && Aligned(backgroundValueStride) &&
+				Aligned(backgroundCount) && Aligned(backgroundCountStride))
+				EdgeBackgroundAdjustRange<true>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
+			else
+				EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride, threshold);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
