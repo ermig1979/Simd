@@ -353,6 +353,11 @@ namespace Test
             result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Vmx::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::EdgeBackgroundGrowRangeSlow), FUNC1(SimdEdgeBackgroundGrowRangeSlow));
+#endif
+
         return result;
     }
 

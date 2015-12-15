@@ -95,5 +95,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
