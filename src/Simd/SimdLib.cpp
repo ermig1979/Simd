@@ -866,6 +866,11 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
         Vmx::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+	else
+#endif
         Base::ConditionalCount8u(src, stride, width, height, value, compareType, count);
 }
 

@@ -60,6 +60,9 @@ namespace Simd
 
 		void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
 
+		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
+			uint8_t value, SimdCompareType compareType, uint32_t * count);
+
 		void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
 		void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,

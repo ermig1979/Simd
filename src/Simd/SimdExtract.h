@@ -144,6 +144,16 @@ namespace Simd
         }
     }
 #endif// SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+	namespace Neon
+	{
+		SIMD_INLINE uint32_t ExtractSum(const uint32x4_t & a)
+		{
+			return vgetq_lane_u32(a, 0) + vgetq_lane_u32(a, 1) + vgetq_lane_u32(a, 2) + vgetq_lane_u32(a, 3);
+		}
+	}
+#endif// SIMD_NEON_ENABLE
 }
 
 #endif//__SimdExtract_h__

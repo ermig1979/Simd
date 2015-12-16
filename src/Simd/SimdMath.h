@@ -597,6 +597,21 @@ namespace Simd
 			vst1q_u8(buffer, value);
 			return vld2_u8(buffer);
 		}
+
+		SIMD_INLINE uint16x8_t HorizontalSum(const uint8x16_t & a)
+		{
+			return vaddl_u8(vget_low_u8(a), vget_high_u8(a));
+		}
+
+		SIMD_INLINE uint32x4_t HorizontalSum(const uint16x8_t & a)
+		{
+			return vaddl_u16(vget_low_u16(a), vget_high_u16(a));
+		}
+
+		SIMD_INLINE uint64x2_t HorizontalSum(const uint32x4_t & a)
+		{
+			return vaddl_u32(vget_low_u32(a), vget_high_u32(a));
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }

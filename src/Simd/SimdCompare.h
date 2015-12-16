@@ -386,5 +386,42 @@ namespace Simd
         }
     }
 #endif// SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+	namespace Neon
+	{
+		template<SimdCompareType compareType> SIMD_INLINE uint8x16_t Compare8u(const uint8x16_t & a, const uint8x16_t & b);
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareEqual>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vceqq_u8(a, b);
+		}
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareNotEqual>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vmvnq_u8(vceqq_u8(a, b));
+		}
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreater>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vcgtq_u8(a, b);
+		}
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreaterOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vcgeq_u8(a, b);
+		}
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesser>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vcltq_u8(a, b);
+		}
+
+		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesserOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			return vcleq_u8(a, b);
+		}
+	}
+#endif// SIMD_NEON_ENABLE
 }
 #endif//__SimdCompare_h__
