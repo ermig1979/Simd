@@ -124,12 +124,16 @@ namespace Simd
             }
         }
 
+		size_t BlockCountMax(size_t src, size_t dst)
+		{
+			return (size_t)Simd::Max(::ceil(float(src) / (A - 1)), ::ceil(float(dst) / HA));
+		}
+
         void EstimateAlphaIndexX(int srcSize, int dstSize, Index * indexes, uint8_t * alphas, size_t & blockCount)
         {
             float scale = (float)srcSize/dstSize;
-
-            int srcNext = 0, dstNext = 0;
-            int block = -1, blockLast = (int)blockCount - 1;
+			int block = 0;
+			indexes[0] = {0, 0};
             for(int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
             {
                 float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
@@ -148,26 +152,18 @@ namespace Simd
                     alpha = 1;
                 }
 
-				if ((srcIndex >= srcNext - 1 || dstIndex >= dstNext) && block < blockLast)
+				int dst = 2 * dstIndex - indexes[block].dst;
+				int src = srcIndex - indexes[block].src;
+				if (src >= A - 1 || dst >= A)
 				{
 					block++;
-					indexes[block].src = srcIndex;
+					indexes[block].src = Simd::Min(srcIndex, srcSize - (int)A);
 					indexes[block].dst = 2 * dstIndex;
-					if (block < blockLast)
-					{
-						srcNext = srcIndex + (int)A;
-						dstNext = dstIndex + (int)HA;
-					}
-					else
-					{
-						srcNext = srcSize - (int)A;
-						dstNext = dstSize - (int)HA;
-					}
+					dst = 0;
+					src = srcIndex - indexes[block].src;
 				}
-                
-                int dst = 2*dstIndex - indexes[block].dst, src = srcIndex - indexes[block].src;
-                indexes[block].shuffle[dst] = src;
-                indexes[block].shuffle[dst + 1] = src + 1;
+				indexes[block].shuffle[dst] = src;
+				indexes[block].shuffle[dst + 1] = src + 1;
 
                 alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
                 alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
@@ -328,7 +324,7 @@ namespace Simd
 
             size_t size = 2*dstWidth;
             size_t bufferWidth = AlignHi(dstWidth, A)*2;
-            size_t blockCount = Simd::Max((int)::ceil(float(srcWidth)/A), (int)::ceil(float(dstWidth)/HA));
+            size_t blockCount = BlockCountMax(srcWidth, dstWidth);
             size_t alignedSize = AlignHi(size, DA) - DA;
 
             BufferG buffer(bufferWidth, blockCount, dstHeight);

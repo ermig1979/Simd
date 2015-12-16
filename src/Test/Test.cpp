@@ -27,81 +27,21 @@
 
 namespace Test
 {
-    struct Options
-    {
-        enum Mode
-        {
-            Auto,
-            Create, 
-            Verify,
-        } mode;
-
-        std::string filter;
-
-        std::string output;
-
-        size_t threads;
-
-        Options(int argc, char* argv[])
-            : mode(Auto)
-            , threads(0)
-        {
-            for(int i = 1; i < argc; ++i)
-            {
-                std::string arg = argv[i];
-                if(arg.find("-m=") == 0)
-                {
-                    switch(arg[3])
-                    {
-                    case 'a': mode = Auto; break;
-                    case 'c': mode = Create; break;
-                    case 'v': mode = Verify; break;
-                    default:
-                        TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl); 
-                        exit(1);
-                    }
-                }
-                else if(arg.find("-t=") == 0)
-                {
-#ifdef NDEBUG
-                    std::stringstream ss(arg.substr(3, arg.size() - 3));
-                    ss >> threads; 
-#endif
-                }
-                else if(arg.find("-f=") == 0)
-                {
-                    filter = arg.substr(3, arg.size() - 3);
-                }
-                else if(arg.find("-o=") == 0)
-                {
-                    output = arg.substr(3, arg.size() - 3);
-                }
-                else
-                {
-                    TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl); 
-                    exit(1);
-                }
-            }
-        }
-
-        bool NeedToPerform(const std::string & name) const
-        {
-            return filter.empty() || name.find(filter) != std::string::npos;
-        }
-    };
-
     typedef bool (*AutoTestPtr)(); 
-    typedef bool (*DataTestPtr)(bool create); 
+    typedef bool (*DataTestPtr)(bool create);
+	typedef bool (*SpecialTestPtr)();
 
     struct Group
     {
         std::string name;
         AutoTestPtr autoTest;
-        DataTestPtr dataTest;
-        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d)
+		DataTestPtr dataTest;
+		SpecialTestPtr specialTest;
+        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d, const SpecialTestPtr & s = NULL)
             : name(n)
             , autoTest(a)
             , dataTest(d)
+			, specialTest(s)
         {
         }
     };
@@ -112,6 +52,13 @@ namespace Test
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest)); return true; } \
+    bool name##AtList = name##AddToList();
+
+#define TEST_ADD_GROUP_EX(name) \
+    bool name##AutoTest(); \
+    bool name##DataTest(bool create); \
+    bool name##SpecialTest(); \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
     TEST_ADD_GROUP(AbsDifferenceSum);
@@ -240,7 +187,7 @@ namespace Test
     TEST_ADD_GROUP(Reorder32bit);
     TEST_ADD_GROUP(Reorder64bit);
 
-    TEST_ADD_GROUP(ResizeBilinear);
+    TEST_ADD_GROUP_EX(ResizeBilinear);
 
     TEST_ADD_GROUP(SegmentationShrinkRegion);
     TEST_ADD_GROUP(SegmentationFillSingleHoles);
@@ -339,6 +286,154 @@ namespace Test
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(miliseconds));
     }
+
+	struct Options
+	{
+		enum Mode
+		{
+			Auto,
+			Create,
+			Verify,
+			Special,
+		} mode;
+
+		std::string filter;
+
+		std::string output;
+
+		size_t threads;
+
+		Options(int argc, char* argv[])
+			: mode(Auto)
+			, threads(0)
+		{
+			for (int i = 1; i < argc; ++i)
+			{
+				std::string arg = argv[i];
+				if (arg.find("-m=") == 0)
+				{
+					switch (arg[3])
+					{
+					case 'a': mode = Auto; break;
+					case 'c': mode = Create; break;
+					case 'v': mode = Verify; break;
+					case 's': mode = Special; break;
+					default:
+						TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
+						exit(1);
+					}
+				}
+				else if (arg.find("-t=") == 0)
+				{
+#ifdef NDEBUG
+					std::stringstream ss(arg.substr(3, arg.size() - 3));
+					ss >> threads;
+#endif
+				}
+				else if (arg.find("-f=") == 0)
+				{
+					filter = arg.substr(3, arg.size() - 3);
+				}
+				else if (arg.find("-o=") == 0)
+				{
+					output = arg.substr(3, arg.size() - 3);
+				}
+				else
+				{
+					TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
+					exit(1);
+				}
+			}
+		}
+
+		bool Required(const Group & group) const
+		{
+			if (mode == Special && group.specialTest == NULL)
+				return false;
+			return filter.empty() || group.name.find(filter) != std::string::npos;
+		}
+	};
+
+	int MakeAutoTests(const Groups & groups, const Options & options)
+	{
+		if (options.threads > 0)
+		{
+			TEST_LOG_SS(Info, "Test threads count = " << options.threads);
+
+			Test::Log::s_log.SetLevel(Test::Log::Error);
+
+			Test::TaskPtrs tasks;
+			for (size_t i = 0; i < options.threads; ++i)
+				tasks.push_back(Test::TaskPtr(new Test::Task(groups, true)));
+
+			std::cout << std::endl;
+			double progress;
+			do
+			{
+				progress = 0;
+				for (size_t i = 0; i < tasks.size(); ++i)
+					progress += tasks[i]->Progress();
+				progress /= double(tasks.size());
+				std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
+				Test::Sleep(40);
+			} while (progress < 1.0 && !Test::Task::s_stopped);
+			std::cout << std::endl << std::endl;
+
+			Test::Log::s_log.SetLevel(Test::Log::Info);
+		}
+		else
+		{
+			Test::Task task(groups, false);
+			task.Run();
+		}
+
+		if (Test::Task::s_stopped)
+			return 1;
+
+		TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+		TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false));
+#endif
+		return 0;
+	}
+
+	int MakeDataTests(const Groups & groups, const Options & options)
+	{
+		for (const Test::Group & group : groups)
+		{
+			bool create = options.mode == Test::Options::Create;
+			TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is started :");
+			bool result = group.dataTest(create);
+			TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is finished " << (result ? "successfully." : "with errors!") << std::endl);
+			if (!result)
+			{
+				TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl);
+				return 1;
+			}
+		}
+		TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
+
+		return 0;
+	}
+
+	int MakeSpecialTests(const Groups & groups, const Options & options)
+	{
+		for (const Test::Group & group : groups)
+		{
+			TEST_LOG_SS(Info, group.name << "SpecialTest - is started :");
+			bool result = group.specialTest();
+			TEST_LOG_SS(Info, group.name << "SpecialTest - data is finished " << (result ? "successfully." : "with errors!") << std::endl);
+			if (!result)
+			{
+				TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl);
+				return 1;
+			}
+		}
+		TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
+
+		return 0;
+	}
 }
 
 int main(int argc, char* argv[])
@@ -349,7 +444,7 @@ int main(int argc, char* argv[])
 
     Test::Groups groups;
     for(const Test::Group & group : Test::g_groups)
-        if(options.NeedToPerform(group.name))
+        if(options.Required(group))
             groups.push_back(group);
     if(groups.empty())
     {
@@ -357,62 +452,16 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    if(options.mode == Test::Options::Auto)
-    {
-        if(options.threads > 0)
-        {
-            TEST_LOG_SS(Info, "Test threads count = " << options.threads);
-
-            Test::Log::s_log.SetLevel(Test::Log::Error);
-
-            Test::TaskPtrs tasks;
-            for(size_t i = 0; i < options.threads; ++i)
-                tasks.push_back(Test::TaskPtr(new Test::Task(groups, true)));
-
-            std::cout << std::endl;
-            double progress;
-            do 
-            {
-                progress = 0;
-                for(size_t i = 0; i < tasks.size(); ++i)
-                    progress += tasks[i]->Progress();
-                progress /= double(tasks.size());
-                std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
-                Test::Sleep(40);
-            } while (progress < 1.0 && !Test::Task::s_stopped);
-            std::cout << std::endl << std::endl;
-
-            Test::Log::s_log.SetLevel(Test::Log::Info); 
-        }
-        else
-        {
-            Test::Task task(groups, false);
-            task.Run();
-        }
-
-        if(Test::Task::s_stopped)
-            return 1;
-        
-        TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
-
-#ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false));
-#endif
-    }
-    else
-    {
-        for(const Test::Group & group : groups)
-        {
-            bool create = options.mode == Test::Options::Create;
-            TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is started :"); 
-            bool result = group.dataTest(create); 
-            TEST_LOG_SS(Info, group.name << "DataTest - data " << (create ? "creation" : "verification") << " is finished " << (result ? "successfully." : "with errors!") << std::endl);
-            if(!result) 
-            { 
-                TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl); 
-                return 1;
-            }            
-        }
-        TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl); 
-    }
+	switch (options.mode)
+	{
+	case Test::Options::Auto: 
+		return Test::MakeAutoTests(groups, options);
+	case Test::Options::Create:
+	case Test::Options::Verify:
+		return Test::MakeDataTests(groups, options);
+	case Test::Options::Special:
+		return Test::MakeSpecialTests(groups, options);
+	default:
+		return 0;
+	}
 }
