@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -257,86 +258,51 @@ namespace Simd
                 backgroundValue, backgroundValueStride, threshold, mask, maskStride);
         }
 
-        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uint8_t * value, uint8_t * background, size_t offset, __m256i mask)
-        {
-            const __m256i _value = Load<align>((__m256i*)(value + offset));
-            const __m256i _background = Load<align>((__m256i*)(background + offset));
-            Store<align>((__m256i*)(background + offset), _mm256_or_si256(_mm256_and_si256(mask, _value), _mm256_andnot_si256(mask, _background)));
-        }
+ 		void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride)
+		{
+			Base::Copy(value, valueStride, width, height, 1, background, backgroundStride);
+		}
 
-        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride)
-        {
-            assert(width >= A);
-            if(align)
-            {
-                assert(Aligned(value) && Aligned(valueStride));
-                assert(Aligned(background) && Aligned(backgroundStride));
-            }
+		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, size_t offset)
+		{
+			const __m256i _value = Load<align>((__m256i*)(value + offset));
+			const __m256i _background = Load<align>((__m256i*)(background + offset));
+			const __m256i _mask = Load<align>((const __m256i*)(mask + offset));
+			Store<align>((__m256i*)(background + offset), _mm256_or_si256(_mm256_and_si256(_mask, _value), _mm256_andnot_si256(_mask, _background)));
+		}
 
-            size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
-            for(size_t row = 0; row < height; ++row)
-            {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    EdgeBackgroundShiftRange<align>(value, background, col, K_INV_ZERO);
-                if(alignedWidth != width)
-                    EdgeBackgroundShiftRange<false>(value, background, width - A, tailMask);
-                value += valueStride;
-                background += backgroundStride;
-            }
-        }
+		template <bool align> void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(background) && Aligned(backgroundStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
 
-        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride)
-        {
-            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
-                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride);
-            else
-                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
-        }
+			size_t alignedWidth = AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundShiftRangeMasked<align>(value, background, mask, col);
+				if (alignedWidth != width)
+					EdgeBackgroundShiftRangeMasked<false>(value, background, mask, width - A);
+				value += valueStride;
+				background += backgroundStride;
+				mask += maskStride;
+			}
+		}
 
-        template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, 
-            size_t offset, __m256i tailMask)
-        {
-            const __m256i _mask = Load<align>((const __m256i*)(mask + offset));
-            EdgeBackgroundShiftRange<align>(value, background, offset, _mm256_and_si256(_mask, tailMask));
-        }
-
-        template <bool align> void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
-        {
-            assert(width >= A);
-            if(align)
-            {
-                assert(Aligned(value) && Aligned(valueStride));
-                assert(Aligned(background) && Aligned(backgroundStride));
-                assert(Aligned(mask) && Aligned(maskStride));
-            }
-
-            size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
-            for(size_t row = 0; row < height; ++row)
-            {
-                for(size_t col = 0; col < alignedWidth; col += A)
-                    EdgeBackgroundShiftRangeMasked<align>(value, background, mask, col, K_INV_ZERO);
-                if(alignedWidth != width)
-                    EdgeBackgroundShiftRangeMasked<false>(value, background, mask, width - A, tailMask);
-                value += valueStride;
-                background += backgroundStride;
-                mask += maskStride;
-            }
-        }
-
-        void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
-        {
-            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && 
-                Aligned(mask) && Aligned(maskStride))
-                EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
-            else
-                EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
-        }
+		void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && Aligned(mask) && Aligned(maskStride))
+				EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+			else
+				EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+		}
     }
 #endif// SIMD_AVX2_ENABLE
 }

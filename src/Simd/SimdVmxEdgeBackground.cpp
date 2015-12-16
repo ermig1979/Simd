@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -324,63 +325,18 @@ namespace Simd
                 threshold, mask, maskStride);
         }
 
-        template <bool align, bool first> 
-        SIMD_INLINE void EdgeBackgroundShiftRange(const Loader<align> & value, const Loader<align> & backgroundSrc, const v128_u8 & mask, Storer<align> & backgroundDst)
+        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride)
         {
+			Base::Copy(value, valueStride, width, height, 1, background, backgroundStride);
+		}
+
+        template <bool align, bool first> 
+        SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const Loader<align> & value, const Loader<align> & backgroundSrc, const Loader<align> & mask, Storer<align> & backgroundDst)
+        {
+            const v128_u8 _mask = Load<align, first>(mask);
             const v128_u8 _value = Load<align, first>(value);
             const v128_u8 _background = Load<align, first>(backgroundSrc);
-            Store<align, first>(backgroundDst, vec_sel(_background, _value, mask));
-        }
-
-        template <bool align> void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride)
-        {
-            assert(width >= A);
-            if(align)
-            {
-                assert(Aligned(value) && Aligned(valueStride));
-                assert(Aligned(background) && Aligned(backgroundStride));
-            }
-
-            size_t alignedWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            for(size_t row = 0; row < height; ++row)
-            {
-                Loader<align> _value(value), _backgroundSrc(background);
-                Storer<align> _backgroundDst(background);
-                EdgeBackgroundShiftRange<align, true>(_value, _backgroundSrc, K8_FF, _backgroundDst);
-                for(size_t col = A; col < alignedWidth; col += A)
-                    EdgeBackgroundShiftRange<align, false>(_value, _backgroundSrc, K8_FF, _backgroundDst);
-                Flush(_backgroundDst);
-
-                if(alignedWidth != width)
-                {
-                    Loader<false> _value(value + width - A), _backgroundSrc(background + width - A);
-                    Storer<false> _backgroundDst(background + width - A);
-                    EdgeBackgroundShiftRange<false, true>(_value, _backgroundSrc, tailMask, _backgroundDst);
-                    Flush(_backgroundDst);
-                }
-
-                value += valueStride;
-                background += backgroundStride;
-            }
-        }
-
-        void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride)
-        {
-            if(Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
-                EdgeBackgroundShiftRange<true>(value, valueStride, width, height, background, backgroundStride);
-            else
-                EdgeBackgroundShiftRange<false>(value, valueStride, width, height, background, backgroundStride);
-        }
-
-        template <bool align, bool first> 
-        SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const Loader<align> & value, const Loader<align> & backgroundSrc, 
-            const Loader<align> & mask, const v128_u8 & tailMask, Storer<align> & backgroundDst)
-        {
-            const v128_u8 _mask = vec_and(Load<align, first>(mask), tailMask);
-            EdgeBackgroundShiftRange<align, first>(value, backgroundSrc, _mask, backgroundDst);
+            Store<align, first>(backgroundDst, vec_sel(_background, _value, _mask));
         }
 
         template <bool align> void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
@@ -395,14 +351,13 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             for(size_t row = 0; row < height; ++row)
             {
                 Loader<align> _value(value), _backgroundSrc(background), _mask(mask);
                 Storer<align> _backgroundDst(background);
-                EdgeBackgroundShiftRangeMasked<align, true>(_value, _backgroundSrc, _mask, K8_FF, _backgroundDst);
+                EdgeBackgroundShiftRangeMasked<align, true>(_value, _backgroundSrc, _mask, _backgroundDst);
                 for(size_t col = A; col < alignedWidth; col += A)
-                    EdgeBackgroundShiftRangeMasked<align, false>(_value, _backgroundSrc, _mask, K8_FF, _backgroundDst);
+                    EdgeBackgroundShiftRangeMasked<align, false>(_value, _backgroundSrc, _mask, _backgroundDst);
                 Flush(_backgroundDst);
 
                 if(alignedWidth != width)
@@ -410,7 +365,7 @@ namespace Simd
                     size_t col = width - A;
                     Loader<false> _value(value + col), _backgroundSrc(background + col), _mask(mask + col);
                     Storer<false> _backgroundDst(background + col);
-                    EdgeBackgroundShiftRangeMasked<false, true>(_value, _backgroundSrc, _mask, tailMask, _backgroundDst);
+                    EdgeBackgroundShiftRangeMasked<false, true>(_value, _backgroundSrc, _mask, _backgroundDst);
                     Flush(_backgroundDst);
                 }
 

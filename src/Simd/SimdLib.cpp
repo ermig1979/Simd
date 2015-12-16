@@ -1158,6 +1158,11 @@ SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueSt
         Vmx::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+	else
+#endif
         Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
 }
 
