@@ -254,13 +254,46 @@ namespace Simd
 			Base::Copy(value, valueStride, width, height, 1, background, backgroundStride);
 		}
 
-		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRange(const uint8_t * value, uint8_t * background, const uint8_t * mask, size_t offset)
+		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, size_t offset)
 		{
 			const uint8x16_t _value = Load<align>(value + offset);
 			const uint8x16_t _background = Load<align>(background + offset);
 			const uint8x16_t _mask = Load<align>(mask + offset);
 			Store<align>(background + offset, vbslq_u8(_mask, _value, _background));
-		}	
+		}
+
+		template <bool align> void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(background) && Aligned(backgroundStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					EdgeBackgroundShiftRangeMasked<align>(value, background, mask, col);
+				if (alignedWidth != width)
+					EdgeBackgroundShiftRangeMasked<false>(value, background, mask, width - A);
+				value += valueStride;
+				background += backgroundStride;
+				mask += maskStride;
+			}
+		}
+
+		void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride) && Aligned(mask) && Aligned(maskStride))
+				EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+			else
+				EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+		}
 	}
 #endif// SIMD_NEON_ENABLE
 }

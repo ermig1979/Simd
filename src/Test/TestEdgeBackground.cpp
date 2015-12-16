@@ -527,6 +527,11 @@ namespace Test
             result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Vmx::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Neon::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
+#endif 
+
         return result;
     }
 
