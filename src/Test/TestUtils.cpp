@@ -25,18 +25,37 @@
 
 namespace Test
 {
+	uint8_t g_rand[UINT16_MAX];
+	bool InitRand()
+	{
+		for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
+			g_rand[i] = ::rand();
+		return true;
+	}
+	bool g_inited = InitRand();
+	SIMD_INLINE const uint8_t * Rand()
+	{
+		return g_rand + (::rand()&INT16_MAX);
+	}
+
     void FillRandom(View & view, uint8_t lo, uint8_t hi)
     {
         assert(view.data);
 
-        size_t width = view.width*View::PixelSize(view.format);
+		size_t width = view.width*View::PixelSize(view.format);
+		bool fast = (lo == 0) && (hi = 255);
         for(size_t row = 0; row < view.height; ++row)
         {
             ptrdiff_t offset = row*view.stride;
-            for(size_t col = 0; col < width; ++col, ++offset)
-            {
-                view.data[offset] = lo + Random(hi - lo + 1);
-            }
+			if (fast)
+			{
+				memcpy(view.data + offset, Rand(), width);
+			}
+			else
+			{
+				for (size_t col = 0; col < width; ++col, ++offset)
+					view.data[offset] = lo + Random(hi - lo + 1);
+			}
         }
     }
 
@@ -48,10 +67,9 @@ namespace Test
 		for(size_t row = 0; row < view.height; ++row)
 		{
 			ptrdiff_t offset = row*view.stride;
+			const uint8_t * rand = Rand();
 			for(size_t col = 0; col < width; ++col, ++offset)
-			{
-				view.data[offset] = Random(2) ? index : 0;
-			}
+				view.data[offset] = (rand[col] & 1) ? index : 0;
 		}
 	}
 
@@ -68,8 +86,9 @@ namespace Test
             ptrdiff_t left = rect.left + indent;
             ptrdiff_t right = rect.right - indent;
             ptrdiff_t offset = row*mask.stride + left;
-            for(ptrdiff_t col = left; col < right; ++col, ++offset)
-                mask.data[offset] = Random(2) ? index : 0;
+			const uint8_t * rand = Rand();
+			for (ptrdiff_t col = left; col < right; ++col, ++offset)
+                mask.data[offset] = (rand[col] & 1) ? index : 0;
         }
     }
 
