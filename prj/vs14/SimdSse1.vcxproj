@@ -60,6 +60,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSse1.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Ann.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Svm.cpp" />
   </ItemGroup>

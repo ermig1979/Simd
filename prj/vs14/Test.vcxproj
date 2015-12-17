@@ -55,6 +55,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Test\Test.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnn.cpp" />
     <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp" />
     <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />

@@ -76,6 +76,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTypes.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Ann.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Svm.cpp" />
   </ItemGroup>

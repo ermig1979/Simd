@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseAlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseAnn.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBayerToBgra.cpp" />

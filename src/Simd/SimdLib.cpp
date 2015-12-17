@@ -298,6 +298,14 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
+typedef void(*SimdAnnProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
+SimdAnnProductSumPtr simdAnnProductSum = SIMD_FUNC3(AnnProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
+
+SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum)
+{
+	simdAnnProductSum(a, b, size, sum);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

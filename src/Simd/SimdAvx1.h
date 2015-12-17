@@ -31,7 +31,9 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
+		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
+
+		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 

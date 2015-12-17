@@ -88,6 +88,7 @@
     <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxAnn.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSvm.cpp" />

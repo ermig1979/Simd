@@ -48,7 +48,7 @@
 
     The <b>%Simd Library</b> is a free open source image processing library, designed for C and C++ programmers.
     It provides many useful high performance algorithms for image processing such as: pixel format conversion, image scaling and filtration, 
-    extraction of statistic information from images, motion detection.
+    extraction of statistic information from images, motion detection, object classification, neural network.
     
     \n\n The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
@@ -417,6 +417,11 @@
 /*! @ingroup functions
     @defgroup svm SVM
     \short Support Vector Machine's functions.
+*/
+
+/*! @ingroup functions
+	@defgroup ann ANN
+	\short Artificial Neural Network's functions.
 */
 
 #ifndef __SimdHelp_h__

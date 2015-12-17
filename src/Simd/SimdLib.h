@@ -440,6 +440,26 @@ extern "C"
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
+	/*! @ingroup ann
+
+		\fn void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
+
+		\short Calculates sum of products for two 32-bit float arrays.
+
+		All arrays must have the same size.
+
+		For every element:
+		\verbatim
+			sum += a[i]*b[i];
+		\endverbatim
+
+		\param [in] a - a pointer to the first array.
+		\param [in] b - a pointer to the second array.
+		\param [in] size - a size of arrays.
+		\param [out] sum - a sum of products.
+	*/
+	SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
+
     /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
@@ -2946,7 +2966,7 @@ extern "C"
 
         All arrays must have the same size. 
 
-        For every point: 
+        For every element: 
         \verbatim
         sum += (a[i] - b[i])*(a[i] - b[i]);
         \endverbatim
