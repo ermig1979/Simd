@@ -75,6 +75,39 @@ namespace Simd
             else
                 AnnProductSum<false>(a, b, size, sum);
         }
+
+		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			size_t alignedSize =  Simd::AlignLo(size, 4);
+			__m128 _slope = _mm_set1_ps(*slope);
+			__m128 _0 = _mm_set1_ps(-0.0f);
+			__m128 _1 = _mm_set1_ps(1.0f);
+			__m128 _0555 = _mm_set1_ps(0.555f);
+			__m128 _0143 = _mm_set1_ps(0.143f);
+			size_t i = 0;
+			for (; i < alignedSize; i += 4)
+			{
+				__m128 _src = Load<align>(src + i);
+				__m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
+				__m128 x2 = _mm_mul_ps(x, x);
+				__m128 x4 = _mm_mul_ps(x2, x2);
+				__m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _0555), _mm_mul_ps(x4, _0143)));
+				__m128 mask = _mm_cmpgt_ps(_src, _0);
+				__m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
+				__m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
+				Store<align>(dst + i, sigmoid);
+			}
+			for (; i < size; ++i)
+				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+		}
+
+		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				AnnRoughSigmoid<true>(src, size, slope, dst);
+			else
+				AnnRoughSigmoid<false>(src, size, slope, dst);
+		}
     }
 #endif// SIMD_SSE_ENABLE
 }

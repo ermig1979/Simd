@@ -27,6 +27,8 @@
 
 namespace Test
 {
+	const float ABS_ROUGH_SIGMOID_ERROR = 0.0025f;
+
 	namespace
 	{
         struct FuncPS
@@ -105,6 +107,88 @@ namespace Test
         return result;
     }
 
+	namespace
+	{
+		struct FuncS
+		{
+			typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
+
+			FuncPtr func;
+			std::string description;
+
+			FuncS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+
+			void Call(const View & src, float slope, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func((float*)src.data, src.width, &slope, (float*)dst.data);
+			}
+		};
+	}
+#define FUNC_S(function) FuncS(function, #function)
+
+	bool AnnSigmoidAutoTest(int size, float error, bool relative, const FuncS & f1, const FuncS & f2)
+	{
+		bool result = true;
+
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+		FillRandom32f(src, -10.0f, 10.0f);
+
+		float slope = 3.0;
+
+		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+
+		result = Compare(dst1, dst2, error, true, 0, relative);
+
+		return result;
+	}
+
+	bool AnnSigmoidAutoTest(float error, bool relative, const FuncS & f1, const FuncS & f2)
+	{
+		bool result = true;
+
+		result = result && AnnSigmoidAutoTest(W*H, error, relative, f1, f2);
+		result = result && AnnSigmoidAutoTest(W*H + O, error, relative, f1, f2);
+		result = result && AnnSigmoidAutoTest(W*H - O, error, relative, f1, f2);
+
+		return result;
+	}
+
+	bool AnnSigmoidAutoTest()
+	{
+		bool result = true;
+
+		result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Base::AnnSigmoid), FUNC_S(SimdAnnSigmoid));
+
+		return result;
+	}
+
+	bool AnnRoughSigmoidAutoTest()
+	{
+		bool result = true;
+
+		result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Base::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
+
+#ifdef SIMD_SSE_ENABLE
+		if (Simd::Sse::Enable)
+			result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Sse::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+		if (Simd::Avx::Enable)
+			result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Avx::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
+#endif
+
+		return result;
+	}
+
     //-----------------------------------------------------------------------
 
     bool AnnProductSumDataTest(bool create, int size, float eps, const FuncPS & f)
@@ -157,4 +241,63 @@ namespace Test
 
         return result;
     }
+
+
+	bool AnnSigmoidDataTest(bool create, int size, float error, bool relative, const FuncS & f)
+	{
+		bool result = true;
+
+		Data data(f.description);
+
+		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+		float slope = 3.0;
+
+		if (create)
+		{
+			FillRandom32f(src, -10.0f, 10.0f);
+
+			TEST_SAVE(src);
+
+			f.Call(src, slope, dst1);
+
+			TEST_SAVE(dst1);
+		}
+		else
+		{
+			TEST_LOAD(src);
+
+			TEST_LOAD(dst1);
+
+			f.Call(src, slope, dst2);
+
+			TEST_SAVE(dst2);
+
+			result = Compare(dst1, dst2, error, true, 0, relative);
+		}
+
+		return result;
+	}
+
+	bool AnnSigmoidDataTest(bool create)
+	{
+		bool result = true;
+
+		result = result && AnnSigmoidDataTest(create, DH, EPS, true, FUNC_S(SimdAnnSigmoid));
+
+		return result;
+	}
+
+	bool AnnRoughSigmoidDataTest(bool create)
+	{
+		bool result = true;
+
+		result = result && AnnSigmoidDataTest(create, DH, EPS, true, FUNC_S(SimdAnnRoughSigmoid));
+
+		return result;
+	}
 }

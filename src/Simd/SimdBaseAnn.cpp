@@ -44,5 +44,19 @@ namespace Simd
                 sums[0] += a[i]*b[i];
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
+
+		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			float s = slope[0];
+			for (size_t i = 0; i < size; ++i)
+				dst[i] = Sigmoid(src[i] * s);
+		}
+
+		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			float s = slope[0];
+			for (size_t i = 0; i < size; ++i)
+				dst[i] = RoughSigmoid(src[i] * s);
+		}
     }
 }

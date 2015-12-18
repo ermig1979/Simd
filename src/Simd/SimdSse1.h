@@ -33,6 +33,8 @@ namespace Simd
 	{
 		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
 
+		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);

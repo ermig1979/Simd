@@ -194,6 +194,19 @@ namespace Simd
                 (value & 0x000000FF00000000) >> 8  | (value & 0x0000FF0000000000) >> 24 | 
                 (value & 0x00FF000000000000) >> 40 | (value & 0xFF00000000000000) >> 56;
         }
+
+		SIMD_INLINE float Sigmoid(float value)
+		{
+			return 1.0f / (1.0f + ::exp(-value));
+		}
+
+		SIMD_INLINE float RoughSigmoid(float value)
+		{
+			float x = ::abs(value);
+			float x2 = x*x;
+			float e = 1.0f + x + x2*0.555f + x2*x2*0.143f;
+			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
+		}
 	}
 
 #ifdef SIMD_SSE_ENABLE

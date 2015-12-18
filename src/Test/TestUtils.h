@@ -64,7 +64,9 @@ namespace Test
 
     bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax = EPS, bool printError = false, int errorCountMax = 0);
 
-    bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false);
+	bool Compare(const View & a, const View & b, float relativeDifferenceMax = EPS, bool printError = false, int errorCountMax = 0, bool relative = true);
+	
+	bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false);
 
 	std::string ColorDescription(View::Format format);
 

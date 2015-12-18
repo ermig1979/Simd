@@ -261,13 +261,13 @@ namespace Test
         return result;
     }
 
-    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, int errorCountMax)
+    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative)
     {
         std::stringstream message;
         int errorCount = 0;
         for(size_t i = 0; i < size; ++i)
         {
-            float relativeDifference = ::fabs(a[i] - b[i])/Simd::Max(::fabs(a[i]), ::fabs(b[i]));
+            float relativeDifference = relative ? ::fabs(a[i] - b[i]) /Simd::Max(::fabs(a[i]), ::fabs(b[i])) : ::fabs(a[i] - b[i]);
             if(relativeDifference >= relativeDifferenceMax)
             {
                 errorCount++;
@@ -293,12 +293,18 @@ namespace Test
     bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax);
+        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax, true);
     }
+
+	bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative)
+	{
+		assert(a.width == b.width);
+		return Compare((float*)a.data, (float*)b.data, a.width, relativeDifferenceMax, printError, errorCountMax, relative);
+	}
 
     bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError)
     {
-        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0);
+        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0, true);
     }
     
 	std::string ColorDescription(View::Format format)

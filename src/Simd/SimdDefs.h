@@ -34,6 +34,7 @@
 #include <limits.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <cmath>
 
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 

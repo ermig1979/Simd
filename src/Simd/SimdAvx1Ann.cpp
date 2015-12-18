@@ -75,6 +75,39 @@ namespace Simd
             else
 				AnnProductSum<false>(a, b, size, sum);
         }
+
+		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			size_t alignedSize = Simd::AlignLo(size, 8);
+			__m256 _slope = _mm256_set1_ps(*slope);
+			__m256 _0 = _mm256_set1_ps(-0.0f);
+			__m256 _1 = _mm256_set1_ps(1.0f);
+			__m256 _0555 = _mm256_set1_ps(0.555f);
+			__m256 _0143 = _mm256_set1_ps(0.143f);
+			size_t i = 0;
+			for (; i < alignedSize; i += 8)
+			{
+				__m256 _src = Load<align>(src + i);
+				__m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
+				__m256 x2 = _mm256_mul_ps(x, x);
+				__m256 x4 = _mm256_mul_ps(x2, x2);
+				__m256 series = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _0555), _mm256_mul_ps(x4, _0143)));
+				__m256 mask = _mm256_cmp_ps(_src, _0, _CMP_GT_OS);
+				__m256 exp = _mm256_or_ps(_mm256_and_ps(_mm256_rcp_ps(series), mask), _mm256_andnot_ps(mask, series));
+				__m256 sigmoid = _mm256_rcp_ps(_mm256_add_ps(_1, exp));
+				Store<align>(dst + i, sigmoid);
+			}
+			for (; i < size; ++i)
+				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+		}
+
+		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				AnnRoughSigmoid<true>(src, size, slope, dst);
+			else
+				AnnRoughSigmoid<false>(src, size, slope, dst);
+		}
     }
 #endif// SIMD_AVX_ENABLE
 }

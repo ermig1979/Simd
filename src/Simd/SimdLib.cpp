@@ -306,6 +306,22 @@ SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, f
 	simdAnnProductSum(a, b, size, sum);
 }
 
+typedef void(*SimdAnnSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnSigmoidPtr simdAnnSigmoid = SIMD_FUNC0(AnnSigmoid);
+
+SIMD_API void SimdAnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+	simdAnnSigmoid(src, size, slope, dst);
+}
+
+typedef void(*SimdAnnRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnRoughSigmoidPtr simdAnnRoughSigmoid = SIMD_FUNC2(AnnRoughSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+	simdAnnRoughSigmoid(src, size, slope, dst);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

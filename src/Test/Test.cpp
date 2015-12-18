@@ -73,6 +73,8 @@ namespace Test
     TEST_ADD_GROUP(AddFeatureDifference);
 
 	TEST_ADD_GROUP(AnnProductSum);
+	TEST_ADD_GROUP(AnnRoughSigmoid);
+	TEST_ADD_GROUP(AnnSigmoid);
 
     TEST_ADD_GROUP(BgraToBgr);
     TEST_ADD_GROUP(BgraToGray);
