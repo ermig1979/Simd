@@ -80,6 +80,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2AddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2AlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2Ann.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuv.cpp" />

@@ -28,6 +28,25 @@ namespace Simd
 {
     namespace Base
     {
+		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+		{
+			for (size_t row = 0; row < height; ++row)
+			{
+				if (inversion)
+				{
+					for (size_t col = 0; col < width; ++col)
+						dst[col] = (255 - src[col]) / 255.0f;
+				}
+				else
+				{
+					for (size_t col = 0; col < width; ++col)
+						dst[col] = src[col] / 255.0f;
+				}
+				src += stride;
+				dst += width;
+			}
+		}
+
         void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);

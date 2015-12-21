@@ -298,6 +298,21 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
+SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+{
+#ifdef SIMD_AVX2_ENABLE
+	if (Avx2::Enable && width >= 8)
+		Avx2::AnnConvert(src, stride, width, height, dst, inversion);
+	else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+	if (Sse2::Enable && width >= Sse2::A)
+		Sse2::AnnConvert(src, stride, width, height, dst, inversion);
+	else
+#endif
+		Base::AnnConvert(src, stride, width, height, dst, inversion);
+}
+
 typedef void(*SimdAnnProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
 SimdAnnProductSumPtr simdAnnProductSum = SIMD_FUNC3(AnnProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
 

@@ -219,6 +219,32 @@ namespace Simd
         SimdAlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
     }
 
+	/*! @ingroup ann
+
+		\fn void AnnConvert(const View<A> & src, float * dst, bool inversion)
+
+		\short Converts a 8-bit gray image to the 32-bit float array.
+
+		The length of output array must be equal to the area of input image.
+
+		For every point:
+		\verbatim
+		dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+		\endverbatim
+
+		\note This function is a C++ wrapper for function ::SimdAnnConvert.
+
+		\param [in] src - an input image.
+		\param [out] dst - a pointer to output array.
+		\param [in] inversion - a flag of color inversion.
+	*/
+	template<class A> SIMD_INLINE void AnnConvert(const View<A> & src, float * dst, bool inversion)
+	{
+		assert(src.format == View<A>::Gray8);
+
+		SimdAnnConvert(src.data, src.stride, src.width, src.height, dst, inversion ? 1 : 0);
+	}
+
     /*! @ingroup background
 
         \fn void BackgroundGrowRangeSlow(const View<A>& value, View<A>& lo, View<A>& hi)

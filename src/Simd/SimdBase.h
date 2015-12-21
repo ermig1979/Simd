@@ -54,6 +54,8 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
+		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+			
 		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
 
 		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst);

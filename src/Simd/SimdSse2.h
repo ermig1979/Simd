@@ -52,7 +52,9 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
-        void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+		void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
         void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,

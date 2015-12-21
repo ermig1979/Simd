@@ -331,6 +331,18 @@ namespace Simd
             return _mm_unpackhi_epi8(a, b); 
         }
 
+		template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
+
+		template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
+		{
+			return _mm_unpacklo_epi16(a, b);
+		}
+
+		template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
+		{
+			return _mm_unpackhi_epi16(a, b);
+		}
+
         SIMD_INLINE __m128i DivideBy16(__m128i value)
         {
             return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);

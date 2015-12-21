@@ -442,6 +442,30 @@ extern "C"
 
 	/*! @ingroup ann
 
+		\fn void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+		\short Converts a 8-bit gray image to the 32-bit float array.
+
+		The length of output array must be equal to the area of input image.
+
+		For every point:
+		\verbatim
+		dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+		\endverbatim
+
+		\note This function has a C++ wrapper Simd::AnnConvert(const View<A>& src, float * dst, bool inversion).
+
+		\param [in] src - a pointer to pixels data of input image.
+		\param [in] stride - a row size of the image.
+		\param [in] width - an image width.
+		\param [in] height - an image height.
+		\param [out] dst - a pointer to output array.
+		\param [in] inversion - a flag of color inversion.
+	*/
+	SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+	/*! @ingroup ann
+
 		\fn void SimdAnnSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
 		\short Calculates sigmoid for 32-bit float array.

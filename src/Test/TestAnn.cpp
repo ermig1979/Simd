@@ -27,7 +27,86 @@
 
 namespace Test
 {
-	const float ABS_ROUGH_SIGMOID_ERROR = 0.0025f;
+	const float ROUGH_SIGMOID_ERROR = 0.0025f;
+
+	namespace
+	{
+		struct FuncC
+		{
+			typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+			FuncPtr func;
+			std::string description;
+			bool inversion;
+
+			FuncC(const FuncPtr & f, const std::string & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
+
+			void Call(const View & src, View & dst) const
+			{
+				TEST_PERFORMANCE_TEST(description);
+				func(src.data, src.stride, src.width, src.height, (float*)dst.data, inversion ? 1 : 0);
+			}
+		};
+	}
+#define FUNC_C(function, inversion) FuncC(function, #function, inversion)
+
+	bool AnnConvertAutoTest(int width, int height, float eps, const FuncC & f1, const FuncC & f2)
+	{
+		bool result = true;
+
+		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(src);
+
+		View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+		View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+		result = Compare(dst1, dst2, eps, true);
+
+		return result;
+	}
+
+	bool AnnConvertAutoTest(float eps, const FuncC & f1, const FuncC & f2)
+	{
+		bool result = true;
+
+		result = result && AnnConvertAutoTest(W, H, eps, f1, f2);
+		result = result && AnnConvertAutoTest(W - O, H + O, eps, f1, f2);
+		result = result && AnnConvertAutoTest(W + O, H - O, eps, f1, f2);
+
+		return result;
+	}
+
+	bool AnnConvertAutoTest()
+	{
+		bool result = true;
+
+		result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Base::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
+		result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Base::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+
+#ifdef SIMD_SSE2_ENABLE
+		if (Simd::Sse2::Enable)
+		{
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Sse2::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Sse2::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+		}
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+		if (Simd::Avx2::Enable)
+		{
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Avx2::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Avx2::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+		}
+#endif
+
+		return result;
+	}
 
 	namespace
 	{
@@ -190,6 +269,55 @@ namespace Test
 	}
 
     //-----------------------------------------------------------------------
+
+	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC & f)
+	{
+		bool result = true;
+
+		Data data(f.description);
+
+		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+		FillRandom(src);
+
+		View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+		View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+
+		if (create)
+		{
+			FillRandom(src);
+
+			TEST_SAVE(src);
+
+			f.Call(src, dst1);
+
+			TEST_SAVE(dst1);
+		}
+		else
+		{
+			TEST_LOAD(src);
+
+			TEST_LOAD(dst1);
+
+			f.Call(src, dst2);
+
+			TEST_SAVE(dst2);
+
+			result = Compare(dst1, dst2, eps, true);
+		}
+
+		return result;
+	}
+
+	bool AnnConvertDataTest(bool create)
+	{
+		bool result = true;
+
+		result = result && AnnConvertDataTest(create, DW, DH, EPS, FUNC_C(SimdAnnConvert, true));
+
+		return result;
+	}
 
     bool AnnProductSumDataTest(bool create, int size, float eps, const FuncPS & f)
     {
