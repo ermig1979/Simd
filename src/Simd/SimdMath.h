@@ -202,7 +202,7 @@ namespace Simd
 
 		SIMD_INLINE float RoughSigmoid(float value)
 		{
-			float x = ::abs(value);
+			float x = ::fabs(value);
 			float x2 = x*x;
 			float e = 1.0f + x + x2*0.555f + x2*x2*0.143f;
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));

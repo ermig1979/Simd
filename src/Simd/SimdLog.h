@@ -87,6 +87,17 @@ namespace Simd
             }
             std::cout << "} " << std::endl;    
         }
+
+		SIMD_INLINE void Log(const v128_f32 & value, const std::string & name)
+		{
+			std::cout << name << " = { ";
+			for (int i = 0; i < 4; i++)
+			{
+				float element = vec_extract(value, i);
+				std::cout << element << " ";
+			}
+			std::cout << "} " << std::endl;
+		}
     }
 #endif//SIMD_VMX_ENABLE
 

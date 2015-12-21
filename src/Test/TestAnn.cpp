@@ -232,7 +232,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
 
-		result = Compare(dst1, dst2, error, true, 0, relative);
+		result = Compare(dst1, dst2, error, true, 32, relative);
 
 		return result;
 	}
@@ -271,6 +271,11 @@ namespace Test
 #ifdef SIMD_AVX_ENABLE
 		if (Simd::Avx::Enable)
 			result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Avx::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
+#endif
+
+#ifdef SIMD_VSX_ENABLE
+		if (Simd::Vsx::Enable)
+			result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Vsx::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
 #endif
 
 		return result;

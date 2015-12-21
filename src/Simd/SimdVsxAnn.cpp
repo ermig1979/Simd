@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
@@ -144,6 +145,49 @@ namespace Simd
             else
 				AnnProductSum<false>(a, b, size, sum);
         }
+
+		template <bool align, bool first> SIMD_INLINE void AnnRoughSigmoid(const float * src, const v128_f32 & slope, 
+			const v128_f32 & _0, const v128_f32 & _1, const v128_f32 & _0555, const v128_f32 & _0143, Storer<align> & dst)
+		{
+			v128_f32 _src = Load<align>(src);
+			v128_f32 x = vec_abs(vec_mul(_src, slope));
+			v128_f32 x2 = vec_mul(x, x);
+			v128_f32 x4 = vec_mul(x2, x2);
+			v128_f32 series = vec_add(vec_add(_1, x), vec_add(vec_mul(x2, _0555), vec_mul(x4, _0143)));
+			v128_f32 exp = vec_sel(series, vec_div(_1, series), vec_cmpgt(_src, _0));
+			v128_f32 sigmoid = vec_div(_1, vec_add(_1, exp));
+			Store<align, first>(dst, sigmoid);
+		}
+
+		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(dst));
+
+			size_t alignedSize = Simd::AlignLo(size, 4);
+			const v128_f32 _slope = SetF32(*slope);
+			const v128_f32 _0 = SetF32(0.0f);
+			const v128_f32 _1 = SetF32(1.0f);
+			const v128_f32 _0555 = SetF32(0.555f);
+			const v128_f32 _0143 = SetF32(0.143f);
+
+			Storer<align> _dst(dst);
+			AnnRoughSigmoid<align, true>(src, _slope, _0, _1, _0555, _0143, _dst);
+			for (size_t i = 4; i < alignedSize; i += 4)
+				AnnRoughSigmoid<align, false>(src + i, _slope, _0, _1, _0555, _0143, _dst);
+			Flush(_dst);
+
+			for (size_t i = alignedSize; i < size; ++i)
+				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+		}
+
+		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				AnnRoughSigmoid<true>(src, size, slope, dst);
+			else
+				AnnRoughSigmoid<false>(src, size, slope, dst);
+		}
     }
 #endif// SIMD_VSX_ENABLE
 }
