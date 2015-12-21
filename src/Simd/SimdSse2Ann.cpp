@@ -42,17 +42,17 @@ namespace Simd
 			return value;
 		}
 
-		template <bool align> void Convert(__m128i value, const __m128 &_1_255, float * dst)
+		template <bool align> void Convert(__m128i src, const __m128 &_1_255, float * dst)
 		{
-			Sse::Store<align>(dst + 0, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<0>(value)), _1_255));
-			Sse::Store<align>(dst + 4, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<1>(value)), _1_255));
+			Sse::Store<align>(dst + 0, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<0>(src)), _1_255));
+			Sse::Store<align>(dst + 4, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<1>(src)), _1_255));
 		}
 
 		template <bool inversion, bool align> void Convert(const uint8_t * src, const __m128 &_1_255, float * dst)
 		{
-			__m128i _value = Invert<inversion>(Load<align>((__m128i*)src));
-			Convert<align>(UnpackU8<0>(_value), _1_255, dst + 0);
-			Convert<align>(UnpackU8<1>(_value), _1_255, dst + 8);
+			__m128i _src = Invert<inversion>(Load<align>((__m128i*)src));
+			Convert<align>(UnpackU8<0>(_src), _1_255, dst + 0);
+			Convert<align>(UnpackU8<1>(_src), _1_255, dst + 8);
 		}
 
 		template <bool inversion, bool align> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)

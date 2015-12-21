@@ -30,6 +30,75 @@ namespace Simd
 #ifdef SIMD_VSX_ENABLE  
     namespace Vsx
     {
+		template <bool inversion> v128_u8 Invert(v128_u8 value);
+
+		template <> v128_u8 Invert<true>(v128_u8 value)
+		{
+			return vec_sub(K8_FF, value);
+		}
+
+		template <> v128_u8 Invert<false>(v128_u8 value)
+		{
+			return value;
+		}
+
+		const v128_u8 K8_PERM_0 = SIMD_VEC_SETR_EPI8(0x10, 0x10, 0x10, 0x00, 0x10, 0x10, 0x10, 0x01, 0x10, 0x10, 0x10, 0x02, 0x10, 0x10, 0x10, 0x03);
+		const v128_u8 K8_PERM_1 = SIMD_VEC_SETR_EPI8(0x10, 0x10, 0x10, 0x04, 0x10, 0x10, 0x10, 0x05, 0x10, 0x10, 0x10, 0x06, 0x10, 0x10, 0x10, 0x07);
+		const v128_u8 K8_PERM_2 = SIMD_VEC_SETR_EPI8(0x10, 0x10, 0x10, 0x08, 0x10, 0x10, 0x10, 0x09, 0x10, 0x10, 0x10, 0x0A, 0x10, 0x10, 0x10, 0x0B);
+		const v128_u8 K8_PERM_3 = SIMD_VEC_SETR_EPI8(0x10, 0x10, 0x10, 0x0C, 0x10, 0x10, 0x10, 0x0D, 0x10, 0x10, 0x10, 0x0E, 0x10, 0x10, 0x10, 0x0F);
+
+		template <bool inversion, bool align, bool first> void Convert(const uint8_t * src, const v128_f32 &_1_255, Storer<align> & dst)
+		{
+			v128_u8 _src = Invert<inversion>(Load<align>(src));
+			Store<align, first>(dst, vec_mul(vec_ctf((v128_u32)vec_perm(_src, K8_00, K8_PERM_0), 0), _1_255));
+			Store<align, false>(dst, vec_mul(vec_ctf((v128_u32)vec_perm(_src, K8_00, K8_PERM_1), 0), _1_255));
+			Store<align, false>(dst, vec_mul(vec_ctf((v128_u32)vec_perm(_src, K8_00, K8_PERM_2), 0), _1_255));
+			Store<align, false>(dst, vec_mul(vec_ctf((v128_u32)vec_perm(_src, K8_00, K8_PERM_3), 0), _1_255));
+		}
+
+		template <bool inversion, bool align> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(src) && Aligned(stride) && Aligned(dst));
+
+			size_t alignedWidth = AlignLo(width, A);
+			v128_f32 _1_255 = SIMD_VEC_SET1_PS(1.0f / 255.0f);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				Storer<align> _dst(dst);
+				Convert<inversion, align, true>(src, _1_255, _dst);
+				for (size_t col = A; col < alignedWidth; col += A)
+					Convert<inversion, align, false>(src + col, _1_255, _dst);
+				Flush(_dst);
+				if (width != alignedWidth)
+				{
+					Storer<false> _dst(dst + width - A);
+					Convert<inversion, false, true>(src + width - A, _1_255, _dst);
+					Flush(_dst);
+				}
+				src += stride;
+				dst += width;
+			}
+		}
+
+		template <bool inversion> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+		{
+			if (Aligned(src) && Aligned(stride) && Aligned(width) && Aligned(dst))
+				AnnConvert<inversion, true>(src, stride, width, height, dst);
+			else
+				AnnConvert<inversion, false>(src, stride, width, height, dst);
+		}
+
+		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+		{
+			if (inversion)
+				AnnConvert<true>(src, stride, width, height, dst);
+			else
+				AnnConvert<false>(src, stride, width, height, dst);
+		}
+
         template <bool align> SIMD_INLINE void AnnProductSum(const float * a, const float * b, size_t offset, v128_f32 & sum)
         {
             v128_f32 _a = Load<align>(a + offset);

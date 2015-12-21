@@ -290,6 +290,11 @@ namespace Simd
             Store<align, first>(storer, (v128_u8)value);
         }
 
+		template <bool align, bool first> void Store(Storer<align> & storer, v128_f32 value)
+		{
+			Store<align, first>(storer, (v128_u8)value);
+		}
+
         template <bool align> SIMD_INLINE void Flush(Storer<align> & s0)
         {
             s0.Flush();

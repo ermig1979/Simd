@@ -66,7 +66,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
 
-		result = Compare(dst1, dst2, eps, true);
+		result = Compare(dst1, dst2, eps, true, 32);
 
 		return result;
 	}
@@ -104,6 +104,14 @@ namespace Test
 			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Avx2::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
 		}
 #endif
+
+#ifdef SIMD_VSX_ENABLE
+		if (Simd::Vsx::Enable)
+		{
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+		}
+#endif 
 
 		return result;
 	}
