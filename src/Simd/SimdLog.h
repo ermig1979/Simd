@@ -117,6 +117,13 @@ namespace Simd
 			vst1q_u16(buffer, value);
 			Simd::Log(buffer, 8, name);
 		}
+
+		SIMD_INLINE void Log(const uint32x4_t & value, const std::string & name)
+		{
+			uint32_t buffer[4];
+			vst1q_u32(buffer, value);
+			Simd::Log(buffer, 4, name);
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }

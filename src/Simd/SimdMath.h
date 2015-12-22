@@ -611,6 +611,11 @@ namespace Simd
 			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
 		}
 
+		SIMD_INLINE uint8x16_t PackSaturatedU16(uint16x8_t lo, uint16x8_t hi)
+		{
+			return vcombine_u8(vmovn_u16(vminq_u16(lo, K16_00FF)), vmovn_u16(vminq_u16(hi, K16_00FF)));
+		}
+
 		SIMD_INLINE uint16x8_t PackU32(uint32x4_t lo, uint32x4_t hi)
 		{
 			return vcombine_u16(vmovn_u32(lo), vmovn_u32(hi));

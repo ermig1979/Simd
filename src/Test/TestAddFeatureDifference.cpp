@@ -115,6 +115,11 @@ namespace Test
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Vmx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Neon::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+#endif 
+
         return result;
     }
 
