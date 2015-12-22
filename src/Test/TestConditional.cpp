@@ -326,6 +326,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vmx::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+#endif
+
         return result;
     }
 
