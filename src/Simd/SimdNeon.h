@@ -76,6 +76,9 @@ namespace Simd
 		void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+		void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
+
 		void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
 		void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,

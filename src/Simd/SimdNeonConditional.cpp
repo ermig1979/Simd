@@ -331,6 +331,96 @@ namespace Simd
 				assert(0);
 			}
 		}
+
+		template <bool align>
+		SIMD_INLINE uint32x4_t SquaredDifference(const uint8_t * src, ptrdiff_t step, uint8x16_t mask)
+		{
+			const uint8x16_t a = vandq_u8(Load<align>(src - step), mask);
+			const uint8x16_t b = vandq_u8(Load<align>(src + step), mask);
+			return Square(AbsDifference(a, b));
+		}
+
+		template <bool align, SimdCompareType compareType>
+		void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+		{
+			assert(width >= A + 2 && height >= 3);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
+
+			src += srcStride;
+			mask += maskStride;
+			height -= 2;
+
+			size_t alignedWidth = Simd::AlignLo(width - 1, A);
+			uint8x16_t noseMask = ShiftRight(K8_FF, 1);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + 1 + alignedWidth);
+
+#ifdef __GNUC__
+			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
+#else
+			uint8x16_t _value = vld1q_dup_u8(&value);
+#endif
+			uint64x2_t _sum = { 0, 0 };
+			for (size_t row = 0; row < height; ++row)
+			{
+				uint32x4_t rowSum = K32_00000000;
+				{
+					const uint8x16_t _mask = vandq_u8(Compare8u<compareType>(Load<false>(mask + 1), _value), noseMask);
+					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + 1, 1, _mask));
+					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + 1, srcStride, _mask));
+				}
+				for (size_t col = A; col < alignedWidth; col += A)
+				{
+					const uint8x16_t _mask = Compare8u<compareType>(Load<false>(mask + col), _value);
+					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + col, 1, _mask));
+					rowSum = vaddq_u32(rowSum, SquaredDifference<align>(src + col, srcStride, _mask));
+				}
+				if (alignedWidth != width - 1)
+				{
+					size_t offset = width - A - 1;
+					const uint8x16_t _mask = vandq_u8(Compare8u<compareType>(Load<false>(mask + offset), _value), tailMask);
+					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + offset, 1, _mask));
+					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + offset, srcStride, _mask));
+				}
+				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				src += srcStride;
+				mask += maskStride;
+			}
+			*sum = ExtractSum(_sum);
+		}
+
+		template <SimdCompareType compareType>
+		void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+				ConditionalSquareGradientSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+			else
+				ConditionalSquareGradientSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+		}
+
+		void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalSquareGradientSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareNotEqual:
+				return ConditionalSquareGradientSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareGreater:
+				return ConditionalSquareGradientSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalSquareGradientSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareLesser:
+				return ConditionalSquareGradientSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareLesserOrEqual:
+				return ConditionalSquareGradientSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			default:
+				assert(0);
+			}
+		}
 	}
 #endif// SIMD_NEON_ENABLE
 }

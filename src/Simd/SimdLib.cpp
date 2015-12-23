@@ -1005,19 +1005,24 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
                                        const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A + 3)
+    if(Avx2::Enable && width >= Avx2::A + 2)
         Avx2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 3)
+    if(Sse2::Enable && width >= Sse2::A + 2)
         Sse2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A + 3)
+    if(Vmx::Enable && width >= Vmx::A + 2)
         Vmx::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
+#endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A + 2)
+		Neon::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+	else
 #endif
         Base::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }

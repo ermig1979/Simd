@@ -306,7 +306,7 @@ namespace Simd
         void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
         {
-            assert(width >= A + 3 && height >= 3);
+            assert(width >= A + 2 && height >= 3);
             if(align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
 

@@ -567,6 +567,19 @@ namespace Simd
 			return value;
 		}
 
+		SIMD_INLINE uint8x16_t ShiftRight(uint8x16_t value, size_t shift)
+		{
+			if (shift & 8)
+				value = vextq_u8(value, K8_00, 8);
+			if (shift & 4)
+				value = vextq_u8(value, K8_00, 4);
+			if (shift & 2)
+				value = vextq_u8(value, K8_00, 2);
+			if (shift & 1)
+				value = vextq_u8(value, K8_00, 1);
+			return value;
+		}
+
 		SIMD_INLINE void SortU8(uint8x16_t & a, uint8x16_t & b)
 		{
 			uint8x16_t t = a;
@@ -641,6 +654,11 @@ namespace Simd
 		SIMD_INLINE uint64x2_t HorizontalSum(const uint32x4_t & a)
 		{
 			return vaddl_u32(vget_low_u32(a), vget_high_u32(a));
+		}
+
+		SIMD_INLINE uint8x16_t AbsDifference(uint8x16_t a, uint8x16_t b)
+		{
+			return vsubq_u8(vmaxq_u8(a, b), vminq_u8(a, b));
 		}
 	}
 #endif//SIMD_NEON_ENABLE
