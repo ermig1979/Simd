@@ -451,6 +451,11 @@ namespace Test
 			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Vmx::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Neon::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif
+
 		return result;
 	}
 

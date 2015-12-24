@@ -421,6 +421,69 @@ namespace Simd
 				assert(0);
 			}
 		}
+
+		template <bool align, SimdCompareType compareType>
+		SIMD_INLINE void ConditionalFill(const uint8_t * src, size_t offset, const uint8x16_t & threshold, const uint8x16_t & value, uint8_t * dst)
+		{
+			const uint8x16_t _src = Load<align>(src + offset);
+			const uint8x16_t _dst = Load<align>(dst + offset);
+			Store<align>(dst + offset, vbslq_u8(Compare8u<compareType>(_src, threshold), value, _dst));
+		}
+
+		template <bool align, SimdCompareType compareType>
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+
+			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
+			uint8x16_t _threshold = SIMD_VEC_SET1_EPI8(threshold);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					ConditionalFill<align, compareType>(src, col, _threshold, _value, dst);
+				if (alignedWidth != width)
+					ConditionalFill<false, compareType>(src, width - A, _threshold, _value, dst);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		template <SimdCompareType compareType>
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ConditionalFill<true, compareType>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			else
+				ConditionalFill<false, compareType>(src, srcStride, width, height, threshold, value, dst, dstStride);
+		}
+
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalFill<SimdCompareEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareNotEqual:
+				return ConditionalFill<SimdCompareNotEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareGreater:
+				return ConditionalFill<SimdCompareGreater>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalFill<SimdCompareGreaterOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareLesser:
+				return ConditionalFill<SimdCompareLesser>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareLesserOrEqual:
+				return ConditionalFill<SimdCompareLesserOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			default:
+				assert(0);
+			}
+		}
 	}
 #endif// SIMD_NEON_ENABLE
 }
