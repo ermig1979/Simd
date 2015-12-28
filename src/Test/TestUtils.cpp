@@ -49,7 +49,8 @@ namespace Test
             ptrdiff_t offset = row*view.stride;
 			if (fast)
 			{
-				memcpy(view.data + offset, Rand(), width);
+				for (size_t col = 0; col < width; col += INT16_MAX)
+					memcpy(view.data + offset + col, Rand(), std::min<size_t>(INT16_MAX, width - col));
 			}
 			else
 			{
