@@ -34,6 +34,9 @@ namespace Simd
 		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
 			size_t width, size_t height, uint64_t * sum);
 
+		void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
+
 		void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
 			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
 			uint16_t weight, uint8_t * difference, size_t differenceStride);
