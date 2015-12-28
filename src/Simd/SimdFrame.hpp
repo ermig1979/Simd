@@ -65,8 +65,9 @@ namespace Simd
 		const size_t width; /*!< \brief A width of the frame. */
 		const size_t height; /*!< \brief A height of the frame. */
 		const Format format; /*!< \brief A pixel format types of the frame. */
-
 		View<A> planes[PLANE_COUNT_MAX];/*!< \brief Planes of the frame. */
+		bool flipped; /*!< \brief A flag of vertically flipped image (false - frame point (0, 0) is placed at top left corner of the frame, true - frame point (0, 0) is placed at bottom left corner of the frame. */
+		double timestamp; /*!< \brief A timestamp of the frame. */
 
 		/*!
 			Creates a new empty Frame structure.
@@ -88,25 +89,31 @@ namespace Simd
 			\note This constructor is not create new image frame! It only creates a reference to the same image. If you want to create a copy then must use method Simd::Frame::Clone.
 
 			\param [in] view - an original image view.
+			\param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
+			\param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
 		*/
-		Frame(const View<A> & view);
+		Frame(const View<A> & view, bool flipped_ = false, double timestamp_ = 0);
 
 		/*!
 			Creates a new Frame structure with specified width, height and pixel format.
 
-			\param [in] w - a width of created frame.
-			\param [in] h - a height of created frame.
-			\param [in] f - a pixel format of created frame.
+			\param [in] width_ - a width of created frame.
+			\param [in] height_ - a height of created frame.
+			\param [in] format_ - a pixel format of created frame.
+			\param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
+			\param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
 		*/
-		Frame(size_t w, size_t h, Format f);
+		Frame(size_t width_, size_t height_, Format format_, bool flipped_ = false, double timestamp_ = 0);
 
 		/*!
 			Creates a new Frame structure with specified width, height and pixel format.
 
 			\param [in] size - a size (width and height) of created frame.
-			\param [in] f - a pixel format of created frame.
+			\param [in] format_ - a pixel format of created frame.
+			\param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
+			\param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
 		*/
-		Frame(const Point<ptrdiff_t> & size, Format f);
+		Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_ = false, double timestamp_ = 0);
 
 		/*!
 			A Frame destructor.
@@ -140,19 +147,19 @@ namespace Simd
 		/*!
 			Re-creates a Frame structure with specified width, height and pixel format.
 
-			\param [in] w - a width of re-created frame.
-			\param [in] h - a height of re-created frame.
-			\param [in] f - a pixel format of re-created frame.
+			\param [in] width_ - a width of re-created frame.
+			\param [in] height_ - a height of re-created frame.
+			\param [in] format_ - a pixel format of re-created frame.
 		*/
-		void Recreate(size_t w, size_t h, Format f);
+		void Recreate(size_t width_, size_t height_, Format format_);
 
 		/*!
 			Re-creates a Frame structure with specified width, height and pixel format.
 
 			\param [in] size - a size (width and height) of re-created frame.
-			\param [in] f - a pixel format of re-created frame.
+			\param [in] format_ - a pixel format of re-created frame.
 		*/
-		void Recreate(const Point<ptrdiff_t> & size, Format f);
+		void Recreate(const Point<ptrdiff_t> & size, Format format_);
 
 		/*!
 			Creates a new Frame structure which points to the region of current frame bounded by the rectangle with specified coordinates.
@@ -314,6 +321,8 @@ namespace Simd
 		: width(0)
 		, height(0)
 		, format(None)
+		, flipped(false)
+		, timestamp(0)
 	{
 	}
 
@@ -321,15 +330,19 @@ namespace Simd
 		: width(frame.width)
 		, height(frame.height)
 		, format(frame.format)
+		, flipped(frame.flipped)
+		, timestamp(frame.timestamp)
 	{
 		for (size_t i = 0, n = PlaneCount(); i < n; ++i)
 			planes[i] = frame.planes[i];
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view)
+	template <class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view, bool flipped_, double timestamp_)
 		: width(view.width)
 		, height(view.height)
 		, format(None)
+		, flipped(flipped_)
+		, timestamp(timestamp_)
 	{
 		switch (view.format)
 		{
@@ -342,20 +355,24 @@ namespace Simd
 		planes[0] = view;
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(size_t w, size_t h, Format f)
+	template <class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
 		: width(0)
 		, height(0)
 		, format(None)
+		, flipped(flipped_)
+		, timestamp(timestamp_)
 	{
-		Recreate(w, h, f);
+		Recreate(width_, height_, format_);
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format f)
+	template <class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_, double timestamp_)
 		: width(0)
 		, height(0)
 		, format(None)
+		, flipped(flipped_)
+		, timestamp(timestamp_)
 	{
-		Recreate(size, f);
+		Recreate(size, format_);
 	}
 
 	template <class A> SIMD_INLINE Frame<A>::~Frame()
@@ -364,7 +381,7 @@ namespace Simd
 
 	template <class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
 	{
-		Frame<A> * clone = new Frame<A>(width, height, format);
+		Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp);
 		Copy(*this, *clone);
 		return clone;
 	}
@@ -376,6 +393,8 @@ namespace Simd
 			*(size_t*)&width = frame.width;
 			*(size_t*)&height = frame.height;
 			*(Format*)&format = frame.format;
+			flipped = frame.flipped;
+			timestamp = frame.timestamp;
 			for (size_t i = 0, n = PlaneCount(); i < n; ++i)
 				planes[i] = frame.planes[i];
 		}
@@ -387,43 +406,43 @@ namespace Simd
 		return *this;
 	}
 
-	template <class A> SIMD_INLINE void Frame<A>::Recreate(size_t w, size_t h, Format f)
+	template <class A> SIMD_INLINE void Frame<A>::Recreate(size_t width_, size_t height_, Format format_)
 	{
-		*(size_t*)&width = w;
-		*(size_t*)&height = h;
-		*(Format*)&format = f;
+		*(size_t*)&width = width_;
+		*(size_t*)&height = height_;
+		*(Format*)&format = format_;
 
 		for (size_t i = 0; i < PLANE_COUNT_MAX; ++i)
 			planes[i].Recreate(0, 0, View<A>::None);
 
-		switch (f)
+		switch (format)
 		{
 		case Nv12:
-			assert((w & 1) == 0 && (h & 1) == 0);
-			planes[0].Recreate(w, h, View<A>::Gray8);
-			planes[1].Recreate(w / 2, h / 2, View<A>::Uv16);
+			assert((width & 1) == 0 && (height & 1) == 0);
+			planes[0].Recreate(width, height, View<A>::Gray8);
+			planes[1].Recreate(width / 2, height / 2, View<A>::Uv16);
 			break;
 		case Yuv420p:
-			assert((w & 1) == 0 && (h & 1) == 0);
-			planes[0].Recreate(w, h, View<A>::Gray8);
-			planes[1].Recreate(w / 2, h / 2, View<A>::Gray8);
-			planes[2].Recreate(w / 2, h / 2, View<A>::Gray8);
+			assert((width & 1) == 0 && (height & 1) == 0);
+			planes[0].Recreate(width, height, View<A>::Gray8);
+			planes[1].Recreate(width / 2, height / 2, View<A>::Gray8);
+			planes[2].Recreate(width / 2, height / 2, View<A>::Gray8);
 			break;
 		case Bgra32:
-			planes[0].Recreate(w, h, View<A>::Bgra32);
+			planes[0].Recreate(width, height, View<A>::Bgra32);
 			break;
 		case Bgr24:
-			planes[0].Recreate(w, h, View<A>::Bgr24);
+			planes[0].Recreate(width, height, View<A>::Bgr24);
 			break;
 		case Gray8:
-			planes[0].Recreate(w, h, View<A>::Gray8);
+			planes[0].Recreate(width, height, View<A>::Gray8);
 			break;
 		}
 	}
 
-	template <class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format f)
+	template <class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format format_)
 	{
-		Recreate(size.x, size.y, f);
+		Recreate(size.x, size.y, format_);
 	}
 
 	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(const ptrdiff_t & left, const ptrdiff_t & top, const ptrdiff_t & right, const ptrdiff_t & bottom) const
@@ -453,6 +472,8 @@ namespace Simd
 			*(size_t*)&frame.width = right - left;
 			*(size_t*)&frame.height = bottom - top;
 			*(Format*)&frame.format = format;
+			frame.flipped = flipped;
+			frame.timestamp = timestamp;
 
 			frame.planes[0] = planes[0].Region(left, top, right, bottom);
 
@@ -494,6 +515,8 @@ namespace Simd
 		*(size_t*)&frame.width = width;
 		*(size_t*)&frame.height = height;
 		*(Format*)&frame.format = format;
+		frame.timestamp = timestamp;
+		frame.flipped = !flipped;
 		for (size_t i = 0, n = PlaneCount(); i < n; ++i)
 			frame.planes[i] = planes[i].Flipped();
 		return frame;
@@ -549,7 +572,7 @@ namespace Simd
 		typedef typename Frame<A>::Format Format;
 
 		return
-			(a.width == b.width && a.height == b.height && a.format == (Format)b.format);
+			(a.width == b.width && a.height == b.height && a.format == (Format)b.format && a.flipped == b.flipped);
 	}
 
 	template <class A, class B> SIMD_INLINE void Copy(const Frame<A> & src, Frame<B> & dst)
@@ -565,7 +588,7 @@ namespace Simd
 
 	template <class A> SIMD_INLINE void Convert(const Frame<A> & src, Frame<A> & dst)
 	{
-		assert(EqualSize(src, dst) && src.format && dst.format);
+		assert(EqualSize(src, dst) && src.format && dst.format && src.flipped == dst.flipped);
 
 		if (src.format == dst.format)
 		{
