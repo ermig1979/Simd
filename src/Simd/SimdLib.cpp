@@ -201,22 +201,22 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
                                        size_t width, size_t height, uint64_t * sums)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width > Avx2::A + 2)
+    if(Avx2::Enable && width >= Avx2::A + 2)
         Avx2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A + 2)
+    if(Sse2::Enable && width >= Sse2::A + 2)
         Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A + 2)
+    if(Vmx::Enable && width >= Vmx::A + 2)
         Vmx::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
-	if (Neon::Enable && width > Neon::A + 2)
+	if (Neon::Enable && width >= Neon::A + 2)
 		Neon::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
 	else
 #endif
@@ -227,19 +227,24 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
                                              const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
 {
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width > Avx2::A + 2)
+    if(Avx2::Enable && width >= Avx2::A + 2)
         Avx2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A + 2)
+    if(Sse2::Enable && width >= Sse2::A + 2)
         Sse2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width > Vmx::A + 2)
+    if(Vmx::Enable && width >= Vmx::A + 2)
         Vmx::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
+#endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A + 2)
+		Neon::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+	else
 #endif
         Base::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
 }

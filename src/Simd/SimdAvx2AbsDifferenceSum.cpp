@@ -149,7 +149,7 @@ namespace Simd
         template <bool align> void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, 
             const uint8_t * background, size_t backgroundStride, size_t width, size_t height, uint64_t * sums)
         {
-            assert(height > 2 && width > A + 2);
+            assert(height > 2 && width >= A + 2);
             if(align)
                 assert(Aligned(background) && Aligned(backgroundStride));
 
@@ -197,7 +197,7 @@ namespace Simd
         template <bool align> void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
         {
-            assert(height > 2 && width > A + 2);
+            assert(height > 2 && width >= A + 2);
             if(align)
                 assert(Aligned(background) && Aligned(backgroundStride));
 
