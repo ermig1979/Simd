@@ -189,7 +189,7 @@ namespace Simd
 #else
 			uint8x16_t _value = vld1q_dup_u8(&value);
 #endif
-			uint64x2_t _sum = {0, 0};
+			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
 				uint32x4_t rowSum = K32_00000000;
@@ -277,7 +277,7 @@ namespace Simd
 #else
 			uint8x16_t _value = vld1q_dup_u8(&value);
 #endif
-			uint64x2_t _sum = { 0, 0 };
+			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
 				uint32x4_t rowSum = K32_00000000;
@@ -361,7 +361,7 @@ namespace Simd
 #else
 			uint8x16_t _value = vld1q_dup_u8(&value);
 #endif
-			uint64x2_t _sum = { 0, 0 };
+			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
 				uint32x4_t rowSum = K32_00000000;
