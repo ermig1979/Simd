@@ -343,6 +343,11 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Vmx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#endif
+
 		return result;
 	}
 

@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />

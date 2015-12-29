@@ -267,6 +267,11 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Vmx::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
         Base::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
 }
 
