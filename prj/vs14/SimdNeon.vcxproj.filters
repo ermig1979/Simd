@@ -110,5 +110,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAlphaBlending.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -101,16 +101,16 @@ set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
-set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++03")
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
 
 file(GLOB_RECURSE SIMD_NEON_SOURCES ${TRUNK_DIR}/src/Simd/SimdNeon*.cpp)
 add_library(SimdNeon STATIC ${SIMD_NEON_SOURCES})
-set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++03")
+set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdNeon)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++03")
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 

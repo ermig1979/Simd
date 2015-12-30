@@ -608,6 +608,30 @@ namespace Simd
 			return vld2q_u8(p);
 		}
 
+		template <bool align> SIMD_INLINE uint8x16x3_t Load3(const uint8_t * p);
+
+		template <> SIMD_INLINE uint8x16x3_t Load3<false>(const uint8_t * p)
+		{
+			return vld3q_u8(p);
+		}
+
+		template <> SIMD_INLINE uint8x16x3_t Load3<true>(const uint8_t * p)
+		{
+			return vld3q_u8(p);
+		}
+
+		template <bool align> SIMD_INLINE uint8x16x4_t Load4(const uint8_t * p);
+
+		template <> SIMD_INLINE uint8x16x4_t Load4<false>(const uint8_t * p)
+		{
+			return vld4q_u8(p);
+		}
+
+		template <> SIMD_INLINE uint8x16x4_t Load4<true>(const uint8_t * p)
+		{
+			return vld4q_u8(p);
+		}
+
 		template <bool align> SIMD_INLINE uint8x8x4_t LoadHalf4(const uint8_t * p);
 
 		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<false>(const uint8_t * p)
