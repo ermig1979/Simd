@@ -115,6 +115,11 @@ namespace Test
             result = result && BinarizationAutoTest(FUNC1(Simd::Vmx::Binarization), FUNC1(SimdBinarization));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && BinarizationAutoTest(FUNC1(Simd::Neon::Binarization), FUNC1(SimdBinarization));
+#endif
+
         return result;
 	}
 

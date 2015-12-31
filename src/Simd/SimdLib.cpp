@@ -902,6 +902,11 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
         Vmx::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+	else
+#endif
         Base::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
 }
 
