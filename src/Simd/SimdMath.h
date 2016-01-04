@@ -554,6 +554,11 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
 	namespace Neon
 	{
+		SIMD_INLINE uint16x8_t SaturateI16ToU8(int16x8_t value)
+		{
+			return (uint16x8_t)vminq_s16((int16x8_t)K16_00FF, vmaxq_s16(value, (int16x8_t)K16_0000));
+		}
+
 		SIMD_INLINE uint8x16_t ShiftLeft(uint8x16_t value, size_t shift)
 		{
 			if (shift & 8)
@@ -644,6 +649,11 @@ namespace Simd
 		SIMD_INLINE uint16x8_t PackU32(uint32x4_t lo, uint32x4_t hi)
 		{
 			return vcombine_u16(vmovn_u32(lo), vmovn_u32(hi));
+		}
+
+		SIMD_INLINE int16x8_t PackI32(int32x4_t lo, int32x4_t hi)
+		{
+			return vcombine_s16(vmovn_s32(lo), vmovn_s32(hi));
 		}
 
 		SIMD_INLINE uint8x8x2_t Deinterleave(uint8x16_t value)

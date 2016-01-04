@@ -963,5 +963,70 @@ namespace Simd
         }
     }
 #endif// SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+	namespace Neon
+	{
+		SIMD_INLINE int32x4_t BgrToY(int32x4_t blue, int32x4_t green, int32x4_t red)
+		{
+			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_Y_WEIGHT), vmulq_s32(green, K32_GREEN_TO_Y_WEIGHT)),
+				vaddq_s32(vmulq_s32(red, K32_RED_TO_Y_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE uint16x8_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		{
+			return SaturateI16ToU8(vaddq_s16(K16_Y_ADJUST, PackI32(
+				BgrToY((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
+				BgrToY((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+		}
+
+		SIMD_INLINE uint8x16_t BgrToY(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+		{
+			return PackU16(
+				BgrToY(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+				BgrToY(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
+		}
+
+		SIMD_INLINE int32x4_t BgrToU(int32x4_t blue, int32x4_t green, int32x4_t red)
+		{
+			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_U_WEIGHT), vmulq_s32(green, K32_GREEN_TO_U_WEIGHT)),
+				vaddq_s32(vmulq_s32(red, K32_RED_TO_U_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE uint16x8_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		{
+			return SaturateI16ToU8(vaddq_s16(K16_UV_ADJUST, PackI32(
+				BgrToU((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
+				BgrToU((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+		}
+
+		SIMD_INLINE uint8x16_t BgrToU(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+		{
+			return PackU16(
+				BgrToU(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+				BgrToU(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
+		}
+
+		SIMD_INLINE int32x4_t BgrToV(int32x4_t blue, int32x4_t green, int32x4_t red)
+		{
+			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_V_WEIGHT), vmulq_s32(green, K32_GREEN_TO_V_WEIGHT)),
+				vaddq_s32(vmulq_s32(red, K32_RED_TO_V_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE uint16x8_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		{
+			return SaturateI16ToU8(vaddq_s16(K16_UV_ADJUST, PackI32(
+				BgrToV((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
+				BgrToV((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+		}
+
+		SIMD_INLINE uint8x16_t BgrToV(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
+		{
+			return PackU16(
+				BgrToV(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
+				BgrToV(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
+		}
+	}
+#endif// SIMD_NEON_ENABLE
 }
 #endif//__SimdConversion_h__
