@@ -619,6 +619,18 @@ namespace Simd
 			return vmovl_u8(vget_high_u8(a));
 		}
 
+		template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a);
+
+		template <> SIMD_INLINE uint32x4_t UnpackU16<0>(uint16x8_t a)
+		{
+			return vmovl_u16(vget_low_u16(a));
+		}
+
+		template <> SIMD_INLINE uint32x4_t UnpackU16<1>(uint16x8_t a)
+		{
+			return vmovl_u16(vget_high_u16(a));
+		}
+
 		SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
 		{
 			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));

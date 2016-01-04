@@ -320,45 +320,62 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
 	namespace Neon
 	{
-		template <bool align> SIMD_INLINE void Store(uint8_t  * p, uint8x16_t a);
+		template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x16_t a);
 
-		template <> SIMD_INLINE void Store<false>(uint8_t  * p, uint8x16_t a)
+		template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x16_t a)
 		{
 			vst1q_u8(p, a);
 		}
 
-		template <> SIMD_INLINE void Store<true>(uint8_t  * p, uint8x16_t a)
+		template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x16_t a)
 		{
 			vst1q_u8(p, a);
 		}
 
-		template <bool align> SIMD_INLINE void Store(uint8_t  * p, uint8x8_t a);
+		template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x8_t a);
 
-		template <> SIMD_INLINE void Store<false>(uint8_t  * p, uint8x8_t a)
+		template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x8_t a)
 		{
 			vst1_u8(p, a);
 		}
 
-		template <> SIMD_INLINE void Store<true>(uint8_t  * p, uint8x8_t a)
+		template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x8_t a)
 		{
 			vst1_u8(p, a);
 		}
 
-		template <bool align> SIMD_INLINE void Store(uint16_t  * p, uint16x8_t a)
+		template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x8_t a)
 		{
 			Store<align>((uint8_t*)p, (uint8x16_t)a);
 		}
 
-		template <bool align> SIMD_INLINE void Store2(uint8_t  * p, uint8x16x2_t a);
+		template <bool align> SIMD_INLINE void Store(uint32_t * p, uint32x4_t a)
+		{
+			Store<align>((uint8_t*)p, (uint8x16_t)a);
+		}
 
-		template <> SIMD_INLINE void Store2<false>(uint8_t  * p, uint8x16x2_t a)
+		template <bool align> SIMD_INLINE void Store2(uint8_t * p, uint8x16x2_t a);
+
+		template <> SIMD_INLINE void Store2<false>(uint8_t * p, uint8x16x2_t a)
 		{
 			vst2q_u8(p, a);
 		}
 
-		template <> SIMD_INLINE void Store2<true>(uint8_t  * p, uint8x16x2_t a)
+		template <> SIMD_INLINE void Store2<true>(uint8_t * p, uint8x16x2_t a)
 		{
 			vst2q_u8(p, a);
+		}
+
+		template <bool align> SIMD_INLINE void Store2(int16_t * p, int16x8x2_t a);
+
+		template <> SIMD_INLINE void Store2<false>(int16_t * p, int16x8x2_t a)
+		{
+			vst2q_s16(p, a);
+		}
+
+		template <> SIMD_INLINE void Store2<true>(int16_t * p, int16x8x2_t a)
+		{
+			vst2q_s16(p, a);
 		}
 	}
 #endif//SIMD_NEON_ENABLE
