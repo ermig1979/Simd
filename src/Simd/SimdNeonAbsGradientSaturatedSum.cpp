@@ -31,8 +31,8 @@ namespace Simd
 	{
 		template<bool align> SIMD_INLINE uint8x16_t AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
 		{
-			const uint8x16_t dx = AbsDifference(Load<false>(src + 1), Load<false>(src - 1));
-			const uint8x16_t dy = AbsDifference(Load<align>(src + stride), Load<align>(src - stride));
+			const uint8x16_t dx = vabdq_u8(Load<false>(src + 1), Load<false>(src - 1));
+			const uint8x16_t dy = vabdq_u8(Load<align>(src + stride), Load<align>(src - stride));
 			return vqaddq_u8(dx, dy);
 		}
 

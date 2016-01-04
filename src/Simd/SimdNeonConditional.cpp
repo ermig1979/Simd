@@ -60,14 +60,14 @@ namespace Simd
 						const uint8x16_t mask = Compare8u<compareType>(Load<align>(src + col), _value);
 						blockSum = vaddq_u8(blockSum, vandq_u8(mask, K8_01));
 					}
-					rowSum = vaddq_u16(rowSum, HorizontalSum(blockSum));
+					rowSum = vaddq_u16(rowSum, vpaddlq_u8(blockSum));
 				}
                 if(alignedWidth != width)
                 {
                     const uint8x16_t mask = vandq_u8(Compare8u<compareType>(Load<false>(src + width - A), _value), tailMask);
-					rowSum = vaddq_u16(rowSum, HorizontalSum(vandq_u8(mask, K8_01)));
+					rowSum = vaddq_u16(rowSum, vpaddlq_u8(vandq_u8(mask, K8_01)));
                 }
-				_count = vaddq_u32(_count, HorizontalSum(rowSum));
+				_count = vaddq_u32(_count, vpaddlq_u16(rowSum));
                 src += stride;
             }
             *count = ExtractSum(_count);
@@ -134,7 +134,7 @@ namespace Simd
 					const uint16x8_t mask = vandq_u16(Compare16i<compareType>(Load<false>(s + width - HA), _value), tailMask);
 					rowSum = vaddq_u16(rowSum, vandq_u16(mask, K16_0001));
 				}
-				_count = vaddq_u32(_count, HorizontalSum(rowSum));
+				_count = vaddq_u32(_count, vpaddlq_u16(rowSum));
 				src += stride;
 			}
 			*count = ExtractSum(_count);
@@ -200,17 +200,17 @@ namespace Simd
 					{
 						const uint8x16_t _src = Load<align>(src + col);
 						const uint8x16_t _mask = Compare8u<compareType>(Load<align>(mask + col), _value);
-						blockSum = vaddq_u16(blockSum, HorizontalSum(vandq_u8(_mask, _src)));
+						blockSum = vaddq_u16(blockSum, vpaddlq_u8(vandq_u8(_mask, _src)));
 					}
-					rowSum = vaddq_u32(rowSum, HorizontalSum(blockSum));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(blockSum));
 				}
 				if (alignedWidth != width)
 				{
 					const uint8x16_t _src = Load<false>(src + width - A);
 					const uint8x16_t _mask = vandq_u8(Compare8u<compareType>(Load<false>(mask + width - A), _value), tailMask);
-					rowSum = vaddq_u32(rowSum, HorizontalSum(HorizontalSum(vandq_u8(_mask, _src))));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(vandq_u8(_mask, _src))));
 				}
-				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				_sum = vaddq_u64(_sum, vpaddlq_u32(rowSum));
 				src += srcStride;
 				mask += maskStride;
 			}
@@ -258,7 +258,7 @@ namespace Simd
 		{
 			uint16x8_t lo = Square(vget_low_u8(value));
 			uint16x8_t hi = Square(vget_high_u8(value));
-			return vaddq_u32(HorizontalSum(lo), HorizontalSum(hi));
+			return vaddq_u32(vpaddlq_u16(lo), vpaddlq_u16(hi));
 		}
 
 		template <bool align, SimdCompareType compareType>
@@ -293,7 +293,7 @@ namespace Simd
 					const uint8x16_t _src = vandq_u8(_mask, Load<false>(src + width - A));
 					rowSum = vaddq_u32(rowSum, Square(_src));
 				}
-				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				_sum = vaddq_u64(_sum, vpaddlq_u32(rowSum));
 				src += srcStride;
 				mask += maskStride;
 			}
@@ -337,7 +337,7 @@ namespace Simd
 		{
 			const uint8x16_t a = vandq_u8(Load<align>(src - step), mask);
 			const uint8x16_t b = vandq_u8(Load<align>(src + step), mask);
-			return Square(AbsDifference(a, b));
+			return Square(vabdq_u8(a, b));
 		}
 
 		template <bool align, SimdCompareType compareType>
@@ -383,7 +383,7 @@ namespace Simd
 					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + offset, 1, _mask));
 					rowSum = vaddq_u32(rowSum, SquaredDifference<false>(src + offset, srcStride, _mask));
 				}
-				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				_sum = vaddq_u64(_sum, vpaddlq_u32(rowSum));
 				src += srcStride;
 				mask += maskStride;
 			}

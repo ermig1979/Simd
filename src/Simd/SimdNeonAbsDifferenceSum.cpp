@@ -50,17 +50,17 @@ namespace Simd
 					uint16x8_t blockSum = K16_0000;
 					for (size_t col = block*blockSize, end = Min(col + blockSize, alignedWidth); col < end; col += A)
 					{
-						const uint8x16_t ad = AbsDifference(Load<align>(a + col), Load<align>(b + col));
-						blockSum = vaddq_u16(blockSum, HorizontalSum(ad));
+						const uint8x16_t ad = vabdq_u8(Load<align>(a + col), Load<align>(b + col));
+						blockSum = vaddq_u16(blockSum, vpaddlq_u8(ad));
 					}
-					rowSum = vaddq_u32(rowSum, HorizontalSum(blockSum));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(blockSum));
 				}
 				if (alignedWidth != width)
 				{
-					const uint8x16_t ad = AbsDifference(Load<false>(a + width - A), Load<false>(b + width - A));
-					rowSum = vaddq_u32(rowSum, HorizontalSum(HorizontalSum(vandq_u8(tailMask, ad))));
+					const uint8x16_t ad = vabdq_u8(Load<false>(a + width - A), Load<false>(b + width - A));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(vandq_u8(tailMask, ad))));
 				}
-				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				_sum = vaddq_u64(_sum, vpaddlq_u32(rowSum));
 				a += aStride;
 				b += bStride;
 			}
@@ -104,20 +104,20 @@ namespace Simd
 					uint16x8_t blockSum = K16_0000;
 					for (size_t col = block*blockSize, end = Min(col + blockSize, alignedWidth); col < end; col += A)
 					{
-						const uint8x16_t ad = AbsDifference(Load<align>(a + col), Load<align>(b + col));
+						const uint8x16_t ad = vabdq_u8(Load<align>(a + col), Load<align>(b + col));
 						const uint8x16_t _mask = vceqq_u8(Load<align>(mask + col), _index);
-						blockSum = vaddq_u16(blockSum, HorizontalSum(vandq_u8(_mask, ad)));
+						blockSum = vaddq_u16(blockSum, vpaddlq_u8(vandq_u8(_mask, ad)));
 					}
-					rowSum = vaddq_u32(rowSum, HorizontalSum(blockSum));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(blockSum));
 				}
 				if (alignedWidth != width)
 				{
 					size_t col = width - A;
-					const uint8x16_t ad = AbsDifference(Load<false>(a + col), Load<false>(b + col));
+					const uint8x16_t ad = vabdq_u8(Load<false>(a + col), Load<false>(b + col));
 					const uint8x16_t _mask = vandq_u8(vceqq_u8(Load<false>(mask + col), _index), tailMask);
-					rowSum = vaddq_u32(rowSum, HorizontalSum(HorizontalSum(vandq_u8(_mask, ad))));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(vandq_u8(_mask, ad))));
 				}
-				_sum = vaddq_u64(_sum, HorizontalSum(rowSum));
+				_sum = vaddq_u64(_sum, vpaddlq_u32(rowSum));
 				a += aStride;
 				b += bStride;
 				mask += maskStride;
@@ -136,9 +136,9 @@ namespace Simd
 
 		template <bool align> void AbsDifferenceSums3(uint8x16_t current, const uint8_t * background, uint16x8_t sums[3])
 		{
-			sums[0] = vaddq_u16(sums[0], HorizontalSum(AbsDifference(current, Load<align>(background - 1))));
-			sums[1] = vaddq_u16(sums[1], HorizontalSum(AbsDifference(current, Load<false>(background))));
-			sums[2] = vaddq_u16(sums[2], HorizontalSum(AbsDifference(current, Load<false>(background + 1))));
+			sums[0] = vaddq_u16(sums[0], vpaddlq_u8(vabdq_u8(current, Load<align>(background - 1))));
+			sums[1] = vaddq_u16(sums[1], vpaddlq_u8(vabdq_u8(current, Load<false>(background))));
+			sums[2] = vaddq_u16(sums[2], vpaddlq_u8(vabdq_u8(current, Load<false>(background + 1))));
 		}
 
 		template <bool align> void AbsDifferenceSums3x3(uint8x16_t current, const uint8_t * background, size_t stride, uint16x8_t sums[9])
@@ -150,9 +150,9 @@ namespace Simd
 
 		template <bool align> void AbsDifferenceSums3Masked(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint32x4_t sums[3])
 		{
-			sums[0] = vaddq_u32(sums[0], HorizontalSum(HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<align>(background - 1))))));
-			sums[1] = vaddq_u32(sums[1], HorizontalSum(HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<false>(background))))));
-			sums[2] = vaddq_u32(sums[2], HorizontalSum(HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<false>(background + 1))))));
+			sums[0] = vaddq_u32(sums[0], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<align>(background - 1))))));
+			sums[1] = vaddq_u32(sums[1], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background))))));
+			sums[2] = vaddq_u32(sums[2], vpaddlq_u16(vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background + 1))))));
 		}
 
 		template <bool align> void AbsDifferenceSums3x3Masked(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint32x4_t sums[9])
@@ -202,7 +202,7 @@ namespace Simd
 					}
 
 					for (size_t i = 0; i < 9; ++i)
-						rowSums[i] = vaddq_u32(rowSums[i], HorizontalSum(blockSums[i]));
+						rowSums[i] = vaddq_u32(rowSums[i], vpaddlq_u16(blockSums[i]));
 				}
 
 				if (alignedWidth != width)
@@ -212,7 +212,7 @@ namespace Simd
 				}
 
 				for (size_t i = 0; i < 9; ++i)
-					_sums[i] = vaddq_u64(_sums[i], HorizontalSum(rowSums[i]));
+					_sums[i] = vaddq_u64(_sums[i], vpaddlq_u32(rowSums[i]));
 
 				current += currentStride;
 				background += backgroundStride;
@@ -233,9 +233,9 @@ namespace Simd
 
 		template <bool align> void AbsDifferenceSums3Masked(uint8x16_t current, const uint8_t * background, uint8x16_t mask, uint16x8_t sums[3])
 		{
-			sums[0] = vaddq_u16(sums[0], HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<align>(background - 1)))));
-			sums[1] = vaddq_u16(sums[1], HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<false>(background)))));
-			sums[2] = vaddq_u16(sums[2], HorizontalSum(AbsDifference(current, vandq_u8(mask, Load<false>(background + 1)))));
+			sums[0] = vaddq_u16(sums[0], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<align>(background - 1)))));
+			sums[1] = vaddq_u16(sums[1], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background)))));
+			sums[2] = vaddq_u16(sums[2], vpaddlq_u8(vabdq_u8(current, vandq_u8(mask, Load<false>(background + 1)))));
 		}
 
 		template <bool align> void AbsDifferenceSums3x3Masked(uint8x16_t current, const uint8_t * background, size_t stride, uint8x16_t mask, uint16x8_t sums[9])
@@ -293,7 +293,7 @@ namespace Simd
 					}
 
 					for (size_t i = 0; i < 9; ++i)
-						rowSums[i] = vaddq_u32(rowSums[i], HorizontalSum(blockSums[i]));
+						rowSums[i] = vaddq_u32(rowSums[i], vpaddlq_u16(blockSums[i]));
 				}
 
 				if (alignedWidth != width)
@@ -305,7 +305,7 @@ namespace Simd
 				}
 
 				for (size_t i = 0; i < 9; ++i)
-					_sums[i] = vaddq_u64(_sums[i], HorizontalSum(rowSums[i]));
+					_sums[i] = vaddq_u64(_sums[i], vpaddlq_u32(rowSums[i]));
 
 				current += currentStride;
 				background += backgroundStride;
