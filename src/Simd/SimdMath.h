@@ -554,11 +554,6 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
 	namespace Neon
 	{
-		SIMD_INLINE uint16x8_t SaturateI16ToU8(int16x8_t value)
-		{
-			return (uint16x8_t)vminq_s16((int16x8_t)K16_00FF, vmaxq_s16(value, (int16x8_t)K16_0000));
-		}
-
 		SIMD_INLINE uint8x16_t ShiftLeft(uint8x16_t value, size_t shift)
 		{
 			if (shift & 8)
@@ -612,28 +607,38 @@ namespace Simd
 			return vshrq_n_u16(vaddq_u16(value, K16_0008), 4);
 		}
 
-		template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a);
+		template <int part> SIMD_INLINE uint8x8_t Half(uint8x16_t a);
 
-		template <> SIMD_INLINE uint16x8_t UnpackU8<0>(uint8x16_t a)
+		template <> SIMD_INLINE uint8x8_t Half<0>(uint8x16_t a)
 		{
-			return vmovl_u8(vget_low_u8(a));
+			return vget_low_u8(a);
 		}
 
-		template <> SIMD_INLINE uint16x8_t UnpackU8<1>(uint8x16_t a)
+		template <> SIMD_INLINE uint8x8_t Half<1>(uint8x16_t a)
 		{
-			return vmovl_u8(vget_high_u8(a));
+			return vget_high_u8(a);
 		}
 
-		template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a);
+		template <int part> SIMD_INLINE uint16x4_t Half(uint16x8_t a);
 
-		template <> SIMD_INLINE uint32x4_t UnpackU16<0>(uint16x8_t a)
+		template <> SIMD_INLINE uint16x4_t Half<0>(uint16x8_t a)
 		{
-			return vmovl_u16(vget_low_u16(a));
+			return vget_low_u16(a);
 		}
 
-		template <> SIMD_INLINE uint32x4_t UnpackU16<1>(uint16x8_t a)
+		template <> SIMD_INLINE uint16x4_t Half<1>(uint16x8_t a)
 		{
-			return vmovl_u16(vget_high_u16(a));
+			return vget_high_u16(a);
+		}
+
+		template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a)
+		{
+			return vmovl_u8(Half<part>(a));
+		}
+
+		template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a)
+		{
+			return vmovl_u16(Half<part>(a));
 		}
 
 		SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
@@ -641,9 +646,14 @@ namespace Simd
 			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
 		}
 
+		SIMD_INLINE uint8x16_t PackSaturatedI16(int16x8_t lo, int16x8_t hi)
+		{
+			return vcombine_u8(vqmovun_s16(lo), vqmovun_s16(hi));
+		}
+
 		SIMD_INLINE uint8x16_t PackSaturatedU16(uint16x8_t lo, uint16x8_t hi)
 		{
-			return vcombine_u8(vmovn_u16(vminq_u16(lo, K16_00FF)), vmovn_u16(vminq_u16(hi, K16_00FF)));
+			return vcombine_u8(vqmovn_u16(lo), vqmovn_u16(hi));
 		}
 
 		SIMD_INLINE uint16x8_t PackU32(uint32x4_t lo, uint32x4_t hi)

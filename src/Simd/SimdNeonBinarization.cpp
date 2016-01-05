@@ -41,15 +41,9 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
 
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-			uint8x16_t _positive = SIMD_VEC_SET1_EPI8(positive);
-			uint8x16_t _negative = SIMD_VEC_SET1_EPI8(negative);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-			uint8x16_t _positive = vld1q_dup_u8(&positive);
-			uint8x16_t _negative = vld1q_dup_u8(&negative);
-#endif
+			uint8x16_t _value = vdupq_n_u8(value);
+			uint8x16_t _positive = vdupq_n_u8(positive);
+			uint8x16_t _negative = vdupq_n_u8(negative);
 
             for(size_t row = 0; row < height; ++row)
             {
@@ -178,16 +172,10 @@ namespace Simd
 			const size_t alignedWidth = AlignLo(width, A);
 
 			const uint8x16_t  tailMask = ShiftLeft(K8_01, A - width + alignedWidth);
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-			uint8x16_t _positive = SIMD_VEC_SET1_EPI8(positive);
-			uint8x16_t _negative = SIMD_VEC_SET1_EPI8(negative);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-			uint8x16_t _positive = vld1q_dup_u8(&positive);
-			uint8x16_t _negative = vld1q_dup_u8(&negative);
-#endif
-			uint32x4_t _threshold = SIMD_VEC_SET1_EPI32(threshold);
+			uint8x16_t _value = vdupq_n_u8(value);
+			uint8x16_t _positive = vdupq_n_u8(positive);
+			uint8x16_t _negative = vdupq_n_u8(negative);
+			uint32x4_t _threshold = vdupq_n_u32(threshold);
 
 			Buffer buffer(AlignHi(width, A), AlignHi(neighborhood + 1, A));
 

@@ -967,62 +967,56 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
 	namespace Neon
 	{
-		SIMD_INLINE int32x4_t BgrToY(int32x4_t blue, int32x4_t green, int32x4_t red)
+		template <int part> SIMD_INLINE int32x4_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_Y_WEIGHT), vmulq_s32(green, K32_GREEN_TO_Y_WEIGHT)),
-				vaddq_s32(vmulq_s32(red, K32_RED_TO_Y_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_Y_WEIGHT),
+				(int16x4_t)Half<part>(green), K16_GREEN_TO_Y_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_Y_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
 		}
 
-		SIMD_INLINE uint16x8_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		SIMD_INLINE int16x8_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return SaturateI16ToU8(vaddq_s16(K16_Y_ADJUST, PackI32(
-				BgrToY((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
-				BgrToY((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+			return vaddq_s16(K16_Y_ADJUST, PackI32(BgrToY<0>(blue, green, red), BgrToY<1>(blue, green, red)));
 		}
 
 		SIMD_INLINE uint8x16_t BgrToY(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
 		{
-			return PackU16(
+			return PackSaturatedI16(
 				BgrToY(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
 				BgrToY(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
 		}
 
-		SIMD_INLINE int32x4_t BgrToU(int32x4_t blue, int32x4_t green, int32x4_t red)
+		template <int part> SIMD_INLINE int32x4_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_U_WEIGHT), vmulq_s32(green, K32_GREEN_TO_U_WEIGHT)),
-				vaddq_s32(vmulq_s32(red, K32_RED_TO_U_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_U_WEIGHT),
+				(int16x4_t)Half<part>(green), K16_GREEN_TO_U_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_U_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
 		}
 
-		SIMD_INLINE uint16x8_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		SIMD_INLINE int16x8_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return SaturateI16ToU8(vaddq_s16(K16_UV_ADJUST, PackI32(
-				BgrToU((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
-				BgrToU((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+			return vaddq_s16(K16_UV_ADJUST, PackI32(BgrToU<0>(blue, green, red), BgrToU<1>(blue, green, red)));
 		}
 
 		SIMD_INLINE uint8x16_t BgrToU(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
 		{
-			return PackU16(
+			return PackSaturatedI16(
 				BgrToU(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
 				BgrToU(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
 		}
 
-		SIMD_INLINE int32x4_t BgrToV(int32x4_t blue, int32x4_t green, int32x4_t red)
+		template <int part> SIMD_INLINE int32x4_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return vshrq_n_s32(vaddq_s32(vaddq_s32(vmulq_s32(blue, K32_BLUE_TO_V_WEIGHT), vmulq_s32(green, K32_GREEN_TO_V_WEIGHT)),
-				vaddq_s32(vmulq_s32(red, K32_RED_TO_V_WEIGHT), K32_BGR_TO_YUV_ROUND_TERM)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_V_WEIGHT),
+				(int16x4_t)Half<part>(green), K16_GREEN_TO_V_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_V_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
 		}
 
-		SIMD_INLINE uint16x8_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
+		SIMD_INLINE int16x8_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
-			return SaturateI16ToU8(vaddq_s16(K16_UV_ADJUST, PackI32(
-				BgrToV((int32x4_t)UnpackU16<0>(blue), (int32x4_t)UnpackU16<0>(green), (int32x4_t)UnpackU16<0>(red)),
-				BgrToV((int32x4_t)UnpackU16<1>(blue), (int32x4_t)UnpackU16<1>(green), (int32x4_t)UnpackU16<1>(red)))));
+			return vaddq_s16(K16_UV_ADJUST, PackI32(BgrToV<0>(blue, green, red), BgrToV<1>(blue, green, red)));
 		}
 
 		SIMD_INLINE uint8x16_t BgrToV(uint8x16_t blue, uint8x16_t green, uint8x16_t red)
 		{
-			return PackU16(
+			return PackSaturatedI16(
 				BgrToV(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
 				BgrToV(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
 		}

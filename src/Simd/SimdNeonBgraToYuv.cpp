@@ -34,7 +34,7 @@ namespace Simd
     {
 		SIMD_INLINE uint16x8_t Average(uint8x16_t a, uint8x16_t b)
 		{
-			return vshrq_n_u16(vaddq_u16(vaddq_u16(vpaddlq_u8(a), vpaddlq_u8(b)), K16_0002), 2);
+			return vshrq_n_u16(vpadalq_u8(vpadalq_u8(K16_0002, a), b), 2);
 		}
 
         template <bool align> SIMD_INLINE void BgraToYuv420p(const uint8_t * bgra0, size_t bgraStride, uint8_t * y0, size_t yStride, uint8_t * u, uint8_t * v)
@@ -62,8 +62,8 @@ namespace Simd
 			uint16x8_t g1 = Average(bgra01.val[1], bgra11.val[1]);
 			uint16x8_t r1 = Average(bgra01.val[2], bgra11.val[2]);
 
-			Store<align>(u, PackU16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-			Store<align>(v, PackU16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+			Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
+			Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
         }
 
         template <bool align> void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
@@ -106,7 +106,7 @@ namespace Simd
 
 		SIMD_INLINE uint16x8_t Average(uint8x16_t value)
 		{
-			return vshrq_n_u16(vaddq_u16(vpaddlq_u8(value), K16_0001), 1);
+			return vshrq_n_u16(vpadalq_u8(K16_0001, value), 1);
 		}
 
 		template <bool align> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
@@ -125,8 +125,8 @@ namespace Simd
 			uint16x8_t g1 = Average(bgra1.val[1]);
 			uint16x8_t r1 = Average(bgra1.val[2]);
 
-			Store<align>(u, PackU16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
-			Store<align>(v, PackU16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+			Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
+			Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
 		}
 
 		template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
@@ -165,6 +165,51 @@ namespace Simd
 				BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
 			else
 				BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+		}
+
+		template <bool align> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v)
+		{
+			uint8x16x4_t _bgra = Load4<align>(bgra);
+			Store<align>(y, BgrToY(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+			Store<align>(u, BgrToU(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+			Store<align>(v, BgrToV(_bgra.val[0], _bgra.val[1], _bgra.val[2]));
+		}
+
+		template <bool align> void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0, colBgra = 0; col < alignedWidth; col += A, colBgra += QA)
+					BgraToYuv444p<align>(bgra + colBgra, y + col, u + col, v + col);
+				if (width != alignedWidth)
+				{
+					size_t offset = width - A;
+					BgraToYuv444p<false>(bgra + offset * 4, y + offset, u + offset, v + offset);
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgra += bgraStride;
+			}
+		}
+
+		void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+			else
+				BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
 		}
     }
 #endif// SIMD_NEON_ENABLE

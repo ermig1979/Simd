@@ -43,11 +43,8 @@ namespace Simd
 			size_t blockSize = A << 8;
 			size_t blockCount = (alignedWidth >> 8) + 1;
 
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-#endif
+			uint8x16_t _value = vdupq_n_u8(value);
+
 			uint32x4_t _count = K32_00000000;
             for(size_t row = 0; row < height; ++row)
             {
@@ -114,11 +111,8 @@ namespace Simd
 			size_t alignedWidth = Simd::AlignLo(width, HA);
 			uint16x8_t tailMask = (uint16x8_t)ShiftLeft(K8_FF, 2 * (HA - width + alignedWidth));
 
-#ifdef __GNUC__
-			int16x8_t _value = SIMD_VEC_SET1_EPI16(value);
-#else
-			int16x8_t _value = vld1q_dup_s16(&value);
-#endif
+			int16x8_t _value = vdupq_n_s16(value);
+
 			uint32x4_t _count = K32_00000000;
 			for (size_t row = 0; row < height; ++row)
 			{
@@ -184,11 +178,8 @@ namespace Simd
 			size_t blockSize = A << 8;
 			size_t blockCount = (alignedWidth >> 8) + 1;
 
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-#endif
+			uint8x16_t _value = vdupq_n_u8(value);
+
 			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
@@ -272,11 +263,8 @@ namespace Simd
 			size_t alignedWidth = Simd::AlignLo(width, A);
 			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
 
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-#endif
+			uint8x16_t _value = vdupq_n_u8(value);
+
 			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
@@ -356,11 +344,8 @@ namespace Simd
 			uint8x16_t noseMask = ShiftRight(K8_FF, 1);
 			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + 1 + alignedWidth);
 
-#ifdef __GNUC__
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-#else
-			uint8x16_t _value = vld1q_dup_u8(&value);
-#endif
+			uint8x16_t _value = vdupq_n_u8(value);
+
 			uint64x2_t _sum = K64_0000000000000000;
 			for (size_t row = 0; row < height; ++row)
 			{
@@ -440,8 +425,9 @@ namespace Simd
 
 			size_t alignedWidth = Simd::AlignLo(width, A);
 
-			uint8x16_t _value = SIMD_VEC_SET1_EPI8(value);
-			uint8x16_t _threshold = SIMD_VEC_SET1_EPI8(threshold);
+			uint8x16_t _value = vdupq_n_u8(value);
+			uint8x16_t _threshold = vdupq_n_u8(threshold);
+
 			for (size_t row = 0; row < height; ++row)
 			{
 				for (size_t col = 0; col < alignedWidth; col += A)

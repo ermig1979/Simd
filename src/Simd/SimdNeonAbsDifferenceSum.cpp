@@ -90,12 +90,9 @@ namespace Simd
 			size_t blockSize = A << 8;
 			size_t blockCount = (alignedWidth >> 8) + 1;
 
-#ifdef __GNUC__
-			uint8x16_t _index = SIMD_VEC_SET1_EPI8(index);
-#else
-			uint8x16_t _index = vld1q_dup_u8(&index);
-#endif
+			uint8x16_t _index = vdupq_n_u8(index);
 			uint64x2_t _sum = K64_0000000000000000;
+
 			for (size_t row = 0; row < height; ++row)
 			{
 				uint32x4_t rowSum = K32_00000000;
@@ -263,11 +260,7 @@ namespace Simd
 			size_t blockSize = A << 8;
 			size_t blockCount = (alignedWidth >> 8) + 1;
 
-#ifdef __GNUC__
-			uint8x16_t _index = SIMD_VEC_SET1_EPI8(index);
-#else
-			uint8x16_t _index = vld1q_dup_u8(&index);
-#endif
+			uint8x16_t _index = vdupq_n_u8(index);
 
 			uint64x2_t _sums[9];
 			for (size_t i = 0; i < 9; ++i)

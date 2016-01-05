@@ -79,11 +79,7 @@ namespace Simd
 
             size_t alignedWidth = AlignLo(width, A);
 			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-#ifdef __GNUC__
-			uint16x4_t _weight = SIMD_VEC_SET1_EPI32(weight);
-#else
-			uint16x4_t _weight = vld1_dup_s16(&weight);
-#endif
+			uint16x4_t _weight = vdup_n_u16(weight);
 
             for(size_t row = 0; row < height; ++row)
             {
