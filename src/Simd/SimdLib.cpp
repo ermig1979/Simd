@@ -826,6 +826,11 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
         Vmx::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+	else
+#endif
         Base::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
 }
 

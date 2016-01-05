@@ -29,42 +29,42 @@ namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
-    {
-		SIMD_INLINE uint8x8_t BgraToGray(uint8x8x4_t bgra)
-		{
-			return vmovn_u16(BgrToGray(vmovl_u8(bgra.val[0]), vmovl_u8(bgra.val[1]), vmovl_u8(bgra.val[2])));
-		}
+	{
+        SIMD_INLINE uint8x8_t BgrToGray(uint8x8x3_t bgr)
+        {
+			return vmovn_u16(BgrToGray(vmovl_u8(bgr.val[0]), vmovl_u8(bgr.val[1]), vmovl_u8(bgr.val[2])));
+        }
 
-        template <bool align> void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride)
+        template <bool align> void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
         {
             assert(width >= HA);
 			if(align)
-				assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
+				assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(gray) && Aligned(grayStride));
 
 			size_t alignedWidth = AlignLo(width, HA);
 			for(size_t row = 0; row < height; ++row)
 			{
 				for(size_t col = 0; col < alignedWidth; col += HA)
 				{
-					uint8x8x4_t _bgra = LoadHalf4<align>(bgra + 4*col);
-					Store<align>(gray + col, BgraToGray(_bgra));
+					uint8x8x3_t _bgr = LoadHalf3<align>(bgr + 3*col);
+					Store<align>(gray + col, BgrToGray(_bgr));
 				}
 				if(alignedWidth != width)
 				{
-					uint8x8x4_t _bgra = LoadHalf4<false>(bgra + 4*(width - HA));
-					Store<false>(gray + width - HA, BgraToGray(_bgra));
+					uint8x8x3_t _bgr = LoadHalf3<false>(bgr + 3*(width - HA));
+					Store<false>(gray + width - HA, BgrToGray(_bgr));
 				}
-				bgra += bgraStride;
+				bgr += bgrStride;
 				gray += grayStride;
 			}
         }
 
-		void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride)
+		void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
 		{
-			if(Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
-				BgraToGray<true>(bgra, width, height, bgraStride, gray, grayStride);
+			if(Aligned(bgr) && Aligned(gray) && Aligned(bgrStride) && Aligned(grayStride))
+				BgrToGray<true>(bgr, width, height, bgrStride, gray, grayStride);
 			else
-				BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
+				BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
 		}
     }
 #endif// SIMD_NEON_ENABLE

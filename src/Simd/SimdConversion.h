@@ -967,6 +967,17 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
 	namespace Neon
 	{
+		template <int part> SIMD_INLINE uint32x4_t BgrToGray(const uint16x8_t & blue, const uint16x8_t & green, const uint16x8_t & red)
+		{
+			return vshrq_n_u32(vmlal_u16(vmlal_u16(vmlal_u16(K32_BGR_TO_GRAY_ROUND_TERM, Half<part>(blue), K16_BLUE_TO_GRAY_WEIGHT),
+				Half<part>(green), K16_GREEN_TO_GRAY_WEIGHT), Half<part>(red), K16_RED_TO_GRAY_WEIGHT), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE uint16x8_t BgrToGray(const uint16x8_t & blue, const uint16x8_t & green, const uint16x8_t & red)
+		{
+			return PackU32(BgrToGray<0>(blue, green, red), BgrToGray<1>(blue, green, red));
+		}
+
 		template <int part> SIMD_INLINE int32x4_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
 		{
 			return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_Y_WEIGHT),
