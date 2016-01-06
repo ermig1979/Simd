@@ -96,6 +96,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleaveUv.cpp" />
