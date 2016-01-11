@@ -886,6 +886,11 @@ SIMD_API void SimdBgrToYuv422p(const uint8_t * bgr, size_t width, size_t height,
         Vmx::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::DA)
+		Neon::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+	else
+#endif
         Base::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
 }
 
