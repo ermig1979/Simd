@@ -32,40 +32,41 @@ namespace Simd
 		const size_t A3 = A * 3;
 		const size_t A4 = A * 4;
 
-		template <bool align> SIMD_INLINE void BgraToBgr(const uint8_t * bgra, uint8_t * bgr)
+		template <bool align> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, uint8x16x4_t & _bgra)
         {
-            uint8x16x4_t _bgra = Load4<align>(bgra);
-			Store3<align>(bgr, *(uint8x16x3_t*)&_bgra);
+            *(uint8x16x3_t*)&_bgra = Load3<align>(bgr);
+			Store4<align>(bgra, _bgra);
         }
 
-		template <bool align> void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
+		template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 		{
-            assert(width >= A);
-            if(align)
-                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride));
+			assert(width >= A);
+			if (align)
+				assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride));
 
-            size_t alignedWidth = AlignLo(width, A);
-            if(width == alignedWidth)
-                alignedWidth -= A;
+			size_t alignedWidth = AlignLo(width, A);
 
-			for(size_t row = 0; row < height; ++row)
+			uint8x16x4_t _bgra;
+			_bgra.val[3] = vdupq_n_u8(alpha);
+
+			for (size_t row = 0; row < height; ++row)
 			{
 				for (size_t col = 0, colBgra = 0, colBgr = 0; col < alignedWidth; col += A, colBgra += A4, colBgr += A3)
-					BgraToBgr<align>(bgra + colBgra, bgr + colBgr);
-                if(width != alignedWidth)
-                    BgraToBgr<false>(bgra + 4*(width - A), bgr + 3*(width - A));
-                bgra += bgraStride;
-                bgr += bgrStride;
+					BgrToBgra<align>(bgr + colBgr, bgra + colBgra, _bgra);
+				if (width != alignedWidth)
+					BgrToBgra<false>(bgr + 3 * (width - A), bgra + 4 * (width - A), _bgra);
+				bgr += bgrStride;
+				bgra += bgraStride;
 			}
 		}
 
-        void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
-        {
-            if(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride))
-                BgraToBgr<true>(bgra, width, height, bgraStride, bgr, bgrStride);
-            else
-                BgraToBgr<false>(bgra, width, height, bgraStride, bgr, bgrStride);
-        }
+		void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			if (Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride))
+				BgrToBgra<true>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+			else
+				BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+		}
 	}
 #endif// SIMD_NEON_ENABLE
 }
