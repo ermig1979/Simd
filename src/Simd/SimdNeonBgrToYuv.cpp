@@ -167,6 +167,52 @@ namespace Simd
 			else
 				BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
 		}
+
+
+		template <bool align> SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
+		{
+			uint8x16x3_t _bgr = Load3<align>(bgr);
+			Store<align>(y, BgrToY(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+			Store<align>(u, BgrToU(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+			Store<align>(v, BgrToV(_bgr.val[0], _bgr.val[1], _bgr.val[2]));
+		}
+
+		template <bool align> void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0, colBgr = 0; col < alignedWidth; col += A, colBgr += A3)
+					BgrToYuv444p<align>(bgr + colBgr, y + col, u + col, v + col);
+				if (width != alignedWidth)
+				{
+					size_t offset = width - A;
+					BgrToYuv444p<false>(bgr + offset * 3, y + offset, u + offset, v + offset);
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+				BgrToYuv444p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+			else
+				BgrToYuv444p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
