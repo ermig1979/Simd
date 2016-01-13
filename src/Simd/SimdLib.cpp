@@ -1746,6 +1746,11 @@ SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t widt
         Vmx::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A + 2)
+		Neon::LbpEstimate(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
         Base::LbpEstimate(src, srcStride, width, height, dst, dstStride);
 }
 

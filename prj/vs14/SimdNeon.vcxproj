@@ -105,6 +105,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInterleaveUv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp" />
