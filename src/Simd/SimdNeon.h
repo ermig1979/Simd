@@ -150,6 +150,8 @@ namespace Simd
 		void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			size_t channelCount, uint8_t * dst, size_t dstStride);
 
+		void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
+
 		void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
 		void LbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
