@@ -1438,7 +1438,7 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
 		Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride)
+SIMD_API void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
@@ -1455,10 +1455,15 @@ SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, si
         Vmx::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+	else
+#endif
         Base::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
 }
 
-SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
+SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 {
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)

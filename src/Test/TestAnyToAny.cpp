@@ -205,6 +205,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Vmx::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Neon::GrayToBgr), FUNC(SimdGrayToBgr));
+#endif 
+
         return result;    
     }
 
