@@ -196,6 +196,9 @@ namespace Simd
 
 		void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
+		void SquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint64_t * sum);
+
 		void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 	}

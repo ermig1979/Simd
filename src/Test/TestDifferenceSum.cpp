@@ -216,6 +216,11 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Vmx::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Neon::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
+#endif
+
 		return result;
 	}
 
