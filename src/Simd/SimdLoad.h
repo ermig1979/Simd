@@ -596,6 +596,18 @@ namespace Simd
 			return (uint16x8_t)Load<align>((const uint8_t*)p);
 		}
 
+		template <bool align> SIMD_INLINE float32x4_t Load(const float * p);
+
+		template <> SIMD_INLINE float32x4_t Load<false>(const float * p)
+		{
+			return vld1q_f32(p);
+		}
+
+		template <> SIMD_INLINE float32x4_t Load<true>(const float * p)
+		{
+			return vld1q_f32(p);
+		}
+
 		template <bool align> SIMD_INLINE uint8x16x2_t Load2(const uint8_t * p);
 
 		template <> SIMD_INLINE uint8x16x2_t Load2<false>(const uint8_t * p)

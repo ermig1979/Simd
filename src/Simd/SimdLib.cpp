@@ -2563,6 +2563,7 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
 }
 
 typedef void (* SimdSquaredDifferenceSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
+//SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC4(SquaredDifferenceSum32f, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC3(SquaredDifferenceSum32f, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
 
 SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)

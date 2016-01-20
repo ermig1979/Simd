@@ -202,6 +202,8 @@ namespace Simd
 		void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
 			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
+		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
+
 		void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 	}
