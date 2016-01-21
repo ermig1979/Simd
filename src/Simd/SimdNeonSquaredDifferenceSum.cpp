@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -164,10 +165,57 @@ namespace Simd
 
 		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
 		{
+#if 0
 			if (Aligned(a) && Aligned(b))
 				SquaredDifferenceSum32f<true>(a, b, size, sum);
 			else
 				SquaredDifferenceSum32f<false>(a, b, size, sum);
+#else
+			Base::SquaredDifferenceSum32f(a, b, size, sum);
+#endif
+		}
+
+		template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t offset, float32x4_t & sum, float32x4_t & correction)
+		{
+			float32x4_t _a = Load<align>(a + offset);
+			float32x4_t _b = Load<align>(b + offset);
+			float32x4_t _d = vsubq_f32(_a, _b);
+			float32x4_t term = vmlaq_f32(correction, _d, _d);
+			float32x4_t temp = vaddq_f32(sum, term);
+			correction = vsubq_f32(vmulq_f32(temp, sum), term);
+			sum = temp;
+		}
+
+		template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+		{
+			if (align)
+				assert(Aligned(a) && Aligned(b));
+
+			*sum = 0;
+			size_t alignedSize = AlignLo(size, 4);
+			size_t i = 0;
+			if (alignedSize)
+			{
+				float32x4_t sums = vdupq_n_f32(0);
+				float32x4_t corrections = vdupq_n_f32(0);
+				for (; i < alignedSize; i += 4)
+					SquaredDifferenceKahanSum32f<align>(a, b, i, sums, corrections);
+				*sum += ExtractSum(sums);
+			}
+			for (; i < size; ++i)
+				*sum += Simd::Square(a[i] - b[i]);
+		}
+
+		void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+		{
+#if 0
+			if (Aligned(a) && Aligned(b))
+				SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
+			else
+				SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
+#else
+			Base::SquaredDifferenceKahanSum32f(a, b, size, sum);
+#endif
 		}
     }
 #endif// SIMD_NEON_ENABLE

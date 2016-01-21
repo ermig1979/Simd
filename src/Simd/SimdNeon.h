@@ -204,6 +204,8 @@ namespace Simd
 
 		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
+		void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
+
 		void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 	}

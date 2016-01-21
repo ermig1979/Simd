@@ -424,7 +424,12 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Vsx::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif 
 
-        return result;
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Neon::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#endif 
+
+		return result;
     }
 
     //-----------------------------------------------------------------------
