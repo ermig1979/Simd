@@ -120,6 +120,11 @@ namespace Test
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Vmx::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Neon::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#endif
+
         return result;
     }
 

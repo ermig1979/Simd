@@ -117,6 +117,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

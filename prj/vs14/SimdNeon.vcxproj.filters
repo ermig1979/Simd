@@ -146,5 +146,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSquaredDifferenceSum.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
