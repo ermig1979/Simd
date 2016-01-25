@@ -131,6 +131,64 @@ namespace Simd
 			else
 				TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
 		}
+
+		template <bool align> SIMD_INLINE int16x8_t TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, size_t offset)
+		{
+			uint8x16_t _src = Load<align>(src + offset);
+			uint8x16_t avg = vrhaddq_u8(Load<align>(lo + offset), Load<align>(hi + offset));
+			return (int16x8_t)vsubq_u16(vpaddlq_u8(_src), vpaddlq_u8(avg));
+    	}
+
+		template <bool align> SIMD_INLINE int16x8_t TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, size_t offset, const uint8x16_t & mask)
+		{
+			uint8x16_t _src = vandq_u8(Load<align>(src + offset), mask);
+			uint8x16_t avg = vandq_u8(vrhaddq_u8(Load<align>(lo + offset), Load<align>(hi + offset)), mask);
+			return (int16x8_t)vsubq_u16(vpaddlq_u8(_src), vpaddlq_u8(avg));
+		}
+
+		template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
+		{
+			assert(width >= A && sum != NULL);
+			if (align)
+			{
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+			size_t blockSize = A << 6;
+			size_t blockCount = (alignedWidth >> 6) + 1;
+
+			int64x2_t _sum = (int64x2_t)K64_0000000000000000;
+			for (size_t row = 0; row < height; ++row)
+			{
+				int32x4_t rowSum = (int32x4_t)K32_00000000;
+				for (size_t block = 0; block < blockCount; ++block)
+				{
+					int16x8_t blockSum = (int16x8_t)K16_0000;
+					for (size_t col = block*blockSize, end = Min(col + blockSize, alignedWidth); col < end; col += A)
+						blockSum = vaddq_s16(blockSum, TextureGetDifferenceSum<align>(src, lo, hi, col));
+					rowSum = vaddq_s32(rowSum, vpaddlq_s16(blockSum));
+				}
+				if (alignedWidth != width)
+					rowSum = vaddq_s32(rowSum, vpaddlq_s16(TextureGetDifferenceSum<false>(src, lo, hi, width - A, tailMask)));
+				_sum = vaddq_s64(_sum, vpaddlq_s32(rowSum));
+				src += srcStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+			*sum = ExtractSum(_sum);
+		}
+
+		void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+			else
+				TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

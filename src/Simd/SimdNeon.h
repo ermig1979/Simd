@@ -214,6 +214,9 @@ namespace Simd
 
 		void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			uint8_t boost, uint8_t * dst, size_t dstStride);
+
+		void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 	}
 #endif// SIMD_NEON_ENABLE
 }

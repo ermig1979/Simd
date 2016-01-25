@@ -298,6 +298,11 @@ namespace Test
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Vmx::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Neon::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+#endif
+
         return result;
     }
 

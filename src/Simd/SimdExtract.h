@@ -158,6 +158,11 @@ namespace Simd
 			return vgetq_lane_u64(a, 0) + vgetq_lane_u64(a, 1);
 		}
 
+		SIMD_INLINE int64_t ExtractSum(const int64x2_t & a)
+		{
+			return vgetq_lane_s64(a, 0) + vgetq_lane_s64(a, 1);
+		}
+
 		SIMD_INLINE float ExtractSum(const float32x4_t & a)
 		{
 			return vgetq_lane_f32(a, 0) + vgetq_lane_f32(a, 1) + vgetq_lane_f32(a, 2) + vgetq_lane_f32(a, 3);

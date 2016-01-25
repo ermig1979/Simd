@@ -2881,6 +2881,11 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
         Vmx::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+	else
+#endif
         Base::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
 }
 
