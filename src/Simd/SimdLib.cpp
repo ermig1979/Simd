@@ -2855,6 +2855,11 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
         Vmx::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+	else
+#endif
         Base::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
 }
 

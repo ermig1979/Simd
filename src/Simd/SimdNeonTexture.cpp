@@ -96,6 +96,46 @@ namespace Simd
 			else
 				TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
 		}
+
+		template<bool align> SIMD_INLINE void TextureBoostedUv(const uint8_t * src, uint8_t * dst, uint8x16_t min, uint8x16_t max, uint8x16_t boost)
+		{
+			Store<align>(dst, vmulq_u8(vsubq_u8(vmaxq_u8(min, vminq_u8(max, Load<align>(src))), min), boost));
+		}
+
+		template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t boost, uint8_t * dst, size_t dstStride)
+		{
+			assert(width >= A && boost < 0x80);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			int min = 128 - (128 / boost);
+			int max = 255 - min;
+
+			uint8x16_t _min = vdupq_n_u8(min);
+			uint8x16_t _max = vdupq_n_u8(max);
+			uint8x16_t _boost = vdupq_n_u8(boost);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < alignedWidth; col += A)
+					TextureBoostedUv<align>(src + col, dst + col, _min, _max, _boost);
+				if (width != alignedWidth)
+					TextureBoostedUv<false>(src + width - A, dst + width - A, _min, _max, _boost);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t boost, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+			else
+				TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
