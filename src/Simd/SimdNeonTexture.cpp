@@ -189,6 +189,70 @@ namespace Simd
 			else
 				TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
 		}
+
+		template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			int shift, uint8_t * dst, size_t dstStride)
+		{
+			assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = src == dst ? ShiftLeft(K8_FF, A - width + alignedWidth) : K8_FF;
+			if (shift > 0)
+			{
+				uint8x16_t _shift = vdupq_n_u8(shift);
+				for (size_t row = 0; row < height; ++row)
+				{
+					for (size_t col = 0; col < alignedWidth; col += A)
+					{
+						uint8x16_t _src = Load<align>(src + col);
+						Store<align>(dst + col, vqaddq_u8(_src, _shift));
+					}
+					if (width != alignedWidth)
+					{
+						uint8x16_t _src = Load<false>(src + width - A);
+						Store<false>(dst + width - A, vqaddq_u8(_src, vandq_u8(_shift, tailMask)));
+					}
+					src += srcStride;
+					dst += dstStride;
+				}
+			}
+			if (shift < 0)
+			{
+				uint8x16_t _shift = vdupq_n_u8(-shift);
+				for (size_t row = 0; row < height; ++row)
+				{
+					for (size_t col = 0; col < alignedWidth; col += A)
+					{
+						uint8x16_t _src = Load<align>(src + col);
+						Store<align>(dst + col, vqsubq_u8(_src, _shift));
+					}
+					if (width != alignedWidth)
+					{
+						uint8x16_t _src = Load<false>(src + width - A);
+						Store<false>(dst + width - A, vqsubq_u8(_src, vandq_u8(_shift, tailMask)));
+					}
+					src += srcStride;
+					dst += dstStride;
+				}
+			}
+		}
+
+		void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			int shift, uint8_t * dst, size_t dstStride)
+		{
+			if (shift == 0)
+			{
+				if (src != dst)
+					Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
+				return;
+			}
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+			else
+				TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

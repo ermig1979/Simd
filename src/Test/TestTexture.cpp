@@ -393,6 +393,11 @@ namespace Test
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Vmx::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Neon::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#endif
+
         return result;
     }
 

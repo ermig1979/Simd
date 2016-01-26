@@ -2902,6 +2902,16 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Sse2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
+#ifdef SIMD_VMX_ENABLE
+	if (Vmx::Enable && width >= Vmx::A)
+		Vmx::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+	else
+#endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+	else
+#endif
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
