@@ -2213,6 +2213,11 @@ SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t 
         Vmx::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
+	else
+#endif
         Base::SegmentationChangeIndex(mask, stride, width, height, oldIndex, newIndex);
 }
 

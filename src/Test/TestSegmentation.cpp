@@ -255,6 +255,11 @@ namespace Test
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Vmx::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Neon::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#endif
+
         return result;    
     }
 
