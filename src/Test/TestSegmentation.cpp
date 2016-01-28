@@ -178,6 +178,11 @@ namespace Test
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Vmx::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Neon::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+#endif
+
         return result;    
     }
 

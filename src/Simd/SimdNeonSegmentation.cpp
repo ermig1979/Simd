@@ -61,6 +61,47 @@ namespace Simd
             else
                 SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
         }
+
+		template<bool align> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, const uint8x16_t & index)
+		{
+			uint8x16_t up = vceqq_u8(Load<align>(mask - stride), index);
+			uint8x16_t left = vceqq_u8(Load<false>(mask - 1), index);
+			uint8x16_t right = vceqq_u8(Load<false>(mask + 1), index);
+			uint8x16_t down = vceqq_u8(Load<align>(mask + stride), index);
+			Store<align>(mask, vbslq_u8(vandq_u8(vandq_u8(up, left), vandq_u8(right, down)), index, Load<align>(mask)));
+		}
+
+		template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+		{
+			assert(width > A + 2 && height > 2);
+			if (align)
+				assert(Aligned(mask) && Aligned(stride));
+
+			height -= 1;
+			width -= 1;
+			uint8x16_t _index = vdupq_n_u8(index);
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			for (size_t row = 1; row < height; ++row)
+			{
+				mask += stride;
+
+				FillSingleHoles<false>(mask + 1, stride, _index);
+
+				for (size_t col = A; col < alignedWidth; col += A)
+					FillSingleHoles<align>(mask + col, stride, _index);
+
+				if (alignedWidth != width)
+					FillSingleHoles<false>(mask + width - A, stride, _index);
+			}
+		}
+
+		void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+		{
+			if (Aligned(mask) && Aligned(stride))
+				SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
+			else
+				SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
+		}
     }
 #endif//SIMD_NEON_ENABLE
 }
