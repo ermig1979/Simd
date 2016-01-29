@@ -672,6 +672,11 @@ namespace Simd
 			vst1q_u8(buffer, value);
 			return vld2_u8(buffer);
 		}
+
+		template <int part> SIMD_INLINE uint8x16_t Stretch2(uint8x16_t a)
+		{
+			return (uint8x16_t)vmulq_u16(UnpackU8<part>(a), K16_0101);
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }

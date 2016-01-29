@@ -2268,6 +2268,12 @@ SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parent
         difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A + 1)
+		Neon::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+			difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+	else
+#endif
         Base::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
         difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
 }
