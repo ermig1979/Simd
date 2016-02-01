@@ -677,6 +677,18 @@ namespace Simd
 		{
 			return (uint8x16_t)vmulq_u16(UnpackU8<part>(a), K16_0101);
 		}
+
+		template <bool abs> int16x8_t ConditionalAbs(int16x8_t a);
+
+		template <> SIMD_INLINE int16x8_t ConditionalAbs<true>(int16x8_t a)
+		{
+			return vabdq_s16(a, (int16x8_t)K16_0000);
+		}
+
+		template <> SIMD_INLINE int16x8_t ConditionalAbs<false>(int16x8_t a)
+		{
+			return a;
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }

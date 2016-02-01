@@ -38,13 +38,13 @@ namespace Simd
 				vaddq_u16(vaddl_u8(Half<part>(a[1][2]), Half<part>(a[2][0])), vaddl_u8(Half<part>(a[2][1]), Half<part>(a[2][2])))));
         }
 
-        template<bool align> SIMD_INLINE void Laplace(uint8x16_t a[3][3], int16_t * dst)
+		template <bool align, bool abs> SIMD_INLINE void Laplace(uint8x16_t a[3][3], int16_t * dst)
         {
-            Store<align>(dst + 0, Laplace<0>(a));
-            Store<align>(dst + HA, Laplace<1>(a));
+            Store<align>(dst + 0, ConditionalAbs<abs>(Laplace<0>(a)));
+            Store<align>(dst + 8, ConditionalAbs<abs>(Laplace<1>(a)));
         }
 
-        template <bool align> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+		template <bool align, bool abs> void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width > A);
             if(align)
@@ -67,18 +67,18 @@ namespace Simd
                 LoadNose3<align, 1>(src0 + 0, a[0]);
                 LoadNose3<align, 1>(src1 + 0, a[1]);
                 LoadNose3<align, 1>(src2 + 0, a[2]);
-                Laplace<align>(a, dst + 0);
+                Laplace<align, abs>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBody3<align, 1>(src0 + col, a[0]);
                     LoadBody3<align, 1>(src1 + col, a[1]);
                     LoadBody3<align, 1>(src2 + col, a[2]);
-                    Laplace<align>(a, dst + col);
+                    Laplace<align, abs>(a, dst + col);
                 }
                 LoadTail3<false, 1>(src0 + width - A, a[0]);
                 LoadTail3<false, 1>(src1 + width - A, a[1]);
                 LoadTail3<false, 1>(src2 + width - A, a[2]);
-                Laplace<false>(a, dst + width - A);
+                Laplace<false, abs>(a, dst + width - A);
 
                 dst += dstStride;
             }
@@ -89,10 +89,20 @@ namespace Simd
             assert(dstStride%sizeof(int16_t) == 0);
 
             if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-                Laplace<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                Laplace<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
-                Laplace<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
+
+		void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			assert(dstStride%sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+			else
+				Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

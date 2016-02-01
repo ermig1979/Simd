@@ -1721,6 +1721,11 @@ SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width
         Vmx::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
         Base::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
 }
 
