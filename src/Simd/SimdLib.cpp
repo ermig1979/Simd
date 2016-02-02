@@ -1746,6 +1746,11 @@ SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width
         Vmx::LaplaceAbsSum(src, stride, width, height, sum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::LaplaceAbsSum(src, stride, width, height, sum);
+	else
+#endif
         Base::LaplaceAbsSum(src, stride, width, height, sum);
 }
 

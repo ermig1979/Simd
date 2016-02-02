@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -102,6 +103,81 @@ namespace Simd
 				Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 			else
 				Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
+
+		SIMD_INLINE void LaplaceAbsSum(uint8x16_t a[3][3], uint32x4_t & sum)
+		{
+			sum = vaddq_u32(sum, vpaddlq_u16((uint16x8_t)ConditionalAbs<true>(Laplace<0>(a))));
+			sum = vaddq_u32(sum, vpaddlq_u16((uint16x8_t)ConditionalAbs<true>(Laplace<1>(a))));
+		}
+
+		SIMD_INLINE void SetMask3(uint8x16_t a[3], uint8x16_t mask)
+		{
+			a[0] = vandq_u8(a[0], mask);
+			a[1] = vandq_u8(a[1], mask);
+			a[2] = vandq_u8(a[2], mask);
+		}
+
+		SIMD_INLINE void SetMask3x3(uint8x16_t a[3][3], uint8x16_t mask)
+		{
+			SetMask3(a[0], mask);
+			SetMask3(a[1], mask);
+			SetMask3(a[2], mask);
+		}
+
+		template <bool align> void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width > A);
+			if (align)
+				assert(Aligned(src) && Aligned(stride));
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+
+			uint8x16_t a[3][3];
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+
+			uint64x2_t fullSum = K64_0000000000000000;
+			for (size_t row = 0; row < height; ++row)
+			{
+				src0 = src + stride*(row - 1);
+				src1 = src0 + stride;
+				src2 = src1 + stride;
+				if (row == 0)
+					src0 = src1;
+				if (row == height - 1)
+					src2 = src1;
+
+				uint32x4_t rowSum = K32_00000000;
+
+				LoadNose3<align, 1>(src0 + 0, a[0]);
+				LoadNose3<align, 1>(src1 + 0, a[1]);
+				LoadNose3<align, 1>(src2 + 0, a[2]);
+				LaplaceAbsSum(a, rowSum);
+				for (size_t col = A; col < bodyWidth; col += A)
+				{
+					LoadBody3<align, 1>(src0 + col, a[0]);
+					LoadBody3<align, 1>(src1 + col, a[1]);
+					LoadBody3<align, 1>(src2 + col, a[2]);
+					LaplaceAbsSum(a, rowSum);
+				}
+				LoadTail3<false, 1>(src0 + width - A, a[0]);
+				LoadTail3<false, 1>(src1 + width - A, a[1]);
+				LoadTail3<false, 1>(src2 + width - A, a[2]);
+				SetMask3x3(a, tailMask);
+				LaplaceAbsSum(a, rowSum);
+
+				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+			}
+			*sum = ExtractSum(fullSum);
+		}
+
+		void LaplaceAbsSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(srcStride))
+				LaplaceAbsSum<true>(src, srcStride, width, height, sum);
+			else
+				LaplaceAbsSum<false>(src, srcStride, width, height, sum);
 		}
     }
 #endif// SIMD_NEON_ENABLE
