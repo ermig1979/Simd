@@ -234,6 +234,9 @@ namespace Simd
 
 		void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			int shift, uint8_t * dst, size_t dstStride);
+
+		void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 	}
 #endif// SIMD_NEON_ENABLE
 }

@@ -1,0 +1,101 @@
+/*
+* Simd Library (http://simd.sourceforge.net).
+*
+* Copyright (c) 2011-2016 Yermalayeu Ihar.
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+* copies of the Software, and to permit persons to whom the Software is 
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in 
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdConversion.h"
+
+namespace Simd
+{
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+		template <bool align> SIMD_INLINE void YuvToBgra(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, const uint8x16_t & alpha, uint8_t * bgra)
+		{
+			uint8x16x4_t _bgra;
+			YuvToBgr(y, u, v, *(uint8x16x3_t*)&_bgra);
+			_bgra.val[3] = alpha;
+			Store4<align>(bgra, _bgra);
+		}
+
+		template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v,
+			const uint8x16_t & alpha, uint8_t * bgra)
+		{
+			YuvToBgra<align>(Load<align>(y + 0), u.val[0], v.val[0], alpha, bgra + 0);
+			YuvToBgra<align>(Load<align>(y + A), u.val[1], v.val[1], alpha, bgra + QA);
+		}
+
+		template <bool align> void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
+			if(align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+			}
+
+			uint8x16_t _alpha = vdupq_n_u8(alpha);
+			size_t bodyWidth = AlignLo(width, DA);
+			size_t tail = width - bodyWidth;
+			uint8x16x2_t _u, _v;
+			for(size_t row = 0; row < height; row += 2)
+			{
+				for(size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+				{
+					_u.val[1] = _u.val[0] = Load<align>(u + colUV);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<align>(v + colUV);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgra<align>(y + colY, _u, _v, _alpha, bgra + colBgra);
+					Yuv422pToBgra<align>(y + colY + yStride, _u, _v, _alpha, bgra + colBgra + bgraStride);
+				}
+				if(tail)
+				{
+					size_t offset = width - DA;
+					_u.val[1] = _u.val[0] = Load<false>(u + offset/2);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<false>(v + offset/2);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgra<false>(y + offset, _u, _v, _alpha, bgra + 4*offset);
+					Yuv422pToBgra<false>(y + offset + yStride, _u, _v, _alpha, bgra + 4*offset + bgraStride);
+				}
+				y += 2*yStride;
+				u += uStride;
+				v += vStride;
+				bgra += 2*bgraStride;
+			}
+		}
+
+		void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				Yuv420pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+			else
+				Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+		}
+    }
+#endif// SIMD_NEON_ENABLE
+}

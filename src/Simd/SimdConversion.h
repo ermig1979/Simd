@@ -1031,6 +1031,74 @@ namespace Simd
 				BgrToV(UnpackU8<0>(blue), UnpackU8<0>(green), UnpackU8<0>(red)),
 				BgrToV(UnpackU8<1>(blue), UnpackU8<1>(green), UnpackU8<1>(red)));
 		}
+
+		template <int part> SIMD_INLINE int16x8_t AdjustY(uint8x16_t y)
+		{
+			return vsubq_s16((int16x8_t)UnpackU8<part>(y), K16_Y_ADJUST);
+		}
+
+		template <int part> SIMD_INLINE int16x8_t AdjustUV(uint8x16_t uv)
+		{
+			return vsubq_s16((int16x8_t)UnpackU8<part>(uv), K16_UV_ADJUST);
+		}
+
+		template <int part> SIMD_INLINE int32x4_t YuvToRed(int16x8_t y, int16x8_t v)
+		{
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(K32_YUV_TO_BGR_ROUND_TERM, Half<part>(y), K16_Y_TO_RGB_WEIGHT),
+				Half<part>(v), K16_V_TO_RED_WEIGHT), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE int16x8_t YuvToRed(int16x8_t y, int16x8_t v)
+		{
+			return PackI32(YuvToRed<0>(y, v), YuvToRed<1>(y, v));
+		}
+
+		SIMD_INLINE uint8x16_t YuvToRed(uint8x16_t y, uint8x16_t v)
+		{
+			return PackSaturatedI16(YuvToRed(AdjustY<0>(y), AdjustUV<0>(v)), YuvToRed(AdjustY<1>(y), AdjustUV<1>(v)));
+		}
+
+		template <int part> SIMD_INLINE int32x4_t YuvToGreen(int16x8_t y, int16x8_t u, int16x8_t v)
+		{
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_YUV_TO_BGR_ROUND_TERM, Half<part>(y), K16_Y_TO_RGB_WEIGHT),
+				Half<part>(u), K16_U_TO_GREEN_WEIGHT), Half<part>(v), K16_V_TO_GREEN_WEIGHT), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE int16x8_t YuvToGreen(int16x8_t y, int16x8_t u, int16x8_t v)
+		{
+			return PackI32(YuvToGreen<0>(y, u, v), YuvToGreen<1>(y, u, v));
+		}
+
+		SIMD_INLINE uint8x16_t YuvToGreen(uint8x16_t y, uint8x16_t u, uint8x16_t v)
+		{
+			return PackSaturatedI16(YuvToGreen(AdjustY<0>(y), AdjustUV<0>(u), AdjustUV<0>(v)), 
+				YuvToGreen(AdjustY<1>(y), AdjustUV<1>(u), AdjustUV<1>(v)));
+		}
+
+		template <int part> SIMD_INLINE int32x4_t YuvToBlue(int16x8_t y, int16x8_t u)
+		{
+			return vshrq_n_s32(vmlal_s16(vmlal_s16(K32_YUV_TO_BGR_ROUND_TERM, Half<part>(y), K16_Y_TO_RGB_WEIGHT),
+				Half<part>(u), K16_U_TO_BLUE_WEIGHT), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE int16x8_t YuvToBlue(int16x8_t y, int16x8_t u)
+		{
+			return PackI32(YuvToBlue<0>(y, u), YuvToBlue<1>(y, u));
+		}
+
+		SIMD_INLINE uint8x16_t YuvToBlue(uint8x16_t y, uint8x16_t u)
+		{
+			return PackSaturatedI16(YuvToBlue(AdjustY<0>(y), AdjustUV<0>(u)), YuvToBlue(AdjustY<1>(y), AdjustUV<1>(u)));
+		}
+
+		SIMD_INLINE void YuvToBgr(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16x3_t & bgr)
+		{
+			int16x8_t yLo = AdjustY<0>(y), uLo = AdjustUV<0>(u), vLo = AdjustUV<0>(v);
+			int16x8_t yHi = AdjustY<1>(y), uHi = AdjustUV<1>(u), vHi = AdjustUV<1>(v);
+			bgr.val[0] = PackSaturatedI16(YuvToBlue(yLo, uLo), YuvToBlue(yHi, uHi));
+			bgr.val[1] = PackSaturatedI16(YuvToGreen(yLo, uLo, vLo), YuvToGreen(yHi, uHi, vHi));
+			bgr.val[2] = PackSaturatedI16(YuvToRed(yLo, vLo), YuvToRed(yHi, vHi));
+		}
 	}
 #endif// SIMD_NEON_ENABLE
 }
