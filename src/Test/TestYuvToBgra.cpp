@@ -133,6 +133,11 @@ namespace Test
             result = result && YuvToBgraAutoTest(FUNC(Simd::Vmx::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && YuvToBgraAutoTest(FUNC(Simd::Neon::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
+#endif 
+
         return result;
     }
 

@@ -96,6 +96,56 @@ namespace Simd
 			else
 				Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
+
+		template <bool align> void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			assert((width % 2 == 0) && (width >= DA));
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+			}
+
+			uint8x16_t _alpha = vdupq_n_u8(alpha);
+			size_t bodyWidth = AlignLo(width, DA);
+			size_t tail = width - bodyWidth;
+			uint8x16x2_t _u, _v;
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+				{
+					_u.val[1] = _u.val[0] = Load<align>(u + colUV);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<align>(v + colUV);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgra<align>(y + colY, _u, _v, _alpha, bgra + colBgra);
+				}
+				if (tail)
+				{
+					size_t offset = width - DA;
+					_u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgra<false>(y + offset, _u, _v, _alpha, bgra + 4 * offset);
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgra += bgraStride;
+			}
+		}
+
+		void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				Yuv422pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+			else
+				Yuv422pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
