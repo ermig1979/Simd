@@ -157,6 +157,11 @@ namespace Test
             result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Vmx::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Neon::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
+#endif
+
         return result;
     }
 
