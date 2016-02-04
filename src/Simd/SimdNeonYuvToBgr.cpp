@@ -145,6 +145,52 @@ namespace Simd
 			else
 				Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 		}
+
+		template <bool align> void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			size_t bodyWidth = AlignLo(width, A);
+			size_t tail = width - bodyWidth;
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0, colBgr = 0; col < bodyWidth; col += A, colBgr += A3)
+				{
+					uint8x16_t _y = Load<align>(y + col);
+					uint8x16_t _u = Load<align>(u + col);
+					uint8x16_t _v = Load<align>(v + col);
+					YuvToBgr<align>(_y, _u, _v, bgr + colBgr);
+				}
+				if (tail)
+				{
+					size_t col = width - A;
+					uint8x16_t _y = Load<false>(y + col);
+					uint8x16_t _u = Load<false>(u + col);
+					uint8x16_t _v = Load<false>(v + col);
+					YuvToBgr<false>(_y, _u, _v, bgr + 3 * col);
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+				Yuv444pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+			else
+				Yuv444pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
