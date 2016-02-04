@@ -96,6 +96,55 @@ namespace Simd
 			else
 				Yuv420pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 		}
+
+		template <bool align> void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			assert((width % 2 == 0) && (width >= DA));
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			size_t bodyWidth = AlignLo(width, DA);
+			size_t tail = width - bodyWidth;
+			uint8x16x2_t _u, _v;
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A6)
+				{
+					_u.val[1] = _u.val[0] = Load<align>(u + colUV);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<align>(v + colUV);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgr<align>(y + colY, _u, _v, bgr + colBgr);
+				}
+				if (tail)
+				{
+					size_t offset = width - DA;
+					_u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+					_u = vzipq_u8(_u.val[0], _u.val[1]);
+					_v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+					_v = vzipq_u8(_v.val[0], _v.val[1]);
+					Yuv422pToBgr<false>(y + offset, _u, _v, bgr + 3 * offset);
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+				Yuv422pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+			else
+				Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
