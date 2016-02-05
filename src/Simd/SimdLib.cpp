@@ -2336,6 +2336,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable)
+		Neon::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+		shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+	else
+#endif
         Base::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
 }

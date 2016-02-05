@@ -259,7 +259,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool YuvToAnyDataTest(bool create, int width, int height, int dx, int dy, View::Format dstType, const Func & f)
+    bool YuvToAnyDataTest(bool create, int width, int height, int dx, int dy, View::Format dstType, const Func & f, int maxDifference = 0)
     {
         bool result = true;
 
@@ -303,7 +303,7 @@ namespace Test
 
             TEST_SAVE(dst2);
 
-            result = result && Compare(dst1, dst2, 0, true, 64);
+            result = result && Compare(dst1, dst2, maxDifference, true, 64, 255);
         }
 
         return result;
@@ -358,7 +358,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyDataTest(create, DW, DH, 2, 2, View::Gray8, FUNC(SimdYuv420pToHue));
+        result = result && YuvToAnyDataTest(create, DW, DH, 2, 2, View::Gray8, FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
 
         return result;
     }
@@ -367,7 +367,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyDataTest(create, DW, DH, 1, 1, View::Gray8, FUNC(SimdYuv444pToHue));
+        result = result && YuvToAnyDataTest(create, DW, DH, 1, 1, View::Gray8, FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
 
         return result;
     }

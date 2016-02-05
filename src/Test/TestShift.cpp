@@ -128,6 +128,11 @@ namespace Test
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Vmx::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ShiftBilinearAutoTest(FUNC(Simd::Neon::ShiftBilinear), FUNC(SimdShiftBilinear));
+#endif 
+
 		return result;
 	}
 
