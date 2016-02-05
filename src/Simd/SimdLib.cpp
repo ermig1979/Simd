@@ -3132,6 +3132,11 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Vsx::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::DA)
+		Neon::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+	else
+#endif
         Base::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 }
 

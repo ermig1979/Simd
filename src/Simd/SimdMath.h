@@ -653,6 +653,11 @@ namespace Simd
 			return vmovl_u16(Half<part>(a));
 		}
 
+		template <int part> SIMD_INLINE int32x4_t UnpackI16(int16x8_t a)
+		{
+			return vmovl_s16(Half<part>(a));
+		}
+
 		SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
 		{
 			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
@@ -701,6 +706,53 @@ namespace Simd
 		{
 			return a;
 		}
+
+		SIMD_INLINE int16x8_t SaturateByU8(int16x8_t a)
+		{
+			return (int16x8_t)vmovl_u8(vqmovun_s16(a));
+		}
+
+		template <int iter> SIMD_INLINE float32x4_t Reciprocal(const float32x4_t & a);
+
+		template <> SIMD_INLINE float32x4_t Reciprocal<-1>(const float32x4_t & a)
+		{
+			float _a[4];
+			vst1q_f32(_a, a);
+			float r[4] = {1.0f/_a[0], 1.0f/_a[1], 1.0f/_a[2], 1.0f/_a[3]};
+			return vld1q_f32(r);
+		};
+
+		template<> SIMD_INLINE float32x4_t Reciprocal<0>(const float32x4_t & a)
+		{
+			return vrecpeq_f32(a);
+		}
+
+		template<> SIMD_INLINE float32x4_t Reciprocal<1>(const float32x4_t & a)
+		{
+			float32x4_t r = vrecpeq_f32(a);
+			return vmulq_f32(vrecpsq_f32(a, r), r);
+		}
+
+		template<> SIMD_INLINE float32x4_t Reciprocal<2>(const float32x4_t & a)
+		{
+			float32x4_t r = vrecpeq_f32(a);
+			r = vmulq_f32(vrecpsq_f32(a, r), r);
+			return vmulq_f32(vrecpsq_f32(a, r), r);
+		}
+
+		template <int iter> SIMD_INLINE float32x4_t Div(const float32x4_t & a, const float32x4_t & b)
+		{
+			return vmulq_f32(a, Reciprocal<iter>(b));
+		}
+
+		template <> SIMD_INLINE float32x4_t Div<-1>(const float32x4_t & a, const float32x4_t & b)
+		{
+			float _a[4], _b[4];
+			vst1q_f32(_a, a);
+			vst1q_f32(_b, b);
+			float c[4] = {_a[0]/_b[0], _a[1]/_b[1], _a[2]/_b[2], _a[3]/_b[3]};
+			return vld1q_f32(c);
+		};
 	}
 #endif//SIMD_NEON_ENABLE
 }

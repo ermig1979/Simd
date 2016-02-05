@@ -122,6 +122,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -173,8 +173,8 @@ namespace Test
     {
         assert(Simd::Compatible(a, b));
 
-		if (FullEqual(a, b))
-			return true;
+		//if (FullEqual(a, b))
+		//	return true;
 
         if(a.format == View::Float)
             return Compare<float>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);

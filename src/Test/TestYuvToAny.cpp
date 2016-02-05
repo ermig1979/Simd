@@ -49,7 +49,7 @@ namespace Test
 
 #define FUNC(function) Func(function, #function)
 
-	bool YuvToAnyAutoTest(int width, int height, int dx, int dy, View::Format dstType, const Func & f1, const Func & f2)
+	bool YuvToAnyAutoTest(int width, int height, int dx, int dy, View::Format dstType, const Func & f1, const Func & f2, int maxDifference)
 	{
 		bool result = true;
 
@@ -72,18 +72,18 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, dst2));
 
-		result = result && Compare(dst1, dst2, 0, true, 64);
+		result = result && Compare(dst1, dst2, maxDifference, true, 64, 255);
 
 		return result;
 	}
 
-    bool YuvToAnyAutoTest(int dx, int dy, View::Format dstType, const Func & f1, const Func & f2)
+    bool YuvToAnyAutoTest(int dx, int dy, View::Format dstType, const Func & f1, const Func & f2, int maxDifference = 0)
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(W, H, dx, dy, dstType, f1, f2);
-        result = result && YuvToAnyAutoTest(W + O*dx, H - O*dy, dx, dy, dstType, f1, f2);
-        result = result && YuvToAnyAutoTest(W - O*dx, H + O*dy, dx, dy, dstType, f1, f2);
+        result = result && YuvToAnyAutoTest(W, H, dx, dy, dstType, f1, f2, maxDifference);
+        result = result && YuvToAnyAutoTest(W + O*dx, H - O*dy, dx, dy, dstType, f1, f2, maxDifference);
+        result = result && YuvToAnyAutoTest(W - O*dx, H + O*dy, dx, dy, dstType, f1, f2, maxDifference);
 
         return result;
     }
@@ -193,11 +193,17 @@ namespace Test
         return result;
     }
 
+#if defined(SIMD_NEON_ENABLE) && (SIMD_NEON_RCP_ITER > -1)
+	const int MAX_DIFFERECE = 1;
+#else
+	const int MAX_DIFFERECE = 0;
+#endif
+
     bool Yuv444pToHueAutoTest()
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue));
+        result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
@@ -221,7 +227,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue));
+        result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
 
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
@@ -236,6 +242,11 @@ namespace Test
 #ifdef SIMD_VSX_ENABLE
         if(Simd::Vsx::Enable)
             result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Vsx::Yuv420pToHue), FUNC(SimdYuv420pToHue));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Neon::Yuv420pToHue), FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
 #endif
 
         return result;

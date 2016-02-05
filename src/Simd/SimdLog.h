@@ -28,6 +28,7 @@
 
 #ifdef SIMD_LOG_ENABLE
 #include <iostream>
+#include <iomanip>
 
 namespace Simd
 {
@@ -118,11 +119,35 @@ namespace Simd
 			Simd::Log(buffer, 8, name);
 		}
 
+		SIMD_INLINE void Log(const int16x8_t & value, const std::string & name)
+		{
+			int16_t buffer[8];
+			vst1q_s16(buffer, value);
+			Simd::Log(buffer, 8, name);
+		}
+
 		SIMD_INLINE void Log(const uint32x4_t & value, const std::string & name)
 		{
 			uint32_t buffer[4];
 			vst1q_u32(buffer, value);
 			Simd::Log(buffer, 4, name);
+		}
+
+		SIMD_INLINE void Log(const int32x4_t & value, const std::string & name)
+		{
+			int32_t buffer[4];
+			vst1q_s32(buffer, value);
+			Simd::Log(buffer, 4, name);
+		}
+
+		SIMD_INLINE void Log(const float32x4_t & value, const std::string & name)
+		{
+			float buffer[4];
+			vst1q_f32(buffer, value);
+			std::cout << name << " = { ";
+			for (int i = 0; i < 4; i++)
+				std::cout << buffer[i] << " ";
+			std::cout << "} " << std::endl;
 		}
 	}
 #endif//SIMD_NEON_ENABLE

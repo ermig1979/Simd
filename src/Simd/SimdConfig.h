@@ -50,4 +50,6 @@
 
 #define SIMD_ALLOCATE_ASSERT
 
+#define SIMD_NEON_RCP_ITER -1
+
 #endif//__SimdConfig_h__
