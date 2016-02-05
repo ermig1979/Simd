@@ -129,6 +129,44 @@ namespace Simd
 			else
 				Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 		}
+
+		template <bool align> void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
+			}
+
+			const float32x4_t KF_255_DIV_6 = vdupq_n_f32(Base::KF_255_DIV_6);
+			size_t bodyWidth = AlignLo(width, A);
+			size_t tail = width - bodyWidth;
+			for (size_t row = 0; row < height; ++row)
+			{
+				for (size_t col = 0; col < bodyWidth; col += A)
+					Store<align>(hue + col, YuvToHue(Load<align>(y + col), Load<align>(u + col), Load<align>(v + col), KF_255_DIV_6));
+				if (tail)
+				{
+					size_t col = width - A;
+					Store<false>(hue + col, YuvToHue(Load<false>(y + col), Load<false>(u + col), Load<false>(v + col), KF_255_DIV_6));
+				}
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				hue += hueStride;
+			}
+		}
+
+		void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
+				Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+			else
+				Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
