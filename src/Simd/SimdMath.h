@@ -753,6 +753,11 @@ namespace Simd
 			float c[4] = {_a[0]/_b[0], _a[1]/_b[1], _a[2]/_b[2], _a[3]/_b[3]};
 			return vld1q_f32(c);
 		};
+
+		template <int part> SIMD_INLINE uint16x8_t Sub(uint8x16_t a, uint8x16_t b)
+		{
+			return vsubl_u8(Half<part>(a), Half<part>(b));
+		}
 	}
 #endif//SIMD_NEON_ENABLE
 }
