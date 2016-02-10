@@ -23,19 +23,20 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-		template<bool align> SIMD_INLINE void SobelDx(uint8x16_t a[3][3], int16_t * dst)
+		template<bool align, bool abs> SIMD_INLINE void SobelDx(uint8x16_t a[3][3], int16_t * dst)
 		{
-			Store<align>(dst +  0, (int16x8_t)BinomialSum16(Sub<0>(a[0][2], a[0][0]), Sub<0>(a[1][2], a[1][0]), Sub<0>(a[2][2], a[2][0])));
-			Store<align>(dst + HA, (int16x8_t)BinomialSum16(Sub<1>(a[0][2], a[0][0]), Sub<1>(a[1][2], a[1][0]), Sub<1>(a[2][2], a[2][0])));
+			Store<align>(dst +  0, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<0>(a[0][2], a[0][0]), Sub<0>(a[1][2], a[1][0]), Sub<0>(a[2][2], a[2][0]))));
+			Store<align>(dst + HA, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<1>(a[0][2], a[0][0]), Sub<1>(a[1][2], a[1][0]), Sub<1>(a[2][2], a[2][0]))));
 		}
 
-        template <bool align> void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+        template <bool align, bool abs> void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
         {
             assert(width > A);
             if(align)
@@ -58,18 +59,18 @@ namespace Simd
                 LoadNoseDx(src0 + 0, a[0]);
                 LoadNoseDx(src1 + 0, a[1]);
                 LoadNoseDx(src2 + 0, a[2]);
-                SobelDx<align>(a, dst + 0);
+                SobelDx<align, abs>(a, dst + 0);
                 for(size_t col = A; col < bodyWidth; col += A)
                 {
                     LoadBodyDx(src0 + col, a[0]);
                     LoadBodyDx(src1 + col, a[1]);
                     LoadBodyDx(src2 + col, a[2]);
-                    SobelDx<align>(a, dst + col);
+                    SobelDx<align, abs>(a, dst + col);
                 }
                 LoadTailDx(src0 + width - A, a[0]);
                 LoadTailDx(src1 + width - A, a[1]);
                 LoadTailDx(src2 + width - A, a[2]);
-                SobelDx<false>(a, dst + width - A);
+                SobelDx<false, abs>(a, dst + width - A);
 
                 dst += dstStride;
             }
@@ -80,11 +81,20 @@ namespace Simd
             assert(dstStride%sizeof(int16_t) == 0);
 
             if(Aligned(dst) && Aligned(dstStride))
-                SobelDx<true>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDx<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
             else
-                SobelDx<false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
+                SobelDx<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride/sizeof(int16_t));
         }
 
+		void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			assert(dstStride%sizeof(int16_t) == 0);
+
+			if (Aligned(dst) && Aligned(dstStride))
+				SobelDx<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+			else
+				SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
 
 		template<bool align> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
 		{
