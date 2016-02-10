@@ -2468,6 +2468,11 @@ SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width
         Vmx::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
         Base::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
 }
 

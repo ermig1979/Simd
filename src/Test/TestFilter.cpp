@@ -507,6 +507,11 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+#endif
+
         return result;
     }
 

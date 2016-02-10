@@ -96,13 +96,13 @@ namespace Simd
 				SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
 
-		template<bool align> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
+		template<bool align, bool abs> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
 		{
-			Store<align>(dst +  0, (int16x8_t)BinomialSum16(Sub<0>(a[2][0], a[0][0]), Sub<0>(a[2][1], a[0][1]), Sub<0>(a[2][2], a[0][2])));
-			Store<align>(dst + HA, (int16x8_t)BinomialSum16(Sub<1>(a[2][0], a[0][0]), Sub<1>(a[2][1], a[0][1]), Sub<1>(a[2][2], a[0][2])));
+			Store<align>(dst +  0, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<0>(a[2][0], a[0][0]), Sub<0>(a[2][1], a[0][1]), Sub<0>(a[2][2], a[0][2]))));
+			Store<align>(dst + HA, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<1>(a[2][0], a[0][0]), Sub<1>(a[2][1], a[0][1]), Sub<1>(a[2][2], a[0][2]))));
 		}
 
-		template <bool align> void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+		template <bool align, bool abs> void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
 		{
 			assert(width > A);
 			if (align)
@@ -124,16 +124,16 @@ namespace Simd
 
 				LoadNose3<align, 1>(src0 + 0, a[0]);
 				LoadNose3<align, 1>(src2 + 0, a[2]);
-				SobelDy<align>(a, dst + 0);
+				SobelDy<align, abs>(a, dst + 0);
 				for (size_t col = A; col < bodyWidth; col += A)
 				{
 					LoadBody3<align, 1>(src0 + col, a[0]);
 					LoadBody3<align, 1>(src2 + col, a[2]);
-					SobelDy<align>(a, dst + col);
+					SobelDy<align, abs>(a, dst + col);
 				}
 				LoadTail3<false, 1>(src0 + width - A, a[0]);
 				LoadTail3<false, 1>(src2 + width - A, a[2]);
-				SobelDy<false>(a, dst + width - A);
+				SobelDy<false, abs>(a, dst + width - A);
 
 				dst += dstStride;
 			}
@@ -144,9 +144,19 @@ namespace Simd
 			assert(dstStride%sizeof(int16_t) == 0);
 
 			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
-				SobelDy<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+				SobelDy<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 			else
-				SobelDy<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+				SobelDy<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
+
+		void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			assert(dstStride%sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+			else
+				SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
     }
 #endif// SIMD_NEON_ENABLE
