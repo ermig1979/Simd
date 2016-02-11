@@ -23,17 +23,23 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdMath.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+		template<bool abs, int part> SIMD_INLINE int16x8_t SobelDx(uint8x16_t a[3][3])
+		{
+			return ConditionalAbs<abs>((int16x8_t)BinomialSum16(
+				Sub<part>(a[0][2], a[0][0]), Sub<part>(a[1][2], a[1][0]), Sub<part>(a[2][2], a[2][0])));
+		}
+
 		template<bool align, bool abs> SIMD_INLINE void SobelDx(uint8x16_t a[3][3], int16_t * dst)
 		{
-			Store<align>(dst +  0, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<0>(a[0][2], a[0][0]), Sub<0>(a[1][2], a[1][0]), Sub<0>(a[2][2], a[2][0]))));
-			Store<align>(dst + HA, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<1>(a[0][2], a[0][0]), Sub<1>(a[1][2], a[1][0]), Sub<1>(a[2][2], a[2][0]))));
+			Store<align>(dst, SobelDx<abs, 0>(a));
+			Store<align>(dst + HA, SobelDx<abs, 1>(a));
 		}
 
         template <bool align, bool abs> void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
@@ -95,6 +101,70 @@ namespace Simd
 			else
 				SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
+
+		SIMD_INLINE void SobelDxAbsSum(uint8x16_t a[3][3], uint32x4_t & sum)
+		{
+			sum = vaddq_u32(sum, vpaddlq_u16((uint16x8_t)vaddq_s16(SobelDx<true, 0>(a), SobelDx<true, 1>(a))));
+		}
+
+		SIMD_INLINE void SetMask3(uint8x16_t a[3], uint8x16_t mask)
+		{
+			a[0] = vandq_u8(a[0], mask);
+			a[1] = vandq_u8(a[1], mask);
+			a[2] = vandq_u8(a[2], mask);
+		}
+
+		SIMD_INLINE void SetMask3x3(uint8x16_t a[3][3], uint8x16_t mask)
+		{
+			SetMask3(a[0], mask);
+			SetMask3(a[1], mask);
+			SetMask3(a[2], mask);
+		}
+
+		void SobelDxAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width > A);
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+
+			uint8x16_t a[3][3];
+			uint64x2_t fullSum = K64_0000000000000000;
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				src0 = src + stride*(row - 1);
+				src1 = src0 + stride;
+				src2 = src1 + stride;
+				if (row == 0)
+					src0 = src1;
+				if (row == height - 1)
+					src2 = src1;
+
+				uint32x4_t rowSum = K32_00000000;
+
+				LoadNoseDx(src0 + 0, a[0]);
+				LoadNoseDx(src1 + 0, a[1]);
+				LoadNoseDx(src2 + 0, a[2]);
+				SobelDxAbsSum(a, rowSum);
+				for (size_t col = A; col < bodyWidth; col += A)
+				{
+					LoadBodyDx(src0 + col, a[0]);
+					LoadBodyDx(src1 + col, a[1]);
+					LoadBodyDx(src2 + col, a[2]);
+					SobelDxAbsSum(a, rowSum);
+				}
+				LoadTailDx(src0 + width - A, a[0]);
+				LoadTailDx(src1 + width - A, a[1]);
+				LoadTailDx(src2 + width - A, a[2]);
+				SetMask3x3(a, tailMask);
+				SobelDxAbsSum(a, rowSum);
+
+				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+			}
+			*sum = ExtractSum(fullSum);
+        }
 
 		template<bool align, bool abs> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
 		{
