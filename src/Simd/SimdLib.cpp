@@ -2498,7 +2498,12 @@ SIMD_API void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width
         Vmx::SobelDyAbsSum(src, stride, width, height, sum);
     else
 #endif
-        Base::SobelDyAbsSum(src, stride, width, height, sum);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::SobelDyAbsSum(src, stride, width, height, sum);
+	else
+#endif
+		Base::SobelDyAbsSum(src, stride, width, height, sum);
 }
 
 SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)

@@ -166,10 +166,16 @@ namespace Simd
 			*sum = ExtractSum(fullSum);
         }
 
+		template<bool abs, int part> SIMD_INLINE int16x8_t SobelDy(uint8x16_t a[3][3])
+		{
+			return ConditionalAbs<abs>((int16x8_t)BinomialSum16(
+				Sub<part>(a[2][0], a[0][0]), Sub<part>(a[2][1], a[0][1]), Sub<part>(a[2][2], a[0][2])));
+		}
+
 		template<bool align, bool abs> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
 		{
-			Store<align>(dst +  0, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<0>(a[2][0], a[0][0]), Sub<0>(a[2][1], a[0][1]), Sub<0>(a[2][2], a[0][2]))));
-			Store<align>(dst + HA, ConditionalAbs<abs>((int16x8_t)BinomialSum16(Sub<1>(a[2][0], a[0][0]), Sub<1>(a[2][1], a[0][1]), Sub<1>(a[2][2], a[0][2]))));
+			Store<align>(dst, SobelDy<abs, 0>(a));
+			Store<align>(dst + HA, SobelDy<abs, 1>(a));
 		}
 
 		template <bool align, bool abs> void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
@@ -227,6 +233,61 @@ namespace Simd
 				SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 			else
 				SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
+
+		SIMD_INLINE void SobelDyAbsSum(uint8x16_t a[3][3], uint32x4_t & sum)
+		{
+			sum = vaddq_u32(sum, vpaddlq_u16((uint16x8_t)vaddq_s16(SobelDy<true, 0>(a), SobelDy<true, 1>(a))));
+		}
+
+		template <bool align> void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width > A);
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+
+			uint8x16_t a[3][3];
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + bodyWidth);
+			uint64x2_t fullSum = K64_0000000000000000;
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				src0 = src + stride*(row - 1);
+				src1 = src0 + stride;
+				src2 = src1 + stride;
+				if (row == 0)
+					src0 = src1;
+				if (row == height - 1)
+					src2 = src1;
+
+				uint32x4_t rowSum = K32_00000000;
+
+				LoadNose3<align, 1>(src0 + 0, a[0]);
+				LoadNose3<align, 1>(src2 + 0, a[2]);
+				SobelDyAbsSum(a, rowSum);
+				for (size_t col = A; col < bodyWidth; col += A)
+				{
+					LoadBody3<align, 1>(src0 + col, a[0]);
+					LoadBody3<align, 1>(src2 + col, a[2]);
+					SobelDyAbsSum(a, rowSum);
+				}
+				LoadTail3<false, 1>(src0 + width - A, a[0]);
+				LoadTail3<false, 1>(src2 + width - A, a[2]);
+				SetMask3x3(a, tailMask);
+				SobelDyAbsSum(a, rowSum);
+
+				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+			}
+			*sum = ExtractSum(fullSum);
+		}
+
+		void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(stride))
+				SobelDyAbsSum<true>(src, stride, width, height, sum);
+			else
+				SobelDyAbsSum<false>(src, stride, width, height, sum);
 		}
     }
 #endif// SIMD_NEON_ENABLE
