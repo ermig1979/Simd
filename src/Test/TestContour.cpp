@@ -106,6 +106,11 @@ namespace Test
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vmx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+#endif
+
         return result;
     }
 

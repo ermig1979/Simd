@@ -2549,6 +2549,11 @@ SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, si
         Vmx::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
+	else
+#endif
         Base::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
 }
 
