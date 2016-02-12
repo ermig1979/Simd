@@ -289,6 +289,69 @@ namespace Simd
 			else
 				SobelDyAbsSum<false>(src, stride, width, height, sum);
 		}
+
+		template<int part> SIMD_INLINE int16x8_t ContourMetrics(uint8x16_t a[3][3])
+		{
+			int16x8_t dx = SobelDx<true, part>(a);
+			int16x8_t dy = SobelDy<true, part>(a);
+			return vaddq_s16(vshlq_n_s16(vaddq_s16(dx, dy), 1), (int16x8_t)vandq_u16(vcltq_s16(dx, dy), K16_0001));
+		}
+
+		template<bool align> SIMD_INLINE void ContourMetrics(uint8x16_t a[3][3], int16_t * dst)
+		{
+			Store<align>(dst, ContourMetrics<0>(a));
+			Store<align>(dst + HA, ContourMetrics<1>(a));
+		}
+
+		template <bool align> void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+		{
+			assert(width > A);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride, HA));
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+			uint8x16_t a[3][3];
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				src0 = src + srcStride*(row - 1);
+				src1 = src0 + srcStride;
+				src2 = src1 + srcStride;
+				if (row == 0)
+					src0 = src1;
+				if (row == height - 1)
+					src2 = src1;
+
+				LoadNose3<align, 1>(src0 + 0, a[0]);
+				LoadNose3<align, 1>(src1 + 0, a[1]);
+				LoadNose3<align, 1>(src2 + 0, a[2]);
+				ContourMetrics<align>(a, dst + 0);
+				for (size_t col = A; col < bodyWidth; col += A)
+				{
+					LoadBody3<align, 1>(src0 + col, a[0]);
+					LoadBody3<align, 1>(src1 + col, a[1]);
+					LoadBody3<align, 1>(src2 + col, a[2]);
+					ContourMetrics<align>(a, dst + col);
+				}
+				LoadTail3<false, 1>(src0 + width - A, a[0]);
+				LoadTail3<false, 1>(src1 + width - A, a[1]);
+				LoadTail3<false, 1>(src2 + width - A, a[2]);
+				ContourMetrics<false>(a, dst + width - A);
+
+				dst += dstStride;
+			}
+		}
+
+		void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			assert(dstStride%sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+			else
+				ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

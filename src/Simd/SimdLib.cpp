@@ -2523,6 +2523,11 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
         Vmx::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
         Base::ContourMetrics(src, srcStride, width, height, dst, dstStride);
 }
 
