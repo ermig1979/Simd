@@ -413,6 +413,68 @@ namespace Simd
 			else
 				ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
+
+		template<bool align> SIMD_INLINE uint16x8_t AnchorComponent(const int16_t * src, size_t step, const int16x8_t & value, const uint16x8_t & mask)
+		{
+			int16x8_t last = (int16x8_t)vshrq_n_u16((uint16x8_t)Load<align>(src - step), 1);
+			int16x8_t next = (int16x8_t)vshrq_n_u16((uint16x8_t)Load<align>(src + step), 1);
+			return vandq_u16(vandq_u16(vcgeq_s16(value, last), vcgeq_s16(value, next)), mask);
+		}
+
+		template<bool align> SIMD_INLINE uint16x8_t Anchor(const int16_t * src, size_t stride, const int16x8_t & threshold)
+		{
+			int16x8_t _src = Load<align>(src);
+			uint16x8_t direction = vandq_u16((uint16x8_t)_src, K16_0001);
+			int16x8_t magnitude = (int16x8_t)vshrq_n_u16((uint16x8_t)_src, 1);
+			int16x8_t value = vsubq_s16(magnitude, threshold);
+			uint16x8_t vertical = AnchorComponent<false>(src, 1, value, vceqq_u16(direction, K16_0001));
+			uint16x8_t horizontal = AnchorComponent<align>(src, stride, value, vceqq_u16(direction, K16_0000));
+			return vandq_u16(vcgtq_u16((uint16x8_t)magnitude, K16_0000), vandq_u16(vorrq_u16(vertical, horizontal), K16_00FF));
+		}
+
+		template<bool align> SIMD_INLINE void Anchor(const int16_t * src, size_t stride, const int16x8_t & threshold, uint8_t * dst)
+		{
+			uint16x8_t lo = Anchor<align>(src, stride, threshold);
+			uint16x8_t hi = Anchor<align>(src + HA, stride, threshold);
+			Store<align>(dst, PackU16(lo, hi));
+		}
+
+		template <bool align> void ContourAnchors(const int16_t * src, size_t srcStride, size_t width, size_t height,
+			size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
+		{
+			assert(width > A);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			int16x8_t _threshold = vdupq_n_s16(threshold);
+			memset(dst, 0, width);
+			memset(dst + dstStride*(height - 1), 0, width);
+			src += srcStride;
+			dst += dstStride;
+			for (size_t row = 1; row < height - 1; row += step)
+			{
+				dst[0] = 0;
+				Anchor<false>(src + 1, srcStride, _threshold, dst + 1);
+				for (size_t col = A; col < bodyWidth; col += A)
+					Anchor<align>(src + col, srcStride, _threshold, dst + col);
+				Anchor<false>(src + width - A - 1, srcStride, _threshold, dst + width - A - 1);
+				dst[width - 1] = 0;
+				src += step*srcStride;
+				dst += step*dstStride;
+			}
+		}
+
+		void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
+		{
+			assert(srcStride%sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ContourAnchors<true>((const int16_t *)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+			else
+				ContourAnchors<false>((const int16_t *)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

@@ -192,6 +192,11 @@ namespace Test
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vmx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
+#endif
+
         return result;
     }
 

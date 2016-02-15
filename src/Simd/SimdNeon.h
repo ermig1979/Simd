@@ -231,6 +231,9 @@ namespace Simd
 		void ContourMetricsMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
 
+		void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
+
 		void SquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
 			size_t width, size_t height, uint64_t * sum);
 

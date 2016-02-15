@@ -2574,6 +2574,11 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
         Vmx::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width > Neon::A)
+		Neon::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+	else
+#endif
         Base::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
 }
 
