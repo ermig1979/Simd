@@ -2678,6 +2678,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Vmx::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::GetStatistic(src, stride, width, height, min, max, average);
+	else
+#endif
         Base::GetStatistic(src, stride, width, height, min, max, average);
 }
 
