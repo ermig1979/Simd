@@ -2704,7 +2704,12 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
         Vmx::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
-        Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A && width < SHRT_MAX && height < SHRT_MAX)
+		Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+	else
+#endif
+		Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 }
 
 SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)

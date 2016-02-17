@@ -211,6 +211,11 @@ namespace Test
             result = result && GetMomentsAutoTest(FUNC_M(Simd::Vmx::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && GetMomentsAutoTest(FUNC_M(Simd::Neon::GetMoments), FUNC_M(SimdGetMoments));
+#endif
+
         return result;
     }
 

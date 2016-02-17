@@ -247,6 +247,9 @@ namespace Simd
 		void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
 			uint8_t * min, uint8_t * max, uint8_t * average);
 
+		void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
+
 		void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
