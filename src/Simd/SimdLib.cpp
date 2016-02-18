@@ -2729,6 +2729,11 @@ SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, s
         Vmx::GetRowSums(src, stride, width, height, sums);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::GetRowSums(src, stride, width, height, sums);
+	else
+#endif
         Base::GetRowSums(src, stride, width, height, sums);
 }
 
