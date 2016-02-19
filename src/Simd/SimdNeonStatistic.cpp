@@ -293,6 +293,86 @@ namespace Simd
 			else
 				GetRowSums<false>(src, stride, width, height, sums);
 		}
+
+		namespace
+		{
+			struct Buffer
+			{
+				Buffer(size_t width)
+				{
+					_p = Allocate(sizeof(uint16_t)*width + sizeof(uint32_t)*width);
+					sums16 = (uint16_t*)_p;
+					sums32 = (uint32_t*)(sums16 + width);
+				}
+
+				~Buffer()
+				{
+					Free(_p);
+				}
+
+				uint16_t * sums16;
+				uint32_t * sums32;
+			private:
+				void *_p;
+			};
+		}
+
+		template <bool align> SIMD_INLINE void Sum16(const uint8x16_t & src, uint16_t * dst)
+		{
+			Store<align>(dst + 0, vaddq_u16(Load<align>(dst + 0), UnpackU8<0>(src)));
+			Store<align>(dst + 8, vaddq_u16(Load<align>(dst + 8), UnpackU8<1>(src)));
+		}
+
+		template <bool align> SIMD_INLINE void Sum32(const uint16x8_t & src, uint32_t * dst)
+		{
+			Store<align>(dst + 0, vaddq_u32(Load<align>(dst + 0), UnpackU16<0>(src)));
+			Store<align>(dst + 4, vaddq_u32(Load<align>(dst + 4), UnpackU16<1>(src)));
+		}
+
+		template <bool align> void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			size_t alignedLoWidth = AlignLo(width, A);
+			size_t alignedHiWidth = AlignHi(width, A);
+			const uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedLoWidth);
+			size_t stepSize = SCHAR_MAX + 1;
+			size_t stepCount = (height + SCHAR_MAX) / stepSize;
+
+			Buffer buffer(alignedHiWidth);
+			memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+			for (size_t step = 0; step < stepCount; ++step)
+			{
+				size_t rowStart = step*stepSize;
+				size_t rowEnd = Min(rowStart + stepSize, height);
+
+				memset(buffer.sums16, 0, sizeof(uint16_t)*width);
+				for (size_t row = rowStart; row < rowEnd; ++row)
+				{
+					for (size_t col = 0; col < alignedLoWidth; col += A)
+					{
+						const uint8x16_t _src = Load<align>(src + col);
+						Sum16<true>(_src, buffer.sums16 + col);
+					}
+					if (alignedLoWidth != width)
+					{
+						const uint8x16_t _src = vandq_u8(Load<false>(src + width - A), tailMask);
+						Sum16<false>(_src, buffer.sums16 + width - A);
+					}
+					src += stride;
+				}
+
+				for (size_t col = 0; col < alignedHiWidth; col += HA)
+					Sum32<true>(Load<true>(buffer.sums16 + col), buffer.sums32 + col);
+			}
+			memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+		}
+
+		void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			if (Aligned(src) && Aligned(stride))
+				GetColSums<true>(src, stride, width, height, sums);
+			else
+				GetColSums<false>(src, stride, width, height, sums);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
