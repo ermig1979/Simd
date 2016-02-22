@@ -2779,6 +2779,11 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
         Vmx::GetAbsDyRowSums(src, stride, width, height, sums);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::GetAbsDyRowSums(src, stride, width, height, sums);
+	else
+#endif
         Base::GetAbsDyRowSums(src, stride, width, height, sums);
 }
 

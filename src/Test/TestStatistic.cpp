@@ -352,6 +352,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+#endif
+
         return result;
     }
 
