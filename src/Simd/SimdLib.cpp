@@ -2804,6 +2804,11 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
         Vmx::GetAbsDxColSums(src, stride, width, height, sums);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::GetAbsDxColSums(src, stride, width, height, sums);
+	else
+#endif
         Base::GetAbsDxColSums(src, stride, width, height, sums);
 }
 

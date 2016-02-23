@@ -256,6 +256,8 @@ namespace Simd
 
 		void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
+		void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+
 		void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
 			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 

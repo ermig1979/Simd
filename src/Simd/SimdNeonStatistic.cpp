@@ -418,6 +418,55 @@ namespace Simd
 			else
 				GetAbsDyRowSums<false>(src, stride, width, height, sums);
 		}
+
+		template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			width--;
+			size_t alignedLoWidth = AlignLo(width, A);
+			size_t alignedHiWidth = AlignHi(width, A);
+			const uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedLoWidth);
+			size_t stepSize = SCHAR_MAX + 1;
+			size_t stepCount = (height + SCHAR_MAX) / stepSize;
+
+			Buffer buffer(alignedHiWidth);
+			memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
+			for (size_t step = 0; step < stepCount; ++step)
+			{
+				size_t rowStart = step*stepSize;
+				size_t rowEnd = Min(rowStart + stepSize, height);
+
+				memset(buffer.sums16, 0, sizeof(uint16_t)*width);
+				for (size_t row = rowStart; row < rowEnd; ++row)
+				{
+					for (size_t col = 0; col < alignedLoWidth; col += A)
+					{
+						const uint8x16_t _src0 = Load<align>(src + col + 0);
+						const uint8x16_t _src1 = Load<false>(src + col + 1);
+						Sum16<true>(vabdq_u8(_src0, _src1), buffer.sums16 + col);
+					}
+					if (alignedLoWidth != width)
+					{
+						const uint8x16_t _src0 = Load<false>(src + width - A + 0);
+						const uint8x16_t _src1 = Load<false>(src + width - A + 1);
+						Sum16<false>(vandq_u8(vabdq_u8(_src0, _src1), tailMask), buffer.sums16 + width - A);
+					}
+					src += stride;
+				}
+
+				for (size_t col = 0; col < alignedHiWidth; col += HA)
+					Sum32<true>(Load<true>(buffer.sums16 + col), buffer.sums32 + col);
+			}
+			memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
+			sums[width] = 0;
+		}
+
+		void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			if (Aligned(src) && Aligned(stride))
+				GetAbsDxColSums<true>(src, stride, width, height, sums);
+			else
+				GetAbsDxColSums<false>(src, stride, width, height, sums);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }
