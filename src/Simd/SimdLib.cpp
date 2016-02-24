@@ -2829,6 +2829,11 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Vmx::ValueSum(src, stride, width, height, sum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::ValueSum(src, stride, width, height, sum);
+	else
+#endif
         Base::ValueSum(src, stride, width, height, sum);
 }
 

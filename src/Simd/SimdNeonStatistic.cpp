@@ -64,7 +64,7 @@ namespace Simd
                     const uint8x16_t _src = Load<false>(src + width - A);
 					_min = vminq_u8(_min, _src);
 					_max = vmaxq_u8(_max, _src);
-					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8( _src)));
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(vandq_u8(_src, tailMask))));
                 }
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 				src += stride;
@@ -466,6 +466,49 @@ namespace Simd
 				GetAbsDxColSums<true>(src, stride, width, height, sums);
 			else
 				GetAbsDxColSums<false>(src, stride, width, height, sums);
+		}
+
+		template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(src) && Aligned(stride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+			size_t blockSize = A << 8;
+			size_t blockCount = (alignedWidth >> 8) + 1;
+			uint64x2_t fullSum = K64_0000000000000000;
+			for (size_t row = 0; row < height; ++row)
+			{
+				uint32x4_t rowSum = K32_00000000;
+				for (size_t block = 0; block < blockCount; ++block)
+				{
+					uint16x8_t blockSum = K16_0000;
+					for (size_t col = block*blockSize, end = Min(col + blockSize, alignedWidth); col < end; col += A)
+					{
+						const uint8x16_t _src = Load<align>(src + col);
+						blockSum = vaddq_u16(blockSum, vpaddlq_u8(_src));
+					}
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(blockSum));
+				}
+				if (width - alignedWidth)
+				{
+					const uint8x16_t _src = vandq_u8(Load<false>(src + width - A), tailMask);
+					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(_src)));
+				}
+				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+				src += stride;
+			}
+			*sum = ExtractSum(fullSum);
+		}
+
+		void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(stride))
+				ValueSum<true>(src, stride, width, height, sum);
+			else
+				ValueSum<false>(src, stride, width, height, sum);
 		}
     }
 #endif// SIMD_NEON_ENABLE
