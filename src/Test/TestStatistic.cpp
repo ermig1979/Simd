@@ -492,6 +492,11 @@ namespace Test
             result = result && SumAutoTest(FUNC4(Simd::Vmx::SquareSum), FUNC4(SimdSquareSum));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && SumAutoTest(FUNC4(Simd::Neon::SquareSum), FUNC4(SimdSquareSum));
+#endif
+
         return result;
     }
 
