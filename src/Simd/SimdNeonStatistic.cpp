@@ -553,6 +553,53 @@ namespace Simd
 			else
 				SquareSum<false>(src, stride, width, height, sum);
 		}
+
+		SIMD_INLINE uint32x4_t Correlation(const uint8x16_t & a, const uint8x16_t & b)
+		{
+			uint16x8_t lo = vmull_u8(Half<0>(a), Half<0>(b));
+			uint16x8_t hi = vmull_u8(Half<1>(a), Half<1>(b));
+			return vaddq_u32(vpaddlq_u16(lo), vpaddlq_u16(hi));
+		}
+
+		template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width >= A);
+			if (align)
+				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
+
+			uint64x2_t fullSum = K64_0000000000000000;
+			for (size_t row = 0; row < height; ++row)
+			{
+				uint32x4_t rowSum = K32_00000000;
+				for (size_t col = 0; col < alignedWidth; col += A)
+				{
+					uint8x16_t _a = Load<align>(a + col);
+					uint8x16_t _b = Load<align>(b + col);
+					rowSum = vaddq_u32(rowSum, Correlation(_a, _b));
+				}
+				if (alignedWidth != width)
+				{
+					uint8x16_t _a = vandq_u8(Load<align>(a + width - A), tailMask);
+					uint8x16_t _b = vandq_u8(Load<align>(b + width - A), tailMask);
+					rowSum = vaddq_u32(rowSum, Correlation(_a, _b));
+				}
+				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
+				a += aStride;
+				b += bStride;
+			}
+			*sum = ExtractSum(fullSum);
+		}
+
+		void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+				CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
+			else
+				CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
+		}
     }
 #endif// SIMD_NEON_ENABLE
 }

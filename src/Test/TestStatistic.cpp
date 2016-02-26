@@ -663,6 +663,11 @@ namespace Test
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Vmx::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && CorrelationSumAutoTest(FUNC5(Simd::Neon::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif
+
         return result;
     }
 

@@ -2879,6 +2879,11 @@ SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_
         Vmx::CorrelationSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && width >= Neon::A)
+		Neon::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+	else
+#endif
         Base::CorrelationSum(a, aStride, b, bStride, width, height, sum);
 }
 
