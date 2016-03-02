@@ -124,6 +124,11 @@ namespace Test
             result = result && ResizeAutoTest(FUNC(Simd::Vmx::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable)
+			result = result && ResizeAutoTest(FUNC(Simd::Neon::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif
+
         return result;
     }
 

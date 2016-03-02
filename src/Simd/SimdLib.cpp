@@ -2208,6 +2208,11 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
         Vmx::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+	if (Neon::Enable && dstWidth >= Neon::A)
+		Neon::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+	else
+#endif
         Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
 }
 
