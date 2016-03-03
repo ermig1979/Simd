@@ -43,7 +43,7 @@ namespace Test
         assert(view.data);
 
 		size_t width = view.width*View::PixelSize(view.format);
-		bool fast = (lo == 0) && (hi = 255);
+		bool fast = (lo == 0) && (hi == 255);
         for(size_t row = 0; row < view.height; ++row)
         {
             ptrdiff_t offset = row*view.stride;

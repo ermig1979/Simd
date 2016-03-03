@@ -126,6 +126,11 @@ namespace Test
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Neon::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
+#endif
+
         return result;
     }
 
@@ -149,6 +154,11 @@ namespace Test
         if(Simd::Vmx::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Neon::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
+#endif
 
         return result;
     }
@@ -210,7 +220,12 @@ namespace Test
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
-#endif 
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Neon::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
+#endif
 
         return result;
     }
@@ -234,6 +249,11 @@ namespace Test
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Neon::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
         return result;

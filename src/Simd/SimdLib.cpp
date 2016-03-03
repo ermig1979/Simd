@@ -1584,6 +1584,11 @@ SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size
         Vmx::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::HA)
+        Neon::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+    else
+#endif
         Base::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
 }
 
@@ -1603,6 +1608,11 @@ SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statis
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
     else
 #endif
         Base::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
@@ -1625,6 +1635,11 @@ SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size
         Vmx::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::HA)
+        Neon::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+    else
+#endif
         Base::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
 }
 
@@ -1644,6 +1659,11 @@ SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statis
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
     else
 #endif
         Base::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
