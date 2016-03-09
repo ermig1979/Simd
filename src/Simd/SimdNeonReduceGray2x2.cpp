@@ -29,17 +29,58 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-		SIMD_INLINE uint8x16_t Average(const uint8x16_t & s0, const uint8x16_t & s1)
+		SIMD_INLINE uint8x8_t Average(const uint8x16_t & s0, const uint8x16_t & s1)
 		{
-			return (uint8x16_t)vshrq_n_u16(vaddq_u16(vaddq_u16(vpaddlq_u8(s0), vpaddlq_u8(s1)), K16_0002), 2);
+			return vshrn_n_u16(vaddq_u16(vaddq_u16(vpaddlq_u8(s0), vpaddlq_u8(s1)), vdupq_n_u16(2)), 2);
 		}
 
-		template <bool align> SIMD_INLINE uint8x16_t Average(const uint8_t * src0, const uint8_t * src1)
+		template <bool align> SIMD_INLINE void ReduceGray2x2(const uint8_t * src0, const uint8_t * src1, uint8_t * dst)
 		{
-			uint8x16_t lo = Average(Load<align>(src0 + 0), Load<align>(src1 + 0));
-			uint8x16_t hi = Average(Load<align>(src0 + A), Load<align>(src1 + A));
-			return vuzpq_u8(lo, hi).val[0];
+            uint8x8x2_t _dst;
+			_dst.val[0] = Average(Load<align>(src0 + 0), Load<align>(src1 + 0));
+            _dst.val[1] = Average(Load<align>(src0 + A), Load<align>(src1 + A));
+            Store<align>(dst, *(uint8x16_t*)&_dst);
 		}
+
+        template <bool align> SIMD_INLINE void ReduceGray2x2(const uint8_t * src0, const uint8_t * src1, size_t size, uint8_t * dst)
+        {
+            for (size_t i = 0; i < size; i += DA, src0 += DA, src1 += DA, dst += A)
+                ReduceGray2x2<align>(src0, src1, dst);
+        }
+
+#if defined(SIMD_NEON_ASM_ENABLE) && 0
+        template <> void ReduceGray2x2<true>(const uint8_t * src0, const uint8_t * src1, size_t size, uint8_t * dst)
+        {
+            asm(
+                "mov r4, #2               \n"
+                "vdup.u16  q4, r4         \n"
+                "mov r5, %0               \n"
+                "mov r6, %1               \n"
+                "mov r4, %2               \n"
+                "mov r7, %3               \n"
+                ".loop:                   \n"
+                "vld1.8 {q0}, [r5:128]!   \n"
+                "vld1.8 {q2}, [r6:128]!   \n"
+                "vpaddl.u8 q0, q0         \n"
+                "vpadal.u8 q0, q2         \n"
+                "vadd.u16  q0, q0, q4     \n"
+                "vshrn.u16 d10, q0, #2    \n"
+                "vld1.8 {q1}, [r5:128]!   \n"
+                "vld1.8 {q3}, [r6:128]!   \n"
+                "vpaddl.u8 q1, q1         \n"
+                "vpadal.u8 q1, q3         \n"
+                "vadd.u16  q1, q1, q4     \n"
+                "vshrn.u16 d11, q1, #2    \n"
+                "vst1.8 {q5}, [r7:128]!   \n"
+                "subs r4, r4, #32         \n"
+                "bne .loop                \n"
+
+                :
+                : "r"(src0), "r"(src1), "r" (size), "r"(dst)
+                : "q0", "q1", "q2", "q3", "q4", "q5", "r4", "r5", "r6", "r7", "memory"
+                );
+        }
+#endif
 
         template <bool align> void ReduceGray2x2(
             const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
@@ -58,14 +99,12 @@ namespace Simd
             {
                 const uint8_t * src0 = src;
                 const uint8_t * src1 = (srcRow == srcHeight - 1 ? src : src + srcStride);
-                size_t srcOffset = 0, dstOffset = 0;
-				for (; srcOffset < alignedWidth; srcOffset += DA, dstOffset += A)
-					Store<align>(dst + dstOffset, Average<align>(src0 + srcOffset, src1 + srcOffset));
+				ReduceGray2x2<align>(src0, src1, alignedWidth, dst);
                 if(alignedWidth != srcWidth)
                 {
-                    dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
-                    srcOffset = evenWidth - DA;
-					Store<align>(dst + dstOffset, Average<align>(src0 + srcOffset, src1 + srcOffset));
+                    size_t dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
+                    size_t srcOffset = evenWidth - DA;
+					ReduceGray2x2<align>(src0 + srcOffset, src1 + srcOffset, dst + dstOffset);
 					if (evenWidth != srcWidth)
                         dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
                 }

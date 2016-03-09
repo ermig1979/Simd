@@ -179,6 +179,10 @@
 #define SIMD_NEON_ENABLE
 #endif
 
+#if !defined(SIMD_NEON_ASM_DISABLE) && defined(__GNUC__)
+#define SIMD_NEON_ASM_ENABLE
+#endif
+
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
 #else
