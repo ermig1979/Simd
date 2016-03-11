@@ -2,6 +2,7 @@
 * Simd Library (http://simd.sourceforge.net).
 *
 * Copyright (c) 2011-2016 Yermalayeu Ihar.
+*               2016-2016 Sintegrial Technologies.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -34,9 +35,9 @@ namespace Simd
         return (size + align - 1) & ~(align - 1);
     }
 
-    SIMD_INLINE void* AlignHi(const void *p, size_t align)
+    SIMD_INLINE void * AlignHi(const void * ptr, size_t align)
     {
-        return (void*)((((size_t)p) + align - 1) & ~(align - 1));
+        return (void *)((((size_t)ptr) + align - 1) & ~(align - 1));
     }
 
     SIMD_INLINE size_t AlignLo(size_t size, size_t align)
@@ -44,27 +45,29 @@ namespace Simd
         return size & ~(align - 1);
     }
 
-    SIMD_INLINE void* AlignLo(const void * p, size_t align)
+    SIMD_INLINE void * AlignLo(const void * ptr, size_t align)
     {
-        return (void*)(((size_t)p) & ~(align - 1));
+        return (void *)(((size_t)ptr) & ~(align - 1));
     }
 
     SIMD_INLINE bool Aligned(size_t size, size_t align)
     {
-        return size%align == 0;
+        return size == AlignLo(size, align);
     }
 
-    SIMD_INLINE bool Aligned(const void * p, size_t align)
+    SIMD_INLINE bool Aligned(const void * ptr, size_t align)
     {
-        return ((size_t)p)%align == 0;
+        return ptr == AlignLo(ptr, align);
     }
 
-	SIMD_INLINE void * Allocate(size_t size, size_t align = SIMD_ALIGN)
-	{
+    SIMD_INLINE void * Allocate(size_t size, size_t align = SIMD_ALIGN)
+    {
 #if defined(_MSC_VER) 
         return _aligned_malloc(size, align);
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+        return __mingw_aligned_malloc(size, align);
 #elif defined(__GNUC__)
-        align = AlignHi(align, sizeof(void*));
+        align = AlignHi(align, sizeof(void *));
         size = AlignHi(size, align);
         void * ptr;
         int result = ::posix_memalign(&ptr, align, size);
@@ -73,18 +76,20 @@ namespace Simd
 #endif
         return result ? NULL : ptr;
 #else
-		return malloc(size);
+        return malloc(size);
 #endif
-	}
+    }
 
-	SIMD_INLINE void Free(void * p)
-	{
+    SIMD_INLINE void Free(void * ptr)
+    {
 #if defined(_MSC_VER) 
-        _aligned_free(p);
+        _aligned_free(ptr);
+#elif defined(__MINGW32__) || defined(__MINGW64__)
+        return __mingw_aligned_free(ptr);
 #else
-		free(p);
+        free(ptr);
 #endif
-	}
+    }
 
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
@@ -94,9 +99,9 @@ namespace Simd
             return Simd::Aligned(size, align);
         }
 
-        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m128))
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m128))
         {
-            return Simd::Aligned(p, align);
+            return Simd::Aligned(ptr, align);
         }
     }
 #endif// SIMD_SSE_ENABLE
@@ -129,9 +134,9 @@ namespace Simd
             return Simd::Aligned(size, align);
         }
 
-        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(__m256))
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m256))
         {
-            return Simd::Aligned(p, align);
+            return Simd::Aligned(ptr, align);
         }
     }
 #endif// SIMD_AVX_ENABLE
@@ -151,9 +156,9 @@ namespace Simd
             return Simd::Aligned(size, align);
         }
 
-        SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(vec_uchar16))
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(vec_uchar16))
         {
-            return Simd::Aligned(p, align);
+            return Simd::Aligned(ptr, align);
         }
     }
 #endif// SIMD_VMX_ENABLE
@@ -173,9 +178,9 @@ namespace Simd
 			return Simd::Aligned(size, align);
 		}
 
-		SIMD_INLINE bool Aligned(const void *p, size_t align = sizeof(uint8x16_t))
+		SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(uint8x16_t))
 		{
-			return Simd::Aligned(p, align);
+			return Simd::Aligned(ptr, align);
 		}
 	}
 #endif// SIMD_NEON_ENABLE
