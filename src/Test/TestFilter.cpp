@@ -115,6 +115,11 @@ namespace Test
 			result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#endif
+
 		return result;
 	}
 
