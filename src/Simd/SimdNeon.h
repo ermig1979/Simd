@@ -166,7 +166,13 @@ namespace Simd
 
         void InterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
-		void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+        void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint32_t * histogram);
+
+        void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
+
+        void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
 		void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 

@@ -182,5 +182,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
