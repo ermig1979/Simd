@@ -178,6 +178,116 @@ namespace Simd
 				SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
 					difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
 		}
+
+        SIMD_INLINE bool IsNotZero(uint8x16_t value)
+        {
+            uint32x2_t tmp = (uint32x2_t)vorr_u8(Half<0>(value), Half<1>(value));
+            return vget_lane_u32(vpmax_u32(tmp, tmp), 0);
+        }
+
+        SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, uint8x16_t index)
+        {
+            for (size_t col = 0; col < alignedSize; col += A)
+            {
+                if (IsNotZero(vceqq_u8(Load<false>(mask + col), index)))
+                    return true;
+            }
+            if (alignedSize != fullSize)
+            {
+                if (IsNotZero(vceqq_u8(Load<false>(mask + fullSize - A), index)))
+                    return true;
+            }
+            return false;
+        }
+
+        SIMD_INLINE bool ColsHasIndex(const uint8_t * mask, size_t stride, size_t size, uint8x16_t index, uint8_t * cols)
+        {
+            uint8x16_t _cols = K8_00;
+            for (size_t row = 0; row < size; ++row)
+            {
+                _cols = vorrq_u8(_cols, vceqq_u8(Load<false>(mask), index));
+                mask += stride;
+            }
+            Store<false>(cols, _cols);
+            return IsNotZero(_cols);
+        }
+
+        void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+            ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
+        {
+            assert(*right - *left >= (ptrdiff_t)A && *bottom > *top);
+            assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
+
+            size_t fullWidth = *right - *left;
+            ptrdiff_t alignedWidth = Simd::AlignLo(fullWidth, A);
+            uint8x16_t _index = vdupq_n_u8(index);
+            bool search = true;
+            for (ptrdiff_t row = *top; search && row < *bottom; ++row)
+            {
+                if (RowHasIndex(mask + row*stride + *left, alignedWidth, fullWidth, _index))
+                {
+                    search = false;
+                    *top = row;
+                }
+            }
+
+            if (search)
+            {
+                *left = 0;
+                *top = 0;
+                *right = 0;
+                *bottom = 0;
+                return;
+            }
+
+            search = true;
+            for (ptrdiff_t row = *bottom - 1; search && row >= *top; --row)
+            {
+                if (RowHasIndex(mask + row*stride + *left, alignedWidth, fullWidth, _index))
+                {
+                    search = false;
+                    *bottom = row + 1;
+                }
+            }
+
+            search = true;
+            for (ptrdiff_t col = *left; search && col < *left + alignedWidth; col += A)
+            {
+                uint8_t cols[A];
+                if (ColsHasIndex(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols))
+                {
+                    for (size_t i = 0; i < A; i++)
+                    {
+                        if (cols[i])
+                        {
+                            *left = col + i;
+                            break;
+                        }
+                    }
+                    search = false;
+                    break;
+                }
+            }
+
+            search = true;
+            for (ptrdiff_t col = *right; search && col > *left; col -= A)
+            {
+                uint8_t cols[A];
+                if (ColsHasIndex(mask + (*top)*stride + col - A, stride, *bottom - *top, _index, cols))
+                {
+                    for (ptrdiff_t i = A - 1; i >= 0; i--)
+                    {
+                        if (cols[i])
+                        {
+                            *right = col - A + i + 1;
+                            break;
+                        }
+                    }
+                    search = false;
+                    break;
+                }
+            }
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }

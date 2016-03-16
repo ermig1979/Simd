@@ -101,6 +101,11 @@ namespace Test
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Vmx::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Neon::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+#endif
+
         return result;    
     }
 
