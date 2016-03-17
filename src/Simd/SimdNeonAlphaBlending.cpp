@@ -44,6 +44,24 @@ namespace Simd
 			Store<align>(dst, PackU16(lo, hi));
 		}
 
+        template <int part> SIMD_INLINE uint16x8_t AlphaBlending(const uint8x16_t & src, const uint8x16_t & dst, 
+            const uint8x16_t & alpha, const uint8x16_t & ff_alpha)
+        {
+            return DivideI16By255(vaddq_u16(
+                vmull_u8(Half<part>(src), Half<part>(alpha)),
+                vmull_u8(Half<part>(dst), Half<part>(ff_alpha))));
+        }
+
+        template <bool align> SIMD_INLINE void AlphaBlending(const uint8_t * src, uint8_t * dst, const uint8x16_t & alpha)
+        {
+            uint8x16_t _src = Load<align>(src);
+            uint8x16_t _dst = Load<align>(dst);
+            uint8x16_t ff_alpha = vsubq_u8(K8_FF, alpha);
+            uint16x8_t lo = AlphaBlending<0>(_src, _dst, alpha, ff_alpha);
+            uint16x8_t hi = AlphaBlending<1>(_src, _dst, alpha, ff_alpha);
+            Store<align>(dst, PackU16(lo, hi));
+        }
+
 		template <bool align, size_t channelCount> struct AlphaBlender
 		{
 			void operator()(const uint8_t * src, uint8_t * dst, uint8x16_t alpha);
@@ -53,22 +71,17 @@ namespace Simd
 		{
 			SIMD_INLINE void operator()(const uint8_t * src, uint8_t * dst, uint8x16_t alpha)
 			{
-				uint8x8x2_t _alpha{ vget_low_u8(alpha), vget_high_u8(alpha)};
-				AlphaBlending<align>(src, dst, _alpha);
+				AlphaBlending<align>(src, dst, alpha);
 			}
 		};
 
-		const uint8x8_t K8_TBL1_2_0 = SIMD_VEC_SETR_EPI16(0x0, 0x0, 0x1, 0x1, 0x2, 0x2, 0x3, 0x3);
-		const uint8x8_t K8_TBL1_2_1 = SIMD_VEC_SETR_EPI16(0x4, 0x4, 0x5, 0x5, 0x6, 0x6, 0x7, 0x7);
-
         template <bool align> struct AlphaBlender<align, 2>
         {
-
             SIMD_INLINE void operator()(const uint8_t * src, uint8_t * dst, uint8x16_t alpha)
             {
-				uint8x8x2_t _alpha {vget_low_u8(alpha), vget_high_u8(alpha)};
-				AlphaBlending<align>(src + 0, dst + 0, { vtbl1_u8(_alpha.val[0], K8_TBL1_2_0), vtbl1_u8(_alpha.val[0], K8_TBL1_2_1) });
-				AlphaBlending<align>(src + A, dst + A, { vtbl1_u8(_alpha.val[1], K8_TBL1_2_0), vtbl1_u8(_alpha.val[1], K8_TBL1_2_1) });
+                uint8x16x2_t _alpha = vzipq_u8(alpha, alpha);
+                AlphaBlending<align>(src + 0, dst + 0, _alpha.val[0]);
+                AlphaBlending<align>(src + A, dst + A, _alpha.val[1]);
             }
         };
 
@@ -87,21 +100,14 @@ namespace Simd
 			}
 		};
 
-		const uint8x8_t K8_TBL1_4_0 = SIMD_VEC_SETR_EPI16(0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1);
-		const uint8x8_t K8_TBL1_4_1 = SIMD_VEC_SETR_EPI16(0x2, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x3);
-		const uint8x8_t K8_TBL1_4_2 = SIMD_VEC_SETR_EPI16(0x4, 0x4, 0x4, 0x4, 0x5, 0x5, 0x5, 0x5);
-		const uint8x8_t K8_TBL1_4_3 = SIMD_VEC_SETR_EPI16(0x6, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x7);
-
         template <bool align> struct AlphaBlender<align, 4>
         {
             SIMD_INLINE void operator()(const uint8_t * src, uint8_t * dst, uint8x16_t alpha)
             {
-				uint8x8x2_t _alpha{ vget_low_u8(alpha), vget_high_u8(alpha) };
-				AlphaBlending<align>(src + 0, dst + 0, { vtbl1_u8(_alpha.val[0], K8_TBL1_4_0), vtbl1_u8(_alpha.val[0], K8_TBL1_4_1) });
-				AlphaBlending<align>(src + A, dst + A, { vtbl1_u8(_alpha.val[0], K8_TBL1_4_2), vtbl1_u8(_alpha.val[0], K8_TBL1_4_3) });
-				AlphaBlending<align>(src + DA, dst + DA, { vtbl1_u8(_alpha.val[1], K8_TBL1_4_0), vtbl1_u8(_alpha.val[1], K8_TBL1_4_1) });
-				AlphaBlending<align>(src + A*3, dst + A*3, { vtbl1_u8(_alpha.val[1], K8_TBL1_4_2), vtbl1_u8(_alpha.val[1], K8_TBL1_4_3) });
-			}
+                uint8x16x2_t _alpha = vzipq_u8(alpha, alpha);
+                AlphaBlender<align, 2>()(src + A*0, dst + A*0, _alpha.val[0]);
+                AlphaBlender<align, 2>()(src + A*2, dst + A*2, _alpha.val[1]);
+            }
         };
 
         template <bool align, size_t channelCount> void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, 
