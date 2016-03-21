@@ -36,33 +36,33 @@ namespace Simd
             return vmaxq_u8(vqsubq_u8(value, hi), vqsubq_u8(lo, value));
         }
 
-        SIMD_INLINE uint16x8_t ShiftedWeightedSquare(uint16x8_t difference, uint16x4_t weight)
+        SIMD_INLINE uint16x8_t ShiftedWeightedSquare(uint8x8_t difference, uint16x4_t weight)
         {
-			uint16x8_t square = vmulq_u16(difference, difference);
-			uint32x4_t lo = vshrq_n_u32(vmull_u16(vget_low_u16(square), weight), 16);
-			uint32x4_t hi = vshrq_n_u32(vmull_u16(vget_high_u16(square), weight), 16);
-			return PackU32(lo, hi);
+			uint16x8_t square = vmull_u8(difference, difference);
+			uint16x4_t lo = vshrn_n_u32(vmull_u16(Half<0>(square), weight), 16);
+			uint16x4_t hi = vshrn_n_u32(vmull_u16(Half<1>(square), weight), 16);
+			return vcombine_u16(lo, hi);
         }
 
         SIMD_INLINE uint8x16_t ShiftedWeightedSquare(uint8x16_t difference, uint16x4_t weight)
         {
-            const uint16x8_t lo = ShiftedWeightedSquare(UnpackU8<0>(difference), weight);
-            const uint16x8_t hi = ShiftedWeightedSquare(UnpackU8<1>(difference), weight);
+            const uint16x8_t lo = ShiftedWeightedSquare(Half<0>(difference), weight);
+            const uint16x8_t hi = ShiftedWeightedSquare(Half<1>(difference), weight);
             return PackSaturatedU16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, 
+        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
             uint8_t * difference, size_t offset, uint16x4_t weight, uint8x16_t mask)
         {
             const uint8x16_t _value = Load<align>(value + offset);
             const uint8x16_t _lo = Load<align>(lo + offset);
             const uint8x16_t _hi = Load<align>(hi + offset);
-			uint8x16_t _difference = Load<align>(difference + offset);
+            uint8x16_t _difference = Load<align>(difference + offset);
 
             const uint8x16_t featureDifference = FeatureDifference(_value, _lo, _hi);
             const uint8x16_t inc = vandq_u8(mask, ShiftedWeightedSquare(featureDifference, weight));
             Store<align>(difference + offset, vqaddq_u8(_difference, inc));
-		}
+        }
 
         template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
