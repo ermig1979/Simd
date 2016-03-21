@@ -44,12 +44,13 @@ namespace Simd
 			Store<align>(dst, PackU16(lo, hi));
 		}
 
-        template <int part> SIMD_INLINE uint16x8_t AlphaBlending(const uint8x16_t & src, const uint8x16_t & dst, 
+        template <int part> SIMD_INLINE uint8x8_t AlphaBlending(const uint8x16_t & src, const uint8x16_t & dst, 
             const uint8x16_t & alpha, const uint8x16_t & ff_alpha)
         {
-            return DivideI16By255(vaddq_u16(
+            uint16x8_t value = vaddq_u16(
                 vmull_u8(Half<part>(src), Half<part>(alpha)),
-                vmull_u8(Half<part>(dst), Half<part>(ff_alpha))));
+                vmull_u8(Half<part>(dst), Half<part>(ff_alpha)));
+            return vshrn_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
         }
 
         template <bool align> SIMD_INLINE void AlphaBlending(const uint8_t * src, uint8_t * dst, const uint8x16_t & alpha)
@@ -57,9 +58,9 @@ namespace Simd
             uint8x16_t _src = Load<align>(src);
             uint8x16_t _dst = Load<align>(dst);
             uint8x16_t ff_alpha = vsubq_u8(K8_FF, alpha);
-            uint16x8_t lo = AlphaBlending<0>(_src, _dst, alpha, ff_alpha);
-            uint16x8_t hi = AlphaBlending<1>(_src, _dst, alpha, ff_alpha);
-            Store<align>(dst, PackU16(lo, hi));
+            uint8x8_t lo = AlphaBlending<0>(_src, _dst, alpha, ff_alpha);
+            uint8x8_t hi = AlphaBlending<1>(_src, _dst, alpha, ff_alpha);
+            Store<align>(dst, vcombine_u8(lo, hi));
         }
 
 		template <bool align, size_t channelCount> struct AlphaBlender
