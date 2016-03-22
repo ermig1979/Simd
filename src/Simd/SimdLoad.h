@@ -583,7 +583,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16_t Load<true>(const uint8_t * p)
 		{
-			return vld1q_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
+			return vld1q_u8(_p);
+#elif defined(_MSC_VER)
+            return vld1q_u8_ex(p, 128);
+#else
+            return vld1q_u8(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE int16x8_t Load(const int16_t * p)
@@ -605,7 +612,14 @@ namespace Simd
 
 		template <> SIMD_INLINE float32x4_t Load<false>(const float * p)
 		{
+#if defined(__GNUC__)
+            float * _p = (float *)__builtin_assume_aligned(p, 16);
+            return vld1q_f32(_p);
+#elif defined(_MSC_VER)
+            return vld1q_f32_ex(p, 128);
+#else
 			return vld1q_f32(p);
+#endif
 		}
 
 		template <> SIMD_INLINE float32x4_t Load<true>(const float * p)
@@ -622,7 +636,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16x2_t Load2<true>(const uint8_t * p)
 		{
-			return vld2q_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
+            return vld2q_u8(_p);
+#elif defined(_MSC_VER)
+            return vld2q_u8_ex(p, 128);
+#else
+            return vld2q_u8(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE uint16x8x2_t Load2(const uint16_t * p);
@@ -634,7 +655,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint16x8x2_t Load2<true>(const uint16_t * p)
 		{
-			return vld2q_u16(p);
+#if defined(__GNUC__)
+            uint16_t * _p = (uint16_t *)__builtin_assume_aligned(p, 16);
+            return vld2q_u16(_p);
+#elif defined(_MSC_VER)
+            return vld2q_u16_ex(p, 128);
+#else
+            return vld2q_u16(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE uint8x16x3_t Load3(const uint8_t * p);
@@ -646,7 +674,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16x3_t Load3<true>(const uint8_t * p)
 		{
-			return vld3q_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
+            return vld3q_u8(_p);
+#elif defined(_MSC_VER)
+            return vld3q_u8_ex(p, 128);
+#else
+            return vld3q_u8(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE uint8x16x4_t Load4(const uint8_t * p);
@@ -658,7 +693,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16x4_t Load4<true>(const uint8_t * p)
 		{
-			return vld4q_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
+            return vld4q_u8(_p);
+#elif defined(_MSC_VER)
+            return vld4q_u8_ex(p, 128);
+#else
+            return vld4q_u8(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE uint8x8x3_t LoadHalf3(const uint8_t * p);
@@ -670,7 +712,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x8x3_t LoadHalf3<true>(const uint8_t * p)
 		{
-			return vld3_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            return vld3_u8(_p);
+#elif defined(_MSC_VER)
+            return vld3_u8_ex(p, 64);
+#else
+            return vld3_u8(p);
+#endif
 		}
 
 		template <bool align> SIMD_INLINE uint8x8x4_t LoadHalf4(const uint8_t * p);
@@ -682,7 +731,14 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<true>(const uint8_t * p)
 		{
-			return vld4_u8(p);
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            return vld4_u8(_p);
+#elif defined(_MSC_VER)
+            return vld4_u8_ex(p, 64);
+#else
+            return vld4_u8(p);
+#endif
 		}
 
 		template <size_t count> SIMD_INLINE uint8x16_t LoadBeforeFirst(uint8x16_t first)
@@ -761,7 +817,7 @@ namespace Simd
 			a[2] = LoadAfterLast<1>(vld1q_u8(p));
 		}
 
-#ifdef __GNUC__		
+#if defined(__GNUC__)		
 		SIMD_INLINE uint8x16_t Shuffle(uint8x16_t a, uint8x16_t b)
 		{
 			return __builtin_shuffle(a, b);

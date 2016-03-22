@@ -205,7 +205,7 @@ namespace Simd
 				if (alignedWidth != width)
 				{
 					const uint8x16_t _current = vandq_u8(tailMask, Load<false>(current + width - A));
-					AbsDifferenceSums3x3Masked<align>(_current, background + width - A, backgroundStride, tailMask, rowSums);
+					AbsDifferenceSums3x3Masked<false>(_current, background + width - A, backgroundStride, tailMask, rowSums);
 				}
 
 				for (size_t i = 0; i < 9; ++i)
@@ -280,7 +280,7 @@ namespace Simd
 
 					for (size_t col = block*blockSize, end = Min(col + blockSize, alignedWidth); col < end; col += A)
 					{
-						const uint8x16_t _mask = vceqq_u8(Load<align>(mask + col), _index);
+						const uint8x16_t _mask = vceqq_u8(Load<false>(mask + col), _index);
 						const uint8x16_t _current = vandq_u8(Load<false>(current + col), _mask);
 						AbsDifferenceSums3x3Masked<align>(_current, background + col, backgroundStride, _mask, blockSums);
 					}
