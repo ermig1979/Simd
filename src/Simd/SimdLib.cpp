@@ -1384,6 +1384,11 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
         Vmx::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::FillBgr(dst, stride, width, height, blue, green, red);
+    else
+#endif
         Base::FillBgr(dst, stride, width, height, blue, green, red);
 }
 
@@ -1402,6 +1407,11 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);

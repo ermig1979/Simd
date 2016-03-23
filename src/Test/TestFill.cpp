@@ -251,6 +251,11 @@ namespace Test
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Vmx::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Neon::FillBgra), FUNC_BGRA(SimdFillBgra));
+#endif 
+
         return result;
     }
 
@@ -329,6 +334,11 @@ namespace Test
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Vmx::FillBgr), FUNC_BGR(SimdFillBgr));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && FillBgrAutoTest(FUNC_BGR(Simd::Neon::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
         return result;
