@@ -173,14 +173,10 @@ namespace Simd
 
 		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
 		{
-#if 0
 			if (Aligned(a) && Aligned(b))
 				SquaredDifferenceSum32f<true>(a, b, size, sum);
 			else
 				SquaredDifferenceSum32f<false>(a, b, size, sum);
-#else
-			Base::SquaredDifferenceSum32f(a, b, size, sum);
-#endif
 		}
 
 		template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t offset, float32x4_t & sum, float32x4_t & correction)
@@ -216,14 +212,10 @@ namespace Simd
 
 		void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
 		{
-#if 0
 			if (Aligned(a) && Aligned(b))
 				SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
 			else
 				SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
-#else
-			Base::SquaredDifferenceKahanSum32f(a, b, size, sum);
-#endif
 		}
     }
 #endif// SIMD_NEON_ENABLE

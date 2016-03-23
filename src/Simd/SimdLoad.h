@@ -578,12 +578,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16_t Load<false>(const uint8_t * p)
 		{
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
 			return vld1q_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x16_t Load<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
 			return vld1q_u8(_p);
 #elif defined(_MSC_VER)
@@ -612,31 +618,43 @@ namespace Simd
 
 		template <> SIMD_INLINE float32x4_t Load<false>(const float * p)
 		{
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld1q_f32(p);
+		}
+
+		template <> SIMD_INLINE float32x4_t Load<true>(const float * p)
+		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             float * _p = (float *)__builtin_assume_aligned(p, 16);
             return vld1q_f32(_p);
 #elif defined(_MSC_VER)
             return vld1q_f32_ex(p, 128);
 #else
-			return vld1q_f32(p);
+            return vld1q_f32(p);
 #endif
-		}
-
-		template <> SIMD_INLINE float32x4_t Load<true>(const float * p)
-		{
-			return vld1q_f32(p);
 		}
 
 		template <bool align> SIMD_INLINE uint8x16x2_t Load2(const uint8_t * p);
 
 		template <> SIMD_INLINE uint8x16x2_t Load2<false>(const uint8_t * p)
 		{
-			return vld2q_u8(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld2q_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x16x2_t Load2<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             return vld2q_u8(_p);
 #elif defined(_MSC_VER)
@@ -650,12 +668,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint16x8x2_t Load2<false>(const uint16_t * p)
 		{
-			return vld2q_u16(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld2q_u16(p);
 		}
 
 		template <> SIMD_INLINE uint16x8x2_t Load2<true>(const uint16_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint16_t * _p = (uint16_t *)__builtin_assume_aligned(p, 16);
             return vld2q_u16(_p);
 #elif defined(_MSC_VER)
@@ -669,12 +693,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16x3_t Load3<false>(const uint8_t * p)
 		{
-			return vld3q_u8(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld3q_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x16x3_t Load3<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             return vld3q_u8(_p);
 #elif defined(_MSC_VER)
@@ -688,12 +718,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x16x4_t Load4<false>(const uint8_t * p)
 		{
-			return vld4q_u8(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld4q_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x16x4_t Load4<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             return vld4q_u8(_p);
 #elif defined(_MSC_VER)
@@ -707,12 +743,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x8x3_t LoadHalf3<false>(const uint8_t * p)
 		{
-			return vld3_u8(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld3_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x8x3_t LoadHalf3<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
             return vld3_u8(_p);
 #elif defined(_MSC_VER)
@@ -726,12 +768,18 @@ namespace Simd
 
 		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<false>(const uint8_t * p)
 		{
-			return vld4_u8(p);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld4_u8(p);
 		}
 
 		template <> SIMD_INLINE uint8x8x4_t LoadHalf4<true>(const uint8_t * p)
 		{
 #if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
             return vld4_u8(_p);
 #elif defined(_MSC_VER)
@@ -760,7 +808,10 @@ namespace Simd
 
 		template <bool align, size_t step> SIMD_INLINE void LoadBody3(const uint8_t * p, uint8x16_t a[3])
 		{
-			a[0] = vld1q_u8(p - step);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            a[0] = vld1q_u8(p - step);
 			a[1] = Load<align>(p);
 			a[2] = vld1q_u8(p + step);
 		}
@@ -783,7 +834,10 @@ namespace Simd
 
 		template <bool align, size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, uint8x16_t a[5])
 		{
-			a[0] = vld1q_u8(p - 2 * step);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            a[0] = vld1q_u8(p - 2 * step);
 			a[1] = vld1q_u8(p - step);
 			a[2] = Load<align>(p);
 			a[3] = vld1q_u8(p + step);
@@ -807,7 +861,10 @@ namespace Simd
 
 		SIMD_INLINE void LoadBodyDx(const uint8_t * p, uint8x16_t a[3])
 		{
-			a[0] = vld1q_u8(p - 1);
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            a[0] = vld1q_u8(p - 1);
 			a[2] = vld1q_u8(p + 1);
 		}
 

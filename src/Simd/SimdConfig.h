@@ -52,6 +52,8 @@
 
 #define SIMD_NEON_RCP_ITER -1
 
-//#define SIMD_NEON_ASM_DISABLE
+#define SIMD_NEON_ASM_DISABLE
+
+#define SIMD_NEON_PREFECH_SIZE 384
 
 #endif//__SimdConfig_h__
