@@ -188,5 +188,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

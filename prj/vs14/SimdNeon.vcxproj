@@ -93,6 +93,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp" />

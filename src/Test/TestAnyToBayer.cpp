@@ -97,6 +97,7 @@ namespace Test
         if(Simd::Vmx::Enable)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
+
         return result;    
     }
 
@@ -114,7 +115,13 @@ namespace Test
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Vmx::BgraToBayer), FUNC(SimdBgraToBayer));
-#endif 
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Neon::BgraToBayer), FUNC(SimdBgraToBayer));
+#endif
+
         return result;    
     }
 
