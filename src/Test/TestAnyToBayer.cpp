@@ -98,6 +98,11 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBayer), FUNC(SimdBgrToBayer));
+#endif
+
         return result;    
     }
 
