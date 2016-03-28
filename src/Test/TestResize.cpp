@@ -227,15 +227,32 @@ namespace Test
 	{
 		bool result = true;
 
+        result = result && ResizeSpecialTest(FUNC(Simd::Base::ResizeBilinear), FUNC(SimdResizeBilinear));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && ResizeSpecialTest(FUNC(Simd::Sse2::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif
+
 #ifdef SIMD_SSSE3_ENABLE
 		if (Simd::Ssse3::Enable)
-			result = result && ResizeSpecialTest(FUNC(Simd::Ssse3::ResizeBilinear), FUNC(Simd::Base::ResizeBilinear));
+			result = result && ResizeSpecialTest(FUNC(Simd::Ssse3::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
 		if (Simd::Avx2::Enable)
-			result = result && ResizeSpecialTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(Simd::Base::ResizeBilinear));
+			result = result && ResizeSpecialTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
+
+#ifdef SIMD_VMX_ENABLE
+        if (Simd::Vmx::Enable)
+            result = result && ResizeSpecialTest(FUNC(Simd::Vmx::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ResizeSpecialTest(FUNC(Simd::Neon::ResizeBilinear), FUNC(SimdResizeBilinear));
+#endif
 
 		return result;
 	}

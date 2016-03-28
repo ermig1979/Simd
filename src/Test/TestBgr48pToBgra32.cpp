@@ -107,6 +107,11 @@ namespace Test
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Vmx::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Neon::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
+#endif
+
         return result;    
     }
 
