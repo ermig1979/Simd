@@ -165,6 +165,9 @@ namespace Simd
 
 		void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
+            size_t cellX, size_t cellY, size_t quantization, float * histograms);
+
         void InterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
 
         void InterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,

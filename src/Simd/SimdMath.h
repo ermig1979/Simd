@@ -597,6 +597,11 @@ namespace Simd
 			return vaddq_u16(vaddq_u16(a, c), vaddq_u16(b, b));
 		}
 
+        SIMD_INLINE int16x8_t BinomialSum(const int16x8_t & a, const int16x8_t & b, const int16x8_t & c)
+        {
+            return vaddq_s16(vaddq_s16(a, c), vaddq_s16(b, b));
+        }
+
 		SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c, const uint16x8_t & d)
 		{
 			return vaddq_u16(vaddq_u16(a, d), vmulq_u16(vaddq_u16(b, c), K16_0003));
@@ -754,10 +759,46 @@ namespace Simd
 			return vld1q_f32(c);
 		};
 
-		template <int part> SIMD_INLINE uint16x8_t Sub(uint8x16_t a, uint8x16_t b)
+        template <int iter> SIMD_INLINE float32x4_t Sqrt(const float32x4_t & a);
+
+        template <> SIMD_INLINE float32x4_t Sqrt<-1>(const float32x4_t & a)
+        {
+            float _a[4];
+            vst1q_f32(_a, a);
+            float r[4] = { ::sqrtf(_a[0]), ::sqrtf(_a[1]), ::sqrtf(_a[2]), ::sqrtf(_a[3]) };
+            return vld1q_f32(r);
+        }
+
+        template<> SIMD_INLINE float32x4_t Sqrt<0>(const float32x4_t & a)
+        {
+            float32x4_t e = vrsqrteq_f32(a);
+            return vmulq_f32(e, a);
+        }
+
+        template<> SIMD_INLINE float32x4_t Sqrt<1>(const float32x4_t & a)
+        {
+            float32x4_t e = vrsqrteq_f32(a);
+            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+            return vmulq_f32(e, a);
+        }
+
+        template<> SIMD_INLINE float32x4_t Sqrt<2>(const float32x4_t & a)
+        {
+            float32x4_t e = vrsqrteq_f32(a);
+            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+            return vmulq_f32(e, a);
+        }
+
+		template <int part> SIMD_INLINE int16x8_t Sub(uint8x16_t a, uint8x16_t b)
 		{
-			return vsubl_u8(Half<part>(a), Half<part>(b));
+			return (int16x8_t)vsubl_u8(Half<part>(a), Half<part>(b));
 		}
+
+        template <int part> SIMD_INLINE float32x4_t ToFloat(int16x8_t a)
+        {
+            return vcvtq_f32_s32(UnpackI16<part>(a));
+        }
 	}
 #endif//SIMD_NEON_ENABLE
 }

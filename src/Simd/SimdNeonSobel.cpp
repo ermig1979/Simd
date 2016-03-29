@@ -32,8 +32,7 @@ namespace Simd
     {
 		template<bool abs, int part> SIMD_INLINE int16x8_t SobelDx(uint8x16_t a[3][3])
 		{
-			return ConditionalAbs<abs>((int16x8_t)BinomialSum16(
-				Sub<part>(a[0][2], a[0][0]), Sub<part>(a[1][2], a[1][0]), Sub<part>(a[2][2], a[2][0])));
+			return ConditionalAbs<abs>(BinomialSum(Sub<part>(a[0][2], a[0][0]), Sub<part>(a[1][2], a[1][0]), Sub<part>(a[2][2], a[2][0])));
 		}
 
 		template<bool align, bool abs> SIMD_INLINE void SobelDx(uint8x16_t a[3][3], int16_t * dst)
@@ -168,8 +167,7 @@ namespace Simd
 
 		template<bool abs, int part> SIMD_INLINE int16x8_t SobelDy(uint8x16_t a[3][3])
 		{
-			return ConditionalAbs<abs>((int16x8_t)BinomialSum16(
-				Sub<part>(a[2][0], a[0][0]), Sub<part>(a[2][1], a[0][1]), Sub<part>(a[2][2], a[0][2])));
+			return ConditionalAbs<abs>(BinomialSum(Sub<part>(a[2][0], a[0][0]), Sub<part>(a[2][1], a[0][1]), Sub<part>(a[2][2], a[0][2])));
 		}
 
 		template<bool align, bool abs> SIMD_INLINE void SobelDy(uint8x16_t a[3][3], int16_t * dst)
