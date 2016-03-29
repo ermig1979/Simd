@@ -129,6 +129,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonStatistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />

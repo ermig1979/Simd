@@ -105,6 +105,11 @@ namespace Test
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Vsx::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Neon::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
+#endif 
+
         return result;
     }
 

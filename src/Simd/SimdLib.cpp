@@ -3000,6 +3000,11 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
         Vsx::SvmSumLinear(x, svs, weights, length, count, sum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::SvmSumLinear(x, svs, weights, length, count, sum);
+    else
+#endif
         Base::SvmSumLinear(x, svs, weights, length, count, sum);
 }
 
