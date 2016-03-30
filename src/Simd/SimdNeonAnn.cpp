@@ -134,6 +134,39 @@ namespace Simd
             else
 				AnnProductSum<false>(a, b, size, sum);
         }
+
+        template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            float32x4_t _slope = vdupq_n_f32(*slope);
+            float32x4_t _0 = vdupq_n_f32(-0.0f);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t _0555 = vdupq_n_f32(0.555f);
+            float32x4_t _0143 = vdupq_n_f32(0.143f);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                float32x4_t _src = Load<align>(src + i);
+                float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
+                float32x4_t x2 = vmulq_f32(x, x);
+                float32x4_t x4 = vmulq_f32(x2, x2);
+                float32x4_t series = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _0555), vmulq_f32(x4, _0143)));
+                uint32x4_t mask = vcgtq_f32(_src, _0);
+                float32x4_t exp = vbslq_f32(mask, Reciprocal<1>(series), series);
+                float32x4_t sigmoid = Reciprocal<1>(vaddq_f32(_1, exp));
+                Store<align>(dst + i, sigmoid);
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+        }
+
+        void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnRoughSigmoid<true>(src, size, slope, dst);
+            else
+                AnnRoughSigmoid<false>(src, size, slope, dst);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

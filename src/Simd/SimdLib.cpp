@@ -375,7 +375,7 @@ SIMD_API void SimdAnnSigmoid(const float * src, size_t size, const float * slope
 }
 
 typedef void(*SimdAnnRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnRoughSigmoidPtr simdAnnRoughSigmoid = SIMD_FUNC3(AnnRoughSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
+SimdAnnRoughSigmoidPtr simdAnnRoughSigmoid = SIMD_FUNC4(AnnRoughSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {

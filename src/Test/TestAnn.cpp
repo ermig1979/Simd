@@ -291,6 +291,11 @@ namespace Test
 			result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Vsx::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AnnSigmoidAutoTest(EPS, true, FUNC_S(Simd::Neon::AnnRoughSigmoid), FUNC_S(SimdAnnRoughSigmoid));
+#endif
+
 		return result;
 	}
 
