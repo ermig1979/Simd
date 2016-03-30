@@ -191,6 +191,11 @@ namespace Test
 			result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::AnnProductSum), FUNC_PS(SimdAnnProductSum));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Neon::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+#endif
+
         return result;
     }
 

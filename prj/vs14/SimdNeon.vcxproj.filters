@@ -200,5 +200,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAnn.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

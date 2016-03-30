@@ -354,7 +354,7 @@ SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, s
 }
 
 typedef void(*SimdAnnProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
-SimdAnnProductSumPtr simdAnnProductSum = SIMD_FUNC3(AnnProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC);
+SimdAnnProductSumPtr simdAnnProductSum = SIMD_FUNC4(AnnProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum)
 {
