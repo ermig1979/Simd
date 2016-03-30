@@ -799,6 +799,11 @@ namespace Simd
         {
             return vcvtq_f32_s32(UnpackI16<part>(a));
         }
+
+        template <int part> SIMD_INLINE float32x4_t ToFloat(uint16x8_t a)
+        {
+            return vcvtq_f32_u32(UnpackU16<part>(a));
+        }
 	}
 #endif//SIMD_NEON_ENABLE
 }

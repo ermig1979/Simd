@@ -111,7 +111,15 @@ namespace Test
 			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
 			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
 		}
-#endif 
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+        {
+            result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Neon::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
+            result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Neon::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+        }
+#endif
 
 		return result;
 	}

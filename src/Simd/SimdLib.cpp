@@ -350,6 +350,11 @@ SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, s
 		Vsx::AnnConvert(src, stride, width, height, dst, inversion);
 	else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AnnConvert(src, stride, width, height, dst, inversion);
+    else
+#endif
 		Base::AnnConvert(src, stride, width, height, dst, inversion);
 }
 

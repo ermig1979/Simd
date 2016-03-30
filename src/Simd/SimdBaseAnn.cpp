@@ -30,17 +30,18 @@ namespace Simd
     {
 		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
 		{
+            const float k = 1.0f / 255.0f;
 			for (size_t row = 0; row < height; ++row)
 			{
 				if (inversion)
 				{
 					for (size_t col = 0; col < width; ++col)
-						dst[col] = (255 - src[col]) / 255.0f;
+						dst[col] = (255 - src[col])* k;
 				}
 				else
 				{
 					for (size_t col = 0; col < width; ++col)
-						dst[col] = src[col] / 255.0f;
+						dst[col] = src[col] * k;
 				}
 				src += stride;
 				dst += width;
