@@ -109,7 +109,7 @@ namespace Simd
         uint8_t * const data; /*!< \brief A pointer to the pixel data (first row) of the image. */
 
         /*!
-            Creates a new empty View structure. 
+            Creates a new empty View structure.
         */
         View();
 
@@ -118,17 +118,29 @@ namespace Simd
 
             \note This constructor is not create new image view! It only creates a reference to the same image. If you want to create a copy then must use method Simd::View::Clone.
 
-            \param [in] view - an original image view. 
+            \param [in] view - an original image view.
         */
         View(const View & view);
+
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Creates a new View structure on the base of OpenCV Mat type.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] mat - an OpenCV Mat.
+        */
+        View(const cv::Mat & mat);
+#endif
+
 
         /*!
             Creates a new View structure with specified width, height, row size, pixel format and pointer to pixel data.
 
-            \param [in] w - a width of created image view. 
-            \param [in] h - a height of created image view. 
-            \param [in] s - a stride (row size) of created image view. 
-            \param [in] f - a pixel format of created image view. 
+            \param [in] w - a width of created image view.
+            \param [in] h - a height of created image view.
+            \param [in] s - a stride (row size) of created image view.
+            \param [in] f - a pixel format of created image view.
             \param [in] d - a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer.
         */
         View(size_t w, size_t h, ptrdiff_t s, Format f, void * d);
@@ -136,9 +148,9 @@ namespace Simd
         /*!
             Creates a new View structure with specified width, height, pixel format, pointer to pixel data and memory alignment.
 
-            \param [in] w - a width of created image view. 
-            \param [in] h - a height of created image view. 
-            \param [in] f - a pixel format of created image view. 
+            \param [in] w - a width of created image view.
+            \param [in] h - a height of created image view.
+            \param [in] f - a pixel format of created image view.
             \param [in] d - a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer.
             \param [in] align - a required memory alignment. Its default value is determined by function Allocator::Alignment.
         */
@@ -147,8 +159,8 @@ namespace Simd
         /*!
             Creates a new View structure with specified width, height and pixel format.
 
-            \param [in] size - a size (width and height) of created image view. 
-            \param [in] f - a pixel format of created image view. 
+            \param [in] size - a size (width and height) of created image view.
+            \param [in] f - a pixel format of created image view.
         */
         View(const Point<ptrdiff_t> & size, Format f);
 
@@ -156,6 +168,17 @@ namespace Simd
             A View destructor.
         */
         ~View();
+
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Creates an OpenCV Mat which references this image.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \return an OpenCV Mat which references to this image.
+        */
+        operator cv::Mat();
+#endif
 
         /*!
             Gets a copy of current image view.
@@ -165,47 +188,59 @@ namespace Simd
         View * Clone() const;
 
         /*!
-            Creates reference to other View structure.
+            Creates view which references to other View structure.
 
             \note This function is not create copy of image view! It only create a reference to the same image.
 
-            \param [in] view - an original image view. 
-            \return a reference to itself. 
+            \param [in] view - an original image view.
+            \return a reference to itself.
         */
         View & operator = (const View & view);
 
+#ifdef SIMD_OPENCV_ENABLE
         /*!
-            Creates reference to itself. 
+            Creates view which references to an OpenCV Mat.
 
-            \return a reference to itself. 
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] mat - an OpenCV Mat.
+            \return a reference to itself.
+        */
+        View & operator = (const cv::Mat & mat);
+#endif
+
+        /*!
+            Creates reference to itself.
+
+            \return a reference to itself.
         */
         View & Ref();
 
         /*!
             Re-creates a View structure with specified width, height, pixel format, pointer to pixel data and memory alignment.
 
-            \param [in] w - a width of re-created image view. 
-            \param [in] h - a height of re-created image view. 
-            \param [in] f - a pixel format of re-created image view. 
+            \param [in] w - a width of re-created image view.
+            \param [in] h - a height of re-created image view.
+            \param [in] f - a pixel format of re-created image view.
             \param [in] d - a pointer to the external buffer with pixel data. If this pointer is NULL then will be created own buffer.
             \param [in] align - a required memory alignment. Its default value is determined by function Allocator::Alignment.
         */
         void Recreate(size_t w, size_t h, Format f, void * d = NULL, size_t align = Allocator::Alignment());
-        
+
         /*!
             Re-creates a View structure with specified width, height and pixel format.
 
-            \param [in] size - a size (width and height) of re-created image view. 
-            \param [in] f - a pixel format of re-created image view. 
+            \param [in] size - a size (width and height) of re-created image view.
+            \param [in] f - a pixel format of re-created image view.
         */
         void Recreate(const Point<ptrdiff_t> & size, Format f);
 
         /*!
             Creates a new View structure which points to the region of current image bounded by the rectangle with specified coordinates.
 
-            \param [in] left - a left side of the region. 
-            \param [in] top - a top side of the region. 
-            \param [in] right - a right side of the region. 
+            \param [in] left - a left side of the region.
+            \param [in] top - a top side of the region.
+            \param [in] right - a right side of the region.
             \param [in] bottom - a bottom side of the region.
             \return - a new View structure which points to the region of current image.
         */
@@ -214,16 +249,16 @@ namespace Simd
         /*!
             Creates a new View structure which points to the region of current image bounded by the rectangle with specified coordinates.
 
-            \param [in] topLeft - a top-left corner of the region. 
+            \param [in] topLeft - a top-left corner of the region.
             \param [in] bottomRight - a bottom-right corner of the region.
             \return - a new View structure which points to the region of current image.
         */
         View Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const;
-        
+
         /*!
             Creates a new View structure which points to the region of current image bounded by the rectangle with specified coordinates.
 
-            \param [in] rect - a rectangle which bound the region. 
+            \param [in] rect - a rectangle which bound the region.
             \return - a new View structure which points to the region of current image.
         */
         View Region(const Rectangle<ptrdiff_t> & rect) const;
@@ -231,8 +266,8 @@ namespace Simd
         /*!
             Creates a new View structure which points to the region of current image bounded by the rectangle with specified coordinates.
 
-            \param [in] size - a size (width and height) of the region. 
-            \param [in] position - a value represents the position of the region (see Simd::View::Position). 
+            \param [in] size - a size (width and height) of the region.
+            \param [in] position - a value represents the position of the region (see Simd::View::Position).
             \return - a new View structure which points to the region of current image.
         */
         View Region(const Point<ptrdiff_t> & size, Position position) const;
@@ -268,8 +303,8 @@ namespace Simd
         /*!
             Gets constant reference to the pixel of arbitrary type into current view with specified coordinates.
 
-            \param [in] x - a x-coordinate of the pixel. 
-            \param [in] y - a y-coordinate of the pixel. 
+            \param [in] x - a x-coordinate of the pixel.
+            \param [in] y - a y-coordinate of the pixel.
             \return - a const reference to pixel of arbitrary type.
         */
         template <class T> const T & At(size_t x, size_t y) const;
@@ -277,8 +312,8 @@ namespace Simd
         /*!
             Gets reference to the pixel of arbitrary type into current view with specified coordinates.
 
-            \param [in] x - a x-coordinate of the pixel. 
-            \param [in] y - a y-coordinate of the pixel. 
+            \param [in] x - a x-coordinate of the pixel.
+            \param [in] y - a y-coordinate of the pixel.
             \return - a reference to pixel of arbitrary type.
         */
         template <class T> T & At(size_t x, size_t y);
@@ -286,7 +321,7 @@ namespace Simd
         /*!
             Gets constant reference to the pixel of arbitrary type into current view with specified coordinates.
 
-            \param [in] p - a point with coordinates of the pixel. 
+            \param [in] p - a point with coordinates of the pixel.
             \return - a const reference to pixel of arbitrary type.
         */
         template <class T> const T & At(const Point<ptrdiff_t> & p) const;
@@ -294,7 +329,7 @@ namespace Simd
         /*!
             Gets reference to the pixel of arbitrary type into current view with specified coordinates.
 
-            \param [in] p - a point with coordinates of the pixel. 
+            \param [in] p - a point with coordinates of the pixel.
             \return - a reference to pixel of arbitrary type.
         */
         template <class T> T & At(const Point<ptrdiff_t> & p);
@@ -304,7 +339,7 @@ namespace Simd
 
             Gets pixel size in bytes for current pixel format.
 
-            \param [in] format - a pixel format. 
+            \param [in] format - a pixel format.
             \return - a pixel size in bytes.
         */
         static size_t PixelSize(Format format);
@@ -321,7 +356,7 @@ namespace Simd
 
             Gets pixel channel size in bytes for current pixel format.
 
-            \param [in] format - a pixel format. 
+            \param [in] format - a pixel format.
             \return - a pixel channel size in bytes.
         */
         static size_t ChannelSize(Format format);
@@ -338,7 +373,7 @@ namespace Simd
 
             Gets number of channels in the pixel for current pixel format.
 
-            \param [in] format - a pixel format. 
+            \param [in] format - a pixel format.
             \return - a number of channels.
         */
         static size_t ChannelCount(Format format);
@@ -350,6 +385,28 @@ namespace Simd
         */
         size_t ChannelCount() const;
 
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Converts Simd Library pixel format to OpenCV Matrix type.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] format - a Simd Library pixel format.
+            \return - an OpenCV Matrix type.
+        */
+        static int ToOcv(Format format);
+
+        /*!
+            Converts OpenCV Matrix type to Simd Library pixel format.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] type - an OpenCV Matrix type.
+            \return - a Simd Library pixel format.
+        */
+        static Format OcvTo(int type);
+#endif
+
     private:
         bool _owner;
     };
@@ -360,8 +417,8 @@ namespace Simd
 
         Checks two image views on the same size.
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
         \return - a result of checking.
     */
     template <class A, class B> bool EqualSize(const View<A> & a, const View<B> & b);
@@ -372,9 +429,9 @@ namespace Simd
 
         Checks three image views on the same size.
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
-        \param [in] c - a third image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [in] c - a third image.
         \return - a result of checking.
     */
     template <class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
@@ -385,8 +442,8 @@ namespace Simd
 
         Checks two image views on compatibility (the images must have the same size and pixel format).
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
         \return - a result of checking.
     */
     template <class A, class B> bool Compatible(const View<A> & a, const View<B> & b);
@@ -397,9 +454,9 @@ namespace Simd
 
         Checks three image views on compatibility (the images must have the same size and pixel format).
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
-        \param [in] c - a third image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [in] c - a third image.
         \return - a result of checking.
     */
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
@@ -410,10 +467,10 @@ namespace Simd
 
         Checks four image views on compatibility (the images must have the same size and pixel format).
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
-        \param [in] c - a third image. 
-        \param [in] d - a fourth image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [in] c - a third image.
+        \param [in] d - a fourth image.
         \return - a result of checking.
     */
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
@@ -424,11 +481,11 @@ namespace Simd
 
         Checks five image views on compatibility (the images must have the same size and pixel format).
 
-        \param [in] a - a first image. 
-        \param [in] b - a second image. 
-        \param [in] c - a third image. 
-        \param [in] d - a fourth image. 
-        \param [in] e - a fifth image. 
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [in] c - a third image.
+        \param [in] d - a fourth image.
+        \param [in] e - a fifth image.
         \return - a result of checking.
     */
     template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
@@ -459,6 +516,18 @@ namespace Simd
     }
     /*! \endcond */
 
+#ifdef SIMD_OPENCV_ENABLE
+    template <class A> SIMD_INLINE View<A>::View(const cv::Mat & mat)
+        : width(mat.cols)
+        , height(mat.rows)
+        , stride(mat.step[0])
+        , format(OcvTo(mat.type()))
+        , data(mat.data)
+        , _owner(false)
+    {
+    }
+#endif
+
     template <class A> SIMD_INLINE View<A>::View(size_t w, size_t h, ptrdiff_t s, Format f, void * d)
         : width(w)
         , height(h)
@@ -467,7 +536,7 @@ namespace Simd
         , data((uint8_t*)d)
         , _owner(false)
     {
-        if(data == NULL && height && width && stride && format != None)
+        if (data == NULL && height && width && stride && format != None)
         {
             *(void**)&data = Allocator::Allocate(height*stride, Allocator::Alignment());
             _owner = true;
@@ -498,11 +567,18 @@ namespace Simd
 
     template <class A> SIMD_INLINE View<A>::~View()
     {
-        if(_owner && data)
+        if (_owner && data)
         {
             Allocator::Free(data);
         }
     }
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <class A> SIMD_INLINE View<A>::operator cv::Mat()
+    {
+        return cv::Mat((int)height, (int)width, ToOcv(format), data, stride);
+    }
+#endif
 
     template <class A> SIMD_INLINE View<A> * View<A>::Clone() const
     {
@@ -531,6 +607,24 @@ namespace Simd
         }
         return *this;
     }
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)
+    {
+        if (_owner && data)
+        {
+            Allocator::Free(data);
+            assert(0);
+        }
+        *(size_t*)&width = mat.cols
+        *(size_t*)&height = mat.rows;
+        *(Format*)&format = OcvTo(mat.type())
+        *(ptrdiff_t*)&stride = mat.step[0];
+        *(unsigned char**)&data = mat.data;
+        _owner = false;
+        return *this;
+    }
+#endif
 
     template <class A> SIMD_INLINE View<A> & View<A>::Ref()
     {
@@ -746,6 +840,40 @@ namespace Simd
     {
         return ChannelCount(format);
     }
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <class A> SIMD_INLINE int View<A>::ToOcv(Format format)
+    {
+        switch (format)
+        {
+        case Gray8:     return CV_8UC1;
+        case Uv16:      return CV_8UC2;
+        case Bgr24:     return CV_8UC3;
+        case Bgra32:    return CV_8UC4;
+        case Int16:     return CV_16SC1;
+        case Int32:     return CV_32SC1;
+        case Float:     return CV_32FC1;
+        case Double:    return CV_64FC1;
+        default: assert(0); return 0;
+        }
+    }
+
+    template <class A> SIMD_INLINE typename View<A>::Format View<A>::OcvTo(int type)
+    {
+        switch (type)
+        {
+        case CV_8UC1:   return Gray8;
+        case CV_8UC2:   return Uv16;
+        case CV_8UC3:   return Bgr24;
+        case :CV_8UC4   return Bgra32;
+        case CV_16SC1:  return Int16;
+        case CV_32SC1:  return Int32;
+        case CV_32FC1:  return Float;
+        case CV_64FC1:  return Double;
+        default: assert(0); return 0;
+        }
+    }
+#endif
 
     // View utilities implementation:
 

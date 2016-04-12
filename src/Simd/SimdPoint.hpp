@@ -28,6 +28,10 @@
 
 #include <math.h>
 
+#ifdef SIMD_OPENCV_ENABLE
+#include "opencv2/core/core.hpp"
+#endif
+
 namespace Simd
 {
     /*! @ingroup cpp_point
@@ -63,6 +67,17 @@ namespace Simd
             \param [in] p - a point of arbitrary type. 
         */
         template <class TP, template<class> class TPoint> Point(const TPoint<TP> & p);
+
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Creates a new Point structure on the base of OpenCV size type.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality. 
+
+            \param [in] size - an OpenCV size.
+        */
+        template <class TS> Point(const cv::Size_<TS> & size);
+#endif
 
         /*!
             A point destructor.
@@ -332,6 +347,15 @@ namespace Simd
         , y((T)p.y) 
     {
     }
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <typename T> template <class TS>
+    SIMD_INLINE Point<T>::Point(const cv::Size_<TS> & size)
+        : x((T)size.width)
+        , y((T)size.height)
+    {
+    }
+#endif
 
 	template <typename T> 
 	SIMD_INLINE Point<T>::~Point()

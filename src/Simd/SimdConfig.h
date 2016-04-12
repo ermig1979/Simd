@@ -56,4 +56,6 @@
 
 #define SIMD_NEON_PREFECH_SIZE 384
 
+//#define SIMD_OPENCV_ENABLE
+
 #endif//__SimdConfig_h__

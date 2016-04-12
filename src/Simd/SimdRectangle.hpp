@@ -84,6 +84,17 @@ namespace Simd
         */
 		template <class TR, template<class> class TRectangle> Rectangle(const TRectangle<TR> & r);
 
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Creates a new Rectangle structure on the base of OpenCV rectangle.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] r - an OpenCV rectangle.
+        */
+        template <class TR> Rectangle(const cv::Rect_<TR> & r);
+#endif
+
         /*!
             A rectangle destructor.
         */
@@ -96,6 +107,17 @@ namespace Simd
         */
         template <class TR, template<class> class TRectangle> operator TRectangle<TR>() const;
 
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Converts itself to OpenCV rectangle.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \return an OpenCV rectangle.
+        */
+        template <class TR> operator cv::Rect_<TR>() const;
+#endif
+
         /*!
             Performs copying from rectangle of arbitrary type.
 
@@ -103,6 +125,18 @@ namespace Simd
             \return a reference to itself. 
         */
 		template <typename TR> Rectangle<T> & operator = (const Rectangle<TR> & r);
+
+#ifdef SIMD_OPENCV_ENABLE
+        /*!
+            Performs copying from OpenCV rectangle.
+
+            \note You have to define SIMD_OPENCV_ENABLE in order to use this functionality.
+
+            \param [in] r - an OpenCV rectangle.
+            \return a reference to itself.
+        */
+        template <typename TR> Rectangle<T> & operator = (const cv::Rect_<TR> & r);
+#endif
 
         /*!
             Sets position of left side. 
@@ -489,12 +523,23 @@ namespace Simd
 
 	template <typename T> template <class TR, template<class> class TRectangle> 
 	SIMD_INLINE Rectangle<T>::Rectangle(const TRectangle<TR> & r)
-		: left((T)r.Left())
-		, top((T)r.Top())
-		, right((T)r.Right())
-		, bottom((T)r.Bottom())
+		: left((T)r.left)
+		, top((T)r.top)
+		, right((T)r.right)
+		, bottom((T)r.bottom)
 	{
 	}
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <typename T> template <class TR>
+    SIMD_INLINE Rectangle<T>::Rectangle(const cv::Rect_<TR> & r)
+        : left((T)r.x)
+        , top((T)r.y)
+        , right((T)(r.x + r.width))
+        , bottom((T)(r.y + r.height))
+    {
+    }
+#endif
 
 	template <typename T> 
 	SIMD_INLINE Rectangle<T>::~Rectangle()
@@ -507,6 +552,14 @@ namespace Simd
         return TRectangle<TR>((TR)left, (TR)top, (TR)right, (TR)bottom);
     }
 
+#ifdef SIMD_OPENCV_ENABLE
+    template <typename T> template <class TR>
+    SIMD_INLINE Rectangle<T>::operator cv::Rect_<TR>() const
+    {
+        return cv::Rect_<TR>((TR)left, (TR)top, (TR)(right - left), (TR)(bottom - top));
+    }
+#endif
+
 	template <typename T> template <typename TR> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::operator = (const Rectangle<TR> & r)
 	{
@@ -516,6 +569,18 @@ namespace Simd
 		bottom = (T)r.bottom;
 		return *this;
 	}
+
+#ifdef SIMD_OPENCV_ENABLE
+    template <typename T> template <class TR>
+    SIMD_INLINE Rectangle<T> & Rectangle<T>::operator = (const cv::Rect_<TR> & r)
+    {
+        left = (T)r.x;
+        top = (T)r.y;
+        right = (T)(r.x + r.width);
+        bottom = (T)(r.y + r.height);
+        return *this;
+    }
+#endif
 
     template <typename T> template <typename TL> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetLeft(const TL & l)
