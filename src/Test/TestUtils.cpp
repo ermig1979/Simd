@@ -399,4 +399,44 @@ namespace Test
             return ExpandToLeft("", iCount + fCount + 1);
         }
     }
+
+    bool Load(View & view, const std::string & path)
+    {
+        std::ifstream ifs(path, std::ifstream::binary);
+        if (ifs.is_open())
+        {
+            std::string type;
+            ifs >> type;
+            if (type != "P5")
+                return false;
+            size_t w, h, d;
+            ifs >> w >> h >> d;
+            if (d != 255)
+                return false;
+            ifs.get();
+            view.Recreate(w, h, View::Gray8);
+            for (size_t row = 0; row < view.height; ++row)
+                ifs.read((char*)(view.data + row*view.stride), view.width);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    bool Save(const View & view, const std::string & path)
+    {
+        if (view.format != View::Gray8)
+            return false;
+
+        std::ofstream ofs(path, std::ifstream::binary);
+        if (ofs.is_open())
+        {
+            ofs << "P5\n" << view.width << " " << view.height << "\n255\n";
+            for (size_t row = 0; row < view.height; ++row)
+                ofs.write((const char*)(view.data + row*view.stride), view.width);
+            return true;
+        }
+        else
+            return false;
+    }
 }

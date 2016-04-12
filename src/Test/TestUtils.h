@@ -80,6 +80,9 @@ namespace Test
     std::string ExpandToRight(const std::string & value, size_t count);
 
     std::string ToString(double value, size_t iCount, size_t fCount);
+
+    bool Load(View & view, const std::string & path);
+    bool Save(const View & view, const std::string & path);
 }
 
 #define TEST_CHECK_VALUE(name) \
