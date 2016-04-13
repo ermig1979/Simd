@@ -1149,7 +1149,7 @@ SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t 
 		Vmx::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
 	else
 #endif
-#ifdef SIMD_VMX_ENABLE
+#ifdef SIMD_NEON_ENABLE
 	if (Neon::Enable && width >= Neon::A)
 		Neon::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
 	else

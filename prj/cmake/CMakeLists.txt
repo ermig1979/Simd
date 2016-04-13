@@ -25,47 +25,51 @@ set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
-set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
 
 file(GLOB_RECURSE SIMD_SSE1_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse1*.cpp)
 add_library(SimdSse1 STATIC ${SIMD_SSE1_SOURCES})
-set_target_properties(SimdSse1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse")
+set_target_properties(SimdSse1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse -std=c++11")
 
 file(GLOB_RECURSE SIMD_SSE2_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
 add_library(SimdSse2 STATIC ${SIMD_SSE2_SOURCES})
-set_target_properties(SimdSse2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2")
+set_target_properties(SimdSse2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2 -std=c++11")
 
 file(GLOB_RECURSE SIMD_SSSE3_SOURCES ${TRUNK_DIR}/src/Simd/SimdSsse3*.cpp)
 add_library(SimdSsse3 STATIC ${SIMD_SSSE3_SOURCES})
-set_target_properties(SimdSsse3 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mssse3")
+set_target_properties(SimdSsse3 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mssse3 -std=c++11")
 
 file(GLOB_RECURSE SIMD_SSE41_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse41*.cpp)
 add_library(SimdSse41 STATIC ${SIMD_SSE41_SOURCES})
-set_target_properties(SimdSse41 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1")
+set_target_properties(SimdSse41 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1 -std=c++11")
 
 file(GLOB_RECURSE SIMD_SSE42_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse42*.cpp)
 add_library(SimdSse42 STATIC ${SIMD_SSE42_SOURCES})
-set_target_properties(SimdSse42 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
+set_target_properties(SimdSse42 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2 -std=c++11")
 
 file(GLOB_RECURSE SIMD_AVX1_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx1*.cpp)
 add_library(SimdAvx1 STATIC ${SIMD_AVX1_SOURCES})
-set_target_properties(SimdAvx1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx")
+set_target_properties(SimdAvx1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -std=c++11")
 
 file(GLOB_RECURSE SIMD_AVX2_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx2*.cpp)
 add_library(SimdAvx2 STATIC ${SIMD_AVX2_SOURCES})
-set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
+set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdSse1 SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx1 SimdAvx2)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
+if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+else()
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
+endif()
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
@@ -93,7 +97,11 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
+if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++11")
+else()
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
+endif()
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
 
@@ -117,7 +125,11 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+else()
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+endif()
 
 endif()
 
