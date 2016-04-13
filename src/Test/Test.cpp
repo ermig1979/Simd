@@ -294,6 +294,8 @@ namespace Test
 
 	struct Options
 	{
+        bool help;
+
 		enum Mode
 		{
 			Auto,
@@ -311,11 +313,17 @@ namespace Test
 		Options(int argc, char* argv[])
 			: mode(Auto)
 			, threads(0)
+            , help(false)
 		{
 			for (int i = 1; i < argc; ++i)
 			{
 				std::string arg = argv[i];
-				if (arg.find("-m=") == 0)
+                if (arg.substr(0, 2) == "-h" || arg.substr(0, 2) == "-?")
+                {
+                    help = true;
+                    break;
+                }
+                else if (arg.find("-m=") == 0)
 				{
 					switch (arg[3])
 					{
@@ -439,11 +447,44 @@ namespace Test
 
 		return 0;
 	}
+
+    int PrintHelp()
+    {
+        std::cout << "Test framework of Simd Library." << std::endl << std::endl;
+        std::cout << "Using example:" << std::endl << std::endl;
+        std::cout << "  ./Test -m=a -t=1 -f=Sobel -o=log.txt" << std::endl << std::endl;
+        std::cout << "Where next parameters were used:" << std::endl << std::endl;
+        std::cout << "-m=a       - a auto checking mode which includes performance testing" << std::endl; 
+        std::cout << "             (only for library built in Release mode)." << std::endl;
+        std::cout << "             In this case different implementations of each functions" << std::endl; 
+        std::cout << "             will be compared between themselves " << std::endl;
+        std::cout << "             (for example a scalar implementation and implementations" << std::endl; 
+        std::cout << "             with using of different SIMD instructions such as SSE2, " << std::endl; 
+        std::cout << "             AVX2, and other). Also it can be: " << std::endl;
+        std::cout << "             -m=c - creation of test data for cross-platform testing), " << std::endl;
+        std::cout << "             -m=v - cross - platform testing with using of early " << std::endl;
+        std::cout << "             prepared test data)," << std::endl;
+        std::cout << "             -m=s - running of special tests." << std::endl << std::endl;
+        std::cout << "-t=1       - a number of used threads(every thread run all tests)" << std::endl;
+        std::cout << "             for simulation of multi - thread loading." << std::endl << std::endl;
+        std::cout << "-f=Sobel   - a filter. In current case will be tested only functions" << std::endl;
+        std::cout << "             which contain word 'Sobel' in their names." << std::endl;
+        std::cout << "             If you miss this parameter then full testing will be" << std::endl;
+        std::cout << "             performed." << std::endl << std::endl;
+        std::cout << "-o=log.txt - a file name with test report." << std::endl;
+        std::cout << "             The test's report also will be output to console." << std::endl << std::endl;
+        std::cout << "Also you can use parameter -h or -? to print this help message." << std::endl << std::endl;
+        return 0;
+    }
 }
 
 int main(int argc, char* argv[])
 {
     Test::Options options(argc, argv);
+
+    if (options.help)
+        return Test::PrintHelp();
+
     if(!options.output.empty())
         Test::Log::s_log.SetLogFile(options.output);
 

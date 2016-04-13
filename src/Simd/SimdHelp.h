@@ -129,11 +129,14 @@
 	 - \c -m=a - a auto checking mode which includes performance testing (only for library built in Release mode). 
 	In this case different implementations of each functions will be compared between themselves 
 	(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
-	Also it can be -m=c (creation of test data for cross-platform testing) and -m=v (cross-platform testing with using of early prepared test data). 
+	Also it can be -m=c (creation of test data for cross-platform testing), -m=v (cross-platform testing with using of early prepared test data)
+    and -m=s (running of special tests).
 	 - \c -t=1 - a number of used threads (every thread run all tests) for simulation of multi-thread loading.
 	 - \c -f=Sobel - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 	If you miss this parameter then full testing will be performed.
 	 - \c -o=log.txt - a file name with test report. The test's report also will be output to console.
+    
+    Also you can use parameter -h or -? in order to print help message.
 */
 /*@}*/
 
