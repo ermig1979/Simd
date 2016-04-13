@@ -873,13 +873,6 @@ namespace Simd
 			a[0] = vld1q_u8(p - 1);
 			a[2] = LoadAfterLast<1>(vld1q_u8(p));
 		}
-
-#if defined(__GNUC__)		
-		SIMD_INLINE uint8x16_t Shuffle(uint8x16_t a, uint8x16_t b)
-		{
-			return __builtin_shuffle(a, b);
-		}
-#endif	
 	}
 #endif//SIMD_NEON_ENABLE
 }
