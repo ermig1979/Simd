@@ -65,7 +65,7 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
@@ -93,7 +93,7 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mvsx -std=c++11")
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
 
@@ -117,7 +117,7 @@ add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
-set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 
 endif()
 
