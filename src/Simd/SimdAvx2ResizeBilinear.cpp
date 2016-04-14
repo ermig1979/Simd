@@ -133,7 +133,8 @@ namespace Simd
 		{
 			float scale = (float)srcSize / dstSize;
 			int block = 0;
-			indexes[0] = { 0, 0 };
+            indexes[0].src = 0;
+            indexes[0].dst = 0;
 			for (int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
 			{
 				float alpha = (float)((dstIndex + 0.5)*scale - 0.5);

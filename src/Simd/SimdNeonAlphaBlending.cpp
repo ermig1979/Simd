@@ -30,20 +30,6 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
 	namespace Neon
 	{
-		SIMD_INLINE uint16x8_t AlphaBlending(uint16x8_t src, uint16x8_t dst, uint16x8_t alpha)
-		{
-			return DivideI16By255(vaddq_u16(vmulq_u16(src, alpha), vmulq_u16(dst, vsubq_u16(K16_00FF, alpha))));
-		}
-
-		template <bool align> SIMD_INLINE void AlphaBlending(const uint8_t * src, uint8_t * dst, uint8x8x2_t alpha)
-		{
-			uint8x16_t _src = Load<align>(src);
-			uint8x16_t _dst = Load<align>(dst);
-			uint16x8_t lo = AlphaBlending(UnpackU8<0>(_src), UnpackU8<0>(_dst), vmovl_u8(alpha.val[0]));
-			uint16x8_t hi = AlphaBlending(UnpackU8<1>(_src), UnpackU8<1>(_dst), vmovl_u8(alpha.val[1]));
-			Store<align>(dst, PackU16(lo, hi));
-		}
-
         template <int part> SIMD_INLINE uint8x8_t AlphaBlending(const uint8x16_t & src, const uint8x16_t & dst, 
             const uint8x16_t & alpha, const uint8x16_t & ff_alpha)
         {
@@ -86,18 +72,18 @@ namespace Simd
             }
         };
 
-		const uint8x8_t K8_TBL1_3_0 = SIMD_VEC_SETR_EPI16(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2);
-		const uint8x8_t K8_TBL1_3_1 = SIMD_VEC_SETR_EPI16(0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5);
-		const uint8x8_t K8_TBL1_3_2 = SIMD_VEC_SETR_EPI16(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7);
-
 		template <bool align> struct AlphaBlender<align, 3>
 		{
 			SIMD_INLINE void operator()(const uint8_t * src, uint8_t * dst, uint8x16_t alpha)
 			{
-				uint8x8x2_t _alpha{ vget_low_u8(alpha), vget_high_u8(alpha) };
-				AlphaBlending<align>(src + 0, dst + 0, { vtbl1_u8(_alpha.val[0], K8_TBL1_3_0), vtbl1_u8(_alpha.val[0], K8_TBL1_3_1) });
-				AlphaBlending<align>(src + A, dst + A, { vtbl1_u8(_alpha.val[0], K8_TBL1_3_2), vtbl1_u8(_alpha.val[1], K8_TBL1_3_0) });
-				AlphaBlending<align>(src + DA, dst + DA, { vtbl1_u8(_alpha.val[1], K8_TBL1_3_1), vtbl1_u8(_alpha.val[1], K8_TBL1_3_2) });
+                uint8x16x3_t _alpha;
+                _alpha.val[0] = alpha;
+                _alpha.val[1] = alpha;
+                _alpha.val[2] = alpha;
+                Store3<align>((uint8_t*)&_alpha, _alpha);
+                AlphaBlending<align>(src + 0 * A, dst + 0 * A, _alpha.val[0]);
+                AlphaBlending<align>(src + 1 * A, dst + 1 * A, _alpha.val[1]);
+                AlphaBlending<align>(src + 2 * A, dst + 2 * A, _alpha.val[2]);
 			}
 		};
 

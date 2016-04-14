@@ -25,40 +25,40 @@ set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
-set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
 file(GLOB_RECURSE SIMD_SSE1_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse1*.cpp)
 add_library(SimdSse1 STATIC ${SIMD_SSE1_SOURCES})
-set_target_properties(SimdSse1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse -std=c++11")
+set_target_properties(SimdSse1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse")
 
 file(GLOB_RECURSE SIMD_SSE2_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
 add_library(SimdSse2 STATIC ${SIMD_SSE2_SOURCES})
-set_target_properties(SimdSse2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2 -std=c++11")
+set_target_properties(SimdSse2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2")
 
 file(GLOB_RECURSE SIMD_SSSE3_SOURCES ${TRUNK_DIR}/src/Simd/SimdSsse3*.cpp)
 add_library(SimdSsse3 STATIC ${SIMD_SSSE3_SOURCES})
-set_target_properties(SimdSsse3 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mssse3 -std=c++11")
+set_target_properties(SimdSsse3 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mssse3")
 
 file(GLOB_RECURSE SIMD_SSE41_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse41*.cpp)
 add_library(SimdSse41 STATIC ${SIMD_SSE41_SOURCES})
-set_target_properties(SimdSse41 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1 -std=c++11")
+set_target_properties(SimdSse41 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1")
 
 file(GLOB_RECURSE SIMD_SSE42_SOURCES ${TRUNK_DIR}/src/Simd/SimdSse42*.cpp)
 add_library(SimdSse42 STATIC ${SIMD_SSE42_SOURCES})
-set_target_properties(SimdSse42 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2 -std=c++11")
+set_target_properties(SimdSse42 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
 
 file(GLOB_RECURSE SIMD_AVX1_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx1*.cpp)
 add_library(SimdAvx1 STATIC ${SIMD_AVX1_SOURCES})
-set_target_properties(SimdAvx1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -std=c++11")
+set_target_properties(SimdAvx1 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx")
 
 file(GLOB_RECURSE SIMD_AVX2_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx2*.cpp)
 add_library(SimdAvx2 STATIC ${SIMD_AVX2_SOURCES})
-set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdSse1 SimdSse2 SimdSsse3 SimdSse41 SimdSse42 SimdAvx1 SimdAvx2)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
@@ -109,16 +109,16 @@ set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
 
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
-set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -std=c++11")
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
 file(GLOB_RECURSE SIMD_NEON_SOURCES ${TRUNK_DIR}/src/Simd/SimdNeon*.cpp)
 add_library(SimdNeon STATIC ${SIMD_NEON_SOURCES})
-set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11")
+set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdNeon)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11")
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
