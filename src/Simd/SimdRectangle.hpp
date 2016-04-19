@@ -867,7 +867,7 @@ namespace Simd
         return *this;
     }
 
-    template <typename T> template <typename TP>
+    template <typename T> template <typename TR>
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator += (const Rectangle<TR> & r)
     {
         left += (T)r.left;
