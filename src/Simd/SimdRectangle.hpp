@@ -413,6 +413,14 @@ namespace Simd
         template <typename TP> Rectangle<T> & operator |= (const Point<TP> & p);
 
         /*!
+            Adds to the rectangle's coordinates corresponding coordinates of specified rectangle.
+
+            \param [in] r - specified rectangle.
+            \return a reference to itself.
+        */
+        template <typename TR> Rectangle<T> & operator += (const Rectangle<TR> & r);
+
+        /*!
             Checks on overlapping of current rectangle and specified rectangle.
 
             \param [in] r - specified rectangle. 
@@ -856,6 +864,16 @@ namespace Simd
             if (bottom <= (T)p.y)
                 bottom = (T)p.y + (T)1;
         }
+        return *this;
+    }
+
+    template <typename T> template <typename TP>
+    SIMD_INLINE Rectangle<T> & Rectangle<T>::operator += (const Rectangle<TR> & r)
+    {
+        left += (T)r.left;
+        top += (T)r.top;
+        right += (T)r.right;
+        bottom += (T)r.bottom;
         return *this;
     }
 
