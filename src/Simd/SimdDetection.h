@@ -212,6 +212,8 @@ namespace Simd
             uint32_t sum = rect.p0[offset] - rect.p1[offset] - rect.p2[offset] + rect.p3[offset];
             return rect.weight*sum;
         }
+
+        int DetectionHaarDetect32f(const struct HidHaarCascade & hid, size_t offset, int startStage, float norm);
     }
 }
 

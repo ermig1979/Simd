@@ -505,7 +505,7 @@ namespace Simd
             }
         }
 
-        int DetectionHaarDetect32fp(const HidHaarCascade & hid, size_t offset, int startStage, float norm)
+        int DetectionHaarDetect32f(const HidHaarCascade & hid, size_t offset, int startStage, float norm)
         {
             typedef HidHaarCascade Hid;
             const Hid::Stage * stages = hid.stages.data();
@@ -555,7 +555,7 @@ namespace Simd
                     if (mask.At<uint8_t>(col, row) == 0)
                         continue;
                     float norm = Norm32f(hid, pq_offset + col);
-                    if (DetectionHaarDetect32fp(hid, p_offset + col, 0, norm) > 0)
+                    if (DetectionHaarDetect32f(hid, p_offset + col, 0, norm) > 0)
                         dst.At<uint8_t>(col, row) = 1;
                 }
             }
@@ -566,6 +566,33 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
+            {
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t);
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 2)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    float norm = Norm32f(hid, pq_offset + col);
+                    if (DetectionHaarDetect32f(hid, p_offset + col / 2, 0, norm) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionHaarDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
+            return DetectionHaarDetect32fi(hid,
                 View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));

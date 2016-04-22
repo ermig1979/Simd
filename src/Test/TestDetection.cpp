@@ -132,6 +132,10 @@ namespace Test
 
 #define FUNC_D(function) FuncD(function, #function)
 
+#define ARGS_D(tilted, function1, function2) \
+    FuncD(function1.func, function1.description + (tilted ? "<1>" : "<0>")), \
+    FuncD(function2.func, function2.description + (tilted ? "<1>" : "<0>"))
+
     bool DetectionHaarDetectAutoTest(const void * data, int width, int height, bool throughColumn, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
@@ -181,7 +185,7 @@ namespace Test
 
         SimdDetectionHaarFree(hid);
 
-        Annotate(src, dst1, w, h);
+        //Annotate(src, dst1, w, h);
 
         return result;
     }
@@ -209,8 +213,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, f1, f2);
-        //result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, f1, f2);
+        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, ARGS_D(0, f1, f2));
+        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, ARGS_D(1, f1, f2));
 
         return result;
     }
@@ -224,9 +228,18 @@ namespace Test
         return result;
     }
 
+    bool DetectionHaarDetect32fiAutoTest()
+    {
+        bool result = true;
+
+        result = result && DetectionHaarDetectAutoTest(false, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
-    bool DetectionHaarDetect32fpDataTest(bool create, int width, int height, const FuncD & f)
+    bool DetectionHaarDetectDataTest(bool create, int width, int height, const FuncD & f)
     {
         bool result = true;
 
@@ -250,7 +263,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DetectionHaarDetect32fpDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fp));
+        result = result && DetectionHaarDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fp));
+
+        return result;
+    }
+
+    bool DetectionHaarDetect32fiDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && DetectionHaarDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fi));
 
         return result;
     }

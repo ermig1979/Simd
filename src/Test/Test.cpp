@@ -134,6 +134,7 @@ namespace Test
 
 #ifdef SIMD_DETECTION_ENABLE
     TEST_ADD_GROUP(DetectionHaarDetect32fp);
+    TEST_ADD_GROUP(DetectionHaarDetect32fi);
 #endif
 
     TEST_ADD_GROUP(AlphaBlending);

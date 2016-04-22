@@ -1519,10 +1519,13 @@ extern "C"
 
     SIMD_API void SimdDetectionHaarPrepare(void * hid);
 
-#endif
-
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
+        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+#endif
 
     /*! @ingroup edge_background
 
