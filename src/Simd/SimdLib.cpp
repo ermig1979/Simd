@@ -1194,6 +1194,57 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
+#ifdef SIMD_DETECTION_ENABLE
+
+SIMD_API void * SimdDetectionDataLoadA(const char * path)
+{
+    return Base::DetectionDataLoadA(path);
+}
+
+SIMD_API void SimdDetectionDataFree(void * data)
+{
+    Base::DetectionDataFree(data);
+}
+
+SIMD_API size_t SimdDetectionWindowWidth(const void * data)
+{
+    return Base::DetectionWindowWidth(data);
+}
+
+SIMD_API size_t SimdDetectionWindowHeight(const void * data)
+{
+    return Base::DetectionWindowHeight(data);
+}
+
+SIMD_API void * SimdDetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
+    uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn)
+{
+    return Base::DetectionHaarInit(data, sum, sumStride, width, height, sqsum, sqsumStride, tilted, tiltedStride, throughColumn);
+}
+
+SIMD_API void SimdDetectionHaarFree(void * hid)
+{
+    Base::DetectionHaarFree(hid);
+}
+
+SIMD_API int SimdDetectionHaarHasTilted(const void * hid)
+{
+    return Base::DetectionHaarHasTilted(hid);
+}
+
+SIMD_API void SimdDetectionHaarPrepare(void * hid)
+{
+    Base::DetectionHaarPrepare(hid);
+}
+
+SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
+    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+{
+    Base::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+#endif
+
 SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                  uint8_t * background, size_t backgroundStride)
 {

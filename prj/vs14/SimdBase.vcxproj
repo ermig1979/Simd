@@ -58,11 +58,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase_tinyxml2.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
@@ -92,6 +94,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseCopy.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseCrc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseDeinterleaveUv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp" />
@@ -126,6 +129,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHsv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBase_tinyxml2.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

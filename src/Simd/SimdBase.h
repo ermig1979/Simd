@@ -160,6 +160,30 @@ namespace Simd
 
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
+#ifdef SIMD_DETECTION_ENABLE
+
+        void * DetectionDataLoadA(const char * path);
+
+        size_t DetectionWindowWidth(const void * data);
+
+        size_t DetectionWindowHeight(const void * data);
+
+        void DetectionDataFree(void * data);
+
+        void * DetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
+            uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn);
+
+        void DetectionHaarFree(void * hid);
+
+        int DetectionHaarHasTilted(const void * hid);
+
+        void DetectionHaarPrepare(void * hid);
+
+        void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+#endif
+
         void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride);
 

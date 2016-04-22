@@ -132,6 +132,10 @@ namespace Test
 
     TEST_ADD_GROUP(DeinterleaveUv);
 
+#ifdef SIMD_DETECTION_ENABLE
+    TEST_ADD_GROUP(DetectionHaarDetect32fp);
+#endif
+
     TEST_ADD_GROUP(AlphaBlending);
 
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);

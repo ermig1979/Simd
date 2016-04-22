@@ -1,8 +1,8 @@
 @echo off
 
-set RAR_EXE="C:\Program Files\WinRAR\WinRar.exe"
+set RAR_EXE="C:\Program Files\WinRAR\WinRAR.exe"
 if not exist %RAR_EXE% (
-echo Execution file "%RAR_EXE%" is to exists!
+echo Execution file "%RAR_EXE%" is not exists!
 exit 1
 )
 
@@ -43,5 +43,6 @@ erase %TMP_DIR%\doc\src\*.lnk /q /s /f
 
 echo Create ZIP archive:
 %RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
+
 
 

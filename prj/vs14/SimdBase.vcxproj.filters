@@ -172,6 +172,12 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseAnn.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseDetection.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBase_tinyxml2.cpp">
+      <Filter>Sys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -202,6 +208,12 @@
       <Filter>Sys</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTypes.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
+      <Filter>Sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase_tinyxml2.h">
       <Filter>Sys</Filter>
     </ClInclude>
   </ItemGroup>
