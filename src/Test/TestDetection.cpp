@@ -36,7 +36,10 @@ namespace Test
     View GetSample(const Size & size)
     {
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
-        View dst = g_samples[size.x];
+
+        TEST_ALIGN(size.x);
+
+        View & dst = g_samples[size.x];
         if (dst.format == View::Gray8)
             return dst;
 
@@ -48,7 +51,7 @@ namespace Test
             return dst;
         }
 
-        dst.Recreate(size, View::Gray8);
+        dst.Recreate(size.x, size.y, View::Gray8, NULL, TEST_ALIGN(size.x));
 
         uint8_t min, max, average;
         Simd::GetStatistic(obj, min, max, average);
@@ -56,15 +59,15 @@ namespace Test
 
         if (obj.width < dst.width || obj.height < dst.height)
         {
-            size_t rows = dst.height / obj.height;
-            size_t cols = dst.width / obj.width;
+            size_t rows = dst.height / obj.height * 2;
+            size_t cols = dst.width / obj.width * 2;
             for (size_t row = 0; row < rows; ++row)
             {
                 size_t y = dst.height * (row * 2 + 1) / (2 * rows);
                 for (size_t col = 0; col < cols; ++col)
                 {
                     size_t x = dst.width * (col * 2 + 1) / (2 * cols);
-                    size_t s = (obj.width + Random((int)obj.width * 3)) / 4;
+                    size_t s = (obj.width*2 + Random((int)obj.width)) / 10;
 
                     View resized(s, s, View::Gray8);
                     Simd::ResizeBilinear(obj, resized);
@@ -88,9 +91,23 @@ namespace Test
             Simd::ResizeBilinear(_obj, _dst);
         }
 
-        //Save(dst, "sample.pgm");
-
         return dst;
+    }
+
+    void Annotate(const View & src, const View & mask, size_t w, size_t h)
+    {
+        View dst(src.Size(), View::Gray8);
+        Simd::Copy(src, dst);
+        for (size_t row = 0; row < mask.height - h; ++row)
+        {
+            for (size_t col = 0; col < mask.width - w; ++col)
+            {
+                if (mask.At<uint8_t>(col, row) == 0)
+                    continue;
+                Simd::FillFrame(dst.Region(col, row, col + w, row + h).Ref(), Rect(1, 1, w - 1, h - 1), 255);
+            }
+        }
+        Save(dst, "dst.pgm");
     }
 
     namespace
@@ -164,6 +181,8 @@ namespace Test
 
         SimdDetectionHaarFree(hid);
 
+        Annotate(src, dst1, w, h);
+
         return result;
     }
 
@@ -179,7 +198,7 @@ namespace Test
         }
 
         result = result && DetectionHaarDetectAutoTest(data, W, H, throughColumn, f1, f2);
-        result = result && DetectionHaarDetectAutoTest(data, W + O, H - O, throughColumn, f1, f2);
+        //result = result && DetectionHaarDetectAutoTest(data, W + O, H - O, throughColumn, f1, f2);
 
         SimdDetectionDataFree(data);
 
@@ -191,7 +210,7 @@ namespace Test
         bool result = true;
 
         result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, f1, f2);
-        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, f1, f2);
+        //result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, f1, f2);
 
         return result;
     }

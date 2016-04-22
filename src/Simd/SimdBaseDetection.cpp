@@ -45,8 +45,6 @@ namespace Simd
 {
     namespace Base
     {
-        using namespace Detection;
-
         namespace Xml
         {
             template <class T> T FromString(const std::string & s)
@@ -309,31 +307,268 @@ namespace Simd
                 return 0;
         }
 
+        HidHaarCascade * CreateHid(const Data & data)
+        {
+            if (data.featureType != Data::HAAR)
+                SIMD_EX("It is not HAAR cascade!");
+
+            HidHaarCascade * hid = new HidHaarCascade();
+
+            hid->isThroughColumn = false;
+            hid->isStumpBased = data.isStumpBased;
+            hid->origWinSize = data.origWinSize;
+
+            hid->trees.resize(data.classifiers.size());
+            for (size_t i = 0; i < data.classifiers.size(); ++i)
+                hid->trees[i].nodeCount = data.classifiers[i].nodeCount;
+
+            hid->nodes.resize(data.nodes.size());
+            for (size_t i = 0; i < data.nodes.size(); ++i)
+            {
+                hid->nodes[i].featureIdx = data.nodes[i].featureIdx;
+                hid->nodes[i].left = data.nodes[i].left;
+                hid->nodes[i].right = data.nodes[i].right;
+                hid->nodes[i].threshold = data.nodes[i].threshold;
+            }
+
+            hid->stages.resize(data.stages.size());
+            hid->leaves.resize(data.leaves.size());
+            for (size_t i = 0; i < data.stages.size(); ++i)
+            {
+                hid->stages[i].first = data.stages[i].first;
+                hid->stages[i].ntrees = data.stages[i].ntrees;
+                hid->stages[i].threshold = data.stages[i].threshold;
+                hid->stages[i].hasThree = false;
+                for (int j = data.stages[i].first, n = data.stages[i].first + data.stages[i].ntrees; j < n; ++j)
+                {
+                    hid->leaves[2 * j + 0] = data.leaves[2 * j + 0];
+                    hid->leaves[2 * j + 1] = data.leaves[2 * j + 1];
+                    if (data.haarFeatures[data.nodes[j].featureIdx].rect[2].weight != 0)
+                        hid->stages[i].hasThree = true;
+                }
+            }
+
+            hid->features.resize(data.haarFeatures.size());
+            for (size_t i = 0; i < hid->features.size(); ++i)
+            {
+                for (int j = 0; j < Data::HaarFeature::RECT_NUM; ++j)
+                    hid->features[i].rect[j].weight = data.haarFeatures[i].rect[j].weight;
+                if (data.haarFeatures[i].tilted)
+                    hid->hasTilted = true;
+            }
+
+            return hid;
+        }
+
+        typedef Detection::View View;
+
+        template <class T> SIMD_INLINE T * SumElemPtr(const View & view, ptrdiff_t row, ptrdiff_t col, bool throughColumn)
+        {
+            assert(view.ChannelCount() == 1 && view.ChannelSize() == sizeof(T));
+            assert(row >= 0 && col >= 0 && col < (ptrdiff_t)view.width && row < (ptrdiff_t)view.height);
+
+            if (throughColumn)
+            {
+                if (col & 1)
+                    return (T*)& view.At<T>(col / 2 + (view.width + 1) / 2, row);
+                else
+                    return (T*)& view.At<T>(col / 2, row);
+            }
+            else
+                return (T*)& view.At<T>(col, row);
+        }
+
+        static void InitBase(HidHaarCascade * hid, const View & sum, const View & sqsum, const View & tilted)
+        {
+            Rect rect(1, 1, hid->origWinSize.x - 1, hid->origWinSize.y - 1);
+            hid->windowArea = (float)rect.Area();
+
+            hid->p[0] = SumElemPtr<uint32_t>(sum, rect.top, rect.left, false);
+            hid->p[1] = SumElemPtr<uint32_t>(sum, rect.top, rect.right, false);
+            hid->p[2] = SumElemPtr<uint32_t>(sum, rect.bottom, rect.left, false);
+            hid->p[3] = SumElemPtr<uint32_t>(sum, rect.bottom, rect.right, false);
+
+            hid->pq[0] = SumElemPtr<uint32_t>(sqsum, rect.top, rect.left, false);
+            hid->pq[1] = SumElemPtr<uint32_t>(sqsum, rect.top, rect.right, false);
+            hid->pq[2] = SumElemPtr<uint32_t>(sqsum, rect.bottom, rect.left, false);
+            hid->pq[3] = SumElemPtr<uint32_t>(sqsum, rect.bottom, rect.right, false);
+
+            hid->sum = sum;
+            hid->sqsum = sum;
+            hid->tilted = tilted;
+        }
+
+        template<class T> SIMD_INLINE void UpdateFeaturePtrs(HidHaarCascade * hid, const Data & data)
+        {
+            View sum = hid->isThroughColumn ? hid->isum : hid->sum;
+            View tilted = hid->isThroughColumn ? hid->itilted : hid->tilted;
+            for (size_t i = 0; i < hid->features.size(); i++)
+            {
+                const Data::HaarFeature & df = data.haarFeatures[i];
+                HidHaarCascade::Feature & hf = hid->features[i];
+                for (int j = 0; j < Data::HaarFeature::RECT_NUM; ++j)
+                {
+                    const Data::Rect & dr = df.rect[j].r;
+                    WeightedRect & hr = hf.rect[j];
+                    if (hr.weight != 0.0)
+                    {
+                        if (df.tilted)
+                        {
+                            hr.p0 = SumElemPtr<T>(tilted, dr.y, dr.x, hid->isThroughColumn);
+                            hr.p1 = SumElemPtr<T>(tilted, dr.y + dr.height, dr.x - dr.height, hid->isThroughColumn);
+                            hr.p2 = SumElemPtr<T>(tilted, dr.y + dr.width, dr.x + dr.width, hid->isThroughColumn);
+                            hr.p3 = SumElemPtr<T>(tilted, dr.y + dr.width + dr.height, dr.x + dr.width - dr.height, hid->isThroughColumn);
+                        }
+                        else
+                        {
+                            hr.p0 = SumElemPtr<T>(sum, dr.y, dr.x, hid->isThroughColumn);
+                            hr.p1 = SumElemPtr<T>(sum, dr.y, dr.x + dr.width, hid->isThroughColumn);
+                            hr.p2 = SumElemPtr<T>(sum, dr.y + dr.height, dr.x, hid->isThroughColumn);
+                            hr.p3 = SumElemPtr<T>(sum, dr.y + dr.height, dr.x + dr.width, hid->isThroughColumn);
+                        }
+                    }
+                    else
+                    {
+                        hr.p0 = NULL;
+                        hr.p1 = NULL;
+                        hr.p2 = NULL;
+                        hr.p3 = NULL;
+                    }
+                }
+            }
+        }
+
+        HidHaarCascade * InitVector(const Data & data, const View & sum, const View & sqsum, const View & tilted, bool throughColumn)
+        {
+            if (!data.isStumpBased)
+                SIMD_EX("Can't use tree classfier for vector haar classifier!");
+
+            HidHaarCascade * hid = CreateHid(data);
+            InitBase(hid, sum, sqsum, tilted);
+            if (throughColumn)
+            {
+                hid->isThroughColumn = true;
+                hid->isum.Recreate(sum.width, sum.height, View::Int32, NULL, View::PixelSize(View::Int32));
+                if (hid->hasTilted)
+                    hid->itilted.Recreate(tilted.width, tilted.height, View::Int32, NULL, View::PixelSize(View::Int32));
+            }
+            UpdateFeaturePtrs<uint32_t>(hid, data);
+            return hid;
+        }
+
         void * DetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
             uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn)
         {
-            return NULL;
+            return InitVector(*(Data*)data, 
+                View(width, height, sumStride, View::Int32, sum),
+                View(width, height, sqsumStride, View::Int32, sqsum), 
+                View(width, height, tiltedStride, View::Int32, tilted),
+                throughColumn != 0);
         }
 
         void DetectionHaarFree(void * hid)
         {
-
+            delete (HidHaarCascade*)hid;
         }
         
         int DetectionHaarHasTilted(const void * hid)
         {
-            return 0;
+            return ((HidHaarCascade*)hid)->hasTilted;
         }
 
-        void DetectionHaarPrepare(void * hid)
+        void PrepareThroughColumn32i(const View & src, View & dst)
         {
+            assert(Simd::Compatible(src, dst) && src.format == View::Int32);
 
+            for (size_t row = 0; row < src.height; ++row)
+            {
+                const uint32_t * s = &src.At<uint32_t>(0, row);
+
+                uint32_t * evenDst = &dst.At<uint32_t>(0, row);
+                for (size_t col = 0; col < src.width; col += 2)
+                    evenDst[col >> 1] = s[col];
+
+                uint32_t * oddDst = &dst.At<uint32_t>((dst.width + 1) >> 1, row);
+                for (size_t col = 1; col < src.width; col += 2)
+                    oddDst[col >> 1] = s[col];
+            }
         }
 
-        void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
+        void DetectionHaarPrepare(void * _hid)
+        {
+            HidHaarCascade * hid = (HidHaarCascade*)_hid;
+            if (hid->isThroughColumn)
+            {
+                PrepareThroughColumn32i(hid->sum, hid->isum);
+                if (hid->hasTilted)
+                    PrepareThroughColumn32i(hid->tilted, hid->itilted);
+            }
+        }
+
+        int DetectionHaarDetect32fp(const HidHaarCascade & hid, size_t offset, int startStage, float norm)
+        {
+            typedef HidHaarCascade Hid;
+            const Hid::Stage * stages = hid.stages.data();
+            const Hid::Node * node = hid.nodes.data() + stages[startStage].first;
+            const float * leaves = hid.leaves.data() + stages[startStage].first * 2;
+            for (int i = startStage, n = (int)hid.stages.size(); i < n; ++i)
+            {
+                const Hid::Stage & stage = stages[i];
+                if (stage.canSkip)
+                    continue;
+                const Hid::Node * end = node + stage.ntrees;
+                float stageSum = 0.0;
+                if (stage.hasThree)
+                {
+                    for (; node < end; ++node, leaves += 2)
+                    {
+                        const Hid::Feature & feature = hid.features[node->featureIdx];
+                        float sum = WeightedSum32f(feature.rect[0], offset) + WeightedSum32f(feature.rect[1], offset);
+                        if (feature.rect[2].p0)
+                            sum += WeightedSum32f(feature.rect[2], offset);
+                        stageSum += leaves[sum >= node->threshold*norm];
+                    }
+                }
+                else
+                {
+                    for (; node < end; ++node, leaves += 2)
+                    {
+                        const Hid::Feature & feature = hid.features[node->featureIdx];
+                        float sum = WeightedSum32f(feature.rect[0], offset) + WeightedSum32f(feature.rect[1], offset);
+                        stageSum += leaves[sum >= node->threshold*norm];
+                    }
+                }
+                if (stageSum < stage.threshold)
+                    return -i;
+            }
+            return 1;
+        }
+
+        void DetectionHaarDetect32fp(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
+            {
+                size_t p_offset = row * hid.sum.stride / sizeof(uint32_t);
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 1)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    float norm = Norm32f(hid, pq_offset + col);
+                    if (DetectionHaarDetect32fp(hid, p_offset + col, 0, norm) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionHaarDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride, 
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-
+            const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
+            return DetectionHaarDetect32fp(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
         }
     }
 }

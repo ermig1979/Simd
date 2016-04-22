@@ -37,8 +37,8 @@ namespace Simd
     namespace Detection
     {
         typedef Simd::View<Simd::Allocator> View;
-        typedef Simd::Point<ptrdiff_t> Point;
-        typedef Point Size;
+        typedef Simd::Point<ptrdiff_t> Size;
+        typedef Simd::Rectangle<ptrdiff_t> Rect;
 
         struct Data
         {
@@ -110,6 +110,108 @@ namespace Simd
             std::vector<HaarFeature> haarFeatures;
             std::vector<LbpFeature> lbpFeatures;
         };
+
+        //---------------------------------------------------------------------
+
+        struct WeightedRect
+        {
+            uint32_t *p0, *p1, *p2, *p3;
+            float weight;
+        };
+
+        struct HidHaarFeature
+        {
+            WeightedRect rect[Data::HaarFeature::RECT_NUM];
+        };
+
+        struct HidHaarStage
+        {
+            int first;
+            int ntrees;
+            float threshold;
+            bool hasThree;
+            bool canSkip;
+        };
+
+        struct HidHaarNode
+        {
+            int featureIdx;
+            int left;
+            int right;
+            float threshold;
+        };
+
+        struct HidHaarCascade
+        {
+            Size origWinSize;
+            bool isStumpBased;
+            bool isThroughColumn;
+            bool hasTilted;
+
+            typedef HidHaarNode Node;
+            typedef std::vector<Node> Nodes;
+
+            struct Tree
+            {
+                int nodeCount;
+            };
+            typedef std::vector<Tree> Trees;
+
+            typedef HidHaarFeature Feature;
+            typedef std::vector<Feature> Features;
+
+            typedef HidHaarStage Stage;
+            typedef std::vector<Stage> Stages;
+
+            typedef float Leave;
+            typedef std::vector<Leave> Leaves;
+
+            typedef int ILeave;
+            typedef std::vector<ILeave> ILeaves;
+
+            Nodes nodes;
+            Trees trees;
+            Stages stages;
+            Leaves leaves;
+            Features features;
+
+            float windowArea;
+            float invWinArea;
+            uint32_t *pq[4];
+            uint32_t *p[4];
+
+            View sum, sqsum, tilted;
+            View isum, itilted;
+        };
+    }
+
+    namespace Base
+    {
+        using namespace Detection;
+
+        SIMD_INLINE uint32_t Sum32i(uint32_t * const ptr[4], size_t offset)
+        {
+            return ptr[0][offset] - ptr[1][offset] - ptr[2][offset] + ptr[3][offset];
+        }
+
+        SIMD_INLINE float Norm32f(const HidHaarCascade & hid, size_t offset)
+        {
+            float sum = float(Sum32i(hid.p, offset));
+            float sqsum = float(Sum32i(hid.pq, offset));
+            float q = sqsum*hid.windowArea - sum *sum;
+            return q < 0.0f ? 1.0f : sqrtf(q);
+        }
+
+        SIMD_INLINE int Norm16i(const HidHaarCascade & hid, size_t offset)
+        {
+            return Simd::Round(Norm32f(hid, offset)*hid.invWinArea);
+        }
+
+        SIMD_INLINE float WeightedSum32f(const WeightedRect & rect, size_t offset)
+        {
+            uint32_t sum = rect.p0[offset] - rect.p1[offset] - rect.p2[offset] + rect.p3[offset];
+            return rect.weight*sum;
+        }
     }
 }
 
