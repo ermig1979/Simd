@@ -23,8 +23,6 @@ distribution.
 
 #include "SimdBase_tinyxml2.h"
 
-#ifdef SIMD_DETECTION_ENABLE
-
 #include <new>		// yes, this one new style header, is in the Android SDK.
 #if defined(ANDROID_NDK) || defined(__QNXNTO__)
 #   include <stddef.h>
@@ -2343,5 +2341,3 @@ bool XMLPrinter::Visit( const XMLUnknown& unknown )
 }
 
 }   // namespace tinyxml2
-
-#endif

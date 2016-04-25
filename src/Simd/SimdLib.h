@@ -1500,8 +1500,6 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-#ifdef SIMD_DETECTION_ENABLE
-
     SIMD_API void * SimdDetectionLoadA(const char * path);
 
     typedef enum 
@@ -1539,8 +1537,6 @@ extern "C"
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
     SIMD_API void SimdDetectionFree(void * ptr);
-
-#endif
 
     /*! @ingroup edge_background
 

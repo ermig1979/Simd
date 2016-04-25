@@ -282,7 +282,7 @@ namespace Simd
             return DetectionHaarDetect32fp(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
@@ -343,7 +343,7 @@ namespace Simd
             return DetectionHaarDetect32fi(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         const __m256i K8_SHUFFLE_BITS = SIMD_MM256_SETR_EPI8(
@@ -514,7 +514,7 @@ namespace Simd
             return DetectionLbpDetect32fp(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
@@ -569,10 +569,8 @@ namespace Simd
             return DetectionLbpDetect32fi(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
-
-        //------------------------------------------------------------------
 
         SIMD_INLINE __m256i IntegralSum16i(const __m256i & s0, const __m256i & s1, const __m256i & s2, const __m256i & s3)
         {
@@ -735,7 +733,7 @@ namespace Simd
             return DetectionLbpDetect16ip(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
@@ -787,7 +785,7 @@ namespace Simd
             return DetectionLbpDetect16ii(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 	}
 #endif// SIMD_AVX2_ENABLE

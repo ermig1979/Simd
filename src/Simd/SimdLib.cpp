@@ -1194,8 +1194,6 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
-#ifdef SIMD_DETECTION_ENABLE
-
 SIMD_API void * SimdDetectionLoadA(const char * path)
 {
     return Base::DetectionLoadA(path);
@@ -1272,8 +1270,6 @@ SIMD_API void SimdDetectionFree(void * ptr)
 {
     Base::DetectionFree(ptr);
 }
-
-#endif
 
 SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                  uint8_t * background, size_t backgroundStride)

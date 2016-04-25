@@ -25,8 +25,6 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
-#ifdef SIMD_DETECTION_ENABLE
-
 namespace Test
 {
     typedef std::map<size_t, View> Samples;
@@ -402,4 +400,3 @@ namespace Test
     }
 }
 
-#endif

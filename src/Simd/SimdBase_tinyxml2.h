@@ -26,8 +26,6 @@ distribution.
 
 #include "Simd/SimdConfig.h"
 
-#ifdef SIMD_DETECTION_ENABLE
-
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <ctype.h>
 #   include <limits.h>
@@ -2129,8 +2127,6 @@ private:
 
 #if defined(_MSC_VER)
 #   pragma warning(pop)
-#endif
-
 #endif
 
 #endif // TINYXML2_INCLUDED

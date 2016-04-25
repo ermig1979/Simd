@@ -132,14 +132,12 @@ namespace Test
 
     TEST_ADD_GROUP(DeinterleaveUv);
 
-#ifdef SIMD_DETECTION_ENABLE
     TEST_ADD_GROUP(DetectionHaarDetect32fp);
     TEST_ADD_GROUP(DetectionHaarDetect32fi);
     TEST_ADD_GROUP(DetectionLbpDetect32fp);
     TEST_ADD_GROUP(DetectionLbpDetect32fi);
     TEST_ADD_GROUP(DetectionLbpDetect16ip);
     TEST_ADD_GROUP(DetectionLbpDetect16ii);
-#endif
 
     TEST_ADD_GROUP(AlphaBlending);
 

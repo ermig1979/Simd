@@ -26,8 +26,6 @@
 
 #include "Simd/SimdConst.h"
 
-#ifdef SIMD_DETECTION_ENABLE
-
 #include "Simd/SimdView.hpp"
 
 #include <vector>
@@ -353,7 +351,5 @@ namespace Simd
         }
     }
 }
-
-#endif
 
 #endif//__SimdDetection_h__

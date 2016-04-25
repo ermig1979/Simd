@@ -22,16 +22,13 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdBase.h"
-
-#ifdef SIMD_DETECTION_ENABLE
-
 #include "Simd/SimdDetection.h"
 #include "Simd/SimdBase_tinyxml2.h"
 
-#include <sstream>
 #include <exception>
+#include <stdexcept>
 #include <iostream>
+#include <sstream>
 
 #define SIMD_EX(message) \
 { \
@@ -52,6 +49,25 @@ namespace Simd
                 T t;
                 std::stringstream(s) >> t;
                 return t;
+            }
+
+            template<class InputIterator> inline  InputIterator FindNotSpace(InputIterator first, InputIterator last)
+            {
+                while (first != last) 
+                {
+                    if (!isspace(*first)) 
+                        return first;
+                    ++first;
+                }
+                return last;
+            }
+
+            template <> inline std::string FromString(const std::string & s)
+            {
+                std::string str(s);
+                str.erase(str.begin(), FindNotSpace(str.begin(), str.end()));
+                str.erase(FindNotSpace(str.rbegin(), str.rend()).base(), str.end());
+                return str;
             }
 
             template<class T> inline T GetValue(tinyxml2::XMLNode * parent)
@@ -754,7 +770,7 @@ namespace Simd
             return DetectionHaarDetect32fp(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
@@ -781,7 +797,7 @@ namespace Simd
             return DetectionHaarDetect32fi(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
@@ -806,7 +822,7 @@ namespace Simd
             return DetectionLbpDetect32fp(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
@@ -831,7 +847,7 @@ namespace Simd
             return DetectionLbpDetect32fi(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
@@ -856,7 +872,7 @@ namespace Simd
             return DetectionLbpDetect16ip(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
@@ -881,7 +897,7 @@ namespace Simd
             return DetectionLbpDetect16ii(hid,
                 View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
         }
 
         void DetectionFree(void * ptr)
@@ -890,5 +906,3 @@ namespace Simd
         }
     }
 }
-
-#endif
