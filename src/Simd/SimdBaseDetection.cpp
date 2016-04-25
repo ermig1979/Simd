@@ -313,8 +313,6 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
-
         HidHaarCascade * CreateHidHaar(const Data & data)
         {
             if (data.featureType != SimdDetectionInfoFeatureHaar)
@@ -754,9 +752,9 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
@@ -781,9 +779,9 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fi(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
@@ -806,9 +804,9 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fp(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
@@ -831,9 +829,9 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fi(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
@@ -856,9 +854,9 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ip(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
@@ -881,9 +879,9 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ii(hid,
-                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
         void DetectionFree(void * ptr)

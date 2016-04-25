@@ -86,7 +86,7 @@ namespace Test
         else
         {
             View _obj = obj.Region(obj.Size() * 4 / 7, View::MiddleCenter);
-            size_t size = Simd::Min(dst.width, dst.height);
+            size_t size = 32;
             View _dst = dst.Region(Size(size, size), View::MiddleCenter);
             Simd::ResizeBilinear(_obj, _dst);
         }
@@ -241,6 +241,11 @@ namespace Test
 
         result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+#endif
+
         return result;
     }
 
@@ -249,6 +254,11 @@ namespace Test
         bool result = true;
 
         result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+#endif
 
         return result;
     }
@@ -259,6 +269,11 @@ namespace Test
 
         result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+#endif
+
         return result;
     }
 
@@ -267,6 +282,11 @@ namespace Test
         bool result = true;
 
         result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+#endif
 
         return result;
     }
@@ -277,6 +297,11 @@ namespace Test
 
         result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+#endif
+
         return result;
     }
 
@@ -285,6 +310,11 @@ namespace Test
         bool result = true;
 
         result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+#endif
 
         return result;
     }

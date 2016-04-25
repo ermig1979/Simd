@@ -251,6 +251,25 @@ namespace Simd
 
             virtual ~HidLbpCascade() {}
         };
+
+        template <class T> struct Buffer
+        {
+            Buffer(size_t size)
+            {
+                _p = Simd::Allocate(2 * size*sizeof(T));
+                m = (T*)_p;
+                d = m + size;
+            }
+
+            ~Buffer()
+            {
+                Simd::Free(_p);
+            }
+
+            T *m, *d;
+        private:
+            void *_p;
+        };
     }
 
     namespace Base

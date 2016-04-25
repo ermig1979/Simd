@@ -29,5 +29,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp">
       <Filter>Alg</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp">
+      <Filter>Alg</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
