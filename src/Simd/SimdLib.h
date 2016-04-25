@@ -1502,28 +1502,43 @@ extern "C"
 
 #ifdef SIMD_DETECTION_ENABLE
 
-    SIMD_API void * SimdDetectionDataLoadA(const char * path);
+    SIMD_API void * SimdDetectionLoadA(const char * path);
 
-    SIMD_API void SimdDetectionDataFree(void * data);
+    typedef enum 
+    {
+        SimdDetectionInfoFeatureHaar,
+        SimdDetectionInfoFeatureLbp,
+        SimdDetectionInfoFeatureMask = 3,
+        SimdDetectionInfoHasTilted = 4,
+        SimdDetectionInfoCanInt16 = 8,
+    } SimdDetectionInfoFlags;
 
-    SIMD_API size_t SimdDetectionWindowWidth(const void * data);
+    SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
 
-    SIMD_API size_t SimdDetectionWindowHeight(const void * data);
+    SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
+        uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
 
-    SIMD_API void * SimdDetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-        uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn);
-
-    SIMD_API void SimdDetectionHaarFree(void * hid);
-
-    SIMD_API int SimdDetectionHaarHasTilted(const void * hid);
-
-    SIMD_API void SimdDetectionHaarPrepare(void * hid);
+    SIMD_API void SimdDetectionPrepare(void * hid);
 
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
     SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
+        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
+        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
+        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
+        ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+    SIMD_API void SimdDetectionFree(void * ptr);
 
 #endif
 

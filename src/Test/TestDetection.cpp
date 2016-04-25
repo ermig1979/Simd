@@ -94,7 +94,7 @@ namespace Test
         return dst;
     }
 
-    void Annotate(const View & src, const View & mask, size_t w, size_t h)
+    void Annotate(const View & src, const View & mask, size_t w, size_t h, const std::string & desc)
     {
         View dst(src.Size(), View::Gray8);
         Simd::Copy(src, dst);
@@ -107,7 +107,14 @@ namespace Test
                 Simd::FillFrame(dst.Region(col, row, col + w, row + h).Ref(), Rect(1, 1, w - 1, h - 1), 255);
             }
         }
-        Save(dst, "dst.pgm");
+        std::string path = desc;
+        size_t s = path.length();
+        if (path[s - 1] == '>')
+        {
+            path[s - 3] = '_';
+            path = path.substr(0, s - 1);
+        }
+        Save(dst, path + ".pgm");
     }
 
     namespace
@@ -136,7 +143,7 @@ namespace Test
     FuncD(function1.func, function1.description + (tilted ? "<1>" : "<0>")), \
     FuncD(function2.func, function2.description + (tilted ? "<1>" : "<0>"))
 
-    bool DetectionHaarDetectAutoTest(const void * data, int width, int height, bool throughColumn, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int  int16, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
 
@@ -150,8 +157,8 @@ namespace Test
         View sqsum(width + 1, height + 1, View::Int32);
         View tilted(width + 1, height + 1, View::Int32);
 
-        void * hid = SimdDetectionHaarInit(data, sum.data, sum.stride, sum.width, sum.height, 
-            sqsum.data, sqsum.stride, tilted.data, tilted.stride, throughColumn ? 1 : 0);
+        void * hid = SimdDetectionInit(data, sum.data, sum.stride, sum.width, sum.height, 
+            sqsum.data, sqsum.stride, tilted.data, tilted.stride, throughColumn, int16);
         if (hid == NULL)
         {
             TEST_LOG_SS(Error, "Can't init haar cascade!");
@@ -161,7 +168,9 @@ namespace Test
         View mask(width, height, View::Gray8);
         Simd::Fill(mask, 1);
 
-        size_t w = SimdDetectionWindowWidth(data), h = SimdDetectionWindowHeight(data);
+        size_t w, h;
+        SimdDetectionInfoFlags flags;
+        SimdDetectionInfo(data, &w, &h, &flags);
         Rect rect(0, 0, width - w, height - h);
 
         View dst1(width, height, View::Gray8);
@@ -170,12 +179,14 @@ namespace Test
         View dst2(width, height, View::Gray8);
         Simd::Fill(dst2, 0);
 
-        if(SimdDetectionHaarHasTilted(hid))
+        if((flags &SimdDetectionInfoFeatureMask) == SimdDetectionInfoFeatureLbp)
+            Simd::Integral(src, sum);
+        if(flags&SimdDetectionInfoHasTilted)
             Simd::Integral(src, sum, sqsum, tilted);
         else
             Simd::Integral(src, sum, sqsum);
 
-        SimdDetectionHaarPrepare(hid);
+        SimdDetectionPrepare(hid);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(hid, mask, rect, dst1));
 
@@ -183,38 +194,43 @@ namespace Test
 
         result = result && Compare(dst1, dst2, 0, true, 32);
 
-        SimdDetectionHaarFree(hid);
+        SimdDetectionFree(hid);
 
-        //Annotate(src, dst1, w, h);
+        Annotate(src, dst1, w, h, f2.description);
 
         return result;
     }
 
-    bool DetectionHaarDetectAutoTest(const char * path, bool throughColumn, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const char * path, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
 
-        void * data = SimdDetectionDataLoadA(path);
+        void * data = SimdDetectionLoadA(path);
         if(data == NULL)
         {
-            TEST_LOG_SS(Error, "Can't load haar cascade '" << path << "' !");
+            TEST_LOG_SS(Error, "Can't load cascade '" << path << "' !");
             return false;
         }
 
-        result = result && DetectionHaarDetectAutoTest(data, W, H, throughColumn, f1, f2);
-        //result = result && DetectionHaarDetectAutoTest(data, W + O, H - O, throughColumn, f1, f2);
+        result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);
+        //result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2);
 
-        SimdDetectionDataFree(data);
+        SimdDetectionFree(data);
 
         return result;
     }
 
-    bool DetectionHaarDetectAutoTest(bool throughColumn, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(int lbp, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
 
-        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, ARGS_D(0, f1, f2));
-        result = result && DetectionHaarDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, ARGS_D(1, f1, f2));
+        if (lbp)
+            result = result && DetectionDetectAutoTest("../../data/cascade/lbp_face.xml", throughColumn, int16, f1, f2);
+        else
+        {
+            result = result && DetectionDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, int16, ARGS_D(0, f1, f2));
+            result = result && DetectionDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, int16, ARGS_D(1, f1, f2));
+        }
 
         return result;
     }
@@ -223,7 +239,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DetectionHaarDetectAutoTest(false, FUNC_D(Simd::Base::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+        result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 
         return result;
     }
@@ -232,14 +248,50 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DetectionHaarDetectAutoTest(false, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+        result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Base::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+
+        return result;
+    }
+
+    bool DetectionLbpDetect32fpAutoTest()
+    {
+        bool result = true;
+
+        result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+
+        return result;
+    }
+
+    bool DetectionLbpDetect32fiAutoTest()
+    {
+        bool result = true;
+
+        result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Base::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+
+        return result;
+    }
+
+    bool DetectionLbpDetect16ipAutoTest()
+    {
+        bool result = true;
+
+        result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+
+        return result;
+    }
+
+    bool DetectionLbpDetect16iiAutoTest()
+    {
+        bool result = true;
+
+        result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Base::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
 
         return result;
     }
 
     //-----------------------------------------------------------------------
 
-    bool DetectionHaarDetectDataTest(bool create, int width, int height, const FuncD & f)
+    bool DetectionDetectDataTest(bool create, int width, int height, const FuncD & f)
     {
         bool result = true;
 
@@ -261,20 +313,32 @@ namespace Test
 
     bool DetectionHaarDetect32fpDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && DetectionHaarDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fp));
-
-        return result;
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fp));
     }
 
     bool DetectionHaarDetect32fiDataTest(bool create)
     {
-        bool result = true;
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fi));
+    }
 
-        result = result && DetectionHaarDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionHaarDetect32fi));
+    bool DetectionLbpDetect32fpDataTest(bool create)
+    {
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionLbpDetect32fp));
+    }
 
-        return result;
+    bool DetectionLbpDetect32fiDataTest(bool create)
+    {
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionLbpDetect32fi));
+    }
+
+    bool DetectionLbpDetect16ipDataTest(bool create)
+    {
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionLbpDetect16ip));
+    }
+
+    bool DetectionLbpDetect16iiDataTest(bool create)
+    {
+        return DetectionDetectDataTest(create, DW, DH, FUNC_D(SimdDetectionLbpDetect16ii));
     }
 }
 

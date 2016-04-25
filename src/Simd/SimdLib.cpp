@@ -1196,45 +1196,25 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
 
 #ifdef SIMD_DETECTION_ENABLE
 
-SIMD_API void * SimdDetectionDataLoadA(const char * path)
+SIMD_API void * SimdDetectionLoadA(const char * path)
 {
-    return Base::DetectionDataLoadA(path);
+    return Base::DetectionLoadA(path);
 }
 
-SIMD_API void SimdDetectionDataFree(void * data)
+SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags)
 {
-    Base::DetectionDataFree(data);
+    Base::DetectionInfo(data, width, height, flags);
 }
 
-SIMD_API size_t SimdDetectionWindowWidth(const void * data)
+SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
+    uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16)
 {
-    return Base::DetectionWindowWidth(data);
+    return Base::DetectionInit(data, sum, sumStride, width, height, sqsum, sqsumStride, tilted, tiltedStride, throughColumn, int16);
 }
 
-SIMD_API size_t SimdDetectionWindowHeight(const void * data)
+SIMD_API void SimdDetectionPrepare(void * hid)
 {
-    return Base::DetectionWindowHeight(data);
-}
-
-SIMD_API void * SimdDetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-    uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn)
-{
-    return Base::DetectionHaarInit(data, sum, sumStride, width, height, sqsum, sqsumStride, tilted, tiltedStride, throughColumn);
-}
-
-SIMD_API void SimdDetectionHaarFree(void * hid)
-{
-    Base::DetectionHaarFree(hid);
-}
-
-SIMD_API int SimdDetectionHaarHasTilted(const void * hid)
-{
-    return Base::DetectionHaarHasTilted(hid);
-}
-
-SIMD_API void SimdDetectionHaarPrepare(void * hid)
-{
-    Base::DetectionHaarPrepare(hid);
+    Base::DetectionPrepare(hid);
 }
 
 SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
@@ -1247,6 +1227,35 @@ SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
     Base::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
+    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+{
+    Base::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
+    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+{
+    Base::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
+    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+{
+    Base::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
+    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+{
+    Base::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+}
+
+SIMD_API void SimdDetectionFree(void * ptr)
+{
+    Base::DetectionFree(ptr);
 }
 
 #endif

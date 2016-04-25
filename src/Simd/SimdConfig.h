@@ -58,6 +58,6 @@
 
 //#define SIMD_OPENCV_ENABLE
 
-//#define SIMD_DETECTION_ENABLE
+#define SIMD_DETECTION_ENABLE
 
 #endif//__SimdConfig_h__

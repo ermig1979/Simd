@@ -131,7 +131,7 @@ namespace Simd
             const char * rect = "rect";
         }
 
-        void * DetectionDataLoadA(const char * path)
+        void * DetectionLoadA(const char * path)
         {
             static const float THRESHOLD_EPS = 1e-5f;
 
@@ -158,11 +158,13 @@ namespace Simd
 
                 std::string featureType = Xml::GetValue<std::string>(cascade, Names::featureType);
                 if (featureType == Names::HAAR)
-                    data->featureType = Data::HAAR;
+                    data->featureType = SimdDetectionInfoFeatureHaar;
                 else if (featureType == Names::LBP)
-                    data->featureType = Data::LBP;
+                    data->featureType = SimdDetectionInfoFeatureLbp;
                 else if (featureType == Names::HOG)
-                    data->featureType = Data::HOG;
+                {
+                    SIMD_EX("HOG feature type is not supported!")
+                }
                 else
                     SIMD_EX("Invalid cascade feature type!")
 
@@ -176,6 +178,11 @@ namespace Simd
                     data->isStumpBased = Xml::GetValue<int>(stageParams, Names::maxDepth) == 1 ? true : false;
                 else
                     data->isStumpBased = true;
+
+                if (!data->isStumpBased)
+                {
+                    SIMD_EX("Tree classifier cascades are not supported!")
+                }
 
                 tinyxml2::XMLElement * featureParams = cascade->FirstChildElement(Names::featureParams);
                 data->ncategories = Xml::GetValue<int>(featureParams, Names::maxCatCount);
@@ -241,8 +248,9 @@ namespace Simd
                 }
 
                 tinyxml2::XMLNode * featureNodes = cascade->FirstChildElement(Names::features);
-                if (data->featureType == Data::HAAR)
+                if (data->featureType == SimdDetectionInfoFeatureHaar)
                 {
+                    data->hasTilted = false;
                     data->haarFeatures.reserve(Xml::GetSize(featureNodes));
                     for (tinyxml2::XMLNode * featureNode = featureNodes->FirstChildElement(); featureNode != NULL; featureNode = featureNode->NextSiblingElement())
                     {
@@ -259,12 +267,15 @@ namespace Simd
                             feature.rect[rectIndex].weight = (float)values[4];
                         }
                         feature.tilted = featureNode->FirstChildElement(Names::tilted) && Xml::GetValue<int>(featureNode, Names::tilted) != 0;
+                        if (feature.tilted)
+                            data->hasTilted = true;
                         data->haarFeatures.push_back(feature);
                     }
                 }
 
-                if (data->featureType == Data::LBP)
+                if (data->featureType == SimdDetectionInfoFeatureLbp)
                 {
+                    data->canInt16 = true;
                     data->lbpFeatures.reserve(Xml::GetSize(featureNodes));
                     for (tinyxml2::XMLNode * featureNode = featureNodes->FirstChildElement(); featureNode != NULL; featureNode = featureNode->NextSiblingElement())
                     {
@@ -274,6 +285,8 @@ namespace Simd
                         feature.rect.y = values[1];
                         feature.rect.width = values[2];
                         feature.rect.height = values[3];
+                        if (feature.rect.width*feature.rect.height > 256)
+                            data->canInt16 = false;
                         data->lbpFeatures.push_back(feature);
                     }
                 }
@@ -283,33 +296,28 @@ namespace Simd
                 delete data;
                 data = NULL;
             }
+
             return data;
         }
 
-        void DetectionDataFree(void * data)
+        void DetectionInfo(const void * _data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags)
         {
-            delete (Data*)data;
-        }
-
-        size_t DetectionWindowWidth(const void * data)
-        {
+            Data * data = (Data*)_data;
             if (data)
-                return ((Data*)data)->origWinSize.x;
-            else
-                return 0;
+            {
+                *width = data->origWinSize.x;
+                *height = data->origWinSize.y;
+                *flags = SimdDetectionInfoFlags(data->featureType |
+                    (data->hasTilted ? SimdDetectionInfoHasTilted : 0) |
+                    (data->canInt16 ? SimdDetectionInfoCanInt16 : 0));
+            }
         }
 
-        size_t DetectionWindowHeight(const void * data)
-        {
-            if (data)
-                return ((Data*)data)->origWinSize.y;
-            else
-                return 0;
-        }
+        //---------------------------------------------------------------------
 
-        HidHaarCascade * CreateHid(const Data & data)
+        HidHaarCascade * CreateHidHaar(const Data & data)
         {
-            if (data.featureType != Data::HAAR)
+            if (data.featureType != SimdDetectionInfoFeatureHaar)
                 SIMD_EX("It is not HAAR cascade!");
 
             HidHaarCascade * hid = new HidHaarCascade();
@@ -438,12 +446,12 @@ namespace Simd
             }
         }
 
-        HidHaarCascade * InitVector(const Data & data, const View & sum, const View & sqsum, const View & tilted, bool throughColumn)
+        HidHaarCascade * InitHaar(const Data & data, const View & sum, const View & sqsum, const View & tilted, bool throughColumn)
         {
             if (!data.isStumpBased)
                 SIMD_EX("Can't use tree classfier for vector haar classifier!");
 
-            HidHaarCascade * hid = CreateHid(data);
+            HidHaarCascade * hid = CreateHidHaar(data);
             InitBase(hid, sum, sqsum, tilted);
             if (throughColumn)
             {
@@ -456,24 +464,159 @@ namespace Simd
             return hid;
         }
 
-        void * DetectionHaarInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
-            uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn)
+        template<class T> void InitLbp(const Data & data, size_t index, HidLbpStage<T> * stages, T * leaves);
+
+        template<> void InitLbp<float>(const Data & data, size_t index, HidLbpStage<float> * stages, float * leaves)
         {
-            return InitVector(*(Data*)data, 
-                View(width, height, sumStride, View::Int32, sum),
-                View(width, height, sqsumStride, View::Int32, sqsum), 
-                View(width, height, tiltedStride, View::Int32, tilted),
-                throughColumn != 0);
+            stages[index].first = data.stages[index].first;
+            stages[index].ntrees = data.stages[index].ntrees;
+            stages[index].threshold = data.stages[index].threshold;
+            for (int i = stages[index].first * 2, n = (stages[index].first + stages[index].ntrees) * 2; i < n; ++i)
+                leaves[i] = data.leaves[i];
         }
 
-        void DetectionHaarFree(void * hid)
+        template<> void InitLbp<int>(const Data & data, size_t index, HidLbpStage<int> * stages, int * leaves)
         {
-            delete (HidHaarCascade*)hid;
+            float min = 0, max = 0;
+            for (int i = 0; i < data.stages[index].ntrees; ++i)
+            {
+                const float * leave = data.leaves.data() + (data.stages[index].first + i) * 2;
+                min += std::min(leave[0], leave[1]);
+                max += std::max(leave[0], leave[1]);
+            }
+            float k = float(SHRT_MAX)*0.9f / std::max(std::abs(min), std::abs(max));
+
+            stages[index].first = data.stages[index].first;
+            stages[index].ntrees = data.stages[index].ntrees;
+            stages[index].threshold = Simd::Round(data.stages[index].threshold*k);
+            for (int i = stages[index].first * 2, n = (stages[index].first + stages[index].ntrees) * 2; i < n; ++i)
+                leaves[i] = Simd::Round(data.leaves[i] * k);
+#if 0
+            std::cout
+                << "stage = " << index
+                << "; ntrees = " << data.stages[index].ntrees
+                << "; threshold = " << data.stages[index].threshold
+                << "; min = " << min
+                << "; max = " << max
+                << "; k = " << k
+                << "." << std::endl;
+#endif
         }
-        
-        int DetectionHaarHasTilted(const void * hid)
+
+        template<class TWeight, class TSum> HidLbpCascade<TWeight, TSum> * CreateHidLbp(const Data & data)
         {
-            return ((HidHaarCascade*)hid)->hasTilted;
+            HidLbpCascade<TWeight, TSum> * hid = new HidLbpCascade<TWeight, TSum>();
+
+            hid->isInt16 = (sizeof(TSum) == 2);
+            hid->isThroughColumn = false;
+
+            hid->isStumpBased = data.isStumpBased;
+            //hid->stageType = data.stageType;
+            hid->featureType = data.featureType;
+            hid->ncategories = data.ncategories;
+            hid->origWinSize = data.origWinSize;
+
+            hid->trees.resize(data.classifiers.size());
+            for (size_t i = 0; i < data.classifiers.size(); ++i)
+            {
+                hid->trees[i].nodeCount = data.classifiers[i].nodeCount;
+            }
+
+            hid->nodes.resize(data.nodes.size());
+            for (size_t i = 0; i < data.nodes.size(); ++i)
+            {
+                hid->nodes[i].featureIdx = data.nodes[i].featureIdx;
+                hid->nodes[i].left = data.nodes[i].left;
+                hid->nodes[i].right = data.nodes[i].right;
+            }
+
+            hid->stages.resize(data.stages.size());
+            hid->leaves.resize(data.leaves.size());
+            for (size_t i = 0; i < data.stages.size(); ++i)
+            {
+                InitLbp(data, i, hid->stages.data(), hid->leaves.data());
+            }
+
+            hid->subsets.resize(data.subsets.size());
+            for (size_t i = 0; i < data.subsets.size(); ++i)
+            {
+                hid->subsets[i] = data.subsets[i];
+            }
+
+            hid->features.resize(data.lbpFeatures.size());
+            for (size_t i = 0; i < hid->features.size(); ++i)
+            {
+                hid->features[i].rect.left = data.lbpFeatures[i].rect.x;
+                hid->features[i].rect.top = data.lbpFeatures[i].rect.y;
+                hid->features[i].rect.right = data.lbpFeatures[i].rect.x + data.lbpFeatures[i].rect.width;
+                hid->features[i].rect.bottom = data.lbpFeatures[i].rect.y + data.lbpFeatures[i].rect.height;
+            }
+
+            return hid;
+        }
+
+        template<class TLeave, class TSum> SIMD_INLINE void UpdateFeaturePtrs(HidLbpCascade<TLeave, TSum> * hid)
+        {
+            View sum = (hid->isThroughColumn || hid->isInt16) ? hid->isum : hid->sum;
+            for (size_t i = 0; i < hid->features.size(); i++)
+            {
+                typename HidLbpCascade<TLeave, TSum>::Feature& feature = hid->features[i];
+                for (size_t row = 0; row < 4; ++row)
+                {
+                    for (size_t col = 0; col < 4; ++col)
+                    {
+                        feature.p[row * 4 + col] = SumElemPtr<TSum>(sum,
+                            feature.rect.top + feature.rect.Height()*row,
+                            feature.rect.left + feature.rect.Width()*col, hid->isThroughColumn);
+                    }
+                }
+            }
+        }
+
+        HidBase * InitLbp(const Data & data, const View & sum, bool throughColumn, bool int16)
+        {
+            assert(sum.format == View::Int32);
+            if (int16)
+            {
+                HidLbpCascade<int, short> * hid = CreateHidLbp<int, short>(data);
+                hid->isThroughColumn = throughColumn;
+                hid->sum = sum;
+                hid->isum.Recreate(sum.Size(), View::Int16);
+                UpdateFeaturePtrs(hid);
+                return hid;
+            }
+            else
+            {
+                HidLbpCascade<float, int> * hid = CreateHidLbp<float, int>(data);
+                hid->isThroughColumn = throughColumn;
+                hid->sum = sum;
+                if (throughColumn)
+                    hid->isum.Recreate(sum.Size(), View::Int32);
+                UpdateFeaturePtrs(hid);
+                return hid;
+            }
+        }
+
+        void * DetectionInit(const void * _data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
+            uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16)
+        {
+            Data & data = *(Data*)_data;
+            switch (data.featureType)
+            {
+            case SimdDetectionInfoFeatureHaar:
+                return InitHaar(data,
+                    View(width, height, sumStride, View::Int32, sum),
+                    View(width, height, sqsumStride, View::Int32, sqsum),
+                    View(width, height, tiltedStride, View::Int32, tilted),
+                    throughColumn != 0);
+            case SimdDetectionInfoFeatureLbp:
+                return InitLbp(data,
+                    View(width, height, sumStride, View::Int32, sum),
+                    throughColumn != 0,
+                    int16 != 0);
+            default:
+                return NULL;
+            }
         }
 
         void PrepareThroughColumn32i(const View & src, View & dst)
@@ -494,18 +637,63 @@ namespace Simd
             }
         }
 
-        void DetectionHaarPrepare(void * _hid)
+        void Prepare16i(const View & src, bool throughColumn, View & dst)
         {
-            HidHaarCascade * hid = (HidHaarCascade*)_hid;
-            if (hid->isThroughColumn)
+            assert(Simd::EqualSize(src, dst) && src.format == View::Int32 && dst.format == View::Int16);
+
+            if (throughColumn)
             {
+                for (size_t row = 0; row < src.height; ++row)
+                {
+                    const uint32_t * s = &src.At<uint32_t>(0, row);
+
+                    uint16_t * evenDst = &dst.At<uint16_t>(0, row);
+                    for (size_t col = 0; col < src.width; col += 2)
+                        evenDst[col >> 1] = (uint16_t)s[col];
+
+                    uint16_t * oddDst = &dst.At<uint16_t>((dst.width + 1) >> 1, row);
+                    for (size_t col = 1; col < src.width; col += 2)
+                        oddDst[col >> 1] = (uint16_t)s[col];
+                }
+            }
+            else
+            {
+                for (size_t row = 0; row < src.height; ++row)
+                {
+                    const uint32_t * s = &src.At<uint32_t>(0, row);
+                    uint16_t * d = &dst.At<uint16_t>(0, row);
+                    for (size_t col = 0; col < src.width; ++col)
+                        d[col] = (uint16_t)s[col];
+                }
+            }
+        }
+
+        void DetectionPrepare(void * _hid)
+        {
+            HidBase * hidBase = (HidBase*)_hid;
+            if (hidBase->featureType == SimdDetectionInfoFeatureHaar && hidBase->isThroughColumn)
+            {
+                HidHaarCascade * hid = (HidHaarCascade*)hidBase;
                 PrepareThroughColumn32i(hid->sum, hid->isum);
                 if (hid->hasTilted)
                     PrepareThroughColumn32i(hid->tilted, hid->itilted);
             }
+            else if (hidBase->featureType == SimdDetectionInfoFeatureLbp)
+            {
+                if (hidBase->isInt16)
+                {
+                    HidLbpCascade<int, short> * hid = (HidLbpCascade<int, short>*)hidBase;
+                    Prepare16i(hid->sum, hid->isThroughColumn, hid->isum);
+                }
+                else if (hidBase->isThroughColumn)
+                {
+                    HidLbpCascade<float, int> * hid = (HidLbpCascade<float, int>*)hidBase;
+                    PrepareThroughColumn32i(hid->sum, hid->isum);
+                }
+            }
         }
 
-        int DetectionHaarDetect32f(const HidHaarCascade & hid, size_t offset, int startStage, float norm)
+        int Detect32f(const HidHaarCascade & hid, size_t offset, int startStage, float norm)
         {
             typedef HidHaarCascade Hid;
             const Hid::Stage * stages = hid.stages.data();
@@ -555,7 +743,7 @@ namespace Simd
                     if (mask.At<uint8_t>(col, row) == 0)
                         continue;
                     float norm = Norm32f(hid, pq_offset + col);
-                    if (DetectionHaarDetect32f(hid, p_offset + col, 0, norm) > 0)
+                    if (Detect32f(hid, p_offset + col, 0, norm) > 0)
                         dst.At<uint8_t>(col, row) = 1;
                 }
             }
@@ -582,7 +770,7 @@ namespace Simd
                     if (mask.At<uint8_t>(col, row) == 0)
                         continue;
                     float norm = Norm32f(hid, pq_offset + col);
-                    if (DetectionHaarDetect32f(hid, p_offset + col / 2, 0, norm) > 0)
+                    if (Detect32f(hid, p_offset + col / 2, 0, norm) > 0)
                         dst.At<uint8_t>(col, row) = 1;
                 }
             }
@@ -596,6 +784,111 @@ namespace Simd
                 View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
+            {
+                size_t offset = row * hid.sum.stride / sizeof(int);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 1)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    if (Detect(hid, offset + col, 0) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionLbpDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            return DetectionLbpDetect32fp(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
+            {
+                size_t offset = row * hid.isum.stride / sizeof(int);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 2)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    if (Detect(hid, offset + col / 2, 0) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionLbpDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            return DetectionLbpDetect32fi(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
+            {
+                size_t offset = row * hid.isum.stride / sizeof(short);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 1)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    if (Detect(hid, offset + col, 0) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionLbpDetect16ip(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            return DetectionLbpDetect16ip(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        {
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
+            {
+                size_t offset = row * hid.isum.stride / sizeof(short);
+                for (ptrdiff_t col = rect.left; col < rect.right; col += 2)
+                {
+                    if (mask.At<uint8_t>(col, row) == 0)
+                        continue;
+                    if (Detect(hid, offset + col / 2, 0) > 0)
+                        dst.At<uint8_t>(col, row) = 1;
+                }
+            }
+        }
+
+        void DetectionLbpDetect16ii(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            return DetectionLbpDetect16ii(hid,
+                View(hid.isum.width - 1, hid.isum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                View(hid.isum.width - 1, hid.isum.height - 1, dstStride, View::Gray8, dst));
+        }
+
+        void DetectionFree(void * ptr)
+        {
+            delete (Deletable*)ptr;
         }
     }
 }

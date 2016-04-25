@@ -40,15 +40,13 @@ namespace Simd
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
 
-        struct Data
+        struct Deletable
         {
-            enum FeatureType
-            {
-                HAAR = 0,
-                LBP = 1,
-                HOG = 2
-            };
+            virtual ~Deletable() {}
+        };
 
+        struct Data : public Deletable
+        {
             struct DTreeNode
             {
                 int featureIdx;
@@ -95,9 +93,11 @@ namespace Simd
             };
 
             bool isStumpBased;
+            bool hasTilted;
+            bool canInt16;
 
             int stageType;
-            FeatureType featureType;
+            SimdDetectionInfoFlags featureType;
             int ncategories;
             Size origWinSize;
 
@@ -109,9 +109,22 @@ namespace Simd
 
             std::vector<HaarFeature> haarFeatures;
             std::vector<LbpFeature> lbpFeatures;
+
+            virtual ~Data() {}
         };
 
-        //---------------------------------------------------------------------
+        struct HidBase : public Deletable
+        {
+            SimdDetectionInfoFlags featureType;
+            Size origWinSize;
+            bool isStumpBased;
+            bool isThroughColumn;
+            bool hasTilted;
+            bool isInt16;
+            int ncategories;
+
+            virtual ~HidBase() {}
+        };
 
         struct WeightedRect
         {
@@ -141,13 +154,8 @@ namespace Simd
             float threshold;
         };
 
-        struct HidHaarCascade
+        struct HidHaarCascade : public HidBase
         {
-            Size origWinSize;
-            bool isStumpBased;
-            bool isThroughColumn;
-            bool hasTilted;
-
             typedef HidHaarNode Node;
             typedef std::vector<Node> Nodes;
 
@@ -182,6 +190,66 @@ namespace Simd
 
             View sum, sqsum, tilted;
             View isum, itilted;
+
+            virtual ~HidHaarCascade() 
+            {
+            }
+        };
+
+        //---------------------------------------------------------------------
+
+        template<class TSum> struct HidLbpFeature
+        {
+            Rect rect;
+            const TSum * p[16];
+        };
+
+        template <class TWeight> struct HidLbpStage
+        {
+            int first;
+            int ntrees;
+            TWeight threshold;
+        };
+
+        template<class TWeight, class TSum> struct HidLbpCascade : public HidBase
+        {
+            struct Node
+            {
+                int featureIdx;
+                int left;
+                int right;
+            };
+            typedef std::vector<Node> Nodes;
+
+            struct Tree
+            {
+                int nodeCount;
+            };
+            typedef std::vector<Tree> Trees;
+
+            typedef HidLbpStage<TWeight> Stage;
+            typedef std::vector<Stage> Stages;
+
+            typedef TWeight Leave;
+            typedef std::vector<Leave> Leaves;
+
+            typedef int Subset;
+            typedef std::vector<Subset> Subsets;
+
+            typedef HidLbpFeature<TSum> Feature;
+            typedef std::vector<Feature> Features;
+
+            Nodes nodes;
+            Trees trees;
+            Stages stages;
+            Leaves leaves;
+            Subsets subsets;
+            Features features;
+
+            View sum;
+            View isum;
+
+            virtual ~HidLbpCascade() {}
         };
     }
 
@@ -213,7 +281,57 @@ namespace Simd
             return rect.weight*sum;
         }
 
-        int DetectionHaarDetect32f(const struct HidHaarCascade & hid, size_t offset, int startStage, float norm);
+        int Detect32f(const struct HidHaarCascade & hid, size_t offset, int startStage, float norm);
+
+        template< class T> SIMD_INLINE T IntegralSum(const T * p0, const T * p1, const T * p2, const T * p3, ptrdiff_t offset)
+        {
+            return p0[offset] - p1[offset] - p2[offset] + p3[offset];
+        }
+
+        template< class T> SIMD_INLINE int Calculate(const HidLbpFeature<T> & feature, ptrdiff_t offset)
+        {
+            int central = IntegralSum(feature.p[5], feature.p[6], feature.p[9], feature.p[10], offset);
+
+            return
+                (IntegralSum(feature.p[0], feature.p[1], feature.p[4], feature.p[5], offset) >= central ? 128 : 0) |
+                (IntegralSum(feature.p[1], feature.p[2], feature.p[5], feature.p[6], offset) >= central ? 64 : 0) |
+                (IntegralSum(feature.p[2], feature.p[3], feature.p[6], feature.p[7], offset) >= central ? 32 : 0) |
+                (IntegralSum(feature.p[6], feature.p[7], feature.p[10], feature.p[11], offset) >= central ? 16 : 0) |
+                (IntegralSum(feature.p[10], feature.p[11], feature.p[14], feature.p[15], offset) >= central ? 8 : 0) |
+                (IntegralSum(feature.p[9], feature.p[10], feature.p[13], feature.p[14], offset) >= central ? 4 : 0) |
+                (IntegralSum(feature.p[8], feature.p[9], feature.p[12], feature.p[13], offset) >= central ? 2 : 0) |
+                (IntegralSum(feature.p[4], feature.p[5], feature.p[8], feature.p[9], offset) >= central ? 1 : 0);
+        }
+
+        template<class TWeight, class TSum> inline int Detect(const HidLbpCascade<TWeight, TSum> & hid, size_t offset, int startStage)
+        {
+            typedef HidLbpCascade<TWeight, TSum> Hid;
+
+            size_t subsetSize = (hid.ncategories + 31) / 32;
+            const int * subsets = hid.subsets.data();
+            const typename Hid::Leave * leaves = hid.leaves.data();
+            const typename Hid::Node * nodes = hid.nodes.data();
+            const typename Hid::Stage * stages = hid.stages.data();
+            int nodeOffset = stages[startStage].first;
+            int leafOffset = 2 * nodeOffset;
+            for (int i_stage = startStage, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
+            {
+                const typename Hid::Stage & stage = stages[i_stage];
+                TWeight sum = 0;
+                for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
+                {
+                    const typename Hid::Node & node = nodes[nodeOffset];
+                    int c = Calculate(hid.features[node.featureIdx], offset);
+                    const int * subset = subsets + nodeOffset*subsetSize;
+                    sum += leaves[subset[c >> 5] & (1 << (c & 31)) ? leafOffset : leafOffset + 1];
+                    nodeOffset++;
+                    leafOffset += 2;
+                }
+                if (sum < stage.threshold)
+                    return -i_stage;
+            }
+            return 1;
+        }
     }
 }
 
