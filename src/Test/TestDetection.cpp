@@ -246,6 +246,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+#endif
+
         return result;
     }
 
@@ -258,6 +263,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Sse41::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
 #endif
 
         return result;
@@ -274,6 +284,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+#endif
+
         return result;
     }
 
@@ -286,6 +301,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Sse41::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx2::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
 #endif
 
         return result;
@@ -302,6 +322,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+#endif
+
         return result;
     }
 
@@ -314,6 +339,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Sse41::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
 #endif
 
         return result;

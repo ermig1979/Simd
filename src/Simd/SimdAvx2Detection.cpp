@@ -3,42 +3,45 @@
 *
 * Copyright (c) 2011-2016 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy
+* Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
+* copies of the Software, and to permit persons to whom the Software is 
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in
+* The above copyright notice and this permission notice shall be included in 
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdDetection.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
+#ifdef SIMD_AVX2_ENABLE    
+	namespace Avx2
+	{
         using namespace Simd::Detection;
 
-        SIMD_INLINE void UnpackMask16i(const uint8_t * src, uint16_t * dst, const __m128i & mask)
+        const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
+
+        SIMD_INLINE void UnpackMask16i(const uint8_t * src, uint16_t * dst, const __m256i & mask)
         {
-            __m128i s = _mm_and_si128(mask, _mm_loadu_si128((__m128i*)src));
-            _mm_storeu_si128((__m128i*)dst + 0, _mm_unpacklo_epi8(s, _mm_setzero_si128()));
-            _mm_storeu_si128((__m128i*)dst + 1, _mm_unpackhi_epi8(s, _mm_setzero_si128()));
+            __m256i s = _mm256_and_si256(mask, LoadPermuted<false>((__m256i*)src));
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_unpacklo_epi8(s, _mm256_setzero_si256()));
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_unpackhi_epi8(s, _mm256_setzero_si256()));
         }
 
-        SIMD_INLINE void UnpackMask16i(const uint8_t * src, size_t size, uint16_t * dst, const __m128i & mask)
+        SIMD_INLINE void UnpackMask16i(const uint8_t * src, size_t size, uint16_t * dst, const __m256i & mask)
         {
             size_t alignedSize = Simd::AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)
@@ -47,18 +50,18 @@ namespace Simd
                 UnpackMask16i(src + size - A, dst + size - A, mask);
         }
 
-        SIMD_INLINE void UnpackMask32i(const uint8_t * src, uint32_t * dst, const __m128i & mask)
+        SIMD_INLINE void UnpackMask32i(const uint8_t * src, uint32_t * dst, const __m256i & mask)
         {
-            __m128i s = _mm_and_si128(mask, _mm_loadu_si128((__m128i*)src));
-            __m128i lo = _mm_unpacklo_epi8(s, _mm_setzero_si128());
-            _mm_storeu_si128((__m128i*)dst + 0, _mm_unpacklo_epi16(lo, _mm_setzero_si128()));
-            _mm_storeu_si128((__m128i*)dst + 1, _mm_unpackhi_epi16(lo, _mm_setzero_si128()));
-            __m128i hi = _mm_unpackhi_epi8(s, _mm_setzero_si128());
-            _mm_storeu_si128((__m128i*)dst + 2, _mm_unpacklo_epi16(hi, _mm_setzero_si128()));
-            _mm_storeu_si128((__m128i*)dst + 3, _mm_unpackhi_epi16(hi, _mm_setzero_si128()));
+            __m256i s = _mm256_permutevar8x32_epi32(_mm256_and_si256(mask, _mm256_loadu_si256((__m256i*)src)), K32_PERMUTE);
+            __m256i lo = _mm256_unpacklo_epi8(s, _mm256_setzero_si256());
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_unpacklo_epi16(lo, _mm256_setzero_si256()));
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_unpackhi_epi16(lo, _mm256_setzero_si256()));
+            __m256i hi = _mm256_unpackhi_epi8(s, _mm256_setzero_si256());
+            _mm256_storeu_si256((__m256i*)dst + 2, _mm256_unpacklo_epi16(hi, _mm256_setzero_si256()));
+            _mm256_storeu_si256((__m256i*)dst + 3, _mm256_unpackhi_epi16(hi, _mm256_setzero_si256()));
         }
 
-        SIMD_INLINE void UnpackMask32i(const uint8_t * src, size_t size, uint32_t * dst, const __m128i & mask)
+        SIMD_INLINE void UnpackMask32i(const uint8_t * src, size_t size, uint32_t * dst, const __m256i & mask)
         {
             size_t alignedSize = Simd::AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)
@@ -69,9 +72,9 @@ namespace Simd
 
         SIMD_INLINE void PackResult16i(const uint16_t * src, uint8_t * dst)
         {
-            __m128i lo = _mm_loadu_si128((__m128i*)src + 0);
-            __m128i hi = _mm_loadu_si128((__m128i*)src + 1);
-            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(lo, hi));
+            __m256i lo = _mm256_loadu_si256((__m256i*)src + 0);
+            __m256i hi = _mm256_loadu_si256((__m256i*)src + 1);
+            _mm256_storeu_si256((__m256i*)dst, PackU16ToU8(lo, hi));
         }
 
         SIMD_INLINE void PackResult16i(const uint16_t * src, size_t size, uint8_t * dst)
@@ -85,9 +88,9 @@ namespace Simd
 
         SIMD_INLINE void PackResult32i(const uint32_t * src, uint8_t * dst)
         {
-            __m128i lo = _mm_packus_epi32(_mm_loadu_si128((__m128i*)src + 0), _mm_loadu_si128((__m128i*)src + 1));
-            __m128i hi = _mm_packus_epi32(_mm_loadu_si128((__m128i*)src + 2), _mm_loadu_si128((__m128i*)src + 3));
-            _mm_storeu_si128((__m128i*)dst, _mm_packus_epi16(lo, hi));
+            const __m256i lo = Simd::Avx2::PackI32ToI16(_mm256_loadu_si256((__m256i*)src + 0), _mm256_loadu_si256((__m256i*)src + 1));
+            const __m256i hi = Simd::Avx2::PackI32ToI16(_mm256_loadu_si256((__m256i*)src + 2), _mm256_loadu_si256((__m256i*)src + 3));
+            _mm256_storeu_si256((__m256i*)dst, Simd::Avx2::PackU16ToU8(lo, hi));
         }
 
         SIMD_INLINE void PackResult32i(const uint32_t * src, size_t size, uint8_t * dst)
@@ -99,70 +102,72 @@ namespace Simd
                 PackResult32i(src + size - A, dst + size - A);
         }
 
-        SIMD_INLINE int ResultCount(__m128i result)
+        SIMD_INLINE int ResultCount(__m256i result)
         {
-            uint32_t SIMD_ALIGNED(16) buffer[4];
-            _mm_store_si128((__m128i*)buffer, _mm_sad_epu8(result, _mm_setzero_si128()));
-            return buffer[0] + buffer[2];
+            uint32_t SIMD_ALIGNED(32) buffer[8];
+            _mm256_store_si256((__m256i*)buffer, _mm256_sad_epu8(result, _mm256_setzero_si256()));
+            return buffer[0] + buffer[2] + buffer[4] + buffer[6];
         }
 
-        SIMD_INLINE __m128 ValidSqrt(__m128 value)
+        SIMD_INLINE __m256 ValidSqrt(__m256 value)
         {
-            __m128 mask = _mm_cmpgt_ps(value, _mm_set1_ps(0.0f));
-            return _mm_sqrt_ps(_mm_or_ps(_mm_and_ps(mask, value), _mm_andnot_ps(mask, _mm_set1_ps(1.0f))));
+            __m256 mask = _mm256_cmp_ps(value, _mm256_set1_ps(0.0f), _CMP_GT_OQ);
+            return _mm256_sqrt_ps(_mm256_or_ps(_mm256_and_ps(mask, value), _mm256_andnot_ps(mask, _mm256_set1_ps(1.0f))));
         }
 
-        SIMD_INLINE __m128i Sum32ip(uint32_t * const ptr[4], size_t offset)
+        SIMD_INLINE __m256i Sum32ip(uint32_t * const ptr[4], size_t offset)
         {
-            __m128i s0 = _mm_loadu_si128((__m128i*)(ptr[0] + offset));
-            __m128i s1 = _mm_loadu_si128((__m128i*)(ptr[1] + offset));
-            __m128i s2 = _mm_loadu_si128((__m128i*)(ptr[2] + offset));
-            __m128i s3 = _mm_loadu_si128((__m128i*)(ptr[3] + offset));
-            return _mm_sub_epi32(_mm_sub_epi32(s0, s1), _mm_sub_epi32(s2, s3));
+            __m256i s0 = _mm256_loadu_si256((__m256i*)(ptr[0] + offset));
+            __m256i s1 = _mm256_loadu_si256((__m256i*)(ptr[1] + offset));
+            __m256i s2 = _mm256_loadu_si256((__m256i*)(ptr[2] + offset));
+            __m256i s3 = _mm256_loadu_si256((__m256i*)(ptr[3] + offset));
+            return _mm256_sub_epi32(_mm256_sub_epi32(s0, s1), _mm256_sub_epi32(s2, s3));
         }
 
-        SIMD_INLINE __m128i Sum32ii(uint32_t * const ptr[4], size_t offset)
+        SIMD_INLINE __m256i Sum32ii(uint32_t * const ptr[4], size_t offset)
         {
-            __m128i lo = Sum32ip(ptr, offset + 0);
-            __m128i hi = Sum32ip(ptr, offset + 4);
-            return _mm_or_si128(_mm_srli_si128(_mm_shuffle_epi32(lo, 0x80), 8), _mm_slli_si128(_mm_shuffle_epi32(hi, 0x08), 8));
+            __m256i lo = Sum32ip(ptr, offset + 0);
+            __m256i hi = Sum32ip(ptr, offset + 8);
+            return _mm256_permute2x128_si256(
+                _mm256_permutevar8x32_epi32(lo, K32_PERMUTE),
+                _mm256_permutevar8x32_epi32(hi, K32_PERMUTE), 0x20);
         }
 
-        SIMD_INLINE __m128 Norm32fp(const HidHaarCascade & hid, size_t offset)
+        SIMD_INLINE __m256 Norm32fp(const HidHaarCascade & hid, size_t offset)
         {
-            __m128 area = _mm_set1_ps(hid.windowArea);
-            __m128 sum = _mm_cvtepi32_ps(Sum32ip(hid.p, offset));
-            __m128 sqsum = _mm_cvtepi32_ps(Sum32ip(hid.pq, offset));
-            return ValidSqrt(_mm_sub_ps(_mm_mul_ps(sqsum, area), _mm_mul_ps(sum, sum)));
+            __m256 area = _mm256_set1_ps(hid.windowArea);
+            __m256 sum = _mm256_cvtepi32_ps(Sum32ip(hid.p, offset));
+            __m256 sqsum = _mm256_cvtepi32_ps(Sum32ip(hid.pq, offset));
+            return ValidSqrt(_mm256_sub_ps(_mm256_mul_ps(sqsum, area), _mm256_mul_ps(sum, sum)));
         }
 
-        SIMD_INLINE __m128 Norm32fi(const HidHaarCascade & hid, size_t offset)
+        SIMD_INLINE __m256 Norm32fi(const HidHaarCascade & hid, size_t offset)
         {
-            __m128 area = _mm_set1_ps(hid.windowArea);
-            __m128 sum = _mm_cvtepi32_ps(Sum32ii(hid.p, offset));
-            __m128 sqsum = _mm_cvtepi32_ps(Sum32ii(hid.pq, offset));
-            return ValidSqrt(_mm_sub_ps(_mm_mul_ps(sqsum, area), _mm_mul_ps(sum, sum)));
+            __m256 area = _mm256_set1_ps(hid.windowArea);
+            __m256 sum = _mm256_cvtepi32_ps(Sum32ii(hid.p, offset));
+            __m256 sqsum = _mm256_cvtepi32_ps(Sum32ii(hid.pq, offset));
+            return ValidSqrt(_mm256_sub_ps(_mm256_mul_ps(sqsum, area), _mm256_mul_ps(sum, sum)));
         }
 
-        SIMD_INLINE __m128 WeightedSum32f(const WeightedRect & rect, size_t offset)
+        SIMD_INLINE __m256 WeightedSum32f(const WeightedRect & rect, size_t offset)
         {
-            __m128i s0 = _mm_loadu_si128((__m128i*)(rect.p0 + offset));
-            __m128i s1 = _mm_loadu_si128((__m128i*)(rect.p1 + offset));
-            __m128i s2 = _mm_loadu_si128((__m128i*)(rect.p2 + offset));
-            __m128i s3 = _mm_loadu_si128((__m128i*)(rect.p3 + offset));
-            __m128i sum = _mm_sub_epi32(_mm_sub_epi32(s0, s1), _mm_sub_epi32(s2, s3));
-            return _mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_set1_ps(rect.weight));
+            __m256i s0 = _mm256_loadu_si256((__m256i*)(rect.p0 + offset));
+            __m256i s1 = _mm256_loadu_si256((__m256i*)(rect.p1 + offset));
+            __m256i s2 = _mm256_loadu_si256((__m256i*)(rect.p2 + offset));
+            __m256i s3 = _mm256_loadu_si256((__m256i*)(rect.p3 + offset));
+            __m256i sum = _mm256_sub_epi32(_mm256_sub_epi32(s0, s1), _mm256_sub_epi32(s2, s3));
+            return _mm256_mul_ps(_mm256_cvtepi32_ps(sum), _mm256_set1_ps(rect.weight));
         }
 
-        SIMD_INLINE void StageSum32f(const float * leaves, float threshold, const __m128 & sum, const __m128 & norm, __m128 & stageSum)
+        SIMD_INLINE void StageSum32f(const float * leaves, float threshold, const __m256 & sum, const __m256 & norm, __m256 & stageSum)
         {
-            __m128 mask = _mm_cmplt_ps(sum, _mm_mul_ps(_mm_set1_ps(threshold), norm));
-            __m128 leaf0 = _mm_and_ps(mask, _mm_set1_ps(leaves[0]));
-            __m128 leaf1 = _mm_andnot_ps(mask, _mm_set1_ps(leaves[1]));
-            stageSum = _mm_add_ps(stageSum, _mm_or_ps(leaf0, leaf1));
+            __m256 mask = _mm256_cmp_ps(_mm256_mul_ps(_mm256_set1_ps(threshold), norm), sum, _CMP_GT_OQ);
+            __m256 leaf0 = _mm256_and_ps(mask, _mm256_set1_ps(leaves[0]));
+            __m256 leaf1 = _mm256_andnot_ps(mask, _mm256_set1_ps(leaves[1]));
+            stageSum = _mm256_add_ps(stageSum, _mm256_or_ps(leaf0, leaf1));
         }
 
-        void Detect32f(const HidHaarCascade & hid, size_t offset, const __m128 & norm, __m128i & result)
+        void Detect32f(const HidHaarCascade & hid, size_t offset, const __m256 & norm, __m256i & result)
         {
             typedef HidHaarCascade Hid;
             const float * leaves = hid.leaves.data();
@@ -174,15 +179,15 @@ namespace Simd
                 if (stage.canSkip)
                     continue;
                 const Hid::Node * end = node + stage.ntrees;
-                __m128 stageSum = _mm_setzero_ps();
+                __m256 stageSum = _mm256_setzero_ps();
                 if (stage.hasThree)
                 {
                     for (; node < end; ++node, leaves += 2)
                     {
                         const Hid::Feature & feature = hid.features[node->featureIdx];
-                        __m128 sum = _mm_add_ps(WeightedSum32f(feature.rect[0], offset), WeightedSum32f(feature.rect[1], offset));
+                        __m256 sum = _mm256_add_ps(WeightedSum32f(feature.rect[0], offset), WeightedSum32f(feature.rect[1], offset));
                         if (feature.rect[2].p0)
-                            sum = _mm_add_ps(sum, WeightedSum32f(feature.rect[2], offset));
+                            sum = _mm256_add_ps(sum, WeightedSum32f(feature.rect[2], offset));
                         StageSum32f(leaves, node->threshold, sum, norm, stageSum);
                     }
                 }
@@ -191,23 +196,21 @@ namespace Simd
                     for (; node < end; ++node, leaves += 2)
                     {
                         const Hid::Feature & feature = hid.features[node->featureIdx];
-                        __m128 sum = _mm_add_ps(WeightedSum32f(feature.rect[0], offset), WeightedSum32f(feature.rect[1], offset));
+                        __m256 sum = _mm256_add_ps(WeightedSum32f(feature.rect[0], offset), WeightedSum32f(feature.rect[1], offset));
                         StageSum32f(leaves, node->threshold, sum, norm, stageSum);
                     }
                 }
-                result = _mm_andnot_si128(_mm_castps_si128(_mm_cmpgt_ps(_mm_set1_ps(stage.threshold), stageSum)), result);
+                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_set1_ps(stage.threshold), stageSum, _CMP_GT_OQ)), result);
                 int resultCount = ResultCount(result);
                 if (resultCount == 0)
-                {
                     return;
-                }
                 else if (resultCount == 1)
                 {
-                    uint32_t SIMD_ALIGNED(16) _result[4];
-                    float SIMD_ALIGNED(16) _norm[4];
-                    _mm_store_si128((__m128i*)_result, result);
-                    _mm_store_ps(_norm, norm);
-                    for (int j = 0; j < 4; ++j)
+                    uint32_t SIMD_ALIGNED(32) _result[8];
+                    float SIMD_ALIGNED(32) _norm[8];
+                    _mm256_store_si256((__m256i*)_result, result);
+                    _mm256_store_ps(_norm, norm);
+                    for (int j = 0; j < 8; ++j)
                     {
                         if (_result[j])
                         {
@@ -215,7 +218,7 @@ namespace Simd
                             break;
                         }
                     }
-                    result = _mm_load_si128((__m128i*)_result);
+                    result = _mm256_load_si256((__m256i*)_result);
                     return;
                 }
             }
@@ -227,8 +230,8 @@ namespace Simd
         {
             typedef HidHaarCascade Hid;
 
-            size_t width = rect.Width();
-            size_t alignedWidth = Simd::AlignLo(width, 4);
+            size_t width = mask.width;
+            size_t alignedWidth = Simd::AlignLo(width, 8);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
             Buffer<uint32_t> buffer(width);
@@ -240,26 +243,26 @@ namespace Simd
 
                 UnpackMask32i(mask.data + row*mask.stride, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint32_t));
-                for (; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += 8)
                 {
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (_mm256_testz_si256(result, K32_00000001))
                         continue;
-                    __m128 norm = Norm32fp(hid, pq_offset + col);
+                    __m256 norm = Norm32fp(hid, pq_offset + col);
                     Detect32f(hid, p_offset + col, norm, result);
-                    _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                    _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                 }
                 if (evenWidth > alignedWidth + 2)
                 {
-                    col = evenWidth - 4;
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (!_mm_testz_si128(result, K32_00000001))
+                    col = evenWidth - 8;
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (!_mm256_testz_si256(result, K32_00000001))
                     {
-                        __m128 norm = Norm32fp(hid, pq_offset + col);
+                        __m256 norm = Norm32fp(hid, pq_offset + col);
                         Detect32f(hid, p_offset + col, norm, result);
-                        _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                        _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                     }
-                    col += 4;
+                    col += 8;
                 }
                 for (; col < width; col += 1)
                 {
@@ -287,7 +290,7 @@ namespace Simd
             typedef HidHaarCascade Hid;
 
             const size_t step = 2;
-            size_t width = rect.Width();
+            size_t width = mask.width;
             size_t alignedWidth = Simd::AlignLo(width, HA);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
@@ -302,22 +305,22 @@ namespace Simd
                 memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (_mm256_testz_si256(result, K32_00000001))
                         continue;
-                    __m128 norm = Norm32fi(hid, pq_offset + col);
+                    __m256 norm = Norm32fi(hid, pq_offset + col);
                     Detect32f(hid, p_offset + col / 2, norm, result);
-                    _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                    _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                 }
                 if (evenWidth > alignedWidth)
                 {
                     col = evenWidth - HA;
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (!_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (!_mm256_testz_si256(result, K32_00000001))
                     {
-                        __m128 norm = Norm32fi(hid, pq_offset + col);
+                        __m256 norm = Norm32fi(hid, pq_offset + col);
                         Detect32f(hid, p_offset + col / 2, norm, result);
-                        _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                        _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                     }
                     col += HA;
                 }
@@ -343,31 +346,33 @@ namespace Simd
                 View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
-        const __m128i K8_SHUFFLE_BITS = SIMD_MM_SETR_EPI8(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+        const __m256i K8_SHUFFLE_BITS = SIMD_MM256_SETR_EPI8(
+            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 
-        SIMD_INLINE __m128i IntegralSum32i(const __m128i & s0, const __m128i & s1, const __m128i & s2, const __m128i & s3)
+        SIMD_INLINE __m256i IntegralSum32i(const __m256i & s0, const __m256i & s1, const __m256i & s2, const __m256i & s3)
         {
-            return _mm_sub_epi32(_mm_sub_epi32(s0, s1), _mm_sub_epi32(s2, s3));
+            return _mm256_sub_epi32(_mm256_sub_epi32(s0, s1), _mm256_sub_epi32(s2, s3));
         }
 
-        SIMD_INLINE __m128i GreaterOrEqual32i(__m128i a, __m128i b)
+        SIMD_INLINE __m256i GreaterOrEqual32i(__m256i a, __m256i b)
         {
-            return _mm_cmpeq_epi32(_mm_max_epi32(a, b), a);
+            return _mm256_cmpeq_epi32(_mm256_max_epi32(a, b), a);
         }
 
-        template<int i> SIMD_INLINE void Load(__m128i a[16], const HidLbpFeature<int> & feature, ptrdiff_t offset)
+        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<int> & feature, ptrdiff_t offset)
         {
-            a[i] = _mm_loadu_si128((__m128i*)(feature.p[i] + offset));
+            a[i] = _mm256_loadu_si256((__m256i*)(feature.p[i] + offset));
         }
 
-        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, __m128i & index, __m128i & shuffle, __m128i & mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
         {
-            __m128i a[16];
+            __m256i a[16];
             Load<5>(a, feature, offset);
             Load<6>(a, feature, offset);
             Load<9>(a, feature, offset);
             Load<10>(a, feature, offset);
-            __m128i central = IntegralSum32i(a[5], a[6], a[9], a[10]);
+            __m256i central = IntegralSum32i(a[5], a[6], a[9], a[10]);
 
             Load<0>(a, feature, offset);
             Load<1>(a, feature, offset);
@@ -376,42 +381,43 @@ namespace Simd
 
             shuffle = K32_FFFFFF00;
             Load<2>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[1], a[2], a[5], a[6]), central), K32_00000008));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[1], a[2], a[5], a[6]), central), K32_00000008));
             Load<3>(a, feature, offset);
             Load<7>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[2], a[3], a[6], a[7]), central), K32_00000004));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[2], a[3], a[6], a[7]), central), K32_00000004));
             Load<11>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[6], a[7], a[10], a[11]), central), K32_00000002));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[6], a[7], a[10], a[11]), central), K32_00000002));
             Load<14>(a, feature, offset);
             Load<15>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[10], a[11], a[14], a[15]), central), K32_00000001));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[10], a[11], a[14], a[15]), central), K32_00000001));
 
             mask = K32_FFFFFF00;
             Load<13>(a, feature, offset);
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[9], a[10], a[13], a[14]), central), K32_00000004));
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[9], a[10], a[13], a[14]), central), K32_00000004));
             Load<12>(a, feature, offset);
             Load<8>(a, feature, offset);
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[8], a[9], a[12], a[13]), central), K32_00000002));
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual32i(IntegralSum32i(a[4], a[5], a[8], a[9]), central), K32_00000001));
-            mask = _mm_shuffle_epi8(K8_SHUFFLE_BITS, mask);
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[8], a[9], a[12], a[13]), central), K32_00000002));
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual32i(IntegralSum32i(a[4], a[5], a[8], a[9]), central), K32_00000001));
+            mask = _mm256_shuffle_epi8(K8_SHUFFLE_BITS, mask);
         }
 
-        SIMD_INLINE __m128i LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset)
+        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset)
         {
-            __m128i index, shuffle, mask;
+            __m256i index, shuffle, mask;
             Calculate(feature, offset, index, shuffle, mask);
 
-            __m128i subset0 = _mm_loadu_si128((__m128i*)subset + 0);
-            __m128i subset1 = _mm_loadu_si128((__m128i*)subset + 1);
+            __m256i _subset = _mm256_loadu_si256((__m256i*)subset);
+            __m256i subset0 = _mm256_permute4x64_epi64(_subset, 0x44);
+            __m256i subset1 = _mm256_permute4x64_epi64(_subset, 0xEE);
 
-            __m128i value0 = _mm_and_si128(_mm_shuffle_epi8(subset0, shuffle), mask);
-            __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
-            __m128i value = Simd::Sse2::Combine(index, value1, value0);
+            __m256i value0 = _mm256_and_si256(_mm256_shuffle_epi8(subset0, shuffle), mask);
+            __m256i value1 = _mm256_and_si256(_mm256_shuffle_epi8(subset1, shuffle), mask);
+            __m256i value = Combine(index, value1, value0);
 
-            return _mm_andnot_si128(_mm_cmpeq_epi32(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
+            return _mm256_andnot_si256(_mm256_cmpeq_epi32(value, _mm256_setzero_si256()), K_INV_ZERO);
         }
 
-        void Detect(const HidLbpCascade<float, int> & hid, size_t offset, __m128i & result)
+        void Detect(const HidLbpCascade<float, int> & hid, size_t offset, int startStage, __m256i & result)
         {
             typedef HidLbpCascade<float, int> Hid;
 
@@ -420,30 +426,31 @@ namespace Simd
             const Hid::Leave * leaves = hid.leaves.data();
             const Hid::Node * nodes = hid.nodes.data();
             const Hid::Stage * stages = hid.stages.data();
-            int nodeOffset = 0, leafOffset = 0;
-            for (int i_stage = 0, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
+            int nodeOffset = stages[startStage].first;
+            int leafOffset = 2 * nodeOffset;
+            for (int i_stage = startStage, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
             {
                 const Hid::Stage & stage = stages[i_stage];
-                __m128 sum = _mm_setzero_ps();
+                __m256 sum = _mm256_setzero_ps();
                 for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
                 {
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
-                    __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_ps(sum, Simd::Sse::Combine(_mm_castsi128_ps(mask),
-                        _mm_set1_ps(leaves[leafOffset + 0]), _mm_set1_ps(leaves[leafOffset + 1])));
+                    __m256i mask = LeafMask(feature, offset, subset);
+                    sum = _mm256_add_ps(sum, Simd::Avx::Combine(_mm256_castsi256_ps(mask),
+                        _mm256_set1_ps(leaves[leafOffset + 0]), _mm256_set1_ps(leaves[leafOffset + 1])));
                     nodeOffset++;
                     leafOffset += 2;
                 }
-                result = _mm_andnot_si128(_mm_castps_si128(_mm_cmpgt_ps(_mm_set1_ps(stage.threshold), sum)), result);
+                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_set1_ps(stage.threshold), sum, _CMP_GT_OQ)), result);
                 int resultCount = ResultCount(result);
                 if (resultCount == 0)
                     return;
                 else if (resultCount == 1)
                 {
-                    uint32_t SIMD_ALIGNED(16) _result[4];
-                    _mm_store_si128((__m128i*)_result, result);
-                    for (int i = 0; i < 4; ++i)
+                    uint32_t SIMD_ALIGNED(32) _result[8];
+                    _mm256_store_si256((__m256i*)_result, result);
+                    for (int i = 0; i < 8; ++i)
                     {
                         if (_result[i])
                         {
@@ -451,7 +458,7 @@ namespace Simd
                             break;
                         }
                     }
-                    result = _mm_load_si128((__m128i*)_result);
+                    result = _mm256_load_si256((__m256i*)_result);
                     return;
                 }
             }
@@ -460,7 +467,7 @@ namespace Simd
         void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
         {
             size_t width = rect.Width();
-            size_t alignedWidth = Simd::AlignLo(width, 4);
+            size_t alignedWidth = Simd::AlignLo(width, 8);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
             Buffer<uint32_t> buffer(width);
@@ -471,24 +478,24 @@ namespace Simd
 
                 UnpackMask32i(mask.data + row*mask.stride, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint32_t));
-                for (; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += 8)
                 {
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (_mm256_testz_si256(result, K32_00000001))
                         continue;
-                    Detect(hid, offset + col, result);
-                    _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                    Detect(hid, offset + col, 0, result);
+                    _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                 }
                 if (evenWidth > alignedWidth + 2)
                 {
-                    col = evenWidth - 4;
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (!_mm_testz_si128(result, K32_00000001))
+                    col = evenWidth - 8;
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (!_mm256_testz_si256(result, K32_00000001))
                     {
-                        Detect(hid, offset + col, result);
-                        _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                        Detect(hid, offset + col, 0, result);
+                        _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                     }
-                    col += 4;
+                    col += 8;
                 }
                 for (; col < width; col += 1)
                 {
@@ -527,20 +534,20 @@ namespace Simd
                 memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (_mm256_testz_si256(result, K32_00000001))
                         continue;
-                    Detect(hid, offset + col / 2, result);
-                    _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                    Detect(hid, offset + col / 2, 0, result);
+                    _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                 }
                 if (evenWidth > alignedWidth)
                 {
                     col = evenWidth - HA;
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (!_mm_testz_si128(result, K32_00000001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (!_mm256_testz_si256(result, K32_00000001))
                     {
-                        Detect(hid, offset + col / 2, result);
-                        _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                        Detect(hid, offset + col / 2, 0, result);
+                        _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                     }
                     col += HA;
                 }
@@ -565,29 +572,31 @@ namespace Simd
                 View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
 
-        SIMD_INLINE __m128i IntegralSum16i(const __m128i & s0, const __m128i & s1, const __m128i & s2, const __m128i & s3)
+        //------------------------------------------------------------------
+
+        SIMD_INLINE __m256i IntegralSum16i(const __m256i & s0, const __m256i & s1, const __m256i & s2, const __m256i & s3)
         {
-            return _mm_sub_epi16(_mm_sub_epi16(s0, s1), _mm_sub_epi16(s2, s3));
+            return _mm256_sub_epi16(_mm256_sub_epi16(s0, s1), _mm256_sub_epi16(s2, s3));
         }
 
-        SIMD_INLINE __m128i GreaterOrEqual16i(__m128i a, __m128i b)
+        SIMD_INLINE __m256i GreaterOrEqual16i(__m256i a, __m256i b)
         {
-            return _mm_cmpeq_epi16(_mm_max_epi16(a, b), a);
+            return _mm256_cmpeq_epi16(_mm256_max_epi16(a, b), a);
         }
 
-        template<int i> SIMD_INLINE void Load(__m128i a[16], const HidLbpFeature<short> & feature, ptrdiff_t offset)
+        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<short> & feature, ptrdiff_t offset)
         {
-            a[i] = _mm_loadu_si128((__m128i*)(feature.p[i] + offset));
+            a[i] = _mm256_loadu_si256((__m256i*)(feature.p[i] + offset));
         }
 
-        SIMD_INLINE void Calculate(const HidLbpFeature<short> & feature, ptrdiff_t offset, __m128i & index, __m128i & shuffle, __m128i & mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<short> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
         {
-            __m128i a[16];
+            __m256i a[16];
             Load<5>(a, feature, offset);
             Load<6>(a, feature, offset);
             Load<9>(a, feature, offset);
             Load<10>(a, feature, offset);
-            __m128i central = IntegralSum16i(a[5], a[6], a[9], a[10]);
+            __m256i central = IntegralSum16i(a[5], a[6], a[9], a[10]);
 
             Load<0>(a, feature, offset);
             Load<1>(a, feature, offset);
@@ -596,42 +605,43 @@ namespace Simd
 
             shuffle = K16_FF00;
             Load<2>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[1], a[2], a[5], a[6]), central), K16_0008));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[1], a[2], a[5], a[6]), central), K16_0008));
             Load<3>(a, feature, offset);
             Load<7>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[2], a[3], a[6], a[7]), central), K16_0004));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[2], a[3], a[6], a[7]), central), K16_0004));
             Load<11>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[6], a[7], a[10], a[11]), central), K16_0002));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[6], a[7], a[10], a[11]), central), K16_0002));
             Load<14>(a, feature, offset);
             Load<15>(a, feature, offset);
-            shuffle = _mm_or_si128(shuffle, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[10], a[11], a[14], a[15]), central), K16_0001));
+            shuffle = _mm256_or_si256(shuffle, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[10], a[11], a[14], a[15]), central), K16_0001));
 
             mask = K16_FF00;
             Load<13>(a, feature, offset);
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[9], a[10], a[13], a[14]), central), K16_0004));
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[9], a[10], a[13], a[14]), central), K16_0004));
             Load<12>(a, feature, offset);
             Load<8>(a, feature, offset);
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[8], a[9], a[12], a[13]), central), K16_0002));
-            mask = _mm_or_si128(mask, _mm_and_si128(GreaterOrEqual16i(IntegralSum16i(a[4], a[5], a[8], a[9]), central), K16_0001));
-            mask = _mm_shuffle_epi8(K8_SHUFFLE_BITS, mask);
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[8], a[9], a[12], a[13]), central), K16_0002));
+            mask = _mm256_or_si256(mask, _mm256_and_si256(GreaterOrEqual16i(IntegralSum16i(a[4], a[5], a[8], a[9]), central), K16_0001));
+            mask = _mm256_shuffle_epi8(K8_SHUFFLE_BITS, mask);
         }
 
-        SIMD_INLINE __m128i LeafMask(const HidLbpFeature<short> & feature, ptrdiff_t offset, const int * subset)
+        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<short> & feature, ptrdiff_t offset, const int * subset)
         {
-            __m128i index, shuffle, mask;
+            __m256i index, shuffle, mask;
             Calculate(feature, offset, index, shuffle, mask);
 
-            __m128i subset0 = _mm_loadu_si128((__m128i*)subset + 0);
-            __m128i subset1 = _mm_loadu_si128((__m128i*)subset + 1);
+            __m256i _subset = _mm256_loadu_si256((__m256i*)subset);
+            __m256i subset0 = _mm256_permute4x64_epi64(_subset, 0x44);
+            __m256i subset1 = _mm256_permute4x64_epi64(_subset, 0xEE);
 
-            __m128i value0 = _mm_and_si128(_mm_shuffle_epi8(subset0, shuffle), mask);
-            __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
-            __m128i value = Simd::Sse2::Combine(index, value1, value0);
+            __m256i value0 = _mm256_and_si256(_mm256_shuffle_epi8(subset0, shuffle), mask);
+            __m256i value1 = _mm256_and_si256(_mm256_shuffle_epi8(subset1, shuffle), mask);
+            __m256i value = Simd::Avx2::Combine(index, value1, value0);
 
-            return _mm_andnot_si128(_mm_cmpeq_epi16(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
+            return _mm256_andnot_si256(_mm256_cmpeq_epi16(value, _mm256_setzero_si256()), Simd::Avx2::K_INV_ZERO);
         }
 
-        void Detect(const HidLbpCascade<int, short> & hid, size_t offset, __m128i & result)
+        void Detect(const HidLbpCascade<int, short> & hid, size_t offset, __m256i & result)
         {
             typedef HidLbpCascade<int, short> Hid;
 
@@ -644,25 +654,25 @@ namespace Simd
             for (int i_stage = 0, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
             {
                 const Hid::Stage & stage = stages[i_stage];
-                __m128i sum = _mm_setzero_si128();
+                __m256i sum = _mm256_setzero_si256();
                 for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
                 {
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
-                    __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_epi16(sum, Simd::Sse2::Combine(mask,
-                        _mm_set1_epi16(leaves[leafOffset + 0]), _mm_set1_epi16(leaves[leafOffset + 1])));
+                    __m256i mask = LeafMask(feature, offset, subset);
+                    sum = _mm256_add_epi16(sum, Simd::Avx2::Combine(mask,
+                        _mm256_set1_epi16(leaves[leafOffset + 0]), _mm256_set1_epi16(leaves[leafOffset + 1])));
                     nodeOffset++;
                     leafOffset += 2;
                 }
-                result = _mm_andnot_si128(_mm_cmpgt_epi16(_mm_set1_epi16(stage.threshold), sum), result);
+                result = _mm256_andnot_si256(_mm256_cmpgt_epi16(_mm256_set1_epi16(stage.threshold), sum), result);
                 int resultCount = ResultCount(result);
                 if (resultCount == 0)
                     return;
                 else if (resultCount == 1)
                 {
-                    uint16_t SIMD_ALIGNED(16) _result[HA];
-                    _mm_store_si128((__m128i*)_result, result);
+                    uint16_t SIMD_ALIGNED(32) _result[HA];
+                    _mm256_store_si256((__m256i*)_result, result);
                     for (int i = 0; i < HA; ++i)
                     {
                         if (_result[i])
@@ -671,7 +681,7 @@ namespace Simd
                             break;
                         }
                     }
-                    result = _mm_load_si128((__m128i*)_result);
+                    result = _mm256_load_si256((__m256i*)_result);
                     return;
                 }
             }
@@ -679,7 +689,7 @@ namespace Simd
 
         void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
         {
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);
             size_t evenWidth = Simd::AlignLo(width, 2);
             Buffer<uint16_t> buffer(width);
@@ -691,20 +701,20 @@ namespace Simd
                 memset(buffer.d, 0, width*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (_mm_testz_si128(result, K16_0001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (_mm256_testz_si256(result, K16_0001))
                         continue;
                     Detect(hid, offset + col, result);
-                    _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                    _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                 }
                 if (evenWidth > alignedWidth + 2)
                 {
                     col = evenWidth - HA;
-                    __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
-                    if (!_mm_testz_si128(result, K16_0001))
+                    __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
+                    if (!_mm256_testz_si256(result, K16_0001))
                     {
                         Detect(hid, offset + col, result);
-                        _mm_storeu_si128((__m128i*)(buffer.d + col), result);
+                        _mm256_storeu_si256((__m256i*)(buffer.d + col), result);
                     }
                     col += HA;
                 }
@@ -731,7 +741,7 @@ namespace Simd
         void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
         {
             const size_t step = 2;
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, A);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
@@ -743,20 +753,20 @@ namespace Simd
                 const uint8_t * d = dst.data + row*dst.stride;
                 for (; col < alignedWidth; col += A)
                 {
-                    __m128i result = _mm_and_si128(_mm_loadu_si128((__m128i*)(m + col)), K16_0001);
-                    if (_mm_testz_si128(result, K16_0001))
+                    __m256i result = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(m + col)), K16_0001);
+                    if (_mm256_testz_si256(result, K16_0001))
                         continue;
                     Detect(hid, offset + col / 2, result);
-                    _mm_storeu_si128((__m128i*)(d + col), result);
+                    _mm256_storeu_si256((__m256i*)(d + col), result);
                 }
                 if (evenWidth > alignedWidth + 2)
                 {
                     col = evenWidth - A;
-                    __m128i result = _mm_and_si128(_mm_loadu_si128((__m128i*)(m + col)), K16_0001);
-                    if (!_mm_testz_si128(result, K16_0001))
+                    __m256i result = _mm256_and_si256(_mm256_loadu_si256((__m256i*)(m + col)), K16_0001);
+                    if (!_mm256_testz_si256(result, K16_0001))
                     {
                         Detect(hid, offset + col / 2, result);
-                        _mm_storeu_si128((__m128i*)(d + col), result);
+                        _mm256_storeu_si256((__m256i*)(d + col), result);
                     }
                     col += A;
                 }
@@ -779,6 +789,6 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst));
         }
-    }
-#endif//SIMD_SSE41_ENABLE
+	}
+#endif// SIMD_AVX2_ENABLE
 }
