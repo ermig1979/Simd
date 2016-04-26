@@ -1215,55 +1215,106 @@ SIMD_API void SimdDetectionPrepare(void * hid)
     Base::DetectionPrepare(hid);
 }
 
-typedef void(*SimdDetectionDetectPtr) (const void * hid, const uint8_t * mask, size_t maskStride,
-    ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-SimdDetectionDetectPtr simdDetectionHaarDetect32fp = SIMD_FUNC2(DetectionHaarDetect32fp, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
-
 SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionHaarDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
-
-SimdDetectionDetectPtr simdDetectionHaarDetect32fi = SIMD_FUNC2(DetectionHaarDetect32fi, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
-
-SimdDetectionDetectPtr simdDetectionLbpDetect32fp = SIMD_FUNC2(DetectionLbpDetect32fp, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionLbpDetect32fp(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
-
-SimdDetectionDetectPtr simdDetectionLbpDetect32fi = SIMD_FUNC2(DetectionLbpDetect32fi, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionLbpDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
-
-SimdDetectionDetectPtr simdDetectionLbpDetect16ip = SIMD_FUNC2(DetectionLbpDetect16ip, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionLbpDetect16ip(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
-
-SimdDetectionDetectPtr simdDetectionLbpDetect16ii = SIMD_FUNC2(DetectionLbpDetect16ii, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
-    simdDetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    size_t width = right - left;
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+    else
+#endif
+        Base::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
 }
 
 SIMD_API void SimdDetectionFree(void * ptr)

@@ -203,6 +203,11 @@
 \short Related functions for Pyramid structure.
 */
 
+/*! @ingroup cpp_types
+@defgroup cpp_detection structure Detection
+\short Detection structure and related functions.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */

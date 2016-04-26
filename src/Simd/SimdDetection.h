@@ -194,8 +194,6 @@ namespace Simd
             }
         };
 
-        //---------------------------------------------------------------------
-
         template<class TSum> struct HidLbpFeature
         {
             Rect rect;
@@ -254,14 +252,14 @@ namespace Simd
         {
             Buffer(size_t size)
             {
-                _p = Simd::Allocate(2 * size*sizeof(T));
+                _p = Allocate(2 * size*sizeof(T));
                 m = (T*)_p;
                 d = m + size;
             }
 
             ~Buffer()
             {
-                Simd::Free(_p);
+                Free(_p);
             }
 
             T *m, *d;

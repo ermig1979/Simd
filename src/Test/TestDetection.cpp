@@ -31,7 +31,7 @@ namespace Test
     std::recursive_mutex g_mutex;
     Samples g_samples;
 
-    View GetSample(const Size & size)
+    View GetSample(const Size & size, bool large)
     {
         std::lock_guard<std::recursive_mutex> lock(g_mutex);
 
@@ -57,15 +57,15 @@ namespace Test
 
         if (obj.width < dst.width || obj.height < dst.height)
         {
-            size_t rows = dst.height / obj.height * 2;
-            size_t cols = dst.width / obj.width * 2;
+            size_t rows = dst.height / obj.height * (large ? 1 : 2);
+            size_t cols = dst.width / obj.width * (large ? 1 : 2);
             for (size_t row = 0; row < rows; ++row)
             {
                 size_t y = dst.height * (row * 2 + 1) / (2 * rows);
                 for (size_t col = 0; col < cols; ++col)
                 {
                     size_t x = dst.width * (col * 2 + 1) / (2 * cols);
-                    size_t s = (obj.width*2 + Random((int)obj.width)) / 10;
+                    size_t s = (obj.width * (large ? 3 : 2) + Random((int)obj.width)*(large ? 7 : 1)) / 10;
 
                     View resized(s, s, View::Gray8);
                     Simd::ResizeBilinear(obj, resized);
@@ -147,7 +147,7 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
 
-        View src = GetSample(Size(width, height));
+        View src = GetSample(Size(width, height), false);
         if (src.format == View::None)
             return false;
 

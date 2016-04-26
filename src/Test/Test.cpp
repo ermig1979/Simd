@@ -483,10 +483,14 @@ namespace Test
         std::cout << "Also you can use parameter -h or -? to print this help message." << std::endl << std::endl;
         return 0;
     }
+
+    void CheckCpp();
 }
 
 int main(int argc, char* argv[])
 {
+    Test::CheckCpp();
+
     Test::Options options(argc, argv);
 
     if (options.help)

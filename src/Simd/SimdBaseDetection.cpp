@@ -321,9 +321,12 @@ namespace Simd
             Data * data = (Data*)_data;
             if (data)
             {
-                *width = data->origWinSize.x;
-                *height = data->origWinSize.y;
-                *flags = SimdDetectionInfoFlags(data->featureType |
+                if(width)
+                    *width = data->origWinSize.x;
+                if(height)
+                    *height = data->origWinSize.y;
+                if(flags)
+                    *flags = SimdDetectionInfoFlags(data->featureType |
                     (data->hasTilted ? SimdDetectionInfoHasTilted : 0) |
                     (data->canInt16 ? SimdDetectionInfoCanInt16 : 0));
             }

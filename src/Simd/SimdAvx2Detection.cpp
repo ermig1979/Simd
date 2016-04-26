@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdDetection.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -230,7 +231,7 @@ namespace Simd
         {
             typedef HidHaarCascade Hid;
 
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, 8);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
@@ -290,7 +291,7 @@ namespace Simd
             typedef HidHaarCascade Hid;
 
             const size_t step = 2;
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);
             size_t evenWidth = Simd::AlignLo(width, 2);
 

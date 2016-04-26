@@ -30,28 +30,75 @@
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdFrame.hpp"
 #include "Simd/SimdPyramid.hpp"
+#include "Simd/SimdDetection.hpp"
+
+#include "Test/TestUtils.h"
 
 namespace Test
 {
-    static void CheckCpp()
+    typedef Simd::View<Simd::Allocator> View;
+    typedef Simd::Frame<Simd::Allocator> Frame;
+    typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+    typedef Simd::Detection<Simd::Allocator> Detection;
+    typedef Detection::Size Size;
+    typedef Detection::Objects Objects;
+
+    static void TestView()
     {
-        typedef Simd::View<Simd::Allocator> View;
-
         View vs(6, 6, View::Bgra32);
-		View vd(6, 6, View::Hsl24);
-		Simd::Convert(vs, vd);
+        View vd(6, 6, View::Gray8);
+        Simd::Convert(vs, vd);
+    }
 
-		typedef Simd::Frame<Simd::Allocator> Frame;
+    static void TestFrame()
+    {
+        Frame fs(2, 2, Frame::Yuv420p);
+        Frame fd(2, 2, Frame::Bgr24);
+        Simd::Convert(fs, fd);
+    }
 
-		Frame fs(2, 2, Frame::Yuv420p);
-		Frame fd(2, 2, Frame::Bgr24);
-		Simd::Convert(fs, fd);
+    static void TestPyramid()
+    {
+        Pyramid p(16, 16, 3);
+        p.Fill(1);
+        p.Build(Pyramid::ReduceGray2x2);
+    }
 
-		typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+    View GetSample(const Size & size, bool large);
 
-		Pyramid p(16, 16, 3);
-		p.Fill(1);
-		p.Build(Pyramid::ReduceGray2x2);
+    static void TestDetection()
+    {
+        Detection detection;
+
+        detection.Load("../../data/cascade/haar_face_0.xml", 0);
+        detection.Load("../../data/cascade/haar_face_1.xml", 0);
+        detection.Load("../../data/cascade/lbp_face.xml", 0);
+
+        View src = GetSample(Size(W, H), true);
+        detection.Init(src.Size(), 1.2);
+
+        Objects objects;
+        detection.Detect(src, objects);
+
+        for (size_t i = 0; i < objects.size(); ++i)
+        {
+            Size s = objects[i].rect.Size();
+            Simd::FillFrame(src.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
+        }
+        Save(src, "dst.pgm");
+    }
+
+    void CheckCpp()
+    {
+        TestView();
+
+        TestFrame();
+
+        TestPyramid();
+
+        TestDetection();
+
+        exit(0);
 	}
 }
 
