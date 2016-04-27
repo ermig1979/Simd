@@ -159,6 +159,24 @@ typedef enum
     SimdPixelFormatHsl24,
 } SimdPixelFormatType;
 
+/*! @ingroup c_types
+    Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
+    \note This type is used for implementation of Simd::Detection.
+*/
+typedef enum
+{
+    /*! A HAAR cascade classifier type. */
+    SimdDetectionInfoFeatureHaar = 0,
+    /*! A LBP cascade classifier type. */
+    SimdDetectionInfoFeatureLbp,
+    /*! A mask to select cascade classifier type. */
+    SimdDetectionInfoFeatureMask = 3,
+    /*! A flag which defines existence of tilted features in the HAAR cascade. */
+    SimdDetectionInfoHasTilted = 4,
+    /*! A flag which defines possibility to use 16-bit integers for calculation. */
+    SimdDetectionInfoCanInt16 = 8,
+} SimdDetectionInfoFlags;
+
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
 #    define SIMD_API __declspec(dllexport)
@@ -1500,43 +1518,237 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
+    /*! @ingroup object_detection
+
+        \fn void * SimdDetectionLoadA(const char * path);
+
+        \short Loads a classifier cascade from file. 
+        
+        This function supports OpenCV HAAR and LBP cascades type.         
+        Tree based cascades and old cascade formats are not supported.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] path - a path to cascade.
+        \return a pointer to loaded cascade. On error it returns NULL. 
+                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released with using function ::SimdDetectionFree.
+    */
     SIMD_API void * SimdDetectionLoadA(const char * path);
 
-    typedef enum 
-    {
-        SimdDetectionInfoFeatureHaar,
-        SimdDetectionInfoFeatureLbp,
-        SimdDetectionInfoFeatureMask = 3,
-        SimdDetectionInfoHasTilted = 4,
-        SimdDetectionInfoCanInt16 = 8,
-    } SimdDetectionInfoFlags;
+    /*! @ingroup object_detection
 
+        \fn void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
+
+        \short Gets information about the classifier cascade.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] data - a pointer to cascade which was received with using of function ::SimdDetectionLoadA. 
+        \param [out] width - a pointer to returned width of cascade window.
+        \param [out] height - a pointer to returned height of cascade window.
+        \param [out] flags - a pointer to flags with other information (See ::SimdDetectionInfoFlags).
+    */
     SIMD_API void SimdDetectionInfo(const void * data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags);
 
+    /*! @ingroup object_detection
+
+        \fn void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
+
+        \short Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] data - a pointer to cascade which was received with using of function ::SimdDetectionLoadA.
+        \param [in] sum - a pointer to pixels data of 32-bit integer image with integral sum of given input 8-bit gray image.
+                          See function ::SimdIntegral in order to estimate this integral sum.
+        \param [in] sumStride - a row size of the sum image.
+        \param [in] width - a width of the sum image. It must be per unit greater than width of input 8-bit gray image.
+        \param [in] height - a height of the sum image. It must be per unit greater than height of input 8-bit gray image.
+        \param [in] sqsum - a pointer to pixels data of 32-bit integer image with squared integral sum of given input 8-bit gray image.
+                            Its size must be equal to sum image. See function ::SimdIntegral in order to estimate this squared integral sum. Its
+        \param [in] sqsumStride - a row size of the sqsum image.
+        \param [in] tilted - a pointer to pixels data of 32-bit integer image with tilted integral sum of given input 8-bit gray image.
+                             Its size must be equal to sum image. See function ::SimdIntegral in order to estimate this tilted integral sum.
+        \param [in] tiltedStride - a row size of the tilted image.
+        \param [in] throughColumn - a flag to detect objects only in even columns and rows (to increase performance).
+        \param [in] int16 - a flag use for 16-bit integer version of detection algorithm. (See ::SimdDetectionInfo). 
+        \return a pointer to hidden cascade. On error it returns NULL.
+                This pointer is used in functions ::SimdDetectionPrepare, ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
+                ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
+                It must be released with using function ::SimdDetectionFree.
+    */    
     SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
         uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionPrepare(void * hid);
+
+        \short Prepares hidden classifier cascade structure to work with given input 8-bit gray image. 
+
+        You must call this function before calling of functions ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
+         ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+    */
     SIMD_API void SimdDetectionPrepare(void * hid);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes all points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdDetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, 
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers, processes only even points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes all points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdDetectionLbpDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers, processes only even points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */    
     SIMD_API void SimdDetectionLbpDetect32fi(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes all points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */    
     SIMD_API void SimdDetectionLbpDetect16ip(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        \short Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes only even points).
+
+        You must call function ::SimdDetectionPrepare before calling of this functions.
+        All restriction (input mask and bounding box) affects to left-top corner of scanning window.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] hid - a pointer to hidden cascade which was received with using of function ::SimdDetectionInit.
+        \param [in] mask - a pointer to pixels data of 8-bit image with mask. The mask restricts detection region.
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] left - a left side of bounding box which restricts detection region.
+        \param [in] top - a top side of bounding box which restricts detection region.
+        \param [in] right - a right side of bounding box which restricts detection region.
+        \param [in] bottom - a bottom side of bounding box which restricts detection region.
+        \param [out] dst - a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects.
+        \param [in] dstStride - a row size of the dst image.
+    */
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
-    SIMD_API void SimdDetectionFree(void * ptr);
+    /*! @ingroup object_detection
+
+        \fn void SimdDetectionFree(void * ptr);
+
+        \short Frees pointers which was received with using of functions ::SimdDetectionLoadA and ::SimdDetectionInit.
+
+        \note This function is used for implementation of Simd::Detection.
+
+        \param [in] ptr - a pointer which was received with using of functions ::SimdDetectionLoadA and ::SimdDetectionInit.
+    */    SIMD_API void SimdDetectionFree(void * ptr);
 
     /*! @ingroup edge_background
 

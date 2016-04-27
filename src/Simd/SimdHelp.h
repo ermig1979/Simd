@@ -149,12 +149,12 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_allocator struct Allocator
-    \short Allocator structure and related functions. 
+    @defgroup cpp_allocator Allocator
+    \short Allocator structure. 
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_point struct Point
+    @defgroup cpp_point Point
     \short Point structure and related functions. 
 */
 
@@ -164,7 +164,7 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_rectangle struct Rectangle
+    @defgroup cpp_rectangle Rectangle
     \short Rectangle structure and related functions. 
 */
 
@@ -174,7 +174,12 @@
 */
 
 /*! @ingroup cpp_types
-    @defgroup cpp_view struct View
+    @defgroup cpp_pixels Pixels
+    \short BGR, BGRA, HSL, HSV pixel structures.
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_view View
     \short View structure and related functions. 
 */
 
@@ -184,28 +189,28 @@
 */
 
 /*! @ingroup cpp_types
-@defgroup cpp_frame struct Frame
-\short Frame structure and related functions.
+    @defgroup cpp_frame Frame
+    \short Frame structure and related functions.
 */
 
 /*! @ingroup cpp_frame
-@defgroup cpp_frame_functions Related Functions
-\short Related functions for Frame structure.
+    @defgroup cpp_frame_functions Related Functions
+    \short Related functions for Frame structure.
 */
 
 /*! @ingroup cpp_types
-@defgroup cpp_pyramid struct Pyramid
-\short Pyramid structure and related functions.
+    @defgroup cpp_pyramid Pyramid
+    \short Pyramid structure and related functions.
 */
 
 /*! @ingroup cpp_pyramid
-@defgroup cpp_pyramid_functions Related Functions
-\short Related functions for Pyramid structure.
+    @defgroup cpp_pyramid_functions Related Functions
+    \short Related functions for Pyramid structure.
 */
 
 /*! @ingroup cpp_types
-@defgroup cpp_detection structure Detection
-\short Detection structure and related functions.
+    @defgroup cpp_detection Detection
+    \short Detection structure (C++ Object Detection Wrapper).
 */
 
 /*! @defgroup functions Functions
@@ -430,6 +435,11 @@
 /*! @ingroup functions
 	@defgroup ann ANN
 	\short Artificial Neural Network's functions.
+*/
+
+/*! @ingroup functions
+    @defgroup object_detection Object Detection
+    \short Object Detection's low level functions.
 */
 
 #ifndef __SimdHelp_h__

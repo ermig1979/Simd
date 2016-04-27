@@ -35,27 +35,70 @@ namespace Simd
 
 		\short The Detection structure provides object detection with using HAAR and LBP cascade classifiers.
 
-		\ref cpp_detection_functions.
+        Using example:
+        \verbatim
+        #include "Simd/SimdDetection.hpp"
+        #include "Test/TestUtils.h"
+
+        int main()
+        {
+            typedef Simd::Detection<Simd::Allocator> Detection;
+
+            Detection::View image;
+            Test::Load(image, "../../data/image/lena.pgm");
+
+            Detection detection;
+
+            detection.Load("../../data/cascade/haar_face_0.xml");
+
+            detection.Init(image.Size());
+
+            Detection::Objects objects;
+            detection.Detect(image, objects);
+
+            for (size_t i = 0; i < objects.size(); ++i)
+            {
+                Size s = objects[i].rect.Size();
+                Simd::FillFrame(image.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
+            }
+            Save(image, "result.pgm");
+
+            return 0;   
+        }
+        \endverbatim
+
+        \note This is wrapper around low-level \ref object_detection API.
 	*/
 	template <class A>
 	struct Detection
 	{
 		typedef A Allocator; /*!< Allocator type definition. */
-        typedef Simd::Point<ptrdiff_t> Size;
-        typedef std::vector<Size> Sizes;
-        typedef Simd::Rectangle<ptrdiff_t> Rect;
-        typedef std::vector<Rect> Rects;
-        typedef Simd::View<Simd::Allocator> View;
-        typedef int Tag;
+        typedef Simd::View<Simd::Allocator> View; /*!< An image type definition. */
+        typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
+        typedef std::vector<Size> Sizes; /*!< A vector of image sizes type definition. */
+        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
+        typedef std::vector<Rect> Rects; /*!< A vector of rectangles type definition. */
+        typedef int Tag; /*!< A tag type definition. */
 
-        static const Tag UNDEFINED_OBJECT_TAG = -1;
+        static const Tag UNDEFINED_OBJECT_TAG = -1; /*!< The undefined object tag. */
 
+        /*! 
+            \short The Object structure describes detected object.
+
+        */
         struct Object
         {
-            Rect rect; /*!< \brief A width of the frame. */
-            int weight;
-            Tag tag;
+            Rect rect; /*!< \brief A bounding box around of detected object. */
+            int weight; /*!< \brief An object weight (number of elementary detections). */
+            Tag tag; /*!< \brief An object tag. It's useful if more than one detector works. */
 
+            /*!
+                Creates a new Object structure.
+
+                \param [in] r - initial bounding box.
+                \param [in] w - initial weight.
+                \param [in] t - initial tag.
+            */
             Object(const Rect & r = Rect(), int w = 0, Tag t = UNDEFINED_OBJECT_TAG)
                 : rect(r)
                 , weight(w)
@@ -64,6 +107,11 @@ namespace Simd
 
             }
 
+            /*!
+                Creates a new Object structure on the base of another object.
+
+                \param [in] o - another object.
+            */
             Object(const Object & o)
                 : rect(o.rect)
                 , weight(o.weight)
@@ -71,7 +119,7 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Object> Objects;
+        typedef std::vector<Object> Objects; /*!< A vector of objects type defenition. */
 
         /*!
             Creates a new empty Detection structure.
@@ -89,6 +137,16 @@ namespace Simd
                 ::SimdDetectionFree(_data[i].handle);
         }
 
+        /*!
+            Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type.
+            You can call this function more than once if you want to use several object detectors at the same time.
+
+            \note Tree based cascades and old cascade formats are not supported!
+
+            \param [in] path - a path to cascade.
+            \param [in] tag - an user defined tag. This tag will be inserted in output Object structure.
+            \return a result of this operation.
+        */
         bool Load(const std::string & path, Tag tag = UNDEFINED_OBJECT_TAG)
         {
             Handle handle = ::SimdDetectionLoadA(path.c_str());
@@ -103,36 +161,46 @@ namespace Simd
             return handle != NULL;
         }
 
-        bool Init(const Size & frameSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),
+        /*!
+            Prepares Detection structure to work with image of given size. 
+
+            \param [in] imageSize - a size of input image.
+            \param [in] scaleFactor - a scale factor. To detect objects of different sizes the algorithm uses many scaled image. 
+                                      This parameter defines size difference between neighboring images. This parameter strongly affects to performance.
+            \param [in] sizeMin - a minimal size of detected objects. This parameter strongly affects to performance. 
+            \param [in] sizeMax - a maximal size of detected objects.
+            \param [in] roi - a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask.
+                              The mask affects to the center of detected object.
+            \return a result of this operation.
+        */
+        bool Init(const Size & imageSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),
             const Size & sizeMax = Size(INT_MAX, INT_MAX), const View & roi = View())
         {
             if (_data.empty())
                 return false;
-            _frameSize = frameSize;
-            _scaleFactor = scaleFactor;
-            _sizeMin = sizeMin;
-            _sizeMax = sizeMax;
-            _needNormalization = NeedNormalization();
-            _roi.Recreate(frameSize, View::Gray8);
-            if (roi.format == View::Gray8)
-                Simd::Copy(roi, _roi);
-            else
-                Simd::Fill(_roi, 0xFF);
-            return InitLevels();
+            _imageSize = imageSize;
+            return InitLevels(scaleFactor, sizeMin, sizeMax, roi);
         }
 
-        bool Ready() const
-        {
-            return !(_data.empty() || _levels.empty());
-        }
+        /*!
+            Detects objects at given image.
 
+            \param [in] src - a input image.
+            \param [out] objects - detected objects.
+            \param [in] groupSizeMin - a minimal weight (number of elementary detections) of detected image. 
+            \param [in] sizeDifferenceMax - a parameter to group elementary detections.
+            \param [in] motionMask - an using of motion detection flag. Useful for dynamical restriction of detection region to addition to ROI.
+            \param [in] motionRegions - a set of rectangles (motion regions) to restrict detection region to addition to ROI.
+                                        The regions affect to the center of detected object.
+            \return a result of this operation.
+        */
         bool Detect(const View & src, Objects & objects, int groupSizeMin = 3, double sizeDifferenceMax = 0.2,
             bool motionMask = false, const Rects & motionRegions = Rects())
         {
-            if (!Ready() || src.Size() != _frameSize)
+            if (_levels.empty() || src.Size() != _imageSize)
                 return false;
 
-            BuildPyramid(src);
+            FillLevels(src);
 
             typedef std::map<Tag, Objects> Candidates;
             Candidates candidates;
@@ -231,28 +299,14 @@ namespace Simd
         typedef std::vector<Level> Levels;
 
         std::vector<Data> _data;
-
-        Size _frameSize;
-        double _scaleFactor;
-        Size _sizeMin;
-        Size _sizeMax;
+        Size _imageSize;
         bool _needNormalization;
-
         View _roi;
         Levels _levels;
 
-        bool NeedNormalization()
+        bool InitLevels(double scaleFactor, const Size & sizeMin, const Size & sizeMax, const View & roi)
         {
-            for (size_t i = 0; i < _data.size(); ++i)
-            {
-                if(_data[i].Haar())
-                    return true;
-            }
-            return false;
-        }
-
-        bool InitLevels()
-        {
+            _needNormalization = false;
             _levels.clear();
             _levels.reserve(100);
             double scale = 1.0;
@@ -262,11 +316,11 @@ namespace Simd
                 bool exit = true, insert = false;
                 for (size_t i = 0; i < _data.size(); ++i)
                 {
-                    Size imageSize = _data[i].size * scale;
-                    if (imageSize.x <= _sizeMax.x && imageSize.y <= _sizeMax.y &&
-                        imageSize.x <= _frameSize.x && imageSize.y <= _frameSize.y)
+                    Size windowSize = _data[i].size * scale;
+                    if (windowSize.x <= sizeMax.x && windowSize.y <= sizeMax.y &&
+                        windowSize.x <= _imageSize.x && windowSize.y <= _imageSize.y)
                     {
-                        if (imageSize.x >= _sizeMin.x && imageSize.y >= _sizeMin.y)
+                        if (windowSize.x >= sizeMin.x && windowSize.y >= sizeMin.y)
                             insert = inserts[i] = true;
                         exit = false;
                     }
@@ -281,7 +335,7 @@ namespace Simd
 
                     level.scale = scale;
                     level.throughColumn = scale <= 2.0;
-                    Size scaledSize(_frameSize / scale);
+                    Size scaledSize(_imageSize / scale);
 
                     level.src.Recreate(scaledSize, View::Gray8);
                     level.roi.Recreate(scaledSize, View::Gray8);
@@ -320,19 +374,25 @@ namespace Simd
                             return false;
                         level.needSqsum = level.needSqsum | _data[i].Haar();
                         level.needTilted = level.needTilted | _data[i].Tilted();
+                        _needNormalization = _needNormalization | _data[i].Haar();
                     }
 
-                    Simd::ResizeBilinear(_roi, level.roi);
-                    Simd::Binarization(level.roi, 0, 255, 0, level.roi, SimdCompareGreater);
                     level.rect = Rect(level.roi.Size());
-                    Simd::SegmentationShrinkRegion(level.roi, 255, level.rect);
+                    if (roi.format == View::None)
+                        Simd::Fill(level.roi, 255);
+                    else
+                    {
+                        Simd::ResizeBilinear(roi, level.roi);
+                        Simd::Binarization(level.roi, 0, 255, 0, level.roi, SimdCompareGreater);
+                        Simd::SegmentationShrinkRegion(level.roi, 255, level.rect);
+                    }
                 }
-                scale *= _scaleFactor;
+                scale *= scaleFactor;
             } while (true);
             return !_levels.empty();
         }
 
-        void BuildPyramid(View src)
+        void FillLevels(View src)
         {
             View gray;
             if (src.format != View::Gray8)
@@ -407,32 +467,25 @@ namespace Simd
             double _sizeDifferenceMax;
         };
 
-        template<typename T> int Partition(const std::vector<T> & _vec, std::vector<int> & labels, double sizeDifferenceMax)
+        template<typename T> int Partition(const std::vector<T> & vec, std::vector<int> & labels, double sizeDifferenceMax)
         {
             Similar similar(sizeDifferenceMax);
-
-            int i, j, N = (int)_vec.size();
-            const T* vec = &_vec[0];
-
+            int i, j, N = (int)vec.size();
             const int PARENT = 0;
             const int RANK = 1;
 
             std::vector<int> _nodes(N * 2);
             int(*nodes)[2] = (int(*)[2])&_nodes[0];
 
-            // The first O(N) pass: create N single-vertex trees
             for (i = 0; i < N; i++)
             {
                 nodes[i][PARENT] = -1;
                 nodes[i][RANK] = 0;
             }
 
-            // The main O(N^2) pass: merge connected components
             for (i = 0; i < N; i++)
             {
                 int root = i;
-
-                // find root
                 while (nodes[root][PARENT] >= 0)
                     root = nodes[root][PARENT];
 
@@ -447,7 +500,6 @@ namespace Simd
 
                     if (root2 != root)
                     {
-                        // unite both trees
                         int rank = nodes[root][RANK], rank2 = nodes[root2][RANK];
                         if (rank > rank2)
                             nodes[root2][PARENT] = root;
@@ -460,15 +512,12 @@ namespace Simd
                         assert(nodes[root][PARENT] < 0);
 
                         int k = j, parent;
-
-                        // compress the path from node2 to root
                         while ((parent = nodes[k][PARENT]) >= 0)
                         {
                             nodes[k][PARENT] = root;
                             k = parent;
                         }
 
-                        // compress the path from node to root
                         k = i;
                         while ((parent = nodes[k][PARENT]) >= 0)
                         {
@@ -479,7 +528,6 @@ namespace Simd
                 }
             }
 
-            // Final O(N) pass: enumerate classes
             labels.resize(N);
             int nclasses = 0;
 
@@ -488,7 +536,6 @@ namespace Simd
                 int root = i;
                 while (nodes[root][PARENT] >= 0)
                     root = nodes[root][PARENT];
-                // re-use the rank as the class label
                 if (nodes[root][RANK] >= 0)
                     nodes[root][RANK] = ~nclasses++;
                 labels[i] = ~nodes[root][RANK];
@@ -525,7 +572,6 @@ namespace Simd
                 if (n1 < groupSizeMin)
                     continue;
 
-                // filter out small object rectangles inside large rectangles	
                 size_t j;
                 for (j = 0; j < buffer.size(); j++)
                 {

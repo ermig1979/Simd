@@ -28,8 +28,7 @@
 
 namespace Simd
 {
-    /*! @ingroup cpp_types
-
+    /*! 
         \short Contains various pixel structures.
 
         Contains various pixel structures useful for work with Simd::View structure.
@@ -43,7 +42,8 @@ namespace Simd
 
         //-------------------------------------------------------------------------
 
-        /*!
+        /*! @ingroup cpp_pixels
+
             \short 24-bit BGR pixel.
 
             Provides manipulation of 24-bit BGR (Blue, Green, Red) pixels of the View struct.
@@ -109,7 +109,8 @@ namespace Simd
             template <class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
-        /*!
+        /*! @ingroup cpp_pixels
+
             \short 32-bit BGRA pixel.
 
             Provides manipulation of 32-bit BGRA (Blue, Green, Red, Alpha) pixels of the View struct.
@@ -179,7 +180,8 @@ namespace Simd
             template <class A> static Bgra32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
-        /*!
+        /*! @ingroup cpp_pixels
+
             \short 24-bit HSV pixel.
 
             Provides manipulation of 24-bit HSV (Hue, Saturation, Value) pixels of the View struct.
@@ -238,7 +240,8 @@ namespace Simd
             template <class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
-        /*!
+        /*! @ingroup cpp_pixels
+
             \short 24-bit HSL pixel.
 
             Provides manipulation of 24-bit HSL (Hue, Saturation, Lightness) pixels of the View struct.

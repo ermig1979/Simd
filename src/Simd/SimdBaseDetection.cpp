@@ -593,7 +593,7 @@ namespace Simd
         HidBase * InitLbp(const Data & data, const View & sum, bool throughColumn, bool int16)
         {
             assert(sum.format == View::Int32);
-            if (int16)
+            if (int16 && data.canInt16)
             {
                 HidLbpCascade<int, short> * hid = CreateHidLbp<int, short>(data);
                 hid->isThroughColumn = throughColumn;

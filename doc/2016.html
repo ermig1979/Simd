@@ -28,7 +28,7 @@
 
 <hr/> 
 
-<h3 id="R041">May X, 2016 (version X.X.41.XXX)</h3>
+<h3 id="R041">May X, 2016 (version 3.1.41.XXX)</h3>
 
 <h4>Algorithms</h4>
 <h5>New features</h5>
@@ -37,6 +37,14 @@
  <li>Integration of types Simd::Rectangle and cv::Rect_.</li>
  <li>Integration of types Simd::View and cv::Mat.</li>
  <li>Added operator += for Simd::Rectangle type.</li>
+ <li>Functions for loading, initialization and releasing of OpenCV classifier cascades.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionHaarDetect32fp.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionHaarDetect32fi.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionLbpDetect32fp.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionLbpDetect32fi.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionLbpDetect16ip.</li>
+ <li>Base implementation, SSE4.1 and AVX2 optimizations of function SimdDetectionLbpDetect16ii.</li>
+ <li>Detection structure - wrapper around low-level API for object detection.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -51,9 +59,22 @@
 <ul>
  <li>Saving and loading of View in PGM format.</li>
  <li>Printing of help message.</li>
+ <li>Generation of test image with faces.</li>
+ <li>Tests for verifying functionality of function SimdDetectionHaarDetect32fp.</li>
+ <li>Tests for verifying functionality of function SimdDetectionHaarDetect32fi.</li>
+ <li>Tests for verifying functionality of function SimdDetectionLbpDetect32fp.</li>
+ <li>Tests for verifying functionality of function SimdDetectionLbpDetect32fi.</li>
+ <li>Tests for verifying functionality of function SimdDetectionLbpDetect16ip.</li>
+ <li>Tests for verifying functionality of function SimdDetectionLbpDetect16ii.</li>
+ <li>Tests for verifying functionality of Detection structure.</li>
 </ul>
 
 <h4>Infrastructure</h4>
+<h5>New features</h5>
+<ul>
+ <li>Test images with faces.</li>
+ <li>OpenCV HAAR and LPB classifier cascades.</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Compiler error in Test project for old CPUs.</li>

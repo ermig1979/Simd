@@ -37,7 +37,7 @@ namespace Test
         AutoTestPtr autoTest;
 		DataTestPtr dataTest;
 		SpecialTestPtr specialTest;
-        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d, const SpecialTestPtr & s = NULL)
+        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d, const SpecialTestPtr & s)
             : name(n)
             , autoTest(a)
             , dataTest(d)
@@ -51,7 +51,7 @@ namespace Test
 #define TEST_ADD_GROUP(name) \
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
-    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest)); return true; } \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, NULL)); return true; } \
     bool name##AtList = name##AddToList();
 
 #define TEST_ADD_GROUP_EX(name) \
@@ -59,6 +59,11 @@ namespace Test
     bool name##DataTest(bool create); \
     bool name##SpecialTest(); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, name##SpecialTest)); return true; } \
+    bool name##AtList = name##AddToList();
+
+#define TEST_ADD_GROUP_ONLY_SPECIAL(name) \
+    bool name##SpecialTest(); \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, NULL, NULL, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
     TEST_ADD_GROUP(AbsDifferenceSum);
@@ -138,6 +143,7 @@ namespace Test
     TEST_ADD_GROUP(DetectionLbpDetect32fi);
     TEST_ADD_GROUP(DetectionLbpDetect16ip);
     TEST_ADD_GROUP(DetectionLbpDetect16ii);
+    TEST_ADD_GROUP_ONLY_SPECIAL(Detection);
 
     TEST_ADD_GROUP(AlphaBlending);
 
@@ -368,9 +374,13 @@ namespace Test
 
 		bool Required(const Group & group) const
 		{
+            if (mode == Auto && group.autoTest == NULL)
+                return false;
+            if ((mode == Create || mode == Verify) && group.dataTest == NULL)
+                return false;
 			if (mode == Special && group.specialTest == NULL)
-				return false;
-			return filter.empty() || group.name.find(filter) != std::string::npos;
+                return false;
+            return filter.empty() || group.name.find(filter) != std::string::npos;
 		}
 	};
 
@@ -483,14 +493,10 @@ namespace Test
         std::cout << "Also you can use parameter -h or -? to print this help message." << std::endl << std::endl;
         return 0;
     }
-
-    void CheckCpp();
 }
 
 int main(int argc, char* argv[])
 {
-    Test::CheckCpp();
-
     Test::Options options(argc, argv);
 
     if (options.help)
