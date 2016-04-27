@@ -226,7 +226,7 @@ namespace Simd
             }
 
             objects.clear();
-            for (Candidates::iterator it = candidates.begin(); it != candidates.end(); ++it)
+            for (typename Candidates::iterator it = candidates.begin(); it != candidates.end(); ++it)
                 GroupObjects(objects, it->second, groupSizeMin, sizeDifferenceMax);
 
             return true;
