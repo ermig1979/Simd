@@ -34,6 +34,21 @@ namespace Simd
 
         \short The Rectangle structure defines the positions of left, top, right and bottom sides of a rectangle.
 
+        In order to have mutual conversion with OpenCV rectangle you have to define macro SIMD_OPENCV_ENABLE:
+        \verbatim
+            #include "opencv2/core/core.hpp"
+            #define SIMD_OPENCV_ENABLE
+            #include "Simd/SimdRectangle.hpp"
+
+            int main()
+            {
+                typedef Simd::Rectangle<ptrdiff_t> Rect;
+                Rect rect = cv::Rect(10, 10, 20, 20);
+                cv::Rect cvRect = Rect(10, 10, 30, 30);
+                return 0;
+            }
+        \endverbatim
+
         \ref cpp_rectangle_functions.
     */
 	template <typename T> 

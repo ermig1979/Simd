@@ -33,7 +33,7 @@ namespace Simd
 {
 	/*! @ingroup cpp_detection
 
-		\short The Detection structure provides object detection with using HAAR and LBP cascade classifiers.
+		\short The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.
 
         Using example:
         \verbatim
@@ -301,7 +301,6 @@ namespace Simd
         std::vector<Data> _data;
         Size _imageSize;
         bool _needNormalization;
-        View _roi;
         Levels _levels;
 
         bool InitLevels(double scaleFactor, const Size & sizeMin, const Size & sizeMax, const View & roi)

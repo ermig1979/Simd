@@ -36,6 +36,26 @@ namespace Simd
 
         \short The View structure provides storage and manipulation of images.
 
+        In order to have mutual conversion with OpenCV image type (cv::Mat) you have to define macro SIMD_OPENCV_ENABLE:
+        \verbatim
+        #include "opencv2/core/core.hpp"
+        #define SIMD_OPENCV_ENABLE
+        #include "Simd/SimdView.hpp"
+
+        int main()
+        {
+            typedef Simd::View<Simd::Allocator> View;
+
+            View view1(40, 30, View::Bgr24);
+            cv::Mat mat1(80, 60, CV_8UC3)
+            
+            View view2 = mat1; // view2 will be refer to mat1, it is not a copy!
+            cv::Mat mat2 = view1; // mat2 will be refer to view1, it is not a copy!
+
+            return 0;
+        }
+        \endverbatim
+
         \ref cpp_view_functions.
     */
     template <class A>

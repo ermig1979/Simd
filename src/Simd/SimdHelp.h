@@ -48,7 +48,7 @@
 
     The <b>%Simd Library</b> is a free open source image processing library, designed for C and C++ programmers.
     It provides many useful high performance algorithms for image processing such as: pixel format conversion, image scaling and filtration, 
-    extraction of statistic information from images, motion detection, object classification, neural network.
+    extraction of statistic information from images, motion detection, object detection (HAAR and LBP classifier cascades) and classification, neural network.
     
     \n\n The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, SSE2, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
@@ -66,6 +66,8 @@
      - \c simd/prj/cmake/ - contains files of CMake build systems.
      - \c simd/prj/sh/ - contains additional scripts needed for building of the library in Linux.
      - \c simd/prj/txt/ - contains text files needed for building of the library.
+     - \c simd/data/cascade/ - contains OpenCV cascades (HAAR and LBP).
+     - \c simd/data/image/ - contains image sample.
      - \c simd/doc/ - contains documentation of the library.
      - \c simd/doc/src/ - contains scripts for generation of this documentation by <a href="http://www.doxygen.org">doxygen</a>.
 
@@ -115,6 +117,11 @@
     And to use the library from C++ code you must include:
     \code
     #include "Simd/Simd.hpp"
+    \endcode
+
+    In order to use Simd::Detection you must include:
+    \code
+    #include "Simd/SimdDetection.hpp"
     \endcode
 
     \section s5 Test Framework
@@ -439,7 +446,7 @@
 
 /*! @ingroup functions
     @defgroup object_detection Object Detection
-    \short Object Detection's low level functions.
+    \short Object Detection's low-level API for Simd::Detection.
 */
 
 #ifndef __SimdHelp_h__
