@@ -197,7 +197,7 @@ namespace Simd
 
             \return an OpenCV Mat which references to this image.
         */
-        operator cv::Mat();
+        operator cv::Mat() const;
 #endif
 
         /*!
@@ -594,7 +594,7 @@ namespace Simd
     }
 
 #ifdef SIMD_OPENCV_ENABLE
-    template <class A> SIMD_INLINE View<A>::operator cv::Mat()
+    template <class A> SIMD_INLINE View<A>::operator cv::Mat() const
     {
         return cv::Mat((int)height, (int)width, ToOcv(format), data, stride);
     }
