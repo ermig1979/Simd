@@ -34,9 +34,9 @@ namespace Test
             typedef void (*FuncPtr)(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncSL(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncSL(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & x, const View & svs, const View & weights, size_t length, size_t count, float * sum) const
             {

@@ -141,6 +141,7 @@
 	 - \c -t=1 - a number of used threads (every thread run all tests) for simulation of multi-thread loading.
 	 - \c -f=Sobel - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 	If you miss this parameter then full testing will be performed.
+    You can use several filters - function name has to satisfy at least one of them.
 	 - \c -o=log.txt - a file name with test report. The test's report also will be output to console.
     
     Also you can use parameter -h or -? in order to print help message.

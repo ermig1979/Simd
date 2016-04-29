@@ -30,61 +30,61 @@ namespace Test
 {
     class Data
     {
-        std::string _path;
+        String _path;
 
-        std::string Path(const std::string & name) const;
+        String Path(const String & name) const;
 
-        bool CreatePath(const std::string & path) const;
+        bool CreatePath(const String & path) const;
 
-        template <class T> bool SaveArray(const T * data, size_t size, const std::string & name) const;
-        template <class T> bool LoadArray(T * data, size_t size, const std::string & name) const;
+        template <class T> bool SaveArray(const T * data, size_t size, const String & name) const;
+        template <class T> bool LoadArray(T * data, size_t size, const String & name) const;
 
     public:
-        Data(const std::string & name);
+        Data(const String & name);
 
-        bool Save(const View & image, const std::string & name) const;
-        bool Load(View & image, const std::string & name) const;
+        bool Save(const View & image, const String & name) const;
+        bool Load(View & image, const String & name) const;
 
-        bool Save(const uint64_t & value, const std::string & name) const;
-        bool Load(uint64_t & value, const std::string & name) const;
+        bool Save(const uint64_t & value, const String & name) const;
+        bool Load(uint64_t & value, const String & name) const;
  
-        bool Save(const int64_t & value, const std::string & name) const;
-        bool Load(int64_t & value, const std::string & name) const;
+        bool Save(const int64_t & value, const String & name) const;
+        bool Load(int64_t & value, const String & name) const;
 
-        bool Save(const uint32_t & value, const std::string & name) const;
-        bool Load(uint32_t & value, const std::string & name) const;
+        bool Save(const uint32_t & value, const String & name) const;
+        bool Load(uint32_t & value, const String & name) const;
 
-        bool Save(const uint8_t & value, const std::string & name) const;
-        bool Load(uint8_t & value, const std::string & name) const;
+        bool Save(const uint8_t & value, const String & name) const;
+        bool Load(uint8_t & value, const String & name) const;
 
-        bool Save(const double & value, const std::string & name) const;
-        bool Load(double & value, const std::string & name) const;
+        bool Save(const double & value, const String & name) const;
+        bool Load(double & value, const String & name) const;
 
-        bool Save(const float & value, const std::string & name) const;
-        bool Load(float & value, const std::string & name) const;
+        bool Save(const float & value, const String & name) const;
+        bool Load(float & value, const String & name) const;
 
-        bool Save(const Sums & sums, const std::string & name) const;
-        bool Load(Sums & sums, const std::string & name) const;
+        bool Save(const Sums & sums, const String & name) const;
+        bool Load(Sums & sums, const String & name) const;
 
-        bool Save(const Histogram & histogram, const std::string & name) const;
-        bool Load(Histogram & histogram, const std::string & name) const;
+        bool Save(const Histogram & histogram, const String & name) const;
+        bool Load(Histogram & histogram, const String & name) const;
 
-        bool Save(const Sums64 & sums, const std::string & name) const;
-        bool Load(Sums64 & sums, const std::string & name) const;
+        bool Save(const Sums64 & sums, const String & name) const;
+        bool Load(Sums64 & sums, const String & name) const;
 
-        bool Save(const Rect & rect, const std::string & name) const;
-        bool Load(Rect & rect, const std::string & name) const;
+        bool Save(const Rect & rect, const String & name) const;
+        bool Load(Rect & rect, const String & name) const;
 
-        bool Save(const std::vector<uint8_t> & data, const std::string & name) const;
-        bool Load(std::vector<uint8_t> & data, const std::string & name) const;
+        bool Save(const std::vector<uint8_t> & data, const String & name) const;
+        bool Load(std::vector<uint8_t> & data, const String & name) const;
 
-        bool Save(const Buffer32f & buffer, const std::string & name) const;
-        bool Load(Buffer32f & buffer, const std::string & name) const;
+        bool Save(const Buffer32f & buffer, const String & name) const;
+        bool Load(Buffer32f & buffer, const String & name) const;
 
-        static std::string Description(SimdCompareType type);
-        static std::string Description(SimdOperationBinary8uType type);
-        static std::string Description(SimdOperationBinary16iType type);
-        static std::string Description(View::Format format);
+        static String Description(SimdCompareType type);
+        static String Description(SimdOperationBinary8uType type);
+        static String Description(SimdOperationBinary16iType type);
+        static String Description(View::Format format);
     };
 }
 

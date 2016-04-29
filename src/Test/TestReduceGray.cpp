@@ -35,9 +35,9 @@ namespace Test
 				 uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, View & dst) const
 			{
@@ -57,10 +57,10 @@ namespace Test
 				 uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int correction);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 			bool correction;
 
-			Func2(const FuncPtr & f, const std::string & d, bool c) : func(f), description(d + (c ? "[1]" : "[0]")), correction(c) {}
+			Func2(const FuncPtr & f, const String & d, bool c) : func(f), description(d + (c ? "[1]" : "[0]")), correction(c) {}
 
 			void Call(const View & src, View & dst) const
 			{

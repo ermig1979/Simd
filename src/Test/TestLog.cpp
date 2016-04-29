@@ -40,7 +40,7 @@ namespace Test
 
     }
 
-    void Log::SetLogFile(std::string name)
+    void Log::SetLogFile(String name)
     {
         _file.open(name);
     }
@@ -60,7 +60,7 @@ namespace Test
         _enablePrefix = enable;
     }
 
-    void Log::Write(Level level, const std::string & message)
+    void Log::Write(Level level, const String & message)
     {
         std::stringstream ss;
         if (_enableThreadId)
@@ -85,7 +85,7 @@ namespace Test
             std::lock_guard<std::mutex> lock(_mutex);
             if(_level == Error)
             {
-                const std::string last = _lastSkippedMessages[std::this_thread::get_id()];
+                const String last = _lastSkippedMessages[std::this_thread::get_id()];
                 if(last.size())
                 {
                     std::cout << last;

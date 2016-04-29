@@ -35,9 +35,9 @@ namespace Test
 				 uint8_t * min, uint8_t * max, uint8_t * average);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, uint8_t * min, uint8_t * max, uint8_t * average) const
 			{
@@ -120,9 +120,9 @@ namespace Test
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncM(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & mask, uint8_t index, uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy) const
             {
@@ -226,9 +226,9 @@ namespace Test
             typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func3(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint32_t * sums) const
             {
@@ -396,9 +396,9 @@ namespace Test
             typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint64_t * sum) const
             {
@@ -594,9 +594,9 @@ namespace Test
             typedef void (*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func5(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & a, const View & b, uint64_t * sum) const
             {

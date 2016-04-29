@@ -34,9 +34,9 @@ namespace Test
             typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(View & dst, uint8_t value) const
             {
@@ -106,9 +106,9 @@ namespace Test
                 size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(View & dst, const Rect & frame, uint8_t value) const
             {
@@ -181,9 +181,9 @@ namespace Test
 			typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncBgra(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncBgra(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha) const
 			{
@@ -266,9 +266,9 @@ namespace Test
             typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncBgr(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncBgr(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(View & dst, uint8_t blue, uint8_t green, uint8_t red) const
             {

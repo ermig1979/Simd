@@ -35,9 +35,9 @@ namespace Test
                 const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncH(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint32_t * histogram) const
             {
@@ -52,9 +52,9 @@ namespace Test
                 const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncHM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncHM(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, const View & mask, uint8_t index, uint32_t * histogram) const
             {
@@ -71,9 +71,9 @@ namespace Test
 				size_t step, size_t indent, uint32_t * histogram);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncASDH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncASDH(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, size_t step, size_t indent, uint32_t * histogram) const
 			{

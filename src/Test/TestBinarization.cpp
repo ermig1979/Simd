@@ -35,9 +35,9 @@ namespace Test
 				 uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType type);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, uint8_t value, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
 			{
@@ -132,9 +132,9 @@ namespace Test
                 uint8_t * dst, size_t dstStride, SimdCompareType type);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
             {

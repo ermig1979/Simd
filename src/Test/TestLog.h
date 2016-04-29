@@ -40,12 +40,12 @@ namespace Test
         Log();
         ~Log();
 
-        void SetLogFile(std::string name);
+        void SetLogFile(String name);
         void SetLevel(Level level);
         void SetEnableThreadId(bool enable);
         void SetEnablePrefix(bool enable);
 
-        void Write(Level level, const std::string & message);
+        void Write(Level level, const String & message);
 
         static Log s_log;
     private:
@@ -56,7 +56,7 @@ namespace Test
         bool _enableThreadId;
         bool _enablePrefix;
 
-        typedef std::map<std::thread::id, std::string> Messages;
+        typedef std::map<std::thread::id, String> Messages;
         Messages _lastSkippedMessages;
     };
 }

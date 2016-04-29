@@ -36,9 +36,9 @@ namespace Test
                 SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, View & sum, View & sqsum, View & tilted) const
             {

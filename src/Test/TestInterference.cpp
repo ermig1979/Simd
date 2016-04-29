@@ -34,9 +34,9 @@ namespace Test
 			typedef void (*FuncPtr)(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t value, int16_t saturation);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & statisticSrc, View & statisticDst, uint8_t value, int16_t saturation) const
 			{
@@ -52,9 +52,9 @@ namespace Test
                 uint8_t value, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
             FuncPtr func;
-            std::string description; 
+            String description; 
 
-            Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & statisticSrc, View & statisticDst, uint8_t value, int16_t saturation, const View & mask, uint8_t index) const
             {

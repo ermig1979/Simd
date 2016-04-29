@@ -35,9 +35,9 @@ namespace Test
 				 uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & loSrc, const View & hiSrc, View & loDst, View & hiDst) const
 			{
@@ -99,9 +99,9 @@ namespace Test
 				 uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & loValue, const View & hiValue,
 				const View & loCountSrc, const View & hiCountSrc, View & loCountDst, View & hiCountDst) const
@@ -170,9 +170,9 @@ namespace Test
 				 uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func3(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
 				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uint8_t threshold) const
@@ -248,9 +248,9 @@ namespace Test
 				 uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & loCountSrc, const View & loValueSrc, const View & hiCountSrc, const View & hiValueSrc, 
 				View & loCountDst, View & loValueDst, View & hiCountDst, View & hiValueDst, uint8_t threshold, const View & mask) const
@@ -327,9 +327,9 @@ namespace Test
 				 uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func5(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & loSrc, const View & hiSrc, View & loDst, View & hiDst, const View & mask) const
 			{
@@ -393,9 +393,9 @@ namespace Test
 				 uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func6(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func6(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, uint8_t index, uint8_t value, View & dst) const
 			{

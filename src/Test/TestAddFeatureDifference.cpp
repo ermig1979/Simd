@@ -36,9 +36,9 @@ namespace Test
                 uint16_t weight, uint8_t * difference, size_t differenceStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & lo, const View & hi, uint16_t weight, const View & differenceSrc, View & differenceDst) const
 			{

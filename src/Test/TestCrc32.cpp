@@ -34,9 +34,9 @@ namespace Test
 			typedef uint32_t (*FunkPtr)(const void *src, size_t size);
 
 			FunkPtr func;
-			std::string description;
+			String description;
 
-			Func(const FunkPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FunkPtr & f, const String & d) : func(f), description(d) {}
 
 			uint32_t Call(const std::vector<uint8_t> & src) const
 			{

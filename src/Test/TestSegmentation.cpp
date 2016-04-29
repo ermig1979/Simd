@@ -34,9 +34,9 @@ namespace Test
 			typedef void(*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncSR(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncSR(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, uint8_t index, const Rect & srcRect, Rect & dstRect) const
 			{
@@ -115,9 +115,9 @@ namespace Test
         {
             typedef void(*FuncPtr)(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncFSH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncFSH(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t index, View & dst) const
             {
@@ -197,9 +197,9 @@ namespace Test
         {
             typedef void(*FuncPtr)(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncCI(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncCI(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t oldIndex, uint8_t newIndex, View & dst) const
             {
@@ -281,9 +281,9 @@ namespace Test
                 uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
                 uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncP(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncP(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & parrent, const View & childSrc, View & childDst, const View & difference, 
                 uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold) const

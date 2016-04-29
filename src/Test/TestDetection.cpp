@@ -41,7 +41,7 @@ namespace Test
         if (dst.format == View::Gray8)
             return dst;
 
-        std::string path = "../../data/image/lena.pgm";
+        String path = "../../data/image/lena.pgm";
         View obj;
         if (!Load(obj, path))
         {
@@ -92,7 +92,7 @@ namespace Test
         return dst;
     }
 
-    void Annotate(const View & src, const View & mask, size_t w, size_t h, const std::string & desc)
+    void Annotate(const View & src, const View & mask, size_t w, size_t h, const String & desc)
     {
         View dst(src.Size(), View::Gray8);
         Simd::Copy(src, dst);
@@ -105,7 +105,7 @@ namespace Test
                 Simd::FillFrame(dst.Region(col, row, col + w, row + h).Ref(), Rect(1, 1, w - 1, h - 1), 255);
             }
         }
-        std::string path = desc;
+        String path = desc;
         size_t s = path.length();
         if (path[s - 1] == '>')
         {
@@ -123,9 +123,9 @@ namespace Test
                 ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncD(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncD(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const void * hid, const View & mask, const Rect & rect, View & dst) const
             {

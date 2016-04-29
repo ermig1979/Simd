@@ -35,9 +35,9 @@ namespace Test
 				size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & y, const View & u, const View & v, View & dst) const
 			{

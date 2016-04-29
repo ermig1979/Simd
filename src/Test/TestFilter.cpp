@@ -34,9 +34,9 @@ namespace Test
 			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncC(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncC(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, View & dst) const
 			{
@@ -280,9 +280,9 @@ namespace Test
             typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncG(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncG(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, View & dst) const
             {

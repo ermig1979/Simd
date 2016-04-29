@@ -36,10 +36,10 @@ namespace Test
 			typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 			bool inversion;
 
-			FuncC(const FuncPtr & f, const std::string & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
+			FuncC(const FuncPtr & f, const String & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
 
 			void Call(const View & src, View & dst) const
 			{
@@ -131,9 +131,9 @@ namespace Test
             typedef void (*FuncPtr)(const float * a, const float * b, size_t size, float * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncPS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncPS(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & a, const View & b, float * sum) const
             {
@@ -214,9 +214,9 @@ namespace Test
 			typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncS(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, float slope, View & dst) const
 			{

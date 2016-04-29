@@ -35,9 +35,9 @@ namespace Test
 				size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncS(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & a, const View & b, uint64_t * sum) const
 			{
@@ -52,9 +52,9 @@ namespace Test
 				const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncM(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & a, const View & b, const View & mask, uint8_t index, uint64_t * sum) const
 			{
@@ -68,9 +68,9 @@ namespace Test
             typedef void (*FuncPtr)(const float * a, const float * b, size_t size, float * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & a, const View & b, float * sum) const
             {

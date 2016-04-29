@@ -34,9 +34,9 @@ namespace Test
             typedef void(*FuncPtr)(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
                 const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & blue, const View & green, const View & red, View & bgra, uint8_t alpha) const
             {

@@ -34,7 +34,7 @@ namespace Test
 
     class PerformanceMeasurer
     {
-		std::string	_description;
+		String	_description;
         double _start;
         int _count;
         double _total;
@@ -45,16 +45,16 @@ namespace Test
         long long _size;
 
     public:
-        PerformanceMeasurer(const std::string & description = "Unnamed");
+        PerformanceMeasurer(const String & description = "Unnamed");
         PerformanceMeasurer(const PerformanceMeasurer & pm);
 
         void Enter();
         void Leave(size_t size = 1);
 
         double Average() const;
-        std::string Statistic() const;
+        String Statistic() const;
 
-        std::string Description() const { return _description; }
+        String Description() const { return _description; }
 
         void Combine(const PerformanceMeasurer & other);
     };
@@ -94,7 +94,7 @@ namespace Test
     {
         typedef PerformanceMeasurer Pm;
         typedef std::shared_ptr<Pm> PmPtr;
-        typedef std::map<std::string, PmPtr> FunctionMap;
+        typedef std::map<String, PmPtr> FunctionMap;
         struct Thread
         {
             FunctionMap map;
@@ -113,11 +113,11 @@ namespace Test
         PerformanceMeasurerStorage();
         ~PerformanceMeasurerStorage();
 
-        PerformanceMeasurer* Get(std::string name);
+        PerformanceMeasurer* Get(String name);
 
         size_t Align(size_t size);
 
-        std::string Report(bool sse42 = false, bool align = false, bool raw = false) const;
+        String Report(bool sse42 = false, bool align = false, bool raw = false) const;
     };
 }
 

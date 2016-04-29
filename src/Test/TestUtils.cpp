@@ -107,7 +107,7 @@ namespace Test
     }
 
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
-        const std::string & description)
+        const String & description)
     {
         std::stringstream message;
         int errorCount = 0;
@@ -169,7 +169,7 @@ namespace Test
 	}
 
     bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
-		const std::string & description)
+		const String & description)
     {
         assert(Simd::Compatible(a, b));
 
@@ -308,14 +308,14 @@ namespace Test
         return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0, true);
     }
     
-	std::string ColorDescription(View::Format format)
+	String ColorDescription(View::Format format)
 	{
 		std::stringstream ss;
 		ss << "<" << View::PixelSize(format) << ">";
 		return ss.str();
 	}
 
-    std::string FormatDescription(View::Format format)
+    String FormatDescription(View::Format format)
     {
         switch(format)
         {
@@ -337,14 +337,14 @@ namespace Test
         }
     }
 
-    std::string ScaleDescription(const Point & scale)
+    String ScaleDescription(const Point & scale)
     {
         std::stringstream ss;
         ss << "[" << scale.x << "x" << scale.y << "]";
         return ss.str();
     }
 
-    std::string CompareTypeDescription(SimdCompareType type)
+    String CompareTypeDescription(SimdCompareType type)
     {
         switch(type)
         {
@@ -365,7 +365,7 @@ namespace Test
         return "(Unknown)";
     }
 
-    std::string ExpandToLeft(const std::string & value, size_t count)
+    String ExpandToLeft(const String & value, size_t count)
     {
         assert(count >= value.size());
         std::stringstream ss;
@@ -375,7 +375,7 @@ namespace Test
         return ss.str();
     }
 
-    std::string ExpandToRight(const std::string & value, size_t count)
+    String ExpandToRight(const String & value, size_t count)
     {
         assert(count >= value.size());
         std::stringstream ss;
@@ -385,7 +385,7 @@ namespace Test
         return ss.str();
     }
 
-    std::string ToString(double value, size_t iCount, size_t fCount)
+    String ToString(double value, size_t iCount, size_t fCount)
     {
         assert(iCount > 0);
         if(value > 0)
@@ -400,12 +400,12 @@ namespace Test
         }
     }
 
-    bool Load(View & view, const std::string & path)
+    bool Load(View & view, const String & path)
     {
         std::ifstream ifs(path, std::ifstream::binary);
         if (ifs.is_open())
         {
-            std::string type;
+            String type;
             ifs >> type;
             if (type != "P5")
                 return false;
@@ -423,7 +423,7 @@ namespace Test
             return false;
     }
 
-    bool Save(const View & view, const std::string & path)
+    bool Save(const View & view, const String & path)
     {
         if (view.format != View::Gray8)
             return false;

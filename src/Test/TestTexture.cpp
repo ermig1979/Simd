@@ -35,9 +35,9 @@ namespace Test
                 uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t saturation, uint8_t boost, View &  dx, View & dy) const
             {
@@ -136,9 +136,9 @@ namespace Test
                 uint8_t boost, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t boost, View &  dst) const
             {
@@ -229,9 +229,9 @@ namespace Test
                 const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func3(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, const View & lo, const View & hi, int64_t * sum) const
             {
@@ -314,9 +314,9 @@ namespace Test
                 int shift, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, int shift, View &  dst) const
             {

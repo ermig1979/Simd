@@ -35,9 +35,9 @@ namespace Test
                 const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncM(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncM(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, const View & mask, uint8_t indexMin, View & dst) const
             {
@@ -122,9 +122,9 @@ namespace Test
                 size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncA(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncA(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, size_t step, int16_t threshold, View & dst) const
             {

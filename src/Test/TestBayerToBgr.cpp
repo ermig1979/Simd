@@ -33,9 +33,9 @@ namespace Test
 		{
 			typedef void(*FuncPtr)(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride);
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, View & dst) const
 			{

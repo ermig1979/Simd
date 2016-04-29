@@ -32,12 +32,12 @@
 
 namespace Test
 {
-    std::string Data::Path(const std::string & name) const
+    String Data::Path(const String & name) const
     {
         return _path + "/" + name + ".txt";
     }
 
-    bool Data::CreatePath(const std::string & path) const
+    bool Data::CreatePath(const String & path) const
     {
 #if defined(_MSC_VER)
         if(!std::tr2::sys::exists(std::tr2::sys::path(path)))
@@ -60,12 +60,12 @@ namespace Test
 #endif
     }
 
-    template <class T> bool Data::SaveArray(const T * data, size_t size, const std::string & name) const
+    template <class T> bool Data::SaveArray(const T * data, size_t size, const String & name) const
     {
         if(!CreatePath(_path))
             return false;
 
-        std::string path = Path(name);
+        String path = Path(name);
         std::ofstream ofs(path);
         if(ofs.bad())
         {
@@ -100,9 +100,9 @@ namespace Test
         return true;
     }
 
-    template <class T> bool Data::LoadArray(T * data, size_t size, const std::string & name) const
+    template <class T> bool Data::LoadArray(T * data, size_t size, const String & name) const
     {
-        std::string path = Path(name);
+        String path = Path(name);
         std::ifstream ifs(path);
         if(ifs.bad())
         {
@@ -144,7 +144,7 @@ namespace Test
         return true;
     }
 
-    Data::Data(const std::string & test)
+    Data::Data(const String & test)
     {
         std::stringstream path;
         path << "../../test/";
@@ -160,12 +160,12 @@ namespace Test
         _path = path.str();
     }
 
-    bool Data::Save(const View & image, const std::string & name) const
+    bool Data::Save(const View & image, const String & name) const
     {
         if(!CreatePath(_path))
             return false;
 
-        std::string path = Path(name);
+        String path = Path(name);
         std::ofstream ofs(path);
         if(ofs.bad())
         {
@@ -235,9 +235,9 @@ namespace Test
         return true;
     }
 
-    bool Data::Load(View & image, const std::string & name) const
+    bool Data::Load(View & image, const String & name) const
     {
-        std::string path = Path(name);
+        String path = Path(name);
         std::ifstream ifs(path);
         if(ifs.bad())
         {
@@ -311,22 +311,22 @@ namespace Test
         return true;
     }
 
-    bool Data::Save(const uint64_t & value, const std::string & name) const
+    bool Data::Save(const uint64_t & value, const String & name) const
     {
         return SaveArray(&value, 1, name);
     }
 
-    bool Data::Load(uint64_t & value, const std::string & name) const
+    bool Data::Load(uint64_t & value, const String & name) const
     {
         return LoadArray(&value, 1, name);
     }
 
-    bool Data::Save(const int64_t & value, const std::string & name) const
+    bool Data::Save(const int64_t & value, const String & name) const
     {
         return SaveArray(&value, 1, name);
     }
 
-    bool Data::Load(int64_t & value, const std::string & name) const
+    bool Data::Load(int64_t & value, const String & name) const
     {
         uint64_t _value;
         bool result = LoadArray(&_value, 1, name);
@@ -334,23 +334,23 @@ namespace Test
         return result;
     }
 
-    bool Data::Save(const uint32_t & value, const std::string & name) const
+    bool Data::Save(const uint32_t & value, const String & name) const
     {
         return SaveArray(&value, 1, name);
     }
 
-    bool Data::Load(uint32_t & value, const std::string & name) const
+    bool Data::Load(uint32_t & value, const String & name) const
     {
         return LoadArray(&value, 1, name);
     }
 
-    bool Data::Save(const uint8_t & value, const std::string & name) const
+    bool Data::Save(const uint8_t & value, const String & name) const
     {
         uint32_t _value = value;
         return SaveArray(&_value, 1, name);
     }
 
-    bool Data::Load(uint8_t & value, const std::string & name) const
+    bool Data::Load(uint8_t & value, const String & name) const
     {
         uint32_t _value;
         bool result = LoadArray(&_value, 1, name);
@@ -358,87 +358,87 @@ namespace Test
         return result;
     }
 
-    bool Data::Save(const double & value, const std::string & name) const
+    bool Data::Save(const double & value, const String & name) const
     {
         return SaveArray(&value, 1, name);
     }
 
-    bool Data::Load(double & value, const std::string & name) const
+    bool Data::Load(double & value, const String & name) const
     {
         return LoadArray(&value, 1, name);
     }
 
-    bool Data::Save(const float & value, const std::string & name) const
+    bool Data::Save(const float & value, const String & name) const
     {
         return SaveArray(&value, 1, name);
     }
 
-    bool Data::Load(float & value, const std::string & name) const
+    bool Data::Load(float & value, const String & name) const
     {
         return LoadArray(&value, 1, name);
     }
 
-    bool Data::Save(const Sums & sums, const std::string & name) const
+    bool Data::Save(const Sums & sums, const String & name) const
     {
         return SaveArray(sums.data(), sums.size(), name);
     }
 
-    bool Data::Load(Sums & sums, const std::string & name) const
+    bool Data::Load(Sums & sums, const String & name) const
     {
         return LoadArray(sums.data(), sums.size(), name);
     }
 
-    bool Data::Save(const Histogram & histogram, const std::string & name) const
+    bool Data::Save(const Histogram & histogram, const String & name) const
     {
         return SaveArray(histogram, Simd::HISTOGRAM_SIZE, name);
     }
 
-    bool Data::Load(Histogram & histogram, const std::string & name) const
+    bool Data::Load(Histogram & histogram, const String & name) const
     {
         return LoadArray(histogram, Simd::HISTOGRAM_SIZE, name);
     }
 
-    bool Data::Save(const Sums64 & sums, const std::string & name) const
+    bool Data::Save(const Sums64 & sums, const String & name) const
     {
         return SaveArray(sums.data(), sums.size(), name);
     }
 
-    bool Data::Load(Sums64 & sums, const std::string & name) const
+    bool Data::Load(Sums64 & sums, const String & name) const
     {
         return LoadArray(sums.data(), sums.size(), name);
     }
 
-    bool Data::Save(const Rect & rect, const std::string & name) const
+    bool Data::Save(const Rect & rect, const String & name) const
     {
         return SaveArray((const ptrdiff_t *)&rect, 4, name);
     }
 
-    bool Data::Load(Rect & rect, const std::string & name) const
+    bool Data::Load(Rect & rect, const String & name) const
     {
         return LoadArray((ptrdiff_t *)&rect, 4, name);
     }
 
-    bool Data::Save(const std::vector<uint8_t> & data, const std::string & name) const
+    bool Data::Save(const std::vector<uint8_t> & data, const String & name) const
     {
         return SaveArray(data.data(), data.size(), name);
     }
 
-    bool Data::Load(std::vector<uint8_t> & data, const std::string & name) const
+    bool Data::Load(std::vector<uint8_t> & data, const String & name) const
     {
         return LoadArray(data.data(), data.size(), name);
     }
 
-    bool Data::Save(const Buffer32f & buffer, const std::string & name) const
+    bool Data::Save(const Buffer32f & buffer, const String & name) const
     {
         return SaveArray(buffer.data(), buffer.size(), name);
     }
 
-    bool Data::Load(Buffer32f & buffer, const std::string & name) const
+    bool Data::Load(Buffer32f & buffer, const String & name) const
     {
         return LoadArray(buffer.data(), buffer.size(), name);
     }
 
-    std::string Data::Description(SimdCompareType type)
+    String Data::Description(SimdCompareType type)
     {
         switch(type)
         {
@@ -459,7 +459,7 @@ namespace Test
         return "_Unknown";
     }
 
-    std::string Data::Description(SimdOperationBinary8uType type)
+    String Data::Description(SimdOperationBinary8uType type)
     {
         switch(type)
         {
@@ -478,7 +478,7 @@ namespace Test
         return "_Unknown";
     }
 
-    std::string Data::Description(SimdOperationBinary16iType type)
+    String Data::Description(SimdOperationBinary16iType type)
     {
         switch(type)
         {
@@ -491,7 +491,7 @@ namespace Test
         return "_Unknown";
     }
 
-    std::string Data::Description(View::Format format)
+    String Data::Description(View::Format format)
     {
         switch(format)
         {

@@ -36,9 +36,9 @@ namespace Test
 				size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, const View & bkg, double shiftX, double shiftY, 
 				size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst) const

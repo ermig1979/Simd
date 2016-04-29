@@ -49,7 +49,7 @@ namespace Test
 
     bool Compare(const View & a, const View & b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0, 
-		const std::string & description = "");
+		const String & description = "");
 
 	bool Compare(const Histogram a, const Histogram b, 
 		int differenceMax = 0, bool printError = false, int errorCountMax = 0);
@@ -68,21 +68,21 @@ namespace Test
 	
 	bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false);
 
-	std::string ColorDescription(View::Format format);
+	String ColorDescription(View::Format format);
 
-    std::string FormatDescription(View::Format format);
+    String FormatDescription(View::Format format);
 
-    std::string ScaleDescription(const Point & scale);
+    String ScaleDescription(const Point & scale);
 
-    std::string CompareTypeDescription(SimdCompareType type);
+    String CompareTypeDescription(SimdCompareType type);
 
-    std::string ExpandToLeft(const std::string & value, size_t count);
-    std::string ExpandToRight(const std::string & value, size_t count);
+    String ExpandToLeft(const String & value, size_t count);
+    String ExpandToRight(const String & value, size_t count);
 
-    std::string ToString(double value, size_t iCount, size_t fCount);
+    String ToString(double value, size_t iCount, size_t fCount);
 
-    bool Load(View & view, const std::string & path);
-    bool Save(const View & view, const std::string & path);
+    bool Load(View & view, const String & path);
+    bool Save(const View & view, const String & path);
 }
 
 #define TEST_CHECK_VALUE(name) \

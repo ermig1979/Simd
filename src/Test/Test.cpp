@@ -33,11 +33,11 @@ namespace Test
 
     struct Group
     {
-        std::string name;
+        String name;
         AutoTestPtr autoTest;
 		DataTestPtr dataTest;
 		SpecialTestPtr specialTest;
-        Group(const std::string & n, const AutoTestPtr & a, const DataTestPtr & d, const SpecialTestPtr & s)
+        Group(const String & n, const AutoTestPtr & a, const DataTestPtr & d, const SpecialTestPtr & s)
             : name(n)
             , autoTest(a)
             , dataTest(d)
@@ -317,9 +317,9 @@ namespace Test
 			Special,
 		} mode;
 
-		std::string filter;
+		Strings filters;
 
-		std::string output;
+		String output;
 
 		size_t threads;
 
@@ -330,7 +330,7 @@ namespace Test
 		{
 			for (int i = 1; i < argc; ++i)
 			{
-				std::string arg = argv[i];
+				String arg = argv[i];
                 if (arg.substr(0, 2) == "-h" || arg.substr(0, 2) == "-?")
                 {
                     help = true;
@@ -358,7 +358,7 @@ namespace Test
 				}
 				else if (arg.find("-f=") == 0)
 				{
-					filter = arg.substr(3, arg.size() - 3);
+					filters.push_back(arg.substr(3, arg.size() - 3));
 				}
 				else if (arg.find("-o=") == 0)
 				{
@@ -380,7 +380,18 @@ namespace Test
                 return false;
 			if (mode == Special && group.specialTest == NULL)
                 return false;
-            return filter.empty() || group.name.find(filter) != std::string::npos;
+            if (filters.empty())
+                return true;
+            bool required = false;
+            for (size_t i = 0; i < filters.size(); ++i)
+            {
+                if (group.name.find(filters[i]) != std::string::npos)
+                {
+                    required = true;
+                    break;
+                }
+            }
+            return required;
 		}
 	};
 
@@ -487,7 +498,8 @@ namespace Test
         std::cout << "-f=Sobel   - a filter. In current case will be tested only functions" << std::endl;
         std::cout << "             which contain word 'Sobel' in their names." << std::endl;
         std::cout << "             If you miss this parameter then full testing will be" << std::endl;
-        std::cout << "             performed." << std::endl << std::endl;
+        std::cout << "             performed. You can use several filters - function name" << std::endl;
+        std::cout << "             has to satisfy at least one of them. " << std::endl << std::endl;
         std::cout << "-o=log.txt - a file name with test report." << std::endl;
         std::cout << "             The test's report also will be output to console." << std::endl << std::endl;
         std::cout << "Also you can use parameter -h or -? to print this help message." << std::endl << std::endl;
@@ -511,7 +523,12 @@ int main(int argc, char* argv[])
             groups.push_back(group);
     if(groups.empty())
     {
-        TEST_LOG_SS(Error, "There are not any suitable tests for current filter '" << options.filter <<"'!" << std::endl); 
+        std::stringstream ss;
+        ss << "There are not any suitable tests for current filters: ";
+        for (size_t i = 0; i < options.filters.size(); ++i)
+            ss << "'" << options.filters[i] << "' ";
+        ss << "!" << std::endl;
+        TEST_LOG_SS(Error, ss.str()); 
         return 1;
     }
 

@@ -35,9 +35,9 @@ namespace Test
                 size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncHDH(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncHDH(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, const Point & cell, size_t quantization, float * histograms) const
             {

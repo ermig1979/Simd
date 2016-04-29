@@ -35,9 +35,9 @@ namespace Test
 				 uint8_t * background, size_t backgroundStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func1(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & backgroundSrc, View & backgroundDst) const
 			{
@@ -92,9 +92,9 @@ namespace Test
 				const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func2(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & backgroundValue,
 				const View & backgroundCountSrc, View & backgroundCountDst) const
@@ -153,9 +153,9 @@ namespace Test
 				 uint8_t * backgroundalue, size_t backgroundValueStride, uint8_t threshold);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func3(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func3(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & backgroundCountSrc, const View & backgroundValueSrc,  
 				View & backgroundCountDst, View & backgroundValueDst, uint8_t threshold) const
@@ -216,9 +216,9 @@ namespace Test
                 uint8_t * backgroundalue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func4(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & backgroundCountSrc, const View & backgroundValueSrc,  
                 View & backgroundCountDst, View & backgroundValueDst, uint8_t threshold, const View & mask) const
@@ -281,9 +281,9 @@ namespace Test
 				 uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			Func5(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			Func5(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & value, const View & backgroundSrc, View & backgroundDst, const View & mask) const
 			{

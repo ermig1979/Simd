@@ -64,7 +64,7 @@ namespace Test
 
 	//-------------------------------------------------------------------------
 
-	PerformanceMeasurer::PerformanceMeasurer(const std::string & description)
+	PerformanceMeasurer::PerformanceMeasurer(const String & description)
         : _description(description)
         , _count(0)
         , _total(0)
@@ -114,7 +114,7 @@ namespace Test
         return _count ? (_total / _count) : 0;
     }
 
-	std::string PerformanceMeasurer::Statistic() const
+	String PerformanceMeasurer::Statistic() const
     {
 		std::stringstream ss;
         ss << _description << ": ";
@@ -157,7 +157,7 @@ namespace Test
         return _map[std::this_thread::get_id()];
     }
 
-    PerformanceMeasurer* PerformanceMeasurerStorage::Get(std::string name)
+    PerformanceMeasurer* PerformanceMeasurerStorage::Get(String name)
     {
         Thread & thread = ThisThread();
         name = name + (thread.align ? "{a}" : "{u}");
@@ -180,7 +180,7 @@ namespace Test
         return thread.align ? SIMD_ALIGN : sizeof(void*);
     }
 
-    static std::string FunctionShortName(const std::string & description)
+    static String FunctionShortName(const String & description)
     {
         bool isApi = description.find("Simd::") == std::string::npos;
         if(isApi)
@@ -254,7 +254,7 @@ namespace Test
     typedef Statistic<Name> StatisticNames;
 
     template<class Printer> 
-    static std::string Print(const std::string & name, const Printer & printer, const StatisticEnable & enable, bool align)
+    static String Print(const String & name, const Printer & printer, const StatisticEnable & enable, bool align)
     {
         std::stringstream ss;
 
@@ -325,17 +325,17 @@ namespace Test
         HeaderPrinter(const StatisticNames & d, size_t a, size_t r, size_t f) 
             : data(d), average(a), relation(r), fraction(f) {}
 
-        std::string Average(const Name & a) const
+        String Average(const Name & a) const
         {
             return ExpandToLeft(std::string(a.full), average + fraction + 1);
         }
 
-        std::string Relation(const Name & a, const Name & b) const
+        String Relation(const Name & a, const Name & b) const
         {
             return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction + 1);
         }
 
-        std::string Alignment(const Name & a) const
+        String Alignment(const Name & a) const
         {
             return ExpandToLeft(std::string(a.brief) + ":U/A", relation + fraction + 1);
         }
@@ -349,17 +349,17 @@ namespace Test
         ValuePrinter(const Statistic<Value> & d, size_t a, size_t r, size_t f) 
             : data(d), average(a), relation(r), fraction(f) {}
 
-        std::string Average(const Value & a) const
+        String Average(const Value & a) const
         {
             return ToString(a.first.Average()*1000.0, average, fraction);
         }
 
-        std::string Relation(const Value & a, const Value & b) const
+        String Relation(const Value & a, const Value & b) const
         {
             return ToString(Test::Relation(a.first, b.first), relation, fraction);
         }
 
-        std::string Alignment(const Value & a) const
+        String Alignment(const Value & a) const
         {
             return ToString(Test::Relation(a.second, a.first), relation, fraction);
         }
@@ -367,7 +367,7 @@ namespace Test
 
     static inline bool AddToFunction(const PerformanceMeasurer & src, Function & dst)
     {
-        const std::string & desc = src.Description();
+        const String & desc = src.Description();
         bool align = desc[desc.size() - 2] == 'a';
         (align ? dst.first : dst.second) = src; 
         return true;
@@ -375,7 +375,7 @@ namespace Test
 
     static inline void AddToFunction(const PerformanceMeasurer & src, FunctionStatistic & dst, StatisticEnable & enable)
     {
-        const std::string & desc = src.Description();
+        const String & desc = src.Description();
         if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
             enable.simd = AddToFunction(src, dst.simd);
         if(desc.find("Simd::Base::") != std::string::npos)
@@ -423,7 +423,7 @@ namespace Test
 		if(enable.neon) Add(Cond(s.neon, s.base), d.neon);
 	}
 
-    std::string PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
+    String PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
     {
         FunctionMap map;
         {
@@ -448,7 +448,7 @@ namespace Test
         for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
             const PerformanceMeasurer & pm = *it->second;
-            std::string name = FunctionShortName(pm.Description());
+            String name = FunctionShortName(pm.Description());
             AddToFunction(pm, functions[name], enable);
             timeMax = std::max(timeMax, pm.Average());
             sizeMax = std::max(name.size(), sizeMax);
@@ -462,7 +462,7 @@ namespace Test
         const size_t relative = 3;
         const size_t fraction = 3;
 
-        std::string header = Print(ExpandToRight("Function", sizeMax), HeaderPrinter(names, average, relative, fraction), enable, align);
+        String header = Print(ExpandToRight("Function", sizeMax), HeaderPrinter(names, average, relative, fraction), enable, align);
 
         std::vector<std::string> statistics;
         for(FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)

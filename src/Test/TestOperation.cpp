@@ -35,9 +35,9 @@ namespace Test
 				size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncOB8U(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncOB8U(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & a, const View & b, View & dst, SimdOperationBinary8uType type) const
 			{
@@ -52,9 +52,9 @@ namespace Test
                 size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncOB16I(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncOB16I(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & a, const View & b, View & dst, SimdOperationBinary16iType type) const
             {
@@ -68,9 +68,9 @@ namespace Test
             typedef void (*FuncPtr)(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncVP(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncVP(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & v, const View & h, View & dst) const
             {
@@ -80,7 +80,7 @@ namespace Test
         };
 	}
 
-    SIMD_INLINE std::string OperationBinary8uTypeDescription(SimdOperationBinary8uType type)
+    SIMD_INLINE String OperationBinary8uTypeDescription(SimdOperationBinary8uType type)
     {
         switch(type)
         {
@@ -101,7 +101,7 @@ namespace Test
 		return "<Unknown";
     }
 
-    SIMD_INLINE std::string OperationBinary16iTypeDescription(SimdOperationBinary16iType type)
+    SIMD_INLINE String OperationBinary16iTypeDescription(SimdOperationBinary16iType type)
     {
         switch(type)
         {
@@ -383,7 +383,7 @@ namespace Test
         {
             for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                std::string description = f.description + Data::Description(type) + Data::Description(format);
+                String description = f.description + Data::Description(type) + Data::Description(format);
                 result = result && OperationBinary8uDataTest(create, DW, DH, format, type, FuncOB8U(f.func, description));
             }
         }
@@ -438,7 +438,7 @@ namespace Test
         FuncOB16I f = FUNC_OB16I(SimdOperationBinary16i);
         for(SimdOperationBinary16iType type = SimdOperationBinary16iAddition; type <= SimdOperationBinary16iSubtraction && result; type = SimdOperationBinary16iType(type + 1))
         {
-            std::string description = f.description + Data::Description(type);
+            String description = f.description + Data::Description(type);
             result = result && OperationBinary16iDataTest(create, DW, DH, type, FuncOB16I(f.func, description));
         }
 

@@ -65,6 +65,8 @@
 
 namespace Test
 {
+    typedef std::string String;
+    typedef std::vector<String> Strings;
 	typedef Simd::View<Simd::Allocator> View;
     typedef Simd::Point<ptrdiff_t> Point;
 	typedef Point Size;

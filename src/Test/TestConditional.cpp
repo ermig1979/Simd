@@ -35,9 +35,9 @@ namespace Test
                 uint8_t value, SimdCompareType compareType, uint32_t * count);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncC8U(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncC8U(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, uint8_t value, SimdCompareType compareType, uint32_t & count) const
             {
@@ -127,9 +127,9 @@ namespace Test
                 int16_t value, SimdCompareType compareType, uint32_t * count);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncC16I(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncC16I(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, int16_t value, SimdCompareType compareType, uint32_t & count) const
             {
@@ -219,9 +219,9 @@ namespace Test
                 const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
             FuncPtr func;
-            std::string description;
+            String description;
 
-            FuncS(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+            FuncS(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
             void Call(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint64_t & sum) const
             {
@@ -371,9 +371,9 @@ namespace Test
 				uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
 			FuncPtr func;
-			std::string description;
+			String description;
 
-			FuncF(const FuncPtr & f, const std::string & d) : func(f), description(d) {}
+			FuncF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, const View & dstSrc, View & dstDst) const
 			{
