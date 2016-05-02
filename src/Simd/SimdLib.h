@@ -548,6 +548,32 @@ extern "C"
 	*/
 	SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
 
+    /*! @ingroup ann
+
+        \fn void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+        \short Updates ANN weights.
+
+        All arrays must have the same size.
+
+        The algorithm performs:
+        \verbatim
+        for (size_t k = 0; k < size; ++k)
+        {
+            d[k] = a[0]*d[k] + b[0]*x[k];
+            w[k] += d[k];
+        }
+        \endverbatim
+
+        \param [in] x - a pointer to the X array.
+        \param [in] size - a size of arrays.
+        \param [in] a - a pointer to the first parameter.
+        \param [in] b - a pointer to the second parameter.
+        \param [in/out] d - a pointer to the D array.
+        \param [in/out] w - a pointer to the W array.
+    */
+    SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
     /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);

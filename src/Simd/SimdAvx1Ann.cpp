@@ -108,6 +108,56 @@ namespace Simd
 			else
 				AnnRoughSigmoid<false>(src, size, slope, dst);
 		}
+
+
+        template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const __m256 & a, const __m256 & b, float * d, float * w)
+        {
+            __m256 _d = _mm256_add_ps(_mm256_mul_ps(a, Load<align>(d)), _mm256_mul_ps(b, Load<align>(x)));
+            Store<align>(d, _d);
+            Store<align>(w, _mm256_add_ps(Load<align>(w), _d));
+        }
+
+        template <bool align> SIMD_INLINE void UpdateWeights(const float * x, size_t offset, const __m256 & a, const __m256 & b, float * d, float * w)
+        {
+            UpdateWeights<align>(x + offset, a, b, d + offset, w + offset);
+        }
+
+        template <bool align> SIMD_INLINE void AnnUpdateWeights(const float * x, size_t size, const float & a, const float & b, float * d, float * w)
+        {
+            if (align)
+                assert(Aligned(x) && Aligned(d) && Aligned(w));
+
+            size_t partialAlignedSize = AlignLo(size, 8);
+            size_t fullAlignedSize = AlignLo(size, 32);
+            __m256 _a = _mm256_set1_ps(a);
+            __m256 _b = _mm256_set1_ps(b);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += 32)
+                    {
+                        UpdateWeights<align>(x, i + 0, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + 8, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + 16, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + 24, _a, _b, d, w);
+                    }
+                }
+                for (; i < partialAlignedSize; i += 8)
+                    UpdateWeights<align>(x, i, _a, _b, d, w);
+            }
+            for (; i < size; ++i)
+                Base::UpdateWeights(x, i, a, b, d, w);
+        }
+
+        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+        {
+            if (Aligned(x) && Aligned(d) && Aligned(w))
+                AnnUpdateWeights<true>(x, size, *a, *b, d, w);
+            else
+                AnnUpdateWeights<false>(x, size, *a, *b, d, w);
+        }
     }
 #endif// SIMD_AVX_ENABLE
 }

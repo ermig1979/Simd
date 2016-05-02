@@ -78,5 +78,21 @@ namespace Simd
 			for (size_t i = 0; i < size; ++i)
 				dst[i] = RoughSigmoid(src[i] * s);
 		}
+
+        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+        {
+            float _a = a[0], _b = b[0];
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                UpdateWeights(x, i + 0, _a, _b, d, w);
+                UpdateWeights(x, i + 1, _a, _b, d, w);
+                UpdateWeights(x, i + 2, _a, _b, d, w);
+                UpdateWeights(x, i + 3, _a, _b, d, w);
+            }
+            for (; i < size; ++i)
+                UpdateWeights(x, i, _a, _b, d, w);
+        }
     }
 }

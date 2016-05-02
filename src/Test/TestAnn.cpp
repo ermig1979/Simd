@@ -299,6 +299,88 @@ namespace Test
 		return result;
 	}
 
+    namespace
+    {
+        struct FuncUW
+        {
+            typedef void(*FuncPtr)(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+            FuncPtr func;
+            String description;
+
+            FuncUW(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & x, float a, float b, const View & d, const View & w, View & dDst, View & wDst) const
+            {
+                Simd::Copy(d, dDst);
+                Simd::Copy(w, wDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)x.data, x.width, &a, &b, (float*)dDst.data, (float*)wDst.data);
+            }
+        };
+    }
+#define FUNC_UW(function) FuncUW(function, #function)
+
+    bool AnnUpdateWeightsAutoTest(int size, float error, bool relative, const FuncUW & f1, const FuncUW & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View x(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View d(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View w(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(x, -10.0f, 10.0f);
+        FillRandom32f(d, -10.0f, 10.0f);
+        FillRandom32f(w, -10.0f, 10.0f);
+
+        float a = 2.0, b = 3.0;
+
+        View dDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View wDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View wDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(x, a, b, d, w, dDst1, wDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(x, a, b, d, w, dDst2, wDst2));
+
+        result = result && Compare(dDst1, dDst2, error, true, 32, relative, "d");
+        result = result && Compare(wDst1, wDst2, error, true, 32, relative, "w");
+
+        return result;
+    }
+
+    bool AnnUpdateWeightsAutoTest(float error, bool relative, const FuncUW & f1, const FuncUW & f2)
+    {
+        bool result = true;
+
+        result = result && AnnUpdateWeightsAutoTest(W*H, error, relative, f1, f2);
+        result = result && AnnUpdateWeightsAutoTest(W*H + O, error, relative, f1, f2);
+        result = result && AnnUpdateWeightsAutoTest(W*H - O, error, relative, f1, f2);
+
+        return result;
+    }
+
+    bool AnnUpdateWeightsAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Base::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Sse::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Avx::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
 	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC & f)
@@ -459,4 +541,68 @@ namespace Test
 
 		return result;
 	}
+
+    bool AnnUpdateWeightsDataTest(bool create, int size, float error, bool relative, const FuncUW & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        View x(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View d(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View w(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        float a = 3.0, b = 5.0;
+
+        View dDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View wDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View wDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(x, -10.0f, 10.0f);
+            FillRandom32f(d, -10.0f, 10.0f);
+            FillRandom32f(w, -10.0f, 10.0f);
+
+            TEST_SAVE(x);
+            TEST_SAVE(d);
+            TEST_SAVE(w);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(x, a, b, d, w, dDst1, wDst1));
+
+            TEST_SAVE(dDst1);
+            TEST_SAVE(wDst1);
+        }
+        else
+        {
+            TEST_LOAD(x);
+            TEST_LOAD(d);
+            TEST_LOAD(w);
+
+            TEST_LOAD(dDst1);
+            TEST_LOAD(wDst1);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(x, a, b, d, w, dDst2, wDst2));
+
+            TEST_SAVE(dDst2);
+            TEST_SAVE(wDst2);
+
+            result = Compare(dDst1, dDst2, error, true, 32, relative);
+            result = Compare(wDst1, wDst2, error, true, 32, relative);
+        }
+
+        return result;
+    }
+
+    bool AnnUpdateWeightsDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnUpdateWeightsDataTest(create, DH, EPS, true, FUNC_UW(SimdAnnUpdateWeights));
+
+        return result;
+    }
 }

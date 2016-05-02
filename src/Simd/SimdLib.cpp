@@ -382,6 +382,14 @@ SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * 
 	simdAnnRoughSigmoid(src, size, slope, dst);
 }
 
+typedef void(*SimdAnnUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+SimdAnnUpdateWeightsPtr simdAnnUpdateWeights = SIMD_FUNC2(AnnUpdateWeights, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+{
+    simdAnnUpdateWeights(x, size, a, b, d, w);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

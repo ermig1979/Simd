@@ -207,6 +207,13 @@ namespace Simd
 			float e = 1.0f + x + x2*0.555f + x2*x2*0.143f;
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
 		}
+
+        SIMD_INLINE void UpdateWeights(const float * x, size_t offset, float a, float b, float * d, float * w)
+        {
+            float _d = a*d[offset] + b*x[offset];
+            d[offset] = _d;
+            w[offset] += _d;
+        }
 	}
 
 #ifdef SIMD_SSE_ENABLE

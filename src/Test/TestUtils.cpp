@@ -262,7 +262,8 @@ namespace Test
         return result;
     }
 
-    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative)
+    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, 
+        int errorCountMax, bool relative, const String & description)
     {
         std::stringstream message;
         int errorCount = 0;
@@ -275,7 +276,7 @@ namespace Test
                 if(printError)
                 {
                     if(errorCount == 1)
-                        message << std::endl << "Fail comparison: " << std::endl;
+                        message << std::endl << "Fail comparison: " << description << std::endl;
                     message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
                 }
                 if(errorCount > errorCountMax)
@@ -291,21 +292,21 @@ namespace Test
         return errorCount == 0;
     }
 
-    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax)
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax, true);
+        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax, true, description);
     }
 
-	bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative)
+	bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
 	{
 		assert(a.width == b.width);
-		return Compare((float*)a.data, (float*)b.data, a.width, relativeDifferenceMax, printError, errorCountMax, relative);
+		return Compare((float*)a.data, (float*)b.data, a.width, relativeDifferenceMax, printError, errorCountMax, relative, description);
 	}
 
-    bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError)
+    bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError, const String & description)
     {
-        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0, true);
+        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0, true, description);
     }
     
 	String ColorDescription(View::Format format)
