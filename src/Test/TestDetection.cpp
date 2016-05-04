@@ -485,17 +485,26 @@ namespace Test
         typedef Simd::Detection<Simd::Allocator> Detection;
         typedef Detection::Objects Objects;
 
+        double time;
         Detection detection;
 
+        time = GetTime();
         detection.Load("../../data/cascade/haar_face_0.xml", 0);
-        detection.Load("../../data/cascade/haar_face_1.xml", 0);
-        detection.Load("../../data/cascade/lbp_face.xml", 0);
+        //detection.Load("../../data/cascade/haar_face_1.xml", 1);
+        //detection.Load("../../data/cascade/lbp_face.xml", 2);
+        TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms ");
 
         View src = GetSample(Size(W, H), true);
-        detection.Init(src.Size(), 1.1, Size(40, 40), Size(55, 55));
+
+        time = GetTime();
+        detection.Init(src.Size(), 1.1, Size(), Size(INT_MAX, INT_MAX), View(), -1);
+        TEST_LOG_SS(Info, "Init: " << (GetTime() - time) * 1000 << " ms ");
 
         Objects objects;
+
+        time = GetTime();
         detection.Detect(src, objects);
+        TEST_LOG_SS(Info, "Detect: " << (GetTime() - time) * 1000 << " ms ");
 
         for (size_t i = 0; i < objects.size(); ++i)
         {
