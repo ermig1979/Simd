@@ -33,6 +33,15 @@
 
 namespace Test
 {
+    static void TestPoint()
+    {
+        typedef Simd::Point<ptrdiff_t> Point;
+        typedef Simd::Point<double> FPoint;
+
+        Point p(1.4, 2.6);
+        FPoint fp(1.4, 3.6);
+    }
+
     static void TestView()
     {
         typedef Simd::View<Simd::Allocator> View;
@@ -59,6 +68,8 @@ namespace Test
 
     static void CheckCpp()
     {
+        TestPoint();
+
         TestView();
 
         TestFrame();

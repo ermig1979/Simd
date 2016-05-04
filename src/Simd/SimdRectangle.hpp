@@ -519,19 +519,19 @@ namespace Simd
 
 	template <typename T> template <typename TL, typename TT, typename TR, typename TB> 
 	SIMD_INLINE Rectangle<T>::Rectangle(TL l, TT t, TR r, TB b)  
-		: left((T)l)
-		, top((T)t)
-		, right((T)r)
-		, bottom((T)b)
+		: left(Convert<T, TL>(l))
+		, top(Convert<T, TT>(t))
+		, right(Convert<T, TR>(r))
+		, bottom(Convert<T, TB>(b))
 	{
 	}
 
 	template <typename T> template <typename TLT, typename TRB> 
 	SIMD_INLINE Rectangle<T>::Rectangle(const Point<TLT> & lt, const Point<TRB> & rb)
-		: left((T)lt.x)
-		, top((T)lt.y)
-		, right((T)rb.x)
-		, bottom((T)rb.y)
+		: left(Convert<T, TLT>(lt.x))
+		, top(Convert<T, TLT>(lt.y))
+		, right(Convert<T, TRB>(rb.x))
+		, bottom(Convert<T, TRB>(rb.y))
 	{
 	}
 
@@ -539,27 +539,27 @@ namespace Simd
 	SIMD_INLINE Rectangle<T>::Rectangle(const Point<TRB> & rb)
 		: left(0)
 		, top(0)
-		, right((T)rb.x)
-		, bottom((T)rb.y)
-	{
+        , right(Convert<T, TRB>(rb.x))
+        , bottom(Convert<T, TRB>(rb.y))
+    {
 	}
 
 	template <typename T> template <class TR, template<class> class TRectangle> 
 	SIMD_INLINE Rectangle<T>::Rectangle(const TRectangle<TR> & r)
-		: left((T)r.left)
-		, top((T)r.top)
-		, right((T)r.right)
-		, bottom((T)r.bottom)
+		: left(Convert<T, TR>(r.left))
+		, top(Convert<T, TR>(r.top))
+		, right(Convert<T, TR>(r.right))
+		, bottom(Convert<T, TR>(r.bottom))
 	{
 	}
 
 #ifdef SIMD_OPENCV_ENABLE
     template <typename T> template <class TR>
     SIMD_INLINE Rectangle<T>::Rectangle(const cv::Rect_<TR> & r)
-        : left((T)r.x)
-        , top((T)r.y)
-        , right((T)(r.x + r.width))
-        , bottom((T)(r.y + r.height))
+        : left(Convert<T, TR>(r.x))
+        , top(Convert<T, TR>(r.y))
+        , right(Convert<T, TR>(r.x + r.width))
+        , bottom(Convert<T, TR>(r.y + r.height))
     {
     }
 #endif
@@ -572,24 +572,26 @@ namespace Simd
     template <typename T> template <class TR, template<class> class TRectangle> 
     SIMD_INLINE Rectangle<T>::operator TRectangle<TR>() const
     {
-        return TRectangle<TR>((TR)left, (TR)top, (TR)right, (TR)bottom);
+        return TRectangle<TR>(Convert<TR, T>(left), Convert<TR, T>(top), 
+            Convert<TR, T>(right), Convert<TR, T>(bottom));
     }
 
 #ifdef SIMD_OPENCV_ENABLE
     template <typename T> template <class TR>
     SIMD_INLINE Rectangle<T>::operator cv::Rect_<TR>() const
     {
-        return cv::Rect_<TR>((TR)left, (TR)top, (TR)(right - left), (TR)(bottom - top));
+        return cv::Rect_<TR>(Convert<TR, T>(left), Convert<TR, T>(top),
+            Convert<TR, T>(right - left), Convert<TR, T>(bottom - top));
     }
 #endif
 
 	template <typename T> template <typename TR> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::operator = (const Rectangle<TR> & r)
 	{
-		left = (T)r.left;
-		top = (T)r.top;
-		right = (T)r.right;
-		bottom = (T)r.bottom;
+		left = Convert<T, TR>(r.left);
+		top = Convert<T, TR>(r.top);
+		right = Convert<T, TR>(r.right);
+		bottom = Convert<T, TR>(r.bottom);
 		return *this;
 	}
 
@@ -597,10 +599,10 @@ namespace Simd
     template <typename T> template <class TR>
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator = (const cv::Rect_<TR> & r)
     {
-        left = (T)r.x;
-        top = (T)r.y;
-        right = (T)(r.x + r.width);
-        bottom = (T)(r.y + r.height);
+        left = Convert<T, TR>(r.x);
+        top = Convert<T, TR>(r.y);
+        right = Convert<T, TR>(r.x + r.width);
+        bottom = Convert<T, TR>(r.y + r.height);
         return *this;
     }
 #endif
@@ -608,60 +610,60 @@ namespace Simd
     template <typename T> template <typename TL> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetLeft(const TL & l)
     {
-        left = (T)l;
+        left = Convert<T, TL>(l);
         return *this;
     }
 
     template <typename T> template <typename TT> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetTop(const TT & t)
     {
-        top = (T)t;
+        top = Convert<T, TT>(t);
         return *this;
     }
 
     template <typename T> template <typename TR> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetRight(const TR & r)
     {
-        right = (T)r;
+        right = Convert<T, TR>(r);
         return *this;
     }
 
     template <typename T> template <typename TB> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::SetBottom(const TB & b)
     {
-        bottom = (T)b;
+        bottom = Convert<T, TB>(b);
         return *this;
     }
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::SetTopLeft(const Point<TP> & topLeft)
 	{
-		left = (T)topLeft.x;
-		top = (T)topLeft.y;
+		left = Convert<T, TP>(topLeft.x);
+		top = Convert<T, TP>(topLeft.y);
 		return *this;
 	}
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::SetTopRight(const Point<TP> & topRight)
 	{
-		right = (T)topRight.x;
-		top = (T)topRight.y;
+		right = Convert<T, TP>(topRight.x);
+		top = Convert<T, TP>(topRight.y);
 		return *this;
 	}
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::SetBottomLeft(const Point<TP> & bottomLeft)
 	{
-		left = (T)bottomLeft.x;
-		bottom = (T)bottomLeft.y;
+		left = Convert<T, TP>(bottomLeft.x);
+		bottom = Convert<T, TP>(bottomLeft.y);
 		return *this;
 	}
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::SetBottomRight(const Point<TP> & bottomRight)
 	{
-		right = (T)bottomRight.x;
-		bottom = (T)bottomRight.y;
+		right = Convert<T, TP>(bottomRight.x);
+		bottom = Convert<T, TP>(bottomRight.y);
 		return *this;
 	}
 
@@ -746,13 +748,14 @@ namespace Simd
 	template <typename T> 
 	SIMD_INLINE Point<T> Rectangle<T>::Center() const
 	{
-		return Point<T>((left + right)/2, (top + bottom)/2);
+		return Point<T>((left + right)/2.0, (top + bottom)/2.0);
 	}
 
 	template <typename T> template <typename TX, typename TY> 
 	SIMD_INLINE bool Rectangle<T>::Contains(TX x, TY y) const
 	{
-		return (T)x >= left && (T)x < right && (T)y >= top && (T)y < bottom;
+        Point<T> p(x, y); 
+        return p.x >= left && p.x < right && p.y >= top && p.y < bottom;
 	}
 
 	template <typename T> template <typename TP> 
@@ -764,7 +767,8 @@ namespace Simd
 	template <typename T> template <typename TL, typename TT, typename TR, typename TB> 
 	SIMD_INLINE bool Rectangle<T>::Contains(TL l, TT t, TR r, TB b) const
 	{
-		return (T)l >= left && (T)r <= right && (T)t >= top && (T)b <= bottom;
+        Rectangle<T> rect(l, t, r, b);
+		return rect.left >= left && rect.right <= right && rect.top >= top && rect.bottom <= bottom;
 	}
 
 	template <typename T> template <typename TR> 
@@ -782,10 +786,11 @@ namespace Simd
 	template <typename T> template <typename TX, typename TY> 
 	SIMD_INLINE Rectangle<T> & Rectangle<T>::Shift(TX shiftX, TY shiftY)
 	{
-		left += (T)shiftX;
-		top += (T)shiftY;
-		right += (T)shiftX;
-		bottom += (T)shiftY;
+        Point<T> shift(shiftX, shiftY);
+		left += shift.x;
+		top += shift.y;
+		right += shift.x;
+		bottom += shift.y;
 		return *this;
 	}
 
@@ -798,38 +803,42 @@ namespace Simd
     template <typename T> template <typename TX, typename TY> 
     SIMD_INLINE Rectangle<T> Rectangle<T>::Shifted(TX shiftX, TY shiftY) const
     {
-        return Rectangle<T>(left + (T)shiftX, top + (T)shiftY, right + (T)shiftX, bottom + (T)shiftY);
+        Point<T> shift(shiftX, shiftY);
+        return Rectangle<T>(left + shift.x, top + shift.y, right + shift.x, bottom + shift.y);
     }
 
     template <typename T> template <typename TB> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::AddBorder(TB border)
     {
-        left -= (T)border;
-        top -= (T)border;
-        right += (T)border;
-        bottom += (T)border;
+        T _border = Convert<T, TB>(border);
+        left -= _border;
+        top -= _border;
+        right += _border;
+        bottom += _border;
         return *this;
     }
 
     template <typename T> template <typename TR> 
     SIMD_INLINE Rectangle<T> Rectangle<T>::Intersection(const Rectangle<TR> & rect) const
     {
-        T l = std::max<T>(left, rect.left);
-        T t = std::max<T>(top, rect.top);
-        T r = std::max<T>(l, std::min<T>(right, rect.right));
-        T b = std::max<T>(t, std::min<T>(bottom, rect.bottom));
+        Rectangle<T> _rect(rect);
+        T l = std::max(left, _rect.left);
+        T t = std::max(top, _rect.top);
+        T r = std::max(l, std::min(right, _rect.right));
+        T b = std::max(t, std::min(bottom, _rect.bottom));
         return Rectangle(l, t, r, b);
     }
 
     template <typename T> template <typename TP> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator &= (const Point<TP> & p)
     {
-        if (Contains(p))
+        Point<T> _p(p);
+        if (Contains(_p))
         {
-            left = (T)p.x;
-            top = (T)p.y;
-            right = (T)p.x + (T)1;
-            bottom = (T)p.y + (T)1;
+            left = _p.x;
+            top = _p.y;
+            right = _p.x + 1;
+            bottom = _p.y + 1;
         }
         else
         {
@@ -847,37 +856,39 @@ namespace Simd
         if(r.Empty())
             return this->operator=(r);
 
-        if (left < (T)r.left)
-            left = (T)r.left;
-        if (top < (T)r.top)
-            top = (T)r.top;
-        if (right > (T)r.right)
-            right = (T)r.right;
-        if (bottom > (T)r.bottom)
-            bottom = (T)r.bottom;
+        Rectangle<T> _r(r);
+        if (left < _r.left)
+            left = _r.left;
+        if (top < _r.top)
+            top = _r.top;
+        if (right > _r.right)
+            right = _r.right;
+        if (bottom > _r.bottom)
+            bottom = _r.bottom;
         return *this;
     }
 
     template <typename T> template <typename TP> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator |= (const Point<TP> & p)
     {
+        Point<T> _p(p);
         if (Empty())
         {
-            left = (T)p.x;
-            top = (T)p.y;
-            right = (T)p.x + (T)1;
-            bottom = (T)p.y + (T)1;
+            left = _p.x;
+            top = _p.y;
+            right = _p.x + 1;
+            bottom = _p.y + 1;
         }
         else
         {
-            if (left > (T)p.x)
-                left = (T)p.x;
-            if (top > (T)p.y)
-                top = (T)p.y;
-            if (right <= (T)p.x)
-                right = (T)p.x + (T)1;
-            if (bottom <= (T)p.y)
-                bottom = (T)p.y + (T)1;
+            if (left > _p.x)
+                left = _p.x;
+            if (top > _p.y)
+                top = _p.y;
+            if (right <= _p.x)
+                right = _p.x + 1;
+            if (bottom <= _p.y)
+                bottom = _p.y + 1;
         }
         return *this;
     }
@@ -885,10 +896,10 @@ namespace Simd
     template <typename T> template <typename TR>
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator += (const Rectangle<TR> & r)
     {
-        left += (T)r.left;
-        top += (T)r.top;
-        right += (T)r.right;
-        bottom += (T)r.bottom;
+        left += Convert<T, TR>(r.left);
+        top += Convert<T, TR>(r.top);
+        right += Convert<T, TR>(r.right);
+        bottom += Convert<T, TR>(r.bottom);
         return *this;
     }
 
@@ -919,19 +930,19 @@ namespace Simd
     template<class T1, class T2>
     SIMD_INLINE Rectangle<T1> operator / (const Rectangle<T1> & rect, const T2 & value)
     {
-        return Rectangle<T1>((T1)(rect.left/value), (T1)(rect.top/value), (T1)(rect.right/value), (T1)(rect.bottom/value));
+        return Rectangle<T1>(rect.left/value, rect.top/value, rect.right/value, rect.bottom/value);
     }
 
     template<class T1, class T2>
     SIMD_INLINE Rectangle<T1> operator * (const Rectangle<T1> & rect, const T2 & value)
     {
-        return Rectangle<T1>((T1)(rect.left*value), (T1)(rect.top*value), (T1)(rect.right*value), (T1)(rect.bottom*value));
+        return Rectangle<T1>(rect.left*value, rect.top*value, rect.right*value, rect.bottom*value);
     }
 
     template<class T1, class T2>
     SIMD_INLINE Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect)
     {
-        return Rectangle<T1>((T1)(rect.left*value), (T1)(rect.top*value), (T1)(rect.right*value), (T1)(rect.bottom*value));
+        return Rectangle<T1>(rect.left*value, rect.top*value, rect.right*value, rect.bottom*value);
     }
 }
 #endif//__SimdRectangle_hpp__

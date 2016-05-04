@@ -61,6 +61,8 @@ namespace Simd
 		return a*a;
 	}
 
+#ifndef SIMD_ROUND
+#define SIMD_ROUND
     SIMD_INLINE int Round(double value)
     {
 #if defined(SIMD_SSE2_ENABLE) && ((defined(_MSC_VER) && defined(_M_X64)) || (defined(__GNUC__) && defined(__x86_64__)))
@@ -70,6 +72,7 @@ namespace Simd
         return (int)(value + (value >= 0 ? 0.5 : -0.5));
 #endif
     }
+#endif
 
     namespace Base
     {

@@ -327,6 +327,32 @@ namespace Simd
 
 	// struct Point<T> implementation:
 
+#ifndef SIMD_ROUND
+#define SIMD_ROUND
+    SIMD_INLINE int Round(double value)
+    {
+        return (int)(value + (value >= 0 ? 0.5 : -0.5));
+    }
+#endif
+
+    template <class TD, class TS>
+    SIMD_INLINE TD Convert(TS src)
+    {
+        return (TD)src;
+    }
+
+    template <>
+    SIMD_INLINE ptrdiff_t Convert<ptrdiff_t, double>(double src)
+    {
+        return Round(src);
+    }
+
+    template <>
+    SIMD_INLINE ptrdiff_t Convert<ptrdiff_t, float>(float src)
+    {
+        return Round(src);
+    }
+
 	template <typename T> 
 	SIMD_INLINE Point<T>::Point()
 		: x(0)
@@ -336,23 +362,23 @@ namespace Simd
 
 	template <typename T> template <typename TX, typename TY> 
 	SIMD_INLINE Point<T>::Point(TX tx, TY ty)  
-		: x((T)tx)
-		, y((T)ty) 
+		: x(Convert<T, TX>(tx))
+		, y(Convert<T, TY>(ty))
 	{
 	}
 
     template <typename T> template <class TP, template<class> class TPoint> 
 	SIMD_INLINE Point<T>::Point(const TPoint<TP> & p)
-        : x((T)p.x)
-        , y((T)p.y) 
+        : x(Convert<T, TP>(p.x))
+        , y(Convert<T, TP>(p.y))
     {
     }
 
 #ifdef SIMD_OPENCV_ENABLE
     template <typename T> template <class TS>
     SIMD_INLINE Point<T>::Point(const cv::Size_<TS> & size)
-        : x((T)size.width)
-        , y((T)size.height)
+        : x(Convert<T, TS>(size.width))
+        , y(Convert<T, TS>(size.height))
     {
     }
 #endif
@@ -365,46 +391,46 @@ namespace Simd
     template <typename T> template <class TP, template<class> class TPoint> 
     SIMD_INLINE Point<T>::operator TPoint<TP>() const
     {
-        return TPoint<TP>((TP)x, (TP)y);
+        return TPoint<TP>(Convert<TP, T>(x), Convert<TP, T>(y));
     }
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Point<T> & Point<T>::operator = (const Point<TP> & p) 
 	{
-		 x = (T)p.x; 
-		 y = (T)p.y; 
+		 x = Convert<T, TP>(p.x);
+		 y = Convert<T, TP>(p.y);
 		 return *this; 
 	}
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Point<T> & Point<T>::operator += (const Point<TP> & p) 
 	{
-		x += (T)p.x; 
-		y += (T)p.y; 
+		x += Convert<T, TP>(p.x);
+		y += Convert<T, TP>(p.y);
 		return *this; 
 	}
 
 	template <typename T> template <typename TP> 
 	SIMD_INLINE Point<T> & Point<T>::operator -= (const Point<TP> & p) 
 	{
-		x -= (T)p.x; 
-		y -= (T)p.y; 
+		x -= Convert<T, TP>(p.x);
+		y -= Convert<T, TP>(p.y);
 		return *this; 
 	}
 
 	template <typename T> template <typename TA> 
 	SIMD_INLINE Point<T> & Point<T>::operator *= (const TA & a) 
 	{
-		x = (T)(x*a); 
-		y = (T)(y*a); 
+		x = Convert<T, TA>(x*a);
+		y = Convert<T, TA>(y*a);
 		return *this; 
 	}
 
 	template <typename T> 
 	SIMD_INLINE Point<T> & Point<T>::operator /= (double a) 
 	{
-		x = (T)(x/a); 
-		y = (T)(y/a); 
+		x = Convert<T, double>(x/a);
+		y = Convert<T, double>(y/a);
 		return *this; 
 	}
 
