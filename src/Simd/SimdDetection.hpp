@@ -225,7 +225,7 @@ namespace Simd
                 {
                     Hid & hid = level.hids[j];
 
-                    hid.Detect(mask, level.rect, level.dst, _workers);
+                    hid.Detect(mask, level.rect, level.dst, _workers, level.throughColumn);
 
                     AddObjects(candidates[hid.data->tag], level.dst, level.rect, hid.data->size, level.scale,
                         level.throughColumn ? 2 : 1, hid.data->tag);
@@ -268,7 +268,7 @@ namespace Simd
             Data * data;
             DetectPtr detect;
 
-            void Detect(const View & mask, const Rect & rect, View & dst, WorkerPtrs & workers)
+            void Detect(const View & mask, const Rect & rect, View & dst, WorkerPtrs & workers, bool throughColumn)
             {
                 Size s = dst.Size() - data->size;
                 View m = mask.Region(s, View::MiddleCenter);
@@ -283,6 +283,8 @@ namespace Simd
                 else
                 {
                     size_t step = (r.top + r.bottom) / workers.size();
+                    if (throughColumn)
+                        step += step & 1;
                     for (size_t i = 0; i < workers.size(); ++i)
                     {
                         ptrdiff_t top = r.top + i*step;
