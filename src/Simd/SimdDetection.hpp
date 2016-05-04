@@ -672,7 +672,7 @@ namespace Simd
             }
 
             for (size_t i = 0; i < buffer.size(); i++)
-                buffer[i].rect = buffer[i].rect / buffer[i].weight;
+                buffer[i].rect = buffer[i].rect / double(buffer[i].weight);
 
             for (size_t i = 0; i < buffer.size(); i++)
             {
@@ -691,8 +691,8 @@ namespace Simd
 
                     Rect r2 = buffer[j].rect;
 
-                    int dx = int(r2.Width() * sizeDifferenceMax);
-                    int dy = int(r2.Height() * sizeDifferenceMax);
+                    int dx = Simd::Round(r2.Width() * sizeDifferenceMax);
+                    int dy = Simd::Round(r2.Height() * sizeDifferenceMax);
 
                     if (i != j && (n2 > std::max(3, n1) || n1 < 3) &&
                         r1.left >= r2.left - dx && r1.top >= r2.top - dy &&
