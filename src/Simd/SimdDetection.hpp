@@ -176,11 +176,10 @@ namespace Simd
             \param [in] roi - a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask.
                               The mask affects to the center of detected object.
             \param [in] threadCount - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number. 
-                              The mask affects to the center of detected object.
             \return a result of this operation.
         */
         bool Init(const Size & imageSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),
-            const Size & sizeMax = Size(INT_MAX, INT_MAX), const View & roi = View(), ptrdiff_t threadNumber = 1)
+            const Size & sizeMax = Size(INT_MAX, INT_MAX), const View & roi = View(), ptrdiff_t threadNumber = -1)
         {
             if (_data.empty())
                 return false;
