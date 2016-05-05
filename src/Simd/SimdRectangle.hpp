@@ -428,6 +428,14 @@ namespace Simd
         template <typename TP> Rectangle<T> & operator |= (const Point<TP> & p);
 
         /*!
+            Sets to the rectangle results of the union of the rectangle and specified rectangle.
+
+            \param [in] r - specified rectangle.
+            \return a reference to itself.
+        */
+        template <typename TR> Rectangle<T> & operator |= (const Rectangle<TR> & r);
+
+        /*!
             Adds to the rectangle's coordinates corresponding coordinates of specified rectangle.
 
             \param [in] r - specified rectangle.
@@ -858,13 +866,13 @@ namespace Simd
 
         Rectangle<T> _r(r);
         if (left < _r.left)
-            left = _r.left;
+            left = std::min(_r.left, right);
         if (top < _r.top)
-            top = _r.top;
+            top = std::min(_r.top, bottom);
         if (right > _r.right)
-            right = _r.right;
+            right = std::max(_r.right, left);
         if (bottom > _r.bottom)
-            bottom = _r.bottom;
+            bottom = std::max(_r.bottom, top);
         return *this;
     }
 
@@ -890,6 +898,22 @@ namespace Simd
             if (bottom <= _p.y)
                 bottom = _p.y + 1;
         }
+        return *this;
+    }
+
+    template <typename T> template <typename TR>
+    SIMD_INLINE Rectangle<T> & Rectangle<T>::operator |= (const Rectangle<TR> & r)
+    {
+        if (Empty())
+            return this->operator=(r);
+        if (r.Empty())
+            return *this;
+
+        Rectangle<T> _r(r);
+        left = std::min(left, _r.left);
+        top = std::min(top, _r.top);
+        right = std::max(right, _r.right);
+        bottom = std::max(bottom, _r.bottom);
         return *this;
     }
 

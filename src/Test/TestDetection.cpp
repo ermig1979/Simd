@@ -480,40 +480,88 @@ namespace Test
 
 namespace Test
 {
-    bool DetectionSpecialTest()
+    typedef Simd::Detection<Simd::Allocator> Detection;
+    typedef Detection::Objects Objects;
+
+    static void DetectionSpecialTest(Detection & detection, Objects & objects, int threadNumber)
     {
-        typedef Simd::Detection<Simd::Allocator> Detection;
-        typedef Detection::Objects Objects;
-
-        double time;
-        Detection detection;
-
-        time = GetTime();
-        detection.Load("../../data/cascade/haar_face_0.xml", 0);
-        //detection.Load("../../data/cascade/haar_face_1.xml", 1);
-        //detection.Load("../../data/cascade/lbp_face.xml", 2);
-        TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms ");
-
         View src = GetSample(Size(W, H), true);
 
+        View roi(src.Size(), View::Gray8);
+        Simd::Fill(roi, 255);
+        Simd::Fill(roi.Region(Size(W, H)/2, View::MiddleCenter).Ref(), 0);
+
+        double time = GetTime();
+        detection.Init(src.Size(), 1.1, Size(), Size(INT_MAX, INT_MAX), roi, threadNumber);
+        TEST_LOG_SS(Info, "Init for " << threadNumber << " : " << (GetTime() - time) * 1000 << " ms ");
+
+        Detection::Rects rects;
+        size_t B = O + E;
+        rects.push_back(Rect(B, B, W - B, H - B));
+
         time = GetTime();
-        detection.Init(src.Size(), 1.1, Size(), Size(INT_MAX, INT_MAX), View(), -1);
-        TEST_LOG_SS(Info, "Init: " << (GetTime() - time) * 1000 << " ms ");
+        detection.Detect(src, objects, 3, 0.2, true, rects);
+        TEST_LOG_SS(Info, "Detect for " << threadNumber << " : " << (GetTime() - time) * 1000 << " ms " << std::endl);
 
-        Objects objects;
-
-        time = GetTime();
-        detection.Detect(src, objects);
-        TEST_LOG_SS(Info, "Detect: " << (GetTime() - time) * 1000 << " ms ");
-
+        View dst(src.Size(), View::Gray8);
+        Simd::Copy(src, dst);
         for (size_t i = 0; i < objects.size(); ++i)
         {
             Size s = objects[i].rect.Size();
-            Simd::FillFrame(src.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
+            Simd::FillFrame(dst.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
         }
-        Save(src, "dst.pgm");
+        Save(dst, String("dst_") + ToString(threadNumber) + ".pgm");
+    }
 
-        return true;
+    bool DetectionSpecialTest()
+    {
+        Detection detection;
+
+        double time = GetTime();
+        detection.Load("../../data/cascade/haar_face_0.xml", 0);
+        detection.Load("../../data/cascade/haar_face_1.xml", 1);
+        detection.Load("../../data/cascade/lbp_face.xml", 2);
+        TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms " << std::endl);
+
+        Objects os, om;
+
+        DetectionSpecialTest(detection, os, 1);
+
+        DetectionSpecialTest(detection, om, std::thread::hardware_concurrency() - 1);
+
+        bool result = true;
+        if (os.size() != om.size())
+            result = false;
+        else
+        {
+            for (size_t i = 0; i < os.size(); ++i)
+            {
+                if (os[i].rect != om[i].rect || os[i].weight != om[i].weight)
+                {
+                    result = false;
+                    break;
+                }
+            }
+        }
+
+        if (!result)
+        {
+            TEST_LOG_SS(Info, "Detection single thread: ");
+            for (size_t i = 0; i < os.size(); ++i)
+            {
+                TEST_LOG_SS(Info, "(" << os[i].rect.left << ", " << os[i].rect.top << ", " 
+                    << os[i].rect.right << ", " << os[i].rect.bottom << ") - " << os[i].weight);
+            }
+
+            TEST_LOG_SS(Info, "Detection multi threads: ");
+            for (size_t i = 0; i < om.size(); ++i)
+            {
+                TEST_LOG_SS(Info, "(" << om[i].rect.left << ", " << om[i].rect.top << ", "
+                    << om[i].rect.right << ", " << om[i].rect.bottom << ") - " << om[i].weight);
+            }
+        }
+
+        return result;
     }
 }
 

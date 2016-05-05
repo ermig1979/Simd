@@ -216,18 +216,21 @@ namespace Simd
             {
                 Level & level = _levels[i];
                 View mask = level.roi;
+                Rect rect = level.rect;
                 if (motionMask)
                 {
-                    FillMotionMask(motionRegions, level);
+                    FillMotionMask(motionRegions, level, rect);
                     mask = level.mask;
                 }
+                if (rect.Empty())
+                    continue;
                 for (size_t j = 0; j < level.hids.size(); ++j)
                 {
                     Hid & hid = level.hids[j];
 
-                    hid.Detect(mask, level.rect, level.dst, _workers, level.throughColumn);
+                    hid.Detect(mask, rect, level.dst, _workers, level.throughColumn);
 
-                    AddObjects(candidates[hid.data->tag], level.dst, level.rect, hid.data->size, level.scale,
+                    AddObjects(candidates[hid.data->tag], level.dst, rect, hid.data->size, level.scale,
                         level.throughColumn ? 2 : 1, hid.data->tag);
                 }
             }
@@ -282,7 +285,7 @@ namespace Simd
                 }
                 else
                 {
-                    size_t step = (r.top + r.bottom) / workers.size();
+                    size_t step = (r.bottom - r.top) / workers.size() + 1;
                     if (throughColumn)
                         step += step & 1;
                     for (size_t i = 0; i < workers.size(); ++i)
@@ -537,11 +540,17 @@ namespace Simd
                 Simd::Integral(level.src, level.sum);
         }
 
-        void FillMotionMask(const Rects & rects, Level & level) const
+        void FillMotionMask(const Rects & rects, Level & level, Rect & rect) const
         {
             Simd::Fill(level.mask, 0);
+            rect = Rect();
             for (size_t i = 0; i < rects.size(); i++)
-                Simd::Fill(level.mask.Region(rects[i]/level.scale).Ref(), 0xFF);
+            {
+                Rect r = rects[i] / level.scale;
+                rect |= r;
+                Simd::Fill(level.mask.Region(r).Ref(), 0xFF);
+            }
+            rect &= level.rect;
             Simd::OperationBinary8u(level.mask, level.roi, level.mask, SimdOperationBinary8uAnd);
         }
 

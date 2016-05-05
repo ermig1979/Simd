@@ -82,6 +82,13 @@ namespace Test
     String ExpandToLeft(const String & value, size_t count);
     String ExpandToRight(const String & value, size_t count);
 
+    template <class T> SIMD_INLINE std::string ToString(const T & value)
+    {
+        std::stringstream ss;
+        ss << value;
+        return ss.str();
+    }
+
     String ToString(double value, size_t iCount, size_t fCount);
 
     bool Load(View & view, const String & path);
