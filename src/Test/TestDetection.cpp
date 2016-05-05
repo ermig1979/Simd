@@ -553,7 +553,7 @@ namespace Test
                     << os[i].rect.right << ", " << os[i].rect.bottom << ") - " << os[i].weight);
             }
 
-            TEST_LOG_SS(Error "Detection multi threads: ");
+            TEST_LOG_SS(Error, "Detection multi threads: ");
             for (size_t i = 0; i < om.size(); ++i)
             {
                 TEST_LOG_SS(Error, "(" << om[i].rect.left << ", " << om[i].rect.top << ", "
