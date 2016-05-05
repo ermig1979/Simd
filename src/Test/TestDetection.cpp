@@ -527,7 +527,7 @@ namespace Test
 
         DetectionSpecialTest(detection, os, 1);
 
-        DetectionSpecialTest(detection, om, std::thread::hardware_concurrency() - 1);
+        DetectionSpecialTest(detection, om, std::thread::hardware_concurrency());
 
         bool result = true;
         if (os.size() != om.size())
