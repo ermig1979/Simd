@@ -556,10 +556,12 @@ namespace Simd
 
         void AddObjects(Objects & objects, const View & dst, const Rect & rect, const Size & size, double scale, size_t step, Tag tag)
         {
-            for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+            Size s = dst.Size() - size;
+            Rect r = rect.Shifted(-size / 2).Intersection(Rect(s));
+            for (ptrdiff_t row = r.top; row < r.bottom; row += step)
             {
                 const uint8_t * mask = dst.data + row*dst.stride;
-                for (ptrdiff_t col = rect.left; col < rect.right; col += step)
+                for (ptrdiff_t col = r.left; col < r.right; col += step)
                 {
                     if (mask[col] != 0)
                         objects.push_back(Object(Rect(col, row, col + size.x, row + size.y)*scale, 1, tag));

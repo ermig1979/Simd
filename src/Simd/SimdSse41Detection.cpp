@@ -235,10 +235,10 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
                 size_t col = 0;
-                size_t p_offset = row * hid.sum.stride / sizeof(uint32_t);
-                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t);
+                size_t p_offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
-                UnpackMask32i(mask.data + row*mask.stride, width, buffer.m, K8_01);
+                UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint32_t));
                 for (; col < alignedWidth; col += 4)
                 {
@@ -268,7 +268,7 @@ namespace Simd
                     float norm = Base::Norm32f(hid, pq_offset + col);
                     buffer.d[col] = Base::Detect32f(hid, p_offset + col, 0, norm) > 0 ? 1 : 0;
                 }
-                PackResult32i(buffer.d, width, dst.data + row*dst.stride);
+                PackResult32i(buffer.d, width, dst.data + row*dst.stride + rect.left);
             }
         }
 
@@ -295,10 +295,10 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t);
-                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t);
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
-                UnpackMask16i(mask.data + row*mask.stride, evenWidth, buffer.m, K16_0001);
+                UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
                 memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
@@ -323,13 +323,13 @@ namespace Simd
                 }
                 for (; col < width; col += step)
                 {
-                    if (mask.At<uint8_t>(col, row) == 0)
+                    if (mask.At<uint8_t>(col + rect.left, row) == 0)
                         continue;
                     float norm = Base::Norm32f(hid, pq_offset + col);
                     if (Base::Detect32f(hid, p_offset + col / 2, 0, norm) > 0)
-                        dst.At<uint8_t>(col, row) = 1;
+                        dst.At<uint8_t>(col + rect.left, row) = 1;
                 }
-                PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride);
+                PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride + rect.left);
             }
         }
 
@@ -467,9 +467,9 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
                 size_t col = 0;
-                size_t offset = row * hid.sum.stride / sizeof(uint32_t);
+                size_t offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
 
-                UnpackMask32i(mask.data + row*mask.stride, width, buffer.m, K8_01);
+                UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint32_t));
                 for (; col < alignedWidth; col += 4)
                 {
@@ -496,7 +496,7 @@ namespace Simd
                         continue;
                     buffer.d[col] = Base::Detect(hid, offset + col, 0) > 0 ? 1 : 0;
                 }
-                PackResult32i(buffer.d, width, dst.data + row*dst.stride);
+                PackResult32i(buffer.d, width, dst.data + row*dst.stride + rect.left);
             }
         }
 
@@ -521,9 +521,9 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint32_t);
+                size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
 
-                UnpackMask16i(mask.data + row*mask.stride, evenWidth, buffer.m, K16_0001);
+                UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
                 memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
@@ -546,12 +546,12 @@ namespace Simd
                 }
                 for (; col < width; col += step)
                 {
-                    if (mask.At<uint8_t>(col, row) == 0)
+                    if (mask.At<uint8_t>(col + rect.left, row) == 0)
                         continue;
                     if (Base::Detect(hid, offset + col / 2, 0) > 0)
-                        dst.At<uint8_t>(col, row) = 1;
+                        dst.At<uint8_t>(col + rect.left, row) = 1;
                 }
-                PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride);
+                PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride + rect.left);
             }
         }
 
@@ -686,8 +686,8 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint16_t);
-                UnpackMask16i(mask.data + row*mask.stride, width, buffer.m, K8_01);
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
+                UnpackMask16i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
@@ -714,7 +714,7 @@ namespace Simd
                         continue;
                     buffer.d[col] = Base::Detect(hid, offset + col, 0) > 0 ? 1 : 0;
                 }
-                PackResult16i(buffer.d, width, dst.data + row*dst.stride);
+                PackResult16i(buffer.d, width, dst.data + row*dst.stride + rect.left);
             }
         }
 
@@ -738,9 +738,9 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint16_t);
-                const uint8_t * m = mask.data + row*mask.stride;
-                const uint8_t * d = dst.data + row*dst.stride;
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left/2;
+                const uint8_t * m = mask.data + row*mask.stride + rect.left;
+                const uint8_t * d = dst.data + row*dst.stride + rect.left;
                 for (; col < alignedWidth; col += A)
                 {
                     __m128i result = _mm_and_si128(_mm_loadu_si128((__m128i*)(m + col)), K16_0001);
@@ -762,10 +762,10 @@ namespace Simd
                 }
                 for (; col < width; col += step)
                 {
-                    if (mask.At<uint8_t>(col, row) == 0)
+                    if (mask.At<uint8_t>(col + rect.left, row) == 0)
                         continue;
                     if (Base::Detect(hid, offset + col / 2, 0) > 0)
-                        dst.At<uint8_t>(col, row) = 1;
+                        dst.At<uint8_t>(col + rect.left, row) = 1;
                 }
             }
         }

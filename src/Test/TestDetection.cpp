@@ -163,13 +163,14 @@ namespace Test
             return false;
         }
 
-        View mask(width, height, View::Gray8);
-        Simd::Fill(mask, 1);
-
         size_t w, h;
         SimdDetectionInfoFlags flags;
         SimdDetectionInfo(data, &w, &h, &flags);
-        Rect rect(0, 0, width - w, height - h);
+        Rect rect(width/9, height/11, width - w, height - h);
+
+        View mask(width, height, View::Gray8);
+        Simd::Fill(mask, 0);
+        Simd::Fill(mask.Region(rect).Ref(), 255);
 
         View dst1(width, height, View::Gray8);
         Simd::Fill(dst1, 0);
