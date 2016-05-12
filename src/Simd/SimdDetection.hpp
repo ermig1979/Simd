@@ -176,7 +176,7 @@ namespace Simd
             \param [in] sizeMax - a maximal size of detected objects.
             \param [in] roi - a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask.
                               The mask affects to the center of detected object.
-            \param [in] threadCount - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number. 
+            \param [in] threadNumber - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number. 
             \return a result of this operation.
         */
         bool Init(const Size & imageSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),

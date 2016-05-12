@@ -569,8 +569,8 @@ extern "C"
         \param [in] size - a size of arrays.
         \param [in] a - a pointer to the first parameter.
         \param [in] b - a pointer to the second parameter.
-        \param [in/out] d - a pointer to the D array.
-        \param [in/out] w - a pointer to the W array.
+        \param [in, out] d - a pointer to the D array.
+        \param [in, out] w - a pointer to the W array.
     */
     SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 

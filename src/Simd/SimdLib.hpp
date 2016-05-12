@@ -2010,7 +2010,8 @@ namespace Simd
 		\short Performs an averaging with window 3x3.
 
 		For every point:
-		dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
+        \verbatim
+        dst[x, y] = (src[x-1, y-1] + src[x, y-1] + src[x+1, y-1] +
 					 src[x-1, y] + src[x, y] + src[x+1, y] +
 					 src[x-1, y+1] + src[x, y+1] + src[x+1, y+1] + 4) / 9;
 		\endverbatim

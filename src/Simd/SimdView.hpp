@@ -609,6 +609,7 @@ namespace Simd
         return view;
     }
 
+    /*! \cond */
     template <class A> SIMD_INLINE View<A> & View<A>::operator = (const View<A> & view)
     {
         if(this != &view)
@@ -627,6 +628,7 @@ namespace Simd
         }
         return *this;
     }
+    /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
     template <class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)
