@@ -93,6 +93,8 @@ namespace Test
     const int DH = 64;
 
     const float EPS = 0.001f;
+
+    extern String ROOT_PATH;
 }
 
 #endif//__TestConfig_h__

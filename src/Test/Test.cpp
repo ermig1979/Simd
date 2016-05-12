@@ -365,7 +365,11 @@ namespace Test
 				{
 					output = arg.substr(3, arg.size() - 3);
 				}
-				else
+				else if (arg.find("-r=") == 0)
+                {
+                    ROOT_PATH = arg.substr(3, arg.size() - 3);
+                }
+                else
 				{
 					TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
 					exit(1);
@@ -503,9 +507,13 @@ namespace Test
         std::cout << "             has to satisfy at least one of them. " << std::endl << std::endl;
         std::cout << "-o=log.txt - a file name with test report." << std::endl;
         std::cout << "             The test's report also will be output to console." << std::endl << std::endl;
-        std::cout << "Also you can use parameter -h or -? to print this help message." << std::endl << std::endl;
+        std::cout << "Also you can use parameters: " << std::endl << std::endl;
+        std::cout << "    -h or -? to print this help message." << std::endl << std::endl;
+        std::cout << "    -r=../.. to set project root directory." << std::endl << std::endl;
         return 0;
     }
+
+    String ROOT_PATH = "../..";
 }
 
 int main(int argc, char* argv[])

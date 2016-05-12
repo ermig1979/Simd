@@ -41,7 +41,7 @@ namespace Test
         if (dst.format == View::Gray8)
             return dst;
 
-        String path = "../../data/image/lena.pgm";
+        String path = ROOT_PATH + "/data/image/lena.pgm";
         View obj;
         if (!Load(obj, path))
         {
@@ -200,11 +200,11 @@ namespace Test
         return result;
     }
 
-    bool DetectionDetectAutoTest(const char * path, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const String & path, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
 
-        void * data = SimdDetectionLoadA(path);
+        void * data = SimdDetectionLoadA(path.c_str());
         if (data == NULL)
         {
             TEST_LOG_SS(Error, "Can't load cascade '" << path << "' !");
@@ -224,11 +224,11 @@ namespace Test
         bool result = true;
 
         if (lbp)
-            result = result && DetectionDetectAutoTest("../../data/cascade/lbp_face.xml", throughColumn, int16, f1, f2);
+            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/lbp_face.xml", throughColumn, int16, f1, f2);
         else
         {
-            result = result && DetectionDetectAutoTest("../../data/cascade/haar_face_0.xml", throughColumn, int16, ARGS_D(0, f1, f2));
-            result = result && DetectionDetectAutoTest("../../data/cascade/haar_face_1.xml", throughColumn, int16, ARGS_D(1, f1, f2));
+            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/haar_face_0.xml", throughColumn, int16, ARGS_D(0, f1, f2));
+            result = result && DetectionDetectAutoTest(ROOT_PATH + "/data/cascade/haar_face_1.xml", throughColumn, int16, ARGS_D(1, f1, f2));
         }
 
         return result;
@@ -350,7 +350,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool DetectionDetectDataTest(bool create, const char * path, int width, int height, int throughColumn, int int16, const FuncD & f)
+    bool DetectionDetectDataTest(bool create, const String & path, int width, int height, int throughColumn, int int16, const FuncD & f)
     {
         bool result = true;
 
@@ -366,7 +366,7 @@ namespace Test
         View sqsum(width + 1, height + 1, View::Int32);
         View tilted(width + 1, height + 1, View::Int32);
 
-        void * dat = SimdDetectionLoadA(path);
+        void * dat = SimdDetectionLoadA(path.c_str());
         if (dat == NULL)
         {
             TEST_LOG_SS(Error, "Can't load cascade '" << path << "' !");
@@ -434,11 +434,11 @@ namespace Test
         bool result = true;
 
         if (lbp)
-            result = result && DetectionDetectDataTest(create, "../../data/cascade/lbp_face.xml", DW, DH, throughColumn, int16, f);
+            result = result && DetectionDetectDataTest(create, ROOT_PATH + "/data/cascade/lbp_face.xml", DW, DH, throughColumn, int16, f);
         else
         {
-            result = result && DetectionDetectDataTest(create, "../../data/cascade/haar_face_0.xml", DW, DH, throughColumn, int16, FuncD(f.func, f.description + "_0"));
-            result = result && DetectionDetectDataTest(create, "../../data/cascade/haar_face_1.xml", DW, DH, throughColumn, int16, FuncD(f.func, f.description + "_1"));
+            result = result && DetectionDetectDataTest(create, ROOT_PATH + "/data/cascade/haar_face_0.xml", DW, DH, throughColumn, int16, FuncD(f.func, f.description + "_0"));
+            result = result && DetectionDetectDataTest(create, ROOT_PATH + "/data/cascade/haar_face_1.xml", DW, DH, throughColumn, int16, FuncD(f.func, f.description + "_1"));
         }
 
         return result;
@@ -519,9 +519,9 @@ namespace Test
         Detection detection;
 
         double time = GetTime();
-        detection.Load("../../data/cascade/haar_face_0.xml", 0);
-        detection.Load("../../data/cascade/haar_face_1.xml", 1);
-        detection.Load("../../data/cascade/lbp_face.xml", 2);
+        detection.Load(ROOT_PATH + "/data/cascade/haar_face_0.xml", 0);
+        detection.Load(ROOT_PATH + "/data/cascade/haar_face_1.xml", 1);
+        detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
         TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms " << std::endl);
 
         Objects os, om;

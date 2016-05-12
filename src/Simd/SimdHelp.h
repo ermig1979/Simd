@@ -144,7 +144,9 @@
     You can use several filters - function name has to satisfy at least one of them.
 	 - \c -o=log.txt - a file name with test report. The test's report also will be output to console.
     
-    Also you can use parameter -h or -? in order to print help message.
+    Also you can use parameters:
+     - \c -h or -? in order to print help message.
+     - \c -r=../.. to set project root directory.
 */
 /*@}*/
 

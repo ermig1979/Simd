@@ -147,7 +147,7 @@ namespace Test
     Data::Data(const String & test)
     {
         std::stringstream path;
-        path << "../../test/";
+        path << ROOT_PATH << "/test/";
         for(size_t i = 0; i < test.size(); ++i)
         {
             if(test[i] == '<')
