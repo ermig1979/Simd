@@ -23,6 +23,7 @@
 * SOFTWARE.
 */
 #include "Test/TestPerformance.h"
+#include "Test/TestUtils.h"
 #include "Test/TestLog.h"
 
 namespace Test
@@ -324,10 +325,13 @@ namespace Test
 
 		size_t threads;
 
+        bool printAlign;
+
 		Options(int argc, char* argv[])
 			: mode(Auto)
 			, threads(0)
             , help(false)
+            , printAlign(false)
 		{
 			for (int i = 1; i < argc; ++i)
 			{
@@ -353,8 +357,7 @@ namespace Test
 				else if (arg.find("-t=") == 0)
 				{
 #ifdef NDEBUG
-					std::stringstream ss(arg.substr(3, arg.size() - 3));
-					ss >> threads;
+                    threads = FromString<size_t>(arg.substr(3, arg.size() - 3));
 #endif
 				}
 				else if (arg.find("-f=") == 0)
@@ -368,6 +371,10 @@ namespace Test
 				else if (arg.find("-r=") == 0)
                 {
                     ROOT_PATH = arg.substr(3, arg.size() - 3);
+                }
+                else if (arg.find("-pa=") == 0)
+                {
+                    printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else
 				{
@@ -439,7 +446,7 @@ namespace Test
 		TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-		TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(true, true, false));
+		TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(true, options.printAlign, false));
 #endif
 		return 0;
 	}
@@ -510,6 +517,7 @@ namespace Test
         std::cout << "Also you can use parameters: " << std::endl << std::endl;
         std::cout << "    -h or -? to print this help message." << std::endl << std::endl;
         std::cout << "    -r=../.. to set project root directory." << std::endl << std::endl;
+        std::cout << "    -pa=1    to print alignment statistics." << std::endl << std::endl;
         return 0;
     }
 

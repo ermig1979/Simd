@@ -147,6 +147,7 @@
     Also you can use parameters:
      - \c -h or -? in order to print help message.
      - \c -r=../.. to set project root directory.
+     - \c -pa=1 to print alignment statistics.
 */
 /*@}*/
 
