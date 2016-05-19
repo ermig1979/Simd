@@ -892,7 +892,7 @@ namespace Simd
         case CV_32SC1:  return Int32;
         case CV_32FC1:  return Float;
         case CV_64FC1:  return Double;
-        default: assert(0); return 0;
+        default: assert(0); return None;
         }
     }
 #endif
