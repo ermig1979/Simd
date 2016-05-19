@@ -633,17 +633,7 @@ namespace Simd
 #ifdef SIMD_OPENCV_ENABLE
     template <class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)
     {
-        if (_owner && data)
-        {
-            Allocator::Free(data);
-            assert(0);
-        }
-        *(size_t*)&width = mat.cols
-        *(size_t*)&height = mat.rows;
-        *(Format*)&format = OcvTo(mat.type())
-        *(ptrdiff_t*)&stride = mat.step[0];
-        *(unsigned char**)&data = mat.data;
-        _owner = false;
+        *this = View<A>(mat);
         return *this;
     }
 #endif

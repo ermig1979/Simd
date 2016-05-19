@@ -27,6 +27,8 @@
 * Description : This file is needed to verify the C++ API of Simd Library.               
 */
 
+//#define SIMD_OPENCV_ENABLE
+
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdFrame.hpp"
 #include "Simd/SimdPyramid.hpp"
@@ -48,6 +50,14 @@ namespace Test
         View vs(6, 6, View::Bgra32);
         View vd(6, 6, View::Gray8);
         Simd::Convert(vs, vd);
+
+        View sv;
+        sv = vs;
+#ifdef SIMD_OPENCV_ENABLE
+        cv::Mat cm;
+        sv = cm;
+        cm = sv;
+#endif
     }
 
     static void TestFrame()
