@@ -100,27 +100,47 @@ namespace Simd
 
     SIMD_INLINE void * Allocator::Allocate(size_t size, size_t align)
     {
+#ifdef __SimdMemory_h__
+        return Simd::Allocate(size, align);
+#else
         return SimdAllocate(size, align);
+#endif
     }
 
     SIMD_INLINE void Allocator::Free(void * ptr)
     {
+#ifdef __SimdMemory_h__
+        Simd::Free(ptr);
+#else
         SimdFree(ptr);
+#endif
     }
 
     SIMD_INLINE size_t Allocator::Align(size_t size, size_t align)
     {
+#ifdef __SimdMemory_h__
+        return Simd::AlignHi(size, align);
+#else
         return SimdAlign(size, align);
+#endif
     }
 
     SIMD_INLINE void * Allocator::Align(void * ptr, size_t align)
     {
+#ifdef __SimdMemory_h__
+        return Simd::AlignHi(ptr, align);
+#else
         return (void *) SimdAlign((size_t)ptr, align);
+#endif
     }
 
     SIMD_INLINE size_t Allocator::Alignment()
     {
+#ifdef __SimdMemory_h__
+        return SIMD_ALIGN;
+#else
         return SimdAlignment();
+#endif
     }
 }
 

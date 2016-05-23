@@ -25,6 +25,7 @@
 #define __SimdDetection_h__
 
 #include "Simd/SimdConst.h"
+#include "Simd/SimdMemory.h"
 
 #include "Simd/SimdView.hpp"
 
