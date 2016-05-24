@@ -48,9 +48,6 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h">
       <Filter>Sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdTypes.h">
-      <Filter>Sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdLoad.h">
       <Filter>Sys</Filter>
     </ClInclude>

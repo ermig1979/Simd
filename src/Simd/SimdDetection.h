@@ -26,6 +26,7 @@
 
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdEnable.h"
 
 #include "Simd/SimdView.hpp"
 

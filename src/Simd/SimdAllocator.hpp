@@ -136,8 +136,8 @@ namespace Simd
 
     SIMD_INLINE size_t Allocator::Alignment()
     {
-#ifdef __SimdMemory_h__
-        return SIMD_ALIGN;
+#ifdef __SimdEnable_h__
+        return Simd::ALIGNMENT;
 #else
         return SimdAlignment();
 #endif

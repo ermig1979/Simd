@@ -87,52 +87,7 @@ SIMD_API size_t SimdAlign(size_t size, size_t align)
 
 SIMD_API size_t SimdAlignment()
 {
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable)
-        return Avx2::A;
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if(Avx::Enable)
-        return sizeof(__m256);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if(Sse41::Enable)
-        return Sse41::A;
-    else
-#endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable)
-        return Ssse3::A;
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable)
-        return Sse2::A;
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if(Sse::Enable)
-        return sizeof(__m128);
-    else
-#endif
-#ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable)
-        return Vsx::A;
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable)
-        return Vmx::A;
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-	if (Neon::Enable)
-		return Neon::A;
-	else
-#endif
-		return sizeof(void *);
+    return Simd::ALIGNMENT;
 }
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
