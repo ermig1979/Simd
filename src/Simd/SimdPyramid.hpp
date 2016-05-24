@@ -24,7 +24,7 @@
 #ifndef __SimdPyramid_hpp__
 #define __SimdPyramid_hpp__
 
-#include "Simd/SimdView.hpp"
+#include "Simd/SimdLib.hpp"
 
 #include <vector>
 
