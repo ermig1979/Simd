@@ -95,7 +95,7 @@ namespace Simd
          
         }
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && (defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE))
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
 #endif        
@@ -116,7 +116,7 @@ namespace Simd
                 KahanSum(Simd::Square(a[i + 0] - b[i + 0]), sums[0], corrections[0]);
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
-#ifdef __GNUC__
+#if defined(__GNUC__) && (defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE))
 #pragma GCC pop_options
 #endif    
     }
