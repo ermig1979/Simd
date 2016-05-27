@@ -61,7 +61,7 @@ namespace Simd
 		{
 			assert(width >= A);
 			if (align)
-				assert(Aligned(src) && Aligned(stride) && Aligned(dst));
+				assert(Aligned(src) && Aligned(stride) && Aligned(dst) && Aligned(width));
 
 			size_t alignedWidth = AlignLo(width, A);
 			v128_f32 _1_255 = SIMD_VEC_SET1_PS(1.0f / 255.0f);
@@ -86,7 +86,7 @@ namespace Simd
 
 		template <bool inversion> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
 		{
-			if (Aligned(src) && Aligned(stride) && Aligned(width) && Aligned(dst))
+			if (Aligned(src) && Aligned(stride) && Aligned(dst) && Aligned(width))
 				AnnConvert<inversion, true>(src, stride, width, height, dst);
 			else
 				AnnConvert<inversion, false>(src, stride, width, height, dst);

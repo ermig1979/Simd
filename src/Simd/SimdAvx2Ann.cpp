@@ -52,7 +52,7 @@ namespace Simd
 		{
 			assert(width >= 8);
 			if (align)
-				assert(Aligned(dst));
+				assert(Aligned(dst) && Aligned(width));
 
 			size_t alignedWidth = AlignLo(width, 8);
 			__m256 _1_255 = _mm256_set1_ps(1.0f / 255.0f);
@@ -70,7 +70,7 @@ namespace Simd
 
 		template <bool inversion> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
 		{
-			if (Aligned(dst))
+			if (Aligned(dst) && Aligned(width))
 				AnnConvert<inversion, true>(src, stride, width, height, dst);
 			else
 				AnnConvert<inversion, false>(src, stride, width, height, dst);
