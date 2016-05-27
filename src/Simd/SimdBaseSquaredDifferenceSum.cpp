@@ -84,15 +84,21 @@ namespace Simd
                 sums[0] += Simd::Square(a[i] - b[i]);
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
-
+         
         SIMD_INLINE void KahanSum(float value, float & sum, float & correction)
         {
+            
             float term = value - correction;
             float temp = sum + term;
             correction = (temp - sum) - term;
             sum = temp; 
+         
         }
 
+#ifdef __GNUC__
+#pragma GCC push_options
+#pragma GCC optimize ("O1")
+#endif        
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
@@ -110,5 +116,8 @@ namespace Simd
                 KahanSum(Simd::Square(a[i + 0] - b[i + 0]), sums[0], corrections[0]);
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
+#ifdef __GNUC__
+#pragma GCC pop_options
+#endif    
     }
 }
