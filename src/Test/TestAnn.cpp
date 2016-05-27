@@ -366,16 +366,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Base::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+        result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Base::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Sse::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+            result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Sse::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnUpdateWeightsAutoTest(EPS, true, FUNC_UW(Simd::Avx::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+            result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Avx::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
 #endif
 
         return result;
