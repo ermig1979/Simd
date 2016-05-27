@@ -239,7 +239,6 @@ namespace Test
         T sse2;
         T ssse3;
         T sse41;
-        T sse42;
         T avx2;
         T vmx;
         T vsx;
@@ -265,19 +264,17 @@ namespace Test
         if(enable.sse2) ss << printer.Average(printer.data.sse2) << " ";
         if(enable.ssse3) ss << printer.Average(printer.data.ssse3) << " ";
         if(enable.sse41) ss << printer.Average(printer.data.sse41) << " ";
-        if(enable.sse42) ss << printer.Average(printer.data.sse42) << " ";
         if(enable.avx2) ss << printer.Average(printer.data.avx2) << " ";
         if(enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
         if(enable.vsx) ss << printer.Average(printer.data.vsx) << " ";
 		if(enable.neon) ss << printer.Average(printer.data.neon) << " ";
 		ss << "| ";
 
-        if(enable.sse2 || enable.ssse3 || enable.sse41 || enable.sse42 || enable.avx2 || enable.vmx || enable.vsx || enable.neon)
+        if(enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx2 || enable.vmx || enable.vsx || enable.neon)
         {
             if(enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2) << " ";
             if(enable.ssse3) ss << printer.Relation(printer.data.base, printer.data.ssse3) << " ";
             if(enable.sse41) ss << printer.Relation(printer.data.base, printer.data.sse41) << " ";
-            if(enable.sse42) ss << printer.Relation(printer.data.base, printer.data.sse42) << " ";
             if(enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2) << " ";
             if(enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
             if(enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx) << " ";
@@ -332,7 +329,7 @@ namespace Test
 
         String Relation(const Name & a, const Name & b) const
         {
-            return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction + 1);
+            return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction);
         }
 
         String Alignment(const Name & a) const
@@ -356,7 +353,7 @@ namespace Test
 
         String Relation(const Value & a, const Value & b) const
         {
-            return ToString(Test::Relation(a.first, b.first), relation, fraction);
+            return ToString(Test::Relation(a.first, b.first), relation, fraction - 1);
         }
 
         String Alignment(const Value & a) const
@@ -384,10 +381,8 @@ namespace Test
             enable.sse2 = AddToFunction(src, dst.sse2);
         if(desc.find("Simd::Ssse3::") != std::string::npos)
             enable.ssse3 = AddToFunction(src, dst.ssse3);
-        if(desc.find("Simd::Sse41::") != std::string::npos)
+        if(desc.find("Simd::Sse41::") != std::string::npos || desc.find("Simd::Sse42::") != std::string::npos)
             enable.sse41 = AddToFunction(src, dst.sse41);
-        if(desc.find("Simd::Sse42::") != std::string::npos)
-            enable.sse42 = AddToFunction(src, dst.sse42);
         if(desc.find("Simd::Avx2::") != std::string::npos || desc.find("Simd::Avx::") != std::string::npos)
             enable.avx2 = AddToFunction(src, dst.avx2);
         if(desc.find("Simd::Vmx::") != std::string::npos)
@@ -416,14 +411,13 @@ namespace Test
         if(enable.sse2) Add(Cond(s.sse2, s.base), d.sse2);
         if(enable.ssse3) Add(Cond(s.ssse3, Cond(s.sse2, s.base)), d.ssse3);
         if(enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))), d.sse41);
-        if(enable.sse42) Add(Cond(s.sse42, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))), d.sse42);
-        if(enable.avx2) Add(Cond(s.avx2, Cond(s.sse42, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))))), d.avx2);
+        if(enable.avx2) Add(Cond(s.avx2, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))), d.avx2);
         if(enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if(enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
 		if(enable.neon) Add(Cond(s.neon, s.base), d.neon);
 	}
 
-    String PerformanceMeasurerStorage::Report(bool sse42_, bool align, bool raw) const
+    String PerformanceMeasurerStorage::Report(bool align, bool raw) const
     {
         FunctionMap map;
         {
@@ -441,8 +435,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = {false, false, false, false, false, false, false, false, false};
-        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S41"}, {"Sse42", "S42"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}, { "Neon", "N"}};
+        StatisticEnable enable = {false, false, false, false, false, false, false, false};
+        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S4"}, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}, { "Neon", "N"}};
         double timeMax = 0;
         size_t sizeMax = 8;
         for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
@@ -453,7 +447,6 @@ namespace Test
             timeMax = std::max(timeMax, pm.Average());
             sizeMax = std::max(name.size(), sizeMax);
         }
-        enable.sse42 = enable.sse42 && sse42_;
 
         for(FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
             AddToCommon(it->second, enable, common);

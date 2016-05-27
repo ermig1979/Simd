@@ -117,7 +117,7 @@ namespace Test
 
         size_t Align(size_t size);
 
-        String Report(bool sse42 = false, bool align = false, bool raw = false) const;
+        String Report(bool align = false, bool raw = false) const;
     };
 }
 
