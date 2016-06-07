@@ -94,5 +94,16 @@ namespace Simd
             for (; i < size; ++i)
                 UpdateWeights(x, i, _a, _b, d, w);
         }
+
+        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] += Convolution3x3(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 }

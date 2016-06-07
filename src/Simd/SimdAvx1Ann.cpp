@@ -158,6 +158,56 @@ namespace Simd
             else
                 AnnUpdateWeights<false>(x, size, *a, *b, d, w);
         }
+
+        template <bool align> SIMD_INLINE __m256 Convolution3(const float * src, const __m256 * weights)
+        {
+            return _mm256_add_ps(_mm256_mul_ps(Load<align>(src), weights[0]),
+                _mm256_add_ps(_mm256_mul_ps(Load<false>(src + 1), weights[1]),
+                    _mm256_mul_ps(Load<false>(src + 2), weights[2])));
+        }
+
+        template <bool align> SIMD_INLINE __m256 Convolution3x3(const float * src, size_t stride, const __m256 * weights)
+        {
+            return _mm256_add_ps(Convolution3<align>(src, weights),
+                _mm256_add_ps(Convolution3<align>(src + stride, weights + 3),
+                    Convolution3<align>(src + 2 * stride, weights + 6)));
+        }
+
+        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m256 dst[size])
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = _mm256_set1_ps(src[i]);
+        }
+
+        template <bool align> void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t alignedWidth = AlignLo(width, 8);
+            __m256 _weights[9];
+            LoadWeights<9>(weights, _weights);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += 8)
+                {
+                    __m256 _dst = Load<align>(dst + col);
+                    _dst = _mm256_add_ps(_dst, Convolution3x3<align>(src + col, srcStride, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+                for (; col < width; ++col)
+                    dst[col] += Base::Convolution3x3(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AnnAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
+        }
     }
 #endif// SIMD_AVX_ENABLE
 }

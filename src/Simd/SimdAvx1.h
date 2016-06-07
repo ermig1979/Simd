@@ -37,7 +37,9 @@ namespace Simd
 
         void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
-		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
+        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 

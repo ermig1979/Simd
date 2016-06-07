@@ -31,7 +31,7 @@ namespace Test
 
 	namespace
 	{
-		struct FuncC
+		struct FuncC1
 		{
 			typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
 
@@ -39,7 +39,7 @@ namespace Test
 			String description;
 			bool inversion;
 
-			FuncC(const FuncPtr & f, const String & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
+			FuncC1(const FuncPtr & f, const String & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
 
 			void Call(const View & src, View & dst) const
 			{
@@ -48,9 +48,9 @@ namespace Test
 			}
 		};
 	}
-#define FUNC_C(function, inversion) FuncC(function, #function, inversion)
+#define FUNC_C1(function, inversion) FuncC1(function, #function, inversion)
 
-	bool AnnConvertAutoTest(int width, int height, float eps, const FuncC & f1, const FuncC & f2)
+	bool AnnConvertAutoTest(int width, int height, float eps, const FuncC1 & f1, const FuncC1 & f2)
 	{
 		bool result = true;
 
@@ -71,7 +71,7 @@ namespace Test
 		return result;
 	}
 
-	bool AnnConvertAutoTest(float eps, const FuncC & f1, const FuncC & f2)
+	bool AnnConvertAutoTest(float eps, const FuncC1 & f1, const FuncC1 & f2)
 	{
 		bool result = true;
 
@@ -86,38 +86,38 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Base::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
-		result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Base::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+		result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Base::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
+		result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Base::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
 
 #ifdef SIMD_SSE2_ENABLE
 		if (Simd::Sse2::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Sse2::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Sse2::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
 		}
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
 		if (Simd::Avx2::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Avx2::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Avx2::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
 		}
 #endif
 
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Vsx::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
+			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
 		}
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
         {
-            result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Neon::AnnConvert, true), FUNC_C(SimdAnnConvert, true));
-            result = result && AnnConvertAutoTest(EPS, FUNC_C(Simd::Neon::AnnConvert, false), FUNC_C(SimdAnnConvert, false));
+            result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Neon::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
+            result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Neon::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
         }
 #endif
 
@@ -381,9 +381,87 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncC2
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncC2(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const float * weights, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride/sizeof(float), dstDst.width, dstDst.height, weights, (float*)dstDst.data, dstDst.stride/sizeof(float));
+            }
+        };
+    }
+#define FUNC_C2(function) FuncC2(function, #function)
+
+    bool AnnAddConvolutionAutoTest(int width, int height, float eps, int half, const FuncC2 & f1, const FuncC2 & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(src, 0, 1);
+
+        View weights(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(weights, -1, 1);
+
+        View dstSrc(width, height, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(dstSrc, -1000, 1000);
+
+        View dstDst1(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(width, height, View::Float, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, (float*)weights.data, dstSrc, dstDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, (float*)weights.data, dstSrc, dstDst2));
+
+        result = Compare(dstDst1, dstDst2, eps, true, 32);
+
+        return result;
+    }
+
+    bool AnnAddConvolutionAutoTest(float eps, int half, const FuncC2 & f1, const FuncC2 & f2)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionAutoTest(W, H, eps, half, f1, f2);
+        result = result && AnnAddConvolutionAutoTest(W - O, H + O, eps, half, f1, f2);
+        result = result && AnnAddConvolutionAutoTest(W + O, H - O, eps, half, f1, f2);
+
+        return result;
+    }
+
+    bool AnnAddConvolution3x3AutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Base::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Sse::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Avx::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
-	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC & f)
+	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
 	{
 		bool result = true;
 
@@ -427,7 +505,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnConvertDataTest(create, DW, DH, EPS, FUNC_C(SimdAnnConvert, true));
+		result = result && AnnConvertDataTest(create, DW, DH, EPS, FUNC_C1(SimdAnnConvert, true));
 
 		return result;
 	}
@@ -602,6 +680,61 @@ namespace Test
         bool result = true;
 
         result = result && AnnUpdateWeightsDataTest(create, DH, EPS, true, FUNC_UW(SimdAnnUpdateWeights));
+
+        return result;
+    }
+
+    bool AnnAddConvolutionDataTest(bool create, int width, int height, float eps, int half, const FuncC2 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        View weights(Simd::Square(1 + 2*half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstSrc(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst1(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(width, height, View::Float, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom32f(src, 0, 1);
+            FillRandom32f(weights, -1, 1);
+            FillRandom32f(dstSrc, -1000, 1000);
+
+            TEST_SAVE(src);
+            TEST_SAVE(weights);
+            TEST_SAVE(dstSrc);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, (float*)weights.data, dstSrc, dstDst1));
+
+            TEST_SAVE(dstDst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(weights);
+            TEST_LOAD(dstSrc);
+
+            TEST_LOAD(dstDst1);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, (float*)weights.data, dstSrc, dstDst2));
+
+            TEST_SAVE(dstDst2);
+
+            result = Compare(dstDst1, dstDst2, eps, true, 32, false);
+        }
+
+        return result;
+    }
+
+    bool AnnAddConvolution3x3DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, FUNC_C2(SimdAnnAddConvolution3x3));
 
         return result;
     }

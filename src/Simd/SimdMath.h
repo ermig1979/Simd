@@ -217,6 +217,19 @@ namespace Simd
             d[offset] = _d;
             w[offset] += _d;
         }
+
+        SIMD_INLINE float Convolution3(const float * src, const float * weights)
+        {
+            return src[0]*weights[0] + src[1]*weights[1] + src[2]*weights[2];
+        }
+
+        SIMD_INLINE float Convolution3x3(const float * src, size_t stride, const float * weights)
+        {
+            return 
+                Convolution3(src, weights) +
+                Convolution3(src + stride, weights + 3) +
+                Convolution3(src + 2*stride, weights + 6);
+        }
 	}
 
 #ifdef SIMD_SSE_ENABLE

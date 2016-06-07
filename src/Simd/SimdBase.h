@@ -63,6 +63,8 @@ namespace Simd
 		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
         void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 		
 		void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
