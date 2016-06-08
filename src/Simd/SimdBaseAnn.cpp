@@ -95,12 +95,51 @@ namespace Simd
                 UpdateWeights(x, i, _a, _b, d, w);
         }
 
+        SIMD_INLINE float Convolution3(const float * src, const float * weights)
+        {
+            return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2];
+        }
+
+        SIMD_INLINE float Convolution3x3(const float * src, size_t stride, const float * weights)
+        {
+            return
+                Convolution3(src, weights) +
+                Convolution3(src + stride, weights + 3) +
+                Convolution3(src + 2 * stride, weights + 6);
+        }
+
         void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < width; ++col)
                     dst[col] += Convolution3x3(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        SIMD_INLINE float Convolution5(const float * src, const float * weights)
+        {
+            return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2] + src[3] * weights[3] + src[4] * weights[4];
+        }
+
+        SIMD_INLINE float Convolution5x5(const float * src, size_t stride, const float * weights)
+        {
+            return
+                Convolution5(src, weights) +
+                Convolution5(src + stride, weights + 5) +
+                Convolution5(src + 2 * stride, weights + 10) +
+                Convolution5(src + 3 * stride, weights + 15) +
+                Convolution5(src + 4 * stride, weights + 20);
+        }
+
+        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] += Convolution5x5(src + col, srcStride, weights);
                 src += srcStride;
                 dst += dstStride;
             }

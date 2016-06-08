@@ -217,19 +217,6 @@ namespace Simd
             d[offset] = _d;
             w[offset] += _d;
         }
-
-        SIMD_INLINE float Convolution3(const float * src, const float * weights)
-        {
-            return src[0]*weights[0] + src[1]*weights[1] + src[2]*weights[2];
-        }
-
-        SIMD_INLINE float Convolution3x3(const float * src, size_t stride, const float * weights)
-        {
-            return 
-                Convolution3(src, weights) +
-                Convolution3(src + stride, weights + 3) +
-                Convolution3(src + 2*stride, weights + 6);
-        }
 	}
 
 #ifdef SIMD_SSE_ENABLE
@@ -243,6 +230,14 @@ namespace Simd
         SIMD_INLINE __m128 Combine(__m128 mask, __m128 positive, __m128 negative)
         {
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
+        }
+
+        SIMD_INLINE __m128 RightNotZero(size_t count)
+        {
+            union { uint32_t i[4]; float f[4]; } b;
+            for (size_t i = 0; i < 4; ++i)
+                b.i[i] = ((count >= 4 - i) ? -1 : 0);
+            return _mm_loadu_ps(b.f);
         }
     }
 #endif//SIMD_SSE_ENABLE
@@ -408,6 +403,14 @@ namespace Simd
         SIMD_INLINE __m256 Combine(__m256 mask, __m256 positive, __m256 negative)
         {
             return _mm256_or_ps(_mm256_and_ps(mask, positive), _mm256_andnot_ps(mask, negative));
+        }
+
+        SIMD_INLINE __m256 RightNotZero(size_t count)
+        {
+            union { uint32_t i[8]; float f[8]; } b;
+            for (size_t i = 0; i < 8; ++i)
+                b.i[i] = ((count >= 8 - i) ? -1 : 0);
+            return _mm256_loadu_ps(b.f);
         }
     }
 #endif//SIMD_AVX_ENABLE

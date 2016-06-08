@@ -158,11 +158,17 @@ namespace Simd
                 AnnUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
+        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m128 dst[size])
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = _mm_set1_ps(src[i]);
+        }
+
         template <bool align> SIMD_INLINE __m128 Convolution3(const float * src, const __m128 * weights)
         {
-            return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), 
-                _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]), 
-                _mm_mul_ps(Load<false>(src + 2), weights[2])));
+            return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
+                _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]),
+                    _mm_mul_ps(Load<false>(src + 2), weights[2])));
         }
 
         template <bool align> SIMD_INLINE __m128 Convolution3x3(const float * src, size_t stride, const __m128 * weights)
@@ -172,29 +178,27 @@ namespace Simd
                 Convolution3<align>(src + 2 * stride, weights + 6)));
         }
 
-        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m128 dst[size])
-        {
-            for (size_t i = 0; i < size; ++i)
-                dst[i] = _mm_set1_ps(src[i]);
-        }
-
         template <bool align> void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, 4);
+            __m128 tailMask = RightNotZero(width - alignedWidth);
             __m128 _weights[9];
             LoadWeights<9>(weights, _weights);
-
             for (size_t row = 0; row < height; ++row)
             {
-                size_t col = 0;
-                for (; col < alignedWidth; col += 4)
+                for (size_t col = 0; col < alignedWidth; col += 4)
                 {
                     __m128 _dst = Load<align>(dst + col);
                     _dst = _mm_add_ps(_dst, Convolution3x3<align>(src + col, srcStride, _weights));
                     Store<align>(dst + col, _dst);
                 }
-                for (; col < width; ++col)
-                    dst[col] += Base::Convolution3x3(src + col, srcStride, weights);
+                if (width - alignedWidth)
+                {
+                    size_t col = width - 4;
+                    __m128 _dst = Load<false>(dst + col);
+                    _dst = _mm_add_ps(_dst, _mm_and_ps(tailMask, Convolution3x3<false>(src + col, srcStride, _weights)));
+                    Store<false>(dst + col, _dst);
+                }
                 src += srcStride;
                 dst += dstStride;
             }
@@ -206,6 +210,54 @@ namespace Simd
                 AnnAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
+        template <bool align> SIMD_INLINE __m128 Convolution5(const float * src, const __m128 * weights)
+        {
+            return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), _mm_add_ps(
+                _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]), _mm_mul_ps(Load<false>(src + 2), weights[2])),
+                _mm_add_ps(_mm_mul_ps(Load<false>(src + 3), weights[3]), _mm_mul_ps(Load<false>(src + 4), weights[4]))));
+        }
+
+        template <bool align> SIMD_INLINE __m128 Convolution5x5(const float * src, size_t stride, const __m128 * weights)
+        {
+            return _mm_add_ps(Convolution5<align>(src, weights), _mm_add_ps(
+                _mm_add_ps(Convolution5<align>(src + stride, weights + 5), Convolution5<align>(src + 2*stride, weights + 10)),
+                _mm_add_ps(Convolution5<align>(src + 3*stride, weights + 15), Convolution5<align>(src + 4*stride, weights + 20))));
+        }
+
+        template <bool align> void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t alignedWidth = AlignLo(width, 4);
+            __m128 tailMask = RightNotZero(width - alignedWidth);
+            __m128 _weights[25];
+            LoadWeights<25>(weights, _weights);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += 4)
+                {
+                    __m128 _dst = Load<align>(dst + col);
+                    _dst = _mm_add_ps(_dst, Convolution5x5<align>(src + col, srcStride, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - 4;
+                    __m128 _dst = Load<false>(dst + col);
+                    _dst = _mm_add_ps(_dst, _mm_and_ps(tailMask, Convolution5x5<false>(src + col, srcStride, _weights)));
+                    Store<false>(dst + col, _dst);
+                }                
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AnnAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
     }
 #endif// SIMD_SSE_ENABLE

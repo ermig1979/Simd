@@ -459,6 +459,25 @@ namespace Test
         return result;
     }
 
+    bool AnnAddConvolution5x5AutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Base::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Sse::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Avx::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
 	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
@@ -735,6 +754,15 @@ namespace Test
         bool result = true;
 
         result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, FUNC_C2(SimdAnnAddConvolution3x3));
+
+        return result;
+    }
+
+    bool AnnAddConvolution5x5DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, FUNC_C2(SimdAnnAddConvolution5x5));
 
         return result;
     }
