@@ -314,7 +314,7 @@ namespace Simd
                     size_t col = width - 8;
                     Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
                 }
-                src += srcStride;
+                src += 2*srcStride;
                 dst += dstStride;
             }
         }

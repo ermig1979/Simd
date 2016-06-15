@@ -175,7 +175,7 @@ namespace Simd
             {
                 for (size_t col = 0; col < width; col += 2)
                     dst[col>>1] = Max2x2(src + col, srcStride);
-                src += srcStride;
+                src += 2*srcStride;
                 dst += dstStride;
             }
         }
