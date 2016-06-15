@@ -654,6 +654,21 @@ extern "C"
     */
     SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
+    /*! @ingroup ann
+
+        \fn void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+        \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be lesser in 2 times).
+        \param [in] height - a height of the input image (output image height must be lesser in 2 times).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
     /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);

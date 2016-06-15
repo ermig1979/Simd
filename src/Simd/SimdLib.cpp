@@ -391,6 +391,21 @@ SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size
         Base::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= sizeof(__m256)*2)
+        Avx::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= sizeof(__m128)*2)
+        Sse::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

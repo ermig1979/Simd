@@ -158,5 +158,26 @@ namespace Simd
                 dst += dstStride;
             }
         }
+
+        SIMD_INLINE float Max2(const float * src)
+        {
+            return Simd::Max(src[0], src[1]);
+        }
+
+        SIMD_INLINE float Max2x2(const float * src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Max2(src + stride));
+        }
+
+        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t col = 0; col < width; col += 2)
+                    dst[col>>1] = Max2x2(src + col, srcStride);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 }

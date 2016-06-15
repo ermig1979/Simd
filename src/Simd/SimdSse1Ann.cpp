@@ -292,6 +292,40 @@ namespace Simd
             else
                 AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
+
+        template <bool align> SIMD_INLINE __m128 Max2x2(const float * src, size_t stride)
+        {
+            __m128 _src0 = _mm_max_ps(Load<align>(src + 0), Load<align>(src + stride + 0));
+            __m128 _src1 = _mm_max_ps(Load<align>(src + 4), Load<align>(src + stride + 4));
+            return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
+        }
+
+        template <bool align> void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            size_t alignedWidth = AlignLo(width, 8);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += 8)
+                {
+                    Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - 8;
+                    Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AnnMax2x2<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                AnnMax2x2<false>(src, srcStride, width, height, dst, dstStride);
+        }
     }
 #endif// SIMD_SSE_ENABLE
 }

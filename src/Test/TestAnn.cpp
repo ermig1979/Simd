@@ -512,6 +512,77 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncM
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncM(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride/sizeof(float), src.width, src.height, (float*)dst.data, dst.stride/sizeof(float));
+            }
+        };
+    }
+#define FUNC_M(function) FuncM(function, #function)
+
+    bool AnnMax2x2AutoTest(int width, int height, float eps, const FuncM & f1, const FuncM & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(src, -1, 1);
+
+        View dst1(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = Compare(dst1, dst2, eps, true, 32);
+
+        return result;
+    }
+
+    bool AnnMax2x2AutoTest(float eps, const FuncM & f1, const FuncM & f2)
+    {
+        bool result = true;
+
+        result = result && AnnMax2x2AutoTest(W, H, eps, f1, f2);
+        result = result && AnnMax2x2AutoTest(W - E, H + E, eps, f1, f2);
+        result = result && AnnMax2x2AutoTest(W + E, H - E, eps, f1, f2);
+
+        return result;
+    }
+
+    bool AnnMax2x2AutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Base::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Sse::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Avx::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
 	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
@@ -815,6 +886,53 @@ namespace Test
         bool result = true;
 
         result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, FUNC_C2(SimdAnnAddConvolution5x5));
+
+        return result;
+    }
+
+    bool AnnMax2x2DataTest(bool create, int width, int height, float eps, const FuncM & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dst1(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom32f(src, -1, 1);
+
+            TEST_SAVE(src);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, dst1));
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, dst2));
+
+            TEST_SAVE(dst2);
+
+            result = Compare(dst1, dst2, eps, true, 32);
+        }
+
+        return result;
+    }
+
+    bool AnnMax2x2DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnMax2x2DataTest(create, DW, DH, EPS, FUNC_M(SimdAnnMax2x2));
 
         return result;
     }
