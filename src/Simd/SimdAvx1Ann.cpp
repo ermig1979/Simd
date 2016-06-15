@@ -109,6 +109,38 @@ namespace Simd
 				AnnRoughSigmoid<false>(src, size, slope, dst);
 		}
 
+        template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 8);
+            __m256 _slope = _mm256_set1_ps(*slope);
+            __m256 _0 = _mm256_set1_ps(-0.0f);
+            __m256 _1 = _mm256_set1_ps(1.0f);
+            __m256 _0559 = _mm256_set1_ps(0.559f);
+            __m256 _0148 = _mm256_set1_ps(0.148f);
+            size_t i = 0;
+            for (; i < alignedSize; i += 8)
+            {
+                __m256 _src = Load<align>(src + i);
+                __m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
+                __m256 x2 = _mm256_mul_ps(x, x);
+                __m256 x4 = _mm256_mul_ps(x2, x2);
+                __m256 pe = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _0559), _mm256_mul_ps(x4, _0148)));
+                __m256 ne = _mm256_rcp_ps(pe);
+                __m256 absTanh = _mm256_mul_ps(_mm256_sub_ps(pe, ne), _mm256_rcp_ps(_mm256_add_ps(pe, ne)));
+                __m256 tanh = _mm256_xor_ps(absTanh, _mm256_and_ps(_0, _mm256_cmp_ps(_0, _src, _CMP_GT_OS)));
+                Store<align>(dst + i, tanh);
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::RoughTanh(src[i] * slope[0]);
+        }
+
+        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnRoughTanh<true>(src, size, slope, dst);
+            else
+                AnnRoughTanh<false>(src, size, slope, dst);
+        }
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const __m256 & a, const __m256 & b, float * d, float * w)
         {

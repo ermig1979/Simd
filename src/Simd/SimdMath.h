@@ -211,6 +211,20 @@ namespace Simd
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
 		}
 
+        SIMD_INLINE float Tanh(float value)
+        {
+            return ::tanh(value);
+        }
+
+        SIMD_INLINE float RoughTanh(float value)
+        {
+            float x = ::fabs(value);
+            float x2 = x*x;
+            float pe = 1.0f + x + x2*0.559f + x2*x2*0.148f;
+            float ne = 1.0f/pe;
+            return (value > 0 ? 1.0f : -1.0f)*(pe - ne)/(pe + ne);
+        }
+
         SIMD_INLINE void UpdateWeights(const float * x, size_t offset, float a, float b, float * d, float * w)
         {
             float _d = a*d[offset] + b*x[offset];

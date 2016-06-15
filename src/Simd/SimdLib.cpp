@@ -337,6 +337,22 @@ SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * 
 	simdAnnRoughSigmoid(src, size, slope, dst);
 }
 
+typedef void(*SimdAnnTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnTanhPtr simdAnnTanh = SIMD_FUNC0(AnnTanh);
+
+SIMD_API void SimdAnnTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdAnnTanh(src, size, slope, dst);
+}
+
+typedef void(*SimdAnnRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnRoughTanhPtr simdAnnRoughTanh = SIMD_FUNC3(AnnRoughTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdAnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdAnnRoughTanh(src, size, slope, dst);
+}
+
 typedef void(*SimdAnnUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 SimdAnnUpdateWeightsPtr simdAnnUpdateWeights = SIMD_FUNC2(AnnUpdateWeights, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 

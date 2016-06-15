@@ -167,6 +167,39 @@ namespace Simd
             else
                 AnnRoughSigmoid<false>(src, size, slope, dst);
         }
+
+        template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            float32x4_t _slope = vdupq_n_f32(*slope);
+            float32x4_t _0 = vdupq_n_f32(-0.0f);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t _0559 = vdupq_n_f32(0.559f);
+            float32x4_t _0148 = vdupq_n_f32(0.148f);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                float32x4_t _src = Load<align>(src + i);
+                float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
+                float32x4_t x2 = vmulq_f32(x, x);
+                float32x4_t x4 = vmulq_f32(x2, x2);
+                float32x4_t pe = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _0559), vmulq_f32(x4, _0148)));
+                float32x4_t ne = Reciprocal<1>(pe);
+                float32x4_t absTanh = vmulq_f32(vsubq_f32(pe, ne), Reciprocal<1>(vaddq_f32(pe, ne)));
+                float32x4_t tanh = (float32x4_t)veorq_u32((uint32x4_t)absTanh, vandq_u32((uint32x4_t)_0, vcgtq_f32(_0, _src)));
+                Store<align>(dst + i, tanh);
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::RoughTanh(src[i] * slope[0]);
+        }
+
+        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnRoughTanh<true>(src, size, slope, dst);
+            else
+                AnnRoughTanh<false>(src, size, slope, dst);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
