@@ -100,6 +100,13 @@ namespace Simd
                 dst[i] = RoughTanh(src[i] * s);
         }
 
+        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = slope[0];
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = s*DerivativeTanh(src[i]);
+        }
+
         void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
         {
             float _a = a[0], _b = b[0];

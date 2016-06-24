@@ -230,6 +230,11 @@ namespace Simd
             return (value > 0 ? 1.0f : -1.0f)*(pe - ne)/(pe + ne);
         }
 
+        SIMD_INLINE float DerivativeTanh(float function)
+        {
+            return (1.0f - function*function);
+        }
+
         SIMD_INLINE void UpdateWeights(const float * x, size_t offset, float a, float b, float * d, float * w)
         {
             float _d = a*d[offset] + b*x[offset];

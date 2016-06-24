@@ -361,6 +361,14 @@ SIMD_API void SimdAnnRoughTanh(const float * src, size_t size, const float * slo
     simdAnnRoughTanh(src, size, slope, dst);
 }
 
+typedef void(*SimdAnnDerivativeTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnDerivativeTanhPtr simdAnnDerivativeTanh = SIMD_FUNC2(AnnDerivativeTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdAnnDerivativeTanh(src, size, slope, dst);
+}
+
 typedef void(*SimdAnnUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 SimdAnnUpdateWeightsPtr simdAnnUpdateWeights = SIMD_FUNC2(AnnUpdateWeights, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 

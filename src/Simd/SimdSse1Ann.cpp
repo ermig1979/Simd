@@ -165,6 +165,29 @@ namespace Simd
                 AnnRoughTanh<false>(src, size, slope, dst);
         }
 
+        template <bool align> SIMD_INLINE void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            __m128 _slope = _mm_set1_ps(*slope);
+            __m128 _1 = _mm_set1_ps(1.0f);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                __m128 _src = Load<align>(src + i);
+                Store<align>(dst + i, _mm_mul_ps(_slope, _mm_sub_ps(_1, _mm_mul_ps(_src, _src))));
+            }
+            for (; i < size; ++i)
+                dst[i] = slope[0] * Base::DerivativeTanh(src[i]);
+        }
+
+        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnDerivativeTanh<true>(src, size, slope, dst);
+            else
+                AnnDerivativeTanh<false>(src, size, slope, dst);
+        }
+
         template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const __m128 & a, const __m128 & b, float * d, float * w)
         {
             __m128 _d = _mm_add_ps(_mm_mul_ps(a, Load<align>(d)), _mm_mul_ps(b, Load<align>(x)));

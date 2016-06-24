@@ -532,7 +532,7 @@ extern "C"
 
         \fn void SimdAnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
-        \short Calculates derivative sigmoid for 32-bit float array.
+        \short Calculates derivative of sigmoid for 32-bit float array.
 
         All arrays must have the same size.
 
@@ -595,6 +595,26 @@ extern "C"
         \param [out] dst - a pointer to output array.
     */
     SIMD_API void SimdAnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup ann
+
+        \fn void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates derivative of hyperbolic tangent for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] = slope*(1 - src[i]*src[i]);
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
 	/*! @ingroup ann
 

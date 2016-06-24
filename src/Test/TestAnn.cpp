@@ -352,6 +352,25 @@ namespace Test
         return result;
     }
 
+    bool AnnDerivativeTanhAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Sse::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Avx::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+#endif
+
+        return result;
+    }
+
     namespace
     {
         struct FuncUW
@@ -786,6 +805,15 @@ namespace Test
         bool result = true;
 
         result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, FUNC_A(SimdAnnRoughTanh));
+
+        return result;
+    }
+
+    bool AnnDerivativeTanhDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnDerivativeTanh));
 
         return result;
     }
