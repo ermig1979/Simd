@@ -62,6 +62,8 @@ namespace Simd
 
 		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
+        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
         void AnnTanh(const float * src, size_t size, const float * slope, float * dst);
 
         void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);

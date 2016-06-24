@@ -337,6 +337,14 @@ SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * 
 	simdAnnRoughSigmoid(src, size, slope, dst);
 }
 
+typedef void(*SimdAnnDerivativeSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdAnnDerivativeSigmoidPtr simdAnnDerivativeSigmoid = SIMD_FUNC2(AnnDerivativeSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdAnnDerivativeSigmoid(src, size, slope, dst);
+}
+
 typedef void(*SimdAnnTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
 SimdAnnTanhPtr simdAnnTanh = SIMD_FUNC0(AnnTanh);
 

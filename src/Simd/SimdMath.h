@@ -211,6 +211,11 @@ namespace Simd
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
 		}
 
+        SIMD_INLINE float DerivativeSigmoid(float function)
+        {
+            return (1.0f - function)*function;
+        }
+
         SIMD_INLINE float Tanh(float value)
         {
             return ::tanh(value);

@@ -109,6 +109,29 @@ namespace Simd
 				AnnRoughSigmoid<false>(src, size, slope, dst);
 		}
 
+        template <bool align> SIMD_INLINE void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 8);
+            __m256 _slope = _mm256_set1_ps(*slope);
+            __m256 _1 = _mm256_set1_ps(1.0f);
+            size_t i = 0;
+            for (; i < alignedSize; i += 8)
+            {
+                __m256 _src = Load<align>(src + i);
+                Store<align>(dst + i, _mm256_mul_ps(_slope, _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
+            }
+            for (; i < size; ++i)
+                dst[i] = slope[0] * Base::DerivativeSigmoid(src[i]);
+        }
+
+        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnDerivativeSigmoid<true>(src, size, slope, dst);
+            else
+                AnnDerivativeSigmoid<false>(src, size, slope, dst);
+        }
+
         template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 8);

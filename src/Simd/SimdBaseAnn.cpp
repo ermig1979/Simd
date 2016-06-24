@@ -79,6 +79,13 @@ namespace Simd
 				dst[i] = RoughSigmoid(src[i] * s);
 		}
 
+        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = slope[0];
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = s*DerivativeSigmoid(src[i]);
+        }
+
         void AnnTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];

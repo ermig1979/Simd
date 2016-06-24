@@ -81,7 +81,7 @@ namespace Test
 	TEST_ADD_GROUP(AnnConvert);
 	TEST_ADD_GROUP(AnnProductSum);
     TEST_ADD_GROUP(AnnSigmoid);
-	TEST_ADD_GROUP(AnnRoughSigmoid);
+	TEST_ADD_GROUP(AnnDerivativeSigmoid);
     TEST_ADD_GROUP(AnnTanh);
     TEST_ADD_GROUP(AnnRoughTanh);
     TEST_ADD_GROUP(AnnUpdateWeights);

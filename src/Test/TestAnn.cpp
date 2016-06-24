@@ -299,6 +299,25 @@ namespace Test
 		return result;
 	}
 
+    bool AnnDerivativeSigmoidAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Sse::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Avx::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+#endif
+
+        return result;
+    }
+
 
     bool AnnTanhAutoTest()
     {
@@ -743,6 +762,15 @@ namespace Test
 
 		return result;
 	}
+
+    bool AnnDerivativeSigmoidDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnDerivativeSigmoid));
+
+        return result;
+    }
 
     bool AnnTanhDataTest(bool create)
     {
