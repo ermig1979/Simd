@@ -29,6 +29,7 @@
 
 #include <memory.h>
 #include <assert.h>
+#include <algorithm>
 
 namespace Simd
 {
@@ -426,6 +427,13 @@ namespace Simd
         */
         static Format OcvTo(int type);
 #endif
+
+        /*!
+            Swaps content of two (this and other) View  structures.
+
+            \param [in] other - an other image view.
+        */
+        void Swap(View & other);
 
     private:
         bool _owner;
@@ -886,6 +894,16 @@ namespace Simd
         }
     }
 #endif
+
+    template <class A> SIMD_INLINE void View<A>::Swap(View<A> & other)
+    {
+        std::swap((size_t&)width, (size_t&)other.width);
+        std::swap((size_t&)height, (size_t&)other.height);
+        std::swap((ptrdiff_t&)stride, (ptrdiff_t&)other.stride);
+        std::swap((Format&)format, (Format&)other.format);
+        std::swap((uint8_t*)data, (uint8_t*)other.data);
+        std::swap((bool&)_owner, (bool&)other._owner);
+    }
 
     // View utilities implementation:
 

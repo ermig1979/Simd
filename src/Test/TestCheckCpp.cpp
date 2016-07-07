@@ -58,6 +58,7 @@ namespace Test
         sv = cm;
         cm = sv;
 #endif
+        sv.Swap(vs);
     }
 
     static void TestFrame()
