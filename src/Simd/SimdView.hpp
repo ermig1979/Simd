@@ -901,7 +901,7 @@ namespace Simd
         std::swap((size_t&)height, (size_t&)other.height);
         std::swap((ptrdiff_t&)stride, (ptrdiff_t&)other.stride);
         std::swap((Format&)format, (Format&)other.format);
-        std::swap((uint8_t*)data, (uint8_t*)other.data);
+        std::swap((uint8_t*&)data, (uint8_t*&)other.data);
         std::swap((bool&)_owner, (bool&)other._owner);
     }
 
