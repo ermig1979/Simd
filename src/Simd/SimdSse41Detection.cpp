@@ -679,7 +679,7 @@ namespace Simd
 
         void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
         {
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);
             size_t evenWidth = Simd::AlignLo(width, 2);
             Buffer<uint16_t> buffer(width);
@@ -731,7 +731,7 @@ namespace Simd
         void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
         {
             const size_t step = 2;
-            size_t width = mask.width;
+            size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, A);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
