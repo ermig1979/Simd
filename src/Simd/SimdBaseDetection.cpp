@@ -385,9 +385,7 @@ namespace Simd
             return hid;
         }
 
-        typedef Detection::View View;
-
-        template <class T> SIMD_INLINE T * SumElemPtr(const View & view, ptrdiff_t row, ptrdiff_t col, bool throughColumn)
+        template <class T> SIMD_INLINE T * SumElemPtr(const Image & view, ptrdiff_t row, ptrdiff_t col, bool throughColumn)
         {
             assert(view.ChannelCount() == 1 && view.ChannelSize() == sizeof(T));
             assert(row >= 0 && col >= 0 && col < (ptrdiff_t)view.width && row < (ptrdiff_t)view.height);
@@ -403,7 +401,7 @@ namespace Simd
                 return (T*)& view.At<T>(col, row);
         }
 
-        static void InitBase(HidHaarCascade * hid, const View & sum, const View & sqsum, const View & tilted)
+        static void InitBase(HidHaarCascade * hid, const Image & sum, const Image & sqsum, const Image & tilted)
         {
             Rect rect(1, 1, hid->origWinSize.x - 1, hid->origWinSize.y - 1);
             hid->windowArea = (float)rect.Area();
@@ -425,8 +423,8 @@ namespace Simd
 
         template<class T> SIMD_INLINE void UpdateFeaturePtrs(HidHaarCascade * hid, const Data & data)
         {
-            View sum = hid->isThroughColumn ? hid->isum : hid->sum;
-            View tilted = hid->isThroughColumn ? hid->itilted : hid->tilted;
+            Image sum = hid->isThroughColumn ? hid->isum : hid->sum;
+            Image tilted = hid->isThroughColumn ? hid->itilted : hid->tilted;
             for (size_t i = 0; i < hid->features.size(); i++)
             {
                 const Data::HaarFeature & df = data.haarFeatures[i];
@@ -463,7 +461,7 @@ namespace Simd
             }
         }
 
-        HidHaarCascade * InitHaar(const Data & data, const View & sum, const View & sqsum, const View & tilted, bool throughColumn)
+        HidHaarCascade * InitHaar(const Data & data, const Image & sum, const Image & sqsum, const Image & tilted, bool throughColumn)
         {
             if (!data.isStumpBased)
                 SIMD_EX("Can't use tree classfier for vector haar classifier!");
@@ -473,9 +471,9 @@ namespace Simd
             if (throughColumn)
             {
                 hid->isThroughColumn = true;
-                hid->isum.Recreate(sum.width, sum.height, View::Int32, NULL, View::PixelSize(View::Int32));
+                hid->isum.Recreate(sum.width, sum.height, Image::Int32, NULL, Image::PixelSize(Image::Int32));
                 if (hid->hasTilted)
-                    hid->itilted.Recreate(tilted.width, tilted.height, View::Int32, NULL, View::PixelSize(View::Int32));
+                    hid->itilted.Recreate(tilted.width, tilted.height, Image::Int32, NULL, Image::PixelSize(Image::Int32));
             }
             UpdateFeaturePtrs<uint32_t>(hid, data);
             return hid;
@@ -574,7 +572,7 @@ namespace Simd
 
         template<class TLeave, class TSum> SIMD_INLINE void UpdateFeaturePtrs(HidLbpCascade<TLeave, TSum> * hid)
         {
-            View sum = (hid->isThroughColumn || hid->isInt16) ? hid->isum : hid->sum;
+            Image sum = (hid->isThroughColumn || hid->isInt16) ? hid->isum : hid->sum;
             for (size_t i = 0; i < hid->features.size(); i++)
             {
                 typename HidLbpCascade<TLeave, TSum>::Feature& feature = hid->features[i];
@@ -590,15 +588,15 @@ namespace Simd
             }
         }
 
-        HidBase * InitLbp(const Data & data, const View & sum, bool throughColumn, bool int16)
+        HidBase * InitLbp(const Data & data, const Image & sum, bool throughColumn, bool int16)
         {
-            assert(sum.format == View::Int32);
+            assert(sum.format == Image::Int32);
             if (int16 && data.canInt16)
             {
                 HidLbpCascade<int, short> * hid = CreateHidLbp<int, short>(data);
                 hid->isThroughColumn = throughColumn;
                 hid->sum = sum;
-                hid->isum.Recreate(sum.Size(), View::Int16);
+                hid->isum.Recreate(sum.Size(), Image::Int16);
                 UpdateFeaturePtrs(hid);
                 return hid;
             }
@@ -608,7 +606,7 @@ namespace Simd
                 hid->isThroughColumn = throughColumn;
                 hid->sum = sum;
                 if (throughColumn)
-                    hid->isum.Recreate(sum.Size(), View::Int32);
+                    hid->isum.Recreate(sum.Size(), Image::Int32);
                 UpdateFeaturePtrs(hid);
                 return hid;
             }
@@ -622,13 +620,13 @@ namespace Simd
             {
             case SimdDetectionInfoFeatureHaar:
                 return InitHaar(data,
-                    View(width, height, sumStride, View::Int32, sum),
-                    View(width, height, sqsumStride, View::Int32, sqsum),
-                    View(width, height, tiltedStride, View::Int32, tilted),
+                    Image(width, height, sumStride, Image::Int32, sum),
+                    Image(width, height, sqsumStride, Image::Int32, sqsum),
+                    Image(width, height, tiltedStride, Image::Int32, tilted),
                     throughColumn != 0);
             case SimdDetectionInfoFeatureLbp:
                 return InitLbp(data,
-                    View(width, height, sumStride, View::Int32, sum),
+                    Image(width, height, sumStride, Image::Int32, sum),
                     throughColumn != 0,
                     int16 != 0);
             default:
@@ -636,9 +634,9 @@ namespace Simd
             }
         }
 
-        void PrepareThroughColumn32i(const View & src, View & dst)
+        void PrepareThroughColumn32i(const Image & src, Image & dst)
         {
-            assert(Simd::Compatible(src, dst) && src.format == View::Int32);
+            assert(Simd::Compatible(src, dst) && src.format == Image::Int32);
 
             for (size_t row = 0; row < src.height; ++row)
             {
@@ -654,9 +652,9 @@ namespace Simd
             }
         }
 
-        void Prepare16i(const View & src, bool throughColumn, View & dst)
+        void Prepare16i(const Image & src, bool throughColumn, Image & dst)
         {
-            assert(Simd::EqualSize(src, dst) && src.format == View::Int32 && dst.format == View::Int16);
+            assert(Simd::EqualSize(src, dst) && src.format == Image::Int32 && dst.format == Image::Int16);
 
             if (throughColumn)
             {
@@ -749,7 +747,7 @@ namespace Simd
             return 1;
         }
 
-        void DetectionHaarDetect32fp(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionHaarDetect32fp(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
@@ -771,12 +769,12 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
             {
@@ -798,12 +796,12 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fi(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
@@ -823,12 +821,12 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fp(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
             {
@@ -848,12 +846,12 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fi(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
@@ -873,12 +871,12 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ip(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
             {
@@ -898,9 +896,9 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ii(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
         void DetectionFree(void * ptr)

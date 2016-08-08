@@ -221,9 +221,7 @@ namespace Simd
             }
         }
 
-        typedef Detection::View View;
-
-        void DetectionHaarDetect32fp(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionHaarDetect32fp(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             typedef HidHaarCascade Hid;
 
@@ -277,12 +275,12 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             typedef HidHaarCascade Hid;
 
@@ -338,9 +336,9 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fi(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
         const __m128i K8_SHUFFLE_BITS = SIMD_MM_SETR_EPI8(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
@@ -457,7 +455,7 @@ namespace Simd
             }
         }
 
-        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, 4);
@@ -505,12 +503,12 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fp(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             const size_t step = 2;
             size_t width = rect.Width();
@@ -560,9 +558,9 @@ namespace Simd
         {
             const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
             return DetectionLbpDetect32fi(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
         SIMD_INLINE __m128i IntegralSum16i(const __m128i & s0, const __m128i & s1, const __m128i & s2, const __m128i & s3)
@@ -677,7 +675,7 @@ namespace Simd
             }
         }
 
-        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);
@@ -723,12 +721,12 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ip(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const View & mask, const Rect & rect, View & dst)
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             const size_t step = 2;
             size_t width = rect.Width();
@@ -775,9 +773,9 @@ namespace Simd
         {
             const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
             return DetectionLbpDetect16ii(hid,
-                View(hid.sum.width - 1, hid.sum.height - 1, maskStride, View::Gray8, (uint8_t*)mask),
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
-                View(hid.sum.width - 1, hid.sum.height - 1, dstStride, View::Gray8, dst).Ref());
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
     }
 #endif//SIMD_SSE41_ENABLE

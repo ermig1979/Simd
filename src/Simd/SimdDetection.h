@@ -36,7 +36,7 @@ namespace Simd
 {
     namespace Detection
     {
-        typedef Simd::View<Simd::Allocator> View;
+        typedef Simd::View<Simd::Allocator> Image;
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
 
@@ -188,8 +188,8 @@ namespace Simd
             uint32_t *pq[4];
             uint32_t *p[4];
 
-            View sum, sqsum, tilted;
-            View isum, itilted;
+            Image sum, sqsum, tilted;
+            Image isum, itilted;
 
             virtual ~HidHaarCascade() 
             {
@@ -244,8 +244,8 @@ namespace Simd
             Subsets subsets;
             Features features;
 
-            View sum;
-            View isum;
+            Image sum;
+            Image isum;
 
             virtual ~HidLbpCascade() {}
         };
