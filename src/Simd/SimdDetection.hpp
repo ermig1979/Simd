@@ -78,7 +78,7 @@ namespace Simd
 	struct Detection
 	{
 		typedef A Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<Simd::Allocator> View; /*!< An image type definition. */
+        typedef Simd::View<Allocator> View; /*!< An image type definition. */
         typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
         typedef std::vector<Size> Sizes; /*!< A vector of image sizes type definition. */
         typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
