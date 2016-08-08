@@ -691,7 +691,7 @@ namespace Simd
             {
                 Rect r1 = buffer[i].rect;
                 int n1 = buffer[i].weight;
-                if (n1 < groupSizeMin)
+                if (n1 < (int)groupSizeMin)
                     continue;
 
                 size_t j;
@@ -699,7 +699,7 @@ namespace Simd
                 {
                     int n2 = buffer[j].weight;
 
-                    if (j == i || n2 < groupSizeMin)
+                    if (j == i || n2 < (int)groupSizeMin)
                         continue;
 
                     Rect r2 = buffer[j].rect;

@@ -237,7 +237,7 @@ namespace Simd
                 AnnUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
-        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m128 dst[size])
+        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m128 * dst)
         {
             for (size_t i = 0; i < size; ++i)
                 dst[i] = _mm_set1_ps(src[i]);

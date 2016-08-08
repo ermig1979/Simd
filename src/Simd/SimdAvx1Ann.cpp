@@ -251,7 +251,7 @@ namespace Simd
                     Convolution3<align>(src + 2 * stride, weights + 6)));
         }
 
-        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m256 dst[size])
+        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m256 * dst)
         {
             for (size_t i = 0; i < size; ++i)
                 dst[i] = _mm256_set1_ps(src[i]);
