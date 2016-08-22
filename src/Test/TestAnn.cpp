@@ -579,8 +579,8 @@ namespace Test
         View src(width, height, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(src, -1, 1);
 
-        View dst1(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
-        View dst2(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+        View dst1(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
@@ -955,8 +955,8 @@ namespace Test
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Float, NULL, TEST_ALIGN(width));
-        View dst1(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
-        View dst2(width*2, height*2, View::Float, NULL, TEST_ALIGN(width));
+        View dst1(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
 
         if (create)
         {
