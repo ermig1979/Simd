@@ -235,6 +235,9 @@ namespace Simd
                 }
             }
 
+            for (size_t i = 0; i < _workers.size(); ++i)
+                _workers[i]->Slack();
+
             objects.clear();
             for (typename Candidates::iterator it = candidates.begin(); it != candidates.end(); ++it)
                 GroupObjects(objects, it->second, groupSizeMin, sizeDifferenceMax);
@@ -334,6 +337,7 @@ namespace Simd
         {
             Worker()
                 : _run(true)
+                , _slack(true)
             {
                 _thread = std::thread(&Worker::Run, this);
             }
@@ -358,6 +362,11 @@ namespace Simd
                     _cv.wait(lk);
             }
 
+            void Slack()
+            {
+                _slack = true;
+            }
+
         private:
             struct Task
             {
@@ -377,7 +386,7 @@ namespace Simd
             };
             typedef std::shared_ptr<Task> TaskPtr;
             typedef std::queue<TaskPtr> TaskPtrs;
-            volatile bool _run;
+            volatile bool _run, _slack;
             TaskPtrs _tasks;
             std::thread _thread;
             std::mutex _mutex;
@@ -389,11 +398,14 @@ namespace Simd
                 {
                     if (_tasks.size())
                     {
+                        _slack = false;
                         _tasks.front()->Run();
                         std::unique_lock<std::mutex> lk(_mutex);
                         _tasks.pop();
                         _cv.notify_one();
                     }
+                    if(_slack)
+                        std::this_thread::sleep_for(std::chrono::microseconds(1));
                     std::this_thread::yield();
                 }
             }        
@@ -407,6 +419,7 @@ namespace Simd
 
         void InitWorkers(ptrdiff_t threadNumber)
         {
+            _workers.clear();
             ptrdiff_t threadNumberMax = std::thread::hardware_concurrency();
             if (threadNumber <= 0 || threadNumber > threadNumberMax)
                 threadNumber = threadNumberMax;
