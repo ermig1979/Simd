@@ -188,6 +188,70 @@ namespace Simd
                 AnnDerivativeTanh<false>(src, size, slope, dst);
         }
 
+        template <bool align> void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = slope[0];
+            assert(s >= 0.0f && a <= 1.0f);
+            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t i = 0;
+            if (s == 0)
+            {
+                __m256 _0 = _mm256_set1_ps(0.0f);
+                for (; i < alignedSize; i += 8)
+                {
+                    __m256 _src = Load<align>(src + i);
+                    Store<align>(dst + i, _mm256_max_ps(_0, _src));
+                }
+                for (; i < size; ++i)
+                    dst[i] = Simd::Max(0.0f, src[i]);
+            }
+            else
+            {
+                __m256 _s = _mm256_set1_ps(s);
+                for (; i < alignedSize; i += 8)
+                {
+                    __m256 _src = Load<align>(src + i);
+                    Store<align>(dst + i, _mm256_max_ps(_mm256_mul_ps(_s, _src), _src));
+                }
+                for (; i < size; ++i)
+                    dst[i] = Simd::Max(src[i] * s, src[i]);
+            }
+        }
+
+        void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnRelu<true>(src, size, slope, dst);
+            else
+                AnnRelu<false>(src, size, slope, dst);
+        }
+
+
+        template <bool align> void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = -slope[0];
+            __m256 _0 = _mm256_set1_ps(0.0f);
+            __m256 _s = _mm256_set1_ps(s);
+            __m256 d = _mm256_set1_ps(1.0f - s);
+            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t i = 0;
+            for (; i < alignedSize; i += 8)
+            {
+                __m256 mask = _mm256_cmp_ps(Load<align>(src + i), _0, _CMP_GT_OS);
+                Store<align>(dst + i, _mm256_add_ps(_s, _mm256_and_ps(mask, d)));
+            }
+            for (; i < size; ++i)
+                dst[i] = src[i] > 0 ? 1.0f : s;
+        }
+
+        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnDerivativeRelu<true>(src, size, slope, dst);
+            else
+                AnnDerivativeRelu<false>(src, size, slope, dst);
+        }
+
         template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const __m256 & a, const __m256 & b, float * d, float * w)
         {
             __m256 _d = _mm256_add_ps(_mm256_mul_ps(a, Load<align>(d)), _mm256_mul_ps(b, Load<align>(x)));

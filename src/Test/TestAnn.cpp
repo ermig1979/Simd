@@ -227,7 +227,7 @@ namespace Test
 	}
 #define FUNC_A(function) FuncA(function, #function)
 
-	bool AnnActivateFunctionAutoTest(int size, float error, bool relative, const FuncA & f1, const FuncA & f2)
+	bool AnnActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncA & f1, const FuncA & f2)
 	{
 		bool result = true;
 
@@ -235,8 +235,6 @@ namespace Test
 
 		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
 		FillRandom32f(src, -10.0f, 10.0f);
-
-		float slope = 3.0;
 
 		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
 		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
@@ -250,13 +248,13 @@ namespace Test
 		return result;
 	}
 
-	bool AnnActivateFunctionAutoTest(float error, bool relative, const FuncA & f1, const FuncA & f2)
+	bool AnnActivateFunctionAutoTest(float error, bool relative, float slope, const FuncA & f1, const FuncA & f2)
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(W*H, error, relative, f1, f2);
-		result = result && AnnActivateFunctionAutoTest(W*H + O, error, relative, f1, f2);
-		result = result && AnnActivateFunctionAutoTest(W*H - O, error, relative, f1, f2);
+		result = result && AnnActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
+		result = result && AnnActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
+		result = result && AnnActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
 
 		return result;
 	}
@@ -265,7 +263,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnSigmoid), FUNC_A(SimdAnnSigmoid));
+		result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnSigmoid), FUNC_A(SimdAnnSigmoid));
 
 		return result;
 	}
@@ -274,26 +272,26 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+		result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
 
 #ifdef SIMD_SSE_ENABLE
 		if (Simd::Sse::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Sse::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
 		if (Simd::Avx::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Avx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Vsx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Vsx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Neon::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Neon::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
 #endif
 
 		return result;
@@ -303,16 +301,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+        result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Sse::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Avx::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
 #endif
 
         return result;
@@ -323,7 +321,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, false, FUNC_A(Simd::Base::AnnTanh), FUNC_A(SimdAnnTanh));
+        result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Base::AnnTanh), FUNC_A(SimdAnnTanh));
 
         return result;
     }
@@ -332,21 +330,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, false, FUNC_A(Simd::Base::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+        result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Base::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, FUNC_A(Simd::Sse::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Sse::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, FUNC_A(Simd::Avx::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Avx::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, FUNC_A(Simd::Neon::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Neon::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
 #endif
 
         return result;
@@ -356,16 +354,54 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Base::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+        result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Sse::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, FUNC_A(Simd::Avx::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+#endif
+
+        return result;
+    }
+
+    bool AnnReluAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Base::AnnRelu), FUNC_A(SimdAnnRelu));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Sse::AnnRelu), FUNC_A(SimdAnnRelu));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Avx::AnnRelu), FUNC_A(SimdAnnRelu));
+#endif
+
+        return result;
+    }
+
+    bool AnnDerivativeReluAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Base::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Sse::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Avx::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
 #endif
 
         return result;
@@ -724,7 +760,7 @@ namespace Test
     }
 
 
-	bool AnnActivateFunctionDataTest(bool create, int size, float error, bool relative, const FuncA & f)
+	bool AnnActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncA & f)
 	{
 		bool result = true;
 
@@ -735,8 +771,6 @@ namespace Test
 		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
 		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
 		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
-
-		float slope = 3.0;
 
 		if (create)
 		{
@@ -768,7 +802,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnSigmoid));
+		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnSigmoid));
 
 		return result;
 	}
@@ -777,7 +811,7 @@ namespace Test
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnRoughSigmoid));
+		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnRoughSigmoid));
 
 		return result;
 	}
@@ -786,7 +820,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnDerivativeSigmoid));
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnDerivativeSigmoid));
 
         return result;
     }
@@ -795,7 +829,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, FUNC_A(SimdAnnTanh));
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_A(SimdAnnTanh));
 
         return result;
     }
@@ -804,7 +838,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, FUNC_A(SimdAnnRoughTanh));
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_A(SimdAnnRoughTanh));
 
         return result;
     }
@@ -813,7 +847,25 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, FUNC_A(SimdAnnDerivativeTanh));
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnDerivativeTanh));
+
+        return result;
+    }
+
+    bool AnnReluDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 0.5f, FUNC_A(SimdAnnRelu));
+
+        return result;
+    }
+
+    bool AnnDerivativeReluDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 0.5f, FUNC_A(SimdAnnDerivativeRelu));
 
         return result;
     }

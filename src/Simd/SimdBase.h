@@ -70,6 +70,10 @@ namespace Simd
 
         void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
+        void AnnRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
         void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);

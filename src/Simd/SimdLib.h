@@ -616,6 +616,46 @@ extern "C"
     */
     SIMD_API void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
+    /*! @ingroup ann
+
+        \fn void SimdAnnRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates Relu (rectified linear unit) function for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdAnnRelu(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup ann
+
+        \fn void SimdAnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates derivative Relu (rectified linear unit) function for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] =  src[i] > 0 ? 1 : -slope;
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdAnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
 	/*! @ingroup ann
 
 		\fn void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);

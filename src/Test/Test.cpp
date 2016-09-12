@@ -85,6 +85,8 @@ namespace Test
     TEST_ADD_GROUP(AnnTanh);
     TEST_ADD_GROUP(AnnRoughTanh);
     TEST_ADD_GROUP(AnnDerivativeTanh);
+    TEST_ADD_GROUP(AnnRelu);
+    TEST_ADD_GROUP(AnnDerivativeRelu);
     TEST_ADD_GROUP(AnnUpdateWeights);
     TEST_ADD_GROUP(AnnAddConvolution3x3);
     TEST_ADD_GROUP(AnnAddConvolution5x5);
