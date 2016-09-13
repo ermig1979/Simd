@@ -1244,9 +1244,32 @@ namespace Simd
         */
     template<class A> SIMD_INLINE void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
     {
-        assert(EqualSize(bgr, b, g, r) && bgr.format == View<A>::Bgr24 && b.format == View<A>::Gray8 && g.format == View<A>::Gray8 && r.format == View<A>::Gray8);
+        assert(EqualSize(bgr, b) && Compatible(b, g, r) && bgr.format == View<A>::Bgr24 && b.format == View<A>::Gray8);
 
         SimdDeinterleaveBgr(bgr.data, bgr.stride, bgr.width, bgr.height, b.data, b.stride, g.data, g.stride, r.data, r.stride);
+    }
+
+    /*! @ingroup other_conversion
+
+        \fn void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
+
+        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdDeinterleaveBgra.
+
+        \param [in] bgra - an input 32-bit BGRA interleaved image.
+        \param [out] b - an output 8-bit Blue planar image.
+        \param [out] g - an output 8-bit Green planar image.
+        \param [out] r - an output 8-bit Red planar image.
+        \param [out] a - an output 8-bit Alpha planar image.
+    */
+    template<class A> SIMD_INLINE void DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a)
+    {
+        assert(EqualSize(bgra, b) && Compatible(b, g, r, a) && bgra.format == View<A>::Bgr24 && b.format == View<A>::Gray8);
+
+        SimdDeinterleaveBgra(bgra.data, bgra.stride, bgra.width, bgra.height, b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride);
     }
 
     /*! @ingroup edge_background

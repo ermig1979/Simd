@@ -60,5 +60,25 @@ namespace Simd
                 r += rStride;
             }
         }
+
+        void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < width; ++col, offset += 4)
+                {
+                    b[col] = bgra[offset + 0];
+                    g[col] = bgra[offset + 1];
+                    r[col] = bgra[offset + 2];
+                    a[col] = bgra[offset + 3];
+                }
+                bgra += bgraStride;
+                b += bStride;
+                g += gStride;
+                r += rStride;
+                a += aStride;
+            }
+        }
     }
 }

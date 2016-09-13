@@ -1738,10 +1738,36 @@ extern "C"
         \param [out] g - a pointer to pixels data of 8-bit Green planar image.
         \param [in] gStride - a row size of the g image.
         \param [out] r - a pointer to pixels data of 8-bit Red planar image.
-        \param [in] rStride - a row size of the g image.
+        \param [in] rStride - a row size of the r image.
     */
     SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, 
         uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
+
+    /*! @ingroup other_conversion
+
+        \fn void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
+
+        \short Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a).
+
+        \param [in] bgra - a pointer to pixels data of input 32-bit BGRA interleaved image.
+        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] b - a pointer to pixels data of 8-bit Blue planar image.
+        \param [in] bStride - a row size of the b image.
+        \param [out] g - a pointer to pixels data of 8-bit Green planar image.
+        \param [in] gStride - a row size of the g image.
+        \param [out] r - a pointer to pixels data of 8-bit Red planar image.
+        \param [in] rStride - a row size of the r image.
+        \param [out] a - a pointer to pixels data of 8-bit Alpha planar image.
+        \param [in] aStride - a row size of the a image.
+    */
+    SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
+        uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
     /*! @ingroup object_detection
 
