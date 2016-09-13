@@ -1227,6 +1227,28 @@ namespace Simd
         SimdDeinterleaveUv(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
     }
 
+    /*! @ingroup other_conversion
+
+        \fn void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
+
+        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdDeinterleaveBgr.
+
+        \param [in] bgr - an input 24-bit BGR interleaved image.
+        \param [out] b - an output 8-bit Blue planar image.
+        \param [out] g - an output 8-bit Green planar image.
+        \param [out] r - an output 8-bit Red planar image.
+        */
+    template<class A> SIMD_INLINE void DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r)
+    {
+        assert(EqualSize(bgr, b, g, r) && bgr.format == View<A>::Bgr24 && b.format == View<A>::Gray8 && g.format == View<A>::Gray8 && r.format == View<A>::Gray8);
+
+        SimdDeinterleaveBgr(bgr.data, bgr.stride, bgr.width, bgr.height, b.data, b.stride, g.data, g.stride, r.data, r.stride);
+    }
+
     /*! @ingroup edge_background
 
         \fn void EdgeBackgroundGrowRangeSlow(const View<A>& value, View<A>& background)

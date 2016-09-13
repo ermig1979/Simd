@@ -52,7 +52,9 @@ namespace Simd
 
         void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
+
+        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
         void GrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);

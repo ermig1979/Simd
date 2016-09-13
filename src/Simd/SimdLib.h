@@ -1719,6 +1719,30 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
+    /*! @ingroup other_conversion
+
+        \fn void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
+
+        \short Deinterleaves 24-bit BGR interleaved image into separated 8-bit Blue, Green and Red planar images.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r).
+
+        \param [in] bgr - a pointer to pixels data of input 24-bit BGR interleaved image.
+        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] b - a pointer to pixels data of 8-bit Blue planar image.
+        \param [in] bStride - a row size of the b image.
+        \param [out] g - a pointer to pixels data of 8-bit Green planar image.
+        \param [in] gStride - a row size of the g image.
+        \param [out] r - a pointer to pixels data of 8-bit Red planar image.
+        \param [in] rStride - a row size of the g image.
+    */
+    SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, 
+        uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
+
     /*! @ingroup object_detection
 
         \fn void * SimdDetectionLoadA(const char * path);

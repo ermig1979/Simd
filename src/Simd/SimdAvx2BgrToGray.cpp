@@ -47,7 +47,7 @@ namespace Simd
             return PackU16ToU8(lo, hi);
         }
 
-        SIMD_INLINE __m256i PermuteAndShiffle(__m256i bgr, __m256i permute, __m256i shuffle)
+        SIMD_INLINE __m256i PermuteAndShuffle(__m256i bgr, __m256i permute, __m256i shuffle)
         {
             return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), shuffle);
         }
@@ -55,10 +55,10 @@ namespace Simd
         template <bool align> SIMD_INLINE __m256i BgrToGray(const uint8_t * bgr, __m256i permuteBody, __m256i permuteTail, __m256i shuffle)
         {
             __m256i bgra[4];
-            bgra[0] = _mm256_or_si256(K32_01000000, PermuteAndShiffle(Load<align>((__m256i*)(bgr + 0)), permuteBody, shuffle));
-            bgra[1] = _mm256_or_si256(K32_01000000, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 24)), permuteBody, shuffle));
-            bgra[2] = _mm256_or_si256(K32_01000000, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 48)), permuteBody, shuffle));
-            bgra[3] = _mm256_or_si256(K32_01000000, PermuteAndShiffle(Load<align>((__m256i*)(bgr + 64)), permuteTail, shuffle));
+            bgra[0] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 0)), permuteBody, shuffle));
+            bgra[1] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 24)), permuteBody, shuffle));
+            bgra[2] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 48)), permuteBody, shuffle));
+            bgra[3] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 64)), permuteTail, shuffle));
             return BgraToGray(bgra);
         }
 

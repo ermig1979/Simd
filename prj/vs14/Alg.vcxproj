@@ -21,49 +21,49 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\Simd*.h" />
     <ClInclude Include="..\..\src\Simd\Simd*.hpp" />
-	<ClCompile Include="..\..\src\Simd\SimdBase*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdBase*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdSse1*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse1*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdSse2*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse2*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdSsse3*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSsse3*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdSse41*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdSse42*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse42*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx1*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx1*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(PlatformToolset)'=='v140'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(PlatformToolset)'=='v120'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdNeon*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdNeon*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdVmx*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdVmx*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdVsx*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdVsx*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
-    </ClCompile>	
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

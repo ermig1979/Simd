@@ -191,7 +191,7 @@ namespace Simd
         template <bool align> void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
-            assert(s >= 0.0f && a <= 1.0f);
+            assert(s >= 0.0f && s <= 1.0f);
             size_t alignedSize = Simd::AlignLo(size, 8);
             size_t i = 0;
             if (s == 0)

@@ -1250,6 +1250,22 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Base::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
 }
 
+SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+    uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+    else
+#endif
+        Base::DeinterleaveBgr(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+}
+
 SIMD_API void * SimdDetectionLoadA(const char * path)
 {
     return Base::DetectionLoadA(path);

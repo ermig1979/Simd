@@ -146,6 +146,7 @@ namespace Test
     TEST_ADD_GROUP(Crc32c);
 
     TEST_ADD_GROUP(DeinterleaveUv);
+    TEST_ADD_GROUP(DeinterleaveBgr);
 
     TEST_ADD_GROUP(DetectionHaarDetect32fp);
     TEST_ADD_GROUP(DetectionHaarDetect32fi);
