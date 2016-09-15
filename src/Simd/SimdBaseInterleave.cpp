@@ -41,5 +41,22 @@ namespace Simd
 				uv += uvStride;
             }
         }
+
+        void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < width; ++col, offset += 3)
+                {
+                    bgr[offset + 0] = b[col];
+                    bgr[offset + 1] = g[col];
+                    bgr[offset + 2] = r[col];
+                }
+                b += bStride;
+                g += gStride;
+                r += rStride;
+                bgr += bgrStride;
+            }
+        }
     }
 }

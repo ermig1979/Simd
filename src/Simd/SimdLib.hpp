@@ -1944,6 +1944,28 @@ namespace Simd
 		SimdInterleaveUv(u.data, u.stride, v.data, v.stride, u.width, u.height, uv.data, uv.stride);
 	}
 
+    /*! @ingroup other_conversion
+
+        \fn void DeinterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
+
+        \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR interleaved image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdInterleaveBgr.
+
+        \param [in] b - an input 8-bit Blue planar image.
+        \param [in] g - an input 8-bit Green planar image.
+        \param [in] r - an input 8-bit Red planar image.
+        \param [out] bgr - an output 24-bit BGR interleaved image.
+    */
+    template<class A> SIMD_INLINE void DeinterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
+    {
+        assert(EqualSize(bgr, b, g, r) && Compatible(b, g, r) && bgr.format == View<A>::Bgr24 && b.format == View<A>::Gray8);
+
+        SimdInterleaveBgr(b.data, b.stride, g.data, g.stride, r.data, r.stride, bgr.width, bgr.height, bgr.data, bgr.stride);
+    }
+
     /*! @ingroup laplace_filter
 
         \fn void Laplace(const View<A>& src, View<A>& dst)

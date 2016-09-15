@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -71,6 +72,50 @@ namespace Simd
 			else
 				InterleaveUv<false>(u, uStride, v, vStride, width, height, uv, uvStride);
 		}
+
+        template <bool align> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, size_t offset, uint8_t * bgr)
+        {
+            __m256i _b = Load<align>((__m256i*)(b + offset));
+            __m256i _g = Load<align>((__m256i*)(g + offset));
+            __m256i _r = Load<align>((__m256i*)(r + offset));
+            Store<align>((__m256i*)bgr + 0, InterleaveBgr<0>(_b, _g, _r));
+            Store<align>((__m256i*)bgr + 1, InterleaveBgr<1>(_b, _g, _r));
+            Store<align>((__m256i*)bgr + 2, InterleaveBgr<2>(_b, _g, _r));
+        }
+
+        template <bool align> void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride));
+                assert(Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            size_t A3 = A * 3;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += A3)
+                    InterleaveBgr<align>(b, g, r, col, bgr + offset);
+                if (tail)
+                    InterleaveBgr<false>(b, g, r, width - A, bgr + 3 * (width - A));
+                b += bStride;
+                g += gStride;
+                r += rStride;
+                bgr += bgrStride;
+            }
+        }
+
+        void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride)
+                && Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride))
+                InterleaveBgr<true>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+            else
+                InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
