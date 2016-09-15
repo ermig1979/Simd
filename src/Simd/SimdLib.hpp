@@ -1946,7 +1946,7 @@ namespace Simd
 
     /*! @ingroup other_conversion
 
-        \fn void DeinterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
+        \fn void InterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
 
         \short Interleaves 8-bit Blue, Green and Red planar images into one 24-bit BGR interleaved image.
 
@@ -1959,11 +1959,34 @@ namespace Simd
         \param [in] r - an input 8-bit Red planar image.
         \param [out] bgr - an output 24-bit BGR interleaved image.
     */
-    template<class A> SIMD_INLINE void DeinterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
+    template<class A> SIMD_INLINE void InterleaveBgr(const View<A> & b, const View<A> & g, const View<A> & r, View<A> & bgr)
     {
         assert(EqualSize(bgr, b, g, r) && Compatible(b, g, r) && bgr.format == View<A>::Bgr24 && b.format == View<A>::Gray8);
 
         SimdInterleaveBgr(b.data, b.stride, g.data, g.stride, r.data, r.stride, bgr.width, bgr.height, bgr.data, bgr.stride);
+    }
+
+    /*! @ingroup other_conversion
+
+        \fn void InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra)
+
+        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA interleaved image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdInterleaveBgra.
+
+        \param [in] b - an input 8-bit Blue planar image.
+        \param [in] g - an input 8-bit Green planar image.
+        \param [in] r - an input 8-bit Red planar image.
+        \param [in] a - an input 8-bit Alpha planar image.
+        \param [out] bgra - an output 32-bit BGRA interleaved image.
+    */
+    template<class A> SIMD_INLINE void InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra)
+    {
+        assert(EqualSize(bgr, b) && Compatible(b, g, r, a) && bgr.format == View<A>::Bgra32 && b.format == View<A>::Gray8);
+
+        SimdInterleaveBgra(b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride, bgra.width, bgra.height, bgra.data, bgra.stride);
     }
 
     /*! @ingroup laplace_filter

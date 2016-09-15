@@ -187,6 +187,84 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct Func4
+        {
+            typedef void(*FuncPtr)(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
+                size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
+            FuncPtr func;
+            String description;
+
+            Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & b, const View & g, const View & r, const View & a, View & bgra) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride, bgra.width, bgra.height, bgra.data, bgra.stride);
+            }
+        };
+    }
+#define FUNC4(function) Func4(function, #function)
+
+    bool InterleaveBgraAutoTest(int width, int height, const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(b);
+        View g(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(g);
+        View r(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(r);
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(a);
+
+        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(b, g, r, a, bgra1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(b, g, r, a, bgra2));
+
+        result = result && Compare(bgra1, bgra2, 0, true, 64);
+
+        return result;
+    }
+
+    bool InterleaveBgraAutoTest(const Func4 & f1, const Func4 & f2)
+    {
+        bool result = true;
+
+        result = result && InterleaveBgraAutoTest(W, H, f1, f2);
+        result = result && InterleaveBgraAutoTest(W + O, H - O, f1, f2);
+        result = result && InterleaveBgraAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
+    bool InterleaveBgraAutoTest()
+    {
+        bool result = true;
+
+        result = result && InterleaveBgraAutoTest(FUNC4(Simd::Base::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Ssse3::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Avx2::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool InterleaveUvDataTest(bool create, int width, int height, const Func2 & f)
@@ -293,6 +371,66 @@ namespace Test
         bool result = true;
 
         result = result && InterleaveBgrDataTest(create, DW, DH, FUNC3(SimdInterleaveBgr));
+
+        return result;
+    }
+
+    bool InterleaveBgraDataTest(bool create, int width, int height, const Func4 & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View b(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View g(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View r(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom(b);
+            FillRandom(g);
+            FillRandom(r);
+            FillRandom(a);
+
+            TEST_SAVE(b);
+            TEST_SAVE(g);
+            TEST_SAVE(r);
+            TEST_SAVE(a);
+
+            f.Call(b, g, r, a, bgra1);
+
+            TEST_SAVE(bgra1);
+        }
+        else
+        {
+            TEST_LOAD(b);
+            TEST_LOAD(g);
+            TEST_LOAD(r);
+            TEST_LOAD(a);
+
+            TEST_LOAD(bgra1);
+
+            f.Call(b, g, r, a, bgra2);
+
+            TEST_SAVE(bgra2);
+
+            result = result && Compare(bgra1, bgra2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool InterleaveBgraDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && InterleaveBgraDataTest(create, DW, DH, FUNC4(SimdInterleaveBgra));
 
         return result;
     }

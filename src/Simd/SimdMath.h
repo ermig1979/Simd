@@ -524,6 +524,18 @@ namespace Simd
         {
             return _mm256_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
         }
+
+        template <int part> SIMD_INLINE __m256i UnpackU16(__m256i a, __m256i b = K_ZERO);
+
+        template <> SIMD_INLINE __m256i UnpackU16<0>(__m256i a, __m256i b)
+        {
+            return _mm256_unpacklo_epi16(a, b);
+        }
+
+        template <> SIMD_INLINE __m256i UnpackU16<1>(__m256i a, __m256i b)
+        {
+            return _mm256_unpackhi_epi16(a, b);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

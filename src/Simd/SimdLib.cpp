@@ -1971,6 +1971,22 @@ SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t
         Base::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
 }
 
+SIMD_API void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
+    size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+    else
+#endif
+        Base::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+}
+
 SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

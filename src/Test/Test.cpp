@@ -187,6 +187,7 @@ namespace Test
 
 	TEST_ADD_GROUP(InterleaveUv);
     TEST_ADD_GROUP(InterleaveBgr);
+    TEST_ADD_GROUP(InterleaveBgra);
 
 	TEST_ADD_GROUP(MeanFilter3x3);
 	TEST_ADD_GROUP(MedianFilterRhomb3x3);

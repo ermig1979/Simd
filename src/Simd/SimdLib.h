@@ -2613,7 +2613,7 @@ extern "C"
 		All images must have the same width and height.
 		This function used for YUV420P to NV12 conversion.
 
-		\note This function has a C++ wrapper Simd::DeinterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv).
+		\note This function has a C++ wrapper Simd::InterleaveUv(const View<A>& u, const View<A>& v, View<A>& uv).
 
 		\param [in] u - a pointer to pixels data of input 8-bit U planar image.
 		\param [in] uStride - a row size of the u image.
@@ -2634,7 +2634,7 @@ extern "C"
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::DeinterleaveBgr(const View<A>& b, const View<A>& g, const View<A>& r, View<A>& bgr).
+        \note This function has a C++ wrapper Simd::InterleaveBgr(const View<A>& b, const View<A>& g, const View<A>& r, View<A>& bgr).
 
         \param [in] b - a pointer to pixels data of input 8-bit Blue planar image.
         \param [in] bStride - a row size of the b image.
@@ -2649,6 +2649,32 @@ extern "C"
     */
     SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, 
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
+
+    /*! @ingroup other_conversion
+
+        \fn void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
+        \short Interleaves 8-bit Blue, Green, Red and Alpha planar images into one 32-bit BGRA interleaved image.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::InterleaveBgra(const View<A>& b, const View<A>& g, const View<A>& r, const View<A>& a, View<A>& bgra).
+
+        \param [in] b - a pointer to pixels data of input 8-bit Blue planar image.
+        \param [in] bStride - a row size of the b image.
+        \param [in] g - a pointer to pixels data of input 8-bit Green planar image.
+        \param [in] gStride - a row size of the g image.
+        \param [in] r - a pointer to pixels data of input 8-bit Red planar image.
+        \param [in] rStride - a row size of the r image.
+        \param [in] a - a pointer to pixels data of input 8-bit Alpha planar image.
+        \param [in] aStride - a row size of the a image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA interleaved image.
+        \param [in] bgraStride - a row size of the bgr image.
+    */
+    SIMD_API void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
+        size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
 
     /*! @ingroup laplace_filter
 

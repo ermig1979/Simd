@@ -73,6 +73,56 @@ namespace Simd
             else
                 InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
         }
+
+        template <bool align> SIMD_INLINE void InterleaveBgra(const uint8_t * b, const uint8_t * g, const uint8_t * r, const uint8_t * a, size_t offset, uint8_t * bgra)
+        {
+            __m128i _b = Load<align>((__m128i*)(b + offset));
+            __m128i _g = Load<align>((__m128i*)(g + offset));
+            __m128i _r = Load<align>((__m128i*)(r + offset));
+            __m128i _a = Load<align>((__m128i*)(a + offset));
+            __m128i bg0 = _mm_unpacklo_epi8(_b, _g);
+            __m128i bg1 = _mm_unpackhi_epi8(_b, _g);
+            __m128i ra0 = _mm_unpacklo_epi8(_r, _a);
+            __m128i ra1 = _mm_unpackhi_epi8(_r, _a);
+            Store<align>((__m128i*)bgra + 0, _mm_unpacklo_epi16(bg0, ra0));
+            Store<align>((__m128i*)bgra + 1, _mm_unpackhi_epi16(bg0, ra0));
+            Store<align>((__m128i*)bgra + 2, _mm_unpacklo_epi16(bg1, ra1));
+            Store<align>((__m128i*)bgra + 3, _mm_unpackhi_epi16(bg1, ra1));
+        }
+
+        template <bool align> void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride));
+                assert(Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += QA)
+                    InterleaveBgra<align>(b, g, r, a, col, bgra + offset);
+                if (tail)
+                    InterleaveBgra<false>(b, g, r, a, width - A, bgra + 4 * (width - A));
+                b += bStride;
+                g += gStride;
+                r += rStride;
+                a += aStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride)
+                && Aligned(r) && Aligned(rStride) && Aligned(bgra) && Aligned(bgraStride))
+                InterleaveBgra<true>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+            else
+                InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+        }
     }
 #endif// SIMD_SSSE3_ENABLE
 }
