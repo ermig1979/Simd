@@ -669,12 +669,32 @@ extern "C"
 			sum += a[i]*b[i];
 		\endverbatim
 
-		\param [in] a - a pointer to the first array.
-		\param [in] b - a pointer to the second array.
+		\param [in] a - a pointer to the first 32-bit float array.
+		\param [in] b - a pointer to the second 32-bit float array.
 		\param [in] size - a size of arrays.
-		\param [out] sum - a sum of products.
+		\param [out] sum - a pointer to 32-bit float sum of products.
 	*/
 	SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
+
+    /*! @ingroup ann
+
+        \fn void SimdAnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst);
+
+        \short Adds the product of a vector and a scalar to given vector.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] += src[i]*value[0];
+        \endverbatim
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of arrays.
+        \param [in] value - a pointer to the scalar 32-bit float value.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
+    */
+    SIMD_API void SimdAnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst);
 
     /*! @ingroup ann
 

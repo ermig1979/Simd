@@ -321,6 +321,14 @@ SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, f
 	simdAnnProductSum(a, b, size, sum);
 }
 
+typedef void(*SimdAnnAddVectorMultiplyedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+SimdAnnAddVectorMultiplyedByValuePtr simdAnnAddVectorMultiplyedByValue = SIMD_FUNC2(AnnAddVectorMultiplyedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+{
+    simdAnnAddVectorMultiplyedByValue(src, size, value, dst);
+}
+
 typedef void(*SimdAnnSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
 SimdAnnSigmoidPtr simdAnnSigmoid = SIMD_FUNC0(AnnSigmoid);
 

@@ -76,6 +76,48 @@ namespace Simd
                 AnnProductSum<false>(a, b, size, sum);
         }
 
+        template <bool align> void AnnAddVectorMultiplyedByValue(const float * src, const __m128 & value, float * dst)
+        {
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), _mm_mul_ps(value, Load<align>(src))));
+        }
+
+        template <bool align> void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            float val = *value;
+            size_t partialAlignedSize = AlignLo(size, 4);
+            size_t fullAlignedSize = AlignLo(size, 16);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                __m128 _val = _mm_set1_ps(val);
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += 16)
+                    {
+                        AnnAddVectorMultiplyedByValue<align>(src + i + 0, _val, dst + i + 0);
+                        AnnAddVectorMultiplyedByValue<align>(src + i + 4, _val, dst + i + 4);
+                        AnnAddVectorMultiplyedByValue<align>(src + i + 8, _val, dst + i + 8);
+                        AnnAddVectorMultiplyedByValue<align>(src + i + 12, _val, dst + i + 12);
+                    }
+                }
+                for (; i < partialAlignedSize; i += 4)
+                    AnnAddVectorMultiplyedByValue<align>(src + i, _val, dst + i);
+            }
+            for (; i < size; ++i)
+                dst[i] += src[i] * val;
+        }
+
+        void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                AnnAddVectorMultiplyedByValue<true>(src,size, value, dst);
+            else
+                AnnAddVectorMultiplyedByValue<false>(src, size, value, dst);
+        }
+
 		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			size_t alignedSize =  Simd::AlignLo(size, 4);

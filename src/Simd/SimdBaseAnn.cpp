@@ -65,6 +65,22 @@ namespace Simd
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
 
+        void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        {
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            float _value = *value;
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                dst[i + 0] += src[i + 0] * _value;
+                dst[i + 1] += src[i + 1] * _value;
+                dst[i + 2] += src[i + 2] * _value;
+                dst[i + 3] += src[i + 3] * _value;
+            }
+            for (; i < size; ++i)
+                dst[i] += src[i] * _value;
+        }
+
 		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			float s = slope[0];

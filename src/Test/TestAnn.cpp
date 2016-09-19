@@ -207,6 +207,83 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncAVMV
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * value, float * dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncAVMV(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, float value, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &value, (float*)dstDst.data);
+            }
+        };
+    }
+#define FUNC_AVMV(function) FuncAVMV(function, #function)
+
+    bool AnnAddVectorMultiplyedByValueAutoTest(int size, float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(src);
+
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(dstSrc);
+
+        const float value = 0.3f;
+
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, dstSrc, dstDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, dstSrc, dstDst2));
+
+        result = Compare(dstDst1, dstDst2, eps, true);
+
+        return result;
+    }
+
+    bool AnnAddVectorMultiplyedByValueAutoTest(float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    {
+        bool result = true;
+
+        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H, eps, f1, f2);
+        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H + O, eps, f1, f2);
+        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H - O, eps, f1, f2);
+
+        return result;
+    }
+
+    bool AnnAddVectorMultiplyedByValueAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Base::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Sse::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+#endif
+
+        return result;
+    }
+
 	namespace
 	{
 		struct FuncA
@@ -759,6 +836,58 @@ namespace Test
         return result;
     }
 
+    bool AnnAddVectorMultiplyedByValueDataTest(bool create, int size, float eps, const FuncAVMV & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        const float value = 0.3f;
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(src);
+            FillRandom32f(dstSrc);
+
+            TEST_SAVE(src);
+            TEST_SAVE(dstSrc);
+
+            f.Call(src, value, dstSrc, dstDst1);
+
+            TEST_SAVE(dstDst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(dstSrc);
+
+            TEST_LOAD(dstDst1);
+
+            f.Call(src, value, dstSrc, dstDst2);
+
+            TEST_SAVE(dstDst2);
+
+            result = result && Compare(dstDst1, dstDst2, eps, true);
+        }
+
+        return result;
+    }
+
+    bool AnnAddVectorMultiplyedByValueDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddVectorMultiplyedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+
+        return result;
+    }
 
 	bool AnnActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncA & f)
 	{
