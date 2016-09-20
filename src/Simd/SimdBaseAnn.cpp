@@ -215,6 +215,23 @@ namespace Simd
             }
         }
 
+        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t aligned = Simd::AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 3; ++dy)
+                {
+                    const float * w = weights + dy * 3;
+                    float * d = dst + dy*dstStride;
+                    for (size_t dx = 0; dx < 3; ++dx)
+                        AddMultiplied(src, aligned, width, w[dx], d + dx);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
         void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);

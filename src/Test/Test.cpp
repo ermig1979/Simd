@@ -91,6 +91,7 @@ namespace Test
     TEST_ADD_GROUP(AnnUpdateWeights);
     TEST_ADD_GROUP(AnnAddConvolution3x3);
     TEST_ADD_GROUP(AnnAddConvolution5x5);
+    TEST_ADD_GROUP(AnnAddConvolution3x3Back);
     TEST_ADD_GROUP(AnnAddConvolution5x5Back);
     TEST_ADD_GROUP(AnnMax2x2);
 

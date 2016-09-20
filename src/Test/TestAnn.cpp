@@ -669,6 +669,25 @@ namespace Test
         return result;
     }
 
+    bool AnnAddConvolution3x3BackAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Base::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Sse::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Avx::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+#endif
+
+        return result;
+    }
+
     bool AnnAddConvolution5x5BackAutoTest()
     {
         bool result = true;
@@ -1154,6 +1173,15 @@ namespace Test
         bool result = true;
 
         result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdAnnAddConvolution5x5));
+
+        return result;
+    }
+
+    bool AnnAddConvolution3x3BackDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, false, FUNC_C2(SimdAnnAddConvolution3x3Back));
 
         return result;
     }

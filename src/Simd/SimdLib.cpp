@@ -431,19 +431,20 @@ SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size
         Base::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+typedef void(*SimdAnnAddConvolution3x3BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdAnnAddConvolution3x3BackPtr simdAnnAddConvolution3x3Back = SIMD_FUNC2(AnnAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+    simdAnnAddConvolution3x3Back(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+typedef void(*SimdAnnAddConvolution5x5BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdAnnAddConvolution5x5BackPtr simdAnnAddConvolution5x5Back = SIMD_FUNC2(AnnAddConvolution5x5Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
 SIMD_API void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= sizeof(__m256))
-        Avx::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= sizeof(__m128))
-        Sse::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-        Base::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
+    simdAnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
 }
 
 SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)

@@ -438,6 +438,33 @@ namespace Simd
                 AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
+        template <bool align> void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t aligned = AlignLo(width, 16);
+            size_t partial = AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 3; ++dy)
+                {
+                    const float * w = weights + dy * 3;
+                    float * d = dst + dy*dstStride;
+                    AddMultiplied<align>(src, aligned, partial, width, w[0], d + 0);
+                    AddMultiplied<false>(src, aligned, partial, width, w[1], d + 1);
+                    AddMultiplied<false>(src, aligned, partial, width, w[2], d + 2);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AnnAddConvolution3x3Back<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution3x3Back<false>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
         template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = AlignLo(width, 32);

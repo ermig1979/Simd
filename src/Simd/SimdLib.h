@@ -756,6 +756,22 @@ extern "C"
 
     /*! @ingroup ann
 
+        \fn void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 3x3 convolution of 32-bit float image (backward propagation).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be equal to input image width + 2).
+        \param [in] height - a height of the input image (output image height must be equal to input image height + 2).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 9).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup ann
+
         \fn void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (backward propagation).
