@@ -76,46 +76,39 @@ namespace Simd
                 AnnProductSum<false>(a, b, size, sum);
         }
 
-        template <bool align> void AnnAddVectorMultiplyedByValue(const float * src, const __m128 & value, float * dst)
+        template <bool align> SIMD_INLINE void AddMultiplied(const float * src, const __m128 & value, float * dst)
         {
             Store<align>(dst, _mm_add_ps(Load<align>(dst), _mm_mul_ps(value, Load<align>(src))));
         }
 
-        template <bool align> void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        template <bool align> SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t partial, size_t full, float value, float * dst)
         {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            float val = *value;
-            size_t partialAlignedSize = AlignLo(size, 4);
-            size_t fullAlignedSize = AlignLo(size, 16);
             size_t i = 0;
-            if (partialAlignedSize)
+            if (partial)
             {
-                __m128 _val = _mm_set1_ps(val);
-                if (fullAlignedSize)
+                __m128 _value = _mm_set1_ps(value);
+                for (; i < aligned; i += 16)
                 {
-                    for (; i < fullAlignedSize; i += 16)
-                    {
-                        AnnAddVectorMultiplyedByValue<align>(src + i + 0, _val, dst + i + 0);
-                        AnnAddVectorMultiplyedByValue<align>(src + i + 4, _val, dst + i + 4);
-                        AnnAddVectorMultiplyedByValue<align>(src + i + 8, _val, dst + i + 8);
-                        AnnAddVectorMultiplyedByValue<align>(src + i + 12, _val, dst + i + 12);
-                    }
+                    AddMultiplied<align>(src + i + 0, _value, dst + i + 0);
+                    AddMultiplied<align>(src + i + 4, _value, dst + i + 4);
+                    AddMultiplied<align>(src + i + 8, _value, dst + i + 8);
+                    AddMultiplied<align>(src + i + 12, _value, dst + i + 12);
                 }
-                for (; i < partialAlignedSize; i += 4)
-                    AnnAddVectorMultiplyedByValue<align>(src + i, _val, dst + i);
+                for (; i < partial; i += 4)
+                    AddMultiplied<align>(src + i, _value, dst + i);
             }
-            for (; i < size; ++i)
-                dst[i] += src[i] * val;
+            for (; i < full; ++i)
+                dst[i] += src[i] * value;
         }
 
-        void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
+            size_t aligned = AlignLo(size, 16);
+            size_t partial = AlignLo(size, 4);
             if (Aligned(src) && Aligned(dst))
-                AnnAddVectorMultiplyedByValue<true>(src,size, value, dst);
+                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
             else
-                AnnAddVectorMultiplyedByValue<false>(src, size, value, dst);
+                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
 		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
@@ -442,6 +435,35 @@ namespace Simd
                 AnnAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
+        template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t aligned = AlignLo(width, 16);
+            size_t partial = AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 5; ++dy)
+                {
+                    const float * w = weights + dy * 5;
+                    float * d = dst + dy*dstStride;
+                    AddMultiplied<align>(src, aligned, partial, width, w[0], d + 0);
+                    AddMultiplied<false>(src, aligned, partial, width, w[1], d + 1);
+                    AddMultiplied<false>(src, aligned, partial, width, w[2], d + 2);
+                    AddMultiplied<false>(src, aligned, partial, width, w[3], d + 3);
+                    AddMultiplied<align>(src, aligned, partial, width, w[4], d + 4);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AnnAddConvolution5x5Back<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution5x5Back<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE __m128 Max2x2(const float * src, size_t stride)

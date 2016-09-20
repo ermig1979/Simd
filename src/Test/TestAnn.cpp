@@ -228,7 +228,7 @@ namespace Test
     }
 #define FUNC_AVMV(function) FuncAVMV(function, #function)
 
-    bool AnnAddVectorMultiplyedByValueAutoTest(int size, float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    bool AnnAddVectorMultipliedByValueAutoTest(int size, float eps, const FuncAVMV & f1, const FuncAVMV & f2)
     {
         bool result = true;
 
@@ -254,31 +254,31 @@ namespace Test
         return result;
     }
 
-    bool AnnAddVectorMultiplyedByValueAutoTest(float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    bool AnnAddVectorMultipliedByValueAutoTest(float eps, const FuncAVMV & f1, const FuncAVMV & f2)
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H, eps, f1, f2);
-        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H + O, eps, f1, f2);
-        result = result && AnnAddVectorMultiplyedByValueAutoTest(W*H - O, eps, f1, f2);
+        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H, eps, f1, f2);
+        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H + O, eps, f1, f2);
+        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H - O, eps, f1, f2);
 
         return result;
     }
 
-    bool AnnAddVectorMultiplyedByValueAutoTest()
+    bool AnnAddVectorMultipliedByValueAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Base::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+        result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Base::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Sse::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+            result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Sse::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddVectorMultiplyedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx::AnnAddVectorMultiplyedByValue), FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+            result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
 #endif
 
         return result;
@@ -577,50 +577,56 @@ namespace Test
 
             FuncC2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, const float * weights, const View & dstSrc, View & dstDst) const
+            void Call(const View & src, const Size& size, const float * weights, const View & dstSrc, View & dstDst) const
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/sizeof(float), dstDst.width, dstDst.height, weights, (float*)dstDst.data, dstDst.stride/sizeof(float));
+                func((float*)src.data, src.stride/sizeof(float), size.x, size.y, weights, (float*)dstDst.data, dstDst.stride/sizeof(float));
             }
         };
     }
 #define FUNC_C2(function) FuncC2(function, #function)
 
-    bool AnnAddConvolutionAutoTest(int width, int height, float eps, int half, const FuncC2 & f1, const FuncC2 & f2)
+    bool AnnAddConvolutionAutoTest(int width, int height, float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
     {
         bool result = true;
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        Size size(width, height), border(half, half), s(size), d(size);
+        if (forward)
+            s += 2*border;
+        else
+            d += 2*border;
+
+        View src(s.x, s.y, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(src, 0, 1);
 
         View weights(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(weights, -1, 1);
 
-        View dstSrc(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstSrc(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(dstSrc, -1000, 1000);
 
-        View dstDst1(width, height, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst2(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst1(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, (float*)weights.data, dstSrc, dstDst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, size, (float*)weights.data, dstSrc, dstDst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, (float*)weights.data, dstSrc, dstDst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, size, (float*)weights.data, dstSrc, dstDst2));
 
         result = Compare(dstDst1, dstDst2, eps, true, 32);
 
         return result;
     }
 
-    bool AnnAddConvolutionAutoTest(float eps, int half, const FuncC2 & f1, const FuncC2 & f2)
+    bool AnnAddConvolutionAutoTest(float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(W, H, eps, half, f1, f2);
-        result = result && AnnAddConvolutionAutoTest(W - O, H + O, eps, half, f1, f2);
-        result = result && AnnAddConvolutionAutoTest(W + O, H - O, eps, half, f1, f2);
+        result = result && AnnAddConvolutionAutoTest(W, H, eps, half, forward, f1, f2);
+        result = result && AnnAddConvolutionAutoTest(W - O, H + O, eps, half, forward, f1, f2);
+        result = result && AnnAddConvolutionAutoTest(W + O, H - O, eps, half, forward, f1, f2);
 
         return result;
     }
@@ -629,16 +635,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Base::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+        result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Base::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Sse::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Sse::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, FUNC_C2(Simd::Avx::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+            result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
 #endif
 
         return result;
@@ -648,16 +654,35 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Base::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+        result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Base::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Sse::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Sse::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, FUNC_C2(Simd::Avx::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+#endif
+
+        return result;
+    }
+
+    bool AnnAddConvolution5x5BackAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Base::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Sse::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Avx::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
 #endif
 
         return result;
@@ -836,7 +861,7 @@ namespace Test
         return result;
     }
 
-    bool AnnAddVectorMultiplyedByValueDataTest(bool create, int size, float eps, const FuncAVMV & f)
+    bool AnnAddVectorMultipliedByValueDataTest(bool create, int size, float eps, const FuncAVMV & f)
     {
         bool result = true;
 
@@ -880,11 +905,11 @@ namespace Test
         return result;
     }
 
-    bool AnnAddVectorMultiplyedByValueDataTest(bool create)
+    bool AnnAddVectorMultipliedByValueDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultiplyedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdAnnAddVectorMultiplyedByValue));
+        result = result && AnnAddVectorMultipliedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
 
         return result;
     }
@@ -1063,7 +1088,7 @@ namespace Test
         return result;
     }
 
-    bool AnnAddConvolutionDataTest(bool create, int width, int height, float eps, int half, const FuncC2 & f)
+    bool AnnAddConvolutionDataTest(bool create, int width, int height, float eps, int half, bool forward, const FuncC2 & f)
     {
         bool result = true;
 
@@ -1071,11 +1096,17 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
-        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        Size size(width, height), border(half, half), s(size), d(size);
+        if (forward)
+            s += 2 * border;
+        else
+            d += 2 * border;
+
+        View src(s.x, s.y, View::Float, NULL, TEST_ALIGN(width));
         View weights(Simd::Square(1 + 2*half), 1, View::Float, NULL, TEST_ALIGN(width));
-        View dstSrc(width, height, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst1(width, height, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst2(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dstSrc(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst1(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(d.x, d.y, View::Float, NULL, TEST_ALIGN(width));
 
         if (create)
         {
@@ -1087,7 +1118,7 @@ namespace Test
             TEST_SAVE(weights);
             TEST_SAVE(dstSrc);
 
-            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, (float*)weights.data, dstSrc, dstDst1));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, size, (float*)weights.data, dstSrc, dstDst1));
 
             TEST_SAVE(dstDst1);
         }
@@ -1099,7 +1130,7 @@ namespace Test
 
             TEST_LOAD(dstDst1);
 
-            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, (float*)weights.data, dstSrc, dstDst2));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, size, (float*)weights.data, dstSrc, dstDst2));
 
             TEST_SAVE(dstDst2);
 
@@ -1113,7 +1144,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, FUNC_C2(SimdAnnAddConvolution3x3));
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, true, FUNC_C2(SimdAnnAddConvolution3x3));
 
         return result;
     }
@@ -1122,7 +1153,16 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, FUNC_C2(SimdAnnAddConvolution5x5));
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdAnnAddConvolution5x5));
+
+        return result;
+    }
+
+    bool AnnAddConvolution5x5BackDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdAnnAddConvolution5x5Back));
 
         return result;
     }

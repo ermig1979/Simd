@@ -33,7 +33,7 @@ namespace Simd
 	{
 		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
 
-        void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst);
+        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
 		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
@@ -52,6 +52,8 @@ namespace Simd
         void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 

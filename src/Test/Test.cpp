@@ -80,7 +80,7 @@ namespace Test
 
 	TEST_ADD_GROUP(AnnConvert);
 	TEST_ADD_GROUP(AnnProductSum);
-    TEST_ADD_GROUP(AnnAddVectorMultiplyedByValue);
+    TEST_ADD_GROUP(AnnAddVectorMultipliedByValue);
     TEST_ADD_GROUP(AnnSigmoid);
 	TEST_ADD_GROUP(AnnDerivativeSigmoid);
     TEST_ADD_GROUP(AnnTanh);
@@ -91,6 +91,7 @@ namespace Test
     TEST_ADD_GROUP(AnnUpdateWeights);
     TEST_ADD_GROUP(AnnAddConvolution3x3);
     TEST_ADD_GROUP(AnnAddConvolution5x5);
+    TEST_ADD_GROUP(AnnAddConvolution5x5Back);
     TEST_ADD_GROUP(AnnMax2x2);
 
     TEST_ADD_GROUP(BgraToBgr);

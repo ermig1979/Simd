@@ -321,12 +321,12 @@ SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, f
 	simdAnnProductSum(a, b, size, sum);
 }
 
-typedef void(*SimdAnnAddVectorMultiplyedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-SimdAnnAddVectorMultiplyedByValuePtr simdAnnAddVectorMultiplyedByValue = SIMD_FUNC2(AnnAddVectorMultiplyedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+typedef void(*SimdAnnAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+SimdAnnAddVectorMultipliedByValuePtr simdAnnAddVectorMultipliedByValue = SIMD_FUNC2(AnnAddVectorMultipliedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
-SIMD_API void SimdAnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+SIMD_API void SimdAnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
 {
-    simdAnnAddVectorMultiplyedByValue(src, size, value, dst);
+    simdAnnAddVectorMultipliedByValue(src, size, value, dst);
 }
 
 typedef void(*SimdAnnSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
@@ -429,6 +429,21 @@ SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size
     else
 #endif
         Base::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+SIMD_API void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= sizeof(__m256))
+        Avx::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= sizeof(__m128))
+        Sse::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+        Base::AnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
 }
 
 SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)

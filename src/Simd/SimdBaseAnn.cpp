@@ -65,20 +65,23 @@ namespace Simd
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
 
-        void AnnAddVectorMultiplyedByValue(const float * src, size_t size, const float * value, float * dst)
+        SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t full, float value, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 4);
-            float _value = *value;
             size_t i = 0;
-            for (; i < alignedSize; i += 4)
+            for (; i < aligned; i += 4)
             {
-                dst[i + 0] += src[i + 0] * _value;
-                dst[i + 1] += src[i + 1] * _value;
-                dst[i + 2] += src[i + 2] * _value;
-                dst[i + 3] += src[i + 3] * _value;
+                dst[i + 0] += src[i + 0] * value;
+                dst[i + 1] += src[i + 1] * value;
+                dst[i + 2] += src[i + 2] * value;
+                dst[i + 3] += src[i + 3] * value;
             }
-            for (; i < size; ++i)
-                dst[i] += src[i] * _value;
+            for (; i < full; ++i)
+                dst[i] += src[i] * value;
+        }
+
+        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+        {
+            AddMultiplied(src, Simd::AlignLo(size, 4), size, *value, dst);
         }
 
 		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
@@ -207,6 +210,23 @@ namespace Simd
             {
                 for (size_t col = 0; col < width; ++col)
                     dst[col] += Convolution5x5(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            size_t aligned = Simd::AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 5; ++dy)
+                {
+                    const float * w = weights + dy * 5;
+                    float * d = dst + dy*dstStride;
+                    for (size_t dx = 0; dx < 5; ++dx)
+                        AddMultiplied(src, aligned, width, w[dx], d + dx);
+                }
                 src += srcStride;
                 dst += dstStride;
             }
