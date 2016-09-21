@@ -468,6 +468,26 @@ SIMD_API void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, c
         Base::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
 }
 
+SIMD_API void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable && width >= Sse3::F)
+        Sse3::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+        Base::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+}
+
 SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE

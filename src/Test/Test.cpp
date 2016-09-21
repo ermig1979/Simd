@@ -94,6 +94,7 @@ namespace Test
     TEST_ADD_GROUP(AnnAddConvolution3x3Back);
     TEST_ADD_GROUP(AnnAddConvolution5x5Back);
     TEST_ADD_GROUP(AnnAddConvolution3x3Sum);
+    TEST_ADD_GROUP(AnnAddConvolution5x5Sum);
     TEST_ADD_GROUP(AnnMax2x2);
 
     TEST_ADD_GROUP(BgraToBgr);

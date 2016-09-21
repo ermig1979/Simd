@@ -271,6 +271,26 @@ namespace Simd
             }
         }
 
+        void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            size_t aligned = Simd::AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 5; ++dy)
+                {
+                    const float * s = src + dy*srcStride;
+                    float * sum = sums + dy * 5;
+                    sum[0] += ProductSum(s + 0, dst, aligned, width);
+                    sum[1] += ProductSum(s + 1, dst, aligned, width);
+                    sum[2] += ProductSum(s + 2, dst, aligned, width);
+                    sum[3] += ProductSum(s + 3, dst, aligned, width);
+                    sum[4] += ProductSum(s + 4, dst, aligned, width);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
         SIMD_INLINE float Max2(const float * src)
         {
             return Simd::Max(src[0], src[1]);

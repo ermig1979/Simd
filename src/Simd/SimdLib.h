@@ -804,6 +804,22 @@ extern "C"
 
     /*! @ingroup ann
 
+        \fn void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        \short Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
+        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 25).
+    */
+    SIMD_API void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+    /*! @ingroup ann
+
         \fn void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).

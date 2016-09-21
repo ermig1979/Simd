@@ -790,6 +790,30 @@ namespace Test
         return result;
     }
 
+    bool AnnAddConvolution5x5SumAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Base::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+#endif 
+
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse3::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+#endif
+
+        return result;
+    }
+
     namespace
     {
         struct FuncM
@@ -1329,6 +1353,15 @@ namespace Test
         bool result = true;
 
         result = result && AnnAddConvolutionSumDataTest(create, DW, DH, EPS, 1, FUNC_CS(SimdAnnAddConvolution3x3Sum));
+
+        return result;
+    }
+
+    bool AnnAddConvolution5x5SumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionSumDataTest(create, DW, DH, EPS, 2, FUNC_CS(SimdAnnAddConvolution5x5Sum));
 
         return result;
     }
