@@ -438,7 +438,7 @@ namespace Simd
                 AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        template <bool align> void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void AnnAddConvolution3x3BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = AlignLo(width, QF);
             size_t partial = AlignLo(width, F);
@@ -457,6 +457,99 @@ namespace Simd
             }
         }
 
+        namespace
+        {
+            template<int half> struct Buffer
+            {
+                Buffer(size_t width)
+                {
+                    _count = 1 + 2 * half;
+                    _size = width*sizeof(float);
+                    size_t stride = AlignHi(width + 4 * half, F);
+                    size_t full = _count*stride*sizeof(float);
+                    _ptr = Allocate(full);
+                    memset(_ptr, 0, full);
+                    rows[0] = (float*)_ptr;
+                    for (size_t i = 1; i < _count; ++i)
+                        rows[i] = rows[i - 1] + stride;
+                }
+
+                void Update(const float * src)
+                {
+                    float * tmp = rows[0];
+                    if (src == NULL)
+                        memset(tmp + 2 * half, 0, _size);
+                    else
+                        memcpy(tmp + 2 * half, src, _size);
+                    for (size_t i = 0; i < _count - 1; ++i)
+                        rows[i] = rows[i + 1];
+                    rows[_count - 1] = tmp;
+                }
+
+                ~Buffer()
+                {
+                    Free(_ptr);
+                }
+
+                float * rows[1 + 2 * half];
+            private:
+                size_t _count, _size;
+                void * _ptr;
+            };
+        }
+
+        template <size_t size> SIMD_INLINE void LoadWeightsBack(const float * src, __m256 * dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = _mm256_set1_ps(src[size - i - 1]);
+        }
+
+        template <bool align, int half> SIMD_INLINE __m256 Convolution3x3Back(const Buffer<half> & buffer, size_t offset, const __m256 * weights)
+        {
+            return _mm256_add_ps(Convolution3<align>(buffer.rows[0] + offset, weights),
+                _mm256_add_ps(Convolution3<align>(buffer.rows[1] + offset, weights + 3),
+                    Convolution3<align>(buffer.rows[2] + offset, weights + 6)));
+        }
+
+        template <bool align> void AnnAddConvolution3x3BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            Buffer<1> buffer(width);
+            height += 2;
+            width += 2;
+            size_t alignedWidth = AlignLo(width, F);
+            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 _weights[9];
+            LoadWeightsBack<9>(weights, _weights);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                buffer.Update(row < height - 2 ? src : NULL);
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    __m256 _dst = Load<align>(dst + col);
+                    _dst = _mm256_add_ps(_dst, Convolution3x3Back<true>(buffer, col, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - F;
+                    __m256 _dst = Load<false>(dst + col);
+                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution3x3Back<false>(buffer, col, _weights)));
+                    Store<false>(dst + col, _dst);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (width*height < 1024)
+                AnnAddConvolution3x3BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution3x3BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
         void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
@@ -465,9 +558,9 @@ namespace Simd
                 AnnAddConvolution3x3Back<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void AnnAddConvolution5x5BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t aligned = AlignLo(width,QF);
+            size_t aligned = AlignLo(width, QF);
             size_t partial = AlignLo(width, F);
             for (size_t row = 0; row < height; ++row)
             {
@@ -484,6 +577,54 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
+        }
+
+        template <bool align, int half> SIMD_INLINE __m256 Convolution5x5Back(const Buffer<half> & buffer, size_t offset, const __m256 * weights)
+        {
+            return _mm256_add_ps(_mm256_add_ps(Convolution5<align>(buffer.rows[0] + offset, weights),
+                _mm256_add_ps(Convolution5<align>(buffer.rows[1] + offset, weights + 5),
+                    Convolution5<align>(buffer.rows[2] + offset, weights + 10))),
+                _mm256_add_ps(Convolution5<align>(buffer.rows[3] + offset, weights + 15),
+                    Convolution5<align>(buffer.rows[4] + offset, weights + 20)));
+        }
+
+        template <bool align> void AnnAddConvolution5x5BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            Buffer<2> buffer(width);
+            height += 4;
+            width += 4;
+            size_t alignedWidth = AlignLo(width, F);
+            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 _weights[25];
+            LoadWeightsBack<25>(weights, _weights);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                buffer.Update(row < height - 4 ? src : NULL);
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    __m256 _dst = Load<align>(dst + col);
+                    _dst = _mm256_add_ps(_dst, Convolution5x5Back<true>(buffer, col, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - F;
+                    __m256 _dst = Load<false>(dst + col);
+                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5Back<false>(buffer, col, _weights)));
+                    Store<false>(dst + col, _dst);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (width*height < 2048)
+                AnnAddConvolution5x5BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                AnnAddConvolution5x5BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
