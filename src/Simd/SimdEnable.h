@@ -76,6 +76,7 @@ namespace Simd
             SSE2 = 1 << 26,
 
             // Ecx:
+            SSE3 = 1 << 0,
             SSSE3 =	1 << 9,
             SSE41 = 1 << 19,
             SSE42 = 1 << 20,
@@ -186,6 +187,35 @@ namespace Simd
                 return true;
             }
             __except(EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
+#else
+            return true;
+#endif
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif
+
+#ifdef SIMD_SSE3_ENABLE
+    namespace Sse3
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE3);
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+#if defined(_MSC_VER)
+            __try
+            {
+                __m128 value = _mm_hadd_ps(_mm_set1_ps(1.0f), _mm_set1_ps(2.0f)); //try to execute of SSE3 instructions;
+                return true;
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -469,6 +499,12 @@ namespace Simd
 #define SIMD_SSE2_FUNC(func) Simd::Sse2::Enable ? Simd::Sse2::func : 
 #else
 #define SIMD_SSE2_FUNC(func) 
+#endif
+
+#ifdef SIMD_SSE3_ENABLE
+#define SIMD_SSE3_FUNC(func) Simd::Sse3::Enable ? Simd::Sse3::func : 
+#else
+#define SIMD_SSE3_FUNC(func) 
 #endif
 
 #ifdef SIMD_SSSE3_ENABLE

@@ -76,9 +76,21 @@ namespace Simd
 		const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
     }
 
+#ifdef SIMD_SSE_ENABLE    
+    namespace Sse
+    {
+        const size_t F = sizeof(__m128)/sizeof(float);
+        const size_t DF = 2*F;
+        const size_t QF = 4*F;
+        const size_t HF = F/2;
+    }
+#endif// SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        using namespace Sse;
+
         const size_t A = sizeof(__m128i);
         const size_t DA = 2*A;
         const size_t QA = 4*A;
@@ -142,10 +154,17 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSE3_ENABLE    
+    namespace Sse3
+    {
+        using namespace Sse2;
+    }
+#endif// SIMD_SSE3_ENABLE
+
 #ifdef SIMD_SSSE3_ENABLE    
     namespace Ssse3
     {
-        using namespace Sse2;
+        using namespace Sse3;
 
         const __m128i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5);
         const __m128i K8_SHUFFLE_GRAY_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA);
@@ -191,9 +210,21 @@ namespace Simd
     }
 #endif// SIMD_SSE42_ENABLE
 
+#ifdef SIMD_AVX_ENABLE    
+    namespace Avx
+    {
+        const size_t F = sizeof(__m256)/sizeof(float);
+        const size_t DF = 2*F;
+        const size_t QF = 4*F;
+        const size_t HF = F/2;
+    }
+#endif// SIMD_AVX_ENABLE
+
 #ifdef SIMD_AVX2_ENABLE    
 	namespace Avx2
 	{
+        using namespace Avx;
+
 		const size_t A = sizeof(__m256i);
 		const size_t DA = 2*A;
 		const size_t QA = 4*A;

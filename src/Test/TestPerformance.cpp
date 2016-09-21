@@ -379,7 +379,7 @@ namespace Test
             enable.base = AddToFunction(src, dst.base);
         if(desc.find("Simd::Sse2::") != std::string::npos || desc.find("Simd::Sse::") != std::string::npos)
             enable.sse2 = AddToFunction(src, dst.sse2);
-        if(desc.find("Simd::Ssse3::") != std::string::npos)
+        if(desc.find("Simd::Ssse3::") != std::string::npos || desc.find("Simd::Sse3::") != std::string::npos)
             enable.ssse3 = AddToFunction(src, dst.ssse3);
         if(desc.find("Simd::Sse41::") != std::string::npos || desc.find("Simd::Sse42::") != std::string::npos)
             enable.sse41 = AddToFunction(src, dst.sse41);

@@ -86,6 +86,16 @@ namespace Simd
 	}
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSE3_ENABLE
+    namespace Sse3
+    {
+        SIMD_INLINE float ExtractSum(__m128 a)
+        {
+            return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(a, _mm_setzero_ps()), _mm_setzero_ps()));
+        }
+    }
+#endif//SIMD_SSE3_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
@@ -99,8 +109,8 @@ namespace Simd
         SIMD_INLINE float ExtractSum(__m256 a)
         {
             float SIMD_ALIGNED(32) _a[8];
-            _mm256_store_ps(_a, _mm256_hadd_ps(a, _mm256_setzero_ps()));
-            return _a[0] + _a[1] + _a[4] + _a[5];
+            _mm256_store_ps(_a, _mm256_hadd_ps(_mm256_hadd_ps(a, _mm256_setzero_ps()), _mm256_setzero_ps()));
+            return _a[0] + _a[4];
         }
     }
 #endif//SIMD_AVX_ENABLE

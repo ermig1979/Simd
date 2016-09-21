@@ -48,21 +48,25 @@ namespace Simd
 			}
 		}
 
+        SIMD_INLINE float ProductSum(const float * a, const float * b, size_t aligned, size_t full)
+        {
+            size_t i = 0;
+            float sums[4] = { 0, 0, 0, 0 };
+            for (; i < aligned; i += 4)
+            {
+                sums[0] += a[i + 0] * b[i + 0];
+                sums[1] += a[i + 1] * b[i + 1];
+                sums[2] += a[i + 2] * b[i + 2];
+                sums[3] += a[i + 3] * b[i + 3];
+            }
+            for (; i < full; ++i)
+                sums[0] += a[i] * b[i];
+            return sums[0] + sums[1] + sums[2] + sums[3];
+        }
+
         void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
         {
-            size_t alignedSize = Simd::AlignLo(size, 4);
-            float sums[4] = {0, 0, 0, 0};
-            size_t i = 0;
-            for(; i < alignedSize; i += 4)
-            {
-                sums[0] += a[i + 0]*b[i + 0];
-                sums[1] += a[i + 1]*b[i + 1];
-                sums[2] += a[i + 2]*b[i + 2];
-                sums[3] += a[i + 3]*b[i + 3];
-            }
-            for(; i < size; ++i)
-                sums[0] += a[i]*b[i];
-            *sum = sums[0] + sums[1] + sums[2] + sums[3];
+            *sum = ProductSum(a, b, Simd::AlignLo(size, 4), size);
         }
 
         SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t full, float value, float * dst)
@@ -243,6 +247,24 @@ namespace Simd
                     float * d = dst + dy*dstStride;
                     for (size_t dx = 0; dx < 5; ++dx)
                         AddMultiplied(src, aligned, width, w[dx], d + dx);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            size_t aligned = Simd::AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t dy = 0; dy < 3; ++dy)
+                {
+                    const float * s = src + dy*srcStride;
+                    float * sum = sums + dy * 3;
+                    sum[0] += ProductSum(s + 0, dst, aligned, width);
+                    sum[1] += ProductSum(s + 1, dst, aligned, width);
+                    sum[2] += ProductSum(s + 2, dst, aligned, width);
                 }
                 src += srcStride;
                 dst += dstStride;

@@ -258,10 +258,8 @@ namespace Simd
 
         SIMD_INLINE __m128 RightNotZero(size_t count)
         {
-            union { uint32_t i[4]; float f[4]; } b;
-            for (size_t i = 0; i < 4; ++i)
-                b.i[i] = ((count >= 4 - i) ? -1 : 0);
-            return _mm_loadu_ps(b.f);
+            const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
+            return _mm_loadu_ps((float*)(mask + count));
         }
     }
 #endif//SIMD_SSE_ENABLE
@@ -431,10 +429,13 @@ namespace Simd
 
         SIMD_INLINE __m256 RightNotZero(size_t count)
         {
-            union { uint32_t i[8]; float f[8]; } b;
-            for (size_t i = 0; i < 8; ++i)
-                b.i[i] = ((count >= 8 - i) ? -1 : 0);
-            return _mm256_loadu_ps(b.f);
+            const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
+            return _mm256_loadu_ps((float*)(mask + count));
+        }
+
+        SIMD_INLINE __m256 PermutedHorizontalAdd(__m256 a, __m256 b)
+        {
+            return _mm256_hadd_ps(_mm256_permute2f128_ps(a, b, 0x20), _mm256_permute2f128_ps(a, b, 0x31));
         }
     }
 #endif//SIMD_AVX_ENABLE

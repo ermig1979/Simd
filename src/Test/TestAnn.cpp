@@ -709,6 +709,89 @@ namespace Test
 
     namespace
     {
+        struct FuncCS
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+            FuncPtr func;
+            String description;
+
+            FuncCS(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & dst, const View & sumsSrc, View & sumsDst) const
+            {
+                Simd::Copy(sumsSrc, sumsDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), (float*)dst.data, dst.stride / sizeof(float), dst.width, dst.height, (float*)sumsDst.data);
+            }
+        };
+    }
+#define FUNC_CS(function) FuncCS(function, #function)
+
+    bool AnnAddConvolutionSumAutoTest(int width, int height, float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(src, -1, 1);
+
+        View dst(width, height, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(dst, -1, 1);
+
+        View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        FillRandom32f(sumsSrc, -1000, 1000);
+
+        View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst, sumsSrc, sumsDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst, sumsSrc, sumsDst2));
+
+        result = Compare(sumsDst1, sumsDst2, eps, true, 32);
+
+        return result;
+    }
+
+    bool AnnAddConvolutionSumAutoTest(float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionSumAutoTest(W, H, eps, half, f1, f2);
+        result = result && AnnAddConvolutionSumAutoTest(W - O, H + O, eps, half, f1, f2);
+        result = result && AnnAddConvolutionSumAutoTest(W + O, H - O, eps, half, f1, f2);
+
+        return result;
+    }
+
+    bool AnnAddConvolution3x3SumAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Base::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+#endif 
+
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse3::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Avx::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncM
         {
             typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
@@ -1191,6 +1274,61 @@ namespace Test
         bool result = true;
 
         result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdAnnAddConvolution5x5Back));
+
+        return result;
+    }
+
+    bool AnnAddConvolutionSumDataTest(bool create, int width, int height, float eps, int half, const FuncCS & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width + 2 * half, height + 2 * half, View::Float, NULL, TEST_ALIGN(width));
+        View dst(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom32f(src, -1, 1);
+            FillRandom32f(dst, -1, 1);
+            FillRandom32f(sumsSrc, -1000, 1000);
+
+            TEST_SAVE(src);
+            TEST_SAVE(dst);
+            TEST_SAVE(sumsSrc);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, dst, sumsSrc, sumsDst1));
+
+            TEST_SAVE(sumsDst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(dst);
+            TEST_LOAD(sumsSrc);
+
+            TEST_LOAD(sumsDst1);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, dst, sumsSrc, sumsDst2));
+
+            TEST_SAVE(sumsDst2);
+
+            result = Compare(sumsDst1, sumsDst2, eps, true, 32, false);
+        }
+
+        return result;
+    }
+
+    bool AnnAddConvolution3x3SumDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && AnnAddConvolutionSumDataTest(create, DW, DH, EPS, 1, FUNC_CS(SimdAnnAddConvolution3x3Sum));
 
         return result;
     }

@@ -62,6 +62,10 @@
 #define SIMD_SSE2_ENABLE
 #endif
 
+#if !defined(SIMD_SSE3_DISABLE) && _MSC_VER >= 1500
+#define SIMD_SSE3_ENABLE
+#endif
+
 #if !defined(SIMD_SSSE3_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSSE3_ENABLE
 #endif
@@ -139,6 +143,10 @@
 #define SIMD_SSE2_ENABLE
 #endif
 
+#if !defined(SIMD_SSE3_DISABLE) && defined(__SSE3__)
+#define SIMD_SSE3_ENABLE
+#endif
+
 #if !defined(SIMD_SSSE3_DISABLE) && defined(__SSSE3__)
 #define SIMD_SSSE3_ENABLE
 #endif
@@ -199,6 +207,10 @@
 #include <emmintrin.h>
 #endif
 
+#ifdef SIMD_SSE3_ENABLE
+# include <pmmintrin.h>
+#endif
+
 #ifdef SIMD_SSSE3_ENABLE
 #include <tmmintrin.h>
 #endif
@@ -231,7 +243,7 @@
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
-#elif defined(SIMD_SSE_ENABLE) || defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) \
+#elif defined(SIMD_SSE_ENABLE) || defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE3_ENABLE)  || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) \
     || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
 	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16

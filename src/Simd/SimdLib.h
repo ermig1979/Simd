@@ -788,6 +788,22 @@ extern "C"
 
     /*! @ingroup ann
 
+        \fn void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        \short Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
+        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 9).
+    */
+    SIMD_API void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+    /*! @ingroup ann
+
         \fn void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).

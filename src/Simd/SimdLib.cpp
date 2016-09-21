@@ -54,6 +54,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSse3.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
@@ -291,7 +292,7 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
 SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
 {
 #ifdef SIMD_AVX2_ENABLE
-	if (Avx2::Enable && width >= 8)
+	if (Avx2::Enable && width >= Avx::F)
 		Avx2::AnnConvert(src, stride, width, height, dst, inversion);
 	else
 #endif
@@ -404,12 +405,12 @@ SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a
 SIMD_API void SimdAnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= sizeof(__m256))
+    if (Avx::Enable && width >= Avx::F)
         Avx::AnnAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= sizeof(__m128))
+    if (Sse::Enable && width >= Sse::F)
         Sse::AnnAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -419,12 +420,12 @@ SIMD_API void SimdAnnAddConvolution3x3(const float * src, size_t srcStride, size
 SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= sizeof(__m256))
+    if (Avx::Enable && width >= Avx::F)
         Avx::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= sizeof(__m128))
+    if (Sse::Enable && width >= Sse::F)
         Sse::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -447,15 +448,35 @@ SIMD_API void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, 
     simdAnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+SIMD_API void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable && width >= Sse3::F)
+        Sse3::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+        Base::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+}
+
 SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= sizeof(__m256)*2)
+    if (Avx::Enable && width >= Avx::DF)
         Avx::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= sizeof(__m128)*2)
+    if (Sse::Enable && width >= Sse::DF)
         Sse::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif

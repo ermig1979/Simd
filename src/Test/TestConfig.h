@@ -53,6 +53,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSse3.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"

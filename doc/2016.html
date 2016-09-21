@@ -42,6 +42,7 @@
  <li>Base implementation, SSE1 and AVX1 optimizations of function AnnAddVectorMultipliedByValue.</li>
  <li>Base implementation, SSE1 and AVX1 optimizations of function AnnAddConvolution5x5Back.</li>
  <li>Base implementation, SSE1 and AVX1 optimizations of function AnnAddConvolution3x3Back.</li>
+ <li>Base implementation, SSE1, SSE3 and AVX1 optimizations of function AnnAddConvolution3x3Sum.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -56,12 +57,14 @@
  <li>Tests for verifying functionality of function AnnAddVectorMultipliedByValue.</li>
  <li>Tests for verifying functionality of function AnnAddConvolution5x5Back.</li>
  <li>Tests for verifying functionality of function AnnAddConvolution3x3Back.</li>
+ <li>Tests for verifying functionality of function AnnAddConvolution3x3Sum.</li>
 </ul>
 
 <h4>Infrastructure</h4>
 <h5>New features</h5>
 <ul>
  <li>Set MultiProcessorCompilation compiler option into True (MSVS specific).</li>
+ <li>Added SimdSse3 projects for Visual Studio and CMake.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

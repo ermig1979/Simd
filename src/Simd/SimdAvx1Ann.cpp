@@ -43,24 +43,24 @@ namespace Simd
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
-            size_t partialAlignedSize = AlignLo(size, 8);
-            size_t fullAlignedSize = AlignLo(size, 32);
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
             size_t i = 0;
             if(partialAlignedSize)
             {
                 __m256 sums[4] = {_mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps()};
                 if(fullAlignedSize)
                 {
-                    for(; i < fullAlignedSize; i += 32)
+                    for(; i < fullAlignedSize; i += QF)
                     {
-						AnnProductSum<align>(a, b, i, sums[0]);
-						AnnProductSum<align>(a, b, i + 8, sums[1]);
-						AnnProductSum<align>(a, b, i + 16, sums[2]);
-						AnnProductSum<align>(a, b, i + 24, sums[3]);
+						AnnProductSum<align>(a, b, i + F*0, sums[0]);
+						AnnProductSum<align>(a, b, i + F*1, sums[1]);
+						AnnProductSum<align>(a, b, i + F*2, sums[2]);
+						AnnProductSum<align>(a, b, i + F*3, sums[3]);
                     }
                     sums[0] = _mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3]));
                 }
-                for(; i < partialAlignedSize; i += 8)
+                for(; i < partialAlignedSize; i += F)
 					AnnProductSum<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
@@ -87,14 +87,14 @@ namespace Simd
             if (partial)
             {
                 __m256 _value = _mm256_set1_ps(value);
-                for (; i < aligned; i += 32)
+                for (; i < aligned; i += QF)
                 {
-                    AddMultiplied<align>(src + i + 0, _value, dst + i + 0);
-                    AddMultiplied<align>(src + i + 8, _value, dst + i + 8);
-                    AddMultiplied<align>(src + i + 16, _value, dst + i + 16);
-                    AddMultiplied<align>(src + i + 24, _value, dst + i + 24);
+                    AddMultiplied<align>(src + i + F*0, _value, dst + i + 0);
+                    AddMultiplied<align>(src + i + F*1, _value, dst + i + 8);
+                    AddMultiplied<align>(src + i + F*2, _value, dst + i + 16);
+                    AddMultiplied<align>(src + i + F*3, _value, dst + i + 24);
                 }
-                for (; i < partial; i += 8)
+                for (; i < partial; i += F)
                     AddMultiplied<align>(src + i, _value, dst + i);
             }
             for (; i < full; ++i)
@@ -103,8 +103,8 @@ namespace Simd
 
         void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
-            size_t aligned = AlignLo(size, 32);
-            size_t partial = AlignLo(size, 8);
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
             if (Aligned(src) && Aligned(dst))
                 AddMultiplied<true>(src, aligned, partial, size, *value, dst);
             else
@@ -113,14 +113,14 @@ namespace Simd
 
 		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
-			size_t alignedSize = Simd::AlignLo(size, 8);
+			size_t alignedSize = Simd::AlignLo(size, F);
 			__m256 _slope = _mm256_set1_ps(*slope);
 			__m256 _0 = _mm256_set1_ps(-0.0f);
 			__m256 _1 = _mm256_set1_ps(1.0f);
 			__m256 _0555 = _mm256_set1_ps(0.555f);
 			__m256 _0143 = _mm256_set1_ps(0.143f);
 			size_t i = 0;
-			for (; i < alignedSize; i += 8)
+			for (; i < alignedSize; i += F)
 			{
 				__m256 _src = Load<align>(src + i);
 				__m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
@@ -146,11 +146,11 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t alignedSize = Simd::AlignLo(size, F);
             __m256 _slope = _mm256_set1_ps(*slope);
             __m256 _1 = _mm256_set1_ps(1.0f);
             size_t i = 0;
-            for (; i < alignedSize; i += 8)
+            for (; i < alignedSize; i += F)
             {
                 __m256 _src = Load<align>(src + i);
                 Store<align>(dst + i, _mm256_mul_ps(_slope, _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
@@ -169,14 +169,14 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t alignedSize = Simd::AlignLo(size, F);
             __m256 _slope = _mm256_set1_ps(*slope);
             __m256 _0 = _mm256_set1_ps(-0.0f);
             __m256 _1 = _mm256_set1_ps(1.0f);
             __m256 _0559 = _mm256_set1_ps(0.559f);
             __m256 _0148 = _mm256_set1_ps(0.148f);
             size_t i = 0;
-            for (; i < alignedSize; i += 8)
+            for (; i < alignedSize; i += F)
             {
                 __m256 _src = Load<align>(src + i);
                 __m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
@@ -202,11 +202,11 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t alignedSize = Simd::AlignLo(size, F);
             __m256 _slope = _mm256_set1_ps(*slope);
             __m256 _1 = _mm256_set1_ps(1.0f);
             size_t i = 0;
-            for (; i < alignedSize; i += 8)
+            for (; i < alignedSize; i += F)
             {
                 __m256 _src = Load<align>(src + i);
                 Store<align>(dst + i, _mm256_mul_ps(_slope, _mm256_sub_ps(_1, _mm256_mul_ps(_src, _src))));
@@ -227,12 +227,12 @@ namespace Simd
         {
             float s = slope[0];
             assert(s >= 0.0f && s <= 1.0f);
-            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t alignedSize = Simd::AlignLo(size, F);
             size_t i = 0;
             if (s == 0)
             {
                 __m256 _0 = _mm256_set1_ps(0.0f);
-                for (; i < alignedSize; i += 8)
+                for (; i < alignedSize; i += F)
                 {
                     __m256 _src = Load<align>(src + i);
                     Store<align>(dst + i, _mm256_max_ps(_0, _src));
@@ -243,7 +243,7 @@ namespace Simd
             else
             {
                 __m256 _s = _mm256_set1_ps(s);
-                for (; i < alignedSize; i += 8)
+                for (; i < alignedSize; i += F)
                 {
                     __m256 _src = Load<align>(src + i);
                     Store<align>(dst + i, _mm256_max_ps(_mm256_mul_ps(_s, _src), _src));
@@ -268,9 +268,9 @@ namespace Simd
             __m256 _0 = _mm256_set1_ps(0.0f);
             __m256 _s = _mm256_set1_ps(s);
             __m256 d = _mm256_set1_ps(1.0f - s);
-            size_t alignedSize = Simd::AlignLo(size, 8);
+            size_t alignedSize = Simd::AlignLo(size, F);
             size_t i = 0;
-            for (; i < alignedSize; i += 8)
+            for (; i < alignedSize; i += F)
             {
                 __m256 mask = _mm256_cmp_ps(Load<align>(src + i), _0, _CMP_GT_OS);
                 Store<align>(dst + i, _mm256_add_ps(_s, _mm256_and_ps(mask, d)));
@@ -304,8 +304,8 @@ namespace Simd
             if (align)
                 assert(Aligned(x) && Aligned(d) && Aligned(w));
 
-            size_t partialAlignedSize = AlignLo(size, 8);
-            size_t fullAlignedSize = AlignLo(size, 32);
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
             __m256 _a = _mm256_set1_ps(a);
             __m256 _b = _mm256_set1_ps(b);
             size_t i = 0;
@@ -313,15 +313,15 @@ namespace Simd
             {
                 if (fullAlignedSize)
                 {
-                    for (; i < fullAlignedSize; i += 32)
+                    for (; i < fullAlignedSize; i += QF)
                     {
-                        UpdateWeights<align>(x, i + 0, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + 8, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + 16, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + 24, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F*0, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F*1, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F*2, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F*3, _a, _b, d, w);
                     }
                 }
-                for (; i < partialAlignedSize; i += 8)
+                for (; i < partialAlignedSize; i += F)
                     UpdateWeights<align>(x, i, _a, _b, d, w);
             }
             for (; i < size; ++i)
@@ -358,13 +358,13 @@ namespace Simd
 
         template <bool align> void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t alignedWidth = AlignLo(width, 8);
+            size_t alignedWidth = AlignLo(width, F);
             __m256 tailMask = RightNotZero(width - alignedWidth);
             __m256 _weights[9];
             LoadWeights<9>(weights, _weights);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < alignedWidth; col += 8)
+                for (size_t col = 0; col < alignedWidth; col += F)
                 {
                     __m256 _dst = Load<align>(dst + col);
                     _dst = _mm256_add_ps(_dst, Convolution3x3<align>(src + col, srcStride, _weights));
@@ -372,7 +372,7 @@ namespace Simd
                 }
                 if (width - alignedWidth)
                 {
-                    size_t col = width - 8;
+                    size_t col = width - F;
                     __m256 _dst = Load<false>(dst + col);
                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution3x3<false>(src + col, srcStride, _weights)));
                     Store<false>(dst + col, _dst);
@@ -384,7 +384,7 @@ namespace Simd
 
         void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                 AnnAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
@@ -406,13 +406,13 @@ namespace Simd
 
         template <bool align> void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t alignedWidth = AlignLo(width, 8);
+            size_t alignedWidth = AlignLo(width, F);
             __m256 tailMask = RightNotZero(width - alignedWidth);
             __m256 _weights[25];
             LoadWeights<25>(weights, _weights);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < alignedWidth; col += 8)
+                for (size_t col = 0; col < alignedWidth; col += F)
                 {
                     __m256 _dst = Load<align>(dst + col);
                     _dst = _mm256_add_ps(_dst, Convolution5x5<align>(src + col, srcStride, _weights));
@@ -420,7 +420,7 @@ namespace Simd
                 }
                 if (width - alignedWidth)
                 {
-                    size_t col = width - 8;
+                    size_t col = width - F;
                     __m256 _dst = Load<false>(dst + col);
                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5<false>(src + col, srcStride, _weights)));
                     Store<false>(dst + col, _dst);
@@ -432,7 +432,7 @@ namespace Simd
 
         void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                 AnnAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
@@ -440,8 +440,8 @@ namespace Simd
 
         template <bool align> void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t aligned = AlignLo(width, 16);
-            size_t partial = AlignLo(width, 4);
+            size_t aligned = AlignLo(width, QF);
+            size_t partial = AlignLo(width, F);
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t dy = 0; dy < 3; ++dy)
@@ -459,7 +459,7 @@ namespace Simd
 
         void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                 AnnAddConvolution3x3Back<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution3x3Back<false>(src, srcStride, width, height, weights, dst, dstStride);
@@ -467,8 +467,8 @@ namespace Simd
 
         template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t aligned = AlignLo(width, 32);
-            size_t partial = AlignLo(width, 8);
+            size_t aligned = AlignLo(width,QF);
+            size_t partial = AlignLo(width, F);
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t dy = 0; dy < 5; ++dy)
@@ -488,16 +488,71 @@ namespace Simd
 
         void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                 AnnAddConvolution5x5Back<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 AnnAddConvolution5x5Back<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
+        template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m256 & dst, __m256 * sums)
+        {
+            sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(dst, Load<align>(src + 0)));
+            sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(dst, Load<false>(src + 1)));
+            sums[2] = _mm256_add_ps(sums[2], _mm256_mul_ps(dst, Load<false>(src + 2)));
+        }
+
+        template <bool align> SIMD_INLINE void AddMultiplied3x3(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
+        {
+            AddMultiplied3<align>(src + stride * 0, dst, sums + 0);
+            AddMultiplied3<align>(src + stride * 1, dst, sums + 3);
+            AddMultiplied3<align>(src + stride * 2, dst, sums + 6);
+        }
+
+        SIMD_INLINE void Add8ExtractedSums(const __m256 * src, float * dst)
+        {
+            __m256 lo = PermutedHorizontalAdd(PermutedHorizontalAdd(src[0], src[1]), PermutedHorizontalAdd(src[2], src[3]));
+            __m256 hi = PermutedHorizontalAdd(PermutedHorizontalAdd(src[4], src[5]), PermutedHorizontalAdd(src[6], src[7]));
+            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), PermutedHorizontalAdd(lo, hi)));
+        }
+
+        template <bool align> void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            size_t alignedWidth = Simd::AlignLo(width, F);
+            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 _sums[9];
+            memset(_sums, 0, sizeof(_sums));
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    __m256 _dst = Load<align>(dst + col);
+                    AddMultiplied3x3<align>(src + col, srcStride, _dst, _sums);
+                }
+                if (alignedWidth < width)
+                {
+                    size_t col = width - F;
+                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
+                    AddMultiplied3x3<false>(src + col, srcStride, _dst, _sums);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+            Add8ExtractedSums(_sums, sums);
+            sums[8] += ExtractSum(_sums[8]);
+        }
+
+        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                AnnAddConvolution3x3Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+            else
+                AnnAddConvolution3x3Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
         template <bool align> SIMD_INLINE __m256 Max2x2(const float * src, size_t stride)
         {
             __m256 lo = _mm256_max_ps(Load<align>(src + 0), Load<align>(src + stride + 0));
-            __m256 hi = _mm256_max_ps(Load<align>(src + 8), Load<align>(src + stride + 8));
+            __m256 hi = _mm256_max_ps(Load<align>(src + F), Load<align>(src + stride + F));
             __m256 _lo = _mm256_permute2f128_ps(lo, hi, 0x20);
             __m256 _hi = _mm256_permute2f128_ps(lo, hi, 0x31);
             return _mm256_max_ps(_mm256_shuffle_ps(_lo, _hi, 0x88), _mm256_shuffle_ps(_lo, _hi, 0xDD));
@@ -505,16 +560,16 @@ namespace Simd
 
         template <bool align> void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
-            size_t alignedWidth = AlignLo(width, 16);
+            size_t alignedWidth = AlignLo(width, DF);
             for (size_t row = 0; row < height; row += 2)
             {
-                for (size_t col = 0; col < alignedWidth; col += 16)
+                for (size_t col = 0; col < alignedWidth; col += DF)
                 {
                     Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
                 }
                 if (width - alignedWidth)
                 {
-                    size_t col = width - 16;
+                    size_t col = width - DF;
                     Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
                 }
                 src += 2*srcStride;
@@ -524,7 +579,7 @@ namespace Simd
 
         void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
                 AnnMax2x2<true>(src, srcStride, width, height, dst, dstStride);
             else
                 AnnMax2x2<false>(src, srcStride, width, height, dst, dstStride);
