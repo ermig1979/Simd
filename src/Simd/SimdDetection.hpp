@@ -47,7 +47,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::Detection<Simd::Allocator> Detection;
+            typedef Simd::Detection< Simd::Allocator<uint8_t> > Detection;
 
             Detection::View image;
             Test::Load(image, "../../data/image/lena.pgm");

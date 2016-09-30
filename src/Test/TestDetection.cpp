@@ -481,7 +481,7 @@ namespace Test
 
 namespace Test
 {
-    typedef Simd::Detection<Simd::Allocator> Detection;
+    typedef Simd::Detection< Simd::Allocator<uint8_t> > Detection;
     typedef Detection::Objects Objects;
 
     static void DetectionSpecialTest(Detection & detection, Objects & objects, int threadNumber)

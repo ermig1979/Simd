@@ -33,8 +33,10 @@ namespace Simd
         \short Aligned memory allocator.
 
         Performs allocation and deletion of aligned memory.
+
+        \note Also it can be used as an allocator for STL containers.
     */
-    struct Allocator
+    template <class T> struct Allocator
     {
         /*!
             \fn void * Allocate(size_t size, size_t align);
@@ -47,7 +49,14 @@ namespace Simd
             \param [in] align - an align of allocated memory address.
             \return a pointer to allocated memory.
         */
-        static void * Allocate(size_t size, size_t align);
+        static SIMD_INLINE void * Allocate(size_t size, size_t align)
+        {
+#ifdef __SimdMemory_h__
+            return Simd::Allocate(size, align);
+#else
+            return SimdAllocate(size, align);
+#endif
+        }
 
         /*!
             \fn void Free(void * ptr);
@@ -58,7 +67,14 @@ namespace Simd
 
             \param [in] ptr - a pointer to the memory to be deleted.
         */
-        static void Free(void * ptr);
+        static SIMD_INLINE void Free(void * ptr)
+        {
+#ifdef __SimdMemory_h__
+            Simd::Free(ptr);
+#else
+            SimdFree(ptr);
+#endif
+        }
 
         /*!
             \fn size_t Align(size_t size, size_t align);
@@ -70,7 +86,14 @@ namespace Simd
 
             \return an aligned size.
         */
-        static size_t Align(size_t size, size_t align);
+        static SIMD_INLINE size_t Align(size_t size, size_t align)
+        {
+#ifdef __SimdMemory_h__
+            return Simd::AlignHi(size, align);
+#else
+            return SimdAlign(size, align);
+#endif
+        }
 
         /*!
             \fn void * Align(void * ptr, size_t align);
@@ -82,7 +105,14 @@ namespace Simd
 
             \return an aligned address.
         */
-        static void * Align(void * ptr, size_t align);
+        static SIMD_INLINE void * Align(void * ptr, size_t align)
+        {
+#ifdef __SimdMemory_h__
+            return Simd::AlignHi(ptr, align);
+#else
+            return (void *)SimdAlign((size_t)ptr, align);
+#endif
+        }
 
         /*!
             \fn size_t Alignment();
@@ -91,56 +121,96 @@ namespace Simd
 
             \return a required memory alignment.
         */
-        static size_t Alignment();
+        static SIMD_INLINE size_t Alignment()
+        {
+#ifdef __SimdEnable_h__
+            return Simd::ALIGNMENT;
+#else
+            return SimdAlignment();
+#endif
+        }
+
+        //---------------------------------------------------------------------
+        // STL allocator interface implementation:
+
+        typedef T value_type;
+        typedef T * pointer;
+        typedef std::size_t size_type;
+        typedef std::ptrdiff_t difference_type;
+        typedef T & reference;
+        typedef const T & const_reference;
+        typedef const T * const_pointer;
+
+        template <typename U>
+        struct rebind 
+        {
+            typedef Allocator<U> other;
+        };
+
+        SIMD_INLINE Allocator()
+        {
+        }
+
+        template <typename U> SIMD_INLINE Allocator(const Allocator<U> & a)
+        {
+        }
+
+        SIMD_INLINE const_pointer address(const_reference value) const
+        {
+            return std::addressof(value);
+        }
+
+        SIMD_INLINE pointer address(reference value) const
+        {
+            return std::addressof(value);
+        }
+
+        SIMD_INLINE pointer allocate(size_type size, const void * ptr = nullptr) 
+        {
+            return static_cast<pointer>(Allocate(size*sizeof(T), Alignment()));
+        }
+
+        SIMD_INLINE size_type max_size() const
+        {
+            return ~static_cast<std::size_t>(0) / sizeof(T);
+        }
+
+        SIMD_INLINE void deallocate(pointer ptr, size_type size)
+        {
+            Free(ptr);
+        }
+
+        template<class U, class V> SIMD_INLINE void construct(U * ptr, const V & value)
+        {
+            ::new((void*)ptr) U(value);
+        }
+
+#if !(defined(_MSC_VER) && _MSC_VER <= 1800) // -vc2013 doesn't support variadic templates
+        template<class U, class... Args> SIMD_INLINE void construct(U * ptr, Args &&... args)
+        {
+            ::new((void*)ptr) U(std::forward<Args>(args)...);
+        }
+#endif
+
+        template<class U> SIMD_INLINE void construct(U * ptr)
+        {
+            ::new((void*)ptr) U();
+        }
+
+        template<class U> SIMD_INLINE void destroy(U * ptr)
+        {
+            ptr->~U();
+        }
     };
 
-    //-------------------------------------------------------------------------
-
-    // struct Allocator implementation:
-
-    SIMD_INLINE void * Allocator::Allocate(size_t size, size_t align)
+    template<typename T1, typename T2> SIMD_INLINE bool operator == (const Allocator<T1> & a1, const Allocator<T2> & a2)
     {
-#ifdef __SimdMemory_h__
-        return Simd::Allocate(size, align);
-#else
-        return SimdAllocate(size, align);
-#endif
+        return true;
     }
 
-    SIMD_INLINE void Allocator::Free(void * ptr)
+    template<typename T1, typename T2> SIMD_INLINE bool operator != (const Allocator<T1> & a1, const Allocator<T2> & a2)
     {
-#ifdef __SimdMemory_h__
-        Simd::Free(ptr);
-#else
-        SimdFree(ptr);
-#endif
-    }
-
-    SIMD_INLINE size_t Allocator::Align(size_t size, size_t align)
-    {
-#ifdef __SimdMemory_h__
-        return Simd::AlignHi(size, align);
-#else
-        return SimdAlign(size, align);
-#endif
-    }
-
-    SIMD_INLINE void * Allocator::Align(void * ptr, size_t align)
-    {
-#ifdef __SimdMemory_h__
-        return Simd::AlignHi(ptr, align);
-#else
-        return (void *) SimdAlign((size_t)ptr, align);
-#endif
-    }
-
-    SIMD_INLINE size_t Allocator::Alignment()
-    {
-#ifdef __SimdEnable_h__
-        return Simd::ALIGNMENT;
-#else
-        return SimdAlignment();
-#endif
+        return false;
     }
 }
 

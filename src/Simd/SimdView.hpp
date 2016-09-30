@@ -45,7 +45,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::View<Simd::Allocator> View;
+            typedef Simd::View< Simd::Allocator<uint8_t> > View;
 
             View view1(40, 30, View::Bgr24);
             cv::Mat mat1(80, 60, CV_8UC3)
