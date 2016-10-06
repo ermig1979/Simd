@@ -31,7 +31,7 @@ namespace Simd
     namespace Neural
     {
         typedef Point<ptrdiff_t> Size;
-        typedef std::vector< float, Allocator<float> > Vector;
+        typedef std::vector<float, Allocator<float>> Vector;
         typedef std::vector<Vector> Vectors;
         typedef size_t Label;
         typedef std::vector<Label> Labels;
@@ -147,37 +147,80 @@ namespace Simd
             }
         };
 
-        template <class T> struct Buffer
+        struct Index 
         {
-            Size size;
-            size_t count;
-            std::vector<T, Allocator<T>> value;
+            ptrdiff_t width, height, depth;
 
-            SIMD_INLINE Buffer(const Size & s = Size(), size_t c = 0)
+            SIMD_INLINE Index()
+                : width(0)
+                , height(0)
+                , depth(0)
             {
-                Resize(s, c);
             }
 
-            SIMD_INLINE void Resize(const Size & s, size_t c)
+            SIMD_INLINE Index(ptrdiff_t w, ptrdiff_t h, ptrdiff_t d = 1)
+                : width(w)
+                , height(h)
+                , depth(d)
             {
-                size = s;
-                count = c;
-                value.resize(size.x*size.y*count, 0);
             }
 
-            SIMD_INLINE void Resize(size_t w, size_t h, size_t c)
+            SIMD_INLINE Index(const Size & s, ptrdiff_t d = 1)
+                : width(s.x)
+                , height(s.y)
+                , depth(d)
             {
-                Resize(Size(w, h), c);
             }
 
-            SIMD_INLINE T * Get(size_t x, size_t y, size_t c)
+            SIMD_INLINE Index(const Index & i)
+                : width(i.width)
+                , height(i.height)
+                , depth(i.depth)
             {
-                return value.data() + (c*size.y + y)*size.x + x;
             }
 
-            SIMD_INLINE const T * Get(size_t x, size_t y, size_t c) const
+            SIMD_INLINE void Resize(ptrdiff_t w, ptrdiff_t h, ptrdiff_t d)
             {
-                return value.data() + (c*size.y + y)*size.x + x;
+                width = w;
+                height = h;
+                depth = d;
+            }
+
+            SIMD_INLINE void Resize(const Size & s, ptrdiff_t d)
+            {
+                width = s.x;
+                height = s.y;
+                depth = d;
+            }
+
+            SIMD_INLINE ptrdiff_t Offset(ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
+            { 
+                return (height * c + y) * width + x; 
+            }
+
+            template<class T, class A> SIMD_INLINE const T * Get(const std::vector<T, A> & v, ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
+            {
+                return v.data() + Offset(x, y, c);
+            }
+
+            template<class T, class A> SIMD_INLINE T * Get(std::vector<T, A> & v, ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
+            {
+                return v.data() + Offset(x, y, c);
+            }
+
+            SIMD_INLINE Neural::Size Size() const
+            {
+                return Neural::Size(width, height);
+            }
+
+            SIMD_INLINE ptrdiff_t Area() const
+            { 
+                return width * height; 
+            }
+
+            SIMD_INLINE ptrdiff_t Volume() const
+            { 
+                return width * height * depth; 
             }
         };
 
@@ -193,22 +236,45 @@ namespace Simd
 
             const Function function;
 
-            virtual void Forward(const Layer & src, bool train) = 0;
-
-            virtual void Backward(const Vector & src) = 0;
-
             Layer(Layer::Type l, Function::Type f)
                 : type(l)
                 , function(f)
+                , _prev(0)
+                , _next(0)
             {
             }
 
+            virtual void Forward(const Vector & src, size_t thread, bool train) = 0;
+
+            virtual void Backward(const Vector & src, size_t thread) = 0;
+
+            virtual void SetThreadNumber(size_t number)
+            {
+                _common.resize(number);
+                for (size_t i = 0; i < _common.size(); ++i)
+                {
+                    _common[i].sum.resize(_dst.Volume());
+                    _common[i].dst.resize(_dst.Volume());
+                }
+            }
+
+            SIMD_INLINE const Vector & Dst(size_t thread) const
+            { 
+                return _common[thread].dst; 
+            }
+
         protected:
-            Buffer<float> _src;
-            Buffer<float> _weight;
-            Buffer<float> _bias;
-            Buffer<float> _sum;
-            Buffer<float> _dst;
+            Layer * _prev, *_next;
+
+            Index _src, _dst;
+            Vector _weight, _bias;
+
+            struct Common
+            {
+                Vector sum;
+                Vector dst;
+            };
+            std::vector<Common> _common;
 
             friend struct InputLayer;
             friend struct ConvolutionalLayer;
@@ -225,136 +291,171 @@ namespace Simd
                 : Layer(Input, Function::Identity)
             {
                 _dst.Resize(dstSize, 1);
+                SetThreadNumber(1);
             }
 
-            void Forward(const Layer & src, bool train) override {}
+            void Forward(const Vector & src, size_t thread, bool train) override
+            {
+                _common[thread].dst = src;
+            }
 
-            void Backward(const Vector & src) override {}
+            void Backward(const Vector & src, size_t thread) override
+            {
+            }
         };
 
         struct ConvolutionalLayer : public Layer
         {
-            ConvolutionalLayer(Function::Type f, size_t srcCount, const Size & dstSize, size_t dstCount, size_t half, bool valid = true, bool bias = true)
+            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, bool valid = true, bool bias = true)
                 : Layer(Convolutional, f)
             {
-                _half = half;
                 _valid = valid;
-                _src.Resize(Size(dstSize.x + 2 * _half, dstSize.y + 2 * _half), srcCount);
-                _weight.Resize(Size(1 + 2 * _half, 1 + 2 * _half), srcCount*dstCount);
+                _indent = (coreSize - 1)/2;
+                Size pad = _indent*Size(2, 2);
+                _src.Resize(srcSize, srcDepth);
+                _dst.Resize(srcSize - (_valid ? pad : Size()), dstDepth);
+                _padded.Resize(srcSize + (_valid ? Size() : pad), srcDepth);
+                _core.Resize(coreSize, coreSize, srcDepth*dstDepth);
+                _weight.resize(_core.Volume());
                 if (bias)
-                    _bias.Resize(Size(1, 1), dstCount);
-                _sum.Resize(dstSize, dstCount);
-                _dst.Resize(dstSize, dstCount);
+                    _bias.resize(dstDepth);
+                SetThreadNumber(1);
             }
 
-            void Forward(const Layer & src, bool train) override
+            void Forward(const Vector & src, size_t thread, bool train) override
             {
-                CopyAndPad(src);
-                memset(_sum.value.data(), 0, _sum.value.size()*sizeof(float));
-                for (size_t dc = 0; dc < _dst.count; ++dc)
+                const Vector & padded = PaddedSrc(src, thread);
+                Vector & sum = _common[thread].sum;
+                Vector & dst = _common[thread].dst;
+                memset(sum.data(), 0, sum.size()*sizeof(float));
+                for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
                 {
-                    for (size_t sc = 0; sc < _src.count; ++sc)
+                    for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
                     {
-                        //if (!tbl_.is_connected(o, inc))
-                        //    continue;
+                        const float_t * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
+                        const float_t * psrc = _padded.Get(padded, 0, 0, sc);
+                        float_t * psum = _dst.Get(sum, 0, 0, dc);
 
-                        const float_t * weight = _weight.Get(0, 0, _src.count*dc + sc);
-                        const float_t * src = _src.Get(0, 0, sc);
-                        float_t * dst = _sum.Get(0, 0, dc);
-
-                        if (_weight.size.x == 3 && _weight.size.y == 3)
+                        if (_core.width == 3 && _core.height == 3)
                         {
-                            ::SimdAnnAddConvolution3x3(src, _src.size.x, _dst.size.x, _dst.size.y, weight, dst, _dst.size.x);
+                            ::SimdAnnAddConvolution3x3(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
-                        else if (_weight.size.y == 5 && _weight.size.y == 5)
+                        else if (_core.width == 5 && _core.height == 5)
                         {
-                            ::SimdAnnAddConvolution5x5(src, _src.size.x, _dst.size.x, _dst.size.y, weight, dst, _dst.size.x);
+                            ::SimdAnnAddConvolution5x5(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
                         else
                         {
-                            for (ptrdiff_t y = 0; y < _sum.size.y; y++)
+                            for (ptrdiff_t y = 0; y < _dst.height; y++)
                             {
-                                for (ptrdiff_t x = 0; x < _sum.size.x; x++)
+                                for (ptrdiff_t x = 0; x < _dst.width; x++)
                                 {
-                                    const float * pw = weight;
-                                    const float * ps = src + y * _src.size.x + x;
-                                    float sum = 0;
-                                    for (ptrdiff_t wy = 0; wy < _weight.size.y; wy++)
-                                        for (ptrdiff_t wx = 0; wx < _weight.size.x; wx++)
-                                            sum += *pw++ * ps[wy * _src.size.x + wx];
-                                    dst[y * _dst.size.x + x] += sum;
+                                    const float * pw = pweight;
+                                    const float * ps = psrc + y * _padded.width + x;
+                                    float s = 0;
+                                    for (ptrdiff_t wy = 0; wy < _core.height; wy++)
+                                        for (ptrdiff_t wx = 0; wx < _core.width; wx++)
+                                            s += *pw++ * ps[wy * _padded.width + wx];
+                                    psum[y * _dst.width + x] += s;
                                 }
                             }
                         }
                     }
-
-                    if (!_bias.value.empty())
+                    if (!_bias.empty())
                     {
-                        float_t bias = *_bias.Get(0, 0, dc);
-                        size_t size = _sum.size.x*_sum.size.y;
-                        float_t * sum = _sum.Get(0, 0, dc);
+                        float_t bias = _bias[dc];
+                        size_t size = _dst.Area();
+                        float_t * psum = _dst.Get(sum, 0, 0, dc);
                         for (size_t i = 0; i < size; ++i)
-                            sum[i] += bias;
+                            psum[i] += bias;
                     }
                 }
-                function.function(_sum.value.data(), _sum.value.size(), _dst.value.data());
+                function.function(sum.data(), sum.size(), dst.data());
             }
 
-            void Backward(const Vector & src) override
+            void Backward(const Vector & src, size_t thread) override
             {
-
             }
 
-        protected:
-
-            void CopyAndPad(const Layer & src)
+            virtual void SetThreadNumber(size_t number) override
             {
-                size_t half = _valid ? 0 : _half;
-                size_t size = src._dst.size.x*sizeof(float);
-                for (size_t c = 0; c < src._dst.count; ++c)
+                Layer::SetThreadNumber(number);
+                _specific.resize(number);
+                for (size_t i = 0; i < _specific.size(); ++i)
                 {
-                    for (ptrdiff_t y = 0; y < _dst.size.y; ++y)
-                        memcpy(_src.Get(half, half + y, c), src._dst.Get(0, y, c), size);
+                    if (!_valid)
+                    {
+                        _specific[i].paddedSrc.resize(_padded.Volume());
+                    }
                 }
             }
 
-            size_t _half;
+        private:
+
+            const Vector & PaddedSrc(const Vector & src, size_t thread)
+            {
+                if (_valid)
+                    return src;
+                else
+                {
+                    Vector & padded = _specific[thread].paddedSrc;
+                    size_t size = _src.width*sizeof(float);
+                    for (ptrdiff_t c = 0; c < _src.depth; ++c)
+                    {
+                        for (ptrdiff_t y = 0; y < _src.height; ++y)
+                            memcpy(_padded.Get(padded, _indent, _indent + y, c), _src.Get(src, 0, y, c), size);
+                    }
+                    return padded;
+                }
+            }
+
+            struct Specific
+            {
+                Vector paddedSrc;
+            };
+            std::vector<Specific> _specific;
+
+            Index _core;
+            Index _padded;
+            size_t _indent;
             bool _valid;
         };
 
         struct MaxPoolingLayer : public Layer
         {
-            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcCount, size_t poolingSize)
+            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t poolingSize)
                 : Layer(MaxPooling, f)
             {
                 _poolingSize = poolingSize;
-                _src.Resize(srcSize, srcCount);
-                _sum.Resize(srcSize/_poolingSize, srcCount);
-                _dst.Resize(srcSize/_poolingSize, srcCount);
-
-                _index.Resize(srcSize/_poolingSize, srcCount);
+                _src.Resize(srcSize, srcDepth);
+                _dst.Resize(srcSize/_poolingSize, srcDepth);
+                SetThreadNumber(1);
             }
 
-            void Forward(const Layer & src, bool train) override
+            void Forward(const Vector & src, size_t thread, bool train) override
             {
+                Vector & sum = _common[thread].sum;
+                Vector & dst = _common[thread].dst;
+                ptrdiff_t * idx = _specific[thread].index.data();
+
                 if (train || _poolingSize != 2)
                 {
-                    _src.value = src._dst.value;
-                    for (size_t c = 0; c < _dst.count; ++c)
+                    for (ptrdiff_t c = 0; c < _dst.depth; ++c)
                     {
-                        for (ptrdiff_t y = 0; y < _sum.size.y; y++)
+                        for (ptrdiff_t y = 0; y < _dst.height; y++)
                         {
-                            for (ptrdiff_t x = 0; x < _sum.size.x; x++)
+                            for (ptrdiff_t x = 0; x < _dst.width; x++)
                             {
-                                const float * ps = _src.Get(x*_poolingSize, y*_poolingSize, c);
+                                ptrdiff_t srcOffset = _src.Offset(x*_poolingSize, y*_poolingSize, c);
+                                const float * psrc = src.data() + srcOffset;
                                 ptrdiff_t maxIndex = 0;
                                 float maxValue = std::numeric_limits<float_t>::lowest();
                                 for (size_t dy = 0; dy < _poolingSize; dy++)
                                 {
                                     for (size_t dx = 0; dx < _poolingSize; dx++)
                                     {
-                                        ptrdiff_t index = dy*_src.size.x + dx;
-                                        float value = ps[index];
+                                        ptrdiff_t index = dy*_src.width + dx;
+                                        float value = psrc[index];
                                         if (value > maxValue)
                                         {
                                             maxValue = value;
@@ -362,82 +463,96 @@ namespace Simd
                                         }
                                     }
                                 }
-                                _sum.Get(x, y, c)[0] = maxValue;
-                                _index.Get(x, y, c)[0] = maxIndex + (ps - _src.value.data());
+                                ptrdiff_t dstOffset = _dst.Offset(x, y, c);
+                                sum[dstOffset] = maxValue;
+                                idx[dstOffset] = srcOffset + maxIndex;
                             }
                         }
                     }                    
                 }
                 else
                 {
-                    const Buffer<float> & s = src._dst;
-                    ::SimdAnnMax2x2(s.value.data(), s.size.x, s.size.x, s.size.x*s.count, _sum.value.data(), _sum.size.x);
+                    ::SimdAnnMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
                 }
-                function.function(_sum.value.data(), _sum.value.size(), _dst.value.data());
+                function.function(sum.data(), sum.size(), dst.data());
             }
 
-            void Backward(const Vector & src) override
+            void Backward(const Vector & src, size_t thread) override
             {
-
             }
+
+            virtual void SetThreadNumber(size_t number) override
+            {
+                Layer::SetThreadNumber(number);
+                _specific.resize(number);
+                for (size_t i = 0; i < _specific.size(); ++i)
+                {
+                    _specific[i].index.resize(_dst.Volume());
+                }
+            }
+
         protected:
-            Buffer<ptrdiff_t> _index;
+
+            struct Specific
+            {
+                std::vector<ptrdiff_t, Allocator<ptrdiff_t>> index;
+            };
+            std::vector<Specific> _specific;
+
             size_t _poolingSize;
         };
 
         struct FullyConnectedLayer : public Layer
         {
-            FullyConnectedLayer(Function::Type f, size_t srcCount, size_t dstCount, bool bias = true)
+            FullyConnectedLayer(Function::Type f, size_t srcSize, size_t dstSize, bool bias = true)
                 : Layer(FullyConnected, f)
                 , _reordered(false)
             {
-                Size size(1, 1);
-                _src.Resize(size, srcCount);
-                _weight.Resize(dstCount, srcCount, 1);
+                _src.Resize(srcSize, 1, 1);
+                _dst.Resize(dstSize, 1, 1);
+                _weight.resize(dstSize*srcSize);
                 if (bias)
-                    _bias.Resize(Size(1, 1), dstCount);
-                _sum.Resize(size, dstCount);
-                _dst.Resize(size, dstCount);
+                    _bias.resize(dstSize);
+                SetThreadNumber(1);
             }
 
-            void Forward(const Layer & src, bool train) override
+            void Forward(const Vector & src, size_t thread, bool train) override
             {
+                Vector & sum = _common[thread].sum;
+                Vector & dst = _common[thread].dst;
                 if (train || true)
                 {
-                    _src.value = src._dst.value;
-                    memset(_sum.value.data(), 0, sizeof(float_t)*_sum.value.size());
-                    for (size_t i = 0; i < _src.value.size(); i++)
-                        ::SimdAnnAddVectorMultipliedByValue(_weight.Get(0, i, 0), _sum.value.size(), _src.Get(0, 0, i), _sum.Get(0, 0, 0));
+                    memset(sum.data(), 0, sizeof(float_t)*sum.size());
+                    for (size_t i = 0; i < src.size(); i++)
+                        ::SimdAnnAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
                 else
                 {
                     if (!_reordered)
                     {
-                        Vector buffer(_weight.value.size());
-                        for (ptrdiff_t i = 0; i < _weight.size.x; ++i)
-                            for (ptrdiff_t j = 0; j < _weight.size.y; ++j)
-                                buffer[i*_weight.size.y + j] = _weight.value[j*_weight.size.x + i];
-                        _weight.value.swap(buffer);
-                        std::swap(_weight.size.x, _weight.size.y);
+                        Vector buffer(_weight.size());
+                        for (ptrdiff_t i = 0; i < _dst.width; ++i)
+                            for (ptrdiff_t j = 0; j < _src.width; ++j)
+                                buffer[i*_src.width + j] = _weight[j*_dst.width + i];
+                        _weight.swap(buffer);
                         _reordered = true;
                     }
-                    const Buffer<float> & s = src._dst;
-                    for (size_t i = 0; i < _sum.value.size(); ++i)
-                        ::SimdAnnProductSum(s.value.data(), _weight.Get(0, i, 0), s.value.size(), _sum.Get(0, 0, i));
+                    for (size_t i = 0; i < sum.size(); ++i)
+                        ::SimdAnnProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
                 }
 
-                if (!_bias.value.empty())
+                if (!_bias.empty())
                 {
-                    for (size_t i = 0; i < _sum.value.size(); ++i)
-                        _sum.value[i] += _bias.value[i];
+                    for (size_t i = 0; i < sum.size(); ++i)
+                        sum[i] += _bias[i];
                 }
-                function.function(_sum.value.data(), _sum.value.size(), _dst.value.data());
+                function.function(sum.data(), sum.size(), dst.data());
             }
 
-            void Backward(const Vector & src) override
+            void Backward(const Vector & src, size_t thread) override
             {
-
             }
+
         protected:
             bool _reordered;
         };
@@ -457,7 +572,9 @@ namespace Simd
             void Add(Layer * layer)
             {
                 if (_layers.empty())
-                    _layers.push_back(LayerPtr(new InputLayer(layer->_dst.size)));
+                    _layers.push_back(LayerPtr(new InputLayer(layer->_src.Size())));
+                layer->_prev = _layers.back().get();
+                _layers.back()->_next = layer;
                 _layers.push_back(LayerPtr(layer));
             }
 
@@ -465,7 +582,7 @@ namespace Simd
             {
                 if (src.size() != dst.size())
                     return false;
-                size_t size = _layers.back()->_dst.value.size();
+                size_t size = _layers.back()->_dst.Volume();
                 float min = _layers.back()->function.min;
                 float max = _layers.back()->function.max;
                 Vectors converted(dst.size());
@@ -486,10 +603,9 @@ namespace Simd
                 return false;
             }
 
-            Vector & Predict(const Vector & x, bool train = false)
+            SIMD_INLINE const Vector & Predict(const Vector & x, bool train = false)
             {
-                Forward(x, train);
-                return _layers.back()->_dst.value;
+                return Forward(x, 0, train);
             }
 
             bool Load(std::ifstream & ifs, bool train = false)
@@ -497,10 +613,10 @@ namespace Simd
                 for (size_t i = 0; i < _layers.size(); ++i)
                 {
                     Layer & layer = *_layers[i];
-                    for (size_t j = 0; j < layer._weight.value.size(); ++j)
-                        ifs >> layer._weight.value[j];
-                    for (size_t j = 0; j < layer._bias.value.size(); ++j)
-                        ifs >> layer._bias.value[j];
+                    for (size_t j = 0; j < layer._weight.size(); ++j)
+                        ifs >> layer._weight[j];
+                    for (size_t j = 0; j < layer._bias.size(); ++j)
+                        ifs >> layer._bias[j];
                 }
                 return true;
             }
@@ -522,10 +638,10 @@ namespace Simd
                 for (size_t i = 0; i < _layers.size(); ++i)
                 {
                     const Layer & layer = *_layers[i];
-                    for (size_t j = 0; j < layer._weight.value.size(); ++j)
-                        ofs << layer._weight.value[j] << " ";
-                    for (size_t j = 0; j < layer._bias.value.size(); ++j)
-                        ofs << layer._bias.value[j] << " ";
+                    for (size_t j = 0; j < layer._weight.size(); ++j)
+                        ofs << layer._weight[j] << " ";
+                    for (size_t j = 0; j < layer._bias.size(); ++j)
+                        ofs << layer._bias[j] << " ";
                 }
                 return true;
             }
@@ -545,14 +661,15 @@ namespace Simd
         private:
             LayerPtrs _layers;
 
-            void Forward(const Vector & src, bool train)
+            const Vector & Forward(const Vector & src, size_t thread, bool train)
             {
-                _layers[0]->_dst.value = src;
+                _layers[0]->Forward(src, thread, train);
                 for (size_t i = 1; i < _layers.size(); ++i)
-                    _layers[i]->Forward(*_layers[i - 1], train);
+                    _layers[i]->Forward(_layers[i - 1]->Dst(thread), thread, train);
+                return _layers.back()->Dst(thread);
             }
 
-            void Backward(const Vector & src)
+            void Backward(const Vector & src, size_t thread)
             {
 
             }
