@@ -153,24 +153,29 @@ namespace Simd
             size_t count;
             std::vector<T, Allocator<T>> value;
 
-            Buffer(const Size & s = Size(), size_t c = 0)
+            SIMD_INLINE Buffer(const Size & s = Size(), size_t c = 0)
             {
                 Resize(s, c);
             }
 
-            void Resize(const Size & s, size_t c)
+            SIMD_INLINE void Resize(const Size & s, size_t c)
             {
                 size = s;
                 count = c;
                 value.resize(size.x*size.y*count, 0);
             }
 
-            T * Get(size_t x, size_t y, size_t c) 
+            SIMD_INLINE void Resize(size_t w, size_t h, size_t c)
+            {
+                Resize(Size(w, h), c);
+            }
+
+            SIMD_INLINE T * Get(size_t x, size_t y, size_t c)
             {
                 return value.data() + (c*size.y + y)*size.x + x;
             }
 
-            const T * Get(size_t x, size_t y, size_t c) const
+            SIMD_INLINE const T * Get(size_t x, size_t y, size_t c) const
             {
                 return value.data() + (c*size.y + y)*size.x + x;
             }
@@ -201,14 +206,14 @@ namespace Simd
         protected:
             Buffer<float> _src;
             Buffer<float> _weight;
-            Vector _bias;
+            Buffer<float> _bias;
             Buffer<float> _sum;
             Buffer<float> _dst;
 
             friend struct InputLayer;
             friend struct ConvolutionalLayer;
             friend struct MaxPoolingLayer;
-            friend struct FullConnectedLayer;
+            friend struct FullyConnectedLayer;
             friend struct Network;
         };
         typedef std::shared_ptr<Layer> LayerPtr;
@@ -229,7 +234,7 @@ namespace Simd
 
         struct ConvolutionalLayer : public Layer
         {
-            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcCount, const Size & dstSize, size_t dstCount, size_t half, bool valid = true, bool bias = true)
+            ConvolutionalLayer(Function::Type f, size_t srcCount, const Size & dstSize, size_t dstCount, size_t half, bool valid = true, bool bias = true)
                 : Layer(Convolutional, f)
             {
                 _half = half;
@@ -237,7 +242,7 @@ namespace Simd
                 _src.Resize(Size(dstSize.x + 2 * _half, dstSize.y + 2 * _half), srcCount);
                 _weight.Resize(Size(1 + 2 * _half, 1 + 2 * _half), srcCount*dstCount);
                 if (bias)
-                    _bias.resize(dstCount, 0);
+                    _bias.Resize(Size(1, 1), dstCount);
                 _sum.Resize(dstSize, dstCount);
                 _dst.Resize(dstSize, dstCount);
             }
@@ -245,6 +250,7 @@ namespace Simd
             void Forward(const Layer & src, bool train) override
             {
                 CopyAndPad(src);
+                memset(_sum.value.data(), 0, _sum.value.size()*sizeof(float));
                 for (size_t dc = 0; dc < _dst.count; ++dc)
                 {
                     for (size_t sc = 0; sc < _src.count; ++sc)
@@ -260,7 +266,7 @@ namespace Simd
                         {
                             ::SimdAnnAddConvolution3x3(src, _src.size.x, _dst.size.x, _dst.size.y, weight, dst, _dst.size.x);
                         }
-                        else if (_weight.size.y == 3 && _weight.size.y == 3)
+                        else if (_weight.size.y == 5 && _weight.size.y == 5)
                         {
                             ::SimdAnnAddConvolution5x5(src, _src.size.x, _dst.size.x, _dst.size.y, weight, dst, _dst.size.x);
                         }
@@ -282,9 +288,9 @@ namespace Simd
                         }
                     }
 
-                    if (!_bias.empty())
+                    if (!_bias.value.empty())
                     {
-                        float_t bias = _bias[dc];
+                        float_t bias = *_bias.Get(0, 0, dc);
                         size_t size = _sum.size.x*_sum.size.y;
                         float_t * sum = _sum.Get(0, 0, dc);
                         for (size_t i = 0; i < size; ++i)
@@ -381,19 +387,59 @@ namespace Simd
 
         struct FullyConnectedLayer : public Layer
         {
-            FullyConnectedLayer(Function::Type f)
+            FullyConnectedLayer(Function::Type f, size_t srcCount, size_t dstCount, bool bias = true)
                 : Layer(FullyConnected, f)
+                , _reordered(false)
             {
+                Size size(1, 1);
+                _src.Resize(size, srcCount);
+                _weight.Resize(dstCount, srcCount, 1);
+                if (bias)
+                    _bias.Resize(Size(1, 1), dstCount);
+                _sum.Resize(size, dstCount);
+                _dst.Resize(size, dstCount);
             }
 
             void Forward(const Layer & src, bool train) override
             {
+                if (train || true)
+                {
+                    _src.value = src._dst.value;
+                    memset(_sum.value.data(), 0, sizeof(float_t)*_sum.value.size());
+                    for (size_t i = 0; i < _src.value.size(); i++)
+                        ::SimdAnnAddVectorMultipliedByValue(_weight.Get(0, i, 0), _sum.value.size(), _src.Get(0, 0, i), _sum.Get(0, 0, 0));
+                }
+                else
+                {
+                    if (!_reordered)
+                    {
+                        Vector buffer(_weight.value.size());
+                        for (ptrdiff_t i = 0; i < _weight.size.x; ++i)
+                            for (ptrdiff_t j = 0; j < _weight.size.y; ++j)
+                                buffer[i*_weight.size.y + j] = _weight.value[j*_weight.size.x + i];
+                        _weight.value.swap(buffer);
+                        std::swap(_weight.size.x, _weight.size.y);
+                        _reordered = true;
+                    }
+                    const Buffer<float> & s = src._dst;
+                    for (size_t i = 0; i < _sum.value.size(); ++i)
+                        ::SimdAnnProductSum(s.value.data(), _weight.Get(0, i, 0), s.value.size(), _sum.Get(0, 0, i));
+                }
+
+                if (!_bias.value.empty())
+                {
+                    for (size_t i = 0; i < _sum.value.size(); ++i)
+                        _sum.value[i] += _bias.value[i];
+                }
+                function.function(_sum.value.data(), _sum.value.size(), _dst.value.data());
             }
 
             void Backward(const Vector & src) override
             {
 
             }
+        protected:
+            bool _reordered;
         };
 
         struct TrainOptions
@@ -440,41 +486,56 @@ namespace Simd
                 return false;
             }
 
-            Vector & Predict(const Vector & x)
+            Vector & Predict(const Vector & x, bool train = false)
             {
-                Forward(x, false);
+                Forward(x, train);
                 return _layers.back()->_dst.value;
             }
 
-            bool Load(std::ifstream & ifs)
+            bool Load(std::ifstream & ifs, bool train = false)
             {
-
-                return false;
+                for (size_t i = 0; i < _layers.size(); ++i)
+                {
+                    Layer & layer = *_layers[i];
+                    for (size_t j = 0; j < layer._weight.value.size(); ++j)
+                        ifs >> layer._weight.value[j];
+                    for (size_t j = 0; j < layer._bias.value.size(); ++j)
+                        ifs >> layer._bias.value[j];
+                }
+                return true;
             }
 
-            bool Load(const std::string & path)
+            bool Load(const std::string & path, bool train = false)
             {
                 std::ifstream ifs(path.c_str());
                 if (ifs.is_open())
                 {
-                    bool result = Load(ifs);
+                    bool result = Load(ifs, train);
                     ifs.close();
                     return result;
                 }                
                 return false;
             }
 
-            bool Save(std::ofstream & ofs) const
+            bool Save(std::ofstream & ofs, bool train = false) const
             {
-                return false;
+                for (size_t i = 0; i < _layers.size(); ++i)
+                {
+                    const Layer & layer = *_layers[i];
+                    for (size_t j = 0; j < layer._weight.value.size(); ++j)
+                        ofs << layer._weight.value[j] << " ";
+                    for (size_t j = 0; j < layer._bias.value.size(); ++j)
+                        ofs << layer._bias.value[j] << " ";
+                }
+                return true;
             }
 
-            bool Save(const std::string & path) const
+            bool Save(const std::string & path, bool train = false) const
             {
                 std::ofstream ofs(path.c_str());
                 if (ofs.is_open())
                 {
-                    bool result = Save(ofs);
+                    bool result = Save(ofs, train);
                     ofs.close();
                     return result;
                 }                
