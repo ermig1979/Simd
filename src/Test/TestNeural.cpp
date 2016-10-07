@@ -50,7 +50,7 @@ namespace Test
 	}
 #define FUNC_C1(function, inversion) FuncC1(function, #function, inversion)
 
-	bool AnnConvertAutoTest(int width, int height, float eps, const FuncC1 & f1, const FuncC1 & f2)
+	bool NeuralConvertAutoTest(int width, int height, float eps, const FuncC1 & f1, const FuncC1 & f2)
 	{
 		bool result = true;
 
@@ -71,53 +71,53 @@ namespace Test
 		return result;
 	}
 
-	bool AnnConvertAutoTest(float eps, const FuncC1 & f1, const FuncC1 & f2)
+	bool NeuralConvertAutoTest(float eps, const FuncC1 & f1, const FuncC1 & f2)
 	{
 		bool result = true;
 
-		result = result && AnnConvertAutoTest(W, H, eps, f1, f2);
-		result = result && AnnConvertAutoTest(W - O, H + O, eps, f1, f2);
-		result = result && AnnConvertAutoTest(W + O, H - O, eps, f1, f2);
+		result = result && NeuralConvertAutoTest(W, H, eps, f1, f2);
+		result = result && NeuralConvertAutoTest(W - O, H + O, eps, f1, f2);
+		result = result && NeuralConvertAutoTest(W + O, H - O, eps, f1, f2);
 
 		return result;
 	}
 
-	bool AnnConvertAutoTest()
+	bool NeuralConvertAutoTest()
 	{
 		bool result = true;
 
-		result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Base::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
-		result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Base::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
+		result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+		result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
 
 #ifdef SIMD_SSE2_ENABLE
 		if (Simd::Sse2::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
 		}
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
 		if (Simd::Avx2::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
 		}
 #endif
 
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
 		{
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
-			result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
 		}
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
         {
-            result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Neon::AnnConvert, true), FUNC_C1(SimdAnnConvert, true));
-            result = result && AnnConvertAutoTest(EPS, FUNC_C1(Simd::Neon::AnnConvert, false), FUNC_C1(SimdAnnConvert, false));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Neon::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Neon::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
         }
 #endif
 
@@ -144,7 +144,7 @@ namespace Test
 	}
 #define FUNC_PS(function) FuncPS(function, #function)
 
-    bool AnnProductSumAutoTest(int size, float eps, const FuncPS & f1, const FuncPS & f2)
+    bool NeuralProductSumAutoTest(int size, float eps, const FuncPS & f1, const FuncPS & f2)
     {
         bool result = true;
 
@@ -167,41 +167,41 @@ namespace Test
         return result;
     }
 
-    bool AnnProductSumAutoTest(float eps, const FuncPS & f1, const FuncPS & f2)
+    bool NeuralProductSumAutoTest(float eps, const FuncPS & f1, const FuncPS & f2)
     {
         bool result = true;
 
-        result = result && AnnProductSumAutoTest(W*H, eps, f1, f2);
-        result = result && AnnProductSumAutoTest(W*H + O, eps, f1, f2);
-        result = result && AnnProductSumAutoTest(W*H - O, eps, f1, f2);
+        result = result && NeuralProductSumAutoTest(W*H, eps, f1, f2);
+        result = result && NeuralProductSumAutoTest(W*H + O, eps, f1, f2);
+        result = result && NeuralProductSumAutoTest(W*H - O, eps, f1, f2);
 
         return result;
     }
 
-    bool AnnProductSumAutoTest()
+    bool NeuralProductSumAutoTest()
     {
         bool result = true;
 
-        result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Base::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+        result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Base::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 
 #ifdef SIMD_SSE_ENABLE
 		if (Simd::Sse::Enable)
-			result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Sse::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Sse::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
 		if (Simd::Avx::Enable)
-			result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Avx::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
-			result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AnnProductSumAutoTest(EPS, FUNC_PS(Simd::Neon::AnnProductSum), FUNC_PS(SimdAnnProductSum));
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Neon::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
         return result;
@@ -228,7 +228,7 @@ namespace Test
     }
 #define FUNC_AVMV(function) FuncAVMV(function, #function)
 
-    bool AnnAddVectorMultipliedByValueAutoTest(int size, float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    bool NeuralAddVectorMultipliedByValueAutoTest(int size, float eps, const FuncAVMV & f1, const FuncAVMV & f2)
     {
         bool result = true;
 
@@ -254,31 +254,31 @@ namespace Test
         return result;
     }
 
-    bool AnnAddVectorMultipliedByValueAutoTest(float eps, const FuncAVMV & f1, const FuncAVMV & f2)
+    bool NeuralAddVectorMultipliedByValueAutoTest(float eps, const FuncAVMV & f1, const FuncAVMV & f2)
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H, eps, f1, f2);
-        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H + O, eps, f1, f2);
-        result = result && AnnAddVectorMultipliedByValueAutoTest(W*H - O, eps, f1, f2);
+        result = result && NeuralAddVectorMultipliedByValueAutoTest(W*H, eps, f1, f2);
+        result = result && NeuralAddVectorMultipliedByValueAutoTest(W*H + O, eps, f1, f2);
+        result = result && NeuralAddVectorMultipliedByValueAutoTest(W*H - O, eps, f1, f2);
 
         return result;
     }
 
-    bool AnnAddVectorMultipliedByValueAutoTest()
+    bool NeuralAddVectorMultipliedByValueAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Base::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
+        result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Base::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Sse::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
+            result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Sse::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx::AnnAddVectorMultipliedByValue), FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
+            result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 #endif
 
         return result;
@@ -286,14 +286,14 @@ namespace Test
 
 	namespace
 	{
-		struct FuncA
+		struct FuncAF
 		{
 			typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
 
 			FuncPtr func;
 			String description;
 
-			FuncA(const FuncPtr & f, const String & d) : func(f), description(d) {}
+			FuncAF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
 			void Call(const View & src, float slope, View & dst) const
 			{
@@ -302,9 +302,9 @@ namespace Test
 			}
 		};
 	}
-#define FUNC_A(function) FuncA(function, #function)
+#define FUNC_AF(function) FuncAF(function, #function)
 
-	bool AnnActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncA & f1, const FuncA & f2)
+	bool NeuralActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
 	{
 		bool result = true;
 
@@ -325,160 +325,215 @@ namespace Test
 		return result;
 	}
 
-	bool AnnActivateFunctionAutoTest(float error, bool relative, float slope, const FuncA & f1, const FuncA & f2)
+	bool NeuralActivateFunctionAutoTest(float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
-		result = result && AnnActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
-		result = result && AnnActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
+		result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
+		result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
+		result = result && NeuralActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
 
 		return result;
 	}
 
-	bool AnnSigmoidAutoTest()
+	bool NeuralSigmoidAutoTest()
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnSigmoid), FUNC_A(SimdAnnSigmoid));
+		result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Base::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
 
 		return result;
 	}
 
-	bool AnnRoughSigmoidAutoTest()
+	bool NeuralRoughSigmoidAutoTest()
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+		result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Base::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 
 #ifdef SIMD_SSE_ENABLE
 		if (Simd::Sse::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Sse::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
 		if (Simd::Avx::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Avx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
-			result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Vsx::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+			result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Vsx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Neon::AnnRoughSigmoid), FUNC_A(SimdAnnRoughSigmoid));
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_AF(Simd::Neon::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 		return result;
 	}
 
-    bool AnnDerivativeSigmoidAutoTest()
+    bool NeuralTanhAutoTest()
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
-
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
-#endif 
-
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnDerivativeSigmoid), FUNC_A(SimdAnnDerivativeSigmoid));
-#endif
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralTanh), FUNC_AF(SimdNeuralTanh));
 
         return result;
     }
 
-
-    bool AnnTanhAutoTest()
+    bool NeuralRoughTanhAutoTest()
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Base::AnnTanh), FUNC_A(SimdAnnTanh));
-
-        return result;
-    }
-
-    bool AnnRoughTanhAutoTest()
-    {
-        bool result = true;
-
-        result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Base::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Sse::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Sse::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Avx::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Avx::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_A(Simd::Neon::AnnRoughTanh), FUNC_A(SimdAnnRoughTanh));
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Neon::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif
 
         return result;
     }
 
-    bool AnnDerivativeTanhAutoTest()
+    bool NeuralReluAutoTest()
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Base::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Base::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Sse::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Sse::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 3.0f, FUNC_A(Simd::Avx::AnnDerivativeTanh), FUNC_A(SimdAnnDerivativeTanh));
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Avx::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
 
         return result;
     }
 
-    bool AnnReluAutoTest()
+    namespace
+    {
+        struct FuncAD
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncAD(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, float slope, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dstDst.data);
+            }
+        };
+    }
+#define FUNC_AD(function) FuncAD(function, #function)
+
+    bool NeuralActivateDerivativeAutoTest(int size, float error, bool relative, float slope, const FuncAD & f1, const FuncAD & f2)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Base::AnnRelu), FUNC_A(SimdAnnRelu));
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(src, -10.0f, 10.0f);
+
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(dstSrc, -1.0f, 1.0f);
+
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dstSrc, dstDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dstSrc, dstDst2));
+
+        result = Compare(dstDst1, dstDst2, error, true, 32, relative);
+
+        return result;
+    }
+
+    bool NeuralActivateDerivativeAutoTest(float error, bool relative, float slope, const FuncAD & f1, const FuncAD & f2)
+    {
+        bool result = true;
+
+        result = result && NeuralActivateDerivativeAutoTest(W*H, error, relative, slope, f1, f2);
+        result = result && NeuralActivateDerivativeAutoTest(W*H + O, error, relative, slope, f1, f2);
+        result = result && NeuralActivateDerivativeAutoTest(W*H - O, error, relative, slope, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralDerivativeSigmoidAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Base::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Sse::AnnRelu), FUNC_A(SimdAnnRelu));
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Sse::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_A(Simd::Avx::AnnRelu), FUNC_A(SimdAnnRelu));
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 #endif
 
         return result;
     }
 
-    bool AnnDerivativeReluAutoTest()
+    bool NeuralDerivativeTanhAutoTest()
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Base::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
+        result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Base::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Sse::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Sse::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnActivateFunctionAutoTest(EPS, true, 0.5f, FUNC_A(Simd::Avx::AnnDerivativeRelu), FUNC_A(SimdAnnDerivativeRelu));
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
+#endif
+
+        return result;
+    }
+
+    bool NeuralDerivativeReluAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Base::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Sse::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
 #endif
 
         return result;
@@ -506,7 +561,7 @@ namespace Test
     }
 #define FUNC_UW(function) FuncUW(function, #function)
 
-    bool AnnUpdateWeightsAutoTest(int size, float error, bool relative, const FuncUW & f1, const FuncUW & f2)
+    bool NeuralUpdateWeightsAutoTest(int size, float error, bool relative, const FuncUW & f1, const FuncUW & f2)
     {
         bool result = true;
 
@@ -536,31 +591,31 @@ namespace Test
         return result;
     }
 
-    bool AnnUpdateWeightsAutoTest(float error, bool relative, const FuncUW & f1, const FuncUW & f2)
+    bool NeuralUpdateWeightsAutoTest(float error, bool relative, const FuncUW & f1, const FuncUW & f2)
     {
         bool result = true;
 
-        result = result && AnnUpdateWeightsAutoTest(W*H, error, relative, f1, f2);
-        result = result && AnnUpdateWeightsAutoTest(W*H + O, error, relative, f1, f2);
-        result = result && AnnUpdateWeightsAutoTest(W*H - O, error, relative, f1, f2);
+        result = result && NeuralUpdateWeightsAutoTest(W*H, error, relative, f1, f2);
+        result = result && NeuralUpdateWeightsAutoTest(W*H + O, error, relative, f1, f2);
+        result = result && NeuralUpdateWeightsAutoTest(W*H - O, error, relative, f1, f2);
 
         return result;
     }
 
-    bool AnnUpdateWeightsAutoTest()
+    bool NeuralUpdateWeightsAutoTest()
     {
         bool result = true;
 
-        result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Base::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+        result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Base::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Sse::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+            result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Sse::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Avx::AnnUpdateWeights), FUNC_UW(SimdAnnUpdateWeights));
+            result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Avx::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 #endif
 
         return result;
@@ -587,7 +642,7 @@ namespace Test
     }
 #define FUNC_C2(function) FuncC2(function, #function)
 
-    bool AnnAddConvolutionAutoTest(int width, int height, float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
+    bool NeuralAddConvolutionAutoTest(int width, int height, float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
     {
         bool result = true;
 
@@ -620,88 +675,88 @@ namespace Test
         return result;
     }
 
-    bool AnnAddConvolutionAutoTest(float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
+    bool NeuralAddConvolutionAutoTest(float eps, int half, bool forward, const FuncC2 & f1, const FuncC2 & f2)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(W, H, eps, half, forward, f1, f2);
-        result = result && AnnAddConvolutionAutoTest(W - O, H + O, eps, half, forward, f1, f2);
-        result = result && AnnAddConvolutionAutoTest(W + O, H - O, eps, half, forward, f1, f2);
+        result = result && NeuralAddConvolutionAutoTest(W, H, eps, half, forward, f1, f2);
+        result = result && NeuralAddConvolutionAutoTest(W - O, H + O, eps, half, forward, f1, f2);
+        result = result && NeuralAddConvolutionAutoTest(W + O, H - O, eps, half, forward, f1, f2);
 
         return result;
     }
 
-    bool AnnAddConvolution3x3AutoTest()
+    bool NeuralAddConvolution3x3AutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Base::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Base::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Sse::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::AnnAddConvolution3x3), FUNC_C2(SimdAnnAddConvolution3x3));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
 #endif
 
         return result;
     }
 
-    bool AnnAddConvolution5x5AutoTest()
+    bool NeuralAddConvolution5x5AutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Base::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Base::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Sse::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx::AnnAddConvolution5x5), FUNC_C2(SimdAnnAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
 #endif
 
         return result;
     }
 
-    bool AnnAddConvolution3x3BackAutoTest()
+    bool NeuralAddConvolution3x3BackAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Base::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Base::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Sse::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Avx::AnnAddConvolution3x3Back), FUNC_C2(SimdAnnAddConvolution3x3Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
 #endif
 
         return result;
     }
 
-    bool AnnAddConvolution5x5BackAutoTest()
+    bool NeuralAddConvolution5x5BackAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Base::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Base::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Sse::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Avx::AnnAddConvolution5x5Back), FUNC_C2(SimdAnnAddConvolution5x5Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
 #endif
 
         return result;
@@ -728,7 +783,7 @@ namespace Test
     }
 #define FUNC_CS(function) FuncCS(function, #function)
 
-    bool AnnAddConvolutionSumAutoTest(int width, int height, float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    bool NeuralAddConvolutionSumAutoTest(int width, int height, float eps, int half, const FuncCS & f1, const FuncCS & f2)
     {
         bool result = true;
 
@@ -755,60 +810,60 @@ namespace Test
         return result;
     }
 
-    bool AnnAddConvolutionSumAutoTest(float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    bool NeuralAddConvolutionSumAutoTest(float eps, int half, const FuncCS & f1, const FuncCS & f2)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionSumAutoTest(W, H, eps, half, f1, f2);
-        result = result && AnnAddConvolutionSumAutoTest(W - O, H + O, eps, half, f1, f2);
-        result = result && AnnAddConvolutionSumAutoTest(W + O, H - O, eps, half, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(W, H, eps, half, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(W - O, H + O, eps, half, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(W + O, H - O, eps, half, f1, f2);
 
         return result;
     }
 
-    bool AnnAddConvolution3x3SumAutoTest()
+    bool NeuralAddConvolution3x3SumAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Base::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Base::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse3::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse3::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Avx::AnnAddConvolution3x3Sum), FUNC_CS(SimdAnnAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Avx::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif
 
         return result;
     }
 
-    bool AnnAddConvolution5x5SumAutoTest()
+    bool NeuralAddConvolution5x5SumAutoTest()
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Base::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Base::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse3::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse3::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::AnnAddConvolution5x5Sum), FUNC_CS(SimdAnnAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
         return result;
@@ -834,7 +889,7 @@ namespace Test
     }
 #define FUNC_M(function) FuncM(function, #function)
 
-    bool AnnMax2x2AutoTest(int width, int height, float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralMax2x2AutoTest(int width, int height, float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
@@ -855,31 +910,31 @@ namespace Test
         return result;
     }
 
-    bool AnnMax2x2AutoTest(float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralMax2x2AutoTest(float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        result = result && AnnMax2x2AutoTest(W, H, eps, f1, f2);
-        result = result && AnnMax2x2AutoTest(W - E, H + E, eps, f1, f2);
-        result = result && AnnMax2x2AutoTest(W + E, H - E, eps, f1, f2);
+        result = result && NeuralMax2x2AutoTest(W, H, eps, f1, f2);
+        result = result && NeuralMax2x2AutoTest(W - E, H + E, eps, f1, f2);
+        result = result && NeuralMax2x2AutoTest(W + E, H - E, eps, f1, f2);
 
         return result;
     }
 
-    bool AnnMax2x2AutoTest()
+    bool NeuralMax2x2AutoTest()
     {
         bool result = true;
 
-        result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Base::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+        result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Base::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Sse::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Sse::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && AnnMax2x2AutoTest(EPS, FUNC_M(Simd::Avx::AnnMax2x2), FUNC_M(SimdAnnMax2x2));
+            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Avx::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif
 
         return result;
@@ -887,7 +942,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-	bool AnnConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
+	bool NeuralConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
 	{
 		bool result = true;
 
@@ -927,16 +982,16 @@ namespace Test
 		return result;
 	}
 
-	bool AnnConvertDataTest(bool create)
+	bool NeuralConvertDataTest(bool create)
 	{
 		bool result = true;
 
-		result = result && AnnConvertDataTest(create, DW, DH, EPS, FUNC_C1(SimdAnnConvert, true));
+		result = result && NeuralConvertDataTest(create, DW, DH, EPS, FUNC_C1(SimdNeuralConvert, true));
 
 		return result;
 	}
 
-    bool AnnProductSumDataTest(bool create, int size, float eps, const FuncPS & f)
+    bool NeuralProductSumDataTest(bool create, int size, float eps, const FuncPS & f)
     {
         bool result = true;
 
@@ -978,16 +1033,16 @@ namespace Test
         return result;
     }
 
-    bool AnnProductSumDataTest(bool create)
+    bool NeuralProductSumDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnProductSumDataTest(create, DH, EPS, FUNC_PS(SimdAnnProductSum));
+        result = result && NeuralProductSumDataTest(create, DH, EPS, FUNC_PS(SimdNeuralProductSum));
 
         return result;
     }
 
-    bool AnnAddVectorMultipliedByValueDataTest(bool create, int size, float eps, const FuncAVMV & f)
+    bool NeuralAddVectorMultipliedByValueDataTest(bool create, int size, float eps, const FuncAVMV & f)
     {
         bool result = true;
 
@@ -1031,16 +1086,16 @@ namespace Test
         return result;
     }
 
-    bool AnnAddVectorMultipliedByValueDataTest(bool create)
+    bool NeuralAddVectorMultipliedByValueDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddVectorMultipliedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdAnnAddVectorMultipliedByValue));
+        result = result && NeuralAddVectorMultipliedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 
         return result;
     }
 
-	bool AnnActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncA & f)
+	bool NeuralActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncAF & f)
 	{
 		bool result = true;
 
@@ -1078,79 +1133,121 @@ namespace Test
 		return result;
 	}
 
-	bool AnnSigmoidDataTest(bool create)
+	bool NeuralSigmoidDataTest(bool create)
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnSigmoid));
+		result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralSigmoid));
 
 		return result;
 	}
 
-	bool AnnRoughSigmoidDataTest(bool create)
+	bool NeuralRoughSigmoidDataTest(bool create)
 	{
 		bool result = true;
 
-		result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnRoughSigmoid));
+		result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid));
 
 		return result;
 	}
 
-    bool AnnDerivativeSigmoidDataTest(bool create)
+    bool NeuralTanhDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnDerivativeSigmoid));
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_AF(SimdNeuralTanh));
 
         return result;
     }
 
-    bool AnnTanhDataTest(bool create)
+    bool NeuralRoughTanhDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_A(SimdAnnTanh));
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_AF(SimdNeuralRoughTanh));
 
         return result;
     }
 
-    bool AnnRoughTanhDataTest(bool create)
+    bool NeuralReluDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_A(SimdAnnRoughTanh));
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 0.5f, FUNC_AF(SimdNeuralRelu));
 
         return result;
     }
 
-    bool AnnDerivativeTanhDataTest(bool create)
+    bool NeuralActivateDerivativeDataTest(bool create, int size, float error, bool relative, float slope, const FuncAD & f)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_A(SimdAnnDerivativeTanh));
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(src, -10.0f, 10.0f);
+            FillRandom32f(dstSrc, -1.0f, 1.0f);
+
+            TEST_SAVE(src);
+            TEST_SAVE(dstSrc);
+
+            f.Call(src, slope, dstSrc, dstDst1);
+
+            TEST_SAVE(dstDst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(dstSrc);
+
+            TEST_LOAD(dstDst1);
+
+            f.Call(src, slope, dstSrc, dstDst2);
+
+            TEST_SAVE(dstDst2);
+
+            result = Compare(dstDst1, dstDst2, error, true, 0, relative);
+        }
 
         return result;
     }
 
-    bool AnnReluDataTest(bool create)
+    bool NeuralDerivativeSigmoidDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, false, 0.5f, FUNC_A(SimdAnnRelu));
+        result = result && NeuralActivateDerivativeDataTest(create, DH, EPS, true, 3.0f, FUNC_AD(SimdNeuralDerivativeSigmoid));
 
         return result;
     }
 
-    bool AnnDerivativeReluDataTest(bool create)
+    bool NeuralDerivativeTanhDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnActivateFunctionDataTest(create, DH, EPS, true, 0.5f, FUNC_A(SimdAnnDerivativeRelu));
+        result = result && NeuralActivateDerivativeDataTest(create, DH, EPS, true, 3.0f, FUNC_AD(SimdNeuralDerivativeTanh));
 
         return result;
     }
 
-    bool AnnUpdateWeightsDataTest(bool create, int size, float error, bool relative, const FuncUW & f)
+    bool NeuralDerivativeReluDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && NeuralActivateDerivativeDataTest(create, DH, EPS, true, 0.5f, FUNC_AD(SimdNeuralDerivativeRelu));
+
+        return result;
+    }
+
+    bool NeuralUpdateWeightsDataTest(bool create, int size, float error, bool relative, const FuncUW & f)
     {
         bool result = true;
 
@@ -1205,16 +1302,16 @@ namespace Test
         return result;
     }
 
-    bool AnnUpdateWeightsDataTest(bool create)
+    bool NeuralUpdateWeightsDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnUpdateWeightsDataTest(create, DH, EPS, true, FUNC_UW(SimdAnnUpdateWeights));
+        result = result && NeuralUpdateWeightsDataTest(create, DH, EPS, true, FUNC_UW(SimdNeuralUpdateWeights));
 
         return result;
     }
 
-    bool AnnAddConvolutionDataTest(bool create, int width, int height, float eps, int half, bool forward, const FuncC2 & f)
+    bool NeuralAddConvolutionDataTest(bool create, int width, int height, float eps, int half, bool forward, const FuncC2 & f)
     {
         bool result = true;
 
@@ -1266,43 +1363,43 @@ namespace Test
         return result;
     }
 
-    bool AnnAddConvolution3x3DataTest(bool create)
+    bool NeuralAddConvolution3x3DataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, true, FUNC_C2(SimdAnnAddConvolution3x3));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, true, FUNC_C2(SimdNeuralAddConvolution3x3));
 
         return result;
     }
 
-    bool AnnAddConvolution5x5DataTest(bool create)
+    bool NeuralAddConvolution5x5DataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdAnnAddConvolution5x5));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdNeuralAddConvolution5x5));
 
         return result;
     }
 
-    bool AnnAddConvolution3x3BackDataTest(bool create)
+    bool NeuralAddConvolution3x3BackDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 1, false, FUNC_C2(SimdAnnAddConvolution3x3Back));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, false, FUNC_C2(SimdNeuralAddConvolution3x3Back));
 
         return result;
     }
 
-    bool AnnAddConvolution5x5BackDataTest(bool create)
+    bool NeuralAddConvolution5x5BackDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdAnnAddConvolution5x5Back));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdNeuralAddConvolution5x5Back));
 
         return result;
     }
 
-    bool AnnAddConvolutionSumDataTest(bool create, int width, int height, float eps, int half, const FuncCS & f)
+    bool NeuralAddConvolutionSumDataTest(bool create, int width, int height, float eps, int half, const FuncCS & f)
     {
         bool result = true;
 
@@ -1348,25 +1445,25 @@ namespace Test
         return result;
     }
 
-    bool AnnAddConvolution3x3SumDataTest(bool create)
+    bool NeuralAddConvolution3x3SumDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionSumDataTest(create, DW, DH, EPS, 1, FUNC_CS(SimdAnnAddConvolution3x3Sum));
+        result = result && NeuralAddConvolutionSumDataTest(create, DW, DH, EPS, 1, FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 
         return result;
     }
 
-    bool AnnAddConvolution5x5SumDataTest(bool create)
+    bool NeuralAddConvolution5x5SumDataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnAddConvolutionSumDataTest(create, DW, DH, EPS, 2, FUNC_CS(SimdAnnAddConvolution5x5Sum));
+        result = result && NeuralAddConvolutionSumDataTest(create, DW, DH, EPS, 2, FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 
         return result;
     }
 
-    bool AnnMax2x2DataTest(bool create, int width, int height, float eps, const FuncM & f)
+    bool NeuralMax2x2DataTest(bool create, int width, int height, float eps, const FuncM & f)
     {
         bool result = true;
 
@@ -1404,11 +1501,11 @@ namespace Test
         return result;
     }
 
-    bool AnnMax2x2DataTest(bool create)
+    bool NeuralMax2x2DataTest(bool create)
     {
         bool result = true;
 
-        result = result && AnnMax2x2DataTest(create, DW, DH, EPS, FUNC_M(SimdAnnMax2x2));
+        result = result && NeuralMax2x2DataTest(create, DW, DH, EPS, FUNC_M(SimdNeuralMax2x2));
 
         return result;
     }

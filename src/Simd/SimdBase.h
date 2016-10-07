@@ -54,44 +54,6 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
-		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
-			
-		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
-
-        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-		
-        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
         void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
@@ -318,7 +280,45 @@ namespace Simd
         void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+        void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
+
+        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
         void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 

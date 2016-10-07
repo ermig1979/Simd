@@ -458,381 +458,6 @@ extern "C"
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
 
-	/*! @ingroup ann
-
-		\fn void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
-
-		\short Converts a 8-bit gray image to the 32-bit float array.
-
-		The length of output array must be equal to the area of input image.
-
-		For every point:
-		\verbatim
-		dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
-		\endverbatim
-
-		\note This function has a C++ wrapper Simd::AnnConvert(const View<A>& src, float * dst, bool inversion).
-
-		\param [in] src - a pointer to pixels data of input image.
-		\param [in] stride - a row size of the image.
-		\param [in] width - an image width.
-		\param [in] height - an image height.
-		\param [out] dst - a pointer to output array.
-		\param [in] inversion - a flag of color inversion.
-	*/
-	SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
-
-	/*! @ingroup ann
-
-		\fn void SimdAnnSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-		\short Calculates sigmoid for 32-bit float array.
-
-		All arrays must have the same size.
-
-		For every element:
-		\verbatim
-		dst[i] = 1/(1 + exp(-slope*src[i]));
-		\endverbatim
-
-		\param [in] src - a pointer to the input array.
-		\param [in] size - a size of arrays.
-		\param [in] slope - a pointer to the slope parameter.
-		\param [out] dst - a pointer to output array.
-	*/
-	SIMD_API void SimdAnnSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-	/*! @ingroup ann
-
-		\fn void SimdAnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-		\short Calculates rough sigmoid for 32-bit float array.
-
-		All arrays must have the same size.
-
-		For every element:
-		\verbatim
-		x = ::abs(src[i]*slope);
-		e = 1 + x + x*x*0.555 + x*x*x*x*0.143;
-		dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
-		\endverbatim
-		It is approximate way (maximal error is about 0.2%) of sigmoid function calculation:
-		\verbatim
-		dst[i] = 1/(1 + exp(-slope*src[i]));
-		\endverbatim
-
-		\param [in] src - a pointer to the input array.
-		\param [in] size - a size of arrays.
-		\param [in] slope - a pointer to the slope parameter.
-		\param [out] dst - a pointer to output array.
-	*/
-	SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates derivative of sigmoid for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] = slope*(1 - src[i])*src[i];
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates hyperbolic tangent for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        x = slope*src[i];
-        dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates rough hyperbolic tangent for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        x = ::abs(src[i]*slope);
-        e = 1 + x + x*x*0.559 + x*x*x*x*0.148;
-        dst[i] = (src[i] > 0 ? 1 : -1)*(e - 1/e)/(e + 1/e);
-        \endverbatim
-        It is approximate way (maximal error is less than 0.2%) of hyperbolic tangent function calculation:
-        \verbatim
-        x = slope*src[i];
-        dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates derivative of hyperbolic tangent for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] = slope*(1 - src[i]*src[i]);
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates Relu (rectified linear unit) function for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnRelu(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates derivative Relu (rectified linear unit) function for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] =  src[i] > 0 ? 1 : -slope;
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdAnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
-	/*! @ingroup ann
-
-		\fn void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
-
-		\short Calculates sum of products for two 32-bit float arrays.
-
-		All arrays must have the same size.
-
-		For every element:
-		\verbatim
-			sum += a[i]*b[i];
-		\endverbatim
-
-		\param [in] a - a pointer to the first 32-bit float array.
-		\param [in] b - a pointer to the second 32-bit float array.
-		\param [in] size - a size of arrays.
-		\param [out] sum - a pointer to 32-bit float sum of products.
-	*/
-	SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-        \short Adds the product of a vector and a scalar to given vector.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] += src[i]*value[0];
-        \endverbatim
-
-        \param [in] src - a pointer to the input 32-bit float array.
-        \param [in] size - a size of arrays.
-        \param [in] value - a pointer to the scalar 32-bit float value.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array.
-    */
-    SIMD_API void SimdAnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-        \short Updates ANN weights.
-
-        All arrays must have the same size.
-
-        The algorithm performs:
-        \verbatim
-        for (size_t k = 0; k < size; ++k)
-        {
-            d[k] = a[0]*d[k] + b[0]*x[k];
-            w[k] += d[k];
-        }
-        \endverbatim
-
-        \param [in] x - a pointer to the X array.
-        \param [in] size - a size of arrays.
-        \param [in] a - a pointer to the first parameter.
-        \param [in] b - a pointer to the second parameter.
-        \param [in, out] d - a pointer to the D array.
-        \param [in, out] w - a pointer to the W array.
-    */
-    SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        \short Adds 3x3 convolution of 32-bit float image.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
-        \param [in] weights - a pointer to the array with weights (its size must be at least 9). 
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-    */
-    SIMD_API void SimdAnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        \short Adds 5x5 convolution of 32-bit float image (forward propagation).
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
-        \param [in] weights - a pointer to the array with weights (its size must be at least 25).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-    */
-    SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        \short Adds 3x3 convolution of 32-bit float image (backward propagation).
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must be equal to input image width + 2).
-        \param [in] height - a height of the input image (output image height must be equal to input image height + 2).
-        \param [in] weights - a pointer to the array with weights (its size must be at least 9).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-    */
-    SIMD_API void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-        \short Adds 5x5 convolution of 32-bit float image (backward propagation).
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must be equal to input image width + 4).
-        \param [in] height - a height of the input image (output image height must be equal to input image height + 4).
-        \param [in] weights - a pointer to the array with weights (its size must be at least 25).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-    */
-    SIMD_API void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        \short Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 9).
-    */
-    SIMD_API void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-        \short Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
-        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
-        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 25).
-    */
-    SIMD_API void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
-
-    /*! @ingroup ann
-
-        \fn void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
-        \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
-
-        \param [in] src - a pointer to the input 32-bit float image.
-        \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must be lesser in 2 times).
-        \param [in] height - a height of the input image (output image height must be lesser in 2 times).
-        \param [in, out] dst - a pointer to the output 32-bit float image.
-        \param [in] dstStride - a row size of the output image (in 32-float values).
-    */
-    SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
-
     /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
@@ -2970,6 +2595,381 @@ extern "C"
     */
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+        \short Converts a 8-bit gray image to the 32-bit float array.
+
+        The length of output array must be equal to the area of input image.
+
+        For every point:
+        \verbatim
+        dst[i] = inversion ? (255 - src[col]) / 255 : src[i]/255;
+        \endverbatim
+
+        \note This function has a C++ wrapper Simd::NeuralConvert(const View<A>& src, float * dst, bool inversion).
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] stride - a row size of the image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to output array.
+        \param [in] inversion - a flag of color inversion.
+    */
+    SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates sigmoid for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] = 1/(1 + exp(-slope*src[i]));
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates rough sigmoid for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        x = ::abs(src[i]*slope);
+        e = 1 + x + x*x*0.555 + x*x*x*x*0.143;
+        dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
+        \endverbatim
+        It is approximate way (maximal error is about 0.2%) of sigmoid function calculation:
+        \verbatim
+        dst[i] = 1/(1 + exp(-slope*src[i]));
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Multiplies output 32-bit float array by derivative of sigmoid from input 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] *= slope*(1 - src[i])*src[i];
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [in, out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates hyperbolic tangent for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        x = slope*src[i];
+        dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates rough hyperbolic tangent for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        x = ::abs(src[i]*slope);
+        e = 1 + x + x*x*0.559 + x*x*x*x*0.148;
+        dst[i] = (src[i] > 0 ? 1 : -1)*(e - 1/e)/(e + 1/e);
+        \endverbatim
+        It is approximate way (maximal error is less than 0.2%) of hyperbolic tangent function calculation:
+        \verbatim
+        x = slope*src[i];
+        dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+    \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Multiplies output 32-bit float array by derivative of hyperbolic tangent from input 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] *= slope*(1 - src[i]*src[i]);
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [in, out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates Relu (rectified linear unit) function for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Multiplies output 32-bit float array by derivative of Relu (rectified linear unit) from input 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] *=  src[i] > 0 ? 1 : -slope;
+        \endverbatim
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] slope - a pointer to the slope parameter.
+        \param [in, out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
+
+        \short Calculates sum of products for two 32-bit float arrays.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        sum += a[i]*b[i];
+        \endverbatim
+
+        \param [in] a - a pointer to the first 32-bit float array.
+        \param [in] b - a pointer to the second 32-bit float array.
+        \param [in] size - a size of arrays.
+        \param [out] sum - a pointer to 32-bit float sum of products.
+    */
+    SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+
+        \short Adds the product of a vector and a scalar to given vector.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] += src[i]*value[0];
+        \endverbatim
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of arrays.
+        \param [in] value - a pointer to the scalar 32-bit float value.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
+    */
+    SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+        \short Updates ANN weights.
+
+        All arrays must have the same size.
+
+        The algorithm performs:
+        \verbatim
+        for (size_t k = 0; k < size; ++k)
+        {
+            d[k] = a[0]*d[k] + b[0]*x[k];
+            w[k] += d[k];
+        }
+        \endverbatim
+
+        \param [in] x - a pointer to the X array.
+        \param [in] size - a size of arrays.
+        \param [in] a - a pointer to the first parameter.
+        \param [in] b - a pointer to the second parameter.
+        \param [in, out] d - a pointer to the D array.
+        \param [in, out] w - a pointer to the W array.
+    */
+    SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 3x3 convolution of 32-bit float image.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 9).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 5x5 convolution of 32-bit float image (forward propagation).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 25).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 3x3 convolution of 32-bit float image (backward propagation).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be equal to input image width + 2).
+        \param [in] height - a height of the input image (output image height must be equal to input image height + 2).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 9).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 5x5 convolution of 32-bit float image (backward propagation).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be equal to input image width + 4).
+        \param [in] height - a height of the input image (output image height must be equal to input image height + 4).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 25).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        \short Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 2).
+        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 9).
+    */
+    SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+        \short Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 4).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 4).
+        \param [in, out] sums - a pointer to the array with changes of weights (its size must be at least 25).
+    */
+    SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+        \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be lesser in 2 times).
+        \param [in] height - a height of the input image (output image height must be lesser in 2 times).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
     /*! @ingroup operation
 

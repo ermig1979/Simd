@@ -52,8 +52,6 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
-		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
-
 		void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
@@ -230,7 +228,9 @@ namespace Simd
         void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
+        void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+
+        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
         void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 

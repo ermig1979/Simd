@@ -289,220 +289,6 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
-SIMD_API void SimdAnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
-{
-#ifdef SIMD_AVX2_ENABLE
-	if (Avx2::Enable && width >= Avx::F)
-		Avx2::AnnConvert(src, stride, width, height, dst, inversion);
-	else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-	if (Sse2::Enable && width >= Sse2::A)
-		Sse2::AnnConvert(src, stride, width, height, dst, inversion);
-	else
-#endif
-#ifdef SIMD_VSX_ENABLE
-	if (Vsx::Enable && width >= Vsx::A)
-		Vsx::AnnConvert(src, stride, width, height, dst, inversion);
-	else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
-        Neon::AnnConvert(src, stride, width, height, dst, inversion);
-    else
-#endif
-		Base::AnnConvert(src, stride, width, height, dst, inversion);
-}
-
-typedef void(*SimdAnnProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
-SimdAnnProductSumPtr simdAnnProductSum = SIMD_FUNC4(AnnProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdAnnProductSum(const float * a, const float * b, size_t size, float * sum)
-{
-	simdAnnProductSum(a, b, size, sum);
-}
-
-typedef void(*SimdAnnAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-SimdAnnAddVectorMultipliedByValuePtr simdAnnAddVectorMultipliedByValue = SIMD_FUNC2(AnnAddVectorMultipliedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
-{
-    simdAnnAddVectorMultipliedByValue(src, size, value, dst);
-}
-
-typedef void(*SimdAnnSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnSigmoidPtr simdAnnSigmoid = SIMD_FUNC0(AnnSigmoid);
-
-SIMD_API void SimdAnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
-{
-	simdAnnSigmoid(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnRoughSigmoidPtr simdAnnRoughSigmoid = SIMD_FUNC4(AnnRoughSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdAnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-{
-	simdAnnRoughSigmoid(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnDerivativeSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnDerivativeSigmoidPtr simdAnnDerivativeSigmoid = SIMD_FUNC2(AnnDerivativeSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnDerivativeSigmoid(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnTanhPtr simdAnnTanh = SIMD_FUNC0(AnnTanh);
-
-SIMD_API void SimdAnnTanh(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnTanh(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnRoughTanhPtr simdAnnRoughTanh = SIMD_FUNC3(AnnRoughTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdAnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnRoughTanh(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnDerivativeTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnDerivativeTanhPtr simdAnnDerivativeTanh = SIMD_FUNC2(AnnDerivativeTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnDerivativeTanh(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnReluPtr simdAnnRelu = SIMD_FUNC2(AnnRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnRelu(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnRelu(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnDerivativeReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdAnnDerivativeReluPtr simdAnnDerivativeRelu = SIMD_FUNC2(AnnDerivativeRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdAnnDerivativeRelu(src, size, slope, dst);
-}
-
-typedef void(*SimdAnnUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-SimdAnnUpdateWeightsPtr simdAnnUpdateWeights = SIMD_FUNC2(AnnUpdateWeights, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
-{
-    simdAnnUpdateWeights(x, size, a, b, d, w);
-}
-
-SIMD_API void SimdAnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-{
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= Avx::F)
-        Avx::AnnAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F)
-        Sse::AnnAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-        Base::AnnAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
-}
-
-SIMD_API void SimdAnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-{
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= Avx::F)
-        Avx::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F)
-        Sse::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
-    else
-#endif
-        Base::AnnAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
-}
-
-typedef void(*SimdAnnAddConvolution3x3BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-SimdAnnAddConvolution3x3BackPtr simdAnnAddConvolution3x3Back = SIMD_FUNC2(AnnAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-{
-    simdAnnAddConvolution3x3Back(src, srcStride, width, height, weights, dst, dstStride);
-}
-
-typedef void(*SimdAnnAddConvolution5x5BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-SimdAnnAddConvolution5x5BackPtr simdAnnAddConvolution5x5Back = SIMD_FUNC2(AnnAddConvolution5x5Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdAnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-{
-    simdAnnAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
-}
-
-SIMD_API void SimdAnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-{
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= Avx::F)
-        Avx::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F)
-        Sse::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-        Base::AnnAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
-}
-
-SIMD_API void SimdAnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-{
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= Avx::F)
-        Avx::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F)
-        Sse::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-    else
-#endif
-        Base::AnnAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
-}
-
-SIMD_API void SimdAnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
-{
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && width >= Avx::DF)
-        Avx::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::DF)
-        Sse::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-        Base::AnnMax2x2(src, srcStride, width, height, dst, dstStride);
-}
-
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {
@@ -2285,6 +2071,220 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 	else
 #endif
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx::F)
+        Avx2::NeuralConvert(src, stride, width, height, dst, inversion);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::NeuralConvert(src, stride, width, height, dst, inversion);
+    else
+#endif
+#ifdef SIMD_VSX_ENABLE
+    if (Vsx::Enable && width >= Vsx::A)
+        Vsx::NeuralConvert(src, stride, width, height, dst, inversion);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::NeuralConvert(src, stride, width, height, dst, inversion);
+    else
+#endif
+        Base::NeuralConvert(src, stride, width, height, dst, inversion);
+}
+
+typedef void(*SimdNeuralProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
+SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC4(NeuralProductSum, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum)
+{
+    simdNeuralProductSum(a, b, size, sum);
+}
+
+typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC2(NeuralAddVectorMultipliedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+{
+    simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
+}
+
+typedef void(*SimdNeuralSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralSigmoidPtr simdNeuralSigmoid = SIMD_FUNC0(NeuralSigmoid);
+
+SIMD_API void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralSigmoid(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC4(NeuralRoughSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralRoughSigmoid(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralDerivativeSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralDerivativeSigmoidPtr simdNeuralDerivativeSigmoid = SIMD_FUNC2(NeuralDerivativeSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralDerivativeSigmoid(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralTanhPtr simdNeuralTanh = SIMD_FUNC0(NeuralTanh);
+
+SIMD_API void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralTanh(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralRoughTanhPtr simdNeuralRoughTanh = SIMD_FUNC3(NeuralRoughTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralRoughTanh(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralDerivativeTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralDerivativeTanhPtr simdNeuralDerivativeTanh = SIMD_FUNC2(NeuralDerivativeTanh, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralDerivativeTanh(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralReluPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralReluPtr simdNeuralRelu = SIMD_FUNC2(NeuralRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralRelu(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralDerivativeReluPtr) (const float * src, size_t size, const float * slope, float * dst);
+SimdNeuralDerivativeReluPtr simdNeuralDerivativeRelu = SIMD_FUNC2(NeuralDerivativeRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+{
+    simdNeuralDerivativeRelu(src, size, slope, dst);
+}
+
+typedef void(*SimdNeuralUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC2(NeuralUpdateWeights, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+{
+    simdNeuralUpdateWeights(x, size, a, b, d, w);
+}
+
+SIMD_API void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+        Base::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+        Base::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+typedef void(*SimdNeuralAddConvolution3x3BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdNeuralAddConvolution3x3BackPtr simdNeuralAddConvolution3x3Back = SIMD_FUNC2(NeuralAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+    simdNeuralAddConvolution3x3Back(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+typedef void(*SimdNeuralAddConvolution5x5BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdNeuralAddConvolution5x5BackPtr simdNeuralAddConvolution5x5Back = SIMD_FUNC2(NeuralAddConvolution5x5Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+    simdNeuralAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
+}
+
+SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable && width >= Sse3::F)
+        Sse3::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+        Base::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+}
+
+SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable && width >= Sse3::F)
+        Sse3::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+        Base::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+}
+
+SIMD_API void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::DF)
+        Avx::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::DF)
+        Sse::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
 }
 
 SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

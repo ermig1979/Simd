@@ -78,24 +78,24 @@ namespace Test
 
     TEST_ADD_GROUP(AddFeatureDifference);
 
-	TEST_ADD_GROUP(AnnConvert);
-	TEST_ADD_GROUP(AnnProductSum);
-    TEST_ADD_GROUP(AnnAddVectorMultipliedByValue);
-    TEST_ADD_GROUP(AnnSigmoid);
-	TEST_ADD_GROUP(AnnDerivativeSigmoid);
-    TEST_ADD_GROUP(AnnTanh);
-    TEST_ADD_GROUP(AnnRoughTanh);
-    TEST_ADD_GROUP(AnnDerivativeTanh);
-    TEST_ADD_GROUP(AnnRelu);
-    TEST_ADD_GROUP(AnnDerivativeRelu);
-    TEST_ADD_GROUP(AnnUpdateWeights);
-    TEST_ADD_GROUP(AnnAddConvolution3x3);
-    TEST_ADD_GROUP(AnnAddConvolution5x5);
-    TEST_ADD_GROUP(AnnAddConvolution3x3Back);
-    TEST_ADD_GROUP(AnnAddConvolution5x5Back);
-    TEST_ADD_GROUP(AnnAddConvolution3x3Sum);
-    TEST_ADD_GROUP(AnnAddConvolution5x5Sum);
-    TEST_ADD_GROUP(AnnMax2x2);
+	TEST_ADD_GROUP(NeuralConvert);
+	TEST_ADD_GROUP(NeuralProductSum);
+    TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
+    TEST_ADD_GROUP(NeuralSigmoid);
+	TEST_ADD_GROUP(NeuralDerivativeSigmoid);
+    TEST_ADD_GROUP(NeuralTanh);
+    TEST_ADD_GROUP(NeuralRoughTanh);
+    TEST_ADD_GROUP(NeuralDerivativeTanh);
+    TEST_ADD_GROUP(NeuralRelu);
+    TEST_ADD_GROUP(NeuralDerivativeRelu);
+    TEST_ADD_GROUP(NeuralUpdateWeights);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Back);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Back);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
+    TEST_ADD_GROUP(NeuralMax2x2);
 
     TEST_ADD_GROUP(BgraToBgr);
     TEST_ADD_GROUP(BgraToGray);

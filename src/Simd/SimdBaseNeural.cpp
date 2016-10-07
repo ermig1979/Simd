@@ -28,7 +28,7 @@ namespace Simd
 {
     namespace Base
     {
-		void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+		void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
 		{
             const float k = 1.0f / 255.0f;
 			for (size_t row = 0; row < height; ++row)
@@ -64,7 +64,7 @@ namespace Simd
             return sums[0] + sums[1] + sums[2] + sums[3];
         }
 
-        void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             *sum = ProductSum(a, b, Simd::AlignLo(size, 4), size);
         }
@@ -83,54 +83,54 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
             AddMultiplied(src, Simd::AlignLo(size, 4), size, *value, dst);
         }
 
-		void AnnSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			float s = slope[0];
 			for (size_t i = 0; i < size; ++i)
 				dst[i] = Sigmoid(src[i] * s);
 		}
 
-		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			float s = slope[0];
 			for (size_t i = 0; i < size; ++i)
 				dst[i] = RoughSigmoid(src[i] * s);
 		}
 
-        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             for (size_t i = 0; i < size; ++i)
-                dst[i] = s*DerivativeSigmoid(src[i]);
+                dst[i] *= s*DerivativeSigmoid(src[i]);
         }
 
-        void AnnTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             for (size_t i = 0; i < size; ++i)
                 dst[i] = Tanh(src[i] * s);
         }
 
-        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             for (size_t i = 0; i < size; ++i)
                 dst[i] = RoughTanh(src[i] * s);
         }
 
-        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             for (size_t i = 0; i < size; ++i)
-                dst[i] = s*DerivativeTanh(src[i]);
+                dst[i] *= s*DerivativeTanh(src[i]);
         }
 
-        void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             assert(s >= 0.0f && s <= 1.0f);
@@ -146,14 +146,14 @@ namespace Simd
             }
         }
 
-        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = -slope[0];
             for (size_t i = 0; i < size; ++i)
-                dst[i] = src[i] > 0 ? 1.0f : s;
+                dst[i] *= src[i] > 0 ? 1.0f : s;
         }
 
-        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
         {
             float _a = a[0], _b = b[0];
             size_t alignedSize = Simd::AlignLo(size, 4);
@@ -182,7 +182,7 @@ namespace Simd
                 Convolution3(src + 2 * stride, weights + 6);
         }
 
-        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
@@ -208,7 +208,7 @@ namespace Simd
                 Convolution5(src + 4 * stride, weights + 20);
         }
 
-        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
@@ -219,7 +219,7 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
@@ -236,7 +236,7 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
@@ -253,7 +253,7 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
@@ -271,7 +271,7 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
@@ -301,7 +301,7 @@ namespace Simd
             return Simd::Max(Max2(src), Max2(src + stride));
         }
 
-        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; row += 2)
             {

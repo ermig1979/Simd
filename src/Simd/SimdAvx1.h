@@ -31,37 +31,37 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-		void AnnProductSum(const float * a, const float * b, size_t size, float * sum);
+		void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
-        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
+        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
-		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
+		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
+        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst);
+        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnRelu(const float * src, size_t size, const float * slope, float * dst);
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
-        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
+        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
-        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
-        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
 
-        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 

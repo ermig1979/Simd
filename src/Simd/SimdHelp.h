@@ -444,7 +444,7 @@
 */
 
 /*! @ingroup functions
-	@defgroup ann ANN
+	@defgroup neural Neural Network
 	\short Artificial Neural Network's functions.
 */
 

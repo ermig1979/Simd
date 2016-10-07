@@ -94,8 +94,6 @@ namespace Simd
 
             static SIMD_INLINE void IdentityDerivative(const float * src, size_t size, float * dst)
             {
-                for (size_t i = 0; i < size; ++i)
-                    dst[i] = 1.0f;
             }
 
             static SIMD_INLINE void TanhFunction(const float * src, size_t size, float * dst)
@@ -248,13 +246,19 @@ namespace Simd
 
             virtual void Backward(const Vector & src, size_t thread) = 0;
 
-            virtual void SetThreadNumber(size_t number)
+            virtual void SetThreadNumber(size_t number, bool train)
             {
                 _common.resize(number);
                 for (size_t i = 0; i < _common.size(); ++i)
                 {
                     _common[i].sum.resize(_dst.Volume());
                     _common[i].dst.resize(_dst.Volume());
+                    if (train)
+                    {
+                        _common[i].dWeight.resize(_weight.size());
+                        _common[i].dBias.resize(_bias.size());
+                        _common[i].prevDelta.resize(_src.Volume());
+                    }
                 }
             }
 
@@ -271,8 +275,10 @@ namespace Simd
 
             struct Common
             {
-                Vector sum;
-                Vector dst;
+                Vector sum, dst;
+
+                Vector dWeight, dBias, prevDelta;
+
             };
             std::vector<Common> _common;
 
@@ -291,7 +297,7 @@ namespace Simd
                 : Layer(Input, Function::Identity)
             {
                 _dst.Resize(dstSize, 1);
-                SetThreadNumber(1);
+                SetThreadNumber(1, false);
             }
 
             void Forward(const Vector & src, size_t thread, bool train) override
@@ -319,7 +325,7 @@ namespace Simd
                 _weight.resize(_core.Volume());
                 if (bias)
                     _bias.resize(dstDepth);
-                SetThreadNumber(1);
+                SetThreadNumber(1, false);
             }
 
             void Forward(const Vector & src, size_t thread, bool train) override
@@ -373,19 +379,23 @@ namespace Simd
                 function.function(sum.data(), sum.size(), dst.data());
             }
 
-            void Backward(const Vector & src, size_t thread) override
+            void Backward(const Vector & currDelta, size_t thread) override
             {
             }
 
-            virtual void SetThreadNumber(size_t number) override
+            virtual void SetThreadNumber(size_t number, bool train) override
             {
-                Layer::SetThreadNumber(number);
+                Layer::SetThreadNumber(number, train);
                 _specific.resize(number);
                 for (size_t i = 0; i < _specific.size(); ++i)
                 {
                     if (!_valid)
                     {
                         _specific[i].paddedSrc.resize(_padded.Volume());
+                    }
+                    if (train)
+                    {
+
                     }
                 }
             }
@@ -429,7 +439,7 @@ namespace Simd
                 _poolingSize = poolingSize;
                 _src.Resize(srcSize, srcDepth);
                 _dst.Resize(srcSize/_poolingSize, srcDepth);
-                SetThreadNumber(1);
+                SetThreadNumber(1, false);
             }
 
             void Forward(const Vector & src, size_t thread, bool train) override
@@ -481,9 +491,9 @@ namespace Simd
             {
             }
 
-            virtual void SetThreadNumber(size_t number) override
+            virtual void SetThreadNumber(size_t number, bool train) override
             {
-                Layer::SetThreadNumber(number);
+                Layer::SetThreadNumber(number, train);
                 _specific.resize(number);
                 for (size_t i = 0; i < _specific.size(); ++i)
                 {
@@ -513,14 +523,14 @@ namespace Simd
                 _weight.resize(dstSize*srcSize);
                 if (bias)
                     _bias.resize(dstSize);
-                SetThreadNumber(1);
+                SetThreadNumber(1, false);
             }
 
             void Forward(const Vector & src, size_t thread, bool train) override
             {
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                if (train || true)
+                if (train)
                 {
                     memset(sum.data(), 0, sizeof(float_t)*sum.size());
                     for (size_t i = 0; i < src.size(); i++)
@@ -549,8 +559,26 @@ namespace Simd
                 function.function(sum.data(), sum.size(), dst.data());
             }
 
-            void Backward(const Vector & src, size_t thread) override
+            void Backward(const Vector & currDelta, size_t thread) override
             {
+                const Vector & prevDst = _prev->Dst(thread);
+                Vector & prevDelta = _common[thread].prevDelta;
+                Vector & dWeight = _common[thread].dWeight;
+                Vector & dBias = _common[thread].dBias;
+
+                for (size_t i = 0; i < _src.width; i++)
+                    ::SimdAnnProductSum(&currDelta[0], &_weight[i*_dst.width], _dst.width, &prevDelta[i]);
+
+                _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+
+                for (size_t i = 0; i < _src.width; i++)
+                    ::SimdAnnAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
+
+                if (_bias.size())
+                {
+                    for (size_t i = 0; i < _dst.width; ++i)
+                        dBias[i] += currDelta[i];
+                }
             }
 
         protected:
@@ -559,7 +587,7 @@ namespace Simd
 
         struct TrainOptions
         {
-
+            size_t threadNumber;
         };
         
         struct Network
@@ -599,6 +627,9 @@ namespace Simd
             {
                 if (src.size() != dst.size())
                     return false;
+
+                for (size_t i = 0; i < _layers.size(); ++i)
+                    _layers[i]->SetThreadNumber(options.threadNumber, true);
 
                 return false;
             }

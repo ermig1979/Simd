@@ -30,14 +30,14 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        template <bool align> SIMD_INLINE void AnnProductSum(const float * a, const float * b, size_t offset, __m128 & sum)
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, __m128 & sum)
         {
             __m128 _a = Load<align>(a + offset);
             __m128 _b = Load<align>(b + offset);
             sum = _mm_add_ps(sum, _mm_mul_ps(_a, _b));
         }
 
-        template <bool align> SIMD_INLINE void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
@@ -53,27 +53,27 @@ namespace Simd
                 {
                     for(; i < fullAlignedSize; i += QF)
                     {
-						AnnProductSum<align>(a, b, i + F*0, sums[0]);
-						AnnProductSum<align>(a, b, i + F*1, sums[1]);
-						AnnProductSum<align>(a, b, i + F*2, sums[2]);
-						AnnProductSum<align>(a, b, i + F*3, sums[3]);
+						NeuralProductSum<align>(a, b, i + F*0, sums[0]);
+						NeuralProductSum<align>(a, b, i + F*1, sums[1]);
+						NeuralProductSum<align>(a, b, i + F*2, sums[2]);
+						NeuralProductSum<align>(a, b, i + F*3, sums[3]);
                     }
                     sums[0] = _mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3]));
                 }
                 for(; i < partialAlignedSize; i += F)
-					AnnProductSum<align>(a, b, i, sums[0]);
+					NeuralProductSum<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
             for(; i < size; ++i)
                 *sum += a[i]*b[i];
         }
 
-        void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             if(Aligned(a) && Aligned(b))
-				AnnProductSum<true>(a, b, size, sum);
+				NeuralProductSum<true>(a, b, size, sum);
             else
-                AnnProductSum<false>(a, b, size, sum);
+                NeuralProductSum<false>(a, b, size, sum);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float * src, const __m128 & value, float * dst)
@@ -101,7 +101,7 @@ namespace Simd
                 dst[i] += src[i] * value;
         }
 
-        void AnnAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
         {
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
@@ -111,7 +111,7 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-		template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			size_t alignedSize =  Simd::AlignLo(size, F);
 			__m128 _slope = _mm_set1_ps(*slope);
@@ -136,15 +136,15 @@ namespace Simd
 				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
 		}
 
-		void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			if (Aligned(src) && Aligned(dst))
-				AnnRoughSigmoid<true>(src, size, slope, dst);
+				NeuralRoughSigmoid<true>(src, size, slope, dst);
 			else
-				AnnRoughSigmoid<false>(src, size, slope, dst);
+				NeuralRoughSigmoid<false>(src, size, slope, dst);
 		}
 
-        template <bool align> SIMD_INLINE void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
@@ -153,21 +153,22 @@ namespace Simd
             for (; i < alignedSize; i += F)
             {
                 __m128 _src = Load<align>(src + i);
-                Store<align>(dst + i, _mm_mul_ps(_slope, _mm_mul_ps(_mm_sub_ps(_1, _src), _src)));
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_mul_ps(_mm_sub_ps(_1, _src), _src)));
             }
             for (; i < size; ++i)
-                dst[i] = slope[0]*Base::DerivativeSigmoid(src[i]);
+                dst[i] *= slope[0]*Base::DerivativeSigmoid(src[i]);
         }
 
-        void AnnDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnDerivativeSigmoid<true>(src, size, slope, dst);
+                NeuralDerivativeSigmoid<true>(src, size, slope, dst);
             else
-                AnnDerivativeSigmoid<false>(src, size, slope, dst);
+                NeuralDerivativeSigmoid<false>(src, size, slope, dst);
         }
 
-        template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
@@ -192,15 +193,15 @@ namespace Simd
                 dst[i] = Base::RoughTanh(src[i] * slope[0]);
         }
 
-        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnRoughTanh<true>(src, size, slope, dst);
+                NeuralRoughTanh<true>(src, size, slope, dst);
             else
-                AnnRoughTanh<false>(src, size, slope, dst);
+                NeuralRoughTanh<false>(src, size, slope, dst);
         }
 
-        template <bool align> SIMD_INLINE void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
@@ -209,21 +210,22 @@ namespace Simd
             for (; i < alignedSize; i += F)
             {
                 __m128 _src = Load<align>(src + i);
-                Store<align>(dst + i, _mm_mul_ps(_slope, _mm_sub_ps(_1, _mm_mul_ps(_src, _src))));
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_sub_ps(_1, _mm_mul_ps(_src, _src))));
             }
             for (; i < size; ++i)
-                dst[i] = slope[0] * Base::DerivativeTanh(src[i]);
+                dst[i] *= slope[0] * Base::DerivativeTanh(src[i]);
         }
 
-        void AnnDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnDerivativeTanh<true>(src, size, slope, dst);
+                NeuralDerivativeTanh<true>(src, size, slope, dst);
             else
-                AnnDerivativeTanh<false>(src, size, slope, dst);
+                NeuralDerivativeTanh<false>(src, size, slope, dst);
         }
 
-        template <bool align> void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             assert(s >= 0.0f && s <= 1.0f);
@@ -253,15 +255,15 @@ namespace Simd
             }
         }
 
-        void AnnRelu(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnRelu<true>(src, size, slope, dst);
+                NeuralRelu<true>(src, size, slope, dst);
             else
-                AnnRelu<false>(src, size, slope, dst);
+                NeuralRelu<false>(src, size, slope, dst);
         }
 
-        template <bool align> void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = -slope[0];
             __m128 _0 = _mm_set1_ps(0.0f);
@@ -272,18 +274,19 @@ namespace Simd
             for (; i < alignedSize; i += F)
             {
                 __m128 mask = _mm_cmpgt_ps(Load<align>(src + i), _0);
-                Store<align>(dst + i, _mm_add_ps(_s, _mm_and_ps(mask, d)));
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_add_ps(_s, _mm_and_ps(mask, d)), _dst));
             }
             for (; i < size; ++i)
-                dst[i] = src[i] > 0 ? 1.0f : s;
+                dst[i] *= src[i] > 0 ? 1.0f : s;
         }
 
-        void AnnDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnDerivativeRelu<true>(src, size, slope, dst);
+                NeuralDerivativeRelu<true>(src, size, slope, dst);
             else
-                AnnDerivativeRelu<false>(src, size, slope, dst);
+                NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const __m128 & a, const __m128 & b, float * d, float * w)
@@ -298,7 +301,7 @@ namespace Simd
             UpdateWeights<align>(x + offset, a, b, d + offset, w + offset);
         }
 
-        template <bool align> SIMD_INLINE void AnnUpdateWeights(const float * x, size_t size, const float & a, const float & b, float * d, float * w)
+        template <bool align> SIMD_INLINE void NeuralUpdateWeights(const float * x, size_t size, const float & a, const float & b, float * d, float * w)
         {
             if (align)
                 assert(Aligned(x) && Aligned(d) && Aligned(w));
@@ -327,12 +330,12 @@ namespace Simd
                 Base::UpdateWeights(x, i, a, b, d, w);
         }
 
-        void AnnUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
         {
             if (Aligned(x) && Aligned(d) && Aligned(w))
-                AnnUpdateWeights<true>(x, size, *a, *b, d, w);
+                NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
             else
-                AnnUpdateWeights<false>(x, size, *a, *b, d, w);
+                NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
         template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m128 * dst)
@@ -355,7 +358,7 @@ namespace Simd
                 Convolution3<align>(src + 2 * stride, weights + 6)));
         }
 
-        template <bool align> void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
@@ -381,12 +384,12 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE __m128 Convolution5(const float * src, const __m128 * weights)
@@ -403,7 +406,7 @@ namespace Simd
                 _mm_add_ps(Convolution5<align>(src + 3*stride, weights + 15), Convolution5<align>(src + 4*stride, weights + 20))));
         }
 
-        template <bool align> void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
@@ -429,15 +432,15 @@ namespace Simd
             }
         }
 
-        void AnnAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        template <bool align> void AnnAddConvolution3x3BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution3x3BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = AlignLo(width, QF);
             size_t partial = AlignLo(width, F);
@@ -510,7 +513,7 @@ namespace Simd
                     Convolution3<align>(buffer.rows[2] + offset, weights + 6)));
         }
 
-        template <bool align> void AnnAddConvolution3x3BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution3x3BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             Buffer<1> buffer(width);
             height += 2;
@@ -541,23 +544,23 @@ namespace Simd
             }
         }
 
-        template <bool align> void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (width*height < 1024)
-                AnnAddConvolution3x3BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution3x3BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        void AnnAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution3x3Back<true>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3Back<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution3x3Back<false>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution3x3Back<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        template <bool align> void AnnAddConvolution5x5BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution5x5BackSmall(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = AlignLo(width, QF);
             size_t partial = AlignLo(width, F);
@@ -587,7 +590,7 @@ namespace Simd
                     Convolution5<align>(buffer.rows[4] + offset, weights + 20)));
         }
 
-        template <bool align> void AnnAddConvolution5x5BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution5x5BackLarge(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             Buffer<2> buffer(width);
             height += 4;
@@ -618,20 +621,20 @@ namespace Simd
             }
         }
 
-        template <bool align> void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (width*height < 2048)
-                AnnAddConvolution5x5BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5BackSmall<align>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution5x5BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5BackLarge<align>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        void AnnAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution5x5Back<true>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5Back<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                AnnAddConvolution5x5Back<false>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5Back<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m128 & dst, __m128 * sums)
@@ -648,7 +651,7 @@ namespace Simd
             AddMultiplied3<align>(src + stride * 2, dst, sums + 6);
         }
 
-        template <bool align> void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        template <bool align> void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
@@ -674,12 +677,12 @@ namespace Simd
                 sums[i] += ExtractSum(_sums[i]);
         }
 
-        void AnnAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution3x3Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolution3x3Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
             else
-                AnnAddConvolution3x3Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolution3x3Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied5(const float * src, const __m128 & dst, __m128 * sums)
@@ -700,7 +703,7 @@ namespace Simd
             AddMultiplied5<align>(src + stride * 4, dst, sums + 20);
         }
 
-        template <bool align> void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        template <bool align> void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
@@ -726,12 +729,12 @@ namespace Simd
                 sums[i] += ExtractSum(_sums[i]);
         }
 
-        void AnnAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnAddConvolution5x5Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolution5x5Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
             else
-                AnnAddConvolution5x5Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolution5x5Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         template <bool align> SIMD_INLINE __m128 Max2x2(const float * src, size_t stride)
@@ -741,7 +744,7 @@ namespace Simd
             return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
         }
 
-        template <bool align> void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        template <bool align> void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, DF);
             for (size_t row = 0; row < height; row += 2)
@@ -760,12 +763,12 @@ namespace Simd
             }
         }
 
-        void AnnMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                AnnMax2x2<true>(src, srcStride, width, height, dst, dstStride);
+                NeuralMax2x2<true>(src, srcStride, width, height, dst, dstStride);
             else
-                AnnMax2x2<false>(src, srcStride, width, height, dst, dstStride);
+                NeuralMax2x2<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif// SIMD_SSE_ENABLE
