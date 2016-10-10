@@ -99,49 +99,49 @@ namespace Simd
             static SIMD_INLINE void TanhFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdAnnRoughTanh(src, size, &slope, dst);
+                ::SimdNeuralRoughTanh(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void TanhDerivative(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdAnnDerivativeTanh(src, size, &slope, dst);
+                ::SimdNeuralDerivativeTanh(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void SigmoidFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdAnnRoughSigmoid(src, size, &slope, dst);
+                ::SimdNeuralRoughSigmoid(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void SigmoidDerivative(const float * src, size_t size, float * dst)
             {
                 const float slope = 1.0f;
-                ::SimdAnnDerivativeSigmoid(src, size, &slope, dst);
+                ::SimdNeuralDerivativeSigmoid(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void ReluFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.0f;
-                ::SimdAnnRelu(src, size, &slope, dst);
+                ::SimdNeuralRelu(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void ReluDerivative(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.0f;
-                ::SimdAnnDerivativeRelu(src, size, &slope, dst);
+                ::SimdNeuralDerivativeRelu(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void LeakyReluFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.01f;
-                ::SimdAnnRelu(src, size, &slope, dst);
+                ::SimdNeuralRelu(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void LeakyReluDerivative(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.01f;
-                ::SimdAnnDerivativeRelu(src, size, &slope, dst);
+                ::SimdNeuralDerivativeRelu(src, size, &slope, dst);
             }
         };
 
@@ -344,11 +344,11 @@ namespace Simd
 
                         if (_core.width == 3 && _core.height == 3)
                         {
-                            ::SimdAnnAddConvolution3x3(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                            ::SimdNeuralAddConvolution3x3(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
                         else if (_core.width == 5 && _core.height == 5)
                         {
-                            ::SimdAnnAddConvolution5x5(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                            ::SimdNeuralAddConvolution5x5(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
                         else
                         {
@@ -367,7 +367,7 @@ namespace Simd
                             }
                         }
                     }
-                    if (!_bias.empty())
+                    if (_bias.size())
                     {
                         float_t bias = _bias[dc];
                         size_t size = _dst.Area();
@@ -381,6 +381,96 @@ namespace Simd
 
             void Backward(const Vector & currDelta, size_t thread) override
             {
+                const Vector & prevDst = _valid ? _prev->Dst(thread) : _specific[thread].paddedSrc;
+                Vector & prevDelta = _valid ? _common[thread].prevDelta : _specific[thread].paddedDelta;
+                Vector & dWeight = _common[thread].dWeight;
+                Vector & dBias = _common[thread].dBias;
+
+                memset(prevDelta.data(), 0, prevDelta.size()*sizeof(float));
+
+                for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
+                {
+                    for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+                    {
+                        const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
+                        const float * psrc = _dst.Get(currDelta, 0, 0, dc);
+                        float * pdst = _padded.Get(prevDelta, 0, 0, sc);
+
+                        if (_core.width == 3 && _core.height == 3)
+                        {
+                            ::SimdNeuralAddConvolution3x3Back(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
+                        }
+                        else if (_core.width == 5 && _core.height == 5)
+                        {
+                            ::SimdNeuralAddConvolution5x5Back(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
+                        }
+                        else
+                        {
+                            for (ptrdiff_t y = 0; y < _dst.height; y++)
+                            {
+                                for (ptrdiff_t x = 0; x < _dst.width; x++)
+                                {
+                                    const float * ppweight = pweight;
+                                    const float ppsrc = psrc[y*_dst.width + x];
+                                    float * ppdst = pdst + y*_padded.width + x;
+                                    for (ptrdiff_t wy = 0; wy < _core.height; wy++)
+                                        for (ptrdiff_t wx = 0; wx < _core.width; wx++)
+                                            ppdst[wy * _padded.width + wx] += *ppweight++ * ppsrc;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+
+                for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
+                {
+                    for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+                    {
+                        const float * delta = _dst.Get(currDelta, 0, 0, dc);
+                        const float * prevo = _padded.Get(prevDst, 0, 0, sc);
+                        float * sums = _core.Get(dWeight, 0, 0, _src.depth*_dst.depth);
+
+                        if (_core.width == 3 && _core.height == 3)
+                        {
+                            ::SimdNeuralAddConvolution3x3Sum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
+                        }
+                        else if (_core.width == 5 && _core.height == 5)
+                        {
+                            ::SimdNeuralAddConvolution5x5Sum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
+                        }
+                        else
+                        {
+                            for (ptrdiff_t wy = 0; wy < _core.height; wy++)
+                            {
+                                for (ptrdiff_t wx = 0; wx < _core.width; wx++)
+                                {
+                                    float dst = 0;
+                                    const float * prevo = _padded.Get(prevDst, wx, wy, sc);
+                                    for (ptrdiff_t y = 0; y < _dst.height; y++)
+                                    {
+                                        float sum;
+                                        ::SimdNeuralProductSum(prevo + y*_padded.width, delta + y*_dst.width, _dst.width, &sum);
+                                        dst += sum;
+                                    }
+                                    dWeight[_core.Offset(wx, wy, _src.depth *dc + sc)] += dst;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (dBias.size()) 
+                {
+                    for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+                    {
+                        const float * delta = _dst.Get(currDelta, 0, 0, dc);
+                        dBias[dc] += std::accumulate(delta, delta + _dst.width*_dst.height, float(0));
+                    }
+                }
+
+                UnpadDelta(prevDelta, thread);
             }
 
             virtual void SetThreadNumber(size_t number, bool train) override
@@ -392,10 +482,8 @@ namespace Simd
                     if (!_valid)
                     {
                         _specific[i].paddedSrc.resize(_padded.Volume());
-                    }
-                    if (train)
-                    {
-
+                        if (train)
+                            _specific[i].paddedDelta.resize(_padded.Volume());
                     }
                 }
             }
@@ -419,9 +507,23 @@ namespace Simd
                 }
             }
 
+            void UnpadDelta(const Vector & src, size_t thread)
+            {
+                if (!_valid)
+                {
+                    Vector & dst = _common[thread].prevDelta;
+                    size_t size = _src.width*sizeof(float);
+                    for (ptrdiff_t c = 0; c < _src.depth; c++)
+                    {
+                        for (ptrdiff_t y = 0; y < _src.height; ++y)
+                            memcpy(_src.Get(dst, 0, y, c), _padded.Get(src, _indent, _indent + y, c), size);
+                    }
+                }
+            }
+
             struct Specific
             {
-                Vector paddedSrc;
+                Vector paddedSrc, paddedDelta;
             };
             std::vector<Specific> _specific;
 
@@ -482,7 +584,7 @@ namespace Simd
                 }
                 else
                 {
-                    ::SimdAnnMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
+                    ::SimdNeuralMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
                 }
                 function.function(sum.data(), sum.size(), dst.data());
             }
@@ -534,7 +636,7 @@ namespace Simd
                 {
                     memset(sum.data(), 0, sizeof(float_t)*sum.size());
                     for (size_t i = 0; i < src.size(); i++)
-                        ::SimdAnnAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
+                        ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
                 else
                 {
@@ -548,10 +650,10 @@ namespace Simd
                         _reordered = true;
                     }
                     for (size_t i = 0; i < sum.size(); ++i)
-                        ::SimdAnnProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
+                        ::SimdNeuralProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
                 }
 
-                if (!_bias.empty())
+                if (_bias.size())
                 {
                     for (size_t i = 0; i < sum.size(); ++i)
                         sum[i] += _bias[i];
@@ -566,17 +668,17 @@ namespace Simd
                 Vector & dWeight = _common[thread].dWeight;
                 Vector & dBias = _common[thread].dBias;
 
-                for (size_t i = 0; i < _src.width; i++)
-                    ::SimdAnnProductSum(&currDelta[0], &_weight[i*_dst.width], _dst.width, &prevDelta[i]);
+                for (ptrdiff_t i = 0; i < _src.width; i++)
+                    ::SimdNeuralProductSum(&currDelta[0], &_weight[i*_dst.width], _dst.width, &prevDelta[i]);
 
                 _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
 
-                for (size_t i = 0; i < _src.width; i++)
-                    ::SimdAnnAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
+                for (ptrdiff_t i = 0; i < _src.width; i++)
+                    ::SimdNeuralAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
 
                 if (_bias.size())
                 {
-                    for (size_t i = 0; i < _dst.width; ++i)
+                    for (ptrdiff_t i = 0; i < _dst.width; ++i)
                         dBias[i] += currDelta[i];
                 }
             }
