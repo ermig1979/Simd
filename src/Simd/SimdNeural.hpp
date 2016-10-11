@@ -27,6 +27,10 @@
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdParallel.hpp"
 
+#ifndef SIMD_CHECK_PERFORMANCE
+#define SIMD_CHECK_PERFORMANCE()
+#endif
+
 namespace Simd
 {
     namespace Neural
@@ -37,6 +41,7 @@ namespace Simd
         typedef std::vector<Vector> Vectors;
         typedef size_t Label;
         typedef std::vector<Label> Labels;
+        typedef Simd::View<Allocator<uint8_t>> View;
 
         template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
         {
@@ -350,12 +355,13 @@ namespace Simd
 
         struct ConvolutionalLayer : public Layer
         {
-            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, bool valid = true, bool bias = true)
+            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, 
+                bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
             {
                 _valid = valid;
-                _indent = (coreSize - 1)/2;
-                Size pad = _indent*Size(2, 2);
+                _indent = coreSize/2;
+                Size pad(coreSize - 1, coreSize - 1);
                 _src.Resize(srcSize, srcDepth);
                 _dst.Resize(srcSize - (_valid ? pad : Size()), dstDepth);
                 _padded.Resize(srcSize + (_valid ? Size() : pad), srcDepth);
@@ -364,6 +370,12 @@ namespace Simd
                 if (bias)
                     _bias.resize(dstDepth);
                 SetThreadNumber(1, false);
+
+                _connection.Recreate(dstDepth, srcDepth, View::Gray8);
+                if (Simd::Compatible(connection, _connection))
+                    Simd::Copy(connection, _connection);
+                else
+                    Simd::Fill(_connection, 1);
             }
 
             void Forward(const Vector & src, size_t thread, bool train) override
@@ -376,6 +388,9 @@ namespace Simd
                 {
                     for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
                     {
+                        if (!_connection.At<bool>(dc, sc))
+                            return;
+
                         const float_t * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
                         const float_t * psrc = _padded.Get(padded, 0, 0, sc);
                         float_t * psum = _dst.Get(sum, 0, 0, dc);
@@ -430,6 +445,9 @@ namespace Simd
                 {
                     for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
                     {
+                        if (!_connection.At<bool>(dc, sc))
+                            return;
+
                         const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
                         const float * psrc = _dst.Get(currDelta, 0, 0, dc);
                         float * pdst = _padded.Get(prevDelta, 0, 0, sc);
@@ -579,6 +597,7 @@ namespace Simd
             Index _padded;
             size_t _indent;
             bool _valid;
+            View _connection;
         };
 
         struct MaxPoolingLayer : public Layer
@@ -776,20 +795,24 @@ namespace Simd
             } initType;
             enum UpdateType
             {
-                AdaptiveGradients,
+                AdaptiveGradient,
             } updateType;
             size_t threadNumber;
             size_t epochStart;
             size_t epochFinish;
             size_t batchSize;
+            float alpha;
+            float epsilon;
 
             TrainOptions()
                 : initType(Xavier)
-                , updateType(AdaptiveGradients)
+                , updateType(AdaptiveGradient)
                 , threadNumber(8)
                 , batchSize(64)
                 , epochStart(0)
                 , epochFinish(100)
+                , alpha(0.01f)
+                , epsilon(0.0001f)
             {
             }
         };
@@ -810,40 +833,31 @@ namespace Simd
                 _layers.push_back(LayerPtr(layer));
             }
 
-            template <class Logger> bool Train(const Vectors & src, const Labels & dst, const TrainOptions & options, const Logger & logger)
+            template <class Logger> bool Train(const Vectors & src, const Labels & dst, TrainOptions options, Logger logger)
             {
-                if (src.size() != dst.size())
-                    return false;
-                size_t size = _layers.back()->_dst.Volume();
-                float min = _layers.back()->function.min;
-                float max = _layers.back()->function.max;
-                Vectors converted(dst.size());
-                for (size_t i = 0; i < dst.size(); ++i)
-                {
-                    converted[i].resize(size, min);
-                    if (dst[i] < size)
-                        converted[i][dst[i]] = max;
-                }
-                return Train(src, converted, options, logger);
-            }
+                SIMD_CHECK_PERFORMANCE();
 
-            template <class Logger> bool Train(const Vectors & src, const Vectors & dst, const TrainOptions & options, Logger logger)
-            {
                 if (src.size() != dst.size())
                     return false;
 
-                size_t threadNumber = std::max<size_t>(1, std::min<size_t>(options.threadNumber, std::thread::hardware_concurrency()));
+                Vectors converted;
+                Convert(dst, converted);
+
+                options.threadNumber = std::max<size_t>(1, std::min<size_t>(options.threadNumber, std::thread::hardware_concurrency()));
 
                 for (size_t i = 0; i < _layers.size(); ++i)
-                    _layers[i]->SetThreadNumber(threadNumber, true);
+                    _layers[i]->SetThreadNumber(options.threadNumber, true);
 
                 if (options.epochStart == 0)
-                    InitWeight(options.initType);
+                    InitWeight(options);
 
                 for (size_t epoch = options.epochStart; epoch < options.epochFinish; ++epoch) 
                 {
                     for (size_t i = 0; i < src.size(); i += options.batchSize)
-                        TrainBatch(src, dst, i, std::min(i + options.batchSize, src.size()), threadNumber, options.updateType);
+                    {
+                        Propogate(src, converted, i, std::min(i + options.batchSize, src.size()), options);
+                        UpdateWeight(options);
+                    }
                     logger();
                 }
 
@@ -931,8 +945,24 @@ namespace Simd
         private:
             LayerPtrs _layers;
 
+            void Convert(const Labels & src, Vectors & dst)
+            {
+                size_t size = _layers.back()->_dst.Volume();
+                float min = _layers.back()->function.min;
+                float max = _layers.back()->function.max;
+                dst.resize(src.size());
+                for (size_t i = 0; i < dst.size(); ++i)
+                {
+                    dst[i].resize(size, min);
+                    if (src[i] < size)
+                        dst[i][src[i]] = max;
+                }
+            }
+
             const Vector & Forward(const Vector & src, size_t thread, bool train)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 _layers.front()->Forward(src, thread, train);
                 for (size_t i = 1; i < _layers.size(); ++i)
                     _layers[i]->Forward(_layers[i - 1]->Dst(thread), thread, train);
@@ -941,6 +971,8 @@ namespace Simd
 
             void Backward(const Vector & current, const Vector & control, size_t thread)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Vector delta(current.size());
                 for (size_t i = 0; i < delta.size(); ++i)
                     delta[i] = current[i] - control[i];
@@ -951,53 +983,103 @@ namespace Simd
                     _layers[i]->Backward(_layers[i + 1]->Delta(thread), thread);
             }
 
-            void TrainBatch(const Vectors & src, const Vectors & dst, size_t start, size_t finish, size_t threadNumber, TrainOptions::UpdateType updateType)
+            void Propogate(const Vectors & src, const Vectors & dst, size_t start, size_t finish, const TrainOptions & options)
             {
-                Parallel(start, finish, [&](size_t thread, size_t begin, size_t end) 
+                SIMD_CHECK_PERFORMANCE();
+
+                Parallel(start, finish, [&](size_t thread, size_t begin, size_t end)
                 {
                     for (size_t i = begin; i < end; ++i)
                     {
                         Vector current = Forward(src[i], thread, true);
                         Backward(current, dst[i], thread);
                     }
-                }, threadNumber);
-                UpdateWeight(updateType);
+                }, options.threadNumber);
             }
 
-            SIMD_INLINE float XavierUniform(float min, float max) 
+            template<TrainOptions::InitType type> float UniformRandom(float min, float max);
+
+            template<> SIMD_INLINE float UniformRandom<TrainOptions::Xavier>(float min, float max)
             {
                 static std::mt19937 gen(1);
                 std::uniform_real_distribution<float> dst(min, max);
                 return dst(gen);
             }
 
-            void InitXavier(Vector & dst, const Layer & layer)
+            template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer)
             {
                 float halfRange = (float)(std::sqrt(6.0/(layer.FanSrcSize() + layer.FanDstSize())));
                 for (size_t i = 0; i < dst.size(); ++i)
-                    dst[i] = XavierUniform(-halfRange, halfRange);
+                    dst[i] = UniformRandom<type>(-halfRange, halfRange);
             }
 
-            void InitWeight(TrainOptions::InitType initType)
+            template<TrainOptions::InitType type> void InitWeight()
             {
-                for (size_t i = 0; i < _layers.size(); ++i)
+                for (size_t l = 0; l < _layers.size(); ++l)
                 {
-                    Layer & layer = *_layers[i];
-                    switch (initType)
-                    {
-                    case TrainOptions::Xavier: 
-                        InitXavier(layer._weight, layer);
-                        InitXavier(layer._bias, layer);
-                        break;
-                    }
+                    Layer & layer = *_layers[l];
+                    InitWeight<type>(layer._weight, layer);
+                    InitWeight<type>(layer._bias, layer);
                     SetZero(layer._gWeight);
                     SetZero(layer._gBias);
                 }
             }
 
-            void UpdateWeight(TrainOptions::UpdateType updateType)
+            void InitWeight(const TrainOptions & options)
             {
+                switch (options.initType)
+                {
+                case TrainOptions::Xavier: InitWeight<TrainOptions::Xavier>(); break;
+                }
+            }
 
+            SIMD_INLINE void AddVector(const Vector & src, Vector & dst)
+            {
+                const float one = 1;
+                ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
+            }
+
+            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, Vector & d, Vector & g, Vector & v);
+
+            template<> void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
+            {
+                const float k = (float)(1.0 / o.batchSize);
+                for (size_t i = 0; i < d.size(); ++i)
+                {
+                    float dk = d[i] * k;
+                    g[i] += dk*dk;
+                    v[i] -= o.alpha * dk / (std::sqrt(g[i]) + o.epsilon);
+                }
+            }
+
+            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & options)
+            {
+                for (size_t l = 0; l < _layers.size(); ++l)
+                {
+                    Layer & layer = *_layers[l];
+                    for (size_t t = 1; t < layer._common.size(); ++t)
+                    {
+                        AddVector(layer._common[t].dWeight, layer._common[0].dWeight);
+                        AddVector(layer._common[t].dBias, layer._common[0].dBias);
+                    }
+                    UpdateWeight<type>(options, layer._common[0].dWeight, layer._gWeight, layer._weight);
+                    UpdateWeight<type>(options, layer._common[0].dBias, layer._gBias, layer._bias);
+                    for (size_t t = 0; t < layer._common.size(); ++t)
+                    {
+                        SetZero(layer._common[t].dWeight);
+                        SetZero(layer._common[t].dBias);
+                    }
+                }
+            }
+
+            void UpdateWeight(const TrainOptions & options)
+            {
+                SIMD_CHECK_PERFORMANCE();
+
+                switch (options.updateType)
+                {
+                case TrainOptions::AdaptiveGradient: UpdateWeight<TrainOptions::AdaptiveGradient>(options); break;
+                }
             }
         };
     }
