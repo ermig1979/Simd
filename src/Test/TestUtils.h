@@ -28,50 +28,50 @@
 
 namespace Test
 {
-	SIMD_INLINE int Random(int range)
-	{
-		return ((::rand()&INT16_MAX)*range)/INT16_MAX;
-	}
+    SIMD_INLINE int Random(int range)
+    {
+        return ((::rand()&INT16_MAX)*range) / INT16_MAX;
+    }
 
     SIMD_INLINE double Random()
     {
-        return ((::rand()&INT16_MAX)*1.0)/INT16_MAX;
+        return ((::rand()&INT16_MAX)*1.0) / INT16_MAX;
     }
 
     void FillRandom(View & view, uint8_t lo = 0, uint8_t hi = 255);
 
 
-	void FillRandomMask(View & view, uint8_t index);
+    void FillRandomMask(View & view, uint8_t index);
 
     void FillRhombMask(View & mask, const Rect & rect, uint8_t index);
-    
+
     void FillRandom32f(View & view, float lo = 0, float hi = 4096.0f);
 
-    bool Compare(const View & a, const View & b, 
-		int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0, 
-		const String & description = "");
+    bool Compare(const View & a, const View & b,
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0,
+        const String & description = "");
 
-	bool Compare(const Histogram a, const Histogram b, 
-		int differenceMax = 0, bool printError = false, int errorCountMax = 0);
-
-    bool Compare(const Sums & a, const Sums & b, 
+    bool Compare(const Histogram a, const Histogram b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
-    bool Compare(const Sums64 & a, const Sums64 & b, 
+    bool Compare(const Sums & a, const Sums & b,
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0);
+
+    bool Compare(const Sums64 & a, const Sums64 & b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0);
 
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
 
-    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax = EPS, 
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax = EPS,
         bool printError = false, int errorCountMax = 0, const String & description = "");
 
-	bool Compare(const View & a, const View & b, float relativeDifferenceMax = EPS, bool printError = false, 
+    bool Compare(const View & a, const View & b, float relativeDifferenceMax = EPS, bool printError = false,
         int errorCountMax = 0, bool relative = true, const String & description = "");
-	
-	bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false,
+
+    bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false,
         const String & description = "");
 
-	String ColorDescription(View::Format format);
+    String ColorDescription(View::Format format);
 
     String FormatDescription(View::Format format);
 
@@ -98,9 +98,6 @@ namespace Test
     }
 
     String ToString(double value, size_t iCount, size_t fCount);
-
-    bool Load(View & view, const String & path);
-    bool Save(const View & view, const String & path);
 }
 
 #define TEST_CHECK_VALUE(name) \

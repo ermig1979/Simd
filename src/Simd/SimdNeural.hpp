@@ -27,6 +27,9 @@
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdParallel.hpp"
 
+#include <numeric>
+#include <random>
+
 #ifndef SIMD_CHECK_PERFORMANCE
 #define SIMD_CHECK_PERFORMANCE()
 #endif

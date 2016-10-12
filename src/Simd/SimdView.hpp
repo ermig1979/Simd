@@ -30,6 +30,7 @@
 #include <memory.h>
 #include <assert.h>
 #include <algorithm>
+#include <fstream>
 
 namespace Simd
 {
@@ -434,6 +435,24 @@ namespace Simd
             \param [in] other - an other image view.
         */
         void Swap(View & other);
+
+        /*!
+            Loads 8-bit gray image from PGM(Portable Graymap Format) binary(P5) file.
+
+            \note PGM files with comments are not supported.
+
+            \param [in] - a path to file with PGM image.
+            \return - a result of loading.
+        */
+        bool Load(const std::string & path);
+
+        /*!
+            Saves 8-bit gray image to PGM(Portable Graymap Format) binary(P5) file.
+
+            \param [in] - a path to file with PGM image.
+            \return - a result of saving.
+        */
+        bool Save(const std::string & path) const;
 
     private:
         bool _owner;
@@ -903,6 +922,46 @@ namespace Simd
         std::swap((Format&)format, (Format&)other.format);
         std::swap((uint8_t*&)data, (uint8_t*&)other.data);
         std::swap((bool&)_owner, (bool&)other._owner);
+    }
+
+    template <class A> SIMD_INLINE bool View<A>::Load(const std::string & path)
+    {
+        std::ifstream ifs(path, std::ifstream::binary);
+        if (ifs.is_open())
+        {
+            std::string type;
+            ifs >> type;
+            if (type != "P5")
+                return false;
+            size_t w, h, d;
+            ifs >> w >> h >> d;
+            if (d != 255)
+                return false;
+            ifs.get();
+            Recreate(w, h, View<A>::Gray8);
+            for (size_t row = 0; row < height; ++row)
+                ifs.read((char*)(data + row*stride), width);
+            return true;
+        }
+        else
+            return false;
+    }
+
+    template <class A> SIMD_INLINE bool View<A>::Save(const std::string & path) const
+    {
+        if (format != View<A>::Gray8)
+            return false;
+
+        std::ofstream ofs(path, std::ifstream::binary);
+        if (ofs.is_open())
+        {
+            ofs << "P5\n" << width << " " << height << "\n255\n";
+            for (size_t row = 0; row < height; ++row)
+                ofs.write((const char*)(data + row*stride), width);
+            return true;
+        }
+        else
+            return false;
     }
 
     // View utilities implementation:

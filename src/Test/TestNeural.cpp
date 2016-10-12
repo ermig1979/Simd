@@ -1510,3 +1510,21 @@ namespace Test
         return result;
     }
 }
+
+//-----------------------------------------------------------------------------
+
+#include "Simd/SimdNeural.hpp"
+
+namespace Test
+{
+    bool NeuralPredictSpecialTest()
+    {
+        return true;
+    }
+
+    bool NeuralTrainSpecialTest()
+    {
+        return true;
+    }
+}
+

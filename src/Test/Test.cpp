@@ -96,6 +96,8 @@ namespace Test
     TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
     TEST_ADD_GROUP(NeuralMax2x2);
+    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralPredict);
+    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralTrain);
 
     TEST_ADD_GROUP(BgraToBgr);
     TEST_ADD_GROUP(BgraToGray);

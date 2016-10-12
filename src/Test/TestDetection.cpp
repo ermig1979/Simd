@@ -43,7 +43,7 @@ namespace Test
 
         String path = ROOT_PATH + "/data/image/lena.pgm";
         View obj;
-        if (!Load(obj, path))
+        if (!obj.Load(path))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
             return dst;
@@ -112,7 +112,7 @@ namespace Test
             path[s - 3] = '_';
             path = path.substr(0, s - 1);
         }
-        Save(dst, path + ".pgm");
+        dst.Save(path + ".pgm");
     }
 
     namespace
@@ -511,7 +511,7 @@ namespace Test
             Size s = objects[i].rect.Size();
             Simd::FillFrame(dst.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
         }
-        Save(dst, String("dst_") + ToString(threadNumber) + ".pgm");
+        dst.Save(String("dst_") + ToString(threadNumber) + ".pgm");
     }
 
     bool DetectionSpecialTest()
