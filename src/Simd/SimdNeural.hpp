@@ -304,6 +304,18 @@ namespace Simd
                 return _common[thread].prevDelta;
             }
 
+            bool Link(Layer * prev)
+            {
+                if (prev->_dst.Volume() == _src.Volume())
+                {
+                    _prev = prev;
+                    prev->_next = this;
+                    return true;
+                }
+                else
+                    return false;
+            }
+
         protected:
             Layer * _prev, *_next;
 
@@ -329,13 +341,6 @@ namespace Simd
 
         struct InputLayer : public Layer
         {
-            InputLayer(const Size & dstSize)
-                : Layer(Input, Function::Identity)
-            {
-                _dst.Resize(dstSize, 1);
-                SetThreadNumber(1, false);
-            }
-
             void Forward(const Vector & src, size_t thread, bool train) override
             {
                 _common[thread].dst = src;
@@ -354,6 +359,16 @@ namespace Simd
             {
                 return 1;
             }
+
+        private:
+            InputLayer(const Layer & next)
+                : Layer(Input, Function::Identity)
+            {
+                _dst = next._src;
+                SetThreadNumber(1, false);
+            }
+
+            friend struct Network;
         };
 
         struct ConvolutionalLayer : public Layer
@@ -618,10 +633,9 @@ namespace Simd
             {
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                ptrdiff_t * idx = _specific[thread].index.data();
-
                 if (train || _poolingSize != 2)
                 {
+                    ptrdiff_t * idx = _specific[thread].index.data();
                     for (ptrdiff_t c = 0; c < _dst.depth; ++c)
                     {
                         for (ptrdiff_t y = 0; y < _dst.height; y++)
@@ -800,7 +814,7 @@ namespace Simd
             {
                 AdaptiveGradient,
             } updateType;
-            size_t threadNumber;
+            mutable size_t threadNumber;
             size_t epochStart;
             size_t epochFinish;
             size_t batchSize;
@@ -810,7 +824,7 @@ namespace Simd
             TrainOptions()
                 : initType(Xavier)
                 , updateType(AdaptiveGradient)
-                , threadNumber(8)
+                , threadNumber(std::thread::hardware_concurrency())
                 , batchSize(64)
                 , epochStart(0)
                 , epochFinish(100)
@@ -827,24 +841,46 @@ namespace Simd
                 _layers.clear();
             }
 
-            void Add(Layer * layer)
+            bool Add(Layer * layer)
             {
                 if (_layers.empty())
-                    _layers.push_back(LayerPtr(new InputLayer(layer->_src.Size())));
-                layer->_prev = _layers.back().get();
-                _layers.back()->_next = layer;
-                _layers.push_back(LayerPtr(layer));
+                    _layers.push_back(LayerPtr(new InputLayer(*layer)));
+                if (layer->Link(_layers.back().get()))
+                {
+                    _layers.push_back(LayerPtr(layer));
+                    return true;
+                }
+                else
+                    return false;
             }
 
-            template <class Logger> bool Train(const Vectors & src, const Labels & dst, TrainOptions options, Logger logger)
+            const Index & InputIndex() const
             {
-                SIMD_CHECK_PERFORMANCE();
+                return _layers.front()->_dst;
+            }
 
+            const Index & OutputIndex() const
+            {
+                return _layers.back()->_dst;
+            }
+
+            template <class Logger> bool Train(const Vectors & src, const Labels & dst, const TrainOptions & options, Logger logger)
+            {
                 if (src.size() != dst.size())
                     return false;
 
                 Vectors converted;
                 Convert(dst, converted);
+
+                return Train(src, converted, options, logger);
+            }
+
+            template <class Logger> bool Train(const Vectors & src, const Vectors & dst, const TrainOptions & options, Logger logger)
+            {
+                SIMD_CHECK_PERFORMANCE();
+
+                if (src.size() != dst.size())
+                    return false;
 
                 options.threadNumber = std::max<size_t>(1, std::min<size_t>(options.threadNumber, std::thread::hardware_concurrency()));
 
@@ -854,11 +890,11 @@ namespace Simd
                 if (options.epochStart == 0)
                     InitWeight(options);
 
-                for (size_t epoch = options.epochStart; epoch < options.epochFinish; ++epoch) 
+                for (size_t epoch = options.epochStart; epoch < options.epochFinish; ++epoch)
                 {
                     for (size_t i = 0; i < src.size(); i += options.batchSize)
                     {
-                        Propogate(src, converted, i, std::min(i + options.batchSize, src.size()), options);
+                        Propogate(src, dst, i, std::min(i + options.batchSize, src.size()), options);
                         UpdateWeight(options);
                     }
                     logger();
@@ -945,10 +981,7 @@ namespace Simd
                 return false;
             }
 
-        private:
-            LayerPtrs _layers;
-
-            void Convert(const Labels & src, Vectors & dst)
+            void Convert(const Labels & src, Vectors & dst) const
             {
                 size_t size = _layers.back()->_dst.Volume();
                 float min = _layers.back()->function.min;
@@ -960,7 +993,10 @@ namespace Simd
                     if (src[i] < size)
                         dst[i][src[i]] = max;
                 }
-            }
+            }       
+
+ private:
+            LayerPtrs _layers;
 
             const Vector & Forward(const Vector & src, size_t thread, bool train)
             {

@@ -1517,8 +1517,189 @@ namespace Test
 
 namespace Test
 {
+    typedef Simd::Neural::Vector Vector;
+    typedef Simd::Neural::Vectors Vectors;
+    typedef Simd::Neural::Label Label;
+    typedef Simd::Neural::Labels Labels;
+    typedef Simd::Neural::Network Network;
+    typedef std::pair<float, float> Error;
+
+    struct TrainSample
+    {
+        Vectors src;
+        Labels lbl;
+        Vectors dst;
+
+        void Resize(size_t size)
+        {
+            src.resize(size);
+            lbl.resize(size);
+            dst.resize(size);
+        }
+    };
+
+    struct TrainData
+    {
+        TrainSample train;
+        TrainSample check;
+    };
+
+    struct TrainOptions : public Simd::Neural::TrainOptions
+    {
+        float threshold;
+        size_t logEvery;
+
+        TrainOptions()
+            : Simd::Neural::TrainOptions()
+            , logEvery(8)
+            , threshold(0.5f)
+        {
+        }
+    };
+
+    Error Check(Network & net, const TrainSample & sample, float politive, bool train)
+    {
+        double sum = 0;
+        size_t count = 0, size = net.OutputIndex().Volume();
+        for (size_t i = 0; i < sample.src.size(); ++i)
+        {
+            const Vector & dst = sample.dst[i];
+            Label lbl = sample.lbl[i];
+
+            Vector cur = net.Predict(sample.src[i], train);
+
+            float difference = 0;
+            for (size_t j = 0; j < size; ++j)
+                difference += Simd::Square(dst[j] - cur[j]);
+            sum += difference / size;
+
+            float negative = lbl < size ? dst[lbl] : politive;
+            for (size_t j = 0; j < size; ++j)
+            {
+                if (j == lbl)
+                {
+                    if (cur[j] < politive)
+                    {
+                        count++;
+                        break;
+                    }
+                }
+                else
+                {
+                    if (cur[j] > negative)
+                    {
+                        count++;
+                        break;
+                    }
+                }
+            }
+        }
+        return Error((float)::sqrt(sum / sample.src.size()), float(count) / float(sample.src.size()));
+    }
+
+    struct Logger
+    {
+        void operator() ()
+        {
+            if (_network && _data && _options)
+            {
+                if (_current%_options->logEvery == 0)
+                {
+                    Error train = Check(*_network, _data->train, _options->threshold, true);
+                    Error check = Check(*_network, _data->check, _options->threshold, true);
+                    std::cout
+                        << std::setprecision(6) << std::fixed << "Epoch " << _current
+                        << ": train (value = " << train.first << " ; count = " << train.second << ")"
+                        << ", check (value = " << check.first << " ; count = " << check.second << ")." << std::endl;
+                }
+                else
+                    std::cout << "Epoch " << _current << "\r";
+
+                _current++;
+            }
+        }
+
+        Logger(Network * network = NULL, TrainData * data = NULL, TrainOptions * options = NULL)
+            : _network(network)
+            , _data(data)
+            , _options(options)
+            , _current(options ? options->epochStart : 0)
+        {
+        }
+
+    private:
+        size_t _current;
+        Network * _network;
+        TrainOptions * _options;
+        TrainData *_data;
+    };
+
+    bool LoadDigits(const Network & net, bool error, TrainSample & dst)
+    {
+        Size size = net.InputIndex().Size();
+        dst.Resize(0);
+        for (size_t i = 0, n = 10, current = 0, total = 0; (error ? i <= n : i < n); ++i)
+        {
+            String path = (i < n ? ROOT_PATH + "/data/image/digit/" + char('0' + i) + ".pgm" : ROOT_PATH + "/data/image/face/lena.pgm");
+            View pooled;
+            if (!pooled.Load(path))
+            {
+                TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
+                return false;
+            }
+            Size number = pooled.Size() / size, shift;
+            total += number.x*number.y;
+            dst.Resize(total);
+            for (shift.y = 0; shift.y < number.y; ++shift.y)
+            {
+                for (shift.x = 0; shift.x < number.x; ++shift.x, ++current)
+                {
+                    dst.lbl[current] = i;
+                    dst.src[current].resize(size.x*size.y);
+                    Simd::NeuralConvert(pooled.Region(shift*size, shift*size + size), dst.src[current].data(), true);
+                }
+            }
+        }
+        net.Convert(dst.lbl, dst.dst);
+        return true;
+    }
+
+    bool CreateNetwork(Network & net)
+    {
+        using namespace Simd::Neural;
+        net.Clear();
+        return 
+            net.Add(new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, 5)) &&
+            net.Add(new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)) &&
+            net.Add(new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, 3)) &&
+            net.Add(new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)) &&
+            net.Add(new FullyConnectedLayer(Function::Sigmoid, 96, 10));
+    }
+
     bool NeuralPredictSpecialTest()
     {
+        Network net;
+        if (!CreateNetwork(net))
+        {
+            TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
+            return false;
+        }
+
+        String path = ROOT_PATH + "/data/network/digit.txt";
+        if (!net.Load(path))
+        {
+            TEST_LOG_SS(Error, "Can't load Simd::Neural::Network from file '" << path << "'!");
+            return false;
+        }        
+        
+        TrainSample sample;
+        LoadDigits(net, true, sample);
+
+        double time = GetTime();
+        Error error = Check(net, sample, 0.5, false);
+        TEST_LOG_SS(Info, "Predict time : " << (GetTime() - time) * 1000000 / sample.src.size() << " us.");
+        TEST_LOG_SS(Info, std::setprecision(6) << "Predict error : (value = " << error.first << " ; count = " << error.second << ")." << std::endl);
+
         return true;
     }
 

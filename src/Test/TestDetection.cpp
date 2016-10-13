@@ -41,7 +41,7 @@ namespace Test
         if (dst.format == View::Gray8)
             return dst;
 
-        String path = ROOT_PATH + "/data/image/lena.pgm";
+        String path = ROOT_PATH + "/data/image/face/lena.pgm";
         View obj;
         if (!obj.Load(path))
         {

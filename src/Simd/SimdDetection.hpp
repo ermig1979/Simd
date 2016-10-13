@@ -50,7 +50,7 @@ namespace Simd
             typedef Simd::Detection< Simd::Allocator<uint8_t> > Detection;
 
             Detection::View image;
-            Test::Load(image, "../../data/image/lena.pgm");
+            Test::Load(image, "../../data/image/face/lena.pgm");
 
             Detection detection;
 
