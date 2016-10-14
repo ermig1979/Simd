@@ -104,7 +104,7 @@ namespace Simd
             static SIMD_INLINE void IdentityFunction(const float * src, size_t size, float * dst)
             {
                 if (src != dst)
-                    memcpy(dst, src, sizeof(float_t)*size);
+                    memcpy(dst, src, sizeof(float)*size);
             }
 
             static SIMD_INLINE void IdentityDerivative(const float * src, size_t size, float * dst)
@@ -409,9 +409,9 @@ namespace Simd
                         if (!_connection.At<bool>(dc, sc))
                             return;
 
-                        const float_t * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
-                        const float_t * psrc = _padded.Get(padded, 0, 0, sc);
-                        float_t * psum = _dst.Get(sum, 0, 0, dc);
+                        const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
+                        const float * psrc = _padded.Get(padded, 0, 0, sc);
+                        float * psum = _dst.Get(sum, 0, 0, dc);
 
                         if (_core.width == 3 && _core.height == 3)
                         {
@@ -440,9 +440,9 @@ namespace Simd
                     }
                     if (_bias.size())
                     {
-                        float_t bias = _bias[dc];
+                        float bias = _bias[dc];
                         size_t size = _dst.Area();
-                        float_t * psum = _dst.Get(sum, 0, 0, dc);
+                        float * psum = _dst.Get(sum, 0, 0, dc);
                         for (size_t i = 0; i < size; ++i)
                             psum[i] += bias;
                     }
@@ -645,7 +645,7 @@ namespace Simd
                                 ptrdiff_t srcOffset = _src.Offset(x*_poolingSize, y*_poolingSize, c);
                                 const float * psrc = src.data() + srcOffset;
                                 ptrdiff_t maxIndex = 0;
-                                float maxValue = std::numeric_limits<float_t>::lowest();
+                                float maxValue = std::numeric_limits<float>::lowest();
                                 for (size_t dy = 0; dy < _poolingSize; dy++)
                                 {
                                     for (size_t dx = 0; dx < _poolingSize; dx++)
@@ -833,6 +833,31 @@ namespace Simd
             {
             }
         };
+
+        namespace Detail
+        {
+            template<TrainOptions::InitType type> float UniformRandom(float min, float max);
+
+            template<> SIMD_INLINE float UniformRandom<TrainOptions::Xavier>(float min, float max)
+            {
+                static std::mt19937 gen(1);
+                std::uniform_real_distribution<float> dst(min, max);
+                return dst(gen);
+            }
+
+            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, Vector & d, Vector & g, Vector & v);
+
+            template<> void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
+            {
+                const float k = (float)(1.0 / o.batchSize);
+                for (size_t i = 0; i < d.size(); ++i)
+                {
+                    float dk = d[i] * k;
+                    g[i] += dk*dk;
+                    v[i] -= o.alpha * dk / (std::sqrt(g[i]) + o.epsilon);
+                }
+            }
+        }
         
         struct Network
         {
@@ -1036,20 +1061,11 @@ namespace Simd
                 }, options.threadNumber);
             }
 
-            template<TrainOptions::InitType type> float UniformRandom(float min, float max);
-
-            template<> SIMD_INLINE float UniformRandom<TrainOptions::Xavier>(float min, float max)
-            {
-                static std::mt19937 gen(1);
-                std::uniform_real_distribution<float> dst(min, max);
-                return dst(gen);
-            }
-
             template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer)
             {
                 float halfRange = (float)(std::sqrt(6.0/(layer.FanSrcSize() + layer.FanDstSize())));
                 for (size_t i = 0; i < dst.size(); ++i)
-                    dst[i] = UniformRandom<type>(-halfRange, halfRange);
+                    dst[i] = Detail::UniformRandom<type>(-halfRange, halfRange);
             }
 
             template<TrainOptions::InitType type> void InitWeight()
@@ -1078,19 +1094,6 @@ namespace Simd
                 ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
             }
 
-            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, Vector & d, Vector & g, Vector & v);
-
-            template<> void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
-            {
-                const float k = (float)(1.0 / o.batchSize);
-                for (size_t i = 0; i < d.size(); ++i)
-                {
-                    float dk = d[i] * k;
-                    g[i] += dk*dk;
-                    v[i] -= o.alpha * dk / (std::sqrt(g[i]) + o.epsilon);
-                }
-            }
-
             template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & options)
             {
                 for (size_t l = 0; l < _layers.size(); ++l)
@@ -1101,8 +1104,8 @@ namespace Simd
                         AddVector(layer._common[t].dWeight, layer._common[0].dWeight);
                         AddVector(layer._common[t].dBias, layer._common[0].dBias);
                     }
-                    UpdateWeight<type>(options, layer._common[0].dWeight, layer._gWeight, layer._weight);
-                    UpdateWeight<type>(options, layer._common[0].dBias, layer._gBias, layer._bias);
+                    Detail::UpdateWeight<type>(options, layer._common[0].dWeight, layer._gWeight, layer._weight);
+                    Detail::UpdateWeight<type>(options, layer._common[0].dBias, layer._gBias, layer._bias);
                     for (size_t t = 0; t < layer._common.size(); ++t)
                     {
                         SetZero(layer._common[t].dWeight);

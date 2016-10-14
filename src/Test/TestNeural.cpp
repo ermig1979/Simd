@@ -1521,6 +1521,7 @@ namespace Test
     typedef Simd::Neural::Vectors Vectors;
     typedef Simd::Neural::Label Label;
     typedef Simd::Neural::Labels Labels;
+    typedef Simd::Neural::VectorI VectorI;
     typedef Simd::Neural::Network Network;
     typedef std::pair<float, float> Error;
 
@@ -1703,8 +1704,26 @@ namespace Test
         return true;
     }
 
+    void Prepare(const TrainSample & src, size_t checkEvery, TrainData & dst)
+    {
+        VectorI index(src.src.size());
+        for (size_t i = 0; i < index.size(); ++i)
+            index[i] = i;
+        std::random_shuffle(index.begin(), index.end());
+    }
+
     bool NeuralTrainSpecialTest()
     {
+        Network net;
+        if (!CreateNetwork(net))
+        {
+            TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
+            return false;
+        }
+
+        TrainSample sample;
+        LoadDigits(net, true, sample);
+
         return true;
     }
 }
