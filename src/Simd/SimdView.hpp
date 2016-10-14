@@ -441,7 +441,7 @@ namespace Simd
 
             \note PGM files with comments are not supported.
 
-            \param [in] - a path to file with PGM image.
+            \param [in] path - a path to file with PGM image.
             \return - a result of loading.
         */
         bool Load(const std::string & path);
@@ -449,7 +449,7 @@ namespace Simd
         /*!
             Saves 8-bit gray image to PGM(Portable Graymap Format) binary(P5) file.
 
-            \param [in] - a path to file with PGM image.
+            \param [in] path - a path to file with PGM image.
             \return - a result of saving.
         */
         bool Save(const std::string & path) const;
