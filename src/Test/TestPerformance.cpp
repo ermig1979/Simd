@@ -470,21 +470,28 @@ namespace Test
 
         if(raw)
         {
-            report << std::endl << std::endl << "Raw performance report:" << std::endl << std::endl;
+            report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
             for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
                 report << it->second->Statistic() << std::endl;
         }
-
-        report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
-        report << separator.str() << std::endl;
-        report << header << std::endl;
-        report << separator.str() << std::endl;
-        report << Print(ExpandToRight("Common", sizeMax), ValuePrinter<Common>(common, average, relative, fraction), enable, align) << std::endl;
-        report << separator.str() << std::endl;
-        for(size_t i = 0; i < statistics.size(); ++i)
-            report << statistics[i] << std::endl;
-        report << separator.str() << std::endl;
+        else
+        {
+            report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
+            report << separator.str() << std::endl;
+            report << header << std::endl;
+            report << separator.str() << std::endl;
+            report << Print(ExpandToRight("Common", sizeMax), ValuePrinter<Common>(common, average, relative, fraction), enable, align) << std::endl;
+            report << separator.str() << std::endl;
+            for (size_t i = 0; i < statistics.size(); ++i)
+                report << statistics[i] << std::endl;
+            report << separator.str() << std::endl;
+        }
 
         return report.str();
+    }
+
+    void PerformanceMeasurerStorage::Clear()
+    {
+        _map.clear();
     }
 }

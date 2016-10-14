@@ -1513,6 +1513,10 @@ namespace Test
 
 //-----------------------------------------------------------------------------
 
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+#define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(__FUNCTION__)
+#endif
+
 #include "Simd/SimdNeural.hpp"
 
 namespace Test
@@ -1536,6 +1540,13 @@ namespace Test
             src.resize(size);
             lbl.resize(size);
             dst.resize(size);
+        }
+
+        void Reserve(size_t size)
+        {
+            src.reserve(size);
+            lbl.reserve(size);
+            dst.reserve(size);
         }
     };
 
@@ -1608,10 +1619,9 @@ namespace Test
                 {
                     Error train = Check(*_network, _data->train, _options->threshold, true);
                     Error check = Check(*_network, _data->check, _options->threshold, true);
-                    std::cout
-                        << std::setprecision(6) << std::fixed << "Epoch " << _current
+                    TEST_LOG_SS(Info, std::setprecision(6) << std::fixed << "Epoch " << _current
                         << ": train (value = " << train.first << " ; count = " << train.second << ")"
-                        << ", check (value = " << check.first << " ; count = " << check.second << ")." << std::endl;
+                        << ", check (value = " << check.first << " ; count = " << check.second << ").");
                 }
                 else
                     std::cout << "Epoch " << _current << "\r";
@@ -1694,14 +1704,25 @@ namespace Test
         }        
         
         TrainSample sample;
-        LoadDigits(net, true, sample);
+        if (!LoadDigits(net, true, sample))
+            return false;
 
-        double time = GetTime();
         Error error = Check(net, sample, 0.5, false);
-        TEST_LOG_SS(Info, "Predict time : " << (GetTime() - time) * 1000000 / sample.src.size() << " us.");
         TEST_LOG_SS(Info, std::setprecision(6) << "Predict error : (value = " << error.first << " ; count = " << error.second << ")." << std::endl);
 
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.Report(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
+#endif
+
         return true;
+    }
+
+    SIMD_INLINE void Add(const TrainSample & src, size_t index, TrainSample & dst)
+    {
+        dst.src.push_back(src.src[index]);
+        dst.lbl.push_back(src.lbl[index]);
+        dst.dst.push_back(src.dst[index]);
     }
 
     void Prepare(const TrainSample & src, size_t checkEvery, TrainData & dst)
@@ -1710,6 +1731,16 @@ namespace Test
         for (size_t i = 0; i < index.size(); ++i)
             index[i] = i;
         std::random_shuffle(index.begin(), index.end());
+        dst.check.Reserve(index.size());
+        dst.train.Reserve(index.size());
+        for (size_t i = 0; i < index.size(); ++i)
+        {
+            size_t idx = index[i];
+            if (i%checkEvery == 0)
+                Add(src, idx, dst.check);
+            else
+                Add(src, idx, dst.train);
+        }
     }
 
     bool NeuralTrainSpecialTest()
@@ -1722,7 +1753,22 @@ namespace Test
         }
 
         TrainSample sample;
-        LoadDigits(net, true, sample);
+        if (!LoadDigits(net, true, sample))
+            return false;
+
+        TrainData data;
+        Prepare(sample, 8, data);
+
+        TrainOptions options;
+
+        Logger logger(&net, &data, &options);
+
+        net.Train(data.train.src, data.train.dst, options, logger);
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.Report(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
+#endif
 
         return true;
     }

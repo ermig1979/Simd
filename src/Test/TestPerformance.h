@@ -118,6 +118,8 @@ namespace Test
         size_t Align(size_t size);
 
         String Report(bool align = false, bool raw = false) const;
+
+        void Clear();
     };
 }
 
