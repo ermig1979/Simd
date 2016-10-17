@@ -306,7 +306,7 @@ namespace Test
                 const Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :"); 
                 bool result = group.autoTest(); 
-                TEST_LOG_SS(Info, group.name << "AutoTest - is finished " << (result ? "successfully." : "with errors!") << std::endl);
+                TEST_LOG_SS(Info, group.name << "AutoTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
                 if(!result) 
                 { 
                     s_stopped = true;
@@ -493,9 +493,9 @@ namespace Test
 	{
 		for (const Test::Group & group : groups)
 		{
-			TEST_LOG_SS(Info, group.name << "SpecialTest - is started :");
+			TEST_LOG_SS(Info, group.name << "SpecialTest is started :");
 			bool result = group.specialTest();
-			TEST_LOG_SS(Info, group.name << "SpecialTest - data is finished " << (result ? "successfully." : "with errors!") << std::endl);
+			TEST_LOG_SS(Info, group.name << "SpecialTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
 			if (!result)
 			{
 				TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl);

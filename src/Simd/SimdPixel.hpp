@@ -28,7 +28,8 @@
 
 namespace Simd
 {
-    /*! 
+    /*! @ingroup cpp_pixels
+
         \short Contains various pixel structures.
 
         Contains various pixel structures useful for work with Simd::View structure.

@@ -1563,7 +1563,7 @@ namespace Test
 
         TrainOptions()
             : Simd::Neural::TrainOptions()
-            , logEvery(8)
+            , logEvery(10)
             , threshold(0.5f)
         {
         }

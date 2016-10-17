@@ -224,6 +224,11 @@
     \short Detection structure (C++ Object Detection Wrapper).
 */
 
+/*! @ingroup cpp_types
+    @defgroup cpp_neural Neural
+    \short C++ framework for learning of Convolutional Neural Network.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */

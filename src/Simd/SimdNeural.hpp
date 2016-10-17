@@ -36,6 +36,10 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_neural
+
+        \short Contains Framework for learning of Convolutional Neural Network.
+    */
     namespace Neural
     {
         typedef Point<ptrdiff_t> Size;
@@ -51,14 +55,70 @@ namespace Simd
             memset(vector.data(), 0, vector.size()*sizeof(T));
         }
 
+        /*! @ingroup cpp_neural
+
+            \short Activation Function structure.
+
+            Provides activation functions and their derivatives.
+        */
         struct Function
         {
+            /*!
+                \enum Type
+
+                Describes types of activation function. It is used in order to create a Layer in Network. 
+            */
             enum Type
             {
+                /*! 
+                    Identity: 
+                    \verbatim
+                    f(x) = x;
+                    \endverbatim
+                    \verbatim
+                    df(y) = 1;
+                    \endverbatim
+                */
                 Identity,
+                /*! Hyperbolic Tangent:
+                    \verbatim
+                    f(x) = (exp(x) - exp(-x))/(exp(x) + exp(-x));
+                    \endverbatim
+                    \verbatim
+                    df(y) = 1 - y*y;
+                    \endverbatim
+                    See implementation details: ::SimdNeuralRoughTanh and ::SimdNeuralDerivativeTanh.
+                */
                 Tanh,
+                /*! Sigmoid:
+                    \verbatim
+                    f(x) = 1/(1 + exp(-x));
+                    \endverbatim
+                    \verbatim
+                    df(y) = (1 - y)*y;
+                    \endverbatim
+                    See implementation details: ::SimdNeuralRoughSigmoid and ::SimdNeuralDerivativeSigmoid.
+                */
                 Sigmoid,
+                /*! ReLU (Rectified Linear Unit):
+                    \verbatim
+                    f(x) = max(0, x);
+                    \endverbatim
+                    \verbatim
+                    df(y) = y > 0 ? 1 : 0;
+                    \endverbatim
+                    See implementation details: ::SimdNeuralRelu and ::SimdNeuralDerivativeRelu.
+                */
                 Relu,
+                /*! Leaky ReLU(Rectified Linear Unit):
+                    \verbatim
+                    f(x) = x > 0 ? x : 0.01*x;
+                    \endverbatim
+                    \verbatim
+                    df(y) = y > 0 ? 1 : 0.01;
+                    \endverbatim
+                    See implementation details: ::SimdNeuralRelu and ::SimdNeuralDerivativeRelu.
+                */
                 LeakyRelu,
             } const type;
 
@@ -810,6 +870,10 @@ namespace Simd
             {
                 Xavier,
             } initType;
+            enum LossType
+            {
+                Mse,
+            } lossType;
             enum UpdateType
             {
                 AdaptiveGradient,
@@ -823,6 +887,7 @@ namespace Simd
 
             TrainOptions()
                 : initType(Xavier)
+                , lossType(Mse)
                 , updateType(AdaptiveGradient)
                 , threadNumber(std::thread::hardware_concurrency())
                 , batchSize(64)
@@ -845,9 +910,17 @@ namespace Simd
                 return dst(gen);
             }
 
+            template<TrainOptions::LossType type> void Gradient(const Vector & current, const Vector & control, Vector & delta);
+            
+            template<> SIMD_INLINE void Gradient<TrainOptions::Mse>(const Vector & current, const Vector & control, Vector & delta)
+            {
+                for (size_t i = 0; i < current.size(); ++i)
+                    delta[i] = current[i] - control[i];
+            }
+
             template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, Vector & d, Vector & g, Vector & v);
 
-            template<> void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
+            template<> SIMD_INLINE void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
             {
                 const float k = (float)(1.0 / o.batchSize);
                 for (size_t i = 0; i < d.size(); ++i)
@@ -1033,13 +1106,12 @@ namespace Simd
                 return _layers.back()->Dst(thread);
             }
 
-            void Backward(const Vector & current, const Vector & control, size_t thread)
+            void Backward(const Vector & current, const Vector & control, size_t thread, const TrainOptions & options)
             {
                 SIMD_CHECK_PERFORMANCE();
 
                 Vector delta(current.size());
-                for (size_t i = 0; i < delta.size(); ++i)
-                    delta[i] = current[i] - control[i];
+                LossGradient(options, current, control, delta);
                 _layers.back()->function.derivative(current.data(), current.size(), delta.data());
 
                 _layers.back()->Backward(delta, thread);
@@ -1056,7 +1128,7 @@ namespace Simd
                     for (size_t i = begin; i < end; ++i)
                     {
                         Vector current = Forward(src[i], thread, true);
-                        Backward(current, dst[i], thread);
+                        Backward(current, dst[i], thread, options);
                     }
                 }, options.threadNumber);
             }
@@ -1085,6 +1157,14 @@ namespace Simd
                 switch (options.initType)
                 {
                 case TrainOptions::Xavier: InitWeight<TrainOptions::Xavier>(); break;
+                }
+            }
+
+            void LossGradient(const TrainOptions & options, const Vector & current, const Vector & control, Vector & delta)
+            {
+                switch (options.lossType)
+                {
+                case TrainOptions::Mse: Detail::Gradient<TrainOptions::Mse>(current, control, delta); break;
                 }
             }
 
