@@ -2654,10 +2654,12 @@ extern "C"
         e = 1 + x + x*x*0.555 + x*x*x*x*0.143;
         dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
         \endverbatim
-        It is approximate way (maximal error is about 0.2%) of sigmoid function calculation:
+        It is approximate way (maximal error is about 0.2%) of sigmoid function (::SimdNeuralSigmoid) calculation:
         \verbatim
         dst[i] = 1/(1 + exp(-slope*src[i]));
         \endverbatim
+
+        \note This function is used in Simd::Neural::Function.
 
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.
@@ -2678,6 +2680,8 @@ extern "C"
         \verbatim
         dst[i] *= slope*(1 - src[i])*src[i];
         \endverbatim
+
+        \note This function is used in Simd::Neural::Function.
 
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.
@@ -2721,11 +2725,13 @@ extern "C"
         e = 1 + x + x*x*0.559 + x*x*x*x*0.148;
         dst[i] = (src[i] > 0 ? 1 : -1)*(e - 1/e)/(e + 1/e);
         \endverbatim
-        It is approximate way (maximal error is less than 0.2%) of hyperbolic tangent function calculation:
+        It is approximate way (maximal error is less than 0.2%) of hyperbolic tangent (::SimdNeuralTanh)  function calculation:
         \verbatim
         x = slope*src[i];
         dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
         \endverbatim
+
+        \note This function is used in Simd::Neural::Function.
 
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.
@@ -2747,6 +2753,8 @@ extern "C"
         dst[i] *= slope*(1 - src[i]*src[i]);
         \endverbatim
 
+        \note This function is used in Simd::Neural::Function.
+
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.
         \param [in] slope - a pointer to the slope parameter.
@@ -2767,6 +2775,8 @@ extern "C"
         dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
         \endverbatim
 
+        \note This function is used in Simd::Neural::Function.
+
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.
         \param [in] slope - a pointer to the slope parameter.
@@ -2786,6 +2796,8 @@ extern "C"
         \verbatim
         dst[i] *=  src[i] > 0 ? 1 : -slope;
         \endverbatim
+
+        \note This function is used in Simd::Neural::Function.
 
         \param [in] src - a pointer to the input array.
         \param [in] size - a size of arrays.

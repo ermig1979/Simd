@@ -220,10 +220,21 @@ namespace Simd
             }
         };
 
+        /*! @ingroup cpp_neural
+
+            \short Index structure.
+
+            Provides access to complex 3D-array inside simple 1D-array.
+        */
         struct Index 
         {
-            ptrdiff_t width, height, depth;
+            ptrdiff_t width; /*!< \brief A width of 3D-array. */
+            ptrdiff_t height; /*!< \brief A height of 3D-array. */
+            ptrdiff_t depth; /*!< \brief A depth of 3D-array. */
 
+            /*!
+                Creates a new Index structure that contains the default (0, 0, 0) parameters.
+            */
             SIMD_INLINE Index()
                 : width(0)
                 , height(0)
@@ -231,6 +242,13 @@ namespace Simd
             {
             }
 
+            /*!
+                Creates a new Index structure that contains the specified parameters.
+
+                \param [in] w - initial value for width.
+                \param [in] h - initial value for height.
+                \param [in] d - initial value for depth (default value is equal to 1).
+            */
             SIMD_INLINE Index(ptrdiff_t w, ptrdiff_t h, ptrdiff_t d = 1)
                 : width(w)
                 , height(h)
@@ -238,6 +256,12 @@ namespace Simd
             {
             }
 
+            /*!
+                Creates a new Index structure that contains the specified parameters.
+
+                \param [in] s - initial size (width and height).
+                \param [in] d - initial value for depth (default value is equal to 1).
+            */            
             SIMD_INLINE Index(const Size & s, ptrdiff_t d = 1)
                 : width(s.x)
                 , height(s.y)
@@ -245,6 +269,11 @@ namespace Simd
             {
             }
 
+            /*!
+                Creates a new Index structure on the base of another Index structure.
+
+                \param [in] i - another Index structure.
+            */ 
             SIMD_INLINE Index(const Index & i)
                 : width(i.width)
                 , height(i.height)
@@ -252,6 +281,13 @@ namespace Simd
             {
             }
 
+            /*!
+                Recreates the Index structure with specified width, height and depth.
+
+                \param [in] w - new value for width.
+                \param [in] h - new value for height.
+                \param [in] d - new value for depth.
+            */
             SIMD_INLINE void Resize(ptrdiff_t w, ptrdiff_t h, ptrdiff_t d)
             {
                 width = w;
@@ -259,6 +295,12 @@ namespace Simd
                 depth = d;
             }
 
+            /*!
+                Recreates the Index structure with specified width, height and depth.
+
+                \param [in] s - new size (width and height).
+                \param [in] d - new value for depth.
+            */
             SIMD_INLINE void Resize(const Size & s, ptrdiff_t d)
             {
                 width = s.x;
@@ -266,11 +308,28 @@ namespace Simd
                 depth = d;
             }
 
+            /*!
+                Gets offset for 3D-point with specified coordinates.
+
+                \param [in] x - x-coordinate of 3D-point.
+                \param [in] y - y-coordinate of 3D-point.
+                \param [in] c - z-coordinate(channel) of 3D-point.
+                \return - an offset of the point in 1D-array.
+            */
             SIMD_INLINE ptrdiff_t Offset(ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
             { 
                 return (height * c + y) * width + x; 
             }
 
+            /*!
+                Gets constant address of 3D-point in 1D-array (std::vector).
+
+                \param [in] v - std::vector.
+                \param [in] x - x-coordinate of 3D-point.
+                \param [in] y - y-coordinate of 3D-point.
+                \param [in] c - z-coordinate(channel) of 3D-point.
+                \return - a constant address of the point in std::vector.
+            */
             template<class T, class A> SIMD_INLINE const T * Get(const std::vector<T, A> & v, ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
             {
                 size_t offset = Offset(x, y, c);
@@ -278,6 +337,15 @@ namespace Simd
                 return v.data() + offset;
             }
 
+            /*!
+                Gets address of 3D-point in 1D-array (std::vector).
+
+                \param [in] v - std::vector.
+                \param [in] x - x-coordinate of 3D-point.
+                \param [in] y - y-coordinate of 3D-point.
+                \param [in] c - z-coordinate(channel) of 3D-point.
+                \return - an address of the point in std::vector.
+            */
             template<class T, class A> SIMD_INLINE T * Get(std::vector<T, A> & v, ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
             {
                 size_t offset = Offset(x, y, c);
@@ -285,16 +353,31 @@ namespace Simd
                 return v.data() + offset;
             }
 
+            /*!
+                Gets 2D-size (width and height) of the channel in the Index.
+
+                \return - a new Point structure with width and height.
+            */
             SIMD_INLINE Neural::Size Size() const
             {
                 return Neural::Size(width, height);
             }
 
+            /*!
+                Gets area of the channel plane in the Index.
+
+                \return - an area of the channel.
+            */
             SIMD_INLINE ptrdiff_t Area() const
             { 
                 return width * height; 
             }
 
+            /*!
+                Gets total size (volume) of the Index.
+
+                \return - total size (volume) of 3D-array.
+            */
             SIMD_INLINE ptrdiff_t Volume() const
             { 
                 return width * height * depth; 
