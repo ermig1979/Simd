@@ -384,25 +384,26 @@ namespace Simd
             }
         };
 
+        /*! @ingroup cpp_neural
+
+            \short Layer structure.
+
+            Abstract base class(structure) for all possible layers.
+        */
         struct Layer
         {
+            /*!
+                \enum Type
+
+                Describes types of network layers. 
+            */
             enum Type
             {
-                Input,
-                Convolutional,
-                MaxPooling,
-                FullyConnected,
-            } const type;
-
-            const Function function;
-
-            Layer(Layer::Type l, Function::Type f)
-                : type(l)
-                , function(f)
-                , _prev(0)
-                , _next(0)
-            {
-            }
+                Input, /*!< \brief Layer type corresponding to Simd::Neural::InputLayer. */
+                Convolutional, /*!< \brief Layer type corresponding to Simd::Neural::ConvolutionalLayer. */
+                MaxPooling, /*!< \brief Layer type corresponding to Simd::Neural::MaxPoolingLayer. */
+                FullyConnected, /*!< \brief Layer type corresponding to Simd::Neural::FullyConnectedLayer. */
+            };
 
             virtual ~Layer()
             {
@@ -437,17 +438,16 @@ namespace Simd
                 }
             }
 
-            SIMD_INLINE const Vector & Dst(size_t thread) const
-            { 
-                return _common[thread].dst; 
-            }
-
-            SIMD_INLINE const Vector & Delta(size_t thread) const
+        protected:
+            Layer(Layer::Type l, Function::Type f)
+                : _type(l)
+                , _function(f)
+                , _prev(0)
+                , _next(0)
             {
-                return _common[thread].prevDelta;
             }
 
-            bool Link(Layer * prev)
+            SIMD_INLINE bool Link(Layer * prev)
             {
                 if (prev->_dst.Volume() == _src.Volume())
                 {
@@ -459,7 +459,19 @@ namespace Simd
                     return false;
             }
 
-        protected:
+            SIMD_INLINE const Vector & Dst(size_t thread) const
+            {
+                return _common[thread].dst;
+            }
+
+            SIMD_INLINE const Vector & Delta(size_t thread) const
+            {
+                return _common[thread].prevDelta;
+            }
+            
+            const Type _type;
+            const Function _function;
+
             Layer * _prev, *_next;
 
             Index _src, _dst;
@@ -482,6 +494,12 @@ namespace Simd
         typedef std::shared_ptr<Layer> LayerPtr;
         typedef std::vector<LayerPtr> LayerPtrs;
 
+        /*! @ingroup cpp_neural
+
+            \short InputLayer structure.
+
+            First input layer in neural network. This layer is added automatically.
+        */
         struct InputLayer : public Layer
         {
             void Forward(const Vector & src, size_t thread, bool train) override
@@ -514,8 +532,27 @@ namespace Simd
             friend struct Network;
         };
 
+        /*! @ingroup cpp_neural
+
+            \short ConfolutionLayer structure.
+
+            Convolutional layer in neural network.
+        */
         struct ConvolutionalLayer : public Layer
         {
+            /*!
+                \short Creates new ConfolutionLayer structure.
+
+                \param [in] f - a type of activation function used in this layer.
+                \param [in] srcSize - a size (width and height) of input image.
+                \param [in] srcDepth - a number of input channels (images).
+                \param [in] dstDepth - a number of output channels (images).
+                \param [in] coreSize - a size of convolution core.
+                \param [in] valid - a boolean flag (true - only original image points are used in convolution, so output image is decreased; 
+                                    false - input image is padded by zeros and output image has the same size). By default its true.
+                \param [in] bias - a boolean flag (enabling of bias). By default its true.
+                \param [in] connection - a table of connections between input and output channels. By default all channels are connected.
+            */
             ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, 
                 bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
@@ -590,7 +627,7 @@ namespace Simd
                             psum[i] += bias;
                     }
                 }
-                function.function(sum.data(), sum.size(), dst.data());
+                _function.function(sum.data(), sum.size(), dst.data());
             }
 
             void Backward(const Vector & currDelta, size_t thread) override
@@ -639,7 +676,7 @@ namespace Simd
                     }
                 }
 
-                _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
 
                 for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
                 {
@@ -813,7 +850,7 @@ namespace Simd
                 {
                     ::SimdNeuralMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
                 }
-                function.function(sum.data(), sum.size(), dst.data());
+                _function.function(sum.data(), sum.size(), dst.data());
             }
 
             void Backward(const Vector & currDelta, size_t thread) override
@@ -827,7 +864,7 @@ namespace Simd
                 for (size_t i = 0; i < currDelta.size(); ++i)
                     prevDelta[index[i]] = currDelta[i];
 
-                _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
             }
 
             size_t FanSrcSize() const override
@@ -908,7 +945,7 @@ namespace Simd
                     for (size_t i = 0; i < sum.size(); ++i)
                         sum[i] += _bias[i];
                 }
-                function.function(sum.data(), sum.size(), dst.data());
+                _function.function(sum.data(), sum.size(), dst.data());
             }
 
             void Backward(const Vector & currDelta, size_t thread) override
@@ -921,7 +958,7 @@ namespace Simd
                 for (ptrdiff_t i = 0; i < _src.width; i++)
                     ::SimdNeuralProductSum(&currDelta[0], &_weight[i*_dst.width], _dst.width, &prevDelta[i]);
 
-                _prev->function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
 
                 for (ptrdiff_t i = 0; i < _src.width; i++)
                     ::SimdNeuralAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
@@ -1165,8 +1202,8 @@ namespace Simd
             void Convert(const Labels & src, Vectors & dst) const
             {
                 size_t size = _layers.back()->_dst.Volume();
-                float min = _layers.back()->function.min;
-                float max = _layers.back()->function.max;
+                float min = _layers.back()->_function.min;
+                float max = _layers.back()->_function.max;
                 dst.resize(src.size());
                 for (size_t i = 0; i < dst.size(); ++i)
                 {
@@ -1195,7 +1232,7 @@ namespace Simd
 
                 Vector delta(current.size());
                 LossGradient(options, current, control, delta);
-                _layers.back()->function.derivative(current.data(), current.size(), delta.data());
+                _layers.back()->_function.derivative(current.data(), current.size(), delta.data());
 
                 _layers.back()->Backward(delta, thread);
                 for (ptrdiff_t i = _layers.size() - 2; i >= 0; --i)
