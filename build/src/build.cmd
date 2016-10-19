@@ -43,6 +43,7 @@ erase %TMP_DIR%\prj\*.cbTemp /q /s /f
 erase %TMP_DIR%\prj\*.pdb /q /s /f
 erase %TMP_DIR%\prj\*.pgm /q /s /f
 erase %TMP_DIR%\doc\src\*.lnk /q /s /f
+erase %TMP_DIR%\doc\*.tmp /q /s /f
 
 echo Create ZIP archive:
 %RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%

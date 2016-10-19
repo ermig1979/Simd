@@ -388,10 +388,11 @@ namespace Simd
 
             \short Layer structure.
 
-            Abstract base class(structure) for all possible layers.
+            Abstract base class for all possible layers.
         */
-        struct Layer
+        class Layer
         {
+        public:
             /*!
                 \enum Type
 
@@ -485,23 +486,24 @@ namespace Simd
             };
             std::vector<Common> _common;
 
-            friend struct InputLayer;
-            friend struct ConvolutionalLayer;
-            friend struct MaxPoolingLayer;
-            friend struct FullyConnectedLayer;
-            friend struct Network;
+            friend class InputLayer;
+            friend class ConvolutionalLayer;
+            friend class MaxPoolingLayer;
+            friend class FullyConnectedLayer;
+            friend class Network;
         };
         typedef std::shared_ptr<Layer> LayerPtr;
         typedef std::vector<LayerPtr> LayerPtrs;
 
         /*! @ingroup cpp_neural
 
-            \short InputLayer structure.
+            \short InputLayer class.
 
-            First input layer in neural network. This layer is added automatically.
+            First input layer in neural network. This layer can't be created, it is added automatically.
         */
-        struct InputLayer : public Layer
+        class InputLayer : public Layer
         {
+        public:
             void Forward(const Vector & src, size_t thread, bool train) override
             {
                 _common[thread].dst = src;
@@ -529,19 +531,20 @@ namespace Simd
                 SetThreadNumber(1, false);
             }
 
-            friend struct Network;
+            friend class Network;
         };
 
         /*! @ingroup cpp_neural
 
-            \short ConfolutionLayer structure.
+            \short ConfolutionLayer class.
 
             Convolutional layer in neural network.
         */
-        struct ConvolutionalLayer : public Layer
+        class ConvolutionalLayer : public Layer
         {
+        public:
             /*!
-                \short Creates new ConfolutionLayer structure.
+                \short Creates new ConfolutionLayer class.
 
                 \param [in] f - a type of activation function used in this layer.
                 \param [in] srcSize - a size (width and height) of input image.
@@ -798,8 +801,23 @@ namespace Simd
             View _connection;
         };
 
-        struct MaxPoolingLayer : public Layer
+        /*! @ingroup cpp_neural
+
+            \short MaxPoolingLayer class.
+
+            Max pooling layer in neural network.
+        */
+        class MaxPoolingLayer : public Layer
         {
+        public:
+            /*!
+                \short Creates new MaxPoolingLayer class.
+
+                \param [in] f - a type of activation function used in this layer.
+                \param [in] srcSize - a size (width and height) of input image.
+                \param [in] srcDepth - a number of input channels (images).
+                \param [in] poolingSize - a pooling size.
+            */
             MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t poolingSize)
                 : Layer(MaxPooling, f)
             {
@@ -901,8 +919,24 @@ namespace Simd
             size_t _poolingSize;
         };
 
-        struct FullyConnectedLayer : public Layer
+        /*! @ingroup cpp_neural
+
+            \short FullyConnectedLayer class.
+
+            Fully connected layer in neural network.
+        */        
+        class FullyConnectedLayer : public Layer
         {
+        public:
+            /*!
+                \short Creates new FullyConnectedLayer class.
+
+                \param [in] f - a type of activation function used in this layer.
+                \param [in] srcSize - a size of input vector.
+                \param [in] dstSize - a size of output vector.
+                \param [in] coreSize - a size of convolution core.
+                \param [in] bias - a boolean flag (enabling of bias). By default its true.
+            */            
             FullyConnectedLayer(Function::Type f, size_t srcSize, size_t dstSize, bool bias = true)
                 : Layer(FullyConnected, f)
                 , _reordered(false)
@@ -1052,8 +1086,14 @@ namespace Simd
             }
         }
         
-        struct Network
+        class Network
         {
+        public:
+
+            Network()
+            {
+            }
+
             void Clear()
             {
                 _layers.clear();
