@@ -137,6 +137,18 @@ namespace Simd
                 sum += buffer[i];
             return sum;
         }
+
+        template <> SIMD_INLINE uint32_t ExtractSum<uint32_t>(__m256i a)
+        {
+            __m128i b = _mm_add_epi32(_mm256_extractf128_si256(a, 0), _mm256_extractf128_si256(a, 1));
+            return _mm_extract_epi32(_mm_hadd_epi32(_mm_hadd_epi32(b, _mm_setzero_si128()), _mm_setzero_si128()), 0);
+        }
+
+        template <> SIMD_INLINE uint64_t ExtractSum<uint64_t>(__m256i a)
+        {
+            __m128i b = _mm_add_epi64(_mm256_extractf128_si256(a, 0), _mm256_extractf128_si256(a, 1));
+            return _mm_extract_epi64(b, 0) + _mm_extract_epi64(b, 1);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

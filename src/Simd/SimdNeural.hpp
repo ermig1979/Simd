@@ -42,13 +42,13 @@ namespace Simd
     */
     namespace Neural
     {
-        typedef Point<ptrdiff_t> Size;
-        typedef std::vector<float, Allocator<float>> Vector;
-        typedef std::vector<ptrdiff_t, Allocator<ptrdiff_t>> VectorI;
-        typedef std::vector<Vector> Vectors;
-        typedef size_t Label;
-        typedef std::vector<Label> Labels;
-        typedef Simd::View<Allocator<uint8_t>> View;
+        typedef Point<ptrdiff_t> Size; /*!< \brief 2D-size (width and height). */
+        typedef std::vector<float, Allocator<float>> Vector; /*!< \brief Vector with 32-bit float point values. */
+        typedef std::vector<ptrdiff_t, Allocator<ptrdiff_t>> VectorI; /*!< \brief Vector with integer values. */
+        typedef std::vector<Vector> Vectors; /*!< \brief Vector of vectors with 32-bit float point values. */
+        typedef size_t Label; /*!< \brief Integer name (label) of object class. */
+        typedef std::vector<Label> Labels; /*!< \brief Vector of labels. */
+        typedef Simd::View<Allocator<uint8_t>> View; /*!< \brief Image. */
 
         template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
         {
@@ -386,7 +386,7 @@ namespace Simd
 
         /*! @ingroup cpp_neural
 
-            \short Layer structure.
+            \short Layer class.
 
             Abstract base class for all possible layers.
         */
@@ -551,9 +551,9 @@ namespace Simd
                 \param [in] srcDepth - a number of input channels (images).
                 \param [in] dstDepth - a number of output channels (images).
                 \param [in] coreSize - a size of convolution core.
-                \param [in] valid - a boolean flag (true - only original image points are used in convolution, so output image is decreased; 
-                                    false - input image is padded by zeros and output image has the same size). By default its true.
-                \param [in] bias - a boolean flag (enabling of bias). By default its true.
+                \param [in] valid - a boolean flag (True - only original image points are used in convolution, so output image is decreased; 
+                                    False - input image is padded by zeros and output image has the same size). By default its true.
+                \param [in] bias - a boolean flag (enabling of bias). By default its True.
                 \param [in] connection - a table of connections between input and output channels. By default all channels are connected.
             */
             ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, 
@@ -934,8 +934,7 @@ namespace Simd
                 \param [in] f - a type of activation function used in this layer.
                 \param [in] srcSize - a size of input vector.
                 \param [in] dstSize - a size of output vector.
-                \param [in] coreSize - a size of convolution core.
-                \param [in] bias - a boolean flag (enabling of bias). By default its true.
+                \param [in] bias - a boolean flag (enabling of bias). By default it is True.
             */            
             FullyConnectedLayer(Function::Type f, size_t srcSize, size_t dstSize, bool bias = true)
                 : Layer(FullyConnected, f)
@@ -1085,20 +1084,39 @@ namespace Simd
                 }
             }
         }
-        
+
+        /*! @ingroup cpp_neural
+
+            \short Network class.
+
+            Class Network provides functionality for construction, loading, saving, prediction and training of convolutional neural network.
+        */
         class Network
         {
         public:
+            /*!
+                \short Creates a new object of Network class.
 
+                Creates empty network without any layers.
+            */
             Network()
             {
             }
 
+            /*!
+                \short Clears all layers of the neural network.
+            */
             void Clear()
             {
                 _layers.clear();
             }
 
+            /*!
+                \short Adds new Layer to the neural network.
+
+                \param [in] layer - a pointer to the new layer. You can add ConvolutionalLayer, MaxPoolingLayer and FullyConnectedLayer. 
+                \return a result of addition. If added layer is not compatible with previous layer the result might be negative.
+            */
             bool Add(Layer * layer)
             {
                 if (_layers.empty())
@@ -1112,16 +1130,35 @@ namespace Simd
                     return false;
             }
 
+            /*!
+                \short Gets dimensions of input data.
+
+                \return a dimensions of input data.
+            */
             const Index & InputIndex() const
             {
                 return _layers.front()->_dst;
             }
 
+            /*!
+                \short Gets dimensions of output data.
+
+                \return a dimensions of output data.
+            */
             const Index & OutputIndex() const
             {
                 return _layers.back()->_dst;
             }
 
+            /*!
+                \short Trains the neural network.
+
+                \param [in] src - a set of input training samples.
+                \param [in] dst - a set of classification results.
+                \param [in] options - an options of training process.
+                \param [in] logger - a functor to log training process.
+                \return a result of the training.
+            */
             template <class Logger> bool Train(const Vectors & src, const Labels & dst, const TrainOptions & options, Logger logger)
             {
                 if (src.size() != dst.size())
@@ -1133,6 +1170,15 @@ namespace Simd
                 return Train(src, converted, options, logger);
             }
 
+            /*!
+                \short Trains the neural network.
+
+                \param [in] src - a set of input training samples.
+                \param [in] dst - a set of classification results.
+                \param [in] options - an options of training process.
+                \param [in] logger - a functor to log training process.
+                \return a result of the training.
+            */
             template <class Logger> bool Train(const Vectors & src, const Vectors & dst, const TrainOptions & options, Logger logger)
             {
                 SIMD_CHECK_PERFORMANCE();
@@ -1161,11 +1207,27 @@ namespace Simd
                 return true;
             }
 
+            /*!
+                \short Classifies given sample.
+
+                \param [in] x - an input sample.
+                \param [in] train - a boolean flag (True - this method is called during training process, False - otherwise). By default it is equal to False.
+                \return a result of classification (vector with predicted probabilities).
+            */
             SIMD_INLINE const Vector & Predict(const Vector & x, bool train = false)
             {
                 return Forward(x, 0, train);
             }
 
+            /*!
+                \short Loads the neural network from file stream.
+
+                \note The network has to be created previously with using of methods Clear/Add.
+
+                \param [in] ifs - a input file stream.
+                \param [in] train - a boolean flag (True - if we need to load temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of loading.
+            */
             bool Load(std::ifstream & ifs, bool train = false)
             {
                 for (size_t i = 0; i < _layers.size(); ++i)
@@ -1190,6 +1252,15 @@ namespace Simd
                 return true;
             }
 
+            /*!
+                \short Loads the neural network from file.
+
+                \note The network has to be created previously with using of methods Clear/Add.
+
+                \param [in] path - a path to input file.
+                \param [in] train - a boolean flag (True - if we need to load temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of loading.
+            */
             bool Load(const std::string & path, bool train = false)
             {
                 std::ifstream ifs(path.c_str());
@@ -1202,6 +1273,13 @@ namespace Simd
                 return false;
             }
 
+            /*!
+                \short Saves the neural network to file stream.
+
+                \param [out] ofs - a output file stream.
+                \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of saving.
+            */
             bool Save(std::ofstream & ofs, bool train = false) const
             {
                 for (size_t i = 0; i < _layers.size(); ++i)
@@ -1227,6 +1305,13 @@ namespace Simd
                 return true;
             }
 
+            /*!
+                \short Saves the neural network to file.
+
+                \param [in] path - a path to output file.
+                \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of saving.
+            */
             bool Save(const std::string & path, bool train = false) const
             {
                 std::ofstream ofs(path.c_str());
@@ -1239,6 +1324,12 @@ namespace Simd
                 return false;
             }
 
+            /*!
+                \short Converts format of classification results.
+
+                \param [in] src - a set of class indexes.
+                \param [out] dst - a set of vectors with predicted probabilities.
+            */
             void Convert(const Labels & src, Vectors & dst) const
             {
                 size_t size = _layers.back()->_dst.Volume();
