@@ -406,6 +406,9 @@ namespace Simd
                 FullyConnected, /*!< \brief Layer type corresponding to Simd::Neural::FullyConnectedLayer. */
             };
 
+            /*!
+                Virtual destructor.
+            */
             virtual ~Layer()
             {
             }
@@ -414,9 +417,9 @@ namespace Simd
 
             virtual void Backward(const Vector & src, size_t thread) = 0;
 
-            virtual size_t FanSrcSize() const = 0;
+            virtual size_t FanSrc() const = 0;
 
-            virtual size_t FanDstSize() const = 0;
+            virtual size_t FanDst() const = 0;
 
             virtual void SetThreadNumber(size_t number, bool train)
             {
@@ -513,12 +516,12 @@ namespace Simd
             {
             }
 
-            size_t FanSrcSize() const override
+            size_t FanSrc() const override
             {
                 return 1;
             }
 
-            size_t FanDstSize() const override
+            size_t FanDst() const override
             {
                 return 1;
             }
@@ -730,12 +733,12 @@ namespace Simd
                 UnpadDelta(prevDelta, thread);
             }
 
-            size_t FanSrcSize() const override
+            size_t FanSrc() const override
             {
                 return _core.width*_core.height*_src.depth;
             }
 
-            size_t FanDstSize() const override
+            size_t FanDst() const override
             {
                 return _core.width*_core.height*_dst.depth;
             }
@@ -1003,12 +1006,12 @@ namespace Simd
                 }
             }
 
-            size_t FanSrcSize() const override
+            size_t FanSrc() const override
             {
                 return _src.width;
             }
 
-            size_t FanDstSize() const override
+            size_t FanDst() const override
             {
                 return _dst.width;
             }
@@ -1017,27 +1020,70 @@ namespace Simd
             bool _reordered;
         };
 
+        /*! @ingroup cpp_neural
+
+            \short Contains a set of training options.
+        */ 
         struct TrainOptions
         {
+            /*!
+                \enum InitType
+
+                Describes method to initialize weights of neural network.
+            */
             enum InitType
             {
+                /*!
+                     Use fan-in and fan-out for scaling
+                     Xavier Glorot, Yoshua Bengio.
+                     "Understanding the difficulty of training deep feedforward neural networks"
+                     Proc. AISTATS 10, May 2010, vol.9, pp249-256
+                */
                 Xavier,
-            } initType;
+            };
+
+            /*!
+                \enum LossType
+
+                Describes loss function.
+            */
             enum LossType
             {
+                /*!
+                    Mean-Squared-Error loss function for regression.
+                */
                 Mse,
-            } lossType;
+            };
+
+            /*!
+                \enum UpdateType
+
+                Method of wights' updating.
+            */
             enum UpdateType
             {
+                /*!
+                    Adaptive gradients method.
+                    J Duchi, E Hazan and Y Singer,
+                    "Adaptive subgradient methods for online learning and stochastic optimization"
+                    The Journal of Machine Learning Research, pages 2121-2159, 2011.
+                */
                 AdaptiveGradient,
-            } updateType;
-            mutable size_t threadNumber;
-            size_t epochStart;
-            size_t epochFinish;
-            size_t batchSize;
-            float alpha;
-            float epsilon;
+            };
 
+            InitType initType; /*!< \brief Method to initialize weights. */
+            LossType lossType; /*!< \brief Loss function type. */
+            UpdateType updateType; /*!< \brief Weights' update type. */
+            mutable size_t threadNumber; /*!< \brief Number of threads used to train. Use -1 for autodetection.  */
+            size_t epochStart; /*!< \brief Start epoch. It is used to continue training process. */
+            size_t epochFinish; /*!< \brief Finish epoch. Describes total epoch number. */
+            size_t batchSize; /*!< \brief A batch size. */
+            float alpha; /*!< \brief Describes training speed. */
+            float epsilon; /*!< \brief Used to prevent division by zero. */
+
+            /*!
+                \short Default constructor.
+            */
             TrainOptions()
                 : initType(Xavier)
                 , lossType(Mse)
@@ -1054,13 +1100,20 @@ namespace Simd
 
         namespace Detail
         {
-            template<TrainOptions::InitType type> float UniformRandom(float min, float max);
-
-            template<> SIMD_INLINE float UniformRandom<TrainOptions::Xavier>(float min, float max)
+            SIMD_INLINE float RandomUniform(float min, float max)
             {
                 static std::mt19937 gen(1);
                 std::uniform_real_distribution<float> dst(min, max);
                 return dst(gen);
+            }           
+            
+            template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer);
+
+            template<> void InitWeight<TrainOptions::Xavier>(Vector & dst, const Layer & layer)
+            {
+                float halfRange = (float)(std::sqrt(6.0 / (layer.FanSrc() + layer.FanDst())));
+                for (size_t i = 0; i < dst.size(); ++i)
+                    dst[i] = RandomUniform(-halfRange, halfRange);
             }
 
             template<TrainOptions::LossType type> void Gradient(const Vector & current, const Vector & control, Vector & delta);
@@ -1382,13 +1435,6 @@ namespace Simd
                         Backward(current, dst[i], thread, options);
                     }
                 }, options.threadNumber);
-            }
-
-            template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer)
-            {
-                float halfRange = (float)(std::sqrt(6.0/(layer.FanSrcSize() + layer.FanDstSize())));
-                for (size_t i = 0; i < dst.size(); ++i)
-                    dst[i] = Detail::UniformRandom<type>(-halfRange, halfRange);
             }
 
             template<TrainOptions::InitType type> void InitWeight()

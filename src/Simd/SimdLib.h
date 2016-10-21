@@ -2819,6 +2819,8 @@ extern "C"
         sum += a[i]*b[i];
         \endverbatim
 
+        \note This function is used in Simd::Neural.
+
         \param [in] a - a pointer to the first 32-bit float array.
         \param [in] b - a pointer to the second 32-bit float array.
         \param [in] size - a size of arrays.
@@ -2838,6 +2840,8 @@ extern "C"
         \verbatim
         dst[i] += src[i]*value[0];
         \endverbatim
+
+        \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float array.
         \param [in] size - a size of arrays.
@@ -2878,6 +2882,8 @@ extern "C"
 
         \short Adds 3x3 convolution of 32-bit float image.
 
+        \note This function is used in Simd::Neural.
+
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
         \param [in] width - a width of the output image (input image width must be equal to output image width + 2).
@@ -2893,6 +2899,8 @@ extern "C"
         \fn void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (forward propagation).
+
+        \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
@@ -2910,6 +2918,8 @@ extern "C"
 
         \short Adds 3x3 convolution of 32-bit float image (backward propagation).
 
+        \note This function is used in Simd::Neural.
+
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
         \param [in] width - a width of the input image (output image width must be equal to input image width + 2).
@@ -2925,6 +2935,8 @@ extern "C"
         \fn void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (backward propagation).
+
+         \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
@@ -2942,6 +2954,8 @@ extern "C"
 
         \short Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.
 
+        \note This function is used in Simd::Neural.
+
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
         \param [in] dst - a pointer to the output 32-bit float image.
@@ -2958,6 +2972,8 @@ extern "C"
 
         \short Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.
 
+        \note This function is used in Simd::Neural.
+
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
         \param [in] dst - a pointer to the output 32-bit float image.
@@ -2973,6 +2989,8 @@ extern "C"
         \fn void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
+
+        \note This function is used in Simd::Neural.
 
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
