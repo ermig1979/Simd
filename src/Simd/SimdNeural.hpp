@@ -888,12 +888,12 @@ namespace Simd
                 _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
             }
 
-            size_t FanSrcSize() const override
+            size_t FanSrc() const override
             {
                 return _poolingSize*_poolingSize;
             }
 
-            size_t FanDstSize() const override
+            size_t FanDst() const override
             {
                 return 1;
             }
@@ -1442,8 +1442,8 @@ namespace Simd
                 for (size_t l = 0; l < _layers.size(); ++l)
                 {
                     Layer & layer = *_layers[l];
-                    InitWeight<type>(layer._weight, layer);
-                    InitWeight<type>(layer._bias, layer);
+                    Detail::InitWeight<type>(layer._weight, layer);
+                    Detail::InitWeight<type>(layer._bias, layer);
                     SetZero(layer._gWeight);
                     SetZero(layer._gBias);
                 }
