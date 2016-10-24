@@ -141,8 +141,8 @@ namespace Simd
             float32x4_t _slope = vdupq_n_f32(*slope);
             float32x4_t _0 = vdupq_n_f32(-0.0f);
             float32x4_t _1 = vdupq_n_f32(1.0f);
-            float32x4_t _0555 = vdupq_n_f32(0.555f);
-            float32x4_t _0143 = vdupq_n_f32(0.143f);
+            float32x4_t _a = vdupq_n_f32(0.5417f);
+            float32x4_t _b = vdupq_n_f32(0.1460f);
             size_t i = 0;
             for (; i < alignedSize; i += 4)
             {
@@ -150,7 +150,7 @@ namespace Simd
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
                 float32x4_t x2 = vmulq_f32(x, x);
                 float32x4_t x4 = vmulq_f32(x2, x2);
-                float32x4_t series = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _0555), vmulq_f32(x4, _0143)));
+                float32x4_t series = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _a), vmulq_f32(x4, _b)));
                 uint32x4_t mask = vcgtq_f32(_src, _0);
                 float32x4_t exp = vbslq_f32(mask, Reciprocal<1>(series), series);
                 float32x4_t sigmoid = Reciprocal<1>(vaddq_f32(_1, exp));
@@ -174,8 +174,8 @@ namespace Simd
             float32x4_t _slope = vdupq_n_f32(*slope);
             float32x4_t _0 = vdupq_n_f32(-0.0f);
             float32x4_t _1 = vdupq_n_f32(1.0f);
-            float32x4_t _0559 = vdupq_n_f32(0.559f);
-            float32x4_t _0148 = vdupq_n_f32(0.148f);
+            float32x4_t _a = vdupq_n_f32(0.5658f);
+            float32x4_t _b = vdupq_n_f32(0.1430f);
             size_t i = 0;
             for (; i < alignedSize; i += 4)
             {
@@ -183,7 +183,7 @@ namespace Simd
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
                 float32x4_t x2 = vmulq_f32(x, x);
                 float32x4_t x4 = vmulq_f32(x2, x2);
-                float32x4_t pe = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _0559), vmulq_f32(x4, _0148)));
+                float32x4_t pe = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _a), vmulq_f32(x4, _b)));
                 float32x4_t ne = Reciprocal<1>(pe);
                 float32x4_t absTanh = vmulq_f32(vsubq_f32(pe, ne), Reciprocal<1>(vaddq_f32(pe, ne)));
                 float32x4_t tanh = (float32x4_t)veorq_u32((uint32x4_t)absTanh, vandq_u32((uint32x4_t)_0, vcgtq_f32(_0, _src)));

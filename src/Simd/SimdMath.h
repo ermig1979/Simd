@@ -203,11 +203,11 @@ namespace Simd
 			return 1.0f / (1.0f + ::exp(-value));
 		}
 
-		SIMD_INLINE float RoughSigmoid(float value)
+		SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
 		{
 			float x = ::fabs(value);
 			float x2 = x*x;
-			float e = 1.0f + x + x2*0.555f + x2*x2*0.143f;
+			float e = 1.0f + x + x2*0.5417f + x2*x2*0.1460f;
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
 		}
 
@@ -221,11 +221,11 @@ namespace Simd
             return ::tanh(value);
         }
 
-        SIMD_INLINE float RoughTanh(float value)
+        SIMD_INLINE float RoughTanh(float value) // maximal absolute error 0.001514
         {
             float x = ::fabs(value);
             float x2 = x*x;
-            float pe = 1.0f + x + x2*0.559f + x2*x2*0.148f;
+            float pe = 1.0f + x + x2*0.5658f + x2*x2*0.1430f;
             float ne = 1.0f/pe;
             return (value > 0 ? 1.0f : -1.0f)*(pe - ne)/(pe + ne);
         }

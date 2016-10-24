@@ -117,8 +117,8 @@ namespace Simd
 			__m256 _slope = _mm256_set1_ps(*slope);
 			__m256 _0 = _mm256_set1_ps(-0.0f);
 			__m256 _1 = _mm256_set1_ps(1.0f);
-			__m256 _0555 = _mm256_set1_ps(0.555f);
-			__m256 _0143 = _mm256_set1_ps(0.143f);
+			__m256 _a = _mm256_set1_ps(0.5417f);
+			__m256 _b = _mm256_set1_ps(0.1460f);
 			size_t i = 0;
 			for (; i < alignedSize; i += F)
 			{
@@ -126,7 +126,7 @@ namespace Simd
 				__m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
 				__m256 x2 = _mm256_mul_ps(x, x);
 				__m256 x4 = _mm256_mul_ps(x2, x2);
-				__m256 series = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _0555), _mm256_mul_ps(x4, _0143)));
+				__m256 series = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _a), _mm256_mul_ps(x4, _b)));
 				__m256 mask = _mm256_cmp_ps(_src, _0, _CMP_GT_OS);
 				__m256 exp = _mm256_or_ps(_mm256_and_ps(_mm256_rcp_ps(series), mask), _mm256_andnot_ps(mask, series));
 				__m256 sigmoid = _mm256_rcp_ps(_mm256_add_ps(_1, exp));
@@ -174,8 +174,8 @@ namespace Simd
             __m256 _slope = _mm256_set1_ps(*slope);
             __m256 _0 = _mm256_set1_ps(-0.0f);
             __m256 _1 = _mm256_set1_ps(1.0f);
-            __m256 _0559 = _mm256_set1_ps(0.559f);
-            __m256 _0148 = _mm256_set1_ps(0.148f);
+            __m256 _a = _mm256_set1_ps(0.5658f);
+            __m256 _b = _mm256_set1_ps(0.1430f);
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
@@ -183,7 +183,7 @@ namespace Simd
                 __m256 x = _mm256_andnot_ps(_0, _mm256_mul_ps(_src, _slope));
                 __m256 x2 = _mm256_mul_ps(x, x);
                 __m256 x4 = _mm256_mul_ps(x2, x2);
-                __m256 pe = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _0559), _mm256_mul_ps(x4, _0148)));
+                __m256 pe = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _a), _mm256_mul_ps(x4, _b)));
                 __m256 ne = _mm256_rcp_ps(pe);
                 __m256 absTanh = _mm256_mul_ps(_mm256_sub_ps(pe, ne), _mm256_rcp_ps(_mm256_add_ps(pe, ne)));
                 __m256 tanh = _mm256_xor_ps(absTanh, _mm256_and_ps(_0, _mm256_cmp_ps(_0, _src, _CMP_GT_OS)));

@@ -2651,10 +2651,10 @@ extern "C"
         For every element:
         \verbatim
         x = ::abs(src[i]*slope);
-        e = 1 + x + x*x*0.555 + x*x*x*x*0.143;
+        e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
         dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
         \endverbatim
-        It is approximate way (maximal error is about 0.2%) of sigmoid function (::SimdNeuralSigmoid) calculation:
+        It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (::SimdNeuralSigmoid) calculation:
         \verbatim
         dst[i] = 1/(1 + exp(-slope*src[i]));
         \endverbatim
@@ -2722,10 +2722,10 @@ extern "C"
         For every element:
         \verbatim
         x = ::abs(src[i]*slope);
-        e = 1 + x + x*x*0.559 + x*x*x*x*0.148;
+        e = 1 + x + x*x*0.5658 + x*x*x*x*0.1430;
         dst[i] = (src[i] > 0 ? 1 : -1)*(e - 1/e)/(e + 1/e);
         \endverbatim
-        It is approximate way (maximal error is less than 0.2%) of hyperbolic tangent (::SimdNeuralTanh)  function calculation:
+        It is approximate way (maximal absolute error is 0.001514 (~0.15%) ) of hyperbolic tangent (::SimdNeuralTanh)  function calculation:
         \verbatim
         x = slope*src[i];
         dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));

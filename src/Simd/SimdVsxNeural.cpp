@@ -147,13 +147,13 @@ namespace Simd
         }
 
 		template <bool align, bool first> SIMD_INLINE void NeuralRoughSigmoid(const float * src, const v128_f32 & slope, 
-			const v128_f32 & _0, const v128_f32 & _1, const v128_f32 & _0555, const v128_f32 & _0143, Storer<align> & dst)
+			const v128_f32 & _0, const v128_f32 & _1, const v128_f32 & _a, const v128_f32 & _b, Storer<align> & dst)
 		{
 			v128_f32 _src = Load<align>(src);
 			v128_f32 x = vec_abs(vec_mul(_src, slope));
 			v128_f32 x2 = vec_mul(x, x);
 			v128_f32 x4 = vec_mul(x2, x2);
-			v128_f32 series = vec_add(vec_add(_1, x), vec_add(vec_mul(x2, _0555), vec_mul(x4, _0143)));
+			v128_f32 series = vec_add(vec_add(_1, x), vec_add(vec_mul(x2, _a), vec_mul(x4, _b)));
 			v128_f32 exp = vec_sel(series, vec_div(_1, series), vec_cmpgt(_src, _0));
 			v128_f32 sigmoid = vec_div(_1, vec_add(_1, exp));
 			Store<align, first>(dst, sigmoid);
@@ -168,13 +168,13 @@ namespace Simd
 			const v128_f32 _slope = SetF32(*slope);
 			const v128_f32 _0 = SetF32(0.0f);
 			const v128_f32 _1 = SetF32(1.0f);
-			const v128_f32 _0555 = SetF32(0.555f);
-			const v128_f32 _0143 = SetF32(0.143f);
+			const v128_f32 _a = SetF32(0.5417f);
+			const v128_f32 _b = SetF32(0.1460f);
 
 			Storer<align> _dst(dst);
-			NeuralRoughSigmoid<align, true>(src, _slope, _0, _1, _0555, _0143, _dst);
+			NeuralRoughSigmoid<align, true>(src, _slope, _0, _1, _a, _b, _dst);
 			for (size_t i = 4; i < alignedSize; i += 4)
-				NeuralRoughSigmoid<align, false>(src + i, _slope, _0, _1, _0555, _0143, _dst);
+				NeuralRoughSigmoid<align, false>(src + i, _slope, _0, _1, _a, _b, _dst);
 			Flush(_dst);
 
 			for (size_t i = alignedSize; i < size; ++i)

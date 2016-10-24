@@ -117,8 +117,8 @@ namespace Simd
 			__m128 _slope = _mm_set1_ps(*slope);
 			__m128 _0 = _mm_set1_ps(-0.0f);
 			__m128 _1 = _mm_set1_ps(1.0f);
-			__m128 _0555 = _mm_set1_ps(0.555f);
-			__m128 _0143 = _mm_set1_ps(0.143f);
+			__m128 _a = _mm_set1_ps(0.5417f);
+			__m128 _b = _mm_set1_ps(0.1460f);
 			size_t i = 0;
 			for (; i < alignedSize; i += F)
 			{
@@ -126,7 +126,7 @@ namespace Simd
 				__m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
 				__m128 x2 = _mm_mul_ps(x, x);
 				__m128 x4 = _mm_mul_ps(x2, x2);
-				__m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _0555), _mm_mul_ps(x4, _0143)));
+				__m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _a), _mm_mul_ps(x4, _b)));
 				__m128 mask = _mm_cmpgt_ps(_src, _0);
 				__m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
 				__m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
@@ -174,8 +174,8 @@ namespace Simd
             __m128 _slope = _mm_set1_ps(*slope);
             __m128 _0 = _mm_set1_ps(-0.0f);
             __m128 _1 = _mm_set1_ps(1.0f);
-            __m128 _0559 = _mm_set1_ps(0.559f);
-            __m128 _0148 = _mm_set1_ps(0.148f);
+            __m128 _a = _mm_set1_ps(0.5658f);
+            __m128 _b = _mm_set1_ps(0.1430f);
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
@@ -183,7 +183,7 @@ namespace Simd
                 __m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
                 __m128 x2 = _mm_mul_ps(x, x);
                 __m128 x4 = _mm_mul_ps(x2, x2);
-                __m128 pe = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _0559), _mm_mul_ps(x4, _0148)));
+                __m128 pe = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _a), _mm_mul_ps(x4, _b)));
                 __m128 ne = _mm_rcp_ps(pe);
                 __m128 absTanh = _mm_mul_ps(_mm_sub_ps(pe, ne), _mm_rcp_ps(_mm_add_ps(pe, ne)));
                 __m128 tanh = _mm_xor_ps(absTanh, _mm_and_ps(_0, _mm_cmpgt_ps(_0, _src)));
