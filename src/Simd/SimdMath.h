@@ -211,6 +211,18 @@ namespace Simd
 			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
 		}
 
+        SIMD_INLINE float RoughSigmoid2(float value) // maximal absolute error 0.001721
+        {
+            float e1 = Simd::Max(1.0f - value*0.0078125f, 0.5f);
+            float e2 = e1*e1;
+            float e4 = e2*e2;
+            float e8 = e4*e4;
+            float e16 = e8*e8;
+            float e32 = e16*e16;
+            float e64 = e32*e32;
+            return 1.0f / (1.0f + e64*e64);
+        }
+
         SIMD_INLINE float DerivativeSigmoid(float function)
         {
             return (1.0f - function)*function;

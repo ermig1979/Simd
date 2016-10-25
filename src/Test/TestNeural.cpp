@@ -374,6 +374,25 @@ namespace Test
 		return result;
 	}
 
+    bool NeuralRoughSigmoid2AutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Base::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Sse::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
+#endif
+
+        return result;
+    }
+
     bool NeuralTanhAutoTest()
     {
         bool result = true;
@@ -1150,6 +1169,15 @@ namespace Test
 
 		return result;
 	}
+
+    bool NeuralRoughSigmoid2DataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid2));
+
+        return result;
+    }
 
     bool NeuralTanhDataTest(bool create)
     {

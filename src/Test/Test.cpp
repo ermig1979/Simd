@@ -83,6 +83,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
     TEST_ADD_GROUP(NeuralSigmoid);
     TEST_ADD_GROUP(NeuralRoughSigmoid);
+    TEST_ADD_GROUP(NeuralRoughSigmoid2);
     TEST_ADD_GROUP(NeuralDerivativeSigmoid);
     TEST_ADD_GROUP(NeuralTanh);
     TEST_ADD_GROUP(NeuralRoughTanh);
