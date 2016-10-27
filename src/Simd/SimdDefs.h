@@ -90,7 +90,6 @@
 #define SIMD_MADDUBS_ERROR // Visual Studio 2012/2013 release mode compiler bug in function _mm256_maddubs_epi16:
 #endif
 
-
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE)
@@ -99,6 +98,10 @@
 #define SIMD_NEON_ENABLE
 #endif
 
+#endif
+
+#if _MSC_VER >= 1900
+#define SIMD_CPP_2011_ENABLE
 #endif
 
 #elif defined(__GNUC__)
@@ -192,6 +195,10 @@
 #endif
 
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+
+#if __cplusplus >= 201103L
+#define SIMD_CPP_2011_ENABLE
+#endif
 
 #else
 

@@ -26,6 +26,8 @@
 
 #include "Simd/SimdLib.h"
 
+#include <memory>
+
 namespace Simd
 {
     /*! @ingroup cpp_allocator
@@ -157,15 +159,23 @@ namespace Simd
 
         SIMD_INLINE const_pointer address(const_reference value) const
         {
+#if defined(SIMD_CPP_2011_ENABLE)
             return std::addressof(value);
+#else
+            return (reinterpret_cast<const_pointer>(&const_cast<char&>(reinterpret_cast<const volatile char&>(value))));
+#endif
         }
 
         SIMD_INLINE pointer address(reference value) const
         {
+#if defined(SIMD_CPP_2011_ENABLE)
             return std::addressof(value);
+#else
+            return (reinterpret_cast<pointer>(&const_cast<char&>(reinterpret_cast<const volatile char&>(value))));
+#endif
         }
 
-        SIMD_INLINE pointer allocate(size_type size, const void * ptr = nullptr) 
+        SIMD_INLINE pointer allocate(size_type size, const void * ptr = NULL) 
         {
             return static_cast<pointer>(Allocate(size*sizeof(T), Alignment()));
         }
@@ -185,7 +195,7 @@ namespace Simd
             ::new((void*)ptr) U(value);
         }
 
-#if !(defined(_MSC_VER) && _MSC_VER <= 1800) // -vc2013 doesn't support variadic templates
+#if defined(SIMD_CPP_2011_ENABLE)
         template<class U, class... Args> SIMD_INLINE void construct(U * ptr, Args &&... args)
         {
             ::new((void*)ptr) U(std::forward<Args>(args)...);
