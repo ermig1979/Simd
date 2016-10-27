@@ -294,7 +294,7 @@ namespace Simd
                     Store<align>(dst + i, _mm256_max_ps(_mm256_mul_ps(_s, _src), _src));
                 }
                 for (; i < size; ++i)
-                    dst[i] *= Simd::Max(src[i] * s, src[i]);
+                    dst[i] = Simd::Max(src[i] * s, src[i]);
             }
         }
 
