@@ -898,7 +898,7 @@ namespace Test
         FillRandom32f(dst, -1, 1);
 
         View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
-        FillRandom32f(sumsSrc, -1000, 1000);
+        FillRandom32f(sumsSrc, 1000, 2000);
 
         View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
         View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
@@ -1593,7 +1593,7 @@ namespace Test
         {
             FillRandom32f(src, -1, 1);
             FillRandom32f(dst, -1, 1);
-            FillRandom32f(sumsSrc, -1000, 1000);
+            FillRandom32f(sumsSrc, 1000, 2000);
 
             TEST_SAVE(src);
             TEST_SAVE(dst);
