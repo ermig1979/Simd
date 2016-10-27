@@ -382,6 +382,58 @@ namespace Simd
                 NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
+        template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, const __m256 & norm, const __m256 & alpha, const __m256 & epsilon, float * gradient, float * weight)
+        {
+            __m256 d = _mm256_mul_ps(Load<align>(delta), norm);
+            __m256 _gradient = _mm256_add_ps(Load<align>(gradient), _mm256_mul_ps(d, d));
+            Store<align>(gradient, _gradient);
+            Store<align>(weight, _mm256_sub_ps(Load<align>(weight), _mm256_mul_ps(_mm256_mul_ps(alpha, d), _mm256_rsqrt_ps(_mm256_add_ps(_gradient, epsilon)))));
+        }
+
+        template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, const __m256 & norm, const __m256 & alpha, const __m256 & epsilon, float * gradient, float * weight)
+        {
+            AdaptiveGradientUpdate<align>(delta + offset, norm, alpha, epsilon, gradient + offset, weight + offset);
+        }
+
+        template <bool align> void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+        {
+            if (align)
+                assert(Aligned(delta) && Aligned(gradient) && Aligned(weight));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            const float norm = (float)(1.0 / batch);
+            __m256 _norm = _mm256_set1_ps(norm);
+            __m256 _alpha = _mm256_set1_ps(*alpha);
+            __m256 _epsilon = _mm256_set1_ps(*epsilon);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        AdaptiveGradientUpdate<align>(delta, i + F * 0, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 1, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 2, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 3, _norm, _alpha, _epsilon, gradient, weight);
+                    }
+                }
+                for (; i < partialAlignedSize; i += F)
+                    AdaptiveGradientUpdate<align>(delta, i, _norm, _alpha, _epsilon, gradient, weight);
+            }
+            for (; i < size; ++i)
+                Base::AdaptiveGradientUpdate(delta, i, norm, *alpha, *epsilon, gradient, weight);
+        }
+
+        void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+        {
+            if (Aligned(delta) && Aligned(gradient) && Aligned(weight))
+                NeuralAdaptiveGradientUpdate<true>(delta, size, batch, alpha, epsilon, gradient, weight);
+            else
+                NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
+        }
+
         template <bool align> SIMD_INLINE __m256 Convolution3(const float * src, const __m256 * weights)
         {
             return _mm256_add_ps(_mm256_mul_ps(Load<align>(src), weights[0]),

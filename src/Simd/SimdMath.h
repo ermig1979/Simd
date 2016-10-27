@@ -253,6 +253,13 @@ namespace Simd
             d[offset] = _d;
             w[offset] += _d;
         }
+
+        SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, float norm, float alpha, float epsilon, float * gradient, float * weight)
+        {
+            float d = delta[offset]*norm;
+            gradient[offset] += d*d;
+            weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
+        }
 	}
 
 #ifdef SIMD_SSE_ENABLE

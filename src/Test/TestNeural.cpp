@@ -642,6 +642,91 @@ namespace Test
 
     namespace
     {
+        struct FuncAGU
+        {
+            typedef void(*FuncPtr)(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
+
+            FuncPtr func;
+            String description;
+
+            FuncAGU(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & delta, size_t batch, float alpha, float epsilon, const View & gradientSrc, const View & weightSrc, View & gradientDst, View & weightDst) const
+            {
+                Simd::Copy(gradientSrc, gradientDst);
+                Simd::Copy(weightSrc, weightDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)delta.data, delta.width, batch, &alpha, &epsilon, (float*)gradientDst.data, (float*)weightDst.data);
+            }
+        };
+    }
+#define FUNC_AGU(function) FuncAGU(function, #function)
+
+    bool NeuralAdaptiveGradientUpdateAutoTest(int size, float error, bool relative, const FuncAGU & f1, const FuncAGU & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View delta(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View gradientSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(delta, -1.0f, 1.0f);
+        FillRandom32f(gradientSrc, 0.0f, 0.0001f);
+        FillRandom32f(weightSrc, -1.0f, 1.0f);
+
+        const size_t batch = 2;
+        const float alpha = 1.0f, epsilon = 0.0001f;
+        //const size_t batch = 64;
+        //const float alpha = 0.01f, epsilon = 0.0001f;
+
+        View gradientDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View gradientDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(delta, batch, alpha, epsilon, gradientSrc, weightSrc, gradientDst1, weightDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(delta, batch, alpha, epsilon, gradientSrc, weightSrc, gradientDst2, weightDst2));
+
+        result = result && Compare(gradientDst1, gradientDst2, error, true, 32, relative, "gradient");
+        result = result && Compare(weightDst1, weightDst2, error, true, 32, relative, "weight");
+
+        return result;
+    }
+
+    bool NeuralAdaptiveGradientUpdateAutoTest(float error, bool relative, const FuncAGU & f1, const FuncAGU & f2)
+    {
+        bool result = true;
+
+        result = result && NeuralAdaptiveGradientUpdateAutoTest(W*H, error, relative, f1, f2);
+        result = result && NeuralAdaptiveGradientUpdateAutoTest(W*H + O, error, relative, f1, f2);
+        result = result && NeuralAdaptiveGradientUpdateAutoTest(W*H - O, error, relative, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralAdaptiveGradientUpdateAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralAdaptiveGradientUpdateAutoTest(EPS, false, FUNC_AGU(Simd::Base::NeuralAdaptiveGradientUpdate), FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAdaptiveGradientUpdateAutoTest(EPS, false, FUNC_AGU(Simd::Sse::NeuralAdaptiveGradientUpdate), FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAdaptiveGradientUpdateAutoTest(EPS, false, FUNC_AGU(Simd::Avx::NeuralAdaptiveGradientUpdate), FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncC2
         {
             typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
@@ -1335,6 +1420,71 @@ namespace Test
         bool result = true;
 
         result = result && NeuralUpdateWeightsDataTest(create, DH, EPS, true, FUNC_UW(SimdNeuralUpdateWeights));
+
+        return result;
+    }
+
+    bool NeuralAdaptiveGradientUpdateDataTest(bool create, int size, float error, bool relative, const FuncAGU & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        View delta(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View gradientSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        const size_t batch = 64;
+        const float alpha = 0.01f, epsilon = 0.0001f;
+
+        View gradientDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View gradientDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View weightDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(delta, -1.0f, 1.0f);
+            FillRandom32f(gradientSrc, 0.0f, 1.0f);
+            FillRandom32f(weightSrc, -1.0f, 1.0f);
+
+            TEST_SAVE(delta);
+            TEST_SAVE(gradientSrc);
+            TEST_SAVE(weightSrc);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(delta, batch, alpha, epsilon, gradientSrc, weightSrc, gradientDst1, weightDst1));
+
+            TEST_SAVE(gradientDst1);
+            TEST_SAVE(weightDst1);
+        }
+        else
+        {
+            TEST_LOAD(delta);
+            TEST_LOAD(gradientSrc);
+            TEST_LOAD(weightSrc);
+
+            TEST_LOAD(gradientDst1);
+            TEST_LOAD(weightDst1);
+
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(delta, batch, alpha, epsilon, gradientSrc, weightSrc, gradientDst2, weightDst2));
+
+            TEST_SAVE(gradientDst2);
+            TEST_SAVE(weightDst2);
+
+            result = Compare(gradientDst1, gradientDst2, error, true, 32, relative);
+            result = Compare(weightDst1, weightDst2, error, true, 32, relative);
+        }
+
+        return result;
+    }
+
+    bool NeuralAdaptiveGradientUpdateDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && NeuralAdaptiveGradientUpdateDataTest(create, DH, EPS, true, FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
 
         return result;
     }

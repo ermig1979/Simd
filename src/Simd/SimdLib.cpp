@@ -2194,6 +2194,14 @@ SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float 
     simdNeuralUpdateWeights(x, size, a, b, d, w);
 }
 
+typedef void(*SimdNeuralAdaptiveGradientUpdatePtr) (const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
+SimdNeuralAdaptiveGradientUpdatePtr simdNeuralAdaptiveGradientUpdate = SIMD_FUNC2(NeuralAdaptiveGradientUpdate, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+{
+    simdNeuralAdaptiveGradientUpdate(delta, size, batch, alpha, epsilon, gradient, weight);
+}
+
 SIMD_API void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE

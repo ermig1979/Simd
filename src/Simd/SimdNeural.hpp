@@ -50,10 +50,21 @@ namespace Simd
         typedef std::vector<Label> Labels; /*!< \brief Vector of labels. */
         typedef Simd::View<Allocator<uint8_t>> View; /*!< \brief Image. */
 
-        template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
+
+        namespace Detail
         {
-            memset(vector.data(), 0, vector.size()*sizeof(T));
+            template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
+            {
+                memset(vector.data(), 0, vector.size()*sizeof(T));
+            }
+
+            SIMD_INLINE void AddTo(const Vector & src, Vector & dst)
+            {
+                const float one = 1;
+                ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
+            }
         }
+
 
         /*! @ingroup cpp_neural
 
@@ -587,7 +598,7 @@ namespace Simd
                 const Vector & padded = PaddedSrc(src, thread);
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                SetZero(sum);
+                Detail::SetZero(sum);
                 for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
                 {
                     for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
@@ -643,7 +654,7 @@ namespace Simd
                 Vector & dWeight = _common[thread].dWeight;
                 Vector & dBias = _common[thread].dBias;
 
-                SetZero(prevDelta);
+                Detail::SetZero(prevDelta);
 
                 for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
                 {
@@ -880,7 +891,7 @@ namespace Simd
                 Vector & prevDelta = _common[thread].prevDelta;
                 const VectorI & index = _specific[thread].index;
 
-                SetZero(prevDelta);
+                Detail::SetZero(prevDelta);
 
                 for (size_t i = 0; i < currDelta.size(); ++i)
                     prevDelta[index[i]] = currDelta[i];
@@ -957,7 +968,7 @@ namespace Simd
                 Vector & dst = _common[thread].dst;
                 if (train)
                 {
-                    SetZero(sum);
+                    Detail::SetZero(sum);
                     for (size_t i = 0; i < src.size(); i++)
                         ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
@@ -1058,7 +1069,7 @@ namespace Simd
             /*!
                 \enum UpdateType
 
-                Method of wights' updating.
+                Method of weights' updating.
             */
             enum UpdateType
             {
@@ -1067,6 +1078,8 @@ namespace Simd
                     J Duchi, E Hazan and Y Singer,
                     "Adaptive subgradient methods for online learning and stochastic optimization"
                     The Journal of Machine Learning Research, pages 2121-2159, 2011.
+
+                    \note See ::SimdNeuralAdaptiveGradientUpdate.
                 */
                 AdaptiveGradient,
             };
@@ -1074,7 +1087,7 @@ namespace Simd
             InitType initType; /*!< \brief Method to initialize weights. */
             LossType lossType; /*!< \brief Loss function type. */
             UpdateType updateType; /*!< \brief Weights' update type. */
-            mutable size_t threadNumber; /*!< \brief Number of threads used to train. Use -1 for autodetection.  */
+            mutable size_t threadNumber; /*!< \brief Number of threads used to train. Use -1 to auto detect thread number.  */
             size_t epochStart; /*!< \brief Start epoch. It is used to continue training process. */
             size_t epochFinish; /*!< \brief Finish epoch. Describes total epoch number. */
             size_t batchSize; /*!< \brief A batch size. */
@@ -1124,17 +1137,11 @@ namespace Simd
                     delta[i] = current[i] - control[i];
             }
 
-            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, Vector & d, Vector & g, Vector & v);
+            template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, const Vector & d, Vector & g, Vector & v);
 
-            template<> SIMD_INLINE void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, Vector & d, Vector & g, Vector & v)
+            template<> SIMD_INLINE void UpdateWeight<TrainOptions::AdaptiveGradient>(const TrainOptions & o, const Vector & d, Vector & g, Vector & v)
             {
-                const float k = (float)(1.0 / o.batchSize);
-                for (size_t i = 0; i < d.size(); ++i)
-                {
-                    float dk = d[i] * k;
-                    g[i] += dk*dk;
-                    v[i] -= o.alpha * dk / (std::sqrt(g[i]) + o.epsilon);
-                }
+                ::SimdNeuralAdaptiveGradientUpdate(d.data(), d.size(), o.batchSize, &o.alpha, &o.epsilon, g.data(), v.data());
             }
         }
 
@@ -1444,8 +1451,8 @@ namespace Simd
                     Layer & layer = *_layers[l];
                     Detail::InitWeight<type>(layer._weight, layer);
                     Detail::InitWeight<type>(layer._bias, layer);
-                    SetZero(layer._gWeight);
-                    SetZero(layer._gBias);
+                    Detail::SetZero(layer._gWeight);
+                    Detail::SetZero(layer._gBias);
                 }
             }
 
@@ -1465,12 +1472,6 @@ namespace Simd
                 }
             }
 
-            SIMD_INLINE void AddVector(const Vector & src, Vector & dst)
-            {
-                const float one = 1;
-                ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
-            }
-
             template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & options)
             {
                 for (size_t l = 0; l < _layers.size(); ++l)
@@ -1478,15 +1479,15 @@ namespace Simd
                     Layer & layer = *_layers[l];
                     for (size_t t = 1; t < layer._common.size(); ++t)
                     {
-                        AddVector(layer._common[t].dWeight, layer._common[0].dWeight);
-                        AddVector(layer._common[t].dBias, layer._common[0].dBias);
+                        Detail::AddTo(layer._common[t].dWeight, layer._common[0].dWeight);
+                        Detail::AddTo(layer._common[t].dBias, layer._common[0].dBias);
                     }
                     Detail::UpdateWeight<type>(options, layer._common[0].dWeight, layer._gWeight, layer._weight);
                     Detail::UpdateWeight<type>(options, layer._common[0].dBias, layer._gBias, layer._bias);
                     for (size_t t = 0; t < layer._common.size(); ++t)
                     {
-                        SetZero(layer._common[t].dWeight);
-                        SetZero(layer._common[t].dBias);
+                        Detail::SetZero(layer._common[t].dWeight);
+                        Detail::SetZero(layer._common[t].dBias);
                     }
                 }
             }

@@ -2906,6 +2906,39 @@ extern "C"
 
     /*! @ingroup neural
 
+        \fn void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
+
+        \short Updates neural network weights with using of adaptive gradients method.
+
+        Adaptive gradients method.
+        J Duchi, E Hazan and Y Singer,
+        "Adaptive subgradient methods for online learning and stochastic optimization"
+        The Journal of Machine Learning Research, pages 2121-2159, 2011.
+ 
+        The algorithm performs:
+        \verbatim
+        for (i = 0; i < size; ++i)
+        {
+            d = delta[i]/batch;
+            gradient[i] += d*d;
+            weight[i] -= alpha * d / sqrt(gradient[i] + epsilon);
+        }
+        \endverbatim
+
+        \note All arrays must have the same size. This function is used in Simd::Neural.
+
+        \param [in] delta - a pointer to the array with error (delta).
+        \param [in] size - a size of arrays.
+        \param [in] batch - a batch size.
+        \param [in] alpha - a pointer to alpha parameter (update speed).
+        \param [in] epsilon - a pointer to epsilon parameter (a small number used to avoid division by zero).
+        \param [in, out] gradient - a pointer to the array with gradients.
+        \param [in, out] weight - a pointer to the array with weights.
+    */
+    SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight);
+
+    /*! @ingroup neural
+
         \fn void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 3x3 convolution of 32-bit float image.
