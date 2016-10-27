@@ -677,8 +677,6 @@ namespace Test
 
         const size_t batch = 2;
         const float alpha = 1.0f, epsilon = 0.0001f;
-        //const size_t batch = 64;
-        //const float alpha = 0.01f, epsilon = 0.0001f;
 
         View gradientDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
         View weightDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));

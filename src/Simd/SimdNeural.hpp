@@ -50,7 +50,6 @@ namespace Simd
         typedef std::vector<Label> Labels; /*!< \brief Vector of labels. */
         typedef Simd::View<Allocator<uint8_t>> View; /*!< \brief Image. */
 
-
         namespace Detail
         {
             template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
@@ -64,7 +63,6 @@ namespace Simd
                 ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
             }
         }
-
 
         /*! @ingroup cpp_neural
 

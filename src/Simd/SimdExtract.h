@@ -72,7 +72,7 @@ namespace Simd
 
 		template <int index> SIMD_INLINE int64_t ExtractInt64(__m128i a)
 		{
-#if defined(_M_X64) && (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER >= 1600))
+#if defined(SIMD_X64_ENABLE) && (!defined(_MSC_VER) || (defined(_MSC_VER) && _MSC_VER >= 1600))
 			return _mm_cvtsi128_si64(_mm_srli_si128(a, 8 * index));
 #else
 			return (int64_t)ExtractInt32<2*index + 1>(a)*0x100000000 + (uint32_t)ExtractInt32<2*index>(a);
@@ -144,11 +144,13 @@ namespace Simd
             return _mm_extract_epi32(_mm_hadd_epi32(_mm_hadd_epi32(b, _mm_setzero_si128()), _mm_setzero_si128()), 0);
         }
 
+#if defined(SIMD_X64_ENABLE)
         template <> SIMD_INLINE uint64_t ExtractSum<uint64_t>(__m256i a)
         {
             __m128i b = _mm_add_epi64(_mm256_extractf128_si256(a, 0), _mm256_extractf128_si256(a, 1));
             return _mm_extract_epi64(b, 0) + _mm_extract_epi64(b, 1);
         }
+#endif
     }
 #endif// SIMD_AVX2_ENABLE
 
