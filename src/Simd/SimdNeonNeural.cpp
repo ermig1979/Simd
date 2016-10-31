@@ -55,7 +55,7 @@ namespace Simd
             Convert<align>(UnpackU8<1>(_src), _1_255, dst + 8);
         }
 
-        template <bool inversion, bool align> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+        template <bool inversion, bool align> void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
         {
             assert(width >= A);
             if (align)
@@ -75,30 +75,30 @@ namespace Simd
             }
         }
 
-        template <bool inversion> void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+        template <bool inversion> void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
         {
             if (Aligned(src) && Aligned(stride) && Aligned(dst) && Aligned(width))
-                AnnConvert<inversion, true>(src, stride, width, height, dst);
+                NeuralConvert<inversion, true>(src, stride, width, height, dst);
             else
-                AnnConvert<inversion, false>(src, stride, width, height, dst);
+                NeuralConvert<inversion, false>(src, stride, width, height, dst);
         }
 
-        void AnnConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+        void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
         {
             if (inversion)
-                AnnConvert<true>(src, stride, width, height, dst);
+                NeuralConvert<true>(src, stride, width, height, dst);
             else
-                AnnConvert<false>(src, stride, width, height, dst);
+                NeuralConvert<false>(src, stride, width, height, dst);
         }
 
-        template <bool align> SIMD_INLINE void AnnProductSum(const float * a, const float * b, size_t offset, float32x4_t & sum)
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, float32x4_t & sum)
         {
             float32x4_t _a = Load<align>(a + offset);
             float32x4_t _b = Load<align>(b + offset);
             sum = vaddq_f32(sum, vmulq_f32(_a, _b));
         }
 
-        template <bool align> SIMD_INLINE void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
@@ -114,28 +114,28 @@ namespace Simd
                 {
                     for (; i < fullAlignedSize; i += 8)
                     {
-                        AnnProductSum<align>(a, b, i + 0, sums[0]);
-                        AnnProductSum<align>(a, b, i + 4, sums[1]);
+                        NeuralProductSum<align>(a, b, i + 0, sums[0]);
+                        NeuralProductSum<align>(a, b, i + 4, sums[1]);
                     }
                     sums[0] = vaddq_f32(sums[0], sums[1]);
                 }
                 for(; i < partialAlignedSize; i += 4)
-					AnnProductSum<align>(a, b, i, sums[0]);
+                    NeuralProductSum<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
             for(; i < size; ++i)
                 *sum += a[i]*b[i];
         }
 
-        void AnnProductSum(const float * a, const float * b, size_t size, float * sum)
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
             if(Aligned(a) && Aligned(b))
-				AnnProductSum<true>(a, b, size, sum);
+                NeuralProductSum<true>(a, b, size, sum);
             else
-				AnnProductSum<false>(a, b, size, sum);
+                NeuralProductSum<false>(a, b, size, sum);
         }
 
-        template <bool align> SIMD_INLINE void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
             float32x4_t _slope = vdupq_n_f32(*slope);
@@ -160,15 +160,15 @@ namespace Simd
                 dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
         }
 
-        void AnnRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnRoughSigmoid<true>(src, size, slope, dst);
+                NeuralRoughSigmoid<true>(src, size, slope, dst);
             else
-                AnnRoughSigmoid<false>(src, size, slope, dst);
+                NeuralRoughSigmoid<false>(src, size, slope, dst);
         }
 
-        template <bool align> SIMD_INLINE void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             size_t alignedSize = Simd::AlignLo(size, 4);
             float32x4_t _slope = vdupq_n_f32(*slope);
@@ -193,12 +193,12 @@ namespace Simd
                 dst[i] = Base::RoughTanh(src[i] * slope[0]);
         }
 
-        void AnnRoughTanh(const float * src, size_t size, const float * slope, float * dst)
+        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (Aligned(src) && Aligned(dst))
-                AnnRoughTanh<true>(src, size, slope, dst);
+                NeuralRoughTanh<true>(src, size, slope, dst);
             else
-                AnnRoughTanh<false>(src, size, slope, dst);
+                NeuralRoughTanh<false>(src, size, slope, dst);
         }
     }
 #endif// SIMD_NEON_ENABLE
