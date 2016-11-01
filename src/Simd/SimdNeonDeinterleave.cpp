@@ -70,6 +70,53 @@ namespace Simd
             else
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
+
+        template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+            uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride));
+                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            size_t A3 = A * 3;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += A3)
+                {
+                    uint8x16x3_t _bgr = Load3<align>(bgr + offset);
+                    Store<align>(b + col, _bgr.val[0]);
+                    Store<align>(g + col, _bgr.val[1]);
+                    Store<align>(r + col, _bgr.val[2]);
+                }
+                if (tail)
+                {
+                    size_t col = width - A;
+                    size_t offset = 3 * col;
+                    uint8x16x3_t _bgr = Load3<false>(bgr + offset);
+                    Store<false>(b + col, _bgr.val[0]);
+                    Store<false>(g + col, _bgr.val[1]);
+                    Store<false>(r + col, _bgr.val[2]);
+                }
+                bgr += bgrStride;
+                b += bStride;
+                g += gStride;
+                r += rStride;
+            }
+        }
+
+        void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, 
+            uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
+        {
+            if (Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride))
+                DeinterleaveBgr<true>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            else
+                DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
