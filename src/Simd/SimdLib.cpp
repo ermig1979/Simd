@@ -2191,7 +2191,7 @@ SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const flo
 }
 
 typedef void(*SimdNeuralReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralReluPtr simdNeuralRelu = SIMD_FUNC2(NeuralRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdNeuralReluPtr simdNeuralRelu = SIMD_FUNC3(NeuralRelu, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst)
 {

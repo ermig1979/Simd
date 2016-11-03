@@ -228,6 +228,8 @@ namespace Simd
 
         void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
 
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
+
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
 			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 

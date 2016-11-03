@@ -45,14 +45,14 @@ namespace Simd
         template <bool align> void Convert(const uint16x8_t & src, const float32x4_t &_1_255, float * dst)
         {
             Store<align>(dst + 0, vmulq_f32(ToFloat<0>(src), _1_255));
-            Store<align>(dst + 4, vmulq_f32(ToFloat<1>(src), _1_255));
+            Store<align>(dst + F, vmulq_f32(ToFloat<1>(src), _1_255));
         }
 
         template <bool inversion, bool align> void Convert(const uint8_t * src, const float32x4_t &_1_255, float * dst)
         {
             uint8x16_t _src = Invert<inversion>(Load<align>(src));
             Convert<align>(UnpackU8<0>(_src), _1_255, dst + 0);
-            Convert<align>(UnpackU8<1>(_src), _1_255, dst + 8);
+            Convert<align>(UnpackU8<1>(_src), _1_255, dst + DF);
         }
 
         template <bool inversion, bool align> void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
@@ -104,22 +104,22 @@ namespace Simd
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
-            size_t partialAlignedSize = AlignLo(size, 4);
-            size_t fullAlignedSize = AlignLo(size, 8);
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, DF);
             size_t i = 0;
             if(partialAlignedSize)
             {
                 float32x4_t sums[2] = {vdupq_n_f32(0), vdupq_n_f32(0)};
                 if (fullAlignedSize)
                 {
-                    for (; i < fullAlignedSize; i += 8)
+                    for (; i < fullAlignedSize; i += DF)
                     {
                         NeuralProductSum<align>(a, b, i + 0, sums[0]);
-                        NeuralProductSum<align>(a, b, i + 4, sums[1]);
+                        NeuralProductSum<align>(a, b, i + F, sums[1]);
                     }
                     sums[0] = vaddq_f32(sums[0], sums[1]);
                 }
-                for(; i < partialAlignedSize; i += 4)
+                for(; i < partialAlignedSize; i += F)
                     NeuralProductSum<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
@@ -137,14 +137,16 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 4);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t alignedSize = Simd::AlignLo(size, F);
             float32x4_t _slope = vdupq_n_f32(*slope);
             float32x4_t _0 = vdupq_n_f32(-0.0f);
             float32x4_t _1 = vdupq_n_f32(1.0f);
             float32x4_t _a = vdupq_n_f32(0.5417f);
             float32x4_t _b = vdupq_n_f32(0.1460f);
             size_t i = 0;
-            for (; i < alignedSize; i += 4)
+            for (; i < alignedSize; i += F)
             {
                 float32x4_t _src = Load<align>(src + i);
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
@@ -170,14 +172,16 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
-            size_t alignedSize = Simd::AlignLo(size, 4);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t alignedSize = Simd::AlignLo(size, F);
             float32x4_t _slope = vdupq_n_f32(*slope);
             float32x4_t _0 = vdupq_n_f32(-0.0f);
             float32x4_t _1 = vdupq_n_f32(1.0f);
             float32x4_t _a = vdupq_n_f32(0.5658f);
             float32x4_t _b = vdupq_n_f32(0.1430f);
             size_t i = 0;
-            for (; i < alignedSize; i += 4)
+            for (; i < alignedSize; i += F)
             {
                 float32x4_t _src = Load<align>(src + i);
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
@@ -199,6 +203,48 @@ namespace Simd
                 NeuralRoughTanh<true>(src, size, slope, dst);
             else
                 NeuralRoughTanh<false>(src, size, slope, dst);
+        }
+
+        template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            float s = slope[0];
+            assert(s >= 0.0f && s <= 1.0f);
+            size_t alignedSize = Simd::AlignLo(size, F);
+            size_t i = 0;
+            if (s == 0)
+            {
+                float32x4_t _0 = vdupq_n_f32(0.0f);
+                for (; i < alignedSize; i += F)
+                {
+                    float32x4_t _src = Load<align>(src + i);
+                    float32x4_t relu = vmaxq_f32(_0, _src);
+                    Store<align>(dst + i, relu);
+                }
+                for (; i < size; ++i)
+                    dst[i] = Simd::Max(0.0f, src[i]);
+            }
+            else
+            {
+                float32x4_t _s = vdupq_n_f32(s);
+                for (; i < alignedSize; i += F)
+                {
+                    float32x4_t _src = Load<align>(src + i);
+                    float32x4_t relu = vmaxq_f32(vmulq_f32(_src, _s), _src);
+                    Store<align>(dst + i, relu);
+                }
+                for (; i < size; ++i)
+                    dst[i] = Simd::Max(src[i] * s, src[i]);
+            }
+        }
+
+        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralRelu<true>(src, size, slope, dst);
+            else
+                NeuralRelu<false>(src, size, slope, dst);
         }
     }
 #endif// SIMD_NEON_ENABLE
