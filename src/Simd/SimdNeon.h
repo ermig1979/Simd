@@ -189,6 +189,9 @@ namespace Simd
         void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride,
             size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
+        void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride,
+            size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
             size_t step, size_t indent, uint32_t * histogram);
 
