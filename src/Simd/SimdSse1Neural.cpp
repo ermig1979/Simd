@@ -113,7 +113,9 @@ namespace Simd
 
 		template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
-			size_t alignedSize =  Simd::AlignLo(size, F);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t alignedSize = Simd::AlignLo(size, F);
 			__m128 _slope = _mm_set1_ps(*slope);
 			__m128 _0 = _mm_set1_ps(-0.0f);
 			__m128 _1 = _mm_set1_ps(1.0f);
@@ -160,6 +162,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             size_t partialAlignedSize = Simd::AlignLo(size, F);
             size_t fullAlignedSize = Simd::AlignLo(size, QF);
             __m128 _k = _mm_set1_ps((*slope)*0.0078125f);
@@ -189,6 +193,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
             __m128 _1 = _mm_set1_ps(1.0f);
@@ -213,6 +219,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
             __m128 _0 = _mm_set1_ps(-0.0f);
@@ -246,6 +254,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             size_t alignedSize = Simd::AlignLo(size, F);
             __m128 _slope = _mm_set1_ps(*slope);
             __m128 _1 = _mm_set1_ps(1.0f);
@@ -270,6 +280,8 @@ namespace Simd
 
         template <bool align> void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             float s = slope[0];
             assert(s >= 0.0f && s <= 1.0f);
             size_t alignedSize = Simd::AlignLo(size, F);
@@ -308,6 +320,8 @@ namespace Simd
 
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
             float s = -slope[0];
             __m128 _0 = _mm_set1_ps(0.0f);
             __m128 _s = _mm_set1_ps(s);

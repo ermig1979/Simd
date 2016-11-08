@@ -215,6 +215,32 @@ namespace Simd
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
 
+        template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t alignedSize = Simd::AlignLo(size, F);
+            float32x4_t _slope = vdupq_n_f32(*slope);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+            {
+                float32x4_t _src = Load<align>(src + i);
+                float32x4_t _dst = Load<align>(dst + i);
+                Store<align>(dst + i, vmulq_f32(vmulq_f32(_dst, _slope), vmulq_f32(vsubq_f32(_1, _src), _src)));
+            }
+            for (; i < size; ++i)
+                dst[i] *= slope[0] * Base::DerivativeSigmoid(src[i]);
+        }
+
+        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralDerivativeSigmoid<true>(src, size, slope, dst);
+            else
+                NeuralDerivativeSigmoid<false>(src, size, slope, dst);
+        }
+
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)

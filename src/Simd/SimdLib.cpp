@@ -2159,7 +2159,7 @@ SIMD_API void SimdNeuralRoughSigmoid2(const float * src, size_t size, const floa
 }
 
 typedef void(*SimdNeuralDerivativeSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralDerivativeSigmoidPtr simdNeuralDerivativeSigmoid = SIMD_FUNC2(NeuralDerivativeSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdNeuralDerivativeSigmoidPtr simdNeuralDerivativeSigmoid = SIMD_FUNC3(NeuralDerivativeSigmoid, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
