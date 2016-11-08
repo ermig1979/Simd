@@ -276,6 +276,32 @@ namespace Simd
                 NeuralRoughTanh<false>(src, size, slope, dst);
         }
 
+        template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            size_t alignedSize = Simd::AlignLo(size, F);
+            float32x4_t _slope = vdupq_n_f32(*slope);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+            {
+                float32x4_t _src = Load<align>(src + i);
+                float32x4_t _dst = Load<align>(dst + i);
+                Store<align>(dst + i, vmulq_f32(vmulq_f32(_dst, _slope), vsubq_f32(_1, vmulq_f32(_src, _src))));
+            }
+            for (; i < size; ++i)
+                dst[i] *= slope[0] * Base::DerivativeTanh(src[i]);
+        }
+
+        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralDerivativeTanh<true>(src, size, slope, dst);
+            else
+                NeuralDerivativeTanh<false>(src, size, slope, dst);
+        }
+
         template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
