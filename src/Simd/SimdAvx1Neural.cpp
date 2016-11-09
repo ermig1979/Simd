@@ -309,7 +309,7 @@ namespace Simd
 
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
-            float s = -slope[0];
+            float s = slope[0];
             __m256 _0 = _mm256_set1_ps(0.0f);
             __m256 _s = _mm256_set1_ps(s);
             __m256 d = _mm256_set1_ps(1.0f - s);

@@ -155,7 +155,7 @@ namespace Simd
 
         void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
-            float s = -slope[0];
+            float s = slope[0];
             for (size_t i = 0; i < size; ++i)
                 dst[i] *= src[i] > 0 ? 1.0f : s;
         }

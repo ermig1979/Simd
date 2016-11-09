@@ -2822,7 +2822,7 @@ extern "C"
 
         For every element:
         \verbatim
-        dst[i] *=  src[i] > 0 ? 1 : -slope;
+        dst[i] *=  src[i] > 0 ? 1 : slope;
         \endverbatim
 
         \note This function is used in Simd::Neural::Function.

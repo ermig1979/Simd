@@ -41,6 +41,11 @@
  <li>NEON optimization of function NeuralRoughSigmoid2.</li>
  <li>NEON optimization of function NeuralDerivativeSigmoid.</li>
  <li>NEON optimization of function NeuralDerivativeTanh.</li>
+ <li>NEON optimization of function NeuralDerivativeRelu.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Algorithmic error in function NeuralDerivativeRelu.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -54,6 +59,7 @@
  <li>Tests for verifying functionality of NEON version of function NeuralRoughSigmoid2.</li>
  <li>Tests for verifying functionality of NEON version of function NeuralDerivativeSigmoid.</li>
  <li>Tests for verifying functionality of NEON version of function NeuralDerivativeTanh.</li>
+ <li>Tests for verifying functionality of NEON version of function NeuralDerivativeRelu.</li>
 </ul>
 
 <a href="#HOME">Home</a> 
@@ -68,7 +74,6 @@
  <li>Base implementation, SSE1 and AVX1 optimizations of function NeuralRoughSigmoid2.</li>
  <li>Base implementation, SSE1 and AVX1 optimizations of function NeuralAdaptiveGradientUpdate.</li>
 </ul>
-
 <h5>Changes</h5>
 <ul>
  <li>Renamed all functions from SimdAnn* to SimdNeural*.</li>
@@ -78,7 +83,6 @@
  <li>Improved accuracy of function NeuralRoughSigmoid.</li>
  <li>Improved accuracy of function NeuralRoughTanh.</li>
 </ul>
-
 <h5>Bug fixing</h5>
 <ul>
  <li>GCC compiler error in file SimdAllocator.hpp.</li>

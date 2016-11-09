@@ -343,6 +343,34 @@ namespace Simd
             else
                 NeuralRelu<false>(src, size, slope, dst);
         }
+
+        template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            float s = slope[0];
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t _s = vdupq_n_f32(s);
+            size_t alignedSize = Simd::AlignLo(size, F);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+            {
+                uint32x4_t mask = vcgtq_f32(Load<align>(src + i), _0);
+                float32x4_t _dst = Load<align>(dst + i);
+                Store<align>(dst + i, vmulq_f32(vbslq_f32(mask, _1, _s), _dst));
+            }
+            for (; i < size; ++i)
+                dst[i] *= src[i] > 0 ? 1.0f : s;
+        }
+
+        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralDerivativeRelu<true>(src, size, slope, dst);
+            else
+                NeuralDerivativeRelu<false>(src, size, slope, dst);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

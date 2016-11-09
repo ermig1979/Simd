@@ -322,7 +322,7 @@ namespace Simd
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst));
-            float s = -slope[0];
+            float s = slope[0];
             __m128 _0 = _mm_set1_ps(0.0f);
             __m128 _s = _mm_set1_ps(s);
             __m128 d = _mm_set1_ps(1.0f - s);
