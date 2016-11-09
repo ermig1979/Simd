@@ -2320,6 +2320,11 @@ SIMD_API void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width
         Sse::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DF)
+        Neon::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
         Base::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
 }
 

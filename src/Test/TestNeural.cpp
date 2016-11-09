@@ -1064,6 +1064,11 @@ namespace Test
             result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Avx::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Neon::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
+#endif
+
         return result;
     }
 

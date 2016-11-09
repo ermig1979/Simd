@@ -371,6 +371,44 @@ namespace Simd
             else
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
+
+        template <bool align> SIMD_INLINE float32x4_t Max2x2(const float * src, size_t stride)
+        {
+            float32x4_t s0 = vmaxq_f32(Load<align>(src + 0), Load<align>(src + stride + 0));
+            float32x4_t s1 = vmaxq_f32(Load<align>(src + F), Load<align>(src + stride + F));
+            return vcombine_f32(vpmax_f32(vget_low_f32(s0), vget_high_f32(s0)), vpmax_f32(vget_low_f32(s1), vget_high_f32(s1)));
+        }
+
+        template <bool align> void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            assert((width & 1) == 0 && (height & 1) == 0);
+            if (align)
+                assert(Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F));
+
+            size_t alignedWidth = AlignLo(width, DF);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                {
+                    Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - DF;
+                    Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
+                }
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralMax2x2<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                NeuralMax2x2<false>(src, srcStride, width, height, dst, dstStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
