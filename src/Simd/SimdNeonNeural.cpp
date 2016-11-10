@@ -409,6 +409,55 @@ namespace Simd
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
 
+        template <bool align> SIMD_INLINE void UpdateWeights(const float * x, const float32x4_t & a, const float32x4_t & b, float * d, float * w)
+        {
+            float32x4_t _d = vaddq_f32(vmulq_f32(a, Load<align>(d)), vmulq_f32(b, Load<align>(x)));
+            Store<align>(d, _d);
+            Store<align>(w, vaddq_f32(Load<align>(w), _d));
+        }
+
+        template <bool align> SIMD_INLINE void UpdateWeights(const float * x, size_t offset, const float32x4_t & a, const float32x4_t & b, float * d, float * w)
+        {
+            UpdateWeights<align>(x + offset, a, b, d + offset, w + offset);
+        }
+
+        template <bool align> void NeuralUpdateWeights(const float * x, size_t size, const float & a, const float & b, float * d, float * w)
+        {
+            if (align)
+                assert(Aligned(x) && Aligned(d) && Aligned(w));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            float32x4_t _a = vdupq_n_f32(a);
+            float32x4_t _b = vdupq_n_f32(b);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        UpdateWeights<align>(x, i + F * 0, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 1, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 2, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 3, _a, _b, d, w);
+                    }
+                }
+                for (; i < partialAlignedSize; i += F)
+                    UpdateWeights<align>(x, i, _a, _b, d, w);
+            }
+            for (; i < size; ++i)
+                Base::UpdateWeights(x, i, a, b, d, w);
+        }
+
+        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
+        {
+            if (Aligned(x) && Aligned(d) && Aligned(w))
+                NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
+            else
+                NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
+        }
+
         template <bool align> SIMD_INLINE float32x4_t Max2x2(const float * src, size_t stride)
         {
             float32x4_t s0 = vmaxq_f32(Load<align>(src + 0), Load<align>(src + stride + 0));
