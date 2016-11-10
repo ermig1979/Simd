@@ -2127,7 +2127,7 @@ SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size
 }
 
 typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC2(NeuralAddVectorMultipliedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC3(NeuralAddVectorMultipliedByValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
 {
