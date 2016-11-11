@@ -458,6 +458,59 @@ namespace Simd
                 NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
         }
 
+
+        template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, const float32x4_t & norm, const float32x4_t & alpha, const float32x4_t & epsilon, float * gradient, float * weight)
+        {
+            float32x4_t d = vmulq_f32(Load<align>(delta), norm);
+            float32x4_t _gradient = vaddq_f32(Load<align>(gradient), vmulq_f32(d, d));
+            Store<align>(gradient, _gradient);
+            Store<align>(weight, vsubq_f32(Load<align>(weight), vmulq_f32(vmulq_f32(alpha, d), ReciprocalSqrt<1>(vaddq_f32(_gradient, epsilon)))));
+        }
+
+        template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, const float32x4_t & norm, const float32x4_t & alpha, const float32x4_t & epsilon, float * gradient, float * weight)
+        {
+            AdaptiveGradientUpdate<align>(delta + offset, norm, alpha, epsilon, gradient + offset, weight + offset);
+        }
+
+        template <bool align> void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+        {
+            if (align)
+                assert(Aligned(delta) && Aligned(gradient) && Aligned(weight));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            const float norm = (float)(1.0 / batch);
+            float32x4_t _norm = vdupq_n_f32(norm);
+            float32x4_t _alpha = vdupq_n_f32(*alpha);
+            float32x4_t _epsilon = vdupq_n_f32(*epsilon);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        AdaptiveGradientUpdate<align>(delta, i + F * 0, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 1, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 2, _norm, _alpha, _epsilon, gradient, weight);
+                        AdaptiveGradientUpdate<align>(delta, i + F * 3, _norm, _alpha, _epsilon, gradient, weight);
+                    }
+                }
+                for (; i < partialAlignedSize; i += F)
+                    AdaptiveGradientUpdate<align>(delta, i, _norm, _alpha, _epsilon, gradient, weight);
+            }
+            for (; i < size; ++i)
+                Base::AdaptiveGradientUpdate(delta, i, norm, *alpha, *epsilon, gradient, weight);
+        }
+
+        void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+        {
+            if (Aligned(delta) && Aligned(gradient) && Aligned(weight))
+                NeuralAdaptiveGradientUpdate<true>(delta, size, batch, alpha, epsilon, gradient, weight);
+            else
+                NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
+        }
+
         template <bool align> SIMD_INLINE float32x4_t Max2x2(const float * src, size_t stride)
         {
             float32x4_t s0 = vmaxq_f32(Load<align>(src + 0), Load<align>(src + stride + 0));

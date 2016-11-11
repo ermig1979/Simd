@@ -841,7 +841,38 @@ namespace Simd
 			return vld1q_f32(c);
 		};
 
-        template <int iter> SIMD_INLINE float32x4_t Sqrt(const float32x4_t & a);
+        template <int iter> SIMD_INLINE float32x4_t ReciprocalSqrt(const float32x4_t & a);
+
+        template <> SIMD_INLINE float32x4_t ReciprocalSqrt<-1>(const float32x4_t & a)
+        {
+            float _a[4];
+            vst1q_f32(_a, a);
+            float r[4] = { 1.0f/::sqrtf(_a[0]), 1.0f/::sqrtf(_a[1]), 1.0f/::sqrtf(_a[2]), 1.0f/::sqrtf(_a[3]) };
+            return vld1q_f32(r);
+        }
+
+        template<> SIMD_INLINE float32x4_t ReciprocalSqrt<0>(const float32x4_t & a)
+        {
+            return vrsqrteq_f32(a);
+        }
+
+        template<> SIMD_INLINE float32x4_t ReciprocalSqrt<1>(const float32x4_t & a)
+        {
+            float32x4_t e = vrsqrteq_f32(a);
+            return vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+        }
+
+        template<> SIMD_INLINE float32x4_t ReciprocalSqrt<2>(const float32x4_t & a)
+        {
+            float32x4_t e = vrsqrteq_f32(a);
+            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+            return vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
+        }
+
+        template <int iter> SIMD_INLINE float32x4_t Sqrt(const float32x4_t & a)
+        {
+            return vmulq_f32(a, ReciprocalSqrt<iter>(a));
+        }
 
         template <> SIMD_INLINE float32x4_t Sqrt<-1>(const float32x4_t & a)
         {
@@ -849,27 +880,6 @@ namespace Simd
             vst1q_f32(_a, a);
             float r[4] = { ::sqrtf(_a[0]), ::sqrtf(_a[1]), ::sqrtf(_a[2]), ::sqrtf(_a[3]) };
             return vld1q_f32(r);
-        }
-
-        template<> SIMD_INLINE float32x4_t Sqrt<0>(const float32x4_t & a)
-        {
-            float32x4_t e = vrsqrteq_f32(a);
-            return vmulq_f32(e, a);
-        }
-
-        template<> SIMD_INLINE float32x4_t Sqrt<1>(const float32x4_t & a)
-        {
-            float32x4_t e = vrsqrteq_f32(a);
-            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
-            return vmulq_f32(e, a);
-        }
-
-        template<> SIMD_INLINE float32x4_t Sqrt<2>(const float32x4_t & a)
-        {
-            float32x4_t e = vrsqrteq_f32(a);
-            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
-            e = vmulq_f32(vrsqrtsq_f32(vmulq_f32(e, e), a), e);
-            return vmulq_f32(e, a);
         }
 
 		template <int part> SIMD_INLINE int16x8_t Sub(uint8x16_t a, uint8x16_t b)
