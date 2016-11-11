@@ -896,6 +896,17 @@ namespace Simd
         {
             return vcvtq_f32_u32(UnpackU16<part>(a));
         }
+
+        SIMD_INLINE float32x4_t RightNotZero(size_t count)
+        {
+            const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
+            return vld1q_f32((float*)(mask + count));
+        }
+
+        SIMD_INLINE float32x4_t And(float32x4_t a, float32x4_t b)
+        {
+            return (float32x4_t)vandq_u32((uint32x4_t)a, (uint32x4_t)b);
+        }
 	}
 #endif//SIMD_NEON_ENABLE
 }

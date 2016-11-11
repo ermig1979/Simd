@@ -844,6 +844,11 @@ namespace Test
             result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Neon::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
+#endif
+
         return result;
     }
 

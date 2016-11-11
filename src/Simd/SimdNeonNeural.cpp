@@ -511,6 +511,64 @@ namespace Simd
                 NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
         }
 
+        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, float32x4_t * dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = vdupq_n_f32(src[i]);
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Convolution3(const float * src, const float32x4_t * weights)
+        {
+            return vaddq_f32(vmulq_f32(Load<align>(src), weights[0]),
+                vaddq_f32(vmulq_f32(Load<false>(src + 1), weights[1]),
+                    vmulq_f32(Load<false>(src + 2), weights[2])));
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Convolution3x3(const float * src, size_t stride, const float32x4_t * weights)
+        {
+            return vaddq_f32(Convolution3<align>(src, weights),
+                vaddq_f32(Convolution3<align>(src + stride, weights + 3),
+                    Convolution3<align>(src + 2 * stride, weights + 6)));
+        }
+
+        template <bool align> void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            assert(width >= Neon::F);
+            if (align)
+                assert(Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F));
+
+            size_t alignedWidth = AlignLo(width, F);
+            float32x4_t tailMask = RightNotZero(width - alignedWidth);
+            float32x4_t _weights[9];
+            LoadWeights<9>(weights, _weights);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    float32x4_t _dst = Load<align>(dst + col);
+                    _dst = vaddq_f32(_dst, Convolution3x3<align>(src + col, srcStride, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+                if (width - alignedWidth)
+                {
+                    size_t col = width - F;
+                    float32x4_t _dst = Load<false>(dst + col);
+                    _dst = vaddq_f32(_dst, And(tailMask, Convolution3x3<false>(src + col, srcStride, _weights)));
+                    Store<false>(dst + col, _dst);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolution3x3<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                NeuralAddConvolution3x3<false>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
         template <bool align> SIMD_INLINE float32x4_t Max2x2(const float * src, size_t stride)
         {
             float32x4_t s0 = vmaxq_f32(Load<align>(src + 0), Load<align>(src + stride + 0));
