@@ -2263,7 +2263,7 @@ SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, s
 }
 
 typedef void(*SimdNeuralAddConvolution3x3BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-SimdNeuralAddConvolution3x3BackPtr simdNeuralAddConvolution3x3Back = SIMD_FUNC2(NeuralAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdNeuralAddConvolution3x3BackPtr simdNeuralAddConvolution3x3Back = SIMD_FUNC3(NeuralAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
