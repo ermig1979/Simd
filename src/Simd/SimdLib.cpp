@@ -2254,6 +2254,11 @@ SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, s
         Sse::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F)
+        Neon::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
         Base::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
 }
 
