@@ -252,6 +252,8 @@ namespace Simd
 
         void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+
         void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
