@@ -1033,6 +1033,11 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Neon::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+#endif
+
         return result;
     }
 

@@ -800,7 +800,7 @@ namespace Simd
             sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
             sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
             sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Load<false>(src + 3)));
-            sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Load<false>(src + 4)));
+            sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Load<align>(src + 4)));
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied5x5(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
