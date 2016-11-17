@@ -250,6 +250,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+#endif
+
         return result;
     }
 
