@@ -125,12 +125,14 @@ namespace Simd
             return vsubq_u32(vsubq_u32(s0, s1), vsubq_u32(s2, s3));
         }
 
-        //SIMD_INLINE __m128i Sum32ii(uint32_t * const ptr[4], size_t offset)
-        //{
-        //    __m128i lo = Sum32ip(ptr, offset + 0);
-        //    __m128i hi = Sum32ip(ptr, offset + 4);
-        //    return _mm_or_si128(_mm_srli_si128(_mm_shuffle_epi32(lo, 0x80), 8), _mm_slli_si128(_mm_shuffle_epi32(hi, 0x08), 8));
-        //}
+        SIMD_INLINE uint32x4_t Sum32ii(uint32_t * const ptr[4], size_t offset)
+        {
+            uint32x4x2_t s0 = vld2q_u32(ptr[0] + offset);
+            uint32x4x2_t s1 = vld2q_u32(ptr[1] + offset);
+            uint32x4x2_t s2 = vld2q_u32(ptr[2] + offset);
+            uint32x4x2_t s3 = vld2q_u32(ptr[3] + offset);
+            return vsubq_u32(vsubq_u32(s0.val[0], s1.val[0]), vsubq_u32(s2.val[0], s3.val[0]));
+        }
 
         SIMD_INLINE float32x4_t Norm32fp(const HidHaarCascade & hid, size_t offset)
         {
@@ -140,13 +142,13 @@ namespace Simd
             return ValidSqrt(vmlsq_f32(vmulq_f32(sqsum, area), sum, sum));
         }
 
-        //SIMD_INLINE __m128 Norm32fi(const HidHaarCascade & hid, size_t offset)
-        //{
-        //    __m128 area = _mm_set1_ps(hid.windowArea);
-        //    __m128 sum = _mm_cvtepi32_ps(Sum32ii(hid.p, offset));
-        //    __m128 sqsum = _mm_cvtepi32_ps(Sum32ii(hid.pq, offset));
-        //    return ValidSqrt(_mm_sub_ps(_mm_mul_ps(sqsum, area), _mm_mul_ps(sum, sum)));
-        //}
+        SIMD_INLINE float32x4_t Norm32fi(const HidHaarCascade & hid, size_t offset)
+        {
+            float32x4_t area = vdupq_n_f32(hid.windowArea);
+            float32x4_t sum = vcvtq_f32_u32(Sum32ii(hid.p, offset));
+            float32x4_t sqsum = vcvtq_f32_u32(Sum32ii(hid.pq, offset));
+            return ValidSqrt(vmlsq_f32(vmulq_f32(sqsum, area), sum, sum));
+        }
 
         SIMD_INLINE float32x4_t WeightedSum32f(const WeightedRect & rect, size_t offset)
         {
@@ -228,7 +230,7 @@ namespace Simd
             typedef HidHaarCascade Hid;
 
             size_t width = rect.Width();
-            size_t alignedWidth = Simd::AlignLo(width, 4);
+            size_t alignedWidth = Simd::AlignLo(width, F);
             size_t evenWidth = Simd::AlignLo(width, 2);
 
             Buffer<uint32_t> buffer(width);
@@ -240,7 +242,7 @@ namespace Simd
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
                 memset(buffer.d, 0, width*sizeof(uint32_t));
-                for (; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += F)
                 {
                     uint32x4_t result = vld1q_u32(buffer.m + col);
                     if (ResultCount(result) == 0)
@@ -251,7 +253,7 @@ namespace Simd
                 }
                 if (evenWidth > alignedWidth + 2)
                 {
-                    col = evenWidth - 4;
+                    col = evenWidth - F;
                     uint32x4_t result = vld1q_u32(buffer.m + col);
                     if (ResultCount(result) != 0)
                     {
@@ -259,7 +261,7 @@ namespace Simd
                         Detect32f(hid, p_offset + col, norm, result);
                         vst1q_u32(buffer.d + col, result);
                     }
-                    col += 4;
+                    col += F;
                 }
                 for (; col < width; col += 1)
                 {
@@ -277,6 +279,67 @@ namespace Simd
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
             return DetectionHaarDetect32fp(hid,
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+        }
+
+        void DetectionHaarDetect32fi(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
+        {
+            typedef HidHaarCascade Hid;
+
+            const size_t step = 2;
+            size_t width = rect.Width();
+            size_t alignedWidth = Simd::AlignLo(width, HA);
+            size_t evenWidth = Simd::AlignLo(width, 2);
+
+            Buffer<uint16_t> buffer(evenWidth);
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+            {
+                size_t col = 0;
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
+                size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
+
+                UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, (uint8x16_t)K16_0001);
+                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                for (; col < alignedWidth; col += HA)
+                {
+                    uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
+                    if (ResultCount(result) == 0)
+                        continue;
+                    float32x4_t norm = Norm32fi(hid, pq_offset + col);
+                    Detect32f(hid, p_offset + col / 2, norm, result);
+                    vst1q_u16(buffer.d + col, (uint16x8_t)result);
+                }
+                if (evenWidth > alignedWidth)
+                {
+                    col = evenWidth - HA;
+                    uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
+                    if (ResultCount(result) != 0)
+                    {
+                        float32x4_t norm = Norm32fi(hid, pq_offset + col);
+                        Detect32f(hid, p_offset + col / 2, norm, result);
+                        vst1q_u16(buffer.d + col, (uint16x8_t)result);
+                    }
+                    col += HA;
+                }
+                for (; col < width; col += step)
+                {
+                    if (mask.At<uint8_t>(col + rect.left, row) == 0)
+                        continue;
+                    float norm = Base::Norm32f(hid, pq_offset + col);
+                    if (Base::Detect32f(hid, p_offset + col / 2, 0, norm) > 0)
+                        dst.At<uint8_t>(col + rect.left, row) = 1;
+                }
+                PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride + rect.left);
+            }
+        }
+
+        void DetectionHaarDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
+            return DetectionHaarDetect32fi(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
