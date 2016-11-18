@@ -344,6 +344,172 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
+
+        const uint8x16_t K8_TBL_BITS = SIMD_VEC_SETR_EPI8(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+
+        SIMD_INLINE uint8x16_t Shuffle(const uint8x16_t & src, const uint8x16_t & shuffle)
+        {
+            return vcombine_u8(vtbl2_u8((const uint8x8x2_t &)src, vget_low_u8(shuffle)), vtbl2_u8((const uint8x8x2_t &)src, vget_high_u8(shuffle)));
+        }
+
+        SIMD_INLINE uint32x4_t IntegralSum32i(const uint32x4_t & s0, const uint32x4_t & s1, const uint32x4_t & s2, const uint32x4_t & s3)
+        {
+            return vsubq_u32(vsubq_u32(s0, s1), vsubq_u32(s2, s3));
+        }
+
+        template<int i> SIMD_INLINE void Load(uint32x4_t a[16], const HidLbpFeature<int> & feature, ptrdiff_t offset)
+        {
+            a[i] = vld1q_u32((uint32_t*)feature.p[i] + offset);
+        }
+
+        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, uint32x4_t & index, uint32x4_t & shuffle, uint32x4_t & mask)
+        {
+            uint32x4_t a[16];
+            Load<5>(a, feature, offset);
+            Load<6>(a, feature, offset);
+            Load<9>(a, feature, offset);
+            Load<10>(a, feature, offset);
+            uint32x4_t central = IntegralSum32i(a[5], a[6], a[9], a[10]);
+
+            Load<0>(a, feature, offset);
+            Load<1>(a, feature, offset);
+            Load<4>(a, feature, offset);
+            index = vcgeq_u32(IntegralSum32i(a[0], a[1], a[4], a[5]), central);
+
+            shuffle = K32_FFFFFF00;
+            Load<2>(a, feature, offset);
+            shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[1], a[2], a[5], a[6]), central), K32_00000008));
+            Load<3>(a, feature, offset);
+            Load<7>(a, feature, offset);
+            shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[2], a[3], a[6], a[7]), central), K32_00000004));
+            Load<11>(a, feature, offset);
+            shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[6], a[7], a[10], a[11]), central), K32_00000002));
+            Load<14>(a, feature, offset);
+            Load<15>(a, feature, offset);
+            shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[10], a[11], a[14], a[15]), central), K32_00000001));
+
+            mask = K32_08080800;
+            Load<13>(a, feature, offset);
+            mask = vorrq_u32(mask, vandq_u32(vcgeq_u32(IntegralSum32i(a[9], a[10], a[13], a[14]), central), K32_00000004));
+            Load<12>(a, feature, offset);
+            Load<8>(a, feature, offset);
+            mask = vorrq_u32(mask, vandq_u32(vcgeq_u32(IntegralSum32i(a[8], a[9], a[12], a[13]), central), K32_00000002));
+            mask = vorrq_u32(mask, vandq_u32(vcgeq_u32(IntegralSum32i(a[4], a[5], a[8], a[9]), central), K32_00000001));
+            mask = (uint32x4_t)Shuffle(K8_TBL_BITS, (uint8x16_t)mask);
+        }
+
+        SIMD_INLINE uint32x4_t LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset)
+        {
+            uint32x4_t index, shuffle, mask;
+            Calculate(feature, offset, index, shuffle, mask);
+
+            uint32x4_t subset0 = vld1q_u32((uint32_t*)subset + 0);
+            uint32x4_t subset1 = vld1q_u32((uint32_t*)subset + F);
+
+            uint32x4_t value0 = vandq_u32((uint32x4_t)Shuffle((uint8x16_t)subset0, (uint8x16_t)shuffle), mask);
+            uint32x4_t value1 = vandq_u32((uint32x4_t)Shuffle((uint8x16_t)subset1, (uint8x16_t)shuffle), mask);
+            uint32x4_t value = vbslq_u32(index, value1, value0);
+
+            return vmvnq_u32(vceqq_u32(value, K32_00000000));
+        }
+
+        void Detect(const HidLbpCascade<float, int> & hid, size_t offset, uint32x4_t & result)
+        {
+            typedef HidLbpCascade<float, int> Hid;
+
+            size_t subsetSize = (hid.ncategories + 31) / 32;
+            const int * subsets = hid.subsets.data();
+            const Hid::Leave * leaves = hid.leaves.data();
+            const Hid::Node * nodes = hid.nodes.data();
+            const Hid::Stage * stages = hid.stages.data();
+            int nodeOffset = 0, leafOffset = 0;
+            for (int i_stage = 0, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
+            {
+                const Hid::Stage & stage = stages[i_stage];
+                float32x4_t sum = vdupq_n_f32(0.0f);
+                for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
+                {
+                    const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
+                    const int * subset = subsets + nodeOffset*subsetSize;
+                    uint32x4_t mask = LeafMask(feature, offset, subset);
+                    sum = vaddq_f32(sum, vbslq_f32(mask, vdupq_n_f32(leaves[leafOffset + 0]), vdupq_n_f32(leaves[leafOffset + 1])));
+                    nodeOffset++;
+                    leafOffset += 2;
+                }
+                result = vandq_u32(vcleq_f32(vdupq_n_f32(stage.threshold), sum), result);
+                int resultCount = ResultCount(result);
+                if (resultCount == 0)
+                    return;
+                else if (resultCount == 1)
+                {
+                    uint32_t _result[4];
+                    vst1q_u32(_result, result);
+                    for (int i = 0; i < 4; ++i)
+                    {
+                        if (_result[i])
+                        {
+                            _result[i] = Base::Detect(hid, offset + i, i_stage + 1) > 0 ? 1 : 0;
+                            break;
+                        }
+                    }
+                    result = vld1q_u32(_result);
+                    return;
+                }
+            }
+        }
+
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+        {
+            size_t width = rect.Width();
+            size_t alignedWidth = Simd::AlignLo(width, 4);
+            size_t evenWidth = Simd::AlignLo(width, 2);
+
+            Buffer<uint32_t> buffer(width);
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
+            {
+                size_t col = 0;
+                size_t offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
+
+                UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
+                memset(buffer.d, 0, width*sizeof(uint32_t));
+                for (; col < alignedWidth; col += 4)
+                {
+                    uint32x4_t result = vld1q_u32(buffer.m + col);
+                    if (ResultCount(result) == 0)
+                        continue;
+                    Detect(hid, offset + col, result);
+                    vst1q_u32(buffer.d + col, result);
+                }
+                if (evenWidth > alignedWidth + 2)
+                {
+                    col = evenWidth - 4;
+                    uint32x4_t result = vld1q_u32(buffer.m + col);
+                    if (ResultCount(result) != 0)
+                    {
+                        Detect(hid, offset + col, result);
+                        vst1q_u32(buffer.d + col, result);
+                    }
+                    col += 4;
+                }
+                for (; col < width; col += 1)
+                {
+                    if (buffer.m[col] == 0)
+                        continue;
+                    buffer.d[col] = Base::Detect(hid, offset + col, 0) > 0 ? 1 : 0;
+                }
+                PackResult32i(buffer.d, width, dst.data + row*dst.stride + rect.left);
+            }
+        }
+
+        void DetectionLbpDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            return DetectionLbpDetect32fp(hid,
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
