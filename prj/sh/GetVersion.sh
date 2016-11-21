@@ -18,8 +18,7 @@ which svn > /dev/null
 if [ $? -eq 0 ];
 then
 	SVN_INFO=`svn info $TRUNK_DIR`
-	error=$?
-	if [ $error -eq 0 ]; 
+	if [ $? -eq 0 ] 
 	then
 		printf . >>$FULL_VERSION_TXT
 		svn info $TRUNK_DIR | grep Revision: | cut -c11->>$FULL_VERSION_TXT

@@ -15,7 +15,9 @@ endif()
 
 include_directories(${TRUNK_DIR}/src)
 
-execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
+if((CHECK_VERSION STREQUAL "") OR (CHECK_VERSION STREQUAL "1"))
+ execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
+endif()
 
 message("CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
 

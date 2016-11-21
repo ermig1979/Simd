@@ -352,6 +352,11 @@ namespace Simd
             return vcombine_u8(vtbl2_u8((const uint8x8x2_t &)src, vget_low_u8(shuffle)), vtbl2_u8((const uint8x8x2_t &)src, vget_high_u8(shuffle)));
         }
 
+        SIMD_INLINE uint8x16_t Shuffle(const uint8x16x2_t & src, const uint8x16_t & shuffle)
+        {
+            return vcombine_u8(vtbl4_u8((const uint8x8x4_t &)src, vget_low_u8(shuffle)), vtbl4_u8((const uint8x8x4_t &)src, vget_high_u8(shuffle)));
+        }
+
         SIMD_INLINE uint32x4_t IntegralSum32i(const uint32x4_t & s0, const uint32x4_t & s1, const uint32x4_t & s2, const uint32x4_t & s3)
         {
             return vsubq_u32(vsubq_u32(s0, s1), vsubq_u32(s2, s3));
@@ -362,7 +367,7 @@ namespace Simd
             a[i] = vld1q_u32((uint32_t*)feature.p[i] + offset);
         }
 
-        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, uint32x4_t & index, uint32x4_t & shuffle, uint32x4_t & mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, uint32x4_t & shuffle, uint32x4_t & mask)
         {
             uint32x4_t a[16];
             Load<5>(a, feature, offset);
@@ -374,9 +379,9 @@ namespace Simd
             Load<0>(a, feature, offset);
             Load<1>(a, feature, offset);
             Load<4>(a, feature, offset);
-            index = vcgeq_u32(IntegralSum32i(a[0], a[1], a[4], a[5]), central);
 
             shuffle = K32_FFFFFF00;
+            shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[0], a[1], a[4], a[5]), central), K32_00000010));
             Load<2>(a, feature, offset);
             shuffle = vorrq_u32(shuffle, vandq_u32(vcgeq_u32(IntegralSum32i(a[1], a[2], a[5], a[6]), central), K32_00000008));
             Load<3>(a, feature, offset);
@@ -400,15 +405,13 @@ namespace Simd
 
         SIMD_INLINE uint32x4_t LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset)
         {
-            uint32x4_t index, shuffle, mask;
-            Calculate(feature, offset, index, shuffle, mask);
+            uint32x4_t shuffle, mask;
+            Calculate(feature, offset, shuffle, mask);
 
-            uint32x4_t subset0 = vld1q_u32((uint32_t*)subset + 0);
-            uint32x4_t subset1 = vld1q_u32((uint32_t*)subset + F);
-
-            uint32x4_t value0 = vandq_u32((uint32x4_t)Shuffle((uint8x16_t)subset0, (uint8x16_t)shuffle), mask);
-            uint32x4_t value1 = vandq_u32((uint32x4_t)Shuffle((uint8x16_t)subset1, (uint8x16_t)shuffle), mask);
-            uint32x4_t value = vbslq_u32(index, value1, value0);
+            uint8x16x2_t _subset;
+            _subset.val[0] = vld1q_u8((uint8_t*)subset + 0);
+            _subset.val[1] = vld1q_u8((uint8_t*)subset + A);
+            uint32x4_t value = vandq_u32((uint32x4_t)Shuffle(_subset, (uint8x16_t)shuffle), mask);
 
             return vmvnq_u32(vceqq_u32(value, K32_00000000));
         }
