@@ -346,6 +346,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+#endif
+
         return result;
     }
 

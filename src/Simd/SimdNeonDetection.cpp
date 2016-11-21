@@ -568,6 +568,161 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
+
+        SIMD_INLINE uint16x8_t IntegralSum16i(const uint16x8_t & s0, const uint16x8_t & s1, const uint16x8_t & s2, const uint16x8_t & s3)
+        {
+            return vsubq_u16(vsubq_u16(s0, s1), vsubq_u16(s2, s3));
+        }
+
+        template<int i> SIMD_INLINE void Load(uint16x8_t a[16], const HidLbpFeature<short> & feature, ptrdiff_t offset)
+        {
+            a[i] = vld1q_u16((uint16_t*)feature.p[i] + offset);
+        }
+
+        SIMD_INLINE void Calculate(const HidLbpFeature<short> & feature, ptrdiff_t offset, uint16x8_t & shuffle, uint16x8_t & mask)
+        {
+            uint16x8_t a[16];
+            Load<5>(a, feature, offset);
+            Load<6>(a, feature, offset);
+            Load<9>(a, feature, offset);
+            Load<10>(a, feature, offset);
+            uint16x8_t central = IntegralSum16i(a[5], a[6], a[9], a[10]);
+
+            Load<0>(a, feature, offset);
+            Load<1>(a, feature, offset);
+            Load<4>(a, feature, offset);
+
+            shuffle = K16_FF00;
+            shuffle = vorrq_u16(shuffle, vandq_u16(vcgeq_u16(IntegralSum16i(a[0], a[1], a[4], a[5]), central), K16_0010));
+            Load<2>(a, feature, offset);
+            shuffle = vorrq_u16(shuffle, vandq_u16(vcgeq_u16(IntegralSum16i(a[1], a[2], a[5], a[6]), central), K16_0008));
+            Load<3>(a, feature, offset);
+            Load<7>(a, feature, offset);
+            shuffle = vorrq_u16(shuffle, vandq_u16(vcgeq_u16(IntegralSum16i(a[2], a[3], a[6], a[7]), central), K16_0004));
+            Load<11>(a, feature, offset);
+            shuffle = vorrq_u16(shuffle, vandq_u16(vcgeq_u16(IntegralSum16i(a[6], a[7], a[10], a[11]), central), K16_0002));
+            Load<14>(a, feature, offset);
+            Load<15>(a, feature, offset);
+            shuffle = vorrq_u16(shuffle, vandq_u16(vcgeq_u16(IntegralSum16i(a[10], a[11], a[14], a[15]), central), K16_0001));
+
+            mask = K16_0800;
+            Load<13>(a, feature, offset);
+            mask = vorrq_u16(mask, vandq_u16(vcgeq_u16(IntegralSum16i(a[9], a[10], a[13], a[14]), central), K16_0004));
+            Load<12>(a, feature, offset);
+            Load<8>(a, feature, offset);
+            mask = vorrq_u16(mask, vandq_u16(vcgeq_u16(IntegralSum16i(a[8], a[9], a[12], a[13]), central), K16_0002));
+            mask = vorrq_u16(mask, vandq_u16(vcgeq_u16(IntegralSum16i(a[4], a[5], a[8], a[9]), central), K16_0001));
+            mask = (uint16x8_t)Shuffle(K8_TBL_BITS, (uint8x16_t)mask);
+        }
+
+        SIMD_INLINE uint16x8_t LeafMask(const HidLbpFeature<short> & feature, ptrdiff_t offset, const int * subset)
+        {
+            uint16x8_t shuffle, mask;
+            Calculate(feature, offset, shuffle, mask);
+
+            uint8x16x2_t _subset;
+            _subset.val[0] = vld1q_u8((uint8_t*)subset + 0);
+            _subset.val[1] = vld1q_u8((uint8_t*)subset + A);
+            uint16x8_t value = vandq_u16((uint16x8_t)Shuffle(_subset, (uint8x16_t)shuffle), mask);
+
+            return vmvnq_u16(vceqq_u16(value, K16_0000));
+        }
+
+        void Detect(const HidLbpCascade<int, short> & hid, size_t offset, uint16x8_t & result)
+        {
+            typedef HidLbpCascade<int, short> Hid;
+
+            size_t subsetSize = (hid.ncategories + 31) / 32;
+            const int * subsets = hid.subsets.data();
+            const Hid::Leave * leaves = hid.leaves.data();
+            const Hid::Node * nodes = hid.nodes.data();
+            const Hid::Stage * stages = hid.stages.data();
+            int nodeOffset = 0, leafOffset = 0;
+            for (int i_stage = 0, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
+            {
+                const Hid::Stage & stage = stages[i_stage];
+                int16x8_t sum = vdupq_n_s16(0);
+                for (int i_tree = 0, n_trees = stage.ntrees; i_tree < n_trees; i_tree++)
+                {
+                    const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
+                    const int * subset = subsets + nodeOffset*subsetSize;
+                    uint16x8_t mask = LeafMask(feature, offset, subset);
+                    sum = vaddq_s16(sum, vbslq_s16(mask, vdupq_n_s16(leaves[leafOffset + 0]), vdupq_n_s16(leaves[leafOffset + 1])));
+                    nodeOffset++;
+                    leafOffset += 2;
+                }
+                result = vandq_u16(vcleq_s16(vdupq_n_s16(stage.threshold), sum), result);
+                int resultCount = ResultCount(result);
+                if (resultCount == 0)
+                    return;
+                else if (resultCount == 1)
+                {
+                    uint16_t _result[HA];
+                    vst1q_u16(_result, result);
+                    for (int i = 0; i < HA; ++i)
+                    {
+                        if (_result[i])
+                        {
+                            _result[i] = Base::Detect(hid, offset + i, i_stage + 1) > 0 ? 1 : 0;
+                            break;
+                        }
+                    }
+                    result = vld1q_u16(_result);
+                    return;
+                }
+            }
+        }
+
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+        {
+            size_t width = rect.Width();
+            size_t alignedWidth = Simd::AlignLo(width, HA);
+            size_t evenWidth = Simd::AlignLo(width, 2);
+            Buffer<uint16_t> buffer(width);
+            for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
+            {
+                size_t col = 0;
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
+                UnpackMask16i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
+                memset(buffer.d, 0, width*sizeof(uint16_t));
+                for (; col < alignedWidth; col += HA)
+                {
+                    uint16x8_t result = vld1q_u16(buffer.m + col);
+                    if (ResultCount(result) == 0)
+                        continue;
+                    Detect(hid, offset + col, result);
+                    vst1q_u16(buffer.d + col, result);
+                }
+                if (evenWidth > alignedWidth + 2)
+                {
+                    col = evenWidth - HA;
+                    uint16x8_t result = vld1q_u16(buffer.m + col);
+                    if (ResultCount(result) != 0)
+                    {
+                        Detect(hid, offset + col, result);
+                        vst1q_u16(buffer.d + col, result);
+                    }
+                    col += HA;
+                }
+                for (; col < width; ++col)
+                {
+                    if (buffer.m[col] == 0)
+                        continue;
+                    buffer.d[col] = Base::Detect(hid, offset + col, 0) > 0 ? 1 : 0;
+                }
+                PackResult16i(buffer.d, width, dst.data + row*dst.stride + rect.left);
+            }
+        }
+
+        void DetectionLbpDetect16ip(const void * _hid, const uint8_t * mask, size_t maskStride,
+            ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+        {
+            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            return DetectionLbpDetect16ip(hid,
+                Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+                Rect(left, top, right, bottom),
+                Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

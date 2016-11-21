@@ -504,10 +504,13 @@ namespace Simd
 		const uint16x8_t K16_0005 = SIMD_VEC_SET1_EPI16(0x0005);
 		const uint16x8_t K16_0006 = SIMD_VEC_SET1_EPI16(0x0006);
 		const uint16x8_t K16_0008 = SIMD_VEC_SET1_EPI16(0x0008);
-		const uint16x8_t K16_0020 = SIMD_VEC_SET1_EPI16(0x0020);
+        const uint16x8_t K16_0010 = SIMD_VEC_SET1_EPI16(0x0010);
+        const uint16x8_t K16_0020 = SIMD_VEC_SET1_EPI16(0x0020);
 		const uint16x8_t K16_0080 = SIMD_VEC_SET1_EPI16(0x0080);
 		const uint16x8_t K16_00FF = SIMD_VEC_SET1_EPI16(0x00FF);
 		const uint16x8_t K16_0101 = SIMD_VEC_SET1_EPI16(0x0101);
+        const uint16x8_t K16_0800 = SIMD_VEC_SET1_EPI16(0x0800);
+        const uint16x8_t K16_FF00 = SIMD_VEC_SET1_EPI16(0xFF00);
 
 		const uint32x4_t K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
         const uint32x4_t K32_00000001 = SIMD_VEC_SET1_EPI32(0x00000001);
