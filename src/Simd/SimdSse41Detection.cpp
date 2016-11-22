@@ -738,7 +738,7 @@ namespace Simd
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left/2;
                 const uint8_t * m = mask.data + row*mask.stride + rect.left;
-                const uint8_t * d = dst.data + row*dst.stride + rect.left;
+                uint8_t * d = dst.data + row*dst.stride + rect.left;
                 for (; col < alignedWidth; col += A)
                 {
                     __m128i result = _mm_and_si128(_mm_loadu_si128((__m128i*)(m + col)), K16_0001);
