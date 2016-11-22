@@ -958,7 +958,7 @@ namespace Test
         FillRandom32f(dst, -1, 1);
 
         View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
-        FillRandom32f(sumsSrc, 1000, 2000);
+        FillRandom32f(sumsSrc, 2000, 3000);
 
         View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
         View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
@@ -1031,6 +1031,11 @@ namespace Test
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
             result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx2::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

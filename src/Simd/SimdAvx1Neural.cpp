@@ -747,13 +747,6 @@ namespace Simd
             AddMultiplied3<align>(src + stride * 2, dst, sums + 6);
         }
 
-        SIMD_INLINE void Add8ExtractedSums(const __m256 * src, float * dst)
-        {
-            __m256 lo = PermutedHorizontalAdd(PermutedHorizontalAdd(src[0], src[1]), PermutedHorizontalAdd(src[2], src[3]));
-            __m256 hi = PermutedHorizontalAdd(PermutedHorizontalAdd(src[4], src[5]), PermutedHorizontalAdd(src[6], src[7]));
-            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), PermutedHorizontalAdd(lo, hi)));
-        }
-
         template <bool align> void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);

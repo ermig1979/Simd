@@ -456,6 +456,13 @@ namespace Simd
         {
             return _mm256_hadd_ps(_mm256_permute2f128_ps(a, b, 0x20), _mm256_permute2f128_ps(a, b, 0x31));
         }
+
+        SIMD_INLINE void Add8ExtractedSums(const __m256 * src, float * dst)
+        {
+            __m256 lo = PermutedHorizontalAdd(PermutedHorizontalAdd(src[0], src[1]), PermutedHorizontalAdd(src[2], src[3]));
+            __m256 hi = PermutedHorizontalAdd(PermutedHorizontalAdd(src[4], src[5]), PermutedHorizontalAdd(src[6], src[7]));
+            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), PermutedHorizontalAdd(lo, hi)));
+        }
     }
 #endif//SIMD_AVX_ENABLE
 

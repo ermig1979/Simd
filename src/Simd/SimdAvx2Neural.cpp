@@ -83,6 +83,60 @@ namespace Simd
 			else
 				NeuralConvert<false>(src, stride, width, height, dst);
 		}
+
+        template <bool align> SIMD_INLINE void AddMultiplied5(const float * src, const __m256 & dst, __m256 * sums)
+        {
+            sums[0] = _mm256_fmadd_ps(dst, Avx::Load<align>(src + 0), sums[0]);
+            sums[1] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 1), sums[1]);
+            sums[2] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 2), sums[2]);
+            sums[3] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 3), sums[3]);
+            sums[4] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 4), sums[4]);
+        }
+
+        template <bool align> SIMD_INLINE void AddMultiplied5x5(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
+        {
+            AddMultiplied5<align>(src + stride * 0, dst, sums + 0);
+            AddMultiplied5<align>(src + stride * 1, dst, sums + 5);
+            AddMultiplied5<align>(src + stride * 2, dst, sums + 10);
+            AddMultiplied5<align>(src + stride * 3, dst, sums + 15);
+            AddMultiplied5<align>(src + stride * 4, dst, sums + 20);
+        }
+
+        template <bool align> void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            size_t alignedWidth = Simd::AlignLo(width, F);
+            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 _sums[25];
+            memset(_sums, 0, sizeof(_sums));
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    __m256 _dst = Avx::Load<align>(dst + col);
+                    AddMultiplied5x5<align>(src + col, srcStride, _dst, _sums);
+                }
+                if (alignedWidth < width)
+                {
+                    size_t col = width - F;
+                    __m256 _dst = _mm256_and_ps(tailMask, Avx::Load<false>(dst + col));
+                    AddMultiplied5x5<false>(src + col, srcStride, _dst, _sums);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+            Add8ExtractedSums(_sums + 0, sums + 0);
+            Add8ExtractedSums(_sums + 8, sums + 8);
+            Add8ExtractedSums(_sums + 16, sums + 16);
+            sums[24] += Avx::ExtractSum(_sums[24]);
+        }
+
+        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolution5x5Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+            else
+                NeuralAddConvolution5x5Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
