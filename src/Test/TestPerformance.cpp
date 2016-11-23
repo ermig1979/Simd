@@ -256,7 +256,7 @@ namespace Test
 
     template <class T> const T & Previous(const T & f)
     {
-        return (&f)[-1].Average() > 0 ? (&f)[-1] : Previous((&f)[-1]);
+        return (&f)[-1].first.Average() > 0 ? (&f)[-1] : Previous((&f)[-1]);
     }
 
     template<class Printer> 
@@ -372,7 +372,7 @@ namespace Test
 
         String Improving(const Value & a) const
         {
-            return ToString(Test::Relation(Previous(a.first), a.first), relation, fraction - 1);
+            return ToString(Test::Relation(Previous(a).first, a.first), relation, fraction - 1);
         }
 
         String Alignment(const Value & a) const

@@ -2310,6 +2310,11 @@ SIMD_API void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStrid
 
 SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F)
+        Avx2::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable && width >= Avx::F)
         Avx::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
