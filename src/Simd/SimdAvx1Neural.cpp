@@ -128,8 +128,8 @@ namespace Simd
 				__m256 x4 = _mm256_mul_ps(x2, x2);
 				__m256 series = _mm256_add_ps(_mm256_add_ps(_1, x), _mm256_add_ps(_mm256_mul_ps(x2, _a), _mm256_mul_ps(x4, _b)));
 				__m256 mask = _mm256_cmp_ps(_src, _0, _CMP_GT_OS);
-				__m256 exp = _mm256_or_ps(_mm256_and_ps(_mm256_rcp_ps(series), mask), _mm256_andnot_ps(mask, series));
-				__m256 sigmoid = _mm256_rcp_ps(_mm256_add_ps(_1, exp));
+                __m256 exp = _mm256_blendv_ps(series, _mm256_rcp_ps(series), mask);
+                __m256 sigmoid = _mm256_rcp_ps(_mm256_add_ps(_1, exp));
 				Store<align>(dst + i, sigmoid);
 			}
 			for (; i < size; ++i)
@@ -195,7 +195,7 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m256 _src = Load<align>(src + i);
+                __m256 _src = Load<align>(src + i); 
                 __m256 _dst = Load<align>(dst + i);
                 Store<align>(dst + i, _mm256_mul_ps(_mm256_mul_ps(_dst, _slope), _mm256_mul_ps(_mm256_sub_ps(_1, _src), _src)));
             }
@@ -306,11 +306,11 @@ namespace Simd
                 NeuralRelu<false>(src, size, slope, dst);
         }
 
-
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
             __m256 _0 = _mm256_set1_ps(0.0f);
+            __m256 _1 = _mm256_set1_ps(1.0f);
             __m256 _s = _mm256_set1_ps(s);
             __m256 d = _mm256_set1_ps(1.0f - s);
             size_t alignedSize = Simd::AlignLo(size, F);
@@ -319,7 +319,7 @@ namespace Simd
             {
                 __m256 mask = _mm256_cmp_ps(Load<align>(src + i), _0, _CMP_GT_OS);
                 __m256 _dst = Load<align>(dst + i);
-                Store<align>(dst + i, _mm256_mul_ps(_mm256_add_ps(_s, _mm256_and_ps(mask, d)), _dst));
+                Store<align>(dst + i, _mm256_mul_ps(_mm256_blendv_ps(_s, _1, mask), _dst));
             }
             for (; i < size; ++i)
                 dst[i] *= src[i] > 0 ? 1.0f : s;
