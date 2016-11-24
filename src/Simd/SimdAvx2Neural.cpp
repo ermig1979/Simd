@@ -92,6 +92,49 @@ namespace Simd
 				NeuralConvert<false>(src, stride, width, height, dst);
 		}
 
+        template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)
+        {
+            __m256 _src = Avx::Load<align>(src);
+            __m256 e1 = _mm256_max_ps(m, _mm256_fmadd_ps(_src, k, o));
+            __m256 e2 = _mm256_mul_ps(e1, e1);
+            __m256 e4 = _mm256_mul_ps(e2, e2);
+            __m256 e8 = _mm256_mul_ps(e4, e4);
+            __m256 e16 = _mm256_mul_ps(e8, e8);
+            __m256 e32 = _mm256_mul_ps(e16, e16);
+            __m256 e64 = _mm256_mul_ps(e32, e32);
+            __m256 sigmoid = _mm256_rcp_ps(_mm256_fmadd_ps(e64, e64, o));
+            Avx::Store<align>(dst, sigmoid);
+        }
+
+        template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
+        {
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            __m256 _k = _mm256_set1_ps(-(*slope)*0.0078125f);
+            __m256 _1 = _mm256_set1_ps(1.0f);
+            __m256 _05 = _mm256_set1_ps(0.5f);
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                NeuralRoughSigmoid2<align>(src + i + 0 * F, _k, _1, _05, dst + i + 0 * F);
+                NeuralRoughSigmoid2<align>(src + i + 1 * F, _k, _1, _05, dst + i + 1 * F);
+                NeuralRoughSigmoid2<align>(src + i + 2 * F, _k, _1, _05, dst + i + 2 * F);
+                NeuralRoughSigmoid2<align>(src + i + 3 * F, _k, _1, _05, dst + i + 3 * F);
+            }
+            for (; i < partialAlignedSize; i += F)
+                NeuralRoughSigmoid2<align>(src + i, _k, _1, _05, dst + i);
+            for (; i < size; ++i)
+                dst[i] = Base::RoughSigmoid2(src[i] * slope[0]);
+        }
+
+        void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralRoughSigmoid2<true>(src, size, slope, dst);
+            else
+                NeuralRoughSigmoid2<false>(src, size, slope, dst);
+        }
+
         template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m256 * dst)
         {
             for (size_t i = 0; i < size; ++i)

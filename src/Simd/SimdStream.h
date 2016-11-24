@@ -57,6 +57,33 @@ namespace Simd
     }
 #endif//SIMD_SSE_ENABLE
 
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
+    {
+        template <bool align, bool stream> SIMD_INLINE void Stream(__m128i  * p, __m128i a);
+
+        template <> SIMD_INLINE void Stream<false, false>(__m128i   * p, __m128i a)
+        {
+            _mm_storeu_si128(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<false, true>(__m128i   * p, __m128i a)
+        {
+            _mm_storeu_si128(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<true, false>(__m128i   * p, __m128i a)
+        {
+            _mm_store_si128(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<true, true>(__m128i   * p, __m128i a)
+        {
+            _mm_stream_si128(p, a);
+        }
+    }
+#endif//SIMD_SSE2_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
@@ -82,6 +109,33 @@ namespace Simd
             _mm256_stream_ps(p, a);
         }
     }
-#endif
+#endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        template <bool align, bool stream> SIMD_INLINE void Stream(__m256i  * p, __m256i a);
+
+        template <> SIMD_INLINE void Stream<false, false>(__m256i  * p, __m256i a)
+        {
+            _mm256_storeu_si256(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<false, true>(__m256i  * p, __m256i a)
+        {
+            _mm256_storeu_si256(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<true, false>(__m256i  * p, __m256i a)
+        {
+            _mm256_store_si256(p, a);
+        }
+
+        template <> SIMD_INLINE void Stream<true, true>(__m256i  * p, __m256i a)
+        {
+            _mm256_stream_si256(p, a);
+        }
+    }
+#endif//SIMD_AVX2_ENABLE
 }
 #endif//__SimdStream_h__
