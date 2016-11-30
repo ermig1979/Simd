@@ -146,6 +146,7 @@ namespace Test
     TEST_ADD_GROUP(ConditionalSquareSum);
     TEST_ADD_GROUP(ConditionalSquareGradientSum);
 	TEST_ADD_GROUP(ConditionalFill);
+	TEST_ADD_GROUP(ConditionalHistogram);
 
     TEST_ADD_GROUP(ContourMetricsMasked);
     TEST_ADD_GROUP(ContourAnchors);

@@ -145,6 +145,9 @@ namespace Simd
 		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
+		void ConditionalHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
+
 		void Copy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
         void CopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 

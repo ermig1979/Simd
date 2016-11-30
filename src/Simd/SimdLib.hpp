@@ -1105,6 +1105,33 @@ namespace Simd
 
 	/*! @ingroup conditional
 
+	\fn void ConditionalHistogram(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+
+	\short Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition. 
+
+	For every point:
+	\verbatim
+	if(compare(mask[x, y], value))
+	histogram[src[x, y]]++.
+	\endverbatim
+
+	\note This function is a C++ wrapper for function ::SimdConditionalHistogram.
+
+	\param [in] src - an input 8-bit gray image.
+	\param [in] mask - a mask 8-bit image.
+	\param [in] value - a second value for compare operation.
+	\param [in] compareType - a compare operation type (see ::SimdCompareType).
+	\param [out] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+	*/
+	template<class A> SIMD_INLINE void ConditionalHistogram(const View<A>& src, const View<A>& mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+	{
+		assert(Compatible(src, mask) && src.format == View<A>::Gray8);
+
+		SimdConditionalHistogram(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, histogram);
+	}
+
+	/*! @ingroup conditional
+
 		\fn void ConditionalFill(const View<A> & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, View<A> & dst);
 
 		\short Fills pixels of 8-bit gray image by given value if corresponding pixels of input 8-bit gray image satisfy certain condition.

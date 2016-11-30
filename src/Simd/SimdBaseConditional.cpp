@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMath.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdMemory.h"
 
 namespace Simd
 {
@@ -267,6 +268,55 @@ namespace Simd
 				return ConditionalFill<SimdCompareLesser>(src, srcStride, width, height, threshold, value, dst, dstStride);
 			case SimdCompareLesserOrEqual:
 				return ConditionalFill<SimdCompareLesserOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			default:
+				assert(0);
+			}
+		}
+
+		template <SimdCompareType compareType>
+		void ConditionalHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, uint32_t * histogram)
+		{
+			uint32_t histograms[4][HISTOGRAM_SIZE + 4];
+			memset(histograms, 0, sizeof(uint32_t)*(HISTOGRAM_SIZE + 4) * 4);
+			size_t alignedWidth = Simd::AlignLo(width, 4);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += 4)
+				{
+					++histograms[0][(4 + src[col + 0])*Compare8u<compareType>(mask[col + 0], value)];
+					++histograms[1][(4 + src[col + 1])*Compare8u<compareType>(mask[col + 1], value)];
+					++histograms[2][(4 + src[col + 2])*Compare8u<compareType>(mask[col + 2], value)];
+					++histograms[3][(4 + src[col + 3])*Compare8u<compareType>(mask[col + 3], value)];
+				}
+				for (; col < width; ++col)
+					++histograms[0][(4 + src[col + 0])*Compare8u<compareType>(mask[col + 0], value)];
+
+				src += srcStride;
+				mask += maskStride;
+			}
+			for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+				histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
+		}
+
+		void ConditionalHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalHistogram<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareNotEqual:
+				return ConditionalHistogram<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareGreater:
+				return ConditionalHistogram<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalHistogram<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareLesser:
+				return ConditionalHistogram<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareLesserOrEqual:
+				return ConditionalHistogram<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
 			default:
 				assert(0);
 			}
