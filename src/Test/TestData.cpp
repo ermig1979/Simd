@@ -469,6 +469,8 @@ namespace Test
             return "_And";
         case SimdOperationBinary8uMaximum:
             return "_Maximum";
+        case SimdOperationBinary8uMinimum:
+            return "_Minimum";
         case SimdOperationBinary8uSaturatedSubtraction:
             return "_SaturatedSubtraction";
         case SimdOperationBinary8uSaturatedAddition:
