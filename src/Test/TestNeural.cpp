@@ -1688,7 +1688,7 @@ namespace Test
         {
             FillRandom32f(src, -1, 1);
             FillRandom32f(dst, -1, 1);
-            FillRandom32f(sumsSrc, 1000, 2000);
+            FillRandom32f(sumsSrc, 2000, 3000);
 
             TEST_SAVE(src);
             TEST_SAVE(dst);
@@ -1710,7 +1710,7 @@ namespace Test
 
             TEST_SAVE(sumsDst2);
 
-            result = Compare(sumsDst1, sumsDst2, eps, true, 32, false);
+            result = Compare(sumsDst1, sumsDst2, eps, true, 32);
         }
 
         return result;
