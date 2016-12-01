@@ -1288,6 +1288,12 @@ namespace Simd
             */
             bool Load(std::ifstream & ifs, bool train = false)
             {
+                if (train)
+                {
+                    for (size_t i = 0; i < _layers.size(); ++i)
+                        _layers[i]->SetThreadNumber(1, true);
+                }
+
                 for (size_t i = 0; i < _layers.size(); ++i)
                 {
                     Layer & layer = *_layers[i];
