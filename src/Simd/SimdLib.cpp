@@ -1631,6 +1631,11 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
+SIMD_API void SimdInt16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * gray, size_t grayStride)
+{
+	Base::Int16ToGraySaturated(src, width, height, srcStride, gray, grayStride);
+}
+
 SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram)
 {
 #ifdef SIMD_AVX2_ENABLE

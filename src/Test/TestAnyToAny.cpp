@@ -1,7 +1,8 @@
 /*
 * Tests for Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2016 Yermalayeu Ihar,
+*               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -184,6 +185,15 @@ namespace Test
         return result;    
     }
 
+	bool Int16ToGraySaturatedAutoTest()
+	{
+		bool result = true;
+
+		result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Base::Int16ToGraySaturated), FUNC(SimdInt16ToGraySaturated));
+
+		return result;
+	}
+
     bool GrayToBgrAutoTest()
     {
         bool result = true;
@@ -307,4 +317,13 @@ namespace Test
 
         return result;
     }
+
+	bool Int16ToGraySaturatedDataTest(bool create)
+	{
+		bool result = true;
+
+		result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC(SimdInt16ToGraySaturated));
+
+		return result;
+	}
 }

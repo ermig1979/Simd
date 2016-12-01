@@ -2087,6 +2087,34 @@ extern "C"
     SIMD_API void SimdGrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride,
         uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
+	/*! @ingroup int16_conversion
+
+	\fn void SimdInt16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * gray, size_t grayStride);
+
+	\short Converts 16-bit signed integer image to 8-bit gray image with saturation
+
+	All images must have the same width and height.
+
+	For every point:
+	\verbatim
+	if (src[i] > 255)
+		gray[i] = 255;
+	if (src[i] < 0)
+		gray[i] = 0;
+	\endverbatim
+
+	\note This function has a C++ wrapper Simd::Int16ToGraySaturated(const View<A>& int16, View<A>& gray).
+
+	\param [in] src - a pointer to pixels data of input 16-bit signed integer image.
+	\param [in] width - an image width.
+	\param [in] height - an image height.
+	\param [in] srcStride - a row size of the 16-bit signed integer image.
+	\param [out] gray - a pointer to pixels data of input 8-bit gray image.
+	\param [out] grayStride - a row size of the gray image.
+	*/
+	SIMD_API void SimdInt16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride,
+		uint8_t * gray, size_t grayStride);
+
     /*! @ingroup histogram
 
         \fn void SimdAbsSecondDerivativeHistogram(const uint8_t * src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram);

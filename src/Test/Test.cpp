@@ -109,6 +109,8 @@ namespace Test
     TEST_ADD_GROUP(BgrToHsv);
     TEST_ADD_GROUP(GrayToBgr);
 
+	TEST_ADD_GROUP(Int16ToGraySaturated);
+
     TEST_ADD_GROUP(BgraToBayer);
     TEST_ADD_GROUP(BgrToBayer);
 

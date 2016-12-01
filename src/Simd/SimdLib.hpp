@@ -1621,6 +1621,34 @@ namespace Simd
         SimdGrayToBgra(gray.data, gray.width, gray.height, gray.stride, bgra.data, bgra.stride, alpha);
     }
 
+	/*! @ingroup int16_conversion
+
+	\fn Int16ToGraySaturated(const View<A>& src, View<A>& gray)
+
+	\short Converts 16-bit signed integer image to 8-bit gray image with saturation.
+
+	All images must have the same width and height.
+
+	For every point:
+	\verbatim
+	if (src[i] > 255)
+		gray[i] = 255;
+	if (src[i] < 0)
+		gray[i] = 0;
+	\endverbatim
+
+	\note This function is a C++ wrapper for function ::SimdInt16ToGraySaturated.
+
+	\param [in] src - an input 16-bit signed integer image
+	\param [out] gray - an output 8-bit gray image.
+	*/
+	template<class A> SIMD_INLINE void Int16ToGraySaturated(const View<A>& src, View<A>& gray)
+	{
+		assert(EqualSize(src, gray) && src.format == View<A>::Int16 && gray.format == View<A>::Gray8);
+
+		SimdInt16ToGraySaturated(src.data, src.width, src.height, src.stride, gray.data, gray.stride);
+	}
+
     /*! @ingroup histogram
 
         \fn void AbsSecondDerivativeHistogram(const View<A>& src, size_t step, size_t indent, uint32_t * histogram)
