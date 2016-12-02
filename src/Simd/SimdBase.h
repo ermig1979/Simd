@@ -120,8 +120,6 @@ namespace Simd
 
         void BgrToYuv444p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-		void Int16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * gray, size_t grayStride);
-
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
@@ -244,6 +242,8 @@ namespace Simd
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
+        void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
         void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 

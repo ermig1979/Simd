@@ -36,17 +36,17 @@ namespace Simd
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
 
-        SIMD_INLINE __m256i PermuteAndShiffle(__m256i bgr, __m256i permute)
+        SIMD_INLINE __m256i PermuteAndShuffle(__m256i bgr, __m256i permute)
         {
             return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), K8_BGRA_TO_BGR_SHUFFLE);
         }
 
         template <bool align> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, __m256i alpha)
         {
-            Store<align>((__m256i*)bgra + 0, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr +  0)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 1, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 24)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 2, _mm256_or_si256(alpha, PermuteAndShiffle(Load<false>((__m256i*)(bgr + 48)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 3, _mm256_or_si256(alpha, PermuteAndShiffle(Load<align>((__m256i*)(bgr + 64)), K32_BGRA_TO_BGR_PERMUTE_TAIL)));
+            Store<align>((__m256i*)bgra + 0, _mm256_or_si256(alpha, PermuteAndShuffle(Load<align>((__m256i*)(bgr +  0)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 1, _mm256_or_si256(alpha, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 24)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 2, _mm256_or_si256(alpha, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 48)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
+            Store<align>((__m256i*)bgra + 3, _mm256_or_si256(alpha, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 64)), K32_BGRA_TO_BGR_PERMUTE_TAIL)));
         }
 
         template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)

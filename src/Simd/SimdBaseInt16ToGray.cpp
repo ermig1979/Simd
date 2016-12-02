@@ -22,28 +22,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
 	namespace Base
 	{
+        static void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] = RestrictRange(src[col]);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
 
-		SIMD_INLINE uint8_t Int16ToGraySaturated(int16_t value)
+		void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 		{
-			return value > 255 ? 255 : (value < 0 ? 0 : (uint8_t)value);
-		}
-
-		void Int16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * gray, size_t grayStride)
-		{
-			for (size_t row = 0; row < height; ++row)
-			{
-				for (size_t col = 0; col < width; ++col)
-					gray[col] = Int16ToGraySaturated(((int16_t*)src)[col]);
-
-				gray += grayStride;
-				src += srcStride;
-			}
+            Int16ToGray((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
 		}
 	}
 }

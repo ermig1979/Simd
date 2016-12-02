@@ -185,15 +185,6 @@ namespace Test
         return result;    
     }
 
-	bool Int16ToGraySaturatedAutoTest()
-	{
-		bool result = true;
-
-		result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Base::Int16ToGraySaturated), FUNC(SimdInt16ToGraySaturated));
-
-		return result;
-	}
-
     bool GrayToBgrAutoTest()
     {
         bool result = true;
@@ -223,6 +214,30 @@ namespace Test
         return result;    
     }
 
+	bool Int16ToGrayAutoTest()
+	{
+		bool result = true;
+
+		result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Base::Int16ToGray), FUNC(SimdInt16ToGray));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Sse2::Int16ToGray), FUNC(SimdInt16ToGray));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Avx2::Int16ToGray), FUNC(SimdInt16ToGray));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Neon::Int16ToGray), FUNC(SimdInt16ToGray));
+#endif 
+
+		return result;
+	}    
+    
     //-----------------------------------------------------------------------
 
     bool AnyToAnyDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
@@ -318,11 +333,11 @@ namespace Test
         return result;
     }
 
-	bool Int16ToGraySaturatedDataTest(bool create)
+	bool Int16ToGrayDataTest(bool create)
 	{
 		bool result = true;
 
-		result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC(SimdInt16ToGraySaturated));
+		result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC(SimdInt16ToGray));
 
 		return result;
 	}

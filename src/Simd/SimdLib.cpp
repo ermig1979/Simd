@@ -1631,11 +1631,6 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
         Base::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
 }
 
-SIMD_API void SimdInt16ToGraySaturated(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * gray, size_t grayStride)
-{
-	Base::Int16ToGraySaturated(src, width, height, srcStride, gray, grayStride);
-}
-
 SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1721,6 +1716,26 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
     else
 #endif
         Base::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
+}
+
+SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::HA)
+        Neon::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+    else
+#endif
+        Base::Int16ToGray(src, width, height, srcStride, dst, dstStride);
 }
 
 SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, size_t height,
