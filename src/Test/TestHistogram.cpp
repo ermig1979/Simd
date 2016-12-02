@@ -255,6 +255,96 @@ namespace Test
 		return result;
 	}
 
+    namespace
+    {
+        struct FuncHC
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
+
+            FuncPtr func;
+            String description;
+
+            FuncHC(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & mask, uint8_t value, SimdCompareType compareType, uint32_t * histogram) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, mask.data, mask.stride, value, compareType, histogram);
+            }
+        };
+    }
+
+#define ARGS_HC(width, height, type, function1, function2) \
+    width, height, type, \
+    FuncHC(function1.func, function1.description + CompareTypeDescription(type)), \
+    FuncHC(function2.func, function2.description + CompareTypeDescription(type))
+
+#define FUNC_HC(function) \
+    FuncHC(function, std::string(#function))
+
+    bool HistogramConditionalAutoTest(int width, int height, SimdCompareType type, const FuncHC & f1, const FuncHC & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
+        View m(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint8_t value = 127;
+        FillRandom(s);
+        FillRandom(m);
+
+        Histogram h1 = { 0 }, h2 = { 0 };
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, m, value, type, h1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, m, value, type, h2));
+
+        result = result && Compare(h1, h2, 0, true, 32);
+
+        return result;
+    }
+
+    bool HistogramConditionalAutoTest(const FuncHC & f1, const FuncHC & f2)
+    {
+        bool result = true;
+
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && HistogramConditionalAutoTest(ARGS_HC(W, H, type, f1, f2));
+            result = result && HistogramConditionalAutoTest(ARGS_HC(W + O, H - O, type, f1, f2));
+            result = result && HistogramConditionalAutoTest(ARGS_HC(W - O, H + O, type, f1, f2));
+        }
+
+        return result;
+    }
+
+    bool HistogramConditionalAutoTest()
+    {
+        bool result = true;
+
+        result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Base::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Sse2::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Avx2::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Neon::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HistogramDataTest(bool create, int width, int height, const FuncH & f)
@@ -400,6 +490,62 @@ namespace Test
         bool result = true;
 
         result = result && AbsSecondDerivativeHistogramDataTest(create, DW, DH, FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+
+        return result;
+    }
+
+    bool HistogramConditionalDataTest(bool create, int width, int height, SimdCompareType type, const FuncHC & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const uint8_t value = 127;
+        Histogram h1, h2;
+
+        if (create)
+        {
+            FillRandom(src);
+            FillRandom(mask);
+
+            TEST_SAVE(src);
+            TEST_SAVE(mask);
+
+            f.Call(src, mask, value, type, h1);
+
+            TEST_SAVE(h1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(mask);
+
+            TEST_LOAD(h1);
+
+            f.Call(src, mask, value, type, h2);
+
+            TEST_SAVE(h2);
+
+            result = result && Compare(h1, h2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool HistogramConditionalDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncHC f = FUNC_HC(SimdHistogramConditional);
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && HistogramConditionalDataTest(create, DW, DH, type, FuncHC(f.func, f.description + Data::Description(type)));
+        }
 
         return result;
     }

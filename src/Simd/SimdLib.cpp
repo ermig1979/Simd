@@ -1039,12 +1039,6 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
         Base::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
 }
 
-SIMD_API void SimdConditionalHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-	const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
-{
-	Base::ConditionalHistogram(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
-}
-
 SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
@@ -1685,6 +1679,27 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
     else
 #endif
         Base::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
+}
+
+SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+    const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+    else
+#endif
+        Base::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
 }
 
 SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)

@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCompare.h"
 
 namespace Simd
 {
@@ -106,6 +107,55 @@ namespace Simd
             }
             for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
                 histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
+        }
+
+        template <SimdCompareType compareType>
+        void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            const uint8_t * mask, size_t maskStride, uint8_t value, uint32_t * histogram)
+        {
+            uint32_t histograms[4][HISTOGRAM_SIZE + 4];
+            memset(histograms, 0, sizeof(uint32_t)*(HISTOGRAM_SIZE + 4) * 4);
+            size_t alignedWidth = Simd::AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += 4)
+                {
+                    ++histograms[0][(4 + src[col + 0])*Compare8u<compareType>(mask[col + 0], value)];
+                    ++histograms[1][(4 + src[col + 1])*Compare8u<compareType>(mask[col + 1], value)];
+                    ++histograms[2][(4 + src[col + 2])*Compare8u<compareType>(mask[col + 2], value)];
+                    ++histograms[3][(4 + src[col + 3])*Compare8u<compareType>(mask[col + 3], value)];
+                }
+                for (; col < width; ++col)
+                    ++histograms[0][(4 + src[col + 0])*Compare8u<compareType>(mask[col + 0], value)];
+
+                src += srcStride;
+                mask += maskStride;
+            }
+            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+                histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
+        }
+
+        void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+        {
+            switch (compareType)
+            {
+            case SimdCompareEqual:
+                return HistogramConditional<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareNotEqual:
+                return HistogramConditional<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareGreater:
+                return HistogramConditional<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareGreaterOrEqual:
+                return HistogramConditional<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareLesser:
+                return HistogramConditional<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            case SimdCompareLesserOrEqual:
+                return HistogramConditional<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+            default:
+                assert(0);
+            }
         }
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)

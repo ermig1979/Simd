@@ -145,9 +145,6 @@ namespace Simd
 		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-		void ConditionalHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
-
 		void Copy(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
         void CopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, 
@@ -234,6 +231,9 @@ namespace Simd
 
         void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
+
+        void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
 
         void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height, 
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
