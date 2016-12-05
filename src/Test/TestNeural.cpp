@@ -1946,22 +1946,35 @@ namespace Test
         return true;
     }
 
-    bool CreateNetwork(Network & net)
+#define TEST_ADD_LAYER(net, layer) \
+    if(!net.Add(layer)) \
+    { \
+       std::cout << "Can't add layer '" << #layer "' to network!" << std::endl; \
+       return false; \
+    }
+
+    bool CreateNetwork(Network & net, bool dropout)
     {
         using namespace Simd::Neural;
         net.Clear();
-        return 
-            net.Add(new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, 5)) &&
-            net.Add(new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)) &&
-            net.Add(new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, 3)) &&
-            net.Add(new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)) &&
-            net.Add(new FullyConnectedLayer(Function::Sigmoid, 96, 10));
+        TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, 5)));
+        TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+        if(dropout)
+            TEST_ADD_LAYER(net, (new DropoutLayer(6*6*12, 0.9f)));
+        TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, 3)));
+        if (dropout)
+            TEST_ADD_LAYER(net, (new DropoutLayer(4 * 4 * 24, 0.8f)));
+        TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
+        if (dropout)
+            TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.7f)));
+        TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+        return true;
     }
 
     bool NeuralPredictSpecialTest()
     {
         Network net;
-        if (!CreateNetwork(net))
+        if (!CreateNetwork(net, false))
         {
             TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
             return false;
@@ -2017,7 +2030,7 @@ namespace Test
     bool NeuralTrainSpecialTest()
     {
         Network net;
-        if (!CreateNetwork(net))
+        if (!CreateNetwork(net, true))
         {
             TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
             return false;
@@ -2031,6 +2044,10 @@ namespace Test
         Prepare(sample, 8, data);
 
         TrainOptions options;
+        options.epochFinish = 100;
+#ifdef _DEBUG
+        options.threadNumber = 1;
+#endif
 
         Logger logger(&net, &data, &options);
 

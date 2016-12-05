@@ -62,6 +62,20 @@ namespace Simd
                 const float one = 1;
                 ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
             }
+
+            SIMD_INLINE int RandomUniform(int min, int max)
+            {
+                static std::mt19937 gen(1);
+                std::uniform_int_distribution<int> dst(min, max);
+                return dst(gen);
+            }
+
+            SIMD_INLINE float RandomUniform(float min, float max)
+            {
+                static std::mt19937 gen(1);
+                std::uniform_real_distribution<float> dst(min, max);
+                return dst(gen);
+            }
         }
 
         /*! @ingroup cpp_neural
@@ -413,6 +427,7 @@ namespace Simd
                 Convolutional, /*!< \brief Layer type corresponding to Simd::Neural::ConvolutionalLayer. */
                 MaxPooling, /*!< \brief Layer type corresponding to Simd::Neural::MaxPoolingLayer. */
                 FullyConnected, /*!< \brief Layer type corresponding to Simd::Neural::FullyConnectedLayer. */
+                Dropout, /*!< \brief Layer type corresponding to Simd::Neural::DropoutLayer. */
             };
 
             /*!
@@ -502,6 +517,7 @@ namespace Simd
             friend class ConvolutionalLayer;
             friend class MaxPoolingLayer;
             friend class FullyConnectedLayer;
+            friend class DropoutLayer;
             friend class Network;
         };
         typedef std::shared_ptr<Layer> LayerPtr;
@@ -1031,6 +1047,98 @@ namespace Simd
 
         /*! @ingroup cpp_neural
 
+            \short DroputLayer class.
+
+            Dropout layer in neural network.
+        */
+        class DropoutLayer : public Layer
+        {
+        public:
+            /*!
+            \short Creates new DropoutLayer class.
+
+            \param [in] srcSize - a size of input vector.
+            \param [in] rate - a retention probability (dropout rate is 1 - rate).
+            */
+            DropoutLayer(size_t srcSize, float rate)
+                : Layer(Dropout, Function::Identity)
+                , _rate(rate)
+                , _scale(1.0f/rate)
+            {
+                _src.Resize(srcSize, 1, 1);
+                _dst.Resize(srcSize, 1, 1);
+                SetThreadNumber(1, false);
+            }
+
+            void Forward(const Vector & src, size_t thread, bool train) override
+            {
+                Vector & dst = _common[thread].dst;
+                if (train)
+                {
+                    _specific[thread].mask = Mask();
+                    const float * mask = _specific[thread].mask;
+
+                    for (size_t i = 0; i < src.size(); ++i)
+                        dst[i] = mask[i] * _scale * src[i];
+                }
+                else
+                    dst = src;
+            }
+
+            void Backward(const Vector & currDelta, size_t thread) override
+            {
+                const Vector & prevDst = _prev->Dst(thread);
+                Vector & prevDelta = _common[thread].prevDelta;
+                const float * mask = _specific[thread].mask;
+                for (size_t i = 0; i < currDelta.size(); i++)
+                {
+                    prevDelta[i] = mask[i] * currDelta[i];
+                }
+
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+            }
+
+            size_t FanSrc() const override
+            {
+                return 1;
+            }
+
+            size_t FanDst() const override
+            {
+                return 1;
+            }
+
+            virtual void SetThreadNumber(size_t number, bool train) override
+            {
+                Layer::SetThreadNumber(number, train);
+                _specific.resize(number);
+                if (train)
+                {
+                    _mask.resize(_src.Volume()*(1 + _src.Volume()));
+                    for (size_t i = 0; i < _mask.size(); ++i)
+                        _mask[i] = Detail::RandomUniform(0.0f, 1.0f) <= _rate ? 1.0f : 0.0f;
+                }
+            }
+
+        protected:
+            float _rate, _scale;
+            Vector _mask;
+
+            struct Specific
+            {
+                const float * mask;
+            };
+            std::vector<Specific> _specific;
+
+            const float * Mask()
+            {
+                size_t start = Detail::RandomUniform(0, _src.Volume()*_src.Volume());
+                return _mask.data() + start;
+            }
+        };
+
+        /*! @ingroup cpp_neural
+
             \short Contains a set of training options.
         */ 
         struct TrainOptions
@@ -1111,13 +1219,6 @@ namespace Simd
 
         namespace Detail
         {
-            SIMD_INLINE float RandomUniform(float min, float max)
-            {
-                static std::mt19937 gen(1);
-                std::uniform_real_distribution<float> dst(min, max);
-                return dst(gen);
-            }           
-            
             template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer);
 
             template<> void InitWeight<TrainOptions::Xavier>(Vector & dst, const Layer & layer)
