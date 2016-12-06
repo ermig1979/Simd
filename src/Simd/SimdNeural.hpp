@@ -431,13 +431,25 @@ namespace Simd
             };
 
             /*!
+                \enum Method
+
+                Describes method of forward propagation in the network layer.
+            */
+            enum Method
+            {
+                Fast, /*!< \brief The fastest method. It is incompatible with train process.*/
+                Check, /*!< \brief Control checking during train process.*/
+                Train, /*!< \brief Forward propagation in train process.*/
+            };
+
+            /*!
                 Virtual destructor.
             */
             virtual ~Layer()
             {
             }
 
-            virtual void Forward(const Vector & src, size_t thread, bool train) = 0;
+            virtual void Forward(const Vector & src, size_t thread, Method method) = 0;
 
             virtual void Backward(const Vector & src, size_t thread) = 0;
 
@@ -532,7 +544,7 @@ namespace Simd
         class InputLayer : public Layer
         {
         public:
-            void Forward(const Vector & src, size_t thread, bool train) override
+            void Forward(const Vector & src, size_t thread, Method method) override
             {
                 _common[thread].dst = src;
             }
@@ -607,7 +619,7 @@ namespace Simd
                     Simd::Fill(_connection, 1);
             }
 
-            void Forward(const Vector & src, size_t thread, bool train) override
+            void Forward(const Vector & src, size_t thread, Method method) override
             {
                 const Vector & padded = PaddedSrc(src, thread);
                 Vector & sum = _common[thread].sum;
@@ -855,11 +867,15 @@ namespace Simd
                 SetThreadNumber(1, false);
             }
 
-            void Forward(const Vector & src, size_t thread, bool train) override
+            void Forward(const Vector & src, size_t thread, Method method) override
             {
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                if (train || _poolingSize != 2)
+                if (method != Layer::Train && _poolingSize == 2)
+                {
+                    ::SimdNeuralMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
+                }
+                else
                 {
                     ptrdiff_t * idx = _specific[thread].index.data();
                     for (ptrdiff_t c = 0; c < _dst.depth; ++c)
@@ -891,10 +907,6 @@ namespace Simd
                             }
                         }
                     }                    
-                }
-                else
-                {
-                    ::SimdNeuralMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
                 }
                 _function.function(sum.data(), sum.size(), dst.data());
             }
@@ -976,17 +988,12 @@ namespace Simd
                 SetThreadNumber(1, false);
             }
 
-            void Forward(const Vector & src, size_t thread, bool train) override
+            void Forward(const Vector & src, size_t thread, Method method) override
             {
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                if (train)
-                {
-                    Detail::SetZero(sum);
-                    for (size_t i = 0; i < src.size(); i++)
-                        ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
-                }
-                else
+
+                if (method == Layer::Fast)
                 {
                     if (!_reordered)
                     {
@@ -999,6 +1006,13 @@ namespace Simd
                     }
                     for (size_t i = 0; i < sum.size(); ++i)
                         ::SimdNeuralProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
+                }
+                else
+                {
+                    assert(!_reordered);
+                    Detail::SetZero(sum);
+                    for (size_t i = 0; i < src.size(); i++)
+                        ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
 
                 if (_bias.size())
@@ -1053,6 +1067,7 @@ namespace Simd
         */
         class DropoutLayer : public Layer
         {
+            const size_t RANDOM_SIZE = 256;
         public:
             /*!
             \short Creates new DropoutLayer class.
@@ -1070,10 +1085,10 @@ namespace Simd
                 SetThreadNumber(1, false);
             }
 
-            void Forward(const Vector & src, size_t thread, bool train) override
+            void Forward(const Vector & src, size_t thread, Method method) override
             {
                 Vector & dst = _common[thread].dst;
-                if (train)
+                if (method == Layer::Train)
                 {
                     _specific[thread].mask = Mask();
                     const float * mask = _specific[thread].mask;
@@ -1114,7 +1129,7 @@ namespace Simd
                 _specific.resize(number);
                 if (train)
                 {
-                    _mask.resize(_src.Volume()*(1 + _src.Volume()));
+                    _mask.resize(_src.Volume()*(1 + RANDOM_SIZE));
                     for (size_t i = 0; i < _mask.size(); ++i)
                         _mask[i] = Detail::RandomUniform(0.0f, 1.0f) <= _rate ? 1.0f : 0.0f;
                 }
@@ -1132,7 +1147,7 @@ namespace Simd
 
             const float * Mask()
             {
-                size_t start = Detail::RandomUniform(0, _src.Volume()*_src.Volume());
+                size_t start = Detail::RandomUniform(0, int(RANDOM_SIZE*_src.Volume()));
                 return _mask.data() + start;
             }
         };
@@ -1370,12 +1385,12 @@ namespace Simd
                 \short Classifies given sample.
 
                 \param [in] x - an input sample.
-                \param [in] train - a boolean flag (True - this method is called during training process, False - otherwise). By default it is equal to False.
+                \param [in] method - a method of prediction. By default it is equal to Layer::Fast.
                 \return a result of classification (vector with predicted probabilities).
             */
-            SIMD_INLINE const Vector & Predict(const Vector & x, bool train = false)
+            SIMD_INLINE const Vector & Predict(const Vector & x, Layer::Method method = Layer::Fast)
             {
-                return Forward(x, 0, train);
+                return Forward(x, 0, method);
             }
 
             /*!
@@ -1394,7 +1409,6 @@ namespace Simd
                     for (size_t i = 0; i < _layers.size(); ++i)
                         _layers[i]->SetThreadNumber(1, true);
                 }
-
                 for (size_t i = 0; i < _layers.size(); ++i)
                 {
                     Layer & layer = *_layers[i];
@@ -1512,13 +1526,13 @@ namespace Simd
  private:
             LayerPtrs _layers;
 
-            const Vector & Forward(const Vector & src, size_t thread, bool train)
+            const Vector & Forward(const Vector & src, size_t thread, Layer::Method method)
             {
                 SIMD_CHECK_PERFORMANCE();
 
-                _layers.front()->Forward(src, thread, train);
+                _layers.front()->Forward(src, thread, method);
                 for (size_t i = 1; i < _layers.size(); ++i)
-                    _layers[i]->Forward(_layers[i - 1]->Dst(thread), thread, train);
+                    _layers[i]->Forward(_layers[i - 1]->Dst(thread), thread, method);
                 return _layers.back()->Dst(thread);
             }
 
@@ -1543,7 +1557,7 @@ namespace Simd
                 {
                     for (size_t i = begin; i < end; ++i)
                     {
-                        Vector current = Forward(src[i], thread, true);
+                        Vector current = Forward(src[i], thread, Layer::Train);
                         Backward(current, dst[i], thread, options);
                     }
                 }, options.threadNumber);

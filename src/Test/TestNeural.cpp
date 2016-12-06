@@ -1849,7 +1849,7 @@ namespace Test
             const Vector & dst = sample.dst[i];
             Label lbl = sample.lbl[i];
 
-            Vector cur = net.Predict(sample.src[i], train);
+            Vector cur = net.Predict(sample.src[i], train ? Simd::Neural::Layer::Check : Simd::Neural::Layer::Fast);
 
             float difference = 0;
             for (size_t j = 0; j < size; ++j)
