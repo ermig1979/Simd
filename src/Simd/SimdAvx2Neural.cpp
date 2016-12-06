@@ -25,12 +25,20 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdStream.h"
+#include "Simd/SimdConst.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        const size_t F = Avx::F;
+        const size_t QF = Avx::QF;
+        using Avx::Load;
+        using Avx::RightNotZero;
+#endif
+
 		template <bool inversion> __m128i Invert(__m128i value);
 
 		template <> __m128i Invert<true>(__m128i value)
