@@ -67,7 +67,8 @@
      - \c simd/prj/sh/ - contains additional scripts needed for building of the library in Linux.
      - \c simd/prj/txt/ - contains text files needed for building of the library.
      - \c simd/data/cascade/ - contains OpenCV cascades (HAAR and LBP).
-     - \c simd/data/image/ - contains image sample.
+     - \c simd/data/image/ - contains image samples.
+     - \c simd/data/network/ - contains examples of trained networks.
      - \c simd/doc/ - contains documentation of the library.
      - \c simd/doc/src/ - contains scripts for generation of this documentation by <a href="http://www.doxygen.org">doxygen</a>.
 
@@ -89,7 +90,7 @@
 	With using of native compiler (g++) for current platform it is simple:
 	\code
 	cd ./prj/cmake
-	cmake . 
+	cmake . -DTOOLCHAIN="" -DTARGET=""
 	make
 	\endcode
 	To build the library for PowePC and ARM platforms you can also use toolchain for cross compilation.
@@ -138,7 +139,7 @@
 	(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
 	Also it can be -m=c (creation of test data for cross-platform testing), -m=v (cross-platform testing with using of early prepared test data)
     and -m=s (running of special tests).
-	 - \c -t=1 - a number of used threads (every thread run all tests) for simulation of multi-thread loading.
+	 - \c -t=1 - a number of used threads (every thread runs all tests) for simulation of multi-thread loading.
 	 - \c -f=Sobel - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 	If you miss this parameter then full testing will be performed.
     You can use several filters - function name has to satisfy at least one of them.

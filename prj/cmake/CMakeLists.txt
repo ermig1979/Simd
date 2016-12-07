@@ -7,19 +7,23 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
  set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
- message("Using crossplatform toolchain '${TOOLCHAIN}' for '${TARGET}' platform.")
+if((NOT TOOLCHAIN STREQUAL "") AND (NOT ${TARGET} STREQUAL ""))
+ message("Use crossplatform toolchain '${TOOLCHAIN}' for '${TARGET}' platform.")
  set(CMAKE_CXX_COMPILER ${TOOLCHAIN})
  set(CMAKE_SYSTEM_PROCESSOR ${TARGET})
+else()
+ message("Use default toolchain '${CMAKE_CXX_COMPILER}' for current '${CMAKE_SYSTEM_PROCESSOR}' platform.")
 endif()
 
 include_directories(${TRUNK_DIR}/src)
 
-if((CHECK_VERSION STREQUAL "") OR (CHECK_VERSION STREQUAL "1"))
- execute_process(COMMAND sh ${TRUNK_DIR}/prj/sh/GetVersion.sh)
+if((CHECK_VERSION STREQUAL "") OR (NOT (CHECK_VERSION STREQUAL "0")))
+ execute_process(COMMAND bash ${TRUNK_DIR}/prj/sh/GetVersion.sh)
+else()
+ message("Skip version checking.")
 endif()
 
-message("CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
+message("CMAKE_SYSTEM_PROCESSOR = '${CMAKE_SYSTEM_PROCESSOR}'")
 
 if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"))
 
@@ -137,5 +141,6 @@ else()
  set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 endif()
 
+else()
+message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
 endif()
-
