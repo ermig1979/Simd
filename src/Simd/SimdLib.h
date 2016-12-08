@@ -96,6 +96,8 @@ typedef enum
     SimdOperationBinary8uAverage,
     /*! Computes the bitwise AND between two images. */
     SimdOperationBinary8uAnd,
+    /*! Computes the bitwise OR between two images. */
+    SimdOperationBinary8uOr,
     /*! Computes maximal value for every channel of every point of two images. */
     SimdOperationBinary8uMaximum,
     /*! Computes minimal value for every channel of every point of two images. */

@@ -88,6 +88,8 @@ namespace Test
             return "<Avg>";
         case SimdOperationBinary8uAnd:
             return "<And>";
+        case SimdOperationBinary8uOr:
+            return "<Or>";
         case SimdOperationBinary8uMaximum:
             return "<Max>";
         case SimdOperationBinary8uMinimum:
@@ -98,7 +100,7 @@ namespace Test
             return "<Adds>";
         }
 		assert(0);
-		return "<Unknown";
+		return "<Unknown>";
     }
 
     SIMD_INLINE String OperationBinary16iTypeDescription(SimdOperationBinary16iType type)

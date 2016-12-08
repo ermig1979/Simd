@@ -41,6 +41,11 @@ namespace Simd
 			return _mm256_and_si256(a, b);
 		}
 
+        template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uOr>(const __m256i & a, const __m256i & b)
+        {
+            return _mm256_or_si256(a, b);
+        }
+
 		template <> SIMD_INLINE __m256i OperationBinary8u<SimdOperationBinary8uMaximum>(const __m256i & a, const __m256i & b)
 		{
 			return _mm256_max_epu8(a, b);
@@ -99,7 +104,9 @@ namespace Simd
 				return OperationBinary8u<align, SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case SimdOperationBinary8uAnd:
 				return OperationBinary8u<align, SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case SimdOperationBinary8uMaximum:
+            case SimdOperationBinary8uOr:
+                return OperationBinary8u<align, SimdOperationBinary8uOr>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMaximum:
 				return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
             case SimdOperationBinary8uMinimum:
                 return OperationBinary8u<align, SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);

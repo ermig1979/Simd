@@ -42,6 +42,11 @@ namespace Simd
 			return vandq_u8(a, b);
 		}
 
+        template <> SIMD_INLINE uint8x16_t OperationBinary8u<SimdOperationBinary8uOr>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vorrq_u8(a, b);
+        }
+
 		template <> SIMD_INLINE uint8x16_t OperationBinary8u<SimdOperationBinary8uMaximum>(const uint8x16_t & a, const uint8x16_t & b)
 		{
 			return vmaxq_u8(a, b);
@@ -100,7 +105,9 @@ namespace Simd
 				return OperationBinary8u<align, SimdOperationBinary8uAverage>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case SimdOperationBinary8uAnd:
 				return OperationBinary8u<align, SimdOperationBinary8uAnd>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
-			case SimdOperationBinary8uMaximum:
+            case SimdOperationBinary8uOr:
+                return OperationBinary8u<align, SimdOperationBinary8uOr>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
+            case SimdOperationBinary8uMaximum:
 				return OperationBinary8u<align, SimdOperationBinary8uMaximum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
 			case SimdOperationBinary8uMinimum:
 				return OperationBinary8u<align, SimdOperationBinary8uMinimum>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride);
