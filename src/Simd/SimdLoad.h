@@ -330,6 +330,22 @@ namespace Simd
             a[0] = _mm256_loadu_si256((__m256i*)(p - 1));
             a[2] = LoadAfterLast<false, 1>(p);
         }
+
+        template <bool align> SIMD_INLINE __m256 Load(const float * p);
+
+        template <> SIMD_INLINE __m256 Load<false>(const float * p)
+        {
+            return _mm256_loadu_ps(p);
+        }
+
+        template <> SIMD_INLINE __m256 Load<true>(const float * p)
+        {
+#ifdef _MSC_VER
+            return _mm256_castsi256_ps(_mm256_load_si256((__m256i*)p));
+#else
+            return _mm256_load_ps(p);
+#endif
+        }
     }
 #endif//SIMD_AVX2_ENABLE
 

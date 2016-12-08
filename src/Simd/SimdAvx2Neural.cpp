@@ -35,7 +35,6 @@ namespace Simd
 #if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
         const size_t F = Avx::F;
         const size_t QF = Avx::QF;
-        using Avx::Load;
         using Avx::RightNotZero;
 #endif
 
@@ -51,7 +50,7 @@ namespace Simd
 			return value;
 		}
 
-		template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m256 &_1_255, float * dst)
+		template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m256 & _1_255, float * dst)
 		{
 			__m128i _src = Invert<inversion>(_mm_loadl_epi64((__m128i*)src));
 			Avx::Stream<align, stream>(dst, _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_src)), _1_255));
@@ -102,7 +101,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)
         {
-            __m256 _src = Avx::Load<align>(src);
+            __m256 _src = Load<align>(src);
             __m256 e1 = _mm256_max_ps(m, _mm256_fmadd_ps(_src, k, o));
             __m256 e2 = _mm256_mul_ps(e1, e1);
             __m256 e4 = _mm256_mul_ps(e2, e2);
@@ -149,11 +148,18 @@ namespace Simd
                 dst[i] = _mm256_set1_ps(src[i]);
         }
 
+        template<int shift> SIMD_INLINE __m256 Alignr(const __m256 & s0, const __m256 & s4)
+        {
+            return _mm256_castsi256_ps(_mm256_alignr_epi8(_mm256_castps_si256(s4), _mm256_castps_si256(s0), shift*4));
+        }
+
         template <bool align> SIMD_INLINE __m256 Convolution5(const float * src, const __m256 * weights)
         {
-            return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0], _mm256_add_ps(
-                _mm256_fmadd_ps(Avx::Load<false>(src + 1), weights[1], _mm256_mul_ps(Avx::Load<false>(src + 2), weights[2])),
-                _mm256_fmadd_ps(Avx::Load<false>(src + 4), weights[4], _mm256_mul_ps(Avx::Load<false>(src + 3), weights[3]))));
+            __m256 s0 = Load<align>(src + 0);
+            __m256 s4 = Load<false>(src + 4);
+            return _mm256_fmadd_ps(s0, weights[0], _mm256_add_ps(
+                _mm256_fmadd_ps(Alignr<1>(s0, s4), weights[1], _mm256_mul_ps(Alignr<2>(s0, s4), weights[2])),
+                _mm256_fmadd_ps(s4, weights[4], _mm256_mul_ps(Alignr<3>(s0, s4), weights[3]))));
         }
 
         template <bool align> SIMD_INLINE __m256 Convolution5x5(const float * src, size_t stride, const __m256 * weights)
@@ -173,14 +179,14 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     _dst = _mm256_add_ps(_dst, Convolution5x5<align>(src + col, srcStride, _weights));
                     Avx::Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
-                    __m256 _dst = Avx::Load<false>(dst + col);
+                    __m256 _dst = Load<false>(dst + col);
                     _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5<false>(src + col, srcStride, _weights)));
                     Avx::Store<false>(dst + col, _dst);
                 }
@@ -199,9 +205,11 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m256 & dst, __m256 * sums)
         {
-            sums[0] = _mm256_fmadd_ps(dst, Avx::Load<align>(src + 0), sums[0]);
-            sums[1] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 1), sums[1]);
-            sums[2] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 2), sums[2]);
+            __m256 s0 = Load<align>(src + 0);
+            __m256 s4 = Load<false>(src + 4);
+            sums[0] = _mm256_fmadd_ps(dst, s0, sums[0]);
+            sums[1] = _mm256_fmadd_ps(dst, Alignr<1>(s0, s4), sums[1]);
+            sums[2] = _mm256_fmadd_ps(dst, Alignr<2>(s0, s4), sums[2]);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied3x3(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
@@ -221,13 +229,13 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     AddMultiplied3x3<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
-                    __m256 _dst = _mm256_and_ps(tailMask, Avx::Load<false>(dst + col));
+                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
                     AddMultiplied3x3<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;
@@ -247,11 +255,13 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddMultiplied5(const float * src, const __m256 & dst, __m256 * sums)
         {
-            sums[0] = _mm256_fmadd_ps(dst, Avx::Load<align>(src + 0), sums[0]);
-            sums[1] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 1), sums[1]);
-            sums[2] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 2), sums[2]);
-            sums[3] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 3), sums[3]);
-            sums[4] = _mm256_fmadd_ps(dst, Avx::Load<false>(src + 4), sums[4]);
+            __m256 s0 = Load<align>(src + 0);
+            __m256 s4 = Load<false>(src + 4);
+            sums[0] = _mm256_fmadd_ps(dst, s0, sums[0]);
+            sums[1] = _mm256_fmadd_ps(dst, Alignr<1>(s0, s4), sums[1]);
+            sums[2] = _mm256_fmadd_ps(dst, Alignr<2>(s0, s4), sums[2]);
+            sums[3] = _mm256_fmadd_ps(dst, Alignr<3>(s0, s4), sums[3]);
+            sums[4] = _mm256_fmadd_ps(dst, s4, sums[4]);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied5x5(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
@@ -273,13 +283,13 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m256 _dst = Avx::Load<align>(dst + col);
+                    __m256 _dst = Load<align>(dst + col);
                     AddMultiplied5x5<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
-                    __m256 _dst = _mm256_and_ps(tailMask, Avx::Load<false>(dst + col));
+                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
                     AddMultiplied5x5<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;

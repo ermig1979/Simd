@@ -136,7 +136,7 @@ namespace Simd
 
         SIMD_INLINE __m256 Norm32fp(const HidHaarCascade & hid, size_t offset)
         {
-            __m256 area = _mm256_set1_ps(hid.windowArea);
+            __m256 area = _mm256_broadcast_ss(&hid.windowArea);
             __m256 sum = _mm256_cvtepi32_ps(Sum32ip(hid.p, offset));
             __m256 sqsum = _mm256_cvtepi32_ps(Sum32ip(hid.pq, offset));
             return ValidSqrt(_mm256_sub_ps(_mm256_mul_ps(sqsum, area), _mm256_mul_ps(sum, sum)));
@@ -144,7 +144,7 @@ namespace Simd
 
         SIMD_INLINE __m256 Norm32fi(const HidHaarCascade & hid, size_t offset)
         {
-            __m256 area = _mm256_set1_ps(hid.windowArea);
+            __m256 area = _mm256_broadcast_ss(&hid.windowArea);
             __m256 sum = _mm256_cvtepi32_ps(Sum32ii(hid.p, offset));
             __m256 sqsum = _mm256_cvtepi32_ps(Sum32ii(hid.pq, offset));
             return ValidSqrt(_mm256_sub_ps(_mm256_mul_ps(sqsum, area), _mm256_mul_ps(sum, sum)));
@@ -157,15 +157,13 @@ namespace Simd
             __m256i s2 = _mm256_loadu_si256((__m256i*)(rect.p2 + offset));
             __m256i s3 = _mm256_loadu_si256((__m256i*)(rect.p3 + offset));
             __m256i sum = _mm256_sub_epi32(_mm256_sub_epi32(s0, s1), _mm256_sub_epi32(s2, s3));
-            return _mm256_mul_ps(_mm256_cvtepi32_ps(sum), _mm256_set1_ps(rect.weight));
+            return _mm256_mul_ps(_mm256_cvtepi32_ps(sum), _mm256_broadcast_ss(&rect.weight));
         }
 
         SIMD_INLINE void StageSum32f(const float * leaves, float threshold, const __m256 & sum, const __m256 & norm, __m256 & stageSum)
         {
             __m256 mask = _mm256_cmp_ps(_mm256_mul_ps(_mm256_set1_ps(threshold), norm), sum, _CMP_GT_OQ);
-            __m256 leaf0 = _mm256_and_ps(mask, _mm256_set1_ps(leaves[0]));
-            __m256 leaf1 = _mm256_andnot_ps(mask, _mm256_set1_ps(leaves[1]));
-            stageSum = _mm256_add_ps(stageSum, _mm256_or_ps(leaf0, leaf1));
+            stageSum = _mm256_add_ps(stageSum, _mm256_blendv_ps(_mm256_broadcast_ss(leaves + 1), _mm256_broadcast_ss(leaves + 0), mask));
         }
 
         void Detect32f(const HidHaarCascade & hid, size_t offset, const __m256 & norm, __m256i & result)
@@ -201,7 +199,7 @@ namespace Simd
                         StageSum32f(leaves, node->threshold, sum, norm, stageSum);
                     }
                 }
-                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_set1_ps(stage.threshold), stageSum, _CMP_GT_OQ)), result);
+                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_broadcast_ss(&stage.threshold), stageSum, _CMP_GT_OQ)), result);
                 int resultCount = ResultCount(result);
                 if (resultCount == 0)
                     return;
@@ -411,7 +409,7 @@ namespace Simd
 
             __m256i value0 = _mm256_and_si256(_mm256_shuffle_epi8(subset0, shuffle), mask);
             __m256i value1 = _mm256_and_si256(_mm256_shuffle_epi8(subset1, shuffle), mask);
-            __m256i value = Combine(index, value1, value0);
+            __m256i value = _mm256_blendv_epi8(value0, value1, index);
 
             return _mm256_andnot_si256(_mm256_cmpeq_epi32(value, _mm256_setzero_si256()), K_INV_ZERO);
         }
@@ -436,12 +434,11 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m256i mask = LeafMask(feature, offset, subset);
-                    sum = _mm256_add_ps(sum, Simd::Avx::Combine(_mm256_castsi256_ps(mask),
-                        _mm256_set1_ps(leaves[leafOffset + 0]), _mm256_set1_ps(leaves[leafOffset + 1])));
+                    sum = _mm256_add_ps(sum, _mm256_blendv_ps(_mm256_broadcast_ss(leaves + leafOffset + 1), _mm256_broadcast_ss(leaves + leafOffset + 0), _mm256_castsi256_ps(mask)));
                     nodeOffset++;
                     leafOffset += 2;
                 }
-                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_set1_ps(stage.threshold), sum, _CMP_GT_OQ)), result);
+                result = _mm256_andnot_si256(_mm256_castps_si256(_mm256_cmp_ps(_mm256_broadcast_ss(&stage.threshold), sum, _CMP_GT_OQ)), result);
                 int resultCount = ResultCount(result);
                 if (resultCount == 0)
                     return;
@@ -633,7 +630,7 @@ namespace Simd
 
             __m256i value0 = _mm256_and_si256(_mm256_shuffle_epi8(subset0, shuffle), mask);
             __m256i value1 = _mm256_and_si256(_mm256_shuffle_epi8(subset1, shuffle), mask);
-            __m256i value = Simd::Avx2::Combine(index, value1, value0);
+            __m256i value = _mm256_blendv_epi8(value0, value1, index);
 
             return _mm256_andnot_si256(_mm256_cmpeq_epi16(value, _mm256_setzero_si256()), Simd::Avx2::K_INV_ZERO);
         }
@@ -657,8 +654,7 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m256i mask = LeafMask(feature, offset, subset);
-                    sum = _mm256_add_epi16(sum, Simd::Avx2::Combine(mask,
-                        _mm256_set1_epi16(leaves[leafOffset + 0]), _mm256_set1_epi16(leaves[leafOffset + 1])));
+                    sum = _mm256_add_epi16(sum, _mm256_blendv_epi8(_mm256_set1_epi16(leaves[leafOffset + 1]),  _mm256_set1_epi16(leaves[leafOffset + 0]), mask));
                     nodeOffset++;
                     leafOffset += 2;
                 }
