@@ -235,6 +235,8 @@ namespace Simd
 
         void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
 
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
+
         void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
 
         void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);

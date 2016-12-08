@@ -25,7 +25,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdStream.h"
-#include "Simd/SimdConst.h"
 
 namespace Simd
 {
@@ -98,6 +97,52 @@ namespace Simd
 			else
 				NeuralConvert<false>(src, stride, width, height, dst);
 		}
+
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, __m256 & sum)
+        {
+            __m256 _a = Load<align>(a + offset);
+            __m256 _b = Load<align>(b + offset);
+            sum = _mm256_fmadd_ps(_a, _b, sum);
+        }
+
+        template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            *sum = 0;
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        NeuralProductSum<align>(a, b, i + F * 0, sums[0]);
+                        NeuralProductSum<align>(a, b, i + F * 1, sums[1]);
+                        NeuralProductSum<align>(a, b, i + F * 2, sums[2]);
+                        NeuralProductSum<align>(a, b, i + F * 3, sums[3]);
+                    }
+                    sums[0] = _mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3]));
+                }
+                for (; i < partialAlignedSize; i += F)
+                    NeuralProductSum<align>(a, b, i, sums[0]);
+                *sum += Avx::ExtractSum(sums[0]);
+            }
+            for (; i < size; ++i)
+                *sum += a[i] * b[i];
+        }
+
+        void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
+        {
+            if (Aligned(a) && Aligned(b))
+                NeuralProductSum<true>(a, b, size, sum);
+            else
+                NeuralProductSum<false>(a, b, size, sum);
+        }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)
         {
