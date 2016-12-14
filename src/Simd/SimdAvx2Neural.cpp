@@ -144,6 +144,41 @@ namespace Simd
                 NeuralProductSum<false>(a, b, size, sum);
         }
 
+        template <bool align> SIMD_INLINE void AddMultiplied(const float * src, const __m256 & value, float * dst)
+        {
+            Avx::Store<align>(dst, _mm256_fmadd_ps(value, Load<align>(src), Load<align>(dst)));
+        }
+
+        template <bool align> SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t partial, size_t full, float value, float * dst)
+        {
+            size_t i = 0;
+            if (partial)
+            {
+                __m256 _value = _mm256_set1_ps(value);
+                for (; i < aligned; i += QF)
+                {
+                    AddMultiplied<align>(src + i + F * 0, _value, dst + i + 0);
+                    AddMultiplied<align>(src + i + F * 1, _value, dst + i + 8);
+                    AddMultiplied<align>(src + i + F * 2, _value, dst + i + 16);
+                    AddMultiplied<align>(src + i + F * 3, _value, dst + i + 24);
+                }
+                for (; i < partial; i += F)
+                    AddMultiplied<align>(src + i, _value, dst + i);
+            }
+            for (; i < full; ++i)
+                dst[i] += src[i] * value;
+        }
+
+        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+        {
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
+            if (Aligned(src) && Aligned(dst))
+                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
+            else
+                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
+        }
+
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)
         {
             __m256 _src = Load<align>(src);
