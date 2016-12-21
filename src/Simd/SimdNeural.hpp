@@ -1372,7 +1372,7 @@ namespace Simd
                 {
                     for (size_t i = 0; i < src.size(); i += options.batchSize)
                     {
-                        Propogate(src, dst, i, std::min(i + options.batchSize, src.size()), options);
+                        Propagate(src, dst, i, std::min(i + options.batchSize, src.size()), options);
                         UpdateWeight(options);
                     }
                     logger();
@@ -1549,7 +1549,7 @@ namespace Simd
                     _layers[i]->Backward(_layers[i + 1]->Delta(thread), thread);
             }
 
-            void Propogate(const Vectors & src, const Vectors & dst, size_t start, size_t finish, const TrainOptions & options)
+            void Propagate(const Vectors & src, const Vectors & dst, size_t start, size_t finish, const TrainOptions & options)
             {
                 SIMD_CHECK_PERFORMANCE();
 
