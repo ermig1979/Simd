@@ -512,6 +512,18 @@ namespace Simd
     */
     template<class T1, class T2> Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect);
 
+    /*! @ingroup cpp_rectangle_functions
+
+        \fn template <typename T> Rectangle<T> operator + (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
+        \short Sums the corresponding rectangle's coordinates of two rectangles..
+
+        \param [in] r1 - a first rectangle.
+        \param [in] r2 - a second rectangle.
+        \return a rectangle with result coordinates.
+    */
+    template <typename T> Rectangle<T> operator + (const Rectangle<T> & r1, const Rectangle<T> & r2);
+
 	//-------------------------------------------------------------------------
 
 	// struct Rectangle<T> implementation:
@@ -967,6 +979,12 @@ namespace Simd
     SIMD_INLINE Rectangle<T1> operator * (const T2 & value, const Rectangle<T1> & rect)
     {
         return Rectangle<T1>(rect.left*value, rect.top*value, rect.right*value, rect.bottom*value);
+    }
+
+    template<class T>
+    SIMD_INLINE Rectangle<T> operator + (const Rectangle<T> & r1, const Rectangle<T> & r2)
+    {
+        return Rectangle<T>(r1.left + r2.left, r1.top + r2.top, r1.right + r2.right, r1.bottom + r2.bottom);
     }
 }
 #endif//__SimdRectangle_hpp__
