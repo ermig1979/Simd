@@ -76,11 +76,11 @@ As result the library and the test application will be built in the current dire
 
 If you use the library from C code you must include:
 	
-    #include "Simd/Simd.h"
+    #include "Simd/SimdLib.h"
 
 And to use the library from C++ code you must include:
 
-    #include "Simd/Simd.hpp"
+    #include "Simd/SimdLib.hpp"
 
 In order to use [Simd::Detection](http://simd.sourceforge.net/help/struct_simd_1_1_detection.html) you must include:
 
