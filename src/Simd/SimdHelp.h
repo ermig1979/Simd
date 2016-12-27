@@ -112,12 +112,12 @@
 
     If you use the library from C code you must include:
     \code
-    #include "Simd/Simd.h"
+    #include "Simd/SimdLib.h"
     \endcode
 
     And to use the library from C++ code you must include:
     \code
-    #include "Simd/Simd.hpp"
+    #include "Simd/SimdLib.hpp"
     \endcode
 
     In order to use Simd::Detection you must include:
