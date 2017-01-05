@@ -307,3 +307,40 @@ namespace Test
     }
 }
 
+//-----------------------------------------------------------------------------
+
+#include "Simd/SimdContour.hpp"
+
+namespace Test
+{
+    typedef Simd::ContourDetector< Simd::Allocator<uint8_t> > ContourDetector;
+    typedef ContourDetector::Contour Contour;
+    typedef ContourDetector::Contours Contours;
+
+    bool ContourDetectorSpecialTest()
+    {
+        const int width = W, height = H;
+
+        View rnd(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(rnd, 0, 32);
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        Simd::GaussianBlur3x3(rnd, src);
+
+        ContourDetector detector;
+        detector.Init(src.Size());
+
+        Contours contours;
+        detector.Detect(src, contours);
+
+        View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        src.Save("src.pgm");
+
+        bool result = true;
+
+        return result;
+    }
+}
+
+

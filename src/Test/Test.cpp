@@ -150,6 +150,7 @@ namespace Test
 
     TEST_ADD_GROUP(ContourMetricsMasked);
     TEST_ADD_GROUP(ContourAnchors);
+    TEST_ADD_GROUP_ONLY_SPECIAL(ContourDetector);
 
     TEST_ADD_GROUP(Copy);
     TEST_ADD_GROUP(CopyFrame);
