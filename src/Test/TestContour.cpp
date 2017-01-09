@@ -317,15 +317,23 @@ namespace Test
     typedef ContourDetector::Contour Contour;
     typedef ContourDetector::Contours Contours;
 
+    void CreateSample(uint8_t t, size_t k, size_t n, View & dst)
+    {
+        FillRandom(dst, 0, t);
+        View tmp(dst.Size(), View::Gray8);
+        for (size_t i = 0; i < n; ++i)
+        {
+            Simd::GaussianBlur3x3(dst, tmp);
+            tmp.Swap(dst);
+        }
+    }
+
     bool ContourDetectorSpecialTest()
     {
-        const int width = W, height = H;
+        bool result = true;
 
-        View rnd(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        FillRandom(rnd, 0, 32);
-
-        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        Simd::GaussianBlur3x3(rnd, src);
+        View src(W, H, View::Gray8);
+        CreateSample(255, 3, 32, src);
 
         ContourDetector detector;
         detector.Init(src.Size());
@@ -333,11 +341,11 @@ namespace Test
         Contours contours;
         detector.Detect(src, contours);
 
-        View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        TEST_LOG_SS(Info, contours.size() << " contours were found.");
+
+        //View dst(dst.Size(), View::Gray8);
 
         src.Save("src.pgm");
-
-        bool result = true;
 
         return result;
     }

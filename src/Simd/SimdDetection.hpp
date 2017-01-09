@@ -50,7 +50,7 @@ namespace Simd
             typedef Simd::Detection< Simd::Allocator<uint8_t> > Detection;
 
             Detection::View image;
-            Test::Load(image, "../../data/image/face/lena.pgm");
+            image.Load("../../data/image/face/lena.pgm");
 
             Detection detection;
 
@@ -66,7 +66,7 @@ namespace Simd
                 Size s = objects[i].rect.Size();
                 Simd::FillFrame(image.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
             }
-            Save(image, "result.pgm");
+            image.Save("result.pgm");
 
             return 0;   
         }

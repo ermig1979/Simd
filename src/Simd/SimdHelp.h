@@ -230,6 +230,11 @@
     \short C++ framework for learning of Convolutional Neural Network.
 */
 
+/*! @ingroup cpp_types
+    @defgroup cpp_contour Contour Detector
+    \short ContourDetector structure and related functions.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */
