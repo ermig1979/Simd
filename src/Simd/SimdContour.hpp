@@ -37,6 +37,7 @@ namespace Simd
         Using example:
         \verbatim
         #include "Simd/SimdContour.hpp"
+        #include "Simd/SimdDrawing.hpp"
 
         int main()
         {
@@ -54,9 +55,10 @@ namespace Simd
 
             for (size_t i = 0; i < contours.size(); ++i)
             {
-               \\draw detected contours;
+                for (size_t j = 1; j < contours[i].size(); ++j)
+                    Simd::DrawLine(image, contours[i][j - 1], contours[i][j], uint8_t(255));
             }
-            Save(image, "result.pgm");
+            image.Save("result.pgm");
 
             return 0;
         }

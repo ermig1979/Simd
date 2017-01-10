@@ -310,44 +310,39 @@ namespace Test
 //-----------------------------------------------------------------------------
 
 #include "Simd/SimdContour.hpp"
+#include "Simd/SimdDrawing.hpp"
 
 namespace Test
 {
     typedef Simd::ContourDetector< Simd::Allocator<uint8_t> > ContourDetector;
-    typedef ContourDetector::Contour Contour;
-    typedef ContourDetector::Contours Contours;
-
-    void CreateSample(uint8_t t, size_t k, size_t n, View & dst)
-    {
-        FillRandom(dst, 0, t);
-        View tmp(dst.Size(), View::Gray8);
-        for (size_t i = 0; i < n; ++i)
-        {
-            Simd::GaussianBlur3x3(dst, tmp);
-            tmp.Swap(dst);
-        }
-    }
 
     bool ContourDetectorSpecialTest()
     {
-        bool result = true;
+        ContourDetector::View image;
 
-        View src(W, H, View::Gray8);
-        CreateSample(255, 3, 32, src);
+        String path = "../../data/image/face/lena.pgm";
+        if (!image.Load(path))
+        {
+            TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
+            return false;
+        }
 
         ContourDetector detector;
-        detector.Init(src.Size());
+        detector.Init(image.Size());
 
-        Contours contours;
-        detector.Detect(src, contours);
+        ContourDetector::Contours contours;
+        detector.Detect(image, contours);
 
         TEST_LOG_SS(Info, contours.size() << " contours were found.");
 
-        //View dst(dst.Size(), View::Gray8);
+        for (size_t i = 0; i < contours.size(); ++i)
+        {
+            for (size_t j = 1; j < contours[i].size(); ++j)
+                Simd::DrawLine(image, contours[i][j - 1], contours[i][j], uint8_t(255));
+        }
+        image.Save("result.pgm");
 
-        src.Save("src.pgm");
-
-        return result;
+        return true;
     }
 }
 

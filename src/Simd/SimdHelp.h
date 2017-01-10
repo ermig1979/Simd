@@ -235,6 +235,11 @@
     \short ContourDetector structure and related functions.
 */
 
+/*! @ingroup cpp_types
+    @defgroup cpp_drawing Drawing Functions
+    \short Drawing functions.
+*/
+
 /*! @defgroup functions Functions
     \short Functions of %Simd Library API.
 */
