@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -186,5 +186,34 @@ namespace Test
         }
 
         return result;
+    }
+}
+
+//-----------------------------------------------------------------------------
+
+#include "Simd/SimdDrawing.hpp"
+
+namespace Test
+{
+    bool DrawLineSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 255, m = 20;
+
+        for (size_t i = o; i < n; ++i)
+        {
+            ptrdiff_t x1 = Random(W * 2) - W / 2;
+            ptrdiff_t y1 = Random(H * 2) - H / 2;
+            ptrdiff_t x2 = i%m == 0 ? x1 : Random(W * 2) - W / 2;
+            ptrdiff_t y2 = i%m == 1 ? y1 : Random(H * 2) - H / 2;
+            Simd::DrawLine(image, x1, y1, x2, y2, uint8_t(i));
+        }
+
+        image.Save("result.pgm");
+
+        return true;
     }
 }

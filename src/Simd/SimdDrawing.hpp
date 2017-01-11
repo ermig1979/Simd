@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,78 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(Color));
 
+        const ptrdiff_t w = canvas.width - 1;
+        const ptrdiff_t h = canvas.height - 1;
+
+        if (x1 < 0 || y1 < 0 || x1 > w || y1 > h || x2 < 0 || y2 < 0 || x2 > w || y2 > h)
+        {
+            if ((x1 < 0 && x2 < 0) || (y1 < 0 && y2 < 0) || (x1 > w && x2 > w) || (y1 > h && y2 > h))
+                return;
+
+            if (y1 == y2)
+            {
+                x1 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(x1, 0), w);
+                x2 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(x2, 0), w);
+            }
+            else if (x1 == x2)
+            {
+                y1 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(y1, 0), h);
+                y2 = std::min<ptrdiff_t>(std::max<ptrdiff_t>(y2, 0), h);
+            }
+            else
+            {
+                ptrdiff_t x0 = (x1*y2 - y1*x2) / (y2 - y1);
+                ptrdiff_t y0 = (y1*x2 - x1*y2) / (x2 - x1);
+                ptrdiff_t xh = (x1*y2 - y1*x2 + h*(x2 - x1)) / (y2 - y1);
+                ptrdiff_t yw = (y1*x2 - x1*y2 + w*(y2 - y1)) / (x2 - x1);
+
+                if (x1 < 0)
+                {
+                    x1 = 0;
+                    y1 = y0;
+                }
+                if (x2 < 0)
+                {
+                    x2 = 0;
+                    y2 = y0;
+                }
+                if (x1 > w)
+                {
+                    x1 = w;
+                    y1 = yw;
+                }
+                if (x2 > w)
+                {
+                    x2 = w;
+                    y2 = yw;
+                }
+                if ((y1 < 0 && y2 < 0) || (y1 > h && y2 > h))
+                    return;
+
+                if (y1 < 0)
+                {
+                    x1 = x0;
+                    y1 = 0;
+                }
+                if (y2 < 0)
+                {
+                    x2 = x0;
+                    y2 = 0;
+                }
+
+                if (y1 > h)
+                {
+                    x1 = xh;
+                    y1 = h;
+                }
+                if (y2 > h)
+                {
+                    x2 = xh;
+                    y2 = h;
+                }
+            }
+        }
+
         const bool inverse = std::abs(y2 - y1) > std::abs(x2 - x1);
         if (inverse)
         {
@@ -65,9 +137,7 @@ namespace Simd
         const ptrdiff_t ystep = (y1 < y2) ? 1 : -1;
         ptrdiff_t y = y1;
 
-        const ptrdiff_t maxX = x2;
-
-        for (ptrdiff_t x = x1; x < x2; x++)
+        for (ptrdiff_t x = x1; x <= x2 && y <= h && y >= 0; x++)
         {
             if (inverse)
             {
