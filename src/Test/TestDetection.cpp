@@ -212,7 +212,7 @@ namespace Test
         }
 
         result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);
-        //result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2);
+        result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2);
 
         SimdDetectionFree(data);
 
