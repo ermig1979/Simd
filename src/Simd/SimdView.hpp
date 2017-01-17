@@ -460,6 +460,33 @@ namespace Simd
 
     /*! @ingroup cpp_view_functions
 
+        \fn template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
+
+        Gets constant reference to the pixel of arbitrary type at the point at the image with specified coordinates.
+
+        \param [in] view - an image.
+        \param [in] x - a x-coordinate of the pixel.
+        \param [in] y - a y-coordinate of the pixel.
+        \return - a const reference to pixel of arbitrary type.
+    */
+    template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
+
+    /*! @ingroup cpp_view_functions
+
+        \fn template <class A, class T> T & At(View<A> & view, size_t x, size_t y);
+
+        Gets reference to the pixel of arbitrary type at the point at the image with specified coordinates.
+
+        \param [in] view - an image.
+        \param [in] x - a x-coordinate of the pixel.
+        \param [in] y - a y-coordinate of the pixel.
+        \return - a reference to pixel of arbitrary type.
+    */
+    template <class A, class T> T & At(View<A> & view, size_t x, size_t y);
+
+
+    /*! @ingroup cpp_view_functions
+
         \fn template <class A, class B> bool EqualSize(const View<A> & a, const View<B> & b);
 
         Checks two image views on the same size.
@@ -965,6 +992,16 @@ namespace Simd
     }
 
     // View utilities implementation:
+
+    template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y)
+    {
+        return view.At<T>(x, y);
+    }
+
+    template <class A, class T> T & At(View<A> & view, size_t x, size_t y)
+    {
+        return view.At<T>(x, y);
+    }
 
     template <class A, class B> SIMD_INLINE bool EqualSize(const View<A> & a, const View<B> & b)
     {

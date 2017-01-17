@@ -141,11 +141,11 @@ namespace Simd
         {
             if (inverse)
             {
-                canvas.At<Color>(y, x) = color;
+                At<A, Color>(canvas, y, x) = color;
             }
             else
             {
-                canvas.At<Color>(x, y) = color;
+                At<A, Color>(canvas, x, y) = color;
             }
 
             error -= dy;

@@ -173,11 +173,11 @@ namespace Simd
             _anchors.clear();
             for (ptrdiff_t row = _roi.Top() + 1; row < _roi.Bottom() - 1; row += anchorScanInterval)
             {
-                const uint8_t * a = &_a.At<uint8_t>(0, row);
+                const uint8_t * a = &At<A, uint8_t>(_a, 0, row);
                 for (ptrdiff_t col = _roi.Left(); col < _roi.Right() - 1; col += anchorScanInterval)
                 {
                     if (a[col])
-                        _anchors.push_back(Anchor(Point(col, row), _m.At<int16_t>(col, row) / 2));
+                        _anchors.push_back(Anchor(Point(col, row), At<A, uint16_t>(_m, col, row) / 2));
                 }
             }
 
@@ -212,9 +212,9 @@ namespace Simd
             case Left:
                 while (CheckMetricsForMagnitudeAndDirection(x, y, gradientThreshold, 1))
                 {
-                    if (_e.At<uint8_t>(x, y) == 0)
+                    if (At<A, uint8_t>(_e, x, y) == 0)
                     {
-                        _e.At<uint8_t>(x, y) = 255;
+                        At<A, uint8_t>(_e, x, y) = 255;
                         if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
@@ -235,16 +235,16 @@ namespace Simd
                     }
                     else
                         x--;
-                    if (_e.At<uint8_t>(x, y) != 0)
+                    if (At<A, uint8_t>(_e, x, y) != 0)
                         break;
                 }
                 break;
             case Right:
                 while (CheckMetricsForMagnitudeAndDirection(x, y, gradientThreshold, 1))
                 {
-                    if (_e.At<uint8_t>(x, y) == 0)
+                    if (At<A, uint8_t>(_e, x, y) == 0)
                     {
-                        _e.At<uint8_t>(x, y) = 255;
+                        At<A, uint8_t>(_e, x, y) = 255;
                         if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
@@ -265,16 +265,16 @@ namespace Simd
                     }
                     else
                         x++;
-                    if (_e.At<uint8_t>(x, y) != 0)
+                    if (At<A, uint8_t>(_e, x, y) != 0)
                         break;
                 }
                 break;
             case Up:
                 while (CheckMetricsForMagnitudeAndDirection(x, y, gradientThreshold, 0))
                 {
-                    if (_e.At<uint8_t>(x, y) == 0)
+                    if (At<A, uint8_t>(_e, x, y) == 0)
                     {
-                        _e.At<uint8_t>(x, y) = 255;
+                        At<A, uint8_t>(_e, x, y) = 255;
                         if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
@@ -295,16 +295,16 @@ namespace Simd
                     }
                     else
                         y--;
-                    if (_e.At<uint8_t>(x, y) != 0)
+                    if (At<A, uint8_t>(_e, x, y) != 0)
                         break;
                 }
                 break;
             case Down:
                 while (CheckMetricsForMagnitudeAndDirection(x, y, gradientThreshold, 0))
                 {
-                    if (_e.At<uint8_t>(x, y) == 0)
+                    if (At<A, uint8_t>(_e, x, y) == 0)
                     {
-                        _e.At<uint8_t>(x, y) = 255;
+                        At<A, uint8_t>(_e, x, y) = 255;
                         if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
@@ -325,16 +325,16 @@ namespace Simd
                     }
                     else
                         y++;
-                    if (_e.At<uint8_t>(x, y) != 0)
+                    if (At<A, uint8_t>(_e, x, y) != 0)
                         break;
                 }
                 break;
             }
 
-            if (_e.At<uint8_t>(x, y) != 0 || _m.At<uint16_t>(x, y) < gradientThreshold)
+            if (At<A, uint8_t>(_e, x, y) != 0 || At<A, uint16_t>(_m, x, y) < gradientThreshold)
                 return;
 
-            int16_t d = _m.At<uint16_t>(x, y) & 1;
+            uint16_t d = At<A, uint16_t>(_m, x, y) & 1;
             if (d == 0)
             {
                 SmartRoute(contours, contour, x, y, minSegmentLength, gradientThreshold, Up);
@@ -349,19 +349,19 @@ namespace Simd
 
         bool CheckMetricsForMagnitudeAndDirection(ptrdiff_t x, ptrdiff_t y, int16_t gradientThreshold, int16_t direction) const
         {
-            const int16_t & m = _m.At<uint16_t>(x, y);
+            const uint16_t & m = At<A, uint16_t>(_m, x, y);
             return m >= gradientThreshold && (m & 1) == direction;
         }
 
         bool CheckMetricsForMagnitudeMaximum(ptrdiff_t x0, ptrdiff_t y0, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2) const
         {
-            const int16_t m0 = _m.At<int16_t>(x0, y0) | 1;
-            const int16_t m1 = _m.At<int16_t>(x1, y1) | 1;
-            const int16_t m2 = _m.At<int16_t>(x2, y2) | 1;
+            const uint16_t m0 = At<A, uint16_t>(_m, x0, y0) | 1;
+            const uint16_t m1 = At<A, uint16_t>(_m, x1, y1) | 1;
+            const uint16_t m2 = At<A, uint16_t>(_m, x2, y2) | 1;
             return m0 > m1 && m0 > m2;
         }
 
-        int16_t EstimateAdaptiveThreshold()
+        uint16_t EstimateAdaptiveThreshold()
         {
             Point roiSize = _roi.Size();
             Point mSize = _m.Size();
@@ -377,7 +377,7 @@ namespace Simd
             {
                 for (ptrdiff_t j = 0; j < size.y; ++j)
                 {
-                    value = m.At<uint16_t>(i, j);
+                    value = At<A, uint16_t>(m, i, j);
                     if (value)
                     {
                         count++;
@@ -387,7 +387,7 @@ namespace Simd
                 }
             }
 
-            int16_t meanThreshold = (int16_t)((double)sum / count);
+            uint16_t meanThreshold = (uint16_t)((double)sum / count);
             return meanThreshold;
         }
     };
