@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+#include "Simd/SimdDrawing.hpp"
+
 namespace Test
 {
     typedef std::map<size_t, View> Samples;
@@ -102,7 +104,7 @@ namespace Test
             {
                 if (mask.At<uint8_t>(col, row) == 0)
                     continue;
-                Simd::FillFrame(dst.Region(col, row, col + w, row + h).Ref(), Rect(1, 1, w - 1, h - 1), 255);
+                Simd::DrawRectangle(dst, Rect(col, row, col + w, row + h), uint8_t(255));
             }
         }
         String path = desc;
@@ -539,9 +541,9 @@ namespace Test
         for (size_t i = 0; i < objects.size(); ++i)
         {
             Size s = objects[i].rect.Size();
-            Simd::FillFrame(dst.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
+            Simd::DrawRectangle(dst, objects[i].rect, uint8_t(255));
         }
-        dst.Save(String("dst_") + ToString(threadNumber) + ".pgm");
+        dst.Save(String("faces_") + ToString(threadNumber) + ".pgm");
     }
 
     bool DetectionSpecialTest()

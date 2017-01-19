@@ -201,7 +201,7 @@ namespace Test
 
         Simd::Fill(image, 0);
 
-        const size_t o = 55, n = 255, m = 20;
+        const size_t o = 55, n = 256, m = 20, w = 3;
 
         for (size_t i = o; i < n; ++i)
         {
@@ -209,10 +209,33 @@ namespace Test
             ptrdiff_t y1 = Random(H * 2) - H / 2;
             ptrdiff_t x2 = i%m == 0 ? x1 : Random(W * 2) - W / 2;
             ptrdiff_t y2 = i%m == 1 ? y1 : Random(H * 2) - H / 2;
-            Simd::DrawLine(image, x1, y1, x2, y2, uint8_t(i));
+            Simd::DrawLine(image, x1, y1, x2, y2, uint8_t(i), Random(w) + 1);
         }
 
-        image.Save("result.pgm");
+        image.Save("lines.pgm");
+
+        return true;
+    }
+
+    bool DrawRectangleSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 256, w = 3;
+
+        for (size_t i = o; i < n; i += 5)
+        {
+            ptrdiff_t x1 = Random(W * 5 / 4) - W / 8;
+            ptrdiff_t y1 = Random(H * 5 / 4) - H / 8;
+            ptrdiff_t x2 = Random(W * 5 / 4) - W / 8;
+            ptrdiff_t y2 = Random(H * 5 / 4) - H / 8;
+
+            Simd::DrawRectangle(image, Rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2)), uint8_t(i), Random(w) + 1);
+        }
+
+        image.Save("rectangles.pgm");
 
         return true;
     }

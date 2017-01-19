@@ -43,7 +43,7 @@ namespace Simd
         Using example:
         \verbatim
         #include "Simd/SimdDetection.hpp"
-        #include "Test/TestUtils.h"
+        #include "Simd/SimdDrawing.hpp"
 
         int main()
         {
@@ -62,10 +62,8 @@ namespace Simd
             detection.Detect(image, objects);
 
             for (size_t i = 0; i < objects.size(); ++i)
-            {
-                Size s = objects[i].rect.Size();
-                Simd::FillFrame(image.Region(objects[i].rect).Ref(), Rect(1, 1, s.x - 1, s.y - 1), 255);
-            }
+                Simd::DrawRectangle(image, objects[i].rect, uint8_t(255));
+
             image.Save("result.pgm");
 
             return 0;   
