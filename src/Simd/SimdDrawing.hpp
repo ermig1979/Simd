@@ -187,7 +187,7 @@ namespace Simd
 
     /*! @ingroup cpp_drawing
 
-        \fn void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & r, const Color & color, size_t width = 1)
+        \fn void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
 
         \short Draws a rectangle at the image.
 
