@@ -162,27 +162,27 @@
 
 /*! @ingroup cpp_types
     @defgroup cpp_allocator Allocator
-    \short Allocator structure. 
+    \short Simd::Allocator structure. 
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_point Point
-    \short Point structure and related functions. 
+    \short Simd::Point structure and related functions. 
 */
 
 /*! @ingroup cpp_point
     @defgroup cpp_point_functions Related Functions 
-    \short Related functions for Point structure. 
+    \short Related functions for Simd::Point structure. 
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_rectangle Rectangle
-    \short Rectangle structure and related functions. 
+    \short Simd::Rectangle structure and related functions. 
 */
 
 /*! @ingroup cpp_rectangle
     @defgroup cpp_rectangle_functions Related Functions 
-    \short Related functions for Rectangle structure. 
+    \short Related functions for Simd::Rectangle structure. 
 */
 
 /*! @ingroup cpp_types
@@ -192,47 +192,52 @@
 
 /*! @ingroup cpp_types
     @defgroup cpp_view View
-    \short View structure and related functions. 
+    \short Simd::View structure and related functions. 
 */
 
 /*! @ingroup cpp_view
     @defgroup cpp_view_functions Related Functions 
-    \short Related functions for View structure. 
+    \short Related functions for Simd::View structure. 
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_frame Frame
-    \short Frame structure and related functions.
+    \short Simd::Frame structure and related functions.
 */
 
 /*! @ingroup cpp_frame
     @defgroup cpp_frame_functions Related Functions
-    \short Related functions for Frame structure.
+    \short Related functions for Simd::Frame structure.
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_pyramid Pyramid
-    \short Pyramid structure and related functions.
+    \short Simd::Pyramid structure and related functions.
 */
 
 /*! @ingroup cpp_pyramid
     @defgroup cpp_pyramid_functions Related Functions
-    \short Related functions for Pyramid structure.
+    \short Related functions for Simd::Pyramid structure.
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_detection Detection
-    \short Detection structure (C++ Object Detection Wrapper).
+    \short Simd::Detection structure (C++ Object Detection Wrapper).
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_neural Neural
-    \short C++ framework for learning of Convolutional Neural Network.
+    \short Simd::Neural is C++ framework for running and learning of Convolutional Neural Network.
 */
 
 /*! @ingroup cpp_types
     @defgroup cpp_contour Contour Detector
-    \short ContourDetector structure and related functions.
+    \short Simd::ContourDetector structure and related functions.
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_shift Shift Detector
+    \short Simd::ShiftDetector structure and related functions.
 */
 
 /*! @ingroup cpp_types
@@ -435,11 +440,6 @@
 */
 
 /*! @ingroup motion_detection
-    @defgroup contour Contour Extraction
-    \short Functions for contour extraction.
-*/
-
-/*! @ingroup motion_detection
     @defgroup background Background Updating
     \short Functions for background updating.
 */
@@ -461,12 +461,17 @@
 
 /*! @ingroup functions
 	@defgroup neural Neural Network
-	\short Artificial Neural Network's functions.
+	\short Artificial Neural Network's functions for accelerating of Simd::Neural.
 */
 
 /*! @ingroup functions
     @defgroup object_detection Object Detection
     \short Object Detection's low-level API for Simd::Detection.
+*/
+
+/*! @ingroup functions
+    @defgroup contour Contour Extraction
+    \short Contour extraction functions for accelerating of Simd::ContourDetector.
 */
 
 #ifndef __SimdHelp_h__

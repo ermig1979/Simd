@@ -170,7 +170,7 @@ namespace Simd
 
     /*! @ingroup cpp_drawing
 
-        \fn void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color)
+        \fn void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color, size_t width = 1)
 
         \short Draws a line at the image.
 

@@ -194,3 +194,34 @@ namespace Test
         return result;
     }
 }
+
+//-----------------------------------------------------------------------
+
+#include "Simd/SimdShift.hpp"
+#include "Simd/SimdDrawing.hpp"
+
+namespace Test
+{
+    bool ShiftDetectorSpecialTest()
+    {
+        typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
+
+        View background(W, H, View::Gray8);
+        size_t s = std::min(background.width, background.height) / 4;
+        View current(s, s, View::Gray8);
+
+        ShiftDetector shiftDetector;
+
+        shiftDetector.InitBuffers(background.Size(), 4);
+
+        shiftDetector.SetBackground(background);
+
+        shiftDetector.Estimate(current, Rect(current.Size()).Shifted(current.Size()), 32);
+
+        ShiftDetector::FPoint shift = shiftDetector.ProximateShift();
+
+        double stability = shiftDetector.Stability();
+
+        return true;
+    }
+}

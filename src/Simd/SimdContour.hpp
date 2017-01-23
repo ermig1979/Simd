@@ -32,7 +32,7 @@ namespace Simd
 {
     /*! @ingroup cpp_contour
 
-        \short The ContourDetector structure provides detection of contours at the image.
+        \short ContourDetector structure provides detection of contours at the image.
 
         Using example:
         \verbatim
