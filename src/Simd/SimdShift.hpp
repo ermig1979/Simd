@@ -39,12 +39,29 @@ namespace Simd
         Using example:
         \verbatim
         #include "Simd/SimdShift.hpp"
-        #include "Simd/SimdDrawing.hpp"
+        #include <iostream>
 
         int main()
         {
             typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
 
+            ShiftDetector::View background;
+            background.Load("../../data/image/face/lena.pgm");
+
+            ShiftDetector detector;
+
+            detector.InitBuffers(background.Size(), 4);
+
+            detector.SetBackground(background);
+
+            ShiftDetector::Rect region(64, 64, 192, 192);
+
+            ShiftDetector::View current = background.Region(region.Shifted(10, 10));
+
+            if (detector.Estimate(current, region, 32))
+                std::cout << "Shift = (" << detector.Shift().x << ", " << detector.Shift().y << "). " << std::endl;
+            else
+                std::cout << "Can't find shift for current image!" << std::endl;
 
             return 0;
         }
@@ -59,18 +76,48 @@ namespace Simd
         typedef Simd::Point<double> FPoint; /*!< A point with float point coordinates. */
         typedef Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
 
+        /*!
+            \enum TextureType
+
+            Describes types of texture which used to find correlation between background and current image.
+        */
         enum TextureType
         {
+            /*!
+                Original grayscale image.
+            */
             TextureGray,
+            /*!
+                Saturated sum of absolute gradients along X and Y axes.
+            */
             TextureGrad,
         };
 
+        /*!
+            \enum DifferenceType
+
+            Describes types of function which used to find correlation between background and current image.
+        */
         enum DifferenceType
         {
+            /*!
+                Sum of absolute differences of points of two images.
+            */
             AbsDifference,
+            /*!
+                Sum of squared differences of points of two images.
+            */
             SquaredDifference,
         };
 
+        /*!
+            Initializes internal buffers of ShiftDetector structure. It allows it to work with image of given size.
+
+            \param [in] frameSize - a size of background image.
+            \param [in] levelCount - number of levels in the internal image pyramids used to find shift. 
+            \param [in] textureType - type of textures used to detect shift. 
+            \param [in] differenceType - type of correlation functions used to detect shift. 
+        */
         void InitBuffers(const Point & frameSize, size_t levelCount, TextureType textureType = TextureGray, DifferenceType differenceType = AbsDifference)
         {
             if (_background.Size() && _background.Size() == levelCount && _background[0].Size() == frameSize)
@@ -82,6 +129,11 @@ namespace Simd
             _current.Recreate(frameSize, levelCount);
         }
 
+        /*!
+            Sets a background image. Size of background image must be equal to frameSize (see function ShiftDetector::InitBuffers).
+
+            \param [in] background - background image.
+        */
         void SetBackground(const View & background)
         {
             assert(_background.Size() && _background[0].Size() == background.Size());
@@ -95,6 +147,15 @@ namespace Simd
             _background.Build(Pyramid::ReduceGray2x2);
         }
 
+        /*!
+            Estimates shift of current image relative to background image.
+
+            \param [in] current - current image.
+            \param [in] region - a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region.
+            \param [in] maxShift - a 2D-point which characterizes maximal possible shift of the region (along X and Y axes).
+            \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+            \return a result of shift estimation.
+        */
         bool Estimate(const View & current, const Rect & region, const Point & maxShift, double hiddenAreaPenalty = 0)
         {
             assert(current.Size() == region.Size() && region.Area() > 0);
@@ -118,26 +179,55 @@ namespace Simd
             return true;
         }
 
+        /*!
+            Estimates shift of current image relative to background image.
+
+            \param [in] current - current image.
+            \param [in] region - a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region.
+            \param [in] maxShift - a maximal distance which characterizes maximal possible shift of the region.
+            \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+            \return a result of shift estimation.
+        */
         bool Estimate(const View & current, const Rect & region, int maxShift, double hiddenAreaPenalty = 0)
         {
             return Estimate(current, region, Point(maxShift, maxShift), hiddenAreaPenalty);
         }
 
+        /*!
+            Gets estimated integer shift of current image relative to background image.
+
+            \return estimated integer shift.
+        */
         Point Shift() const
         {
             return _levels[0].shift;
         }
 
+        /*!
+            Gets proximate (with sub-pixel accuracy) shift of current image relative to background image.
+
+            \return proximate shift with sub-pixel accuracy.
+        */
         FPoint ProximateShift() const
         {
             return FPoint(_levels[0].shift) + _levels[0].differences.Refinement();
         }
 
+        /*!
+            Gets a value which characterizes stability (reliability) of found shift.
+
+            \return stability (reliability) of found shift.
+        */
         double Stability() const
         {
             return _levels[0].differences.Stability();
         }
 
+        /*!
+            Gets the best correlation of background and current image.
+
+            \return the best correlation of background and current image.
+        */
         double Correlation() const
         {
             double difference = _levels[0].differences.At(_levels[0].shift);
@@ -150,7 +240,7 @@ namespace Simd
     private:
         static const ptrdiff_t REGION_CORRELATION_AREA_MIN = 25;
 
-        typedef Simd::Pyramid<Allocator> Pyramid; 
+        typedef Simd::Pyramid<Allocator> Pyramid;
 
         Pyramid _background;
         Pyramid _current;
@@ -366,15 +456,17 @@ namespace Simd
             }
             assert(levelCount);
 
+            const ptrdiff_t maxShiftMin = 2;
+
             _levels.resize(levelCount);
             size_t buildRegionAlign = 1 << (levelCount - 1);
             for (size_t i = 0; i < _levels.size(); ++i)
             {
-                _levels[i].maxShift.x = std::max<ptrdiff_t>((maxShift.x >> i) + 1, 2);
-                _levels[i].maxShift.y = std::max<ptrdiff_t>((maxShift.y >> i) + 1, 2);
+                _levels[i].maxShift.x = std::max<ptrdiff_t>((maxShift.x >> i) + 1, maxShiftMin);
+                _levels[i].maxShift.y = std::max<ptrdiff_t>((maxShift.y >> i) + 1, maxShiftMin);
 
-                _levels[i].neighborhood.x = (i == _levels.size() - 1 ? _levels[i].maxShift.x : 3);
-                _levels[i].neighborhood.y = (i == _levels.size() - 1 ? _levels[i].maxShift.y : 3);
+                _levels[i].neighborhood.x = (i == _levels.size() - 1 ? _levels[i].maxShift.x : maxShiftMin + 1);
+                _levels[i].neighborhood.y = (i == _levels.size() - 1 ? _levels[i].maxShift.y : maxShiftMin + 1);
 
                 _levels[i].searchRegion.left = region.left >> i;
                 _levels[i].searchRegion.top = region.top >> i;

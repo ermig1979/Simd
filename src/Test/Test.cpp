@@ -242,7 +242,8 @@ namespace Test
     TEST_ADD_GROUP(SegmentationPropagate2x2);
 
     TEST_ADD_GROUP(ShiftBilinear);
-    TEST_ADD_GROUP_ONLY_SPECIAL(ShiftDetector);
+    TEST_ADD_GROUP_ONLY_SPECIAL(ShiftDetectorRand);
+    TEST_ADD_GROUP_ONLY_SPECIAL(ShiftDetectorFile);
 
     TEST_ADD_GROUP(GetStatistic);
     TEST_ADD_GROUP(GetMoments);

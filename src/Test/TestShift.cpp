@@ -202,25 +202,118 @@ namespace Test
 
 namespace Test
 {
-    bool ShiftDetectorSpecialTest()
+    bool CreateBackground(View & bkg, Rect & rect)
+    {
+        View obj;
+
+        const uint8_t lo = 64, hi = 192;
+        const size_t s = 256, co = s / 2;
+        const size_t rl2 = Simd::Square(co * 2 / 7), rh2 = Simd::Square(co * 4 / 7);
+        obj.Recreate(s, s, View::Gray8);
+        for (size_t y = 0; y < s; ++y)
+        {
+            size_t dy2 = Simd::Square(co - y);
+            for (size_t x = 0; x < s; ++x)
+            {
+                size_t dx2 = Simd::Square(co - x);
+                size_t r2 = dy2 + dx2;
+                obj.At<uint8_t>(x, y) = (r2 >= rl2 && r2 <= rh2 ? hi : lo);
+          
+            }
+        }
+        FillRandom(bkg, 0, lo * 2);
+        Point c(bkg.width / 2, bkg.height / 2);
+
+        std::vector<uint8_t> profile(s, 255);
+        for (size_t i = 0, n = s / 4; i < n; ++i)
+            profile[s - i - 1] = profile[i] = uint8_t(i * 255 / n);
+        View alpha(s, s, View::Gray8);
+        Simd::VectorProduct(profile.data(), profile.data(), alpha);
+
+        size_t hs = s / 2;
+        rect = Rect(c.x - hs, c.y - hs, c.x + hs, c.y + hs);
+        Simd::AlphaBlending(obj, alpha, bkg.Region(rect).Ref());
+        rect.AddBorder(-int(hs / 4));
+
+        return true;
+    }
+
+    bool ShiftDetectorRandSpecialTest()
     {
         typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
 
-        View background(W, H, View::Gray8);
-        size_t s = std::min(background.width, background.height) / 4;
-        View current(s, s, View::Gray8);
+        ::srand(1);
+
+        Rect region;
+        View background(1920, 1080, View::Gray8);
+        if (!CreateBackground(background, region))
+            return false;
 
         ShiftDetector shiftDetector;
+        double time;
+
+        time = GetTime();
+        shiftDetector.InitBuffers(background.Size(), 6, ShiftDetector::TextureGray, ShiftDetector::SquaredDifference);
+        TEST_LOG_SS(Info, "InitBuffers : " << (GetTime() - time) * 1000 << " ms ");
+
+        time = GetTime();
+        shiftDetector.SetBackground(background);
+        TEST_LOG_SS(Info, "SetBackground : " << (GetTime() - time) * 1000 << " ms ");
+
+        int n = 10;
+        time = GetTime();
+        for (int i = 0; i < n; ++i)
+        {
+            const int ms = (int)region.Width() / 4;
+            Point ss(Random(2*ms) - ms, Random(2*ms) - ms);
+
+            shiftDetector.Estimate(background.Region(region), region.Shifted(ss), ms*2);
+
+            ShiftDetector::FPoint ds = shiftDetector.ProximateShift();
+
+            if (Simd::SquaredDistance(ShiftDetector::FPoint(ss), ds) > 1.0)
+            {
+                Simd::DrawRectangle(background, region, uint8_t(255));
+                Simd::DrawRectangle(background, region.Shifted(ss), uint8_t(0));
+                background.Save("background.pgm");
+                TEST_LOG_SS(Error, "Detected shift (" << ds.x << ", " << ds.y << ") is not equal to original shift (" << ss.x << ", " << ss.y << ") !");
+                return false;
+            }
+        }
+        TEST_LOG_SS(Info, "Estimate : " << (GetTime() - time) * 1000.0 / n << " ms ");
+
+        return true;
+    }
+
+    bool ShiftDetectorFileSpecialTest()
+    {
+        typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
+
+        ShiftDetector shiftDetector;
+
+        ShiftDetector::View background;
+        String path = ROOT_PATH + "/data/image/face/lena.pgm";
+        if (!background.Load(path))
+        {
+            TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");
+            return false;
+        }
 
         shiftDetector.InitBuffers(background.Size(), 4);
 
         shiftDetector.SetBackground(background);
 
-        shiftDetector.Estimate(current, Rect(current.Size()).Shifted(current.Size()), 32);
+        ShiftDetector::Rect region(64, 64, 192, 192);
 
-        ShiftDetector::FPoint shift = shiftDetector.ProximateShift();
+        ShiftDetector::View current = background.Region(region.Shifted(10, 10));
 
-        double stability = shiftDetector.Stability();
+        if (shiftDetector.Estimate(current, region, 32))
+        {
+            ShiftDetector::Point shift = shiftDetector.Shift();
+            std::cout << "Shift = (" << shift.x << ", " << shift.y << "). " << std::endl;
+        }
+        else
+            std::cout << "Can't find shift for current image!" << std::endl;
 
         return true;
     }

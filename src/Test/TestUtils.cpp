@@ -60,6 +60,63 @@ namespace Test
         }
     }
 
+    void FillRandom2(View & view, uint8_t lo, uint8_t hi, uint8_t step)
+    {
+        assert(view.data && view.height && view.width && view.format == View::Gray8);
+
+        for (size_t row = 0; row < view.height; ++row)
+        {
+            if (row & 1)
+            {
+                for (ptrdiff_t col = view.width - 1; col >= 0; --col)
+                {
+                    int l = lo, h = hi;
+                    if (row)
+                    {
+                        int v = view.At<uint8_t>(col, row - 1);
+                        l = std::max(v - step, l);
+                        h = std::min(v + step, h);
+                    }
+                    if (col != view.width - 1)
+                    {
+                        int v = view.At<uint8_t>(col + 1, row);
+                        l = std::max(v - step/2, l);
+                        h = std::min(v + step/2, h);
+                    }
+                    int r = h - l + 1;
+                    int v = l + Random(r);
+                    view.At<uint8_t>(col, row) = v;
+                }
+            }
+            else
+            {
+                for (size_t col = 0; col < view.width; ++col)
+                {
+                    int l = lo, h = hi;
+                    if (row)
+                    {
+                        int v = view.At<uint8_t>(col, row - 1);
+                        l = std::max(v - step, l);
+                        h = std::min(v + step, h);
+                    }
+                    if (col)
+                    {
+                        int v = view.At<uint8_t>(col - 1, row);
+                        l = std::max(v - step/2, l);
+                        h = std::min(v + step/2, h);
+                    }
+                    int r = h - l + 1;
+                    int v = l + Random(r);
+                    view.At<uint8_t>(col, row) = v;
+                }
+            }
+        }
+
+        View buff(view.Size(), View::Gray8);
+        Simd::GaussianBlur3x3(view, buff);
+        view.Swap(buff);
+    }
+
 	void FillRandomMask(View & view, uint8_t index)
 	{
 		assert(view.data);

@@ -40,6 +40,7 @@ namespace Test
 
     void FillRandom(View & view, uint8_t lo = 0, uint8_t hi = 255);
 
+    void FillRandom2(View & view, uint8_t lo = 0, uint8_t hi = 255, uint8_t step = 1);
 
     void FillRandomMask(View & view, uint8_t index);
 
