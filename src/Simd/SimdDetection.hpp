@@ -25,14 +25,11 @@
 #define __SimdDetection_hpp__
 
 #include "Simd/SimdLib.hpp"
+#include "Simd/SimdParallel.hpp"
 
 #include <vector>
 #include <map>
-#include <thread>
-#include <mutex>
-#include <condition_variable>
 #include <memory>
-#include <queue>
 
 namespace Simd
 {
@@ -183,7 +180,8 @@ namespace Simd
             if (_data.empty())
                 return false;
             _imageSize = imageSize;
-            InitWorkers(threadNumber);
+            ptrdiff_t threadNumberMax = std::thread::hardware_concurrency();
+            _threadNumber = (threadNumber <= 0 || threadNumber > threadNumberMax) ? threadNumberMax : threadNumber;
             return InitLevels(scaleFactor, sizeMin, sizeMax, roi);
         }
 
@@ -226,15 +224,12 @@ namespace Simd
                 {
                     Hid & hid = level.hids[j];
 
-                    hid.Detect(mask, rect, level.dst, _workers, level.throughColumn);
+                    hid.Detect(mask, rect, level.dst, _threadNumber, level.throughColumn);
 
                     AddObjects(candidates[hid.data->tag], level.dst, rect, hid.data->size, level.scale,
                         level.throughColumn ? 2 : 1, hid.data->tag);
                 }
             }
-
-            for (size_t i = 0; i < _workers.size(); ++i)
-                _workers[i]->Slack();
 
             objects.clear();
             for (typename Candidates::iterator it = candidates.begin(); it != candidates.end(); ++it)
@@ -272,7 +267,7 @@ namespace Simd
             Data * data;
             DetectPtr detect;
 
-            void Detect(const View & mask, const Rect & rect, View & dst, WorkerPtrs & workers, bool throughColumn)
+            void Detect(const View & mask, const Rect & rect, View & dst, size_t threadNumber, bool throughColumn)
             {
                 Size s = dst.Size() - data->size;
                 View m = mask.Region(s, View::MiddleCenter);
@@ -280,24 +275,10 @@ namespace Simd
                 Simd::Fill(dst, 0);
                 ::SimdDetectionPrepare(handle);
 
-                if (workers.empty())
+                Parallel(r.top, r.bottom, [&](size_t thread, size_t begin, size_t end)
                 {
-                    detect(handle, m.data, m.stride, r.left, r.top, r.right, r.bottom, dst.data, dst.stride);
-                }
-                else
-                {
-                    size_t step = (r.bottom - r.top) / workers.size() + 1;
-                    if (throughColumn)
-                        step += step & 1;
-                    for (size_t i = 0; i < workers.size(); ++i)
-                    {
-                        ptrdiff_t top = r.top + i*step;
-                        ptrdiff_t bottom = std::min<ptrdiff_t>(top + step, r.bottom);
-                        workers[i]->Add((Hid*)this, m, r.left, top, r.right, bottom, dst);
-                    }
-                    for (size_t i = 0; i < workers.size(); ++i)
-                        workers[i]->Wait();
-                }
+                    detect(handle, m.data, m.stride, r.left, begin, r.right, end, dst.data, dst.stride);
+                }, threadNumber, throughColumn ? 2 : 1);
             }
         };
         typedef std::vector<Hid> Hids;
@@ -331,103 +312,11 @@ namespace Simd
         };
         typedef std::vector<Level> Levels;
 
-        struct Worker
-        {
-            Worker()
-                : _run(true)
-                , _slack(true)
-            {
-                _thread = std::thread(&Worker::Run, this);
-            }
-
-            ~Worker()
-            {
-                _run = false;
-                if(_thread.joinable())
-                    _thread.join();
-            }
-
-            void Add(Hid * h, const View & m, ptrdiff_t l, ptrdiff_t t, ptrdiff_t r, ptrdiff_t b, View & d)
-            {
-                std::unique_lock<std::mutex> lk(_mutex);
-                _tasks.push(TaskPtr(new Task(h, m, l, t, r, b, d)));
-            }
-
-            void Wait()
-            {
-                std::unique_lock<std::mutex> lk(_mutex);
-                while(_tasks.size())
-                    _cv.wait(lk);
-            }
-
-            void Slack()
-            {
-                _slack = true;
-            }
-
-        private:
-            struct Task
-            {
-                Hid * h;
-                View m;
-                Rect r;
-                View d;
-
-                Task(Hid * h_, const View & m_, ptrdiff_t l_, ptrdiff_t t_, ptrdiff_t r_, ptrdiff_t b_, View & d_)
-                    : h(h_), m(m_), r(l_, t_, r_, b_), d(d_)
-                {}
-
-                void Run() 
-                { 
-                    h->detect(h->handle, m.data, m.stride, r.left, r.top, r.right, r.bottom, d.data, d.stride); 
-                }
-            };
-            typedef std::shared_ptr<Task> TaskPtr;
-            typedef std::queue<TaskPtr> TaskPtrs;
-            volatile bool _run, _slack;
-            TaskPtrs _tasks;
-            std::thread _thread;
-            std::mutex _mutex;
-            std::condition_variable _cv;
-
-            void Run()
-            {
-                while (_run)
-                {
-                    if (_tasks.size())
-                    {
-                        _slack = false;
-                        _tasks.front()->Run();
-                        std::unique_lock<std::mutex> lk(_mutex);
-                        _tasks.pop();
-                        _cv.notify_one();
-                    }
-                    if(_slack)
-                        std::this_thread::sleep_for(std::chrono::microseconds(1));
-                    std::this_thread::yield();
-                }
-            }        
-        };
-
         std::vector<Data> _data;
         Size _imageSize;
         bool _needNormalization;
+        ptrdiff_t _threadNumber;
         Levels _levels;
-        WorkerPtrs _workers;
-
-        void InitWorkers(ptrdiff_t threadNumber)
-        {
-            _workers.clear();
-            ptrdiff_t threadNumberMax = std::thread::hardware_concurrency();
-            if (threadNumber <= 0 || threadNumber > threadNumberMax)
-                threadNumber = threadNumberMax;
-            if (threadNumber > 1)
-            {
-                _workers.reserve(threadNumber);
-                for (ptrdiff_t i = 0; i < threadNumber; ++i)
-                    _workers.push_back(WorkerPtr(new Worker()));
-            }
-        }
 
         bool InitLevels(double scaleFactor, const Size & sizeMin, const Size & sizeMax, const View & roi)
         {

@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-    template<class Function> inline void Parallel(size_t begin, size_t end, const Function & function, size_t threadNumber) 
+    template<class Function> inline void Parallel(size_t begin, size_t end, const Function & function, size_t threadNumber, size_t blockStepMin = 1) 
     {
         threadNumber = std::min<size_t>(threadNumber, std::thread::hardware_concurrency());
         if (threadNumber <= 1)
@@ -39,6 +39,8 @@ namespace Simd
             std::vector<std::future<void>> futures;
 
             size_t blockSize = (end - begin + threadNumber - 1)/threadNumber;
+            if (blockStepMin > 1)
+                blockSize += blockSize%blockStepMin;
             size_t blockBegin = begin;
             size_t blockEnd = blockBegin + blockSize;
 
