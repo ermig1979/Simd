@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -417,6 +417,8 @@ namespace Simd
 
 		switch (format)
 		{
+        case None:
+            break;
 		case Nv12:
 			assert((width & 1) == 0 && (height & 1) == 0);
 			planes[0].Recreate(width, height, View<A>::Gray8);

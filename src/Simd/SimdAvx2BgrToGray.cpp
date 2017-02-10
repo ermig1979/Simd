@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -47,18 +48,13 @@ namespace Simd
             return PackU16ToU8(lo, hi);
         }
 
-        SIMD_INLINE __m256i PermuteAndShuffle(__m256i bgr, __m256i permute, __m256i shuffle)
-        {
-            return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), shuffle);
-        }
-
-        template <bool align> SIMD_INLINE __m256i BgrToGray(const uint8_t * bgr, __m256i permuteBody, __m256i permuteTail, __m256i shuffle)
+        template <bool align> SIMD_INLINE __m256i BgrToGray(const uint8_t * bgr)
         {
             __m256i bgra[4];
-            bgra[0] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 0)), permuteBody, shuffle));
-            bgra[1] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 24)), permuteBody, shuffle));
-            bgra[2] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 48)), permuteBody, shuffle));
-            bgra[3] = _mm256_or_si256(K32_01000000, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 64)), permuteTail, shuffle));
+            bgra[0] = BgrToBgra<false>(Load<align>((__m256i*)(bgr + 0)), K32_01000000);
+            bgra[1] = BgrToBgra<false>(Load<false>((__m256i*)(bgr + 24)), K32_01000000);
+            bgra[2] = BgrToBgra<false>(Load<false>((__m256i*)(bgr + 48)), K32_01000000);
+            bgra[3] = BgrToBgra<true>(Load<align>((__m256i*)(bgr + 64)), K32_01000000);
             return BgraToGray(bgra);
         }
 
@@ -70,19 +66,12 @@ namespace Simd
 
             size_t alignedWidth = AlignLo(width, A);
 
-            __m256i _permuteBody = _mm256_setr_epi32(0, 1, 2, 0, 3, 4, 5, 0);
-            __m256i _permuteTail = _mm256_setr_epi32(2, 3, 4, 0, 5, 6, 7, 0);
-
-            __m256i _shuffle = _mm256_setr_epi8(
-                0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
-                0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
-
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
-                    Store<align>((__m256i*)(gray + col), BgrToGray<align>(bgr + 3*col, _permuteBody, _permuteTail, _shuffle));
+                    Store<align>((__m256i*)(gray + col), BgrToGray<align>(bgr + 3*col));
                 if(width != alignedWidth)
-                    Store<false>((__m256i*)(gray + width - A), BgrToGray<false>(bgr + 3*(width - A), _permuteBody, _permuteTail, _shuffle));
+                    Store<false>((__m256i*)(gray + width - A), BgrToGray<false>(bgr + 3*(width - A)));
                 bgr += bgrStride;
                 gray += grayStride;
             }

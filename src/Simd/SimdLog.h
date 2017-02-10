@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -34,13 +34,26 @@ namespace Simd
 {
 	template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
 	{
-		std::cout << name << " = { ";
+		std::cout << name.c_str() << " = { ";
 		for (int i = 0; i < size; i++)
 		{
 			std::cout << int(data[i]) << " ";
 		}
 		std::cout << "} " << std::endl;
 	}
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        template<class T> SIMD_INLINE void Log(const __m256i & value, const std::string & name)
+        {
+            const size_t n = sizeof(__m256i) / sizeof(T);
+            T buffer[n];
+            _mm256_storeu_si256((__m256i*)buffer, value);
+            Simd::Log<T>(buffer, n, name);
+        }
+    }
+#endif //SIMD_AVX2_ENABLE
 
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
@@ -154,6 +167,8 @@ namespace Simd
 }
 
 #define SIMD_LOG(value) Log(value, #value)
+
+#define SIMD_LOG1(value) Log<uint8_t>(value, #value)
 
 #else//SIMD_LOG_ENABLE
 

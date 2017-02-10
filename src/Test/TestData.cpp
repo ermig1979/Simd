@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -527,6 +527,10 @@ namespace Test
             return "_BayerRggb";
         case View::BayerBggr: 
             return "_BayerBggr";
+        case View::Hsv24:
+            return "_Hsv24";
+        case View::Hsl24:
+            return "_Hsl24";
         }
         assert(0); 
         return "_Unknown";

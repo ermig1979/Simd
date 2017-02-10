@@ -209,13 +209,15 @@ namespace Simd
         {
             switch (direction)
             {
+            case Unknown:
+                break;
             case Left:
                 while (CheckMetricsForMagnitudeAndDirection(x, y, gradientThreshold, 1))
                 {
                     if (At<A, uint8_t>(_e, x, y) == 0)
                     {
                         At<A, uint8_t>(_e, x, y) = 255;
-                        if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
+                        if (!contour.empty() && (std::abs(contour.back().x - x) > 1 || std::abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
                                 contours.push_back(contour);
@@ -245,7 +247,7 @@ namespace Simd
                     if (At<A, uint8_t>(_e, x, y) == 0)
                     {
                         At<A, uint8_t>(_e, x, y) = 255;
-                        if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
+                        if (!contour.empty() && (std::abs(contour.back().x - x) > 1 || std::abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
                                 contours.push_back(contour);
@@ -275,7 +277,7 @@ namespace Simd
                     if (At<A, uint8_t>(_e, x, y) == 0)
                     {
                         At<A, uint8_t>(_e, x, y) = 255;
-                        if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
+                        if (!contour.empty() && (std::abs(contour.back().x - x) > 1 || std::abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
                                 contours.push_back(contour);
@@ -305,7 +307,7 @@ namespace Simd
                     if (At<A, uint8_t>(_e, x, y) == 0)
                     {
                         At<A, uint8_t>(_e, x, y) = 255;
-                        if (!contour.empty() && (abs(contour.back().x - x) > 1 || abs(contour.back().y - y) > 1))
+                        if (!contour.empty() && (std::abs(contour.back().x - x) > 1 || std::abs(contour.back().y - y) > 1))
                         {
                             if (contour.size() > minSegmentLength)
                                 contours.push_back(contour);

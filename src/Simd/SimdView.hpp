@@ -953,7 +953,7 @@ namespace Simd
 
     template <class A> SIMD_INLINE bool View<A>::Load(const std::string & path)
     {
-        std::ifstream ifs(path, std::ifstream::binary);
+        std::ifstream ifs(path.c_str(), std::ifstream::binary);
         if (ifs.is_open())
         {
             std::string type;
@@ -979,7 +979,7 @@ namespace Simd
         if (format != View<A>::Gray8)
             return false;
 
-        std::ofstream ofs(path, std::ifstream::binary);
+        std::ofstream ofs(path.c_str(), std::ifstream::binary);
         if (ofs.is_open())
         {
             ofs << "P5\n" << width << " " << height << "\n255\n";
@@ -995,12 +995,16 @@ namespace Simd
 
     template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y)
     {
-        return view.At<T>(x, y);
+        assert(x < view.width && y < view.height);
+
+        return ((const T*)(view.data + y*view.stride))[x];
     }
 
     template <class A, class T> T & At(View<A> & view, size_t x, size_t y)
     {
-        return view.At<T>(x, y);
+        assert(x < view.width && y < view.height);
+
+        return ((T*)(view.data + y*view.stride))[x];
     }
 
     template <class A, class B> SIMD_INLINE bool EqualSize(const View<A> & a, const View<B> & b)

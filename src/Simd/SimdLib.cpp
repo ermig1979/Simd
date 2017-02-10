@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar,
+* Copyright (c) 2011-2017 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -692,7 +692,7 @@ SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, s
 
 SIMD_API void SimdBgrToBgra(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
 {
-#ifdef SIMD_AVX2_ENABLE
+#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
     else
@@ -743,7 +743,7 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
 
 SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride)
 {
-#ifdef SIMD_AVX2_ENABLE
+#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar,
+* Copyright (c) 2011-2017 Yermalayeu Ihar,
 *               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
@@ -355,6 +355,10 @@ namespace Simd
         const __m256i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM256_SETR_EPI8(
             -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1,
             -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
+
+        const __m256i K8_BGRA_TO_BGR_SHUFFLE = SIMD_MM256_SETR_EPI8(
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
+            0x4, 0x5, 0x6, -1, 0x7, 0x8, 0x9, -1, 0xA, 0xB, 0xC, -1, 0xD, 0xE, 0xF, -1);
 	}
 #endif// SIMD_AVX2_ENABLE
 

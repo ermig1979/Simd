@@ -11,7 +11,7 @@ SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) a
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
-MSVS and G++ compilers, MSVS project and CMake build systems.
+MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
 #Library folder's structure
 
@@ -50,7 +50,7 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, PowerPC and ARM platforms.
+The library can be built for x86/x64, PowerPC and ARM platforms with using of G++ or Clang compilers.
 With using of native compiler (g++) for current platform it is simple:
 
 	cd ./prj/cmake

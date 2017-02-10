@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -92,7 +92,7 @@ namespace Test
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
-#ifdef SIMD_AVX2_ENABLE
+#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
         if(Simd::Avx2::Enable)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 

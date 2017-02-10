@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -23,30 +23,19 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        const __m256i K32_BGRA_TO_BGR_PERMUTE_BODY = SIMD_MM256_SETR_EPI32(0, 1, 2, 0, 3, 4, 5, 0);
-        const __m256i K32_BGRA_TO_BGR_PERMUTE_TAIL = SIMD_MM256_SETR_EPI32(2, 3, 4, 0, 5, 6, 7, 0);
-
-        const __m256i K8_BGRA_TO_BGR_SHUFFLE = SIMD_MM256_SETR_EPI8(
-            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
-            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
-
-        SIMD_INLINE __m256i PermuteAndShuffle(__m256i bgr, __m256i permute)
-        {
-            return _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(bgr, permute), K8_BGRA_TO_BGR_SHUFFLE);
-        }
-
         template <bool align> SIMD_INLINE void BgrToBgra(const uint8_t * bgr, uint8_t * bgra, __m256i alpha)
         {
-            Store<align>((__m256i*)bgra + 0, _mm256_or_si256(alpha, PermuteAndShuffle(Load<align>((__m256i*)(bgr +  0)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 1, _mm256_or_si256(alpha, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 24)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 2, _mm256_or_si256(alpha, PermuteAndShuffle(Load<false>((__m256i*)(bgr + 48)), K32_BGRA_TO_BGR_PERMUTE_BODY)));
-            Store<align>((__m256i*)bgra + 3, _mm256_or_si256(alpha, PermuteAndShuffle(Load<align>((__m256i*)(bgr + 64)), K32_BGRA_TO_BGR_PERMUTE_TAIL)));
+            Store<align>((__m256i*)bgra + 0, BgrToBgra<false>(Load<align>((__m256i*)(bgr +  0)), alpha));
+            Store<align>((__m256i*)bgra + 1, BgrToBgra<false>(Load<false>((__m256i*)(bgr + 24)), alpha));
+            Store<align>((__m256i*)bgra + 2, BgrToBgra<false>(Load<false>((__m256i*)(bgr + 48)), alpha));
+            Store<align>((__m256i*)bgra + 3, BgrToBgra<true >(Load<align>((__m256i*)(bgr + 64)), alpha));
         }
 
         template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
