@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -41,20 +41,21 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
 
-            __m256i value_ = _mm256_set1_epi8(value);
-            __m256i positive_ = _mm256_set1_epi8(positive);
-            __m256i negative_ = _mm256_set1_epi8(negative);
+            __m256i _value = _mm256_set1_epi8(value);
+            __m256i _positive = _mm256_set1_epi8(positive);
+            __m256i _negative = _mm256_set1_epi8(negative);
             for(size_t row = 0; row < height; ++row)
             {
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
-                    const __m256i mask = Compare8u<compareType>(Load<align>((__m256i*)(src + col)), value_);
-                    Store<align>((__m256i*)(dst + col), Combine(mask, positive_, negative_));
+                    const __m256i mask = Compare8u<compareType>(Load<align>((__m256i*)(src + col)), _value);
+                    Store<align>((__m256i*)(dst + col), _mm256_blendv_epi8(_negative, _positive, mask));
+                   
                 }
                 if(alignedWidth != width)
                 {
-                    const __m256i mask = Compare8u<compareType>(Load<false>((__m256i*)(src + width - A)), value_);
-                    Store<false>((__m256i*)(dst + width - A), Combine(mask, positive_, negative_));
+                    const __m256i mask = Compare8u<compareType>(Load<false>((__m256i*)(src + width - A)), _value);
+                    Store<false>((__m256i*)(dst + width - A), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
                 src += srcStride;
                 dst += dstStride;
@@ -212,12 +213,12 @@ namespace Simd
                 for(size_t col = 0; col < alignedWidth; col += A)
                 {
                     const __m256i mask = CompareSum<true>(buffer.sum + col, ff_threshold);
-                    Store<align>((__m256i*)(dst + col), Combine(mask, _positive, _negative));
+                    Store<align>((__m256i*)(dst + col), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
                 if(alignedWidth != width)
                 {
                     const __m256i mask = CompareSum<false>(buffer.sum + width - A, ff_threshold);
-                    Store<false>((__m256i*)(dst + width - A), Combine(mask, _positive, _negative));
+                    Store<false>((__m256i*)(dst + width - A), _mm256_blendv_epi8(_negative, _positive, mask));
                 }
 
                 dst += dstStride;
