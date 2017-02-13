@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,9 @@ namespace Simd
 
 		SIMD_INLINE int ExtractInt32Sum(__m128i a)
 		{
-			return ExtractInt32<0>(a) + ExtractInt32<1>(a) + ExtractInt32<2>(a) + ExtractInt32<3>(a);
+            int SIMD_ALIGNED(16) _a[4];
+            _mm_store_si128((__m128i*)_a, a);
+            return _a[0] + _a[1] + _a[2] + _a[3];
 		}
 
 		template <int index> SIMD_INLINE int64_t ExtractInt64(__m128i a)
@@ -81,8 +83,10 @@ namespace Simd
 
 		SIMD_INLINE int64_t ExtractInt64Sum(__m128i a)
 		{
-			return ExtractInt64<0>(a) + ExtractInt64<1>(a);
-		}
+            int64_t SIMD_ALIGNED(16) _a[2];
+            _mm_store_si128((__m128i*)_a, a);
+            return _a[0] + _a[1];
+        }
 	}
 #endif// SIMD_SSE2_ENABLE
 
