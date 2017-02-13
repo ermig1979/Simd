@@ -50,7 +50,6 @@ namespace Simd
                 {
                     const __m256i mask = Compare8u<compareType>(Load<align>((__m256i*)(src + col)), _value);
                     Store<align>((__m256i*)(dst + col), _mm256_blendv_epi8(_negative, _positive, mask));
-                   
                 }
                 if(alignedWidth != width)
                 {

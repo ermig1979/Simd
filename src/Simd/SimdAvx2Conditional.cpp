@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -385,7 +385,7 @@ namespace Simd
 		{
 			const __m256i _src = Load<align>((__m256i*)(src + offset));
 			const __m256i _dst = Load<align>((__m256i*)(dst + offset));
-			Store<align>((__m256i*)(dst + offset), Combine(Compare8u<compareType>(_src, threshold), value, _dst));
+			Store<align>((__m256i*)(dst + offset), _mm256_blendv_epi8(_dst, value, Compare8u<compareType>(_src, threshold)));
 		}
 
 		template <bool align, SimdCompareType compareType>
