@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -439,11 +439,6 @@ namespace Simd
         SIMD_INLINE __m256 Square(__m256 value)
         {
             return _mm256_mul_ps(value, value);
-        }
-
-        SIMD_INLINE __m256 Combine(__m256 mask, __m256 positive, __m256 negative)
-        {
-            return _mm256_or_ps(_mm256_and_ps(mask, positive), _mm256_andnot_ps(mask, negative));
         }
 
         SIMD_INLINE __m256 RightNotZero(size_t count)

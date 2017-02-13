@@ -79,12 +79,12 @@ namespace Simd
                 __m256 dot = _mm256_add_ps(_mm256_mul_ps(dx, buffer.cos[i]), _mm256_mul_ps(dy, buffer.sin[i]));
                 __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
                 bestDot = _mm256_max_ps(dot, bestDot);
-                bestIndex = Combine(_mm256_castps_si256(mask), buffer.pos[i], bestIndex);
+                bestIndex = _mm256_blendv_epi8(bestIndex, buffer.pos[i], _mm256_castps_si256(mask));
 
                 dot = _mm256_sub_ps(_mm256_setzero_ps(), dot);
                 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
                 bestDot = _mm256_max_ps(dot, bestDot);
-                bestIndex = Combine(_mm256_castps_si256(mask), buffer.neg[i], bestIndex);
+                bestIndex = _mm256_blendv_epi8(bestIndex, buffer.neg[i], _mm256_castps_si256(mask));
             }
             Store<align>((__m256i*)(buffer.index + col), bestIndex);
             Avx::Store<align>(buffer.value + col, _mm256_sqrt_ps(_mm256_add_ps(_mm256_mul_ps(dx, dx), _mm256_mul_ps(dy, dy))));
