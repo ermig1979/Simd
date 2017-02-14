@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -72,7 +72,7 @@ namespace Simd
         template<bool align> SIMD_INLINE void ChangeIndex(uint8_t * mask, __m256i oldIndex, __m256i newIndex)
         {
             __m256i _mask = Load<align>((__m256i*)mask);
-            Store<align>((__m256i*)mask, Combine(_mm256_cmpeq_epi8(_mask, oldIndex), newIndex, _mask));
+            Store<align>((__m256i*)mask, _mm256_blendv_epi8(_mask, newIndex, _mm256_cmpeq_epi8(_mask, oldIndex)));
         }
 
         template<bool align> void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
@@ -108,8 +108,8 @@ namespace Simd
             const __m256i _child1 = Load<false>((__m256i*)(child1 + childCol));
             const __m256i condition0 = _mm256_or_si256(parentAll, _mm256_and_si256(parentOne, Greater8u(_difference0, threshold)));
             const __m256i condition1 = _mm256_or_si256(parentAll, _mm256_and_si256(parentOne, Greater8u(_difference1, threshold)));
-            Store<false>((__m256i*)(child0 + childCol), Combine(Lesser8u(_child0, invalid), Combine(condition0, index, empty), _child0));
-            Store<false>((__m256i*)(child1 + childCol), Combine(Lesser8u(_child1, invalid), Combine(condition1, index, empty), _child1));
+            Store<false>((__m256i*)(child0 + childCol), _mm256_blendv_epi8(_child0, _mm256_blendv_epi8(empty, index, condition0), Lesser8u(_child0, invalid)));
+            Store<false>((__m256i*)(child1 + childCol), _mm256_blendv_epi8(_child1, _mm256_blendv_epi8(empty, index, condition1), Lesser8u(_child1, invalid)));
         }
 
         template<bool align> SIMD_INLINE void SegmentationPropagate2x2(const uint8_t * parent0, const uint8_t * parent1, size_t parentCol,

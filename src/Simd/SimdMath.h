@@ -513,11 +513,6 @@ namespace Simd
             return _mm256_add_epi16(_mm256_add_epi16(a, c), _mm256_add_epi16(b, b));
         }
 
-        SIMD_INLINE __m256i Combine(__m256i mask, __m256i positive, __m256i negative)
-        {
-            return _mm256_or_si256(_mm256_and_si256(mask, positive), _mm256_andnot_si256(mask, negative));
-        }
-
         template <bool abs> __m256i ConditionalAbs(__m256i a);
 
         template <> SIMD_INLINE __m256i ConditionalAbs<true>(__m256i a)

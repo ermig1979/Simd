@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -119,7 +119,7 @@ namespace Simd
         template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
         {
             __m256i old = Load<align>(p);
-            Store<align>(p, Combine(mask, value, old));
+            Store<align>(p, _mm256_blendv_epi8(old, value, mask));
         }
 
         SIMD_INLINE __m256i PackI16ToI8(__m256i lo, __m256i hi)
