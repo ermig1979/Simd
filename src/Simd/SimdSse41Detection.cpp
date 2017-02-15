@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -404,7 +404,7 @@ namespace Simd
 
             __m128i value0 = _mm_and_si128(_mm_shuffle_epi8(subset0, shuffle), mask);
             __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
-            __m128i value = Simd::Sse2::Combine(index, value1, value0);
+            __m128i value = _mm_blendv_epi8(value0, value1, index);
 
             return _mm_andnot_si128(_mm_cmpeq_epi32(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
         }
@@ -428,8 +428,8 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_ps(sum, Simd::Sse::Combine(_mm_castsi128_ps(mask),
-                        _mm_set1_ps(leaves[leafOffset + 0]), _mm_set1_ps(leaves[leafOffset + 1])));
+                    sum = _mm_add_ps(sum, _mm_blendv_ps(_mm_set1_ps(leaves[leafOffset + 1]), 
+                        _mm_set1_ps(leaves[leafOffset + 0]), _mm_castsi128_ps(mask)));
                     nodeOffset++;
                     leafOffset += 2;
                 }
@@ -624,7 +624,7 @@ namespace Simd
 
             __m128i value0 = _mm_and_si128(_mm_shuffle_epi8(subset0, shuffle), mask);
             __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
-            __m128i value = Simd::Sse2::Combine(index, value1, value0);
+            __m128i value = _mm_blendv_epi8(value0, value1, index);
 
             return _mm_andnot_si128(_mm_cmpeq_epi16(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
         }
@@ -648,8 +648,8 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_epi16(sum, Simd::Sse2::Combine(mask,
-                        _mm_set1_epi16(leaves[leafOffset + 0]), _mm_set1_epi16(leaves[leafOffset + 1])));
+                    sum = _mm_add_epi16(sum, _mm_blendv_epi8(_mm_set1_epi16(leaves[leafOffset + 1]), 
+                        _mm_set1_epi16(leaves[leafOffset + 0]), mask));
                     nodeOffset++;
                     leafOffset += 2;
                 }

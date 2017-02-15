@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar,
+* Copyright (c) 2011-2017 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -260,7 +260,7 @@ extern "C"
 
         \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.
 
-        Calculation is performed for for polynomial 0x1EDC6F41 (Castagnoli-crc).
+        Calculation is performed for polynomial 0x1EDC6F41 (Castagnoli-crc).
 
         \param [in] src - a pointer to data.
         \param [in] size - a size of the data.
