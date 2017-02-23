@@ -24,7 +24,7 @@
 #ifndef __SimdPyramid_hpp__
 #define __SimdPyramid_hpp__
 
-#include "Simd/SimdLib.hpp"
+#include "Simd/SimdView.hpp"
 
 #include <vector>
 
@@ -43,18 +43,6 @@ namespace Simd
 	template <class A> struct Pyramid
     {
 		typedef A Allocator; /*!< Allocator type definition. */
-
-		/*! 
-			\enum BuildType
-			Describes type of algorithm used for building of the pyramid (see function Simd::Pyramid::Build).
-		*/
-		enum BuildType
-		{
-			ReduceGray2x2, /*!< Using of function ::SimdReduceGray2x2 for pyramid building. */
-			ReduceGray3x3, /*!< Using of function ::SimdReduceGray3x3 for pyramid building. */
-			ReduceGray4x4, /*!< Using of function ::SimdReduceGray4x4 for pyramid building. */
-			ReduceGray5x5, /*!< Using of function ::SimdReduceGray5x5 for pyramid building. */
-		};
 
 		/*!
 			Creates a new empty Pyramid structure.
@@ -154,21 +142,6 @@ namespace Simd
 			\param [in] pyramid - other pyramid.
 		*/
 		void Swap(Pyramid<A> & pyramid);
-
-		/*! 
-			Fills pixels data of images in the pyramid by given value.
-
-			\param [in] value - a value to fill pyramid.
-		*/
-		void Fill(uint8_t value);
-
-		/*! 
-			Builds the pyramid. 
-
-			\param [in] buildType - a type of algorithm used for building of the pyramid (see Simd::Pyramid::BuildType).
-			\param [in] compensation - a flag of compensation of rounding. It is equal to 'true' by default.
-		*/
-		void Build(BuildType buildType, bool compensation = true);	
 
 	private:
 		std::vector< View<A> > _views;
@@ -274,41 +247,6 @@ namespace Simd
 	SIMD_INLINE void Pyramid<A>::Swap(Pyramid & pyramid)
 	{
 		_views.swap(pyramid._views);
-	}
-
-	template <class A>
-	SIMD_INLINE void Pyramid<A>::Fill(uint8_t value)
-	{
-		for (size_t level = 0; level < _views.size(); ++level)
-		{
-			Simd::Fill(_views[level], value);
-		}
-	}
-
-	template <class A>
-	SIMD_INLINE void Pyramid<A>::Build(BuildType buildType, bool compensation)
-	{
-		switch (buildType)
-		{
-		case Pyramid::ReduceGray2x2:
-			for (size_t level = 1; level < _views.size(); ++level)
-				Simd::ReduceGray2x2(_views[level - 1], _views[level]);
-			break;
-		case Pyramid::ReduceGray3x3:
-			for (size_t level = 1; level < _views.size(); ++level)
-				Simd::ReduceGray3x3(_views[level - 1], _views[level], compensation);
-			break;
-		case Pyramid::ReduceGray4x4:
-			for (size_t level = 1; level < _views.size(); ++level)
-				Simd::ReduceGray4x4(_views[level - 1], _views[level]);
-			break;
-		case Pyramid::ReduceGray5x5:
-			for (size_t level = 1; level < _views.size(); ++level)
-				Simd::ReduceGray5x5(_views[level - 1], _views[level], compensation);
-			break;
-		default:
-			assert(0);
-		}
 	}
 
 	// Pyramid utilities implementation:

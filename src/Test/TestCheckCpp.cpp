@@ -73,8 +73,8 @@ namespace Test
     {
         typedef Simd::Pyramid< Simd::Allocator<uint8_t> > Pyramid;
         Pyramid p(16, 16, 3);
-        p.Fill(1);
-        p.Build(Pyramid::ReduceGray2x2);
+        Fill(p, 1);
+        Build(p, ::SimdReduce2x2);
     }
 
     static void TestStdVector()

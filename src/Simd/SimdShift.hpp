@@ -25,7 +25,6 @@
 #define __SimdShift_hpp__
 
 #include "Simd/SimdLib.hpp"
-#include "Simd/SimdPyramid.hpp"
 
 #include <vector>
 #include <float.h>
@@ -144,7 +143,7 @@ namespace Simd
                 Simd::AbsGradientSaturatedSum(background, _background[0]);
             else
                 assert(0);
-            _background.Build(Pyramid::ReduceGray2x2);
+            Build(_background, ::SimdReduce2x2);
         }
 
         /*!

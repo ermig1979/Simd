@@ -32,6 +32,10 @@
 <h3 id="R051">March X, 2017 (version X.X.51.XXX)</h3> 
 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Function Simd::ReduceGray.</li>
+<ul>
 <h5>Improving</h5>
 <ul>
  <li>Using of Simd::Parallel in Simd::Detection instead of its own implementation of multithreading.</li>
@@ -46,6 +50,12 @@
  <li>Improving of SSE4.1 optimization of function DetectionLbpDetect32fi.</li>
  <li>Improving of SSE4.1 optimization of function DetectionLbpDetect16ip.</li>
  <li>Improving of SSE4.1 optimization of function DetectionLbpDetect16ii.</li>
+</ul>
+<h5>Changes</h5>
+<ul>
+ <li>Enumeration SimdReduceType instead of enumeration Simd::Pyramid::BuildType.</li>
+ <li>Function Simd::Fill instead of method Simd::Pyramid::Fill.</li>
+ <li>Function Simd::Build instead of method Simd::Pyramid::Build.</li>
 </ul>
 
 <h5>Bug fixing</h5>

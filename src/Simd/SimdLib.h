@@ -179,6 +179,17 @@ typedef enum
     SimdDetectionInfoCanInt16 = 8,
 } SimdDetectionInfoFlags;
 
+/*! @ingroup c_types
+    Describes type of algorithm used for image reducing (downscale in 2 times) (see function Simd::ReduceGray).
+*/
+enum SimdReduceType
+{
+    SimdReduce2x2, /*!< Using of function ::SimdReduceGray2x2 for image reducing. */
+    SimdReduce3x3, /*!< Using of function ::SimdReduceGray3x3 for image reducing. */
+    SimdReduce4x4, /*!< Using of function ::SimdReduceGray4x4 for image reducing. */
+    SimdReduce5x5, /*!< Using of function ::SimdReduceGray5x5 for image reducing. */
+};
+
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
 #    define SIMD_API __declspec(dllexport)

@@ -25,6 +25,7 @@
 
 #include "Simd/SimdView.hpp"
 #include "Simd/SimdPixel.hpp"
+#include "Simd/SimdPyramid.hpp"
 
 #ifndef __SimdLib_hpp__
 #define __SimdLib_hpp__
@@ -2324,7 +2325,7 @@ namespace Simd
 
         \fn void ReduceGray2x2(const View<A>& src, View<A>& dst)
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2. 
+        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 2x2. 
 
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
@@ -2340,7 +2341,7 @@ namespace Simd
     */
     template<class A> SIMD_INLINE void ReduceGray2x2(const View<A>& src, View<A>& dst)
     {
-        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
+        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
 
         SimdReduceGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
@@ -2349,7 +2350,7 @@ namespace Simd
 
         \fn void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3. 
+        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3. 
 
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
@@ -2368,7 +2369,7 @@ namespace Simd
     */
     template<class A> SIMD_INLINE void ReduceGray3x3(const View<A>& src, View<A>& dst, bool compensation = true)
     {
-        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
+        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
 
         SimdReduceGray3x3(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation ? 1 : 0);
     }
@@ -2377,7 +2378,7 @@ namespace Simd
 
         \fn void ReduceGray4x4(const View<A>& src, View<A>& dst)
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 4x4. 
+        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 4x4. 
 
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
@@ -2396,7 +2397,7 @@ namespace Simd
     */
     template<class A> SIMD_INLINE void ReduceGray4x4(const View<A>& src, View<A>& dst)
     {
-        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
+        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
 
         SimdReduceGray4x4(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
@@ -2405,7 +2406,7 @@ namespace Simd
 
         \fn void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
 
-        \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5. 
+        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 5x5. 
 
         For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
 
@@ -2428,9 +2429,45 @@ namespace Simd
     */
     template<class A> SIMD_INLINE void ReduceGray5x5(const View<A>& src, View<A>& dst, bool compensation = true)
     {
-        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8);
+        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
 
         SimdReduceGray5x5(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, compensation ? 1 : 0);
+    }
+
+    /*! @ingroup resizing
+
+        \fn void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
+
+        \short Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image.
+
+        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a reduced output image.
+        \param [in] reduceType - a type of function used for image reducing.
+        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+    */
+    template<class A> SIMD_INLINE void ReduceGray(const View<A> & src, View<A> & dst, ::SimdReduceType reduceType, bool compensation = true)
+    {
+        assert(src.format == View<A>::Gray8 && dst.format == View<A>::Gray8 && Scale(src.Size()) == dst.Size());
+
+        switch (reduceType)
+        {
+        case SimdReduce2x2:
+        	Simd::ReduceGray2x2(src, dst);
+        	break;
+        case SimdReduce3x3:
+        	Simd::ReduceGray3x3(src, dst, compensation);
+        	break;
+        case SimdReduce4x4:
+        	Simd::ReduceGray4x4(src, dst);
+        	break;
+        case SimdReduce5x5:
+        	Simd::ReduceGray5x5(src, dst, compensation);
+        	break;
+        default:
+        	assert(0);
+        }
     }
 
     /*! @ingroup resizing
@@ -3553,6 +3590,37 @@ namespace Simd
 			assert(0);
 		}
 	}
+
+    /*! @ingroup cpp_pyramid_functions
+
+        \fn void Fill(Pyramid<A> & pyramid, uint8_t value)
+
+        \short Fills pixels data of images in the pyramid by given value.
+
+        \param [out] pyramid - a pyramid.
+        \param [in] value - a value to fill the pyramid.
+    */
+    template<class A> SIMD_INLINE void Fill(Pyramid<A> & pyramid, uint8_t value)
+    {
+        for (size_t level = 0; level < pyramid.Size(); ++level)
+            Simd::Fill(pyramid.At(level), value);
+    }
+
+    /*! @ingroup cpp_pyramid_functions
+
+        \fn void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
+
+        \short Builds the pyramid (fills upper levels on the base of the lowest level).
+
+        \param [out] pyramid - a built pyramid.
+        \param [in] reduceType - a type of function used for image reducing.
+        \param [in] compensation - a flag of compensation of rounding. It is relevant only for ::SimdReduce3x3 and ::SimdReduce5x5. It is equal to 'true' by default.
+    */
+    template<class A> SIMD_INLINE void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
+    {
+        for (size_t level = 1; level < pyramid.Size(); ++level)
+            Simd::ReduceGray(pyramid.At(level - 1), pyramid.At(level), reduceType, compensation);
+    }
 }
 
 #endif//__SimdLib_hpp__
