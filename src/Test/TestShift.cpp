@@ -240,7 +240,7 @@ namespace Test
 
     bool ShiftDetectorRandSpecialTest()
     {
-        typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
+        typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
         ::srand(1);
 
@@ -287,7 +287,7 @@ namespace Test
 
     bool ShiftDetectorFileSpecialTest()
     {
-        typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
+        typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
         ShiftDetector shiftDetector;
 

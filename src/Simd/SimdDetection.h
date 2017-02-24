@@ -36,7 +36,7 @@ namespace Simd
 {
     namespace Detection
     {
-        typedef Simd::View< Simd::Allocator<uint8_t> > Image;
+        typedef Simd::View<Simd::Allocator> Image;
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
 

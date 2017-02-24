@@ -44,7 +44,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::Detection< Simd::Allocator<uint8_t> > Detection;
+            typedef Simd::Detection<Simd::Allocator> Detection;
 
             Detection::View image;
             image.Load("../../data/image/face/lena.pgm");
@@ -69,11 +69,11 @@ namespace Simd
 
         \note This is wrapper around low-level \ref object_detection API.
 	*/
-	template <class A>
+	template <template<class> class A>
 	struct Detection
 	{
-		typedef A Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<Allocator> View; /*!< An image type definition. */
+		typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
+        typedef Simd::View<A> View; /*!< An image type definition. */
         typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
         typedef std::vector<Size> Sizes; /*!< A vector of image sizes type definition. */
         typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */

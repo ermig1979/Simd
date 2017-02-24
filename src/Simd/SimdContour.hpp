@@ -41,7 +41,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::ContourDetector< Simd::Allocator<uint8_t> > ContourDetector;
+            typedef Simd::ContourDetector<Simd::Allocator> ContourDetector;
 
             ContourDetector::View image;
             image.Load("../../data/image/face/lena.pgm");
@@ -65,11 +65,11 @@ namespace Simd
         \endverbatim
 
     */
-    template <class A>
+    template <template<class> class A>
     struct ContourDetector
     {
-        typedef A Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<Allocator> View; /*!< An image type definition. */
+        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
+        typedef Simd::View<A> View; /*!< An image type definition. */
         typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
         typedef Simd::Point<ptrdiff_t> Point; /*!< A point type definition. */
         typedef Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */

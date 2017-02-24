@@ -46,7 +46,7 @@ namespace Test
 
     static void TestView()
     {
-        typedef Simd::View< Simd::Allocator<uint8_t> > View;
+        typedef Simd::View<Simd::Allocator> View;
         View vs(6, 6, View::Bgra32);
         View vd(6, 6, View::Gray8);
         Simd::Convert(vs, vd);
@@ -63,7 +63,7 @@ namespace Test
 
     static void TestFrame()
     {
-        typedef Simd::Frame< Simd::Allocator<uint8_t> > Frame;
+        typedef Simd::Frame<Simd::Allocator> Frame;
         Frame fs(2, 2, Frame::Yuv420p);
         Frame fd(2, 2, Frame::Bgr24);
         Simd::Convert(fs, fd);
@@ -71,7 +71,7 @@ namespace Test
 
     static void TestPyramid()
     {
-        typedef Simd::Pyramid< Simd::Allocator<uint8_t> > Pyramid;
+        typedef Simd::Pyramid<Simd::Allocator> Pyramid;
         Pyramid p(16, 16, 3);
         Fill(p, 1);
         Build(p, ::SimdReduce2x2);

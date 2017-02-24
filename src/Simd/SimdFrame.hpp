@@ -34,10 +34,10 @@ namespace Simd
 
 		\ref cpp_frame_functions.
 	*/
-	template <class A>
+	template <template<class> class A>
 	struct Frame
 	{
-		typedef A Allocator; /*!< Allocator type definition. */
+		typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
 
 		/*! Maximal count of pixel planes in a frame. */
 		static const size_t PLANE_COUNT_MAX = 4;
@@ -265,7 +265,7 @@ namespace Simd
 
 	/*! @ingroup cpp_frame_functions
 
-		\fn template <class A, class B> bool EqualSize(const Frame<A> & a, const Frame<B> & b);
+		\fn template <template<class> class A, template<class> class B> bool EqualSize(const Frame<A> & a, const Frame<B> & b);
 
 		Checks two frames on the same size.
 
@@ -273,11 +273,11 @@ namespace Simd
 		\param [in] b - a second frame.
 		\return - a result of checking.
 	*/
-	template <class A, class B> bool EqualSize(const Frame<A> & a, const Frame<B> & b);
+	template <template<class> class A, template<class> class B> bool EqualSize(const Frame<A> & a, const Frame<B> & b);
 
 	/*! @ingroup cpp_frame_functions
 
-		\fn template <class A, class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
+		\fn template <template<class> class A, template<class> class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
 
 		Checks two frames on compatibility (the frames must have the same size and pixel format).
 
@@ -285,11 +285,11 @@ namespace Simd
 		\param [in] b - a second frame.
 		\return - a result of checking.
 	*/
-	template <class A, class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
+	template <template<class> class A, template<class> class B> bool Compatible(const Frame<A> & a, const Frame<B> & b);
 
 	/*! @ingroup cpp_frame_functions
 
-		\fn template <class A, class B> void Copy(const Frame<A> & src, Frame<B> & dst);
+		\fn template <template<class> class A, template<class> class B> void Copy(const Frame<A> & src, Frame<B> & dst);
 
 		\short Copies one frame to another frame.
 
@@ -298,11 +298,11 @@ namespace Simd
 		\param [in] src - an input frame.
 		\param [out] dst - an output frame.
 	*/
-	template <class A, class B> void Copy(const Frame<A> & src, Frame<B> & dst);
+	template <template<class> class A, template<class> class B> void Copy(const Frame<A> & src, Frame<B> & dst);
 
 	/*! @ingroup cpp_frame_functions
 
-		\fn template <class A> void Convert(const Frame<A> & src, Frame<A> & dst);
+		\fn template <template<class> class A> void Convert(const Frame<A> & src, Frame<A> & dst);
 
 		\short Converts one frame to another frame.
 
@@ -311,13 +311,13 @@ namespace Simd
 		\param [in] src - an input frame.
 		\param [out] dst - an output frame.
 	*/
-	template <class A> void Convert(const Frame<A> & src, Frame<A> & dst);
+	template <template<class> class A> void Convert(const Frame<A> & src, Frame<A> & dst);
 
 	//-------------------------------------------------------------------------
 
 	// struct Frame implementation:
 
-	template <class A> SIMD_INLINE Frame<A>::Frame()
+	template <template<class> class A> SIMD_INLINE Frame<A>::Frame()
 		: width(0)
 		, height(0)
 		, format(None)
@@ -326,7 +326,7 @@ namespace Simd
 	{
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(const Frame & frame)
+	template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const Frame & frame)
 		: width(frame.width)
 		, height(frame.height)
 		, format(frame.format)
@@ -337,7 +337,7 @@ namespace Simd
 			planes[i] = frame.planes[i];
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view, bool flipped_, double timestamp_)
+	template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view, bool flipped_, double timestamp_)
 		: width(view.width)
 		, height(view.height)
 		, format(None)
@@ -355,7 +355,7 @@ namespace Simd
 		planes[0] = view;
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
+	template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
 		: width(0)
 		, height(0)
 		, format(None)
@@ -365,7 +365,7 @@ namespace Simd
 		Recreate(width_, height_, format_);
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_, double timestamp_)
+	template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_, double timestamp_)
 		: width(0)
 		, height(0)
 		, format(None)
@@ -375,18 +375,18 @@ namespace Simd
 		Recreate(size, format_);
 	}
 
-	template <class A> SIMD_INLINE Frame<A>::~Frame()
+	template <template<class> class A> SIMD_INLINE Frame<A>::~Frame()
 	{
 	}
 
-	template <class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
+	template <template<class> class A> SIMD_INLINE Frame<A> * Frame<A>::Clone() const
 	{
 		Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp);
 		Copy(*this, *clone);
 		return clone;
 	}
 
-	template <class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
+	template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
 	{
 		if (this != &frame)
 		{
@@ -401,12 +401,12 @@ namespace Simd
 		return *this;
 	}
 
-	template <class A> SIMD_INLINE Frame<A> & Frame<A>::Ref()
+	template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::Ref()
 	{
 		return *this;
 	}
 
-	template <class A> SIMD_INLINE void Frame<A>::Recreate(size_t width_, size_t height_, Format format_)
+	template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(size_t width_, size_t height_, Format format_)
 	{
 		*(size_t*)&width = width_;
 		*(size_t*)&height = height_;
@@ -442,18 +442,18 @@ namespace Simd
 		}
 	}
 
-	template <class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format format_)
+	template <template<class> class A> SIMD_INLINE void Frame<A>::Recreate(const Point<ptrdiff_t> & size, Format format_)
 	{
 		Recreate(size.x, size.y, format_);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(const ptrdiff_t & left, const ptrdiff_t & top, const ptrdiff_t & right, const ptrdiff_t & bottom) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(const ptrdiff_t & left, const ptrdiff_t & top, const ptrdiff_t & right, const ptrdiff_t & bottom) const
 	{
 		Rectangle<ptrdiff_t> rect(left, top, right, bottom);
 		return Region(rect.left, rect.top, rect.right, rect.bottom);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(ptrdiff_t & left, ptrdiff_t & top, ptrdiff_t & right, ptrdiff_t & bottom) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(ptrdiff_t & left, ptrdiff_t & top, ptrdiff_t & right, ptrdiff_t & bottom) const
 	{
 		if (format != None && right >= left && bottom >= top)
 		{
@@ -491,27 +491,27 @@ namespace Simd
 			return Frame<A>();
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const
 	{
 		return Region(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(Point<ptrdiff_t> & topLeft, Point<ptrdiff_t> & bottomRight) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(Point<ptrdiff_t> & topLeft, Point<ptrdiff_t> & bottomRight) const
 	{
 		return Region(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(const Rectangle<ptrdiff_t> & rect) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(const Rectangle<ptrdiff_t> & rect) const
 	{
 		return Region(rect.left, rect.top, rect.right, rect.bottom);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Region(Rectangle<ptrdiff_t> & rect) const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Region(Rectangle<ptrdiff_t> & rect) const
 	{
 		return Region(rect.left, rect.top, rect.right, rect.bottom);
 	}
 
-	template <class A> SIMD_INLINE Frame<A> Frame<A>::Flipped() const
+	template <template<class> class A> SIMD_INLINE Frame<A> Frame<A>::Flipped() const
 	{
 		Frame frame;
 		*(size_t*)&frame.width = width;
@@ -524,12 +524,12 @@ namespace Simd
 		return frame;
 	}
 
-	template <class A> SIMD_INLINE Point<ptrdiff_t> Frame<A>::Size() const
+	template <template<class> class A> SIMD_INLINE Point<ptrdiff_t> Frame<A>::Size() const
 	{
 		return Point<ptrdiff_t>(width, height);
 	}
 
-	template <class A> SIMD_INLINE size_t Frame<A>::DataSize() const
+	template <template<class> class A> SIMD_INLINE size_t Frame<A>::DataSize() const
 	{
 		size_t size = 0;
 		for (size_t i = 0; i < PLANE_COUNT_MAX; ++i)
@@ -537,12 +537,12 @@ namespace Simd
 		return size;
 	}
 
-	template <class A> SIMD_INLINE size_t Frame<A>::Area() const
+	template <template<class> class A> SIMD_INLINE size_t Frame<A>::Area() const
 	{
 		return width*height;
 	}
 
-	template <class A> SIMD_INLINE size_t Frame<A>::PlaneCount(Format format)
+	template <template<class> class A> SIMD_INLINE size_t Frame<A>::PlaneCount(Format format)
 	{
 		switch (format)
 		{
@@ -556,20 +556,20 @@ namespace Simd
 		}
 	}
 
-	template <class A> SIMD_INLINE size_t Frame<A>::PlaneCount() const
+	template <template<class> class A> SIMD_INLINE size_t Frame<A>::PlaneCount() const
 	{
 		return PlaneCount(format);
 	}
 
 	// View utilities implementation:
 
-	template <class A, class B> SIMD_INLINE bool EqualSize(const Frame<A> & a, const Frame<B> & b)
+	template <template<class> class A, template<class> class B> SIMD_INLINE bool EqualSize(const Frame<A> & a, const Frame<B> & b)
 	{
 		return
 			(a.width == b.width && a.height == b.height);
 	}
 
-	template <class A, class B> SIMD_INLINE bool Compatible(const Frame<A> & a, const Frame<B> & b)
+	template <template<class> class A, template<class> class B> SIMD_INLINE bool Compatible(const Frame<A> & a, const Frame<B> & b)
 	{
 		typedef typename Frame<A>::Format Format;
 
@@ -577,7 +577,7 @@ namespace Simd
 			(a.width == b.width && a.height == b.height && a.format == (Format)b.format && a.flipped == b.flipped);
 	}
 
-	template <class A, class B> SIMD_INLINE void Copy(const Frame<A> & src, Frame<B> & dst)
+	template <template<class> class A, template<class> class B> SIMD_INLINE void Copy(const Frame<A> & src, Frame<B> & dst)
 	{
 		assert(Compatible(src, dst));
 
@@ -588,7 +588,7 @@ namespace Simd
 		}
 	}
 
-	template <class A> SIMD_INLINE void Convert(const Frame<A> & src, Frame<A> & dst)
+	template <template<class> class A> SIMD_INLINE void Convert(const Frame<A> & src, Frame<A> & dst)
 	{
 		assert(EqualSize(src, dst) && src.format && dst.format && src.flipped == dst.flipped);
 

@@ -46,7 +46,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::View< Simd::Allocator<uint8_t> > View;
+            typedef Simd::View<Simd::Allocator> View;
 
             View view1(40, 30, View::Bgr24);
             cv::Mat mat1(80, 60, CV_8UC3)
@@ -60,10 +60,10 @@ namespace Simd
 
         \ref cpp_view_functions.
     */
-    template <class A>
+    template <template<class> class A>
     struct View
     {
-        typedef A Allocator; /*!< Allocator type definition. */
+        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
 
         /*!
             \enum Format
@@ -460,7 +460,7 @@ namespace Simd
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
+        \fn template <template<class> class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
 
         Gets constant reference to the pixel of arbitrary type at the point at the image with specified coordinates.
 
@@ -469,11 +469,11 @@ namespace Simd
         \param [in] y - a y-coordinate of the pixel.
         \return - a const reference to pixel of arbitrary type.
     */
-    template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
+    template <template<class> class A, class T> const T & At(const View<A> & view, size_t x, size_t y);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A, class T> T & At(View<A> & view, size_t x, size_t y);
+        \fn template <template<class> class A, class T> T & At(View<A> & view, size_t x, size_t y);
 
         Gets reference to the pixel of arbitrary type at the point at the image with specified coordinates.
 
@@ -482,12 +482,12 @@ namespace Simd
         \param [in] y - a y-coordinate of the pixel.
         \return - a reference to pixel of arbitrary type.
     */
-    template <class A, class T> T & At(View<A> & view, size_t x, size_t y);
+    template <template<class> class A, class T> T & At(View<A> & view, size_t x, size_t y);
 
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A, class B> bool EqualSize(const View<A> & a, const View<B> & b);
+        \fn template <template<class> class A, template<class> class B> bool EqualSize(const View<A> & a, const View<B> & b);
 
         Checks two image views on the same size.
 
@@ -495,11 +495,11 @@ namespace Simd
         \param [in] b - a second image.
         \return - a result of checking.
     */
-    template <class A, class B> bool EqualSize(const View<A> & a, const View<B> & b);
+    template <template<class> class A, template<class> class B> bool EqualSize(const View<A> & a, const View<B> & b);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
+        \fn template <template<class> class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
 
         Checks three image views on the same size.
 
@@ -508,11 +508,11 @@ namespace Simd
         \param [in] c - a third image.
         \return - a result of checking.
     */
-    template <class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
+    template <template<class> class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A, class B> bool Compatible(const View<A> & a, const View<B> & b);
+        \fn template <template<class> class A, template<class> class B> bool Compatible(const View<A> & a, const View<B> & b);
 
         Checks two image views on compatibility (the images must have the same size and pixel format).
 
@@ -520,11 +520,11 @@ namespace Simd
         \param [in] b - a second image.
         \return - a result of checking.
     */
-    template <class A, class B> bool Compatible(const View<A> & a, const View<B> & b);
+    template <template<class> class A, template<class> class B> bool Compatible(const View<A> & a, const View<B> & b);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
+        \fn template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
 
         Checks three image views on compatibility (the images must have the same size and pixel format).
 
@@ -533,11 +533,11 @@ namespace Simd
         \param [in] c - a third image.
         \return - a result of checking.
     */
-    template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
+    template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
+        \fn template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
 
         Checks four image views on compatibility (the images must have the same size and pixel format).
 
@@ -547,11 +547,11 @@ namespace Simd
         \param [in] d - a fourth image.
         \return - a result of checking.
     */
-    template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
+    template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
 
     /*! @ingroup cpp_view_functions
 
-        \fn template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
+        \fn template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
 
         Checks five image views on compatibility (the images must have the same size and pixel format).
 
@@ -562,13 +562,13 @@ namespace Simd
         \param [in] e - a fifth image.
         \return - a result of checking.
     */
-    template <class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
+    template <template<class> class A> bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e);
 
     //-------------------------------------------------------------------------
 
     // struct View implementation:
 
-    template <class A> SIMD_INLINE View<A>::View()
+    template <template<class> class A> SIMD_INLINE View<A>::View()
         : width(0)
         , height(0)
         , stride(0)
@@ -579,7 +579,7 @@ namespace Simd
     }
 
     /*! \cond */
-    template <class A> SIMD_INLINE View<A>::View(const View<A> & view)
+    template <template<class> class A> SIMD_INLINE View<A>::View(const View<A> & view)
         : width(view.width)
         , height(view.height)
         , stride(view.stride)
@@ -591,7 +591,7 @@ namespace Simd
     /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
-    template <class A> SIMD_INLINE View<A>::View(const cv::Mat & mat)
+    template <template<class> class A> SIMD_INLINE View<A>::View(const cv::Mat & mat)
         : width(mat.cols)
         , height(mat.rows)
         , stride(mat.step[0])
@@ -602,7 +602,7 @@ namespace Simd
     }
 #endif
 
-    template <class A> SIMD_INLINE View<A>::View(size_t w, size_t h, ptrdiff_t s, Format f, void * d)
+    template <template<class> class A> SIMD_INLINE View<A>::View(size_t w, size_t h, ptrdiff_t s, Format f, void * d)
         : width(w)
         , height(h)
         , stride(s)
@@ -617,7 +617,7 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE View<A>::View(size_t w, size_t h, Format f, void * d, size_t align)
+    template <template<class> class A> SIMD_INLINE View<A>::View(size_t w, size_t h, Format f, void * d, size_t align)
         : width(0)
         , height(0)
         , stride(0)
@@ -628,7 +628,7 @@ namespace Simd
         Recreate(w, h, f, d, align);
     }
 
-    template <class A> SIMD_INLINE View<A>::View(const Point<ptrdiff_t> & size, Format f)
+    template <template<class> class A> SIMD_INLINE View<A>::View(const Point<ptrdiff_t> & size, Format f)
         : width(0)
         , height(0)
         , stride(0)
@@ -639,7 +639,7 @@ namespace Simd
         Recreate(size.x, size.y, f);
     }
 
-    template <class A> SIMD_INLINE View<A>::~View()
+    template <template<class> class A> SIMD_INLINE View<A>::~View()
     {
         if (_owner && data)
         {
@@ -648,13 +648,13 @@ namespace Simd
     }
 
 #ifdef SIMD_OPENCV_ENABLE
-    template <class A> SIMD_INLINE View<A>::operator cv::Mat() const
+    template <template<class> class A> SIMD_INLINE View<A>::operator cv::Mat() const
     {
         return cv::Mat((int)height, (int)width, ToOcv(format), data, stride);
     }
 #endif
 
-    template <class A> SIMD_INLINE View<A> * View<A>::Clone() const
+    template <template<class> class A> SIMD_INLINE View<A> * View<A>::Clone() const
     {
         View<A> * view = new View<A>(width, height, format);
         size_t size = width*PixelSize();
@@ -664,7 +664,7 @@ namespace Simd
     }
 
     /*! \cond */
-    template <class A> SIMD_INLINE View<A> & View<A>::operator = (const View<A> & view)
+    template <template<class> class A> SIMD_INLINE View<A> & View<A>::operator = (const View<A> & view)
     {
         if(this != &view)
         {
@@ -685,19 +685,19 @@ namespace Simd
     /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
-    template <class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)
+    template <template<class> class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)
     {
         *this = View<A>(mat);
         return *this;
     }
 #endif
 
-    template <class A> SIMD_INLINE View<A> & View<A>::Ref()
+    template <template<class> class A> SIMD_INLINE View<A> & View<A>::Ref()
     {
         return *this;
     }
 
-    template <class A> SIMD_INLINE void View<A>::Recreate(size_t w, size_t h, Format f, void * d, size_t align)
+    template <template<class> class A> SIMD_INLINE void View<A>::Recreate(size_t w, size_t h, Format f, void * d, size_t align)
     {
         if(_owner && data)
         {
@@ -721,12 +721,12 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE void View<A>::Recreate(const Point<ptrdiff_t> & size, Format f)
+    template <template<class> class A> SIMD_INLINE void View<A>::Recreate(const Point<ptrdiff_t> & size, Format f)
     {
         Recreate(size.x, size.y, f);
     }
 
-    template <class A> SIMD_INLINE View<A> View<A>::Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const
+    template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const
     {
         if(data != NULL && right >= left && bottom >= top)
         {
@@ -740,17 +740,17 @@ namespace Simd
             return View<A>();
     }
 
-    template <class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const
+    template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight) const
     {
         return Region(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
     }
 
-    template <class A> SIMD_INLINE View<A> View<A>::Region(const Rectangle<ptrdiff_t> & rect) const
+    template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(const Rectangle<ptrdiff_t> & rect) const
     {
         return Region(rect.Left(), rect.Top(), rect.Right(), rect.Bottom());
     }
 
-    template <class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & size, Position position) const
+    template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & size, Position position) const
     {
         switch(position)
         {
@@ -778,49 +778,49 @@ namespace Simd
         return View<A>();
     }
 
-    template <class A> SIMD_INLINE View<A> View<A>::Flipped() const
+    template <template<class> class A> SIMD_INLINE View<A> View<A>::Flipped() const
     {
         return View<A>(width, height, -stride, format, data + (height - 1)*stride);
     }
 
-    template <class A> SIMD_INLINE Point<ptrdiff_t> View<A>::Size() const
+    template <template<class> class A> SIMD_INLINE Point<ptrdiff_t> View<A>::Size() const
     {
         return Point<ptrdiff_t>(width, height);
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::DataSize() const
+    template <template<class> class A> SIMD_INLINE size_t View<A>::DataSize() const
     {
         return stride*height;
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::Area() const
+    template <template<class> class A> SIMD_INLINE size_t View<A>::Area() const
     {
         return width*height;
     }
 
-    template <class A> template<class T> SIMD_INLINE const T & View<A>::At(size_t x, size_t y) const
+    template <template<class> class A> template<class T> SIMD_INLINE const T & View<A>::At(size_t x, size_t y) const
     {
         assert(x < width && y < height);
         return ((const T*)(data + y*stride))[x];
     }
 
-    template <class A> template<class T> SIMD_INLINE T & View<A>::At(size_t x, size_t y)
+    template <template<class> class A> template<class T> SIMD_INLINE T & View<A>::At(size_t x, size_t y)
     {
         assert(x < width && y < height);
         return ((T*)(data + y*stride))[x];
     }
 
-    template <class A> template<class T> SIMD_INLINE const T & View<A>::At(const Point<ptrdiff_t> & p) const
+    template <template<class> class A> template<class T> SIMD_INLINE const T & View<A>::At(const Point<ptrdiff_t> & p) const
     {
         return At<T>(p.x, p.y);
     }
 
-    template <class A> template<class T> SIMD_INLINE T & View<A>::At(const Point<ptrdiff_t> & p)
+    template <template<class> class A> template<class T> SIMD_INLINE T & View<A>::At(const Point<ptrdiff_t> & p)
     {
         return At<T>(p.x, p.y);
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::PixelSize(Format format)
+    template <template<class> class A> SIMD_INLINE size_t View<A>::PixelSize(Format format)
     {
         switch(format)
         {
@@ -844,12 +844,12 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::PixelSize() const
+    template <template<class> class A> SIMD_INLINE size_t View<A>::PixelSize() const
     {
         return PixelSize(format);
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::ChannelSize(Format format)
+    template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelSize(Format format)
     {
         switch(format)
         {
@@ -873,12 +873,12 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::ChannelSize() const
+    template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelSize() const
     {
         return ChannelSize(format);
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::ChannelCount(Format format)
+    template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelCount(Format format)
     {
         switch(format)
         {
@@ -902,13 +902,13 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE size_t View<A>::ChannelCount() const
+    template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelCount() const
     {
         return ChannelCount(format);
     }
 
 #ifdef SIMD_OPENCV_ENABLE
-    template <class A> SIMD_INLINE int View<A>::ToOcv(Format format)
+    template <template<class> class A> SIMD_INLINE int View<A>::ToOcv(Format format)
     {
         switch (format)
         {
@@ -924,7 +924,7 @@ namespace Simd
         }
     }
 
-    template <class A> SIMD_INLINE typename View<A>::Format View<A>::OcvTo(int type)
+    template <template<class> class A> SIMD_INLINE typename View<A>::Format View<A>::OcvTo(int type)
     {
         switch (type)
         {
@@ -941,7 +941,7 @@ namespace Simd
     }
 #endif
 
-    template <class A> SIMD_INLINE void View<A>::Swap(View<A> & other)
+    template <template<class> class A> SIMD_INLINE void View<A>::Swap(View<A> & other)
     {
         std::swap((size_t&)width, (size_t&)other.width);
         std::swap((size_t&)height, (size_t&)other.height);
@@ -951,7 +951,7 @@ namespace Simd
         std::swap((bool&)_owner, (bool&)other._owner);
     }
 
-    template <class A> SIMD_INLINE bool View<A>::Load(const std::string & path)
+    template <template<class> class A> SIMD_INLINE bool View<A>::Load(const std::string & path)
     {
         std::ifstream ifs(path.c_str(), std::ifstream::binary);
         if (ifs.is_open())
@@ -974,7 +974,7 @@ namespace Simd
             return false;
     }
 
-    template <class A> SIMD_INLINE bool View<A>::Save(const std::string & path) const
+    template <template<class> class A> SIMD_INLINE bool View<A>::Save(const std::string & path) const
     {
         if (format != View<A>::Gray8)
             return false;
@@ -993,34 +993,34 @@ namespace Simd
 
     // View utilities implementation:
 
-    template <class A, class T> const T & At(const View<A> & view, size_t x, size_t y)
+    template <template<class> class A, class T> const T & At(const View<A> & view, size_t x, size_t y)
     {
         assert(x < view.width && y < view.height);
 
         return ((const T*)(view.data + y*view.stride))[x];
     }
 
-    template <class A, class T> T & At(View<A> & view, size_t x, size_t y)
+    template <template<class> class A, class T> T & At(View<A> & view, size_t x, size_t y)
     {
         assert(x < view.width && y < view.height);
 
         return ((T*)(view.data + y*view.stride))[x];
     }
 
-    template <class A, class B> SIMD_INLINE bool EqualSize(const View<A> & a, const View<B> & b)
+    template <template<class> class A, template<class> class B> SIMD_INLINE bool EqualSize(const View<A> & a, const View<B> & b)
     {
         return
             (a.width == b.width && a.height == b.height);
     }
 
-    template <class A> SIMD_INLINE bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c)
+    template <template<class> class A> SIMD_INLINE bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c)
     {
         return
             (a.width == b.width && a.height == b.height) &&
             (a.width == c.width && a.height == c.height);
     }
 
-    template <class A, class B> SIMD_INLINE bool Compatible(const View<A> & a, const View<B> & b)
+    template <template<class> class A, template<class> class B> SIMD_INLINE bool Compatible(const View<A> & a, const View<B> & b)
     {
         typedef typename View<A>::Format Format;
 
@@ -1028,14 +1028,14 @@ namespace Simd
             (a.width == b.width && a.height == b.height && a.format == (Format)b.format);
     }
 
-    template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c)
+    template <template<class> class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c)
     {
         return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&
             (a.width == c.width && a.height == c.height && a.format == c.format);
     }
 
-    template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d)
+    template <template<class> class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d)
     {
         return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&
@@ -1043,7 +1043,7 @@ namespace Simd
             (a.width == d.width && a.height == d.height && a.format == d.format);
     }
 
-    template <class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e)
+    template <template<class> class A> SIMD_INLINE bool Compatible(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d, const View<A> & e)
     {
         return
             (a.width == b.width && a.height == b.height && a.format == b.format) &&

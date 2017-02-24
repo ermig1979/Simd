@@ -48,7 +48,7 @@ namespace Simd
         typedef std::vector<Vector> Vectors; /*!< \brief Vector of vectors with 32-bit float point values. */
         typedef size_t Label; /*!< \brief Integer name (label) of object class. */
         typedef std::vector<Label> Labels; /*!< \brief Vector of labels. */
-        typedef Simd::View<Allocator<uint8_t>> View; /*!< \brief Image. */
+        typedef Simd::View<Allocator> View; /*!< \brief Image. */
 
         namespace Detail
         {

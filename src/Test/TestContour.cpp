@@ -314,7 +314,7 @@ namespace Test
 
 namespace Test
 {
-    typedef Simd::ContourDetector< Simd::Allocator<uint8_t> > ContourDetector;
+    typedef Simd::ContourDetector<Simd::Allocator> ContourDetector;
 
     bool ContourDetectorSpecialTest()
     {

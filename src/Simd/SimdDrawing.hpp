@@ -42,7 +42,7 @@ namespace Simd
         \param [in] color - a color of the line.
         \param [in] width - a width of the line. By default it is equal to 1.
     */
-    template<class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1)
+    template<template<class> class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2, const Color & color, size_t width = 1)
     {
         assert(canvas.PixelSize() == sizeof(Color));
 
@@ -180,7 +180,7 @@ namespace Simd
         \param [in] color - a color of the line.
         \param [in] width - a width of the line. By default it is equal to 1.
     */
-    template<class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color, size_t width = 1)
+    template<template<class> class A, class Color> SIMD_INLINE void DrawLine(View<A> & canvas, const Point<ptrdiff_t> & p1, const Point<ptrdiff_t> & p2, const Color & color, size_t width = 1)
     {
         DrawLine(canvas, p1.x, p1.y, p2.x, p2.y, color, width);
     }
@@ -196,7 +196,7 @@ namespace Simd
         \param [in] color - a color of the rectangle's frame.
         \param [in] width - a width of the rectangle's frame. By default it is equal to 1.
     */
-    template<class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
+    template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
     {
         DrawLine(canvas, rect.left, rect.top, rect.right, rect.top, color, width);
         DrawLine(canvas, rect.right, rect.top, rect.right, rect.bottom, color, width);

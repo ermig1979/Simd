@@ -40,9 +40,9 @@ namespace Simd
 
 		\ref cpp_pyramid_functions.
 	*/
-	template <class A> struct Pyramid
+	template <template<class> class A> struct Pyramid
     {
-		typedef A Allocator; /*!< Allocator type definition. */
+		typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
 
 		/*!
 			Creates a new empty Pyramid structure.
@@ -165,24 +165,24 @@ namespace Simd
 
 	// struct Pyramid implementation:
 
-	template <class A> 
+	template <template<class> class A> 
 	SIMD_INLINE Pyramid<A>::Pyramid()
 	{
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE Pyramid<A>::Pyramid(const Point<ptrdiff_t> & size, size_t levelCount)
 	{
 		Recreate(size, levelCount);
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE Pyramid<A>::Pyramid(size_t width, size_t height, size_t levelCount)
 	{
 		Recreate(width, height, levelCount);
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE void Pyramid<A>::Recreate(Point<ptrdiff_t> size, size_t levelCount)
 	{
 		if (_views.size() && size == _views[0].Size())
@@ -195,55 +195,55 @@ namespace Simd
 		}
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE void Pyramid<A>::Recreate(size_t width, size_t height, size_t levelCount)
 	{
 		Recreate(Point<ptrdiff_t>(width, height), levelCount);
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE size_t Pyramid<A>::Size() const
 	{
 		return _views.size();
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE View<A> & Pyramid<A>::operator [] (size_t level)
 	{
 		return _views[level];
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE const View<A> & Pyramid<A>::operator [] (size_t level) const
 	{
 		return _views[level];
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE View<A> & Pyramid<A>::At(size_t level)
 	{
 		return _views[level];
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE const View<A> & Pyramid<A>::At(size_t level) const
 	{
 		return _views[level];
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE View<A> & Pyramid<A>::Top()
 	{
 		return _views.back();
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE const View<A> & Pyramid<A>::Top() const
 	{
 		return _views.back();
 	}
 
-	template <class A>
+	template <template<class> class A>
 	SIMD_INLINE void Pyramid<A>::Swap(Pyramid & pyramid)
 	{
 		_views.swap(pyramid._views);

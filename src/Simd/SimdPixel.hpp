@@ -86,7 +86,7 @@ namespace Simd
             Bgr24(const Bgr24 & p);
 
             /*!
-                \fn template <class A> static const Bgr24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static const Bgr24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets constant reference to the pixel with specific coordinates at the image view. 
 
@@ -95,10 +95,10 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a constant reference to the pixel.
             */
-            template <class A> static const Bgr24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static const Bgr24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
             /*!
-                \fn template <class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets reference to the pixel with specific coordinates at the image view. 
 
@@ -107,7 +107,7 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a reference to the pixel.
             */
-            template <class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
         /*! @ingroup cpp_pixels
@@ -157,7 +157,7 @@ namespace Simd
             Bgra32(const Bgra32 & p);
 
             /*!
-                \fn template <class A> static const Bgr32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static const Bgr32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets constant reference to the pixel with specific coordinates at the image view. 
 
@@ -166,10 +166,10 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a constant reference to the pixel.
             */
-            template <class A> static const Bgra32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static const Bgra32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
             /*!
-                \fn template <class A> static Bgr32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static Bgr32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets reference to the pixel with specific coordinates at the image view. 
 
@@ -178,7 +178,7 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a reference to the pixel.
             */
-            template <class A> static Bgra32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static Bgra32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
         /*! @ingroup cpp_pixels
@@ -217,7 +217,7 @@ namespace Simd
             Hsv24(const Hsv24 & p);
 
             /*!
-                \fn template <class A> static const Hsv24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static const Hsv24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets constant reference to the pixel with specific coordinates at the image view. 
 
@@ -226,10 +226,10 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a constant reference to the pixel.
             */
-            template <class A> static const Hsv24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static const Hsv24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
             /*!
-                \fn template <class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets reference to the pixel with specific coordinates at the image view. 
 
@@ -238,7 +238,7 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a reference to the pixel.
             */
-            template <class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
         /*! @ingroup cpp_pixels
@@ -278,7 +278,7 @@ namespace Simd
 
 
             /*!
-                \fn template <class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets constant reference to the pixel with specific coordinates at the image view. 
 
@@ -287,10 +287,10 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a constant reference to the pixel.
             */
-            template <class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
             
             /*!
-                \fn template <class A> static Hsl24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+                \fn template <template<class> class A> static Hsl24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
                 Gets reference to the pixel with specific coordinates at the image view. 
 
@@ -299,7 +299,7 @@ namespace Simd
                 \param [in] row - y-coordinate of the pixel.
                 \return a reference to the pixel.
             */
-            template <class A> static Hsl24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+            template <template<class> class A> static Hsl24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
         //-------------------------------------------------------------------------
@@ -334,14 +334,14 @@ namespace Simd
         {
         }
 
-        template <class A> SIMD_INLINE const Bgr24 & Bgr24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE const Bgr24 & Bgr24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgr24);
 
             return At<Bgr24>(view, col, row);
         }
 
-        template <class A> SIMD_INLINE Bgr24 & Bgr24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE Bgr24 & Bgr24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgr24);
 
@@ -382,14 +382,14 @@ namespace Simd
         {
         }
 
-        template <class A> SIMD_INLINE const Bgra32 & Bgra32::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE const Bgra32 & Bgra32::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgra32);
 
             return At<Bgra32>(view, col, row);
         }
 
-        template <class A> SIMD_INLINE Bgra32 & Bgra32::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE Bgra32 & Bgra32::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgra32);
 
@@ -419,14 +419,14 @@ namespace Simd
         {
         }
 
-        template <class A> SIMD_INLINE const Hsv24 & Hsv24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE const Hsv24 & Hsv24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsv24);
 
             return At<Hsv24>(view, col, row);
         }
 
-        template <class A> SIMD_INLINE Hsv24 & Hsv24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE Hsv24 & Hsv24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsv24);
 
@@ -456,14 +456,14 @@ namespace Simd
         {
         }
 
-        template <class A> SIMD_INLINE const Hsl24 & Hsl24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE const Hsl24 & Hsl24::At(const View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsl24);
 
             return At<Hsl24>(view, col, row);
         }
 
-        template <class A> SIMD_INLINE Hsl24 & Hsl24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
+        template <template<class> class A> SIMD_INLINE Hsl24 & Hsl24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsl24);
 

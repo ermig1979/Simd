@@ -42,7 +42,7 @@ namespace Simd
 
         int main()
         {
-            typedef Simd::ShiftDetector< Simd::Allocator<uint8_t> > ShiftDetector;
+            typedef Simd::ShiftDetector<Simd::Allocator> ShiftDetector;
 
             ShiftDetector::View background;
             background.Load("../../data/image/face/lena.pgm");
@@ -66,11 +66,11 @@ namespace Simd
         }
         \endverbatim
     */
-    template <class A>
+    template <template<class> class A>
     struct ShiftDetector
     {
-        typedef A Allocator; /*!< Allocator type definition. */
-        typedef Simd::View<Allocator> View; /*!< An image type definition. */
+        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
+        typedef Simd::View<A> View; /*!< An image type definition. */
         typedef Simd::Point<ptrdiff_t> Point; /*!< A point with integer coordinates. */
         typedef Simd::Point<double> FPoint; /*!< A point with float point coordinates. */
         typedef Rectangle<ptrdiff_t> Rect; /*!< A rectangle type definition. */
@@ -239,7 +239,7 @@ namespace Simd
     private:
         static const ptrdiff_t REGION_CORRELATION_AREA_MIN = 25;
 
-        typedef Simd::Pyramid<Allocator> Pyramid;
+        typedef Simd::Pyramid<A> Pyramid;
 
         Pyramid _background;
         Pyramid _current;
