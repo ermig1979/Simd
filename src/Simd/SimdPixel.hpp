@@ -338,14 +338,14 @@ namespace Simd
         {
             assert(view.format == View<A>::Bgr24);
 
-            return At<Bgr24>(view, col, row);
+            return Simd::At<A, Bgr24>(view, col, row);
         }
 
         template <template<class> class A> SIMD_INLINE Bgr24 & Bgr24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgr24);
 
-            return At<Bgr24>(view, col, row);
+            return Simd::At<A, Bgr24>(view, col, row);
         }
 
         // struct Bgra32 implementation:
@@ -386,14 +386,14 @@ namespace Simd
         {
             assert(view.format == View<A>::Bgra32);
 
-            return At<Bgra32>(view, col, row);
+            return Simd::At<A, Bgra32>(view, col, row);
         }
 
         template <template<class> class A> SIMD_INLINE Bgra32 & Bgra32::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Bgra32);
 
-            return At<Bgra32>(view, col, row);
+            return Simd::At<A, Bgra32>(view, col, row);
         }
 
         // struct Hsv24 implementation:
@@ -423,14 +423,14 @@ namespace Simd
         {
             assert(view.format == View<A>::Hsv24);
 
-            return At<Hsv24>(view, col, row);
+            return Simd::At<A, Hsv24>(view, col, row);
         }
 
         template <template<class> class A> SIMD_INLINE Hsv24 & Hsv24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsv24);
 
-            return At<Hsv24>(view, col, row);
+            return Simd::At<A, Hsv24>(view, col, row);
         }
 
         // struct Hsl24 implementation:
@@ -460,14 +460,14 @@ namespace Simd
         {
             assert(view.format == View<A>::Hsl24);
 
-            return At<Hsl24>(view, col, row);
+            return Simd::At<A, Hsl24>(view, col, row);
         }
 
         template <template<class> class A> SIMD_INLINE Hsl24 & Hsl24::At(View<A> & view, ptrdiff_t col, ptrdiff_t row)
         {
             assert(view.format == View<A>::Hsl24);
 
-            return At<Hsl24>(view, col, row);
+            return Simd::At<A, Hsl24>(view, col, row);
         }
     }
 }
