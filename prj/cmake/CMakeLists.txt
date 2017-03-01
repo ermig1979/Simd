@@ -117,18 +117,24 @@ elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQU
 
 set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
 
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm")
+set(CXX_NEON_FLAG "-mfpu=neon")
+else()
+set(CXX_NEON_FLAG "")
+endif() 
+
 file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
 set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
 file(GLOB_RECURSE SIMD_NEON_SOURCES ${TRUNK_DIR}/src/Simd/SimdNeon*.cpp)
 add_library(SimdNeon STATIC ${SIMD_NEON_SOURCES})
-set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon")
+set_target_properties(SimdNeon PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
 
 file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
 add_library(Simd STATIC ${SIMD_SOURCES})
 target_link_libraries(Simd SimdBase SimdNeon)
-set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon")
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG}")
 
 add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
 
@@ -136,7 +142,7 @@ file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
 add_executable(Test ${TEST_SOURCES})
 target_link_libraries(Test Simd TestCheckC -lpthread)
 if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
- set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mfpu=neon -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_NEON_FLAG} -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 else()
  set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 endif()

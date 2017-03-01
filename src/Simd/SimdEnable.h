@@ -419,7 +419,11 @@ namespace Simd
 #if defined(_MSC_VER)
 			return true;
 #elif defined(__GNUC__)
-			return CpuInfo::CheckBit(AT_HWCAP, HWCAP_ARM_NEON);
+#if defined(SIMD_ARM64_ENABLE)
+            return true;
+#else
+            return CpuInfo::CheckBit(AT_HWCAP, HWCAP_ARM_NEON);
+#endif
 #else
 #error Do not know how to detect NEON support!
 #endif
