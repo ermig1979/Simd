@@ -108,7 +108,7 @@ namespace Simd
             size_t step = sizeof(size_t)*3;
             size_t alignedSize = AlignLo(width, sizeof(size_t))*3;
             size_t bgrs[3];
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             bgrs[0] = Fill64(blue, green, red);
             bgrs[1] = Fill64(red, blue, green);
             bgrs[2] = Fill64(green, red, blue);
@@ -145,7 +145,7 @@ namespace Simd
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
 #endif
 
-#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             uint64_t bgra64 = uint64_t(bgra32) | (uint64_t(bgra32) << 32);
             size_t alignedWidth = AlignLo(width, 2);
             for(size_t row = 0; row < height; ++row)
