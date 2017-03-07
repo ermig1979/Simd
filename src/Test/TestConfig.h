@@ -96,6 +96,7 @@ namespace Test
     const float EPS = 0.001f;
 
     extern String ROOT_PATH;
+    extern String SOURCE;
 }
 
 #endif//__TestConfig_h__

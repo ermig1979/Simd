@@ -78,30 +78,6 @@ namespace Test
 
     TEST_ADD_GROUP(AddFeatureDifference);
 
-	TEST_ADD_GROUP(NeuralConvert);
-	TEST_ADD_GROUP(NeuralProductSum);
-    TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
-    TEST_ADD_GROUP(NeuralSigmoid);
-    TEST_ADD_GROUP(NeuralRoughSigmoid);
-    TEST_ADD_GROUP(NeuralRoughSigmoid2);
-    TEST_ADD_GROUP(NeuralDerivativeSigmoid);
-    TEST_ADD_GROUP(NeuralTanh);
-    TEST_ADD_GROUP(NeuralRoughTanh);
-    TEST_ADD_GROUP(NeuralDerivativeTanh);
-    TEST_ADD_GROUP(NeuralRelu);
-    TEST_ADD_GROUP(NeuralDerivativeRelu);
-    TEST_ADD_GROUP(NeuralUpdateWeights);
-    TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Back);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Back);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
-    TEST_ADD_GROUP(NeuralMax2x2);
-    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralPredict);
-    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralTrain);
-
     TEST_ADD_GROUP(BgraToBgr);
     TEST_ADD_GROUP(BgraToGray);
     TEST_ADD_GROUP(BgrToGray);
@@ -186,6 +162,23 @@ namespace Test
     TEST_ADD_GROUP(FillBgra);
     TEST_ADD_GROUP(FillBgr);
 
+    TEST_ADD_GROUP(MeanFilter3x3);
+    TEST_ADD_GROUP(MedianFilterRhomb3x3);
+    TEST_ADD_GROUP(MedianFilterRhomb5x5);
+    TEST_ADD_GROUP(MedianFilterSquare3x3);
+    TEST_ADD_GROUP(MedianFilterSquare5x5);
+    TEST_ADD_GROUP(GaussianBlur3x3);
+    TEST_ADD_GROUP(AbsGradientSaturatedSum);
+    TEST_ADD_GROUP(LbpEstimate);
+    TEST_ADD_GROUP(NormalizeHistogram);
+    TEST_ADD_GROUP(SobelDx);
+    TEST_ADD_GROUP(SobelDxAbs);
+    TEST_ADD_GROUP(SobelDy);
+    TEST_ADD_GROUP(SobelDyAbs);
+    TEST_ADD_GROUP(ContourMetrics);
+    TEST_ADD_GROUP(Laplace);
+    TEST_ADD_GROUP(LaplaceAbs);
+
     TEST_ADD_GROUP(Histogram);
     TEST_ADD_GROUP(HistogramMasked);
     TEST_ADD_GROUP(HistogramConditional);
@@ -204,22 +197,31 @@ namespace Test
     TEST_ADD_GROUP(InterleaveBgr);
     TEST_ADD_GROUP(InterleaveBgra);
 
-	TEST_ADD_GROUP(MeanFilter3x3);
-	TEST_ADD_GROUP(MedianFilterRhomb3x3);
-    TEST_ADD_GROUP(MedianFilterRhomb5x5);
-    TEST_ADD_GROUP(MedianFilterSquare3x3);
-    TEST_ADD_GROUP(MedianFilterSquare5x5);
-    TEST_ADD_GROUP(GaussianBlur3x3);
-    TEST_ADD_GROUP(AbsGradientSaturatedSum);
-    TEST_ADD_GROUP(LbpEstimate);
-    TEST_ADD_GROUP(NormalizeHistogram);
-    TEST_ADD_GROUP(SobelDx);
-    TEST_ADD_GROUP(SobelDxAbs);
-    TEST_ADD_GROUP(SobelDy);
-    TEST_ADD_GROUP(SobelDyAbs);
-    TEST_ADD_GROUP(ContourMetrics);
-    TEST_ADD_GROUP(Laplace);
-    TEST_ADD_GROUP(LaplaceAbs);
+    TEST_ADD_GROUP_ONLY_SPECIAL(Motion);
+
+    TEST_ADD_GROUP(NeuralConvert);
+    TEST_ADD_GROUP(NeuralProductSum);
+    TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
+    TEST_ADD_GROUP(NeuralSigmoid);
+    TEST_ADD_GROUP(NeuralRoughSigmoid);
+    TEST_ADD_GROUP(NeuralRoughSigmoid2);
+    TEST_ADD_GROUP(NeuralDerivativeSigmoid);
+    TEST_ADD_GROUP(NeuralTanh);
+    TEST_ADD_GROUP(NeuralRoughTanh);
+    TEST_ADD_GROUP(NeuralDerivativeTanh);
+    TEST_ADD_GROUP(NeuralRelu);
+    TEST_ADD_GROUP(NeuralDerivativeRelu);
+    TEST_ADD_GROUP(NeuralUpdateWeights);
+    TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Back);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Back);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
+    TEST_ADD_GROUP(NeuralMax2x2);
+    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralPredict);
+    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralTrain);
 
     TEST_ADD_GROUP(OperationBinary8u);
     TEST_ADD_GROUP(OperationBinary16i);
@@ -401,6 +403,10 @@ namespace Test
                 {
                     ROOT_PATH = arg.substr(3, arg.size() - 3);
                 }
+                else if (arg.find("-s=") == 0)
+                {
+                    SOURCE = arg.substr(3, arg.size() - 3);
+                }
                 else if (arg.find("-pa=") == 0)
                 {
                     printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
@@ -551,6 +557,7 @@ namespace Test
     }
 
     String ROOT_PATH = "../..";
+    String SOURCE = "";
 }
 
 int main(int argc, char* argv[])

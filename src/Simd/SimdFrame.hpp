@@ -346,9 +346,9 @@ namespace Simd
 	{
 		switch (view.format)
 		{
-		case View<A>::Gray8: format = Gray8; break;
-		case View<A>::Bgr24: format = Bgr24; break;
-		case View<A>::Bgra32: format = Bgra32; break;
+		case View<A>::Gray8: (Format&)format = Gray8; break;
+		case View<A>::Bgr24: (Format&)format = Bgr24; break;
+		case View<A>::Bgra32: (Format&)format = Bgra32; break;
 		default:
 			assert(0);
 		}

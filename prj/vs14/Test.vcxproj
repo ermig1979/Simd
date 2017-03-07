@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Prop.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="Ocv.props" Condition="exists('Ocv.props')" Label="Ocv" />
+  </ImportGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{423128F2-9D4E-408D-9123-49CE57A32B0A}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
