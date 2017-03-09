@@ -124,7 +124,7 @@ namespace Simd
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride));
+                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride));
                 assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride));
             }
 
