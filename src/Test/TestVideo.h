@@ -36,7 +36,6 @@ namespace Test
 
         struct Filter
         {
-            virtual bool Resize(const Size & size) = 0;
             virtual bool Process(const Frame & input, Frame & output) = 0;
         };
 

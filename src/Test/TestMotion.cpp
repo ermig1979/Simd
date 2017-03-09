@@ -32,7 +32,7 @@
 #endif
 
 #include "Test/TestVideo.h"
-//#include "Simd/SimdMotion.hpp"
+#include "Simd/SimdMotion.hpp"
 #include "Simd/SimdDrawing.hpp"
 #include "Simd/SimdPixel.hpp"
 
@@ -42,16 +42,32 @@ namespace Test
 
     struct Filter : public Video::Filter 
     {
-        virtual bool Resize(const Size & size)
+        Filter()
         {
-            return true;
+
         }
 
         virtual bool Process(const Frame & input, Frame & output)
         {
-            Simd::DrawLine(output.planes[0], 0, 0, 100, 100, Simd::Pixel::Bgr24(0, 255, 255), 3);
+            Simd::Motion::Metadata metadata;
+            _detector.NextFrame(input, metadata, &output);
+
+            Simd::Pixel::Bgr24 yellow(0, 255, 255);
+            size_t width = 2;
+
+            for (size_t i = 0; i < metadata.objects.size(); ++i)
+            {
+                const Simd::Motion::Object & object = metadata.objects[i];
+                Simd::DrawRectangle(output.planes[0], object.current.rect, yellow, width);
+            }
+
+            Simd::DrawLine(output.planes[0], 0, 0, 100, 100, yellow, width);
+
             return true;
         }
+
+    private:
+        Simd::Motion::Detector _detector;
     };
 
     bool MotionSpecialTest()
