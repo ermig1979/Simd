@@ -33,6 +33,7 @@ namespace Simd
 {
     namespace Motion
     {
+        typedef double Time;
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Point<ptrdiff_t> Point;
         typedef std::vector<Point> Points;
@@ -44,7 +45,7 @@ namespace Simd
         struct Position
         {
             Point point;
-            double time;
+            Time time;
             Rect rect;
         };
         typedef std::vector<Position> Positions;
@@ -92,10 +93,16 @@ namespace Simd
             int TextureGradientSaturation;
             int TextureGradientBoost;
 
+            double BackgroundGrowTime;
+            double BackgroundIncrementTime;
+
             Options()
             {
                 TextureGradientSaturation = 16;
                 TextureGradientBoost = 4;
+
+                BackgroundGrowTime = 1.0;
+                BackgroundIncrementTime = 1.0;
             }
         };
 
@@ -136,6 +143,8 @@ namespace Simd
                 SetFrame(input, output);
 
                 EstimateTextures();
+
+                UpdateBackground();
 
                 return true;
             }
@@ -198,6 +207,58 @@ namespace Simd
                 }
             };
 
+            struct Background
+            {
+                enum State
+                {
+                    Init,
+                    Grow,
+                    Update
+                };
+
+                State state;
+                int count;
+                int sabotageCounter;
+                Time expandEndTime;
+                Time lastFrameTime;
+                Time incrementCounterTime;
+
+                Background()
+                    : state(Init)
+                {
+                }
+            };
+
+            struct Stability
+            {
+                enum State
+                {
+                    Empty,
+                    Ready
+                };
+
+                State state;
+
+                enum SceneState
+                {
+                    Unknown,
+                    Stable,
+                    Sabotage
+                } sceneState;
+
+                bool sabotage;
+                int kMovingRegionScore;
+                int kMovingRegionThreshold;
+                int kMovingRegionMinShortage;
+
+                Stability()
+                    : state(Empty)
+                    , sceneState(Unknown)
+                    , sabotage(false)
+                {
+                }
+            };
+
             struct Scene
             {
                 Frame input, *output;
@@ -206,6 +267,10 @@ namespace Simd
                 Model model;
 
                 Texture texture;
+
+                Background background;
+
+                Stability stability;
 
                 void Create(const Model & m)
                 {
@@ -246,6 +311,142 @@ namespace Simd
                 }
 
                 return true;
+            }
+
+            struct InitUpdater
+            {
+                void operator()(View & value, View & loValue, View & loCount, View & hiValue, View & hiCount) const
+                {
+                    Simd::Copy(value, loValue);
+                    Simd::Copy(value, hiValue);
+                    Simd::Fill(loCount, 0);
+                    Simd::Fill(hiCount, 0);
+                }
+            };
+
+            struct GrowRangeUpdater
+            {
+                void operator()(View & value, View & loValue, View & loCount, View & hiValue, View & hiCount) const
+                {
+                    Simd::BackgroundGrowRangeFast(value, loValue, hiValue);
+                }
+            };
+
+            struct IncrementCountUpdater
+            {
+                void operator()(View & value, View & loValue, View & loCount, View & hiValue, View & hiCount) const
+                {
+                    Simd::BackgroundIncrementCount(value, loValue, hiValue, loCount, hiCount);
+                }
+            };
+
+            struct AdjustRangeUpdater
+            {
+                void operator()(View & value, View & loValue, View & loCount, View & hiValue, View & hiCount) const
+                {
+                    Simd::BackgroundAdjustRange(loCount, loValue, hiCount, hiValue, 1);
+                }
+            };
+
+            template <typename Updater> void Apply(Texture::Features & features, const Updater & updater)
+            {
+                for (size_t i = 0; i < features.size(); ++i)
+                {
+                    Texture::Feature & feature = *features[i];
+                    for (size_t j = 0; j < feature.value.Size(); ++j)
+                    {
+                        updater(feature.value[j], feature.lo.value[j], feature.lo.count[j], feature.hi.value[j], feature.hi.count[j]);
+                    }
+                }
+            }
+
+            bool UpdateBackground()
+            {
+                Background & background = _scene.background;
+                const Stability::SceneState & stabilityState = _scene.stability.sceneState;
+                const Time & time = _scene.input.timestamp;
+
+                switch (background.state)
+                {
+                case Background::Update:
+                    switch (stabilityState)
+                    {
+                    case Stability::Stable:
+                    {
+                        Apply(_scene.texture.features, IncrementCountUpdater());
+                        ++background.count;
+                        background.incrementCounterTime += time - background.lastFrameTime;
+
+                        if (background.count >= 127 || (background.incrementCounterTime > _options.BackgroundIncrementTime && background.count >= 8))
+                        {
+                            Apply(_scene.texture.features, AdjustRangeUpdater());
+
+                            background.incrementCounterTime = 0;
+                            background.count = 0;
+                        }
+                    }
+                    case Stability::Sabotage:
+                        background.sabotageCounter++;
+                        if (background.sabotageCounter > 0)//_sabotageCounterMax)
+                        {
+                            InitBackground();
+                        }
+                        break;
+
+                    default:
+                        assert(0);
+                    }
+
+                    if (stabilityState != Stability::Sabotage)
+                    {
+                        background.sabotageCounter = 0;
+                    }
+                    break;
+
+                case Background::Grow:
+
+                    if (stabilityState == Stability::Sabotage)
+                    {
+                        InitBackground();
+                    }
+                    else
+                    {
+                        Apply(_scene.texture.features, GrowRangeUpdater());
+
+                        if (stabilityState != Stability::Stable && _scene.stability.state != Stability::Empty)
+                        {
+                            background.expandEndTime = time + _options.BackgroundGrowTime;
+                        }
+
+                        if (background.expandEndTime < time)
+                        {
+                            background.state = Background::Update;
+                            background.count = 0;
+                        }
+                    }
+                    break;
+
+                case Background::Init:
+                    InitBackground();
+                    break;
+                default:
+                    assert(0);
+                }
+
+                background.lastFrameTime = time;
+                return true;
+            }
+
+            void InitBackground()
+            {
+                Background & background = _scene.background;
+
+                Apply(_scene.texture.features, InitUpdater());
+
+                background.expandEndTime = _scene.input.timestamp + _options.BackgroundGrowTime;
+                background.state = Background::Grow;
+                background.count = 0;
+                background.incrementCounterTime = 0;
             }
 
             Scene _scene;
