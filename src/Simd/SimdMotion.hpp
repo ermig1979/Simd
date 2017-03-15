@@ -29,6 +29,10 @@
 
 #include <vector>
 
+#ifndef SIMD_CHECK_PERFORMANCE
+#define SIMD_CHECK_PERFORMANCE()
+#endif
+
 namespace Simd
 {
     namespace Motion
@@ -93,6 +97,12 @@ namespace Simd
             int TextureGradientSaturation;
             int TextureGradientBoost;
 
+            int DifferenceGrayFeatureWeight;
+            int DifferenceDxFeatureWeight;
+            int DifferenceDyFeatureWeight;
+            bool DifferencePropagateForward;
+            bool DifferenceRoiMaskEnable;
+
             double BackgroundGrowTime;
             double BackgroundIncrementTime;
 
@@ -100,6 +110,12 @@ namespace Simd
             {
                 TextureGradientSaturation = 16;
                 TextureGradientBoost = 4;
+
+                DifferenceGrayFeatureWeight = 18;
+                DifferenceDxFeatureWeight = 18;
+                DifferenceDyFeatureWeight = 18;
+                DifferencePropagateForward = true;
+                DifferenceRoiMaskEnable = true;
 
                 BackgroundGrowTime = 1.0;
                 BackgroundIncrementTime = 1.0;
@@ -130,6 +146,8 @@ namespace Simd
 
             bool NextFrame(const Frame & input, Metadata & metadata, Frame * output = NULL)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 if (output && output->Size() != input.Size())
                     return false;
 
@@ -144,7 +162,17 @@ namespace Simd
 
                 EstimateTextures();
 
+                EstimateDifference();
+
+                _scene.stability.sceneState = Stability::Stable;
+
                 UpdateBackground();
+
+                if (output && output->format == Frame::Bgr24)
+                {
+                    const View & src = _scene.difference[1];
+                    Simd::GrayToBgr(src, output->planes[0].Region(src.Size(), View::BottomRight));
+                }
 
                 return true;
             }
@@ -171,13 +199,15 @@ namespace Simd
                 {
                     Pyramid value; 
                     Bound lo; 
-                    Bound hi; 
+                    Bound hi;
+                    uint16_t weight;
 
-                    void Create(const Size & size, int levelCount)
+                    void Create(const Size & size, int levelCount, int weight_)
                     {
                         value.Recreate(size, levelCount);
                         lo.Create(size, levelCount);
                         hi.Create(size, levelCount);
+                        weight = uint16_t(weight_ * 256);
                     }
                 };
 
@@ -195,14 +225,15 @@ namespace Simd
                 typedef std::vector<Feature *> Features;
                 Features features;
 
-                void Create(const Size & size, int levelCount)
+                void Create(const Size & size, int levelCount, const Options & options)
                 {
+                    gray.Create(size, levelCount, options.DifferenceGrayFeatureWeight);
+                    dx.Create(size, levelCount, options.DifferenceDxFeatureWeight);
+                    dy.Create(size, levelCount, options.DifferenceDyFeatureWeight);
+
                     features.clear();
-                    gray.Create(size, levelCount);
                     features.push_back(&gray);
-                    dx.Create(size, levelCount);
                     features.push_back(&dx);
-                    dy.Create(size, levelCount);
                     features.push_back(&dy);
                 }
             };
@@ -264,6 +295,8 @@ namespace Simd
                 Frame input, *output;
                 View gray;
 
+                Pyramid buffer;
+
                 Model model;
 
                 Texture texture;
@@ -272,16 +305,23 @@ namespace Simd
 
                 Stability stability;
 
-                void Create(const Model & m)
+                Pyramid difference;
+
+                void Create(const Model & m, const Options & o)
                 {
+                    const size_t levelCount = 3;
                     model = m;
                     gray.Recreate(model.size, View::Gray8);
-                    texture.Create(model.size, 3);
+                    buffer.Recreate(model.size, levelCount);
+                    texture.Create(model.size, levelCount, o);
+                    difference.Recreate(model.size, levelCount);
                 }
             };
 
             bool SetFrame(const Frame & input, Frame * output)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 _scene.input = input;
                 _scene.output = output;
                 Simd::Convert(input, Frame(_scene.gray).Ref());
@@ -291,13 +331,15 @@ namespace Simd
 
             bool Calibrate(const Model & model)
             {
-                _scene.Create(model);
+                _scene.Create(model, _options);
 
                 return true;
             }
 
             bool EstimateTextures()
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Texture & texture = _scene.texture;
 
                 Simd::Copy(_scene.gray, texture.gray.value[0]);
@@ -308,6 +350,41 @@ namespace Simd
                     Simd::TextureBoostedSaturatedGradient(texture.gray.value[i],
                         _options.TextureGradientSaturation, _options.TextureGradientBoost, 
                         texture.dx.value[i], texture.dy.value[i]);
+                }
+
+                return true;
+            }
+
+            bool EstimateDifference()
+            {
+                SIMD_CHECK_PERFORMANCE();
+
+                const Texture & texture = _scene.texture;
+                Pyramid & difference = _scene.difference;
+                Pyramid & buffer = _scene.buffer;
+                for (size_t i = 0; i < difference.Size(); ++i)
+                {
+                    Simd::Fill(difference[i], 0);
+                    for (size_t j = 0; j < texture.features.size(); ++j)
+                    {
+                        const Texture::Feature & feature = *texture.features[j];
+                        Simd::AddFeatureDifference(feature.value[i], feature.lo.value[i], feature.hi.value[i], feature.weight, difference[i]);
+                    }
+                }
+
+                if (_options.DifferencePropagateForward)
+                {
+                    for (size_t i = 1; i < difference.Size(); ++i)
+                    {
+                        Simd::ReduceGray4x4(difference[i - 1], buffer[i]);
+                        Simd::OperationBinary8u(difference[i], buffer[i], difference[i], SimdOperationBinary8uMaximum);
+                    }
+                }
+
+                if (_options.DifferenceRoiMaskEnable)
+                {
+                    //for (size_t i = 0; i < difference.Size(); ++i)
+                    //    Simd::OperationBinary8u(difference[i], scene.model->roiMask[i], difference[i], SimdOperationBinary8uAnd);
                 }
 
                 return true;
@@ -362,6 +439,8 @@ namespace Simd
 
             bool UpdateBackground()
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Background & background = _scene.background;
                 const Stability::SceneState & stabilityState = _scene.stability.sceneState;
                 const Time & time = _scene.input.timestamp;
@@ -372,7 +451,6 @@ namespace Simd
                     switch (stabilityState)
                     {
                     case Stability::Stable:
-                    {
                         Apply(_scene.texture.features, IncrementCountUpdater());
                         ++background.count;
                         background.incrementCounterTime += time - background.lastFrameTime;
@@ -384,7 +462,7 @@ namespace Simd
                             background.incrementCounterTime = 0;
                             background.count = 0;
                         }
-                    }
+                        break;
                     case Stability::Sabotage:
                         background.sabotageCounter++;
                         if (background.sabotageCounter > 0)//_sabotageCounterMax)
