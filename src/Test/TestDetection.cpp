@@ -538,6 +538,7 @@ namespace Test
 
         View dst(src.Size(), View::Gray8);
         Simd::Copy(src, dst);
+        //dst.Save(String("faces.pgm"));
         for (size_t i = 0; i < objects.size(); ++i)
         {
             Size s = objects[i].rect.Size();

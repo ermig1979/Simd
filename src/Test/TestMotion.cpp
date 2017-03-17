@@ -61,8 +61,6 @@ namespace Test
                 Simd::DrawRectangle(output.planes[0], object.current.rect, yellow, width);
             }
 
-            Simd::DrawLine(output.planes[0], 0, 0, 100, 100, yellow, width);
-
             return true;
         }
 
