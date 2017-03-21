@@ -375,7 +375,7 @@ namespace Test
                 ds += diff;
                 ns += norm;
             }
-            float rdn = ::fabs(ds)*sqrt(cycle)/ns;
+            float rdn = float(::fabs(ds)*sqrt(cycle)/ns);
             if (rdn > relativeDifferenceMax)
             {
                 for (size_t c = 0; c < cycle && errorCount <= errorCountMax; ++c)

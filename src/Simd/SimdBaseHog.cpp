@@ -178,7 +178,8 @@ namespace Simd
                 const uint8_t * src0 = src1 - stride;
                 const uint8_t * src2 = src1 + stride;
 
-                for (size_t col = 1; col < width - 1; ++col) 
+#if 1
+                for (size_t col = 1; col < width - 1; ++col)
                 {
                     float dy = (float)(src2[col] - src0[col]);
                     float dx = (float)(src1[col + 1] - src1[col - 1]);
@@ -186,15 +187,15 @@ namespace Simd
 
                     float bestDot = 0;
                     int index = 0;
-                    for (int direction = 0; direction < buffer.size; direction++) 
+                    for (int direction = 0; direction < buffer.size; direction++)
                     {
-                        float dot = buffer.cos[direction]*dx + buffer.sin[direction]*dy;
-                        if (dot > bestDot) 
+                        float dot = buffer.cos[direction] * dx + buffer.sin[direction] * dy;
+                        if (dot > bestDot)
                         {
                             bestDot = dot;
                             index = direction;
-                        } 
-                        else if (-dot > bestDot) 
+                        }
+                        else if (-dot > bestDot)
                         {
                             bestDot = -dot;
                             index = direction + buffer.size;
@@ -204,6 +205,36 @@ namespace Simd
                     buffer.value[col] = value;
                     buffer.index[col] = index;
                 }
+#else
+                size_t size = (buffer.size + 1) / 2;
+                for (size_t col = 1; col < width - 1; ++col)
+                {
+                    float dy = (float)(src2[col] - src0[col]);
+                    float dx = (float)(src1[col + 1] - src1[col - 1]);
+                    float value = (float)::sqrt(dx*dx + dy*dy);
+                    float ady = abs(dy);
+                    float adx = abs(dx);
+
+                    float bestDot = 0;
+                    int index = 0;
+                    for (int direction = 0; direction < size; direction++)
+                    {
+                        float dot = buffer.cos[direction] * adx + buffer.sin[direction] * ady;
+                        if (dot > bestDot)
+                        {
+                            bestDot = dot;
+                            index = direction;
+                        }
+                    }
+                    if (dx < 0)
+                        index = buffer.size - index;
+                    if (dy < 0 && index != 0)
+                        index = buffer.size*2 - index - (dx == 0);
+
+                    buffer.value[col] = value;
+                    buffer.index[col] = index;
+                }
+#endif
 
                 AddRowToHistograms(buffer.index, buffer.value, row, width, height, cellX, cellY, quantization, histograms);
             }
