@@ -270,6 +270,18 @@ namespace Simd
             return _mm_mul_ps(value, value);
         }
 
+        template<bool fast> __m128 Sqrt(__m128 value);
+
+        template<> SIMD_INLINE __m128 Sqrt<false>(__m128 value)
+        {
+            return _mm_sqrt_ps(value);
+        }
+
+        template<> SIMD_INLINE __m128 Sqrt<true>(__m128 value)
+        {
+            return _mm_mul_ps(_mm_rsqrt_ps(value), value);
+        }
+
         SIMD_INLINE __m128 Combine(__m128 mask, __m128 positive, __m128 negative)
         {
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
@@ -433,12 +445,41 @@ namespace Simd
     }
 #endif// SIMD_SSSE3_ENABLE
 
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
+
+        template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)
+        {
+            return _mm_cvtepi16_epi32(a);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackI16<1>(__m128i a)
+        {
+            return _mm_cvtepi16_epi32(_mm_srli_si128(a, 8));
+        }
+    }
+#endif// SIMD_SSE41_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
         SIMD_INLINE __m256 Square(__m256 value)
         {
             return _mm256_mul_ps(value, value);
+        }
+
+        template<bool fast> __m256 Sqrt(__m256 value);
+
+        template<> SIMD_INLINE __m256 Sqrt<false>(__m256 value)
+        {
+            return _mm256_sqrt_ps(value);
+        }
+
+        template<> SIMD_INLINE __m256 Sqrt<true>(__m256 value)
+        {
+            return _mm256_mul_ps(_mm256_rsqrt_ps(value), value);
         }
 
         SIMD_INLINE __m256 RightNotZero(size_t count)

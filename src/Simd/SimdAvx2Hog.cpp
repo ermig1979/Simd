@@ -87,7 +87,7 @@ namespace Simd
                 bestIndex = _mm256_blendv_epi8(bestIndex, buffer.neg[i], _mm256_castps_si256(mask));
             }
             Store<align>((__m256i*)(buffer.index + col), bestIndex);
-            Avx::Store<align>(buffer.value + col, _mm256_sqrt_ps(_mm256_add_ps(_mm256_mul_ps(dx, dx), _mm256_mul_ps(dy, dy))));
+            Avx::Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_add_ps(_mm256_mul_ps(dx, dx), _mm256_mul_ps(dy, dy))));
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256i & t, const __m256i & l, const __m256i & r, const __m256i & b, Buffer & buffer, size_t col)

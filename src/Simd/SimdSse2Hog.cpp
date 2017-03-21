@@ -87,7 +87,7 @@ namespace Simd
                 bestIndex = Combine(_mm_castps_si128(mask), buffer.neg[i], bestIndex);
             }
             Store<align>((__m128i*)(buffer.index + col), bestIndex);
-            Sse::Store<align>(buffer.value + col, _mm_sqrt_ps(_mm_add_ps(_mm_mul_ps(dx, dx), _mm_mul_ps(dy, dy))));
+            Sse::Store<align>(buffer.value + col, Sse::Sqrt<0>(_mm_add_ps(_mm_mul_ps(dx, dx), _mm_mul_ps(dy, dy))));
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m128i & t, const __m128i & l, const __m128i & r, const __m128i & b, Buffer & buffer, size_t col)

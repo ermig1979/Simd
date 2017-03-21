@@ -65,7 +65,11 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, cell, quantization, h2.data()));
 
+#ifdef SIMD_HOG_FAST
+        result = result && CompareCycle(h1, h2, quantization, EPS, true, 32);
+#else
         result = result && Compare(h1, h2, EPS, true, 32);
+#endif
 
         return result;
     }
@@ -74,8 +78,9 @@ namespace Test
     {
         bool result = true;
 
-        Point c(8, 8), s(32, 24);
-        size_t q = 18;
+        const size_t C = 8;
+        Point c(C, C), s(W / C, H / C);
+        const size_t q = 18;
 
         result = result && HogDirectionHistogramsAutoTest(c, s, q, f1, f2);
         result = result && HogDirectionHistogramsAutoTest(c, s + Point(1, 1), q, f1, f2);
@@ -93,6 +98,11 @@ namespace Test
 #ifdef SIMD_SSE2_ENABLE
         if(Simd::Sse2::Enable)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
+#endif 
+
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_HOG_FAST)
+        if (Simd::Sse41::Enable)
+            result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse41::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

@@ -355,6 +355,49 @@ namespace Test
         return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax, true, description);
     }
 
+    bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
+    {
+        assert(a.size() == b.size() && a.size()%cycle == 0);
+        std::stringstream message;
+        Buffer32f rds(cycle, 0);
+        int errorCount = 0;
+        const size_t size = a.size() / cycle;
+        for (size_t i = 0; i < size && errorCount <= errorCountMax; ++i)
+        {
+            const float * pa = a.data() + i*cycle;
+            const float * pb = b.data() + i*cycle;
+            float ds = 0, ns = 0;
+            for (size_t c = 0; c < cycle; ++c)
+            {
+                float diff = pb[c] - pa[c];
+                float norm = Simd::Max(::fabs(pa[c]), ::fabs(pb[c]));
+                rds[c] = ::fabs(diff)/norm;
+                ds += diff;
+                ns += norm;
+            }
+            float rdn = ::fabs(ds)*sqrt(cycle)/ns;
+            if (rdn > relativeDifferenceMax)
+            {
+                for (size_t c = 0; c < cycle && errorCount <= errorCountMax; ++c)
+                {
+                    if (rds[c] >= relativeDifferenceMax)
+                    {
+                        errorCount++;
+                        if (printError)
+                        {
+                            if (errorCount == 1)
+                                message << std::endl << "Fail comparison: " << description << std::endl;
+                            message << "Error at [" << i << ", " << c << "] : " << pa[c] << " != " << pb[c] << "; (relative difference = " << rds[c] << ")!" << std::endl;
+                        }
+                    }
+                }
+            }
+        }
+        if (printError && errorCount > 0)
+            TEST_LOG_SS(Error, message.str());
+        return errorCount == 0;
+    }
+
 	bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
 	{
 		assert(a.width == b.width);
