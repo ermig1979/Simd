@@ -2169,29 +2169,29 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
 {
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx::F)
-        Avx2::NeuralConvert(src, stride, width, height, dst, inversion);
+        Avx2::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
     if (Sse2::Enable && width >= Sse2::A)
-        Sse2::NeuralConvert(src, stride, width, height, dst, inversion);
+        Sse2::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
     if (Vsx::Enable && width >= Vsx::A)
-        Vsx::NeuralConvert(src, stride, width, height, dst, inversion);
+        Vsx::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
-        Neon::NeuralConvert(src, stride, width, height, dst, inversion);
+        Neon::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
-        Base::NeuralConvert(src, stride, width, height, dst, inversion);
+        Base::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
 }
 
 typedef void(*SimdNeuralProductSumPtr) (const float * a, const float * b, size_t size, float * sum);

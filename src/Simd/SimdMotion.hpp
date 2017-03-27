@@ -677,7 +677,7 @@ namespace Simd
 
                     if (region.rect.Empty())
                     {
-                        for (region.level; region.level <= level; region.level++)
+                        for (; region.level <= level; region.level++)
                         {
                             region.rect = rects.top();
                             rects.pop();

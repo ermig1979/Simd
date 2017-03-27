@@ -33,7 +33,7 @@ namespace Test
 	{
 		struct FuncC1
 		{
-			typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+			typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 			FuncPtr func;
 			String description;
@@ -44,7 +44,7 @@ namespace Test
 			void Call(const View & src, View & dst) const
 			{
 				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, (float*)dst.data, inversion ? 1 : 0);
+				func(src.data, src.stride, src.width, src.height, (float*)dst.data, src.width, inversion ? 1 : 0);
 			}
 		};
 	}
@@ -1948,7 +1948,7 @@ namespace Test
                 {
                     dst.lbl[current] = i;
                     dst.src[current].resize(size.x*size.y);
-                    Simd::NeuralConvert(pooled.Region(shift*size, shift*size + size), dst.src[current].data(), true);
+                    Simd::NeuralConvert(pooled.Region(shift*size, shift*size + size), dst.src[current].data(), size.x, true);
                 }
             }
         }

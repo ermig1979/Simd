@@ -289,7 +289,7 @@ namespace Simd
         void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
-        void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+        void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 

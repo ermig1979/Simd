@@ -55,11 +55,11 @@ namespace Simd
             Convert<align>(UnpackU8<1>(_src), _1_255, dst + DF);
         }
 
-        template <bool inversion, bool align> void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+        template <bool inversion, bool align> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             assert(width >= A);
             if (align)
-                assert(Aligned(src) && Aligned(stride) && Aligned(dst) && Aligned(width));
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width, A);
             float32x4_t _1_255 = vdupq_n_f32(1.0f / 255.0f);
@@ -70,25 +70,25 @@ namespace Simd
                     Convert<inversion, align>(src + col, _1_255, dst + col);
                 if (width != alignedWidth)
                     Convert<inversion, false>(src + width - A, _1_255, dst + width - A);
-                src += stride;
-                dst += width;
+                src += srcStride;
+                dst += dstStride;
             }
         }
 
-        template <bool inversion> void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst)
+        template <bool inversion> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
-            if (Aligned(src) && Aligned(stride) && Aligned(dst) && Aligned(width))
-                NeuralConvert<inversion, true>(src, stride, width, height, dst);
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                NeuralConvert<inversion, true>(src, srcStride, width, height, dst, dstStride);
             else
-                NeuralConvert<inversion, false>(src, stride, width, height, dst);
+                NeuralConvert<inversion, false>(src, srcStride, width, height, dst, dstStride);
         }
 
-        void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+        void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
         {
             if (inversion)
-                NeuralConvert<true>(src, stride, width, height, dst);
+                NeuralConvert<true>(src, srcStride, width, height, dst, dstStride);
             else
-                NeuralConvert<false>(src, stride, width, height, dst);
+                NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, float32x4_t & sum)

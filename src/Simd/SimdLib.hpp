@@ -2229,7 +2229,7 @@ namespace Simd
 
     /*! @ingroup neural
 
-        \fn void NeuralConvert(const View<A> & src, float * dst, bool inversion)
+        \fn void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
 
         \short Converts a 8-bit gray image to the 32-bit float array.
 
@@ -2244,13 +2244,14 @@ namespace Simd
 
         \param [in] src - an input image.
         \param [out] dst - a pointer to output array.
+        \param [in] stride - a row size of the output array.
         \param [in] inversion - a flag of color inversion.
     */
-    template<template<class> class A> SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, bool inversion)
+    template<template<class> class A> SIMD_INLINE void NeuralConvert(const View<A> & src, float * dst, size_t stride, bool inversion)
     {
         assert(src.format == View<A>::Gray8);
 
-        SimdNeuralConvert(src.data, src.stride, src.width, src.height, dst, inversion ? 1 : 0);
+        SimdNeuralConvert(src.data, src.stride, src.width, src.height, dst, stride, inversion ? 1 : 0);
     }
 
     /*! @ingroup operation

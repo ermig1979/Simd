@@ -28,7 +28,7 @@ namespace Simd
 {
     namespace Base
     {
-		void NeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion)
+		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
 		{
             const float k = 1.0f / 255.0f;
 			for (size_t row = 0; row < height; ++row)
@@ -43,8 +43,8 @@ namespace Simd
 					for (size_t col = 0; col < width; ++col)
 						dst[col] = src[col] * k;
 				}
-				src += stride;
-				dst += width;
+				src += srcStride;
+				dst += dstStride;
 			}
 		}
 

@@ -2662,7 +2662,7 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+        \fn void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
         \short Converts a 8-bit gray image to the 32-bit float array.
 
@@ -2676,13 +2676,14 @@ extern "C"
         \note This function has a C++ wrapper Simd::NeuralConvert(const View<A>& src, float * dst, bool inversion).
 
         \param [in] src - a pointer to pixels data of input image.
-        \param [in] stride - a row size of the image.
+        \param [in] srcStride - a row size (in bytes) of the image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [out] dst - a pointer to output array.
+        \param [in] dstStride - a row size of the output array.
         \param [in] inversion - a flag of color inversion.
     */
-    SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t stride, size_t width, size_t height, float * dst, int inversion);
+    SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
     /*! @ingroup neural
 

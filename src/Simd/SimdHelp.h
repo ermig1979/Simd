@@ -97,7 +97,7 @@
 	There is an example of using for PowerPC (64 bit):
 	\code
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
 	make
 	\endcode
 	For ARM (32 bit):
