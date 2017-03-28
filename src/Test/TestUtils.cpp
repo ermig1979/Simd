@@ -257,7 +257,7 @@ namespace Test
         return false;
     }
 
-    template <class T> bool Compare(const T * a, const T * b, size_t size, int64_t differenceMax, bool printError, int errorCountMax)
+    template <class T> bool Compare(const T * a, const T * b, size_t size, int64_t differenceMax, bool printError, int errorCountMax, const String & description)
     {
         std::stringstream message;
         int errorCount = 0;
@@ -275,7 +275,7 @@ namespace Test
                 if(printError)
                 {
                     if(errorCount == 1)
-                        message << std::endl << "Fail comparison: " << std::endl;
+                        message << std::endl << "Fail comparison: " << description << std::endl;
                     message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
                 }
                 if(errorCount > errorCountMax)
@@ -291,21 +291,21 @@ namespace Test
         return errorCount == 0;
     }
 
-	bool Compare(const Histogram a, const Histogram b, int differenceMax, bool printError, int errorCountMax)
+	bool Compare(const Histogram a, const Histogram b, int differenceMax, bool printError, int errorCountMax, const String & description)
 	{
-        return Compare(a, b, Simd::HISTOGRAM_SIZE, differenceMax, printError, errorCountMax);
+        return Compare(a, b, Simd::HISTOGRAM_SIZE, differenceMax, printError, errorCountMax, description);
 	}
 
-    bool Compare(const Sums & a, const Sums & b, int differenceMax, bool printError, int errorCountMax)
+    bool Compare(const Sums & a, const Sums & b, int differenceMax, bool printError, int errorCountMax, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
+        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax, description);
     }
 
-    bool Compare(const Sums64 & a, const Sums64 & b, int differenceMax, bool printError, int errorCountMax)
+    bool Compare(const Sums64 & a, const Sums64 & b, int differenceMax, bool printError, int errorCountMax, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax);
+        return Compare(a.data(), b.data(), a.size(), differenceMax, printError, errorCountMax, description);
     }
 
     bool Compare(const Rect & a, const Rect & b, bool printError)

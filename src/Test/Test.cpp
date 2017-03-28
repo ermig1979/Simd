@@ -186,6 +186,8 @@ namespace Test
 
     TEST_ADD_GROUP(HogDirectionHistograms);
 
+    TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
+
     TEST_ADD_GROUP(Integral);
 
     TEST_ADD_GROUP(InterferenceIncrement);

@@ -247,6 +247,11 @@
 */
 
 /*! @ingroup cpp_types
+    @defgroup cpp_image_matcher Image Matcher
+    \short Simd::ImageMatcher structure and related functions.
+*/
+
+/*! @ingroup cpp_types
     @defgroup cpp_drawing Drawing Functions
     \short Drawing functions.
 */

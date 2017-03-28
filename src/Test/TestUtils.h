@@ -53,13 +53,13 @@ namespace Test
         const String & description = "");
 
     bool Compare(const Histogram a, const Histogram b,
-        int differenceMax = 0, bool printError = false, int errorCountMax = 0);
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0, const String & description = "");
 
     bool Compare(const Sums & a, const Sums & b,
-        int differenceMax = 0, bool printError = false, int errorCountMax = 0);
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0, const String & description = "");
 
     bool Compare(const Sums64 & a, const Sums64 & b,
-        int differenceMax = 0, bool printError = false, int errorCountMax = 0);
+        int differenceMax = 0, bool printError = false, int errorCountMax = 0, const String & description = "");
 
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
 
