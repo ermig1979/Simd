@@ -143,6 +143,15 @@ namespace Simd
                     See implementation details: ::SimdNeuralRelu and ::SimdNeuralDerivativeRelu.
                 */
                 LeakyRelu,
+                /*! Softmax (normalized exponential function):
+                    \verbatim
+                    f(x[i]) = exp(x[i])/sum(exp(x[i]));
+                    \endverbatim
+                    \verbatim
+                    df(y) = y*(1 - y);
+                    \endverbatim
+                */
+                Softmax,
             } const type;
 
             typedef void(*FuncPtr) (const float * src, size_t size, float * dst);
@@ -178,6 +187,12 @@ namespace Simd
                 case LeakyRelu:
                     function = LeakyReluFunction;
                     derivative = LeakyReluDerivative;
+                    break;
+                case Softmax:
+                    function = SoftmaxFunction;
+                    derivative = SoftmaxDerivative;
+                    min = 0.0f;
+                    max = 1.0f;
                     break;
                 }
             }
@@ -240,6 +255,24 @@ namespace Simd
             {
                 const float slope = 0.01f;
                 ::SimdNeuralDerivativeRelu(src, size, &slope, dst);
+            }
+
+            static SIMD_INLINE void SoftmaxFunction(const float * src, size_t size, float * dst)
+            {
+                float max = FLT_MIN;
+                for (size_t i = 0; i < size; ++i)
+                    max = std::max(max, src[i]);
+                float sum = 0;
+                for (size_t i = 0; i < size; ++i)
+                    sum += ::exp(src[i] - max);
+                for (size_t i = 0; i < size; ++i)
+                    dst[i] = ::exp(src[i] - max) / sum;
+            }
+
+            static SIMD_INLINE void SoftmaxDerivative(const float * src, size_t size, float * dst)
+            {
+                for (size_t i = 0; i < size; ++i)
+                    dst[i] = src[i] * (1.0f - src[i]);
             }
         };
 
@@ -1185,6 +1218,10 @@ namespace Simd
                     Mean-Squared-Error loss function for regression.
                 */
                 Mse,
+                /*!
+                    Cross Entropy Multiclass loss function for multi-class classification.
+                */
+                CrossEntropyMulticlass
             };
 
             /*!
@@ -1236,7 +1273,7 @@ namespace Simd
         {
             template<TrainOptions::InitType type> void InitWeight(Vector & dst, const Layer & layer);
 
-            template<> void InitWeight<TrainOptions::Xavier>(Vector & dst, const Layer & layer)
+            template<> SIMD_INLINE void InitWeight<TrainOptions::Xavier>(Vector & dst, const Layer & layer)
             {
                 float halfRange = (float)(std::sqrt(6.0 / (layer.FanSrc() + layer.FanDst())));
                 for (size_t i = 0; i < dst.size(); ++i)
@@ -1249,6 +1286,12 @@ namespace Simd
             {
                 for (size_t i = 0; i < current.size(); ++i)
                     delta[i] = current[i] - control[i];
+            }
+
+            template<> SIMD_INLINE void Gradient<TrainOptions::CrossEntropyMulticlass>(const Vector & current, const Vector & control, Vector & delta)
+            {
+                for (size_t i = 0; i < current.size(); ++i)
+                    delta[i] = -control[i]/current[i];
             }
 
             template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, const Vector & d, Vector & g, Vector & v);
@@ -1541,8 +1584,25 @@ namespace Simd
                 SIMD_CHECK_PERFORMANCE();
 
                 Vector delta(current.size());
-                LossGradient(options, current, control, delta);
-                _layers.back()->_function.derivative(current.data(), current.size(), delta.data());
+                if (_layers.back()->_function.type == Function::Softmax)
+                {
+                    Vector grad(current.size());
+                    LossGradient(options, current, control, grad);
+                    for (size_t i = 0; i < delta.size(); ++i)
+                    {
+                        float sum = grad[i]*current[i]*(1.0f - current[i]);
+                        for (size_t j = 0; j < i; ++j)
+                            sum -= grad[j] * current[j] * current[i];
+                        for (size_t j = i + 1; j < grad.size(); ++j)
+                            sum -= grad[j] * current[j] * current[i];
+                        delta[i] = sum;
+                    }
+                }
+                else
+                {
+                    LossGradient(options, current, control, delta);
+                    _layers.back()->_function.derivative(current.data(), current.size(), delta.data());
+                }
 
                 _layers.back()->Backward(delta, thread);
                 for (ptrdiff_t i = _layers.size() - 2; i >= 0; --i)
@@ -1588,6 +1648,7 @@ namespace Simd
                 switch (options.lossType)
                 {
                 case TrainOptions::Mse: Detail::Gradient<TrainOptions::Mse>(current, control, delta); break;
+                case TrainOptions::CrossEntropyMulticlass: Detail::Gradient<TrainOptions::CrossEntropyMulticlass>(current, control, delta); break;
                 }
             }
 
