@@ -1219,7 +1219,11 @@ namespace Simd
                 */
                 Mse,
                 /*!
-                    Cross Entropy Multiclass loss function for multi-class classification.
+                    Cross-entropy loss function for (multiple independent) binary classifications.
+                */
+                CrossEntropy,
+                /*!
+                    Cross-entropy loss function for multi-class classification.
                 */
                 CrossEntropyMulticlass
             };
@@ -1286,6 +1290,12 @@ namespace Simd
             {
                 for (size_t i = 0; i < current.size(); ++i)
                     delta[i] = current[i] - control[i];
+            }
+
+            template<> SIMD_INLINE void Gradient<TrainOptions::CrossEntropy>(const Vector & current, const Vector & control, Vector & delta)
+            {
+                for (size_t i = 0; i < current.size(); ++i)
+                    delta[i] = (current[i] - control[i])/(current[i] *(1.0f - current[i]));
             }
 
             template<> SIMD_INLINE void Gradient<TrainOptions::CrossEntropyMulticlass>(const Vector & current, const Vector & control, Vector & delta)
@@ -1579,29 +1589,50 @@ namespace Simd
                 return _layers.back()->Dst(thread);
             }
 
+            bool Cannonical(const TrainOptions & options) const
+            {
+                const Function::Type & func = _layers.back()->_function.type;
+                const TrainOptions::LossType & loss = options.lossType;
+                if (loss == TrainOptions::Mse && func == Function::Identity)
+                    return true;
+                if (loss == TrainOptions::CrossEntropy && (func == Function::Sigmoid || func == Function::Tanh))
+                    return true;
+                if (loss == TrainOptions::CrossEntropyMulticlass && func == Function::Softmax)
+                    return true;
+                return false;
+            }
+
             void Backward(const Vector & current, const Vector & control, size_t thread, const TrainOptions & options)
             {
                 SIMD_CHECK_PERFORMANCE();
 
                 Vector delta(current.size());
-                if (_layers.back()->_function.type == Function::Softmax)
+                if (Cannonical(options))
                 {
-                    Vector grad(current.size());
-                    LossGradient(options, current, control, grad);
-                    for (size_t i = 0; i < delta.size(); ++i)
-                    {
-                        float sum = grad[i]*current[i]*(1.0f - current[i]);
-                        for (size_t j = 0; j < i; ++j)
-                            sum -= grad[j] * current[j] * current[i];
-                        for (size_t j = i + 1; j < grad.size(); ++j)
-                            sum -= grad[j] * current[j] * current[i];
-                        delta[i] = sum;
-                    }
+                    for (size_t i = 0; i < current.size(); ++i)
+                        delta[i] = current[i] - control[i];
                 }
                 else
                 {
-                    LossGradient(options, current, control, delta);
-                    _layers.back()->_function.derivative(current.data(), current.size(), delta.data());
+                    if (_layers.back()->_function.type == Function::Softmax)
+                    {
+                        Vector grad(current.size());
+                        LossGradient(options, current, control, grad);
+                        for (size_t i = 0; i < delta.size(); ++i)
+                        {
+                            float sum = grad[i] * current[i] * (1.0f - current[i]);
+                            for (size_t j = 0; j < i; ++j)
+                                sum -= grad[j] * current[j] * current[i];
+                            for (size_t j = i + 1; j < grad.size(); ++j)
+                                sum -= grad[j] * current[j] * current[i];
+                            delta[i] = sum;
+                        }
+                    }
+                    else
+                    {
+                        LossGradient(options, current, control, delta);
+                        _layers.back()->_function.derivative(current.data(), current.size(), delta.data());
+                    }
                 }
 
                 _layers.back()->Backward(delta, thread);
@@ -1648,6 +1679,7 @@ namespace Simd
                 switch (options.lossType)
                 {
                 case TrainOptions::Mse: Detail::Gradient<TrainOptions::Mse>(current, control, delta); break;
+                case TrainOptions::CrossEntropy: Detail::Gradient<TrainOptions::CrossEntropy>(current, control, delta); break;
                 case TrainOptions::CrossEntropyMulticlass: Detail::Gradient<TrainOptions::CrossEntropyMulticlass>(current, control, delta); break;
                 }
             }
