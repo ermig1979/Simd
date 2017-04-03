@@ -103,7 +103,7 @@ namespace Simd
             /*!
                 Creates a new Result structure.
 
-                \param [in] t - a tag of arbitrary type.
+                \param [in] h - a pointer to hash of found similar image.
                 \param [in] d - A mean squared difference.
             */
             Result(const Hash * h, double d)
