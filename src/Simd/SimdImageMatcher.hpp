@@ -157,7 +157,7 @@ namespace Simd
         */
         bool Init(double threshold = 0.05, HashType type = Hash16x16, size_t number = 0, bool normalized = false)
         {
-            static const int sizes[] = { 16, 32, 64 };
+            static const size_t sizes[] = { 16, 32, 64 };
             size_t size = sizes[type];
 
             if(number >= 10000 && threshold < 0.10)
@@ -197,9 +197,9 @@ namespace Simd
             size_t step = main / fast;
             size_t area = Simd::Square(step);
 
-            for (int fast_y = 0; fast_y < fast; ++fast_y)
+            for (size_t  fast_y = 0; fast_y < fast; ++fast_y)
             {
-                for (int fast_x = 0; fast_x < fast; ++fast_x)
+                for (size_t  fast_x = 0; fast_x < fast; ++fast_x)
                 {
                     size_t sum = area / 2;
                     for (size_t y = fast_y*step, y_end = y + step; y < y_end; ++y)

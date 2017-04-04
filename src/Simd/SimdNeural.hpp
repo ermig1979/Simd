@@ -27,6 +27,8 @@
 #include "Simd/SimdLib.hpp"
 #include "Simd/SimdParallel.hpp"
 
+#include <float.h>
+
 #include <numeric>
 #include <random>
 
