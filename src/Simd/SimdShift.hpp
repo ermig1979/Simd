@@ -458,7 +458,7 @@ namespace Simd
             const ptrdiff_t maxShiftMin = 2;
 
             _levels.resize(levelCount);
-            size_t buildRegionAlign = 1 << (levelCount - 1);
+            size_t buildRegionAlign = size_t(1) << (levelCount - 1);
             for (size_t i = 0; i < _levels.size(); ++i)
             {
                 _levels[i].maxShift.x = std::max<ptrdiff_t>((maxShift.x >> i) + 1, maxShiftMin);
