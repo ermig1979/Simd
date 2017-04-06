@@ -35,7 +35,7 @@ set NAME=%1
 
 echo Update copyrights in "%NAME%"
 
-find /c "%COPYRIGHT_2016%" "%NAME%" | find ": 1" 1>nul && powershell -Command "(gc "%NAME%") -replace '%COPYRIGHT_2016%', '%VALID_COPYRIGHT%' | Out-File "%NAME%"
+find /c "%COPYRIGHT_2016%" "%NAME%" | find ": 1" 1>nul && powershell -Command "(Get-Content "%NAME%") -replace '%COPYRIGHT_2016%', '%VALID_COPYRIGHT%' | Set-Content "%NAME%"
 
 goto :eof
 ::-----------------------------------------------------------------------------
