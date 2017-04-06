@@ -29,8 +29,8 @@ namespace Test
 
     Log::Log()
         : _level(Log::Info)
-        , _enablePrefix(true)
         , _enableThreadId(true)
+        , _enablePrefix(true)
     {
 
     }

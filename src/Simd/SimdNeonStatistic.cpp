@@ -80,7 +80,7 @@ namespace Simd
                 *min = Base::MinU8(min_buffer[i], *min);
                 *max = Base::MaxU8(max_buffer[i], *max);
             }
-            *average = (uint8_t)((ExtractSum(fullSum) + width*height/2)/(width*height));
+            *average = (uint8_t)((ExtractSum64u(fullSum) + width*height/2)/(width*height));
         }
 
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
@@ -238,12 +238,12 @@ namespace Simd
 			else
 				GetMomentsLarge<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
 
-			*area = ExtractSum(_area);
-			*x = ExtractSum(_x);
-			*y = ExtractSum(_y);
-			*xx = ExtractSum(_xx);
-			*xy = ExtractSum(_xy);
-			*yy = ExtractSum(_yy);
+			*area = ExtractSum32u(_area);
+			*x = ExtractSum64u(_x);
+			*y = ExtractSum64u(_y);
+			*xx = ExtractSum64u(_xx);
+			*xy = ExtractSum64u(_xy);
+			*yy = ExtractSum64u(_yy);
 		}
 
 		void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
@@ -281,7 +281,7 @@ namespace Simd
 					const uint8x16_t _src = vandq_u8(Load<false>(src + width - A), tailMask);
 					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(_src)));
 				}
-				sums[row] = ExtractSum(rowSum);
+				sums[row] = ExtractSum32u(rowSum);
 				src += stride;
 			}
 		}
@@ -405,7 +405,7 @@ namespace Simd
 					const uint8x16_t _src1 = Load<false>(src1 + width - A);
 					rowSum = vaddq_u32(rowSum, vpaddlq_u16(vpaddlq_u8(vandq_u8(vabdq_u8(_src0, _src1), tailMask))));
 				}
-				sums[row] = ExtractSum(rowSum);
+				sums[row] = ExtractSum32u(rowSum);
 				src0 += stride;
 				src1 += stride;
 			}
@@ -500,7 +500,7 @@ namespace Simd
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 				src += stride;
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
 		}
 
 		void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
@@ -543,7 +543,7 @@ namespace Simd
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 				src += stride;
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
 		}
 
 		void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
@@ -590,7 +590,7 @@ namespace Simd
 				a += aStride;
 				b += bStride;
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
 		}
 
 		void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)

@@ -84,7 +84,7 @@ namespace Test
         v[15] = 0.0f;
     }
 
-    static void CheckCpp()
+    void CheckCpp()
     {
         TestPoint();
 

@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{580cacd6-f070-4ec4-bf5f-cc89d04168c7}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Simd</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+	<Link>
+      <AdditionalOptions>%(AdditionalOptions) -lm</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\Simd*.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+	<ClCompile Include="..\..\src\Simd\SimdLib.cpp">
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2</AdditionalOptions>
+        <EnableNeonCodegen Condition="'$(Platform)'=='ARM'">true</EnableNeonCodegen>
+        <FloatABI Condition="'$(Platform)'=='ARM'">softfp</FloatABI>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Alg.vcxproj">
+      <Project>{5806a1bb-939e-4cd9-ad4b-cd3e3d10c6e6}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

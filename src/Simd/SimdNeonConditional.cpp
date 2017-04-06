@@ -67,7 +67,7 @@ namespace Simd
 				_count = vaddq_u32(_count, vpaddlq_u16(rowSum));
                 src += stride;
             }
-            *count = ExtractSum(_count);
+            *count = ExtractSum32u(_count);
         }
 
         template <SimdCompareType compareType> 
@@ -131,7 +131,7 @@ namespace Simd
 				_count = vaddq_u32(_count, vpaddlq_u16(rowSum));
 				src += stride;
 			}
-			*count = ExtractSum(_count);
+			*count = ExtractSum32u(_count);
 		}
 
 		template <SimdCompareType compareType>
@@ -205,7 +205,7 @@ namespace Simd
 				src += srcStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		template <SimdCompareType compareType>
@@ -285,7 +285,7 @@ namespace Simd
 				src += srcStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		template <SimdCompareType compareType>
@@ -372,7 +372,7 @@ namespace Simd
 				src += srcStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		template <SimdCompareType compareType>

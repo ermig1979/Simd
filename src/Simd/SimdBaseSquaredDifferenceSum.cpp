@@ -96,8 +96,12 @@ namespace Simd
         }
 
 #if defined(__GNUC__) && (defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE))
+#ifdef __clang__
+#pragma clang optimize off
+#else
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
+#endif
 #endif        
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
         {
@@ -117,7 +121,11 @@ namespace Simd
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
 #if defined(__GNUC__) && (defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE))
+#ifdef __clang__
+#pragma clang optimize on
+#else
 #pragma GCC pop_options
+#endif 
 #endif    
     }
 }

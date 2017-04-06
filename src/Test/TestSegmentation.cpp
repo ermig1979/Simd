@@ -528,8 +528,6 @@ namespace Test
         View childDst1(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
         View childDst2(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const uint8_t oldIndex = 3, newIndex = 2;
-
         if(create)
         {
             FillRandomMask(parent, currentIndex);

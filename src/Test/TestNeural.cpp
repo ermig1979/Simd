@@ -27,8 +27,6 @@
 
 namespace Test
 {
-	const float ROUGH_SIGMOID_ERROR = 0.0025f;
-
 	namespace
 	{
 		struct FuncC1
@@ -1844,8 +1842,8 @@ namespace Test
 
         TrainOptions()
             : Simd::Neural::TrainOptions()
-            , logEvery(10)
             , threshold(0.5f)
+            , logEvery(10)
         {
         }
     };
@@ -1912,10 +1910,10 @@ namespace Test
         }
 
         Logger(Network * network = NULL, TrainData * data = NULL, TrainOptions * options = NULL)
-            : _network(network)
-            , _data(data)
+            : _current(options ? options->epochStart : 0)
+            , _network(network)
             , _options(options)
-            , _current(options ? options->epochStart : 0)
+            , _data(data)
         {
         }
 

@@ -26,6 +26,7 @@
 
 #include "Simd/SimdPoint.hpp"
 #include "Simd/SimdRectangle.hpp"
+#include "Simd/SimdFrame.hpp"
 #include "Simd/SimdDrawing.hpp"
 
 #include <vector>
@@ -441,7 +442,7 @@ namespace Simd
 
             void GenerateSearchRegionScanlines(Model & model)
             {
-                static const int ROI_EMPTY = 0;
+                //static const int ROI_EMPTY = 0;
                 static const int ROI_NON_EMPTY = 255;
 
                 model.roiMask.Recreate(model.frameSize, model.levelCount);

@@ -256,12 +256,12 @@ namespace Simd
             const size_t main;
 
             Matcher(double threshold, size_t size)
-                : _threshold(threshold)
-                , fast(4)
+                : fast(4)
                 , main(size)
                 , _fastSize(fast*fast)
                 , _mainSize(size*size)
                 , _size(0)
+                , _threshold(threshold)
             {
                 _fastMax = uint64_t(Square(threshold*UINT8_MAX)*_fastSize);
                 _mainMax = uint64_t(Square(threshold*UINT8_MAX)*_mainSize);

@@ -169,7 +169,7 @@ namespace Simd
 
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
 		}
 
 		void LaplaceAbsSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint64_t * sum)

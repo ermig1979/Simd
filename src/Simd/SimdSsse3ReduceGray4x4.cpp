@@ -95,7 +95,6 @@ namespace Simd
         template <> SIMD_INLINE __m128i ReduceColTail<false>(const uint8_t *src)
         {
             const __m128i t0 = _mm_loadu_si128((__m128i*)(src - 1));
-            const __m128i t1 = LoadAfterLast<1>(t0);
             return BinomialSum16(t0, LoadAfterLast<1>(LoadAfterLast<1>(t0)));
         }
 

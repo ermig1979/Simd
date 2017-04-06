@@ -227,8 +227,6 @@ namespace Simd
 
         void DetectionHaarDetect32fp(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
-            typedef HidHaarCascade Hid;
-
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, F);
             size_t evenWidth = Simd::AlignLo(width, 2);
@@ -286,8 +284,6 @@ namespace Simd
 
         void DetectionHaarDetect32fi(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
         {
-            typedef HidHaarCascade Hid;
-
             const size_t step = 2;
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);

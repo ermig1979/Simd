@@ -64,7 +64,7 @@ namespace Simd
 				a += aStride;
 				b += bStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t * sum)
@@ -119,7 +119,7 @@ namespace Simd
 				b += bStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
@@ -216,7 +216,7 @@ namespace Simd
 			}
 
 			for (size_t i = 0; i < 9; ++i)
-				sums[i] = ExtractSum(_sums[i]);
+				sums[i] = ExtractSum64u(_sums[i]);
 		}
 
 		void AbsDifferenceSums3x3(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
@@ -306,7 +306,7 @@ namespace Simd
 			}
 
 			for (size_t i = 0; i < 9; ++i)
-				sums[i] = ExtractSum(_sums[i]);
+				sums[i] = ExtractSum64u(_sums[i]);
 		}
 
 		void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,

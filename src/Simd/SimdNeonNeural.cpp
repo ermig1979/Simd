@@ -121,7 +121,7 @@ namespace Simd
                 }
                 for(; i < partialAlignedSize; i += F)
                     NeuralProductSum<align>(a, b, i, sums[0]);
-                *sum += ExtractSum(sums[0]);
+                *sum += ExtractSum32f(sums[0]);
             }
             for(; i < size; ++i)
                 *sum += a[i]*b[i];
@@ -877,7 +877,7 @@ namespace Simd
                 dst += dstStride;
             }
             for (size_t i = 0; i < 9; ++i)
-                sums[i] += ExtractSum(_sums[i]);
+                sums[i] += ExtractSum32f(_sums[i]);
         }
 
         void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
@@ -937,7 +937,7 @@ namespace Simd
                 dst += dstStride;
             }
             for (size_t i = 0; i < 25; ++i)
-                sums[i] += ExtractSum(_sums[i]);
+                sums[i] += ExtractSum32f(_sums[i]);
         }
 
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)

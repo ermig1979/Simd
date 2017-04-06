@@ -83,7 +83,7 @@ namespace Simd
 				a += aStride;
 				b += bStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		void SquaredDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
@@ -132,7 +132,7 @@ namespace Simd
 				b += bStride;
 				mask += maskStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64u(_sum);
 		}
 
 		void SquaredDifferenceSumMasked(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
@@ -165,7 +165,7 @@ namespace Simd
 				float32x4_t sums = vdupq_n_f32(0);
 				for (; i < alignedSize; i += 4)
 					SquaredDifferenceSum32f<align>(a, b, i, sums);
-				*sum += ExtractSum(sums);
+				*sum += ExtractSum32f(sums);
 			}
 			for (; i < size; ++i)
 				*sum += Simd::Square(a[i] - b[i]);
@@ -204,7 +204,7 @@ namespace Simd
 				float32x4_t corrections = vdupq_n_f32(0);
 				for (; i < alignedSize; i += 4)
 					SquaredDifferenceKahanSum32f<align>(a, b, i, sums, corrections);
-				*sum += ExtractSum(sums);
+				*sum += ExtractSum32f(sums);
 			}
 			for (; i < size; ++i)
 				*sum += Simd::Square(a[i] - b[i]);

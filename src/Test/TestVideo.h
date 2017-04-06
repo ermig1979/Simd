@@ -51,7 +51,6 @@ namespace Test
     private:
         struct Native;
         Native * _native;
-        Filter * _filter;
     };
 }
 

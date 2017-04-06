@@ -119,7 +119,7 @@ namespace Simd
             const __m256i K32_9 = SIMD_MM256_SET1_EPI32(9);
             const __m256i K32_18 = SIMD_MM256_SET1_EPI32(18);
 
-            const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
+            //const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256 & dx, const __m256 & dy, Buffer & buffer, size_t col)
             {

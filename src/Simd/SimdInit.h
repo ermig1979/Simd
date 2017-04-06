@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE))
 
 	template <class T> SIMD_INLINE char GetChar(T value, size_t index)
     {
@@ -44,7 +44,7 @@ namespace Simd
 	Simd::GetChar(int32_t(a), 0), Simd::GetChar(int32_t(a), 1), \
 	Simd::GetChar(int32_t(a), 2), Simd::GetChar(int32_t(a), 3)
 
-#elif defined(__GNUC__)
+#elif defined(__GNUC__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
 
 #define SIMD_CHAR_AS_LONGLONG(a) (((long long)a) & 0xFF)
 
@@ -88,7 +88,7 @@ namespace Simd
 #define SIMD_LL_SET2_EPI32(a, b) \
     SIMD_INT_AS_LONGLONG(a) | (SIMD_INT_AS_LONGLONG(b) << 32)
 
-#endif//__GNUC__
+#endif//defined(__GNUC__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
 
 #if defined(SIMD_SSE2_ENABLE)
 
@@ -272,7 +272,7 @@ namespace Simd
 
 #endif// SIMD_AVX2_ENABLE
 
-#if defined(SIMD_VMX_ENABLE) || defined(SIMD_NEON_ENABLE)
+#if defined(SIMD_VMX_ENABLE) || (defined(SIMD_NEON_ENABLE) && defined(__GNUC__))
 
 #define SIMD_VEC_SET1_EPI8(a) \
     {a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a}
@@ -319,7 +319,53 @@ namespace Simd
 #define SIMD_VEC_SETR_PS(a0, a1, a2, a3) \
     {a0, a1, a2, a3}
 
-#endif//defined(SIMD_VMX_ENABLE) || defined(SIMD_NEON_ENABLE)
+#define SIMD_VEC_SET1_PI16(a) \
+    {a, a, a, a}
+
+#endif//defined(SIMD_VMX_ENABLE) || (defined(SIMD_NEON_ENABLE) && defined(__GNUC__))
+
+#if defined(_MSC_VER) && defined(SIMD_NEON_ENABLE)
+
+#define SIMD_VEC_SET1_EPI8(a) \
+    {SIMD_LL_SET1_EPI8(a), SIMD_LL_SET1_EPI8(a)}
+
+#define SIMD_VEC_SET2_EPI8(a0, a1) \
+    {SIMD_LL_SET2_EPI8(a0, a1), SIMD_LL_SET2_EPI8(a0, a1)}
+
+#define SIMD_VEC_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) \
+    {SIMD_LL_SETR_EPI8(a0, a1, a2, a3, a4, a5, a6, a7), SIMD_LL_SETR_EPI8(a8, a9, aa, ab, ac, ad, ae, af)}
+
+#define SIMD_VEC_SET1_EPI16(a) \
+    {SIMD_LL_SET1_EPI16(a), SIMD_LL_SET1_EPI16(a)}
+
+#define SIMD_VEC_SET2_EPI16(a0, a1) \
+    {SIMD_LL_SET2_EPI16(a0, a1), SIMD_LL_SET2_EPI16(a0, a1)}
+
+#define SIMD_VEC_SETR_EPI16(a0, a1, a2, a3, a4, a5, a6, a7) \
+    {SIMD_LL_SETR_EPI16(a0, a1, a2, a3), SIMD_LL_SETR_EPI16(a4, a5, a6, a7)}
+
+#define SIMD_VEC_SET1_EPI32(a) \
+    {SIMD_LL_SET1_EPI32(a), SIMD_LL_SET1_EPI32(a)}
+
+#define SIMD_VEC_SET2_EPI32(a0, a1) \
+    {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a0, a1)}
+
+#define SIMD_VEC_SETR_EPI32(a0, a1, a2, a3) \
+    {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a2, a3)}
+
+#define SIMD_VEC_SET1_EPI64(a) \
+    {a, a}
+
+#define SIMD_VEC_SET2_EPI64(a0, a1) \
+    {a0, a1}
+
+#define SIMD_VEC_SETR_EPI64(a0, a1) \
+    {a0, a1}
+
+#define SIMD_VEC_SET1_PI16(a) \
+    {SIMD_LL_SET1_EPI16(a)}
+
+#endif//defined(_MSC_VER) && defined(SIMD_NEON_ENABLE)
 }
 
 #endif//__SimdInit_h__

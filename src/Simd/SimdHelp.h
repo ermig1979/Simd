@@ -61,7 +61,9 @@
     The %Simd Library has next folder's structure:
      - \c simd/src/Simd/ - contains source codes of the library.
      - \c simd/src/Test/ - contains test framework of the library.
-     - \c simd/prj/vs14/ - contains project files of Microsoft Visual Studio 2015.
+     - \c simd/prj/vs2015/ - contains project files of Microsoft Visual Studio 2015.
+     - \c simd/prj/vs2017w/ - contains project files of Microsoft Visual Studio 2017 (for Windows).
+     - \c simd/prj/vs2017a/ - contains project files of Microsoft Visual Studio 2017 (for Android).
      - \c simd/prj/cmd/ - contains additional scripts needed for building of the library in Windows.
      - \c simd/prj/cmake/ - contains files of CMake build systems.
      - \c simd/prj/sh/ - contains additional scripts needed for building of the library in Linux.
@@ -74,15 +76,23 @@
 
 	\section s2 The library building for Windows
 
-	To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2015. 
+	To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2015 (or 2017). 
 	These project files are in the directory: 
-	\c simd/prj/vs14/.
+	\c simd/prj/vs2015/.
 	\n By default the library is built as	a DLL (Dynamic Linked Library).
 	You also may build it as a static library. 
 	To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also uncomment \#define SIMD_STATIC in file:
 	\c simd/src/Simd/SimdConfig.h.
 
-	\section s3 The library building for Linux
+    \section s3 The library building for Android
+
+    To build the library and test application for Android(x86, x64, ARM, ARM64) you need to use Microsoft Visual Studio 2017.
+    The project files are in the directory:
+    \c simd/prj/vs2017a/
+    By default the library is built as a SO (Dynamic Library).
+
+	\section s4 The library building for Linux
+
 	To build the library and test application for Linux 32/64 you need to use CMake build systems.
 	Files of CMake build systems are placed in the directory:
 	\c simd/prj/cmake/.
@@ -114,7 +124,7 @@
     \endcode
 	As result the library and the test application will be built in the current directory.
 
-    \section s4 The library using
+    \section s5 The library using
 
     If you use the library from C code you must include:
     \code
@@ -131,7 +141,7 @@
     #include "Simd/SimdDetection.hpp"
     \endcode
 
-    \section s5 Test Framework
+    \section s6 Test Framework
 
     The test suite is needed for testing of correctness of work of the library and also for its performance testing.
 	There is a set of tests for every function from API of the library. 

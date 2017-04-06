@@ -55,8 +55,6 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-        uint8_t value = Random(256);
-
         View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
@@ -134,7 +132,6 @@ namespace Test
         View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        uint8_t value = Random(256);
         Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));

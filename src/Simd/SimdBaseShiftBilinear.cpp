@@ -64,7 +64,6 @@ namespace Simd
 			{
 				const uint8_t * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
-				size_t srcOffset = (iDy > 0 ? 0 : - iDy)*srcStride + xOffset;
 				size_t bkgOffset = (iDy > 0 ? 0 : - iDy)*bkgStride + xOffset;
 				size_t dstOffset = (iDy > 0 ? 0 : - iDy)*dstStride + xOffset;
 
@@ -105,7 +104,6 @@ namespace Simd
 			if(fDy)
 			{
 				const uint8_t * ps[2][2];
-				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 
@@ -147,7 +145,6 @@ namespace Simd
 			{
 				const uint8_t * ps[2][2];
 				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
-				size_t srcOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*srcStride + xOffset;
 				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + xOffset;
 				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + xOffset;
 

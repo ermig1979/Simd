@@ -312,7 +312,6 @@ namespace Simd
             __m256 _0 = _mm256_set1_ps(0.0f);
             __m256 _1 = _mm256_set1_ps(1.0f);
             __m256 _s = _mm256_set1_ps(s);
-            __m256 d = _mm256_set1_ps(1.0f - s);
             size_t alignedSize = Simd::AlignLo(size, F);
             size_t i = 0;
             for (; i < alignedSize; i += F)

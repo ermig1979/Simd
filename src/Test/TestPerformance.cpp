@@ -68,9 +68,9 @@ namespace Test
         : _description(description)
         , _count(0)
         , _total(0)
-        , _entered(false)
         , _min(std::numeric_limits<double>::max())
         , _max(std::numeric_limits<double>::min())
+        , _entered(false)
         , _size(0)
     {
     }
@@ -79,9 +79,9 @@ namespace Test
         : _description(pm._description)
         , _count(pm._count)
         , _total(pm._total)
-        , _entered(pm._entered)
         , _min(pm._min)
         , _max(pm._max)
+        , _entered(pm._entered)
         , _size(pm._size)
     {
     }

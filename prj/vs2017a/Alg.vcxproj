@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5806a1bb-939e-4cd9-ad4b-cd3e3d10c6e6}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Alg</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <ExceptionHandling>Enabled</ExceptionHandling>
+    </ClCompile>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) -lm</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\Simd*.h" />
+    <ClInclude Include="..\..\src\Simd\Simd*.hpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBase*.cpp">
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1*.cpp">
+	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -msse</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -msse</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2*.cpp">
+	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -msse2</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -msse2</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse3*.cpp">
+	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -msse3</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -msse3</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3*.cpp">
+	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mssse3</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mssse3</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41*.cpp">
+	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -msse4.1</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -msse4.1</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse42*.cpp">
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -msse4.2</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -msse4.2</AdditionalOptions>
+   </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1*.cpp">
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx</AdditionalOptions>
+    </ClCompile>
+	<ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2 -mfma</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2 -mfma</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeon*.cpp">
+        <EnableNeonCodegen Condition="'$(Platform)'=='ARM'">true</EnableNeonCodegen>
+        <FloatABI Condition="'$(Platform)'=='ARM'">softfp</FloatABI>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmx*.cpp">
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsx*.cpp">
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

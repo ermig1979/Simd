@@ -1266,9 +1266,9 @@ namespace Simd
                 , lossType(Mse)
                 , updateType(AdaptiveGradient)
                 , threadNumber(std::thread::hardware_concurrency())
-                , batchSize(64)
                 , epochStart(0)
                 , epochFinish(100)
+                , batchSize(64)
                 , alpha(0.01f)
                 , epsilon(0.0001f)
             {

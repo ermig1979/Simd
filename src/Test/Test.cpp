@@ -342,8 +342,6 @@ namespace Test
 
 	struct Options
 	{
-        bool help;
-
 		enum Mode
 		{
 			Auto,
@@ -351,6 +349,8 @@ namespace Test
 			Verify,
 			Special,
 		} mode;
+
+        bool help;
 
 		Strings filters;
 
@@ -362,8 +362,8 @@ namespace Test
 
 		Options(int argc, char* argv[])
 			: mode(Auto)
-			, threads(0)
             , help(false)
+			, threads(0)
             , printAlign(false)
 		{
 			for (int i = 1; i < argc; ++i)
@@ -560,10 +560,14 @@ namespace Test
 
     String ROOT_PATH = "../..";
     String SOURCE = "";
+
+    void CheckCpp();
 }
 
 int main(int argc, char* argv[])
 {
+    Test::CheckCpp();
+
     Test::Options options(argc, argv);
 
     if (options.help)

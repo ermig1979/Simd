@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/auxv.h>
+#include <asm/hwcap.h>
 #endif
 
 #else
@@ -126,7 +127,7 @@ namespace Simd
                 count = ::read(file, buffer, sizeof(buffer))/sizeof(unsigned long);
                 for (int i = 0; i < count; i += 2) 
                 {                                                                                                           
-                    if (buffer[i] == at) 
+                    if (buffer[i] == (unsigned)at) 
                     {                                                                                                                                      
                         result = !!(buffer[i + 1] & bit);                                                                                                           
                         count = 0;
@@ -422,7 +423,7 @@ namespace Simd
 #if defined(SIMD_ARM64_ENABLE)
             return true;
 #else
-            return CpuInfo::CheckBit(AT_HWCAP, HWCAP_ARM_NEON);
+            return CpuInfo::CheckBit(AT_HWCAP, HWCAP_NEON);
 #endif
 #else
 #error Do not know how to detect NEON support!

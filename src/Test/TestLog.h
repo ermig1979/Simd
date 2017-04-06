@@ -52,7 +52,6 @@ namespace Test
         std::mutex _mutex;
         std::ofstream _file;
         Level _level;
-        bool _hasError;
         bool _enableThreadId;
         bool _enablePrefix;
 

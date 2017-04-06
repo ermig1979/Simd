@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{529a7487-dfa5-49b9-8c63-60ce3c55c6ab}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Test</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>3.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemGroup>
+    <ProjectReference Include="Alg.vcxproj">
+      <Project>{5806a1bb-939e-4cd9-ad4b-cd3e3d10c6e6}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Simd.vcxproj">
+      <Project>{580cacd6-f070-4ec4-bf5f-cc89d04168c7}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <CompileAs>CompileAsCpp</CompileAs>
+		<AdditionalOptions>%(AdditionalOptions) -std=c++11</AdditionalOptions>
+        <ExceptionHandling>Enabled</ExceptionHandling>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>%(AdditionalOptions) -lm</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Test\Test*.h" />
+	<ClCompile Include="..\..\src\Test\Test*.c" />
+	<ClCompile Include="..\..\src\Test\Test*.cpp">
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2</AdditionalOptions>
+        <EnableNeonCodegen Condition="'$(Platform)'=='ARM'">true</EnableNeonCodegen>
+        <FloatABI Condition="'$(Platform)'=='ARM'">softfp</FloatABI>
+    </ClCompile>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

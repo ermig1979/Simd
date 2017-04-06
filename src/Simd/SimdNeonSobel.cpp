@@ -162,7 +162,7 @@ namespace Simd
 
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
         }
 
 		template<bool abs, int part> SIMD_INLINE int16x8_t SobelDy(uint8x16_t a[3][3])
@@ -277,7 +277,7 @@ namespace Simd
 
 				fullSum = vaddq_u64(fullSum, vpaddlq_u32(rowSum));
 			}
-			*sum = ExtractSum(fullSum);
+			*sum = ExtractSum64u(fullSum);
 		}
 
 		void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)

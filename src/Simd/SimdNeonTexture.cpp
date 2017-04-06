@@ -178,7 +178,7 @@ namespace Simd
 				lo += loStride;
 				hi += hiStride;
 			}
-			*sum = ExtractSum(_sum);
+			*sum = ExtractSum64i(_sum);
 		}
 
 		void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,

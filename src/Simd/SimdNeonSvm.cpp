@@ -82,7 +82,7 @@ namespace Simd
                 float32x4_t _weights = Load<false>(weights + i);
                 _sum = vaddq_f32(_sum, vmulq_f32(sums, _weights));
             }
-            *sum = ExtractSum(_sum);
+            *sum = ExtractSum32f(_sum);
             for(; i < count; ++i)
                 *sum += buffer.sums[i]*weights[i];
         }
