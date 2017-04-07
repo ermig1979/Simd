@@ -1,4 +1,5 @@
-#Introduction
+Introduction
+============
 
 The [Simd Library](http://simd.sourceforge.net) is a free open source image processing library, designed for C and C++ programmers. 
 It provides many useful high performance algorithms for image processing such as: 
@@ -13,7 +14,8 @@ The Simd Library has C API and also contains useful C++ classes and functions to
 The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, 
 MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
-#Library folder's structure
+Library folder's structure
+==========================
 
 The Simd Library has next folder's structure:
 
@@ -32,7 +34,8 @@ The Simd Library has next folder's structure:
 * `simd/doc/` - contains documentation of the library.
 * `simd/doc/src/` - contains scripts for generation of this documentation by doxygen.
 
-#The library building for Windows
+The library building for Windows
+================================
 
 To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2015 (or 2017). 
 The project files are in the directory: 
@@ -45,7 +48,8 @@ To do this you must change appropriate property (Configuration Type) of **Simd**
 
 `simd/src/Simd/SimdConfig.h`
 
-#The library building for Android
+The library building for Android
+================================
 
 To build the library and test application for Android(x86, x64, ARM, ARM64) you need to use Microsoft Visual Studio 2017. 
 The project files are in the directory: 
@@ -54,7 +58,8 @@ The project files are in the directory:
 
 By default the library is built as a SO (Dynamic Library).
 
-#The library building for Linux
+The library building for Linux
+==============================
 
 To build the library and test application for Linux 32/64 you need to use CMake build systems.
 Files of CMake build systems are placed in the directory:
@@ -89,7 +94,8 @@ And for ARM (64 bit):
 
 As result the library and the test application will be built in the current directory.
 
-#The library using
+The library using
+=================
 
 If you use the library from C code you must include:
 	
@@ -103,7 +109,8 @@ In order to use [Simd::Detection](http://simd.sourceforge.net/help/struct_simd_1
 
     #include "Simd/SimdDetection.hpp"
 	
-#Interaction with OpenCV:
+Interaction with OpenCV
+=======================
 
 If you need use mutual conversion between Simd and OpenCV types you just have to define macro `SIMD_OPENCV_ENABLE` before including of Simd headers:
     
@@ -117,7 +124,8 @@ And you can converse next types:
 * `cv::Rect` <--> `Simd::Rectangle`.
 * `cv::Mat` <--> `Simd::View`.
 	
-#Test Framework
+Test Framework
+==============
 
 The test suite is needed for testing of correctness of work of the library and also for its performance testing.
 There is a set of tests for every function from API of the library. 
