@@ -36,6 +36,16 @@
 #define SIMD_CHECK_PERFORMANCE()
 #endif
 
+//#define SIMD_CHECK_OVERFLOW
+
+#if defined(SIMD_CHECK_OVERFLOW) && !defined(NDEBUG)
+#define SIMD_CHECK_OVERFLOW_1(vector) Simd::Neural::Detail::CheckOverflow(vector.data(), vector.size());
+#define SIMD_CHECK_OVERFLOW_2(data, size) Simd::Neural::Detail::CheckOverflow(data, size);
+#else
+#define SIMD_CHECK_OVERFLOW_1(vector)
+#define SIMD_CHECK_OVERFLOW_2(data, size)
+#endif
+
 namespace Simd
 {
     /*! @ingroup cpp_neural
@@ -77,6 +87,18 @@ namespace Simd
                 static std::mt19937 gen(1);
                 std::uniform_real_distribution<float> dst(min, max);
                 return dst(gen);
+            }
+
+            SIMD_INLINE void CheckOverflow(const float * data, size_t size)
+            {
+                for (size_t i = 0; i < size; ++i)
+                {
+                    const float & value = data[i];
+                    bool isNaN = (value != value);
+                    bool isInfinity = (value == std::numeric_limits<double>::infinity() || value == -std::numeric_limits<double>::infinity());
+                    if (isNaN || isInfinity)
+                        throw std::runtime_error("Float overflow!");
+                }
             }
         }
 
@@ -261,7 +283,7 @@ namespace Simd
 
             static SIMD_INLINE void SoftmaxFunction(const float * src, size_t size, float * dst)
             {
-                float max = FLT_MIN;
+                float max = -FLT_MAX;
                 for (size_t i = 0; i < size; ++i)
                     max = std::max(max, src[i]);
                 float sum = 0;
