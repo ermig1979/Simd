@@ -54,7 +54,7 @@
     In particular the library supports following CPU extensions: SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
 
     \n\n The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
-    The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
+    The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
     \section s1 Library folder's structure
 
@@ -141,7 +141,20 @@
     #include "Simd/SimdDetection.hpp"
     \endcode
 
-    \section s6 Test Framework
+    \section s6 Interaction with OpenCV:
+
+    If you need use mutual conversion between %Simd and OpenCV types you just have to define macro SIMD_OPENCV_ENABLE before including of %Simd headers:
+    \code
+    #include <opencv2/core/core.hpp>
+    #define SIMD_OPENCV_ENABLE
+    #include "Simd/SimdLib.hpp"
+    \endcode
+    And you can converse next types:
+     - cv::Point, cv::Size <--> Simd::Point
+     - cv::Rect <--> Simd::Rectangle
+     - cv::Mat <--> Simd::View
+
+    \section s7 Test Framework
 
     The test suite is needed for testing of correctness of work of the library and also for its performance testing.
 	There is a set of tests for every function from API of the library. 

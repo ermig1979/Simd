@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://simd.sourceforge.net).
 *
-* Copyright (c) 2011-2016 Yermalayeu Ihar.
+* Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy 
 * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,29 @@ namespace Simd
     /*! @ingroup cpp_point
 
         \short The Point structure defines the x- and y-coordinates of a point.
+
+        In order to have mutual conversion with OpenCV cv::Point and cv::Size types you have to define macro SIMD_OPENCV_ENABLE:
+        \verbatim
+        #include "opencv2/core/core.hpp"
+        #define SIMD_OPENCV_ENABLE
+        #include "Simd/SimdPoint.hpp"
+
+        int main()
+        {
+            typedef Simd::Point<ptrdiff_t> Point;
+
+            cv::Size cvSize;
+            cv::Point cvPoint;
+            Point simdPoint;
+
+            simdPoint = cvPoint;
+            simdPoint = cvSize;
+            cvSize = simdPoint;
+            cvPoint = simdPoint;
+
+            return 0;
+        }
+        \endverbatim
 
         \ref cpp_point_functions.
     */

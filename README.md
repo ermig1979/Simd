@@ -10,7 +10,7 @@ In particular the library supports following CPU extensions:
 SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX and AVX2 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
-The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
+The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, 
 MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
 #Library folder's structure
@@ -41,7 +41,7 @@ The project files are in the directory:
 
 By default the library is built as a DLL (Dynamic Linked Library).
 You also may build it as a static library. 
-To do this you must change appropriate property (Configuration Type) of **Simd** project and also uncomment \#define SIMD_STATIC in file:
+To do this you must change appropriate property (Configuration Type) of **Simd** project and also uncomment `#define SIMD_STATIC` in file:
 
 `simd/src/Simd/SimdConfig.h`
 
@@ -103,6 +103,20 @@ In order to use [Simd::Detection](http://simd.sourceforge.net/help/struct_simd_1
 
     #include "Simd/SimdDetection.hpp"
 	
+#Interaction with OpenCV:
+
+If you need use mutual conversion between Simd and OpenCV types you just have to define macro `SIMD_OPENCV_ENABLE` before including of Simd headers:
+    
+    #include <opencv2/core/core.hpp>
+    #define SIMD_OPENCV_ENABLE
+    #include "Simd/SimdLib.hpp"
+
+And you can converse next types:
+	
+* `cv::Point`, `cv::Size` <--> `Simd::Point`.
+* `cv::Rect` <--> `Simd::Rectangle`.
+* `cv::Mat` <--> `Simd::View`.
+	
 #Test Framework
 
 The test suite is needed for testing of correctness of work of the library and also for its performance testing.
@@ -116,8 +130,8 @@ Where next parameters were used:
 * `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
 In this case different implementations of each functions will be compared between themselves 
 (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
-Also it can be -m=c (creation of test data for cross-platform testing), -m=v (cross-platform testing with using of early prepared test data)
-and -m=s (running of special tests).
+Also it can be `-m=c` (creation of test data for cross-platform testing), `-m=v` (cross-platform testing with using of early prepared test data)
+and `-m=s` (running of special tests).
 * `-t=1` - a number of used threads (every thread runs all tests) for simulation of multi-thread loading.
 * `-f=Sobel` - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 If you miss this parameter then full testing will be performed.
