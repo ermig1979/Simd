@@ -479,7 +479,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Sqrt<true>(__m256 value)
         {
-            return _mm256_mul_ps(_mm256_rsqrt_ps(value), value);
+            return _mm256_mul_ps(_mm256_rsqrt_ps(_mm256_max_ps(value, _mm256_set1_ps(0.00000001f))), value);
         }
 
         SIMD_INLINE __m256 RightNotZero(size_t count)
