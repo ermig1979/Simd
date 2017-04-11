@@ -1715,7 +1715,7 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
         Avx2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
     else
 #endif
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_HOG_FAST)
+#ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::A + 2)
         Sse41::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
     else

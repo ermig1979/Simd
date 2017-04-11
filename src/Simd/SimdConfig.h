@@ -60,6 +60,4 @@
 
 //#define SIMD_OPENCV_ENABLE
 
-//#define SIMD_HOG_FAST
-
 #endif//__SimdConfig_h__

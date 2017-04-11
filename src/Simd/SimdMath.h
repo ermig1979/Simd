@@ -279,7 +279,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Sqrt<true>(__m128 value)
         {
-            return _mm_mul_ps(_mm_rsqrt_ps(value), value);
+            return _mm_mul_ps(_mm_rsqrt_ps(_mm_max_ps(value, _mm_set1_ps(0.00000001f))), value);
         }
 
         SIMD_INLINE __m128 Combine(__m128 mask, __m128 positive, __m128 negative)
@@ -413,6 +413,18 @@ namespace Simd
 		{
 			return _mm_unpackhi_epi16(a, b);
 		}
+
+        template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
+
+        template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)
+        {
+            return _mm_srai_epi32(_mm_unpacklo_epi16(a, a), 16);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackI16<1>(__m128i a)
+        {
+            return _mm_srai_epi32(_mm_unpackhi_epi16(a, a), 16);
+        }
 
         SIMD_INLINE __m128i DivideBy16(__m128i value)
         {

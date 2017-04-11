@@ -65,11 +65,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, cell, quantization, h2.data()));
 
-#ifdef SIMD_HOG_FAST
-        result = result && CompareCycle(h1, h2, quantization, EPS, true, 32);
-#else
         result = result && Compare(h1, h2, EPS, true, 32);
-#endif
 
         return result;
     }
@@ -100,7 +96,7 @@ namespace Test
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_HOG_FAST)
+#ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse41::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
