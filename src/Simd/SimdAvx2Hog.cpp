@@ -196,35 +196,28 @@ namespace Simd
                 Avx::Store<align>(buffer.value + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
-            template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256i & t, const __m256i & l, const __m256i & r, const __m256i & b, Buffer & buffer, size_t col)
+            template <int part> SIMD_INLINE __m256 CovertDifference(const __m128i & a, const __m128i & b)
             {
-                HogDirectionHistograms<align>(
-                    _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(r, K_ZERO), _mm256_unpacklo_epi16(l, K_ZERO))),
-                    _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(b, K_ZERO), _mm256_unpacklo_epi16(t, K_ZERO))),
-                    buffer, col + 0);
-                HogDirectionHistograms<align>(
-                    _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(r, K_ZERO), _mm256_unpackhi_epi16(l, K_ZERO))),
-                    _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(b, K_ZERO), _mm256_unpackhi_epi16(t, K_ZERO))),
-                    buffer, col + 8);
+                return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Ssse3::SubUnpackedU8<part>(a, b)));
             }
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
             {
                 const uint8_t * s = src + col;
-                __m256i t = LoadPermuted<false>((__m256i*)(s - stride));
-                __m256i l = LoadPermuted<false>((__m256i*)(s - 1));
-                __m256i r = LoadPermuted<false>((__m256i*)(s + 1));
-                __m256i b = LoadPermuted<false>((__m256i*)(s + stride));
-                HogDirectionHistograms<align>(PermutedUnpackLoU8(t), PermutedUnpackLoU8(l), PermutedUnpackLoU8(r), PermutedUnpackLoU8(b), buffer, col + 0);
-                HogDirectionHistograms<align>(PermutedUnpackHiU8(t), PermutedUnpackHiU8(l), PermutedUnpackHiU8(r), PermutedUnpackHiU8(b), buffer, col + 16);
+                __m128i t = Sse2::Load<false>((__m128i*)(s - stride));
+                __m128i l = Sse2::Load<false>((__m128i*)(s - 1));
+                __m128i r = Sse2::Load<false>((__m128i*)(s + 1));
+                __m128i b = Sse2::Load<false>((__m128i*)(s + stride));
+                HogDirectionHistograms<align>(CovertDifference<0>(r, l), CovertDifference<0>(b, t), buffer, col + 0);
+                HogDirectionHistograms<align>(CovertDifference<1>(r, l), CovertDifference<1>(b, t), buffer, col + 8);
             }
 
             void AddRowToBuffer(const uint8_t * src, size_t stride, Buffer & buffer, size_t row, size_t width, size_t aligned)
             {
                 const uint8_t * s = src + stride*row;
-                for (size_t col = 1; col < aligned; col += A)
+                for (size_t col = 1; col < aligned; col += HA)
                     HogDirectionHistograms<true>(s, stride, buffer, col);
-                HogDirectionHistograms<false>(s, stride, buffer, width - 1 - A);
+                HogDirectionHistograms<false>(s, stride, buffer, width - 1 - HA);
 
                 __m128 ky = buffer.ky[(row + 4) & 7];
                 __m128 * hist = buffer.hist;
@@ -361,7 +354,7 @@ namespace Simd
 
                 Buffer buffer(width);
 
-                size_t aligned = AlignLo(width - 2, A) + 1;
+                size_t aligned = AlignLo(width - 2, HA) + 1;
 
                 for (size_t row = 1; row < 4; ++row)
                     AddRowToBuffer(src, stride, buffer, row, width, aligned);

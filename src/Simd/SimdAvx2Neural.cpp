@@ -57,19 +57,19 @@ namespace Simd
 
 		template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 		{
-			assert(width >= 8);
+			assert(width >= F);
 			if (align)
 				assert(Aligned(dst) && Aligned(dstStride));
 
-			size_t alignedWidth = AlignLo(width, 8);
+			size_t alignedWidth = AlignLo(width, F);
 			__m256 _1_255 = _mm256_set1_ps(1.0f / 255.0f);
 
 			for (size_t row = 0; row < height; ++row)
 			{
-				for (size_t col = 0; col < alignedWidth; col += 8)
+				for (size_t col = 0; col < alignedWidth; col += F)
 					Convert<inversion, align, stream>(src + col, _1_255, dst + col);
 				if(width != alignedWidth)
-					Convert<inversion, false, stream>(src + width - 8, _1_255, dst + width - 8);
+					Convert<inversion, false, stream>(src + width - F, _1_255, dst + width - F);
 				src += srcStride;
 				dst += dstStride;
 			}
