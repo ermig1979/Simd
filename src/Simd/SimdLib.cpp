@@ -1738,6 +1738,21 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
         Base::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
 }
 
+SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::HA + 2)
+        Avx2::HogExtractFeatures(src, stride, width, height, features);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::HogExtractFeatures(src, stride, width, height, features);
+    else
+#endif
+        Base::HogExtractFeatures(src, stride, width, height, features);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

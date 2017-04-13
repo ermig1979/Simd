@@ -2214,6 +2214,24 @@ extern "C"
     SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
         size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
+    /*! @ingroup face_recognition
+
+        \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
+        \short Extracts HOG features for 8-bit gray image.
+
+        Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
+
+        \note This function has a C++ wrapper Simd::HogExtractFeatures(const View<A> & src, float * features).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] stride - a row size of the image.
+        \param [in] width - an image width. It must be a multiple of 8. Its minimal value is 16.
+        \param [in] height - an image height. It must be a multiple of 8. Its minimal value is 16.
+        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31.
+    */
+    SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
     /*! @ingroup other_conversion
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);

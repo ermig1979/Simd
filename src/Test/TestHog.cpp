@@ -119,6 +119,77 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHEF
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
+            FuncPtr func;
+            String description;
+
+            FuncHEF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, float * features) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, features);
+            }
+        };
+    }
+
+#define FUNC_HEF(function) FuncHEF(function, #function)
+
+    bool HogExtractFeaturesAutoTest(int width, int height, const FuncHEF & f1, const FuncHEF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        const size_t size = (width/8)*(height/8)*31;
+        Buffer32f features1(size, 0), features2(size, 0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, features1.data()));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, features2.data()));
+
+        result = result && Compare(features1, features2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogExtractFeaturesAutoTest(const FuncHEF & f1, const FuncHEF & f2)
+    {
+        bool result = true;
+
+        result = result && HogExtractFeaturesAutoTest(W, H, f1, f2);
+        result = result && HogExtractFeaturesAutoTest(W + 8, H - 8, f1, f2);
+
+        return result;
+    }
+
+    bool HogExtractFeaturesAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Base::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Sse41::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx2::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogDirectionHistogramsDataTest(bool create, int width, int height, const FuncHDH & f)
@@ -167,6 +238,54 @@ namespace Test
         bool result = true;
 
         result = result && HogDirectionHistogramsDataTest(create, DW, DH, FUNC_HDH(SimdHogDirectionHistograms));
+
+        return result;
+    }
+
+    bool HogExtractFeaturesDataTest(bool create, int width, int height, const FuncHEF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        const size_t size = 31*(width/8)*(height/8);
+        Buffer32f f1(size, 0), f2(size, 0);
+
+        if (create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, f1.data());
+
+            TEST_SAVE(f1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(f1);
+
+            f.Call(src, f2.data());
+
+            TEST_SAVE(f2);
+
+            result = result && Compare(f1, f2, EPS, true, 64);
+        }
+
+        return result;
+    }
+
+    bool HogExtractFeaturesDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && HogExtractFeaturesDataTest(create, DW, DH, FUNC_HEF(SimdHogExtractFeatures));
 
         return result;
     }

@@ -185,6 +185,7 @@ namespace Test
     TEST_ADD_GROUP(AbsSecondDerivativeHistogram);
 
     TEST_ADD_GROUP(HogDirectionHistograms);
+    TEST_ADD_GROUP(HogExtractFeatures);
 
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 

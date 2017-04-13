@@ -241,6 +241,8 @@ namespace Simd
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
+        void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);

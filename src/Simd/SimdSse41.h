@@ -51,6 +51,8 @@ namespace Simd
 
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
+        void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
     }
