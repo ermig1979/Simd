@@ -1748,7 +1748,7 @@ namespace Simd
 
         Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.
 
-        \note This function is a C++ wrapper for function ::SimdExtractFeatures.
+        \note This function is a C++ wrapper for function ::SimdHogExtractFeatures.
 
         \param [in] src - an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16.
         \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31.

@@ -410,7 +410,7 @@ namespace Simd
             typedef std::vector<int, Simd::Allocator<int> > Vector32i;
             typedef std::vector<float, Simd::Allocator<float> > Vector32f;
 
-            size_t _sx, _sy;
+            size_t _sx, _sy, _hs;
 
             __m256i _pos[5];
             __m256 _cos[5], _sin[5];
@@ -426,6 +426,7 @@ namespace Simd
             void Init(size_t w, size_t h)
             {
                 _sx = w / C;
+                _hs = _sx + 2;
                 _sy = h / C;
                 for (int i = 0; i < 5; ++i)
                 {
@@ -446,8 +447,8 @@ namespace Simd
                 _index.resize(w);
                 _value.resize(w);
                 _buffer.resize((_sx + 1) * 4 * Q2);
-                _histogram.resize(_sx*_sy*Q2);
-                _norm.resize(_sx*_sy);
+                _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
+                _norm.resize((_sx + 2)*(_sy + 2));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m256 & dx, const __m256 & dy, size_t col)
@@ -503,32 +504,15 @@ namespace Simd
 
                 __m128 ky = _ky[(row + 4) & 7];
                 __m128 * buffer = (__m128*)_buffer.data();
-                size_t cellEnd = width / 8;
-
-                for (size_t col = 1; col < 4; ++col)
+                for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
                 {
-                    int index = _index[col];
-                    __m128 value = _mm_set1_ps(_value[col]);
-                    buffer[index] = _mm_add_ps(buffer[index], _mm_mul_ps(value, _mm_mul_ps(ky, _kx[(col + 4) & 7])));
-                }
-                buffer += 18;
-
-                for (size_t cell = 1, col = 4; cell < cellEnd; ++cell)
-                {
-                    for (size_t i = 0; i < 8; ++i, ++col)
+                    for (; i < n; ++i, ++col)
                     {
                         int index = _index[col];
                         __m128 value = _mm_set1_ps(_value[col]);
                         buffer[index] = _mm_add_ps(buffer[index], _mm_mul_ps(value, _mm_mul_ps(ky, _kx[i])));
                     }
-                    buffer += 18;
-                }
-
-                for (size_t col = width - 4; col < width - 1; ++col)
-                {
-                    int index = _index[col];
-                    __m128 value = _mm_set1_ps(_value[col]);
-                    buffer[index] = _mm_add_ps(buffer[index], _mm_mul_ps(value, _mm_mul_ps(ky, _kx[(col + 4) & 7])));
+                    buffer += Q2;
                 }
             }
 
@@ -537,100 +521,44 @@ namespace Simd
                 typedef float f18_t[18];
 
                 float * src = _buffer.data();
-                f18_t * h0 = (f18_t*)_histogram.data() + row*width - width - 1;
-                f18_t * h1 = h0 + width;
+                f18_t * h0 = (f18_t*)_histogram.data() + row*_hs;
+                f18_t * h1 = h0 + _hs;
 
-                if (row == 0)
+                for (size_t cell = 0; cell <= width; ++cell)
                 {
-                    for (size_t i = 0; i < 18; ++i)
-                        h1[1][i] += src[i * 4 + 3];
-                    h1++;
-                    src += 72;
-                    for (size_t cell = 1; cell < width; ++cell)
+                    __m128 * ps = (__m128*)src;
+                    for (size_t i = 0; i < 16; i += 4)
                     {
-                        for (size_t i = 0; i < 18; ++i)
-                        {
-                            h1[0][i] += src[i * 4 + 2];
-                            h1[1][i] += src[i * 4 + 3];
-                        }
-                        h1++;
-                        src += 72;
+                        __m128 s00 = _mm_unpacklo_ps(ps[i + 0], ps[i + 2]);
+                        __m128 s01 = _mm_unpacklo_ps(ps[i + 1], ps[i + 3]);
+                        __m128 s10 = _mm_unpackhi_ps(ps[i + 0], ps[i + 2]);
+                        __m128 s11 = _mm_unpackhi_ps(ps[i + 1], ps[i + 3]);
+
+                        _mm_storeu_ps(h0[0] + i, _mm_add_ps(_mm_loadu_ps(h0[0] + i), _mm_unpacklo_ps(s00, s01)));
+                        _mm_storeu_ps(h0[1] + i, _mm_add_ps(_mm_loadu_ps(h0[1] + i), _mm_unpackhi_ps(s00, s01)));
+                        _mm_storeu_ps(h1[0] + i, _mm_add_ps(_mm_loadu_ps(h1[0] + i), _mm_unpacklo_ps(s10, s11)));
+                        _mm_storeu_ps(h1[1] + i, _mm_add_ps(_mm_loadu_ps(h1[1] + i), _mm_unpackhi_ps(s10, s11)));
                     }
-                    for (size_t i = 0; i < 18; ++i)
-                        h1[0][i] += src[i * 4 + 2];
-                }
-                else if (row == height)
-                {
-                    for (size_t i = 0; i < 18; ++i)
-                        h0[1][i] += src[i * 4 + 1];
-                    h0++;
-                    src += 72;
-                    for (size_t cell = 1; cell < width; ++cell)
-                    {
-                        for (size_t i = 0; i < 18; ++i)
-                        {
-                            h0[0][i] += src[i * 4 + 0];
-                            h0[1][i] += src[i * 4 + 1];
-                        }
-                        h0++;
-                        src += 72;
-                    }
-                    for (size_t i = 0; i < 18; ++i)
-                        h0[0][i] += src[i * 4 + 0];
-                }
-                else
-                {
-                    for (size_t i = 0; i < 18; ++i)
-                    {
-                        h0[1][i] += src[i * 4 + 1];
-                        h1[1][i] += src[i * 4 + 3];
-                    }
+                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h0[0] + 16)), (__m64*)(h0[1] + 16)));
+                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h1[0] + 16)), (__m64*)(h1[1] + 16)));
+                    _mm_storel_pi((__m64*)(h0[0] + 16), s0);
+                    _mm_storeh_pi((__m64*)(h0[1] + 16), s0);
+                    _mm_storel_pi((__m64*)(h1[0] + 16), s1);
+                    _mm_storeh_pi((__m64*)(h1[1] + 16), s1);
                     h0++;
                     h1++;
                     src += 72;
-                    for (size_t cell = 1; cell < width; ++cell)
-                    {
-                        __m128 * ps = (__m128*)src;
-                        for (size_t i = 0; i < 16; i += 4)
-                        {
-                            __m128 s00 = _mm_unpacklo_ps(ps[i + 0], ps[i + 2]);
-                            __m128 s01 = _mm_unpacklo_ps(ps[i + 1], ps[i + 3]);
-                            __m128 s10 = _mm_unpackhi_ps(ps[i + 0], ps[i + 2]);
-                            __m128 s11 = _mm_unpackhi_ps(ps[i + 1], ps[i + 3]);
-
-                            _mm_storeu_ps(h0[0] + i, _mm_add_ps(_mm_loadu_ps(h0[0] + i), _mm_unpacklo_ps(s00, s01)));
-                            _mm_storeu_ps(h0[1] + i, _mm_add_ps(_mm_loadu_ps(h0[1] + i), _mm_unpackhi_ps(s00, s01)));
-                            _mm_storeu_ps(h1[0] + i, _mm_add_ps(_mm_loadu_ps(h1[0] + i), _mm_unpacklo_ps(s10, s11)));
-                            _mm_storeu_ps(h1[1] + i, _mm_add_ps(_mm_loadu_ps(h1[1] + i), _mm_unpackhi_ps(s10, s11)));
-                        }
-                        for (size_t i = 16; i < 18; ++i)
-                        {
-                            h0[0][i] += src[i * 4 + 0];
-                            h0[1][i] += src[i * 4 + 1];
-                            h1[0][i] += src[i * 4 + 2];
-                            h1[1][i] += src[i * 4 + 3];
-                        }
-                        h0++;
-                        h1++;
-                        src += 72;
-                    }
-                    for (size_t i = 0; i < 18; ++i)
-                    {
-                        h0[0][i] += src[i * 4 + 0];
-                        h1[0][i] += src[i * 4 + 2];
-                    }
                 }
-                memset(_buffer.data(), 0, _buffer.size() * sizeof(float));
+                SetZero(_buffer);
             }
 
-            void GetHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
+            void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
-                const size_t quantization = 18;
-
-                memset(_histogram.data(), 0, 18 * _sx*_sy*sizeof(float));
+                SetZero(_histogram);
 
                 size_t aligned = AlignHi(width - 1, HA) - HA;
 
+                SetZero(_buffer);
                 for (size_t row = 1; row < 4; ++row)
                     AddRowToBuffer(src, stride, row, width, aligned);
                 AddToHistogram(0, _sx, _sy);
@@ -645,91 +573,114 @@ namespace Simd
                 AddToHistogram(_sy, _sx, _sy);
             }
 
-        public:
-            void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+            SIMD_INLINE float GetNorm(const float * src)
             {
-                Init(width, height);
+                __m256 norm = _mm256_add_ps(_mm256_loadu_ps(src), _mm256_loadu_ps(src + Q));
+                norm = _mm256_mul_ps(norm, norm);
+                norm = _mm256_hadd_ps(norm, norm);
+                norm = _mm256_hadd_ps(norm, norm);
+                float buf[8];
+                _mm256_storeu_ps(buf, norm);
+                return buf[0] + buf[4] + Simd::Square(src[Q - 1] + src[Q2 - 1]);
+            }
 
-                GetHistogram(src, stride, width, height);
-
-                for (size_t i = 0, n = _norm.size(); i < n; ++i)
+            void EstimateNorm()
+            {
+                SetZero(_norm);
+                for (size_t y = 0, i = 0; y < _sy; y++)
                 {
-                    const float * h = _histogram.data() + i*Q2;
-                    for (int o = 0; o < Q; ++o)
-                        _norm[i] += Simd::Square(h[o] + h[o + Q]);
+                    const float * h = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    float * n = _norm.data() + (y + 1)*_hs + 1;
+                    for (size_t x = 0; x < _sx; x++, i++)
+                        n[x] = GetNorm(h + x*Q2);
                 }
+            }
 
-                float eps = 0.0001f;
+            void ExtractFeatures(float * features)
+            {
+                __m128 _02 = _mm_set1_ps(0.2f);
+                __m128 _05 = _mm_set1_ps(0.5f);
+                __m128 _02357 = _mm_set1_ps(0.2357f);
+                __m128 eps = _mm_set1_ps(0.0001f);
                 for (size_t y = 0; y < _sy; y++)
                 {
+                    float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
                     for (size_t x = 0; x < _sx; x++)
                     {
                         float * dst = features + (y*_sx + x) * 31;
 
-                        float *psrc, *p, n1, n2, n3, n4,
-                            x0y0 = 0.0f, x1y0 = 0.0f, x2y0 = 0.0f, x0y1 = 0.0f, x1y1 = 0.0f, x2y1 = 0.0f, x0y2 = 0.0f, x1y2 = 0.0f, x2y2 = 0.0f;
-                        ptrdiff_t xx = x - 1, yy = y - 1;
+                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p1 = p0 + _hs;
+                        float * p2 = p1 + _hs;
 
-                        p = _norm.data() + yy*_sx + xx;
-                        if (xx > 0 && yy > 0) 		x0y0 = *p;
-                        if (yy > 0)				x1y0 = *(p + 1);
-                        if (xx + 2 < (int)_sx && yy > 0)	x2y0 = *(p + 2);
-                        if (xx > 0) 				x0y1 = *(p + _sx);
-                        x1y1 = *(p + _sx + 1);
-                        if (xx + 2 < (int)_sx) 			x2y1 = *(p + 2 + _sx);
-                        if (xx > 0 && yy + 2 < (int)_sy)	x0y2 = *(p + 2 * _sx);
-                        if (yy + 2 < (int)_sy) 			    x1y2 = *(p + 1 + 2 * _sx);
-                        if (xx + 2 < (int)_sx && yy + 2 < (int)_sy) x2y2 = *(p + 2 + 2 * _sx);
+                        __m128 n = _mm_setr_ps(
+                            p1[1] + p1[2] + p2[1] + p2[2],
+                            p0[1] + p0[2] + p1[1] + p1[2],
+                            p1[0] + p1[1] + p2[0] + p2[1],
+                            p0[0] + p0[1] + p1[0] + p1[1]);
 
-                        n1 = 1.0f / sqrt(x1y1 + x2y1 + x1y2 + x2y2 + eps);
-                        n2 = 1.0f / sqrt(x1y0 + x2y0 + x1y1 + x2y1 + eps);
-                        n3 = 1.0f / sqrt(x0y1 + x1y1 + x0y2 + x1y2 + eps);
-                        n4 = 1.0f / sqrt(x0y0 + x1y0 + x0y1 + x1y1 + eps);
+                        n = _mm_rsqrt_ps(_mm_add_ps(n, eps));
 
-                        float t1 = 0;
-                        float t2 = 0;
-                        float t3 = 0;
-                        float t4 = 0;
+                        __m128 t = _mm_setzero_ps();
 
-                        psrc = _histogram.data() + (y*_sx + x)*Q2;
-                        for (int o = 0; o < Q2; o++)
+                        float * src = ph + x*Q2;
+                        for (int o = 0; o < 16; o += 4)
                         {
-                            float h1 = Simd::Min(*psrc * n1, 0.2f);
-                            float h2 = Simd::Min(*psrc * n2, 0.2f);
-                            float h3 = Simd::Min(*psrc * n3, 0.2f);
-                            float h4 = Simd::Min(*psrc * n4, 0.2f);
-                            *dst = 0.5f * (h1 + h2 + h3 + h4);
-                            t1 += h1;
-                            t2 += h2;
-                            t3 += h3;
-                            t4 += h4;
-                            dst++;
-                            psrc++;
+                            __m128 s = _mm_loadu_ps(src);
+                            __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
+                            __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
+                            __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
+                            __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
+                            t = _mm_add_ps(t, _mm_add_ps(_mm_add_ps(h0, h1), _mm_add_ps(h2, h3)));
+                            _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                            dst += 4;
+                            src += 4;
+                        }
+                        {
+                            __m128 h0 = _mm_min_ps(_mm_mul_ps(_mm_set1_ps(*src++), n), _02);
+                            __m128 h1 = _mm_min_ps(_mm_mul_ps(_mm_set1_ps(*src++), n), _02);
+                            t = _mm_add_ps(t, _mm_add_ps(h0, h1));
+                            __m128 h = _mm_hadd_ps(h0, h1);
+                            _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(h, h)));
+                            dst += 2;
                         }
 
-                        psrc = _histogram.data() + (y*_sx + x)*Q2;
-                        for (int o = 0; o < Q; o++)
+                        src = ph + x*Q2;
+                        for (int o = 0; o < 8; o += 4)
                         {
-                            float sum = *psrc + *(psrc + Q);
-                            float h1 = Simd::Min(sum * n1, 0.2f);
-                            float h2 = Simd::Min(sum * n2, 0.2f);
-                            float h3 = Simd::Min(sum * n3, 0.2f);
-                            float h4 = Simd::Min(sum * n4, 0.2f);
-                            *dst = 0.5f * (h1 + h2 + h3 + h4);
-                            dst++;
-                            psrc++;
+                            __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + Q));
+                            __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
+                            __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
+                            __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
+                            __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
+                            _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                            dst += 4;
+                            src += 4;
                         }
-
-                        *dst = 0.2357f * t1;
-                        dst++;
-                        *dst = 0.2357f * t2;
-                        dst++;
-                        *dst = 0.2357f * t3;
-                        dst++;
-                        *dst = 0.2357f * t4;
-
+                        {
+                            __m128 s = _mm_set1_ps(src[0] + src[Q]);
+                            __m128 h = _mm_min_ps(_mm_mul_ps(s, n), _02);
+                            h = _mm_mul_ps(_05, h);
+                            h = _mm_hadd_ps(h, h);
+                            h = _mm_hadd_ps(h, h);
+                            _mm_store_ss(dst++, h);
+                        }
+                        _mm_storeu_ps(dst, _mm_mul_ps(t, _02357));
                     }
                 }
+            }
+
+        public:
+
+            void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+            {
+                Init(width, height);
+
+                EstimateHistogram(src, stride, width, height);
+
+                EstimateNorm();
+
+                ExtractFeatures(features);
             }
         };
 

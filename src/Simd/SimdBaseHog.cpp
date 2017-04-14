@@ -279,7 +279,12 @@ namespace Simd
                 _index.resize(w);
                 _value.resize(w);
                 _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
-                _norm.resize(_sx*_sy);
+                _norm.resize((_sx + 2)*(_sy + 2));
+            }
+
+            template<class Vector> SIMD_INLINE void SetZero(Vector & dst)
+            {
+                memset(dst.data(), 0, dst.size()*sizeof(typename Vector::value_type));
             }
 
             void AddRowToHistogram(size_t row, size_t width, size_t height)
@@ -307,10 +312,9 @@ namespace Simd
                 }
             }
 
-            void SetHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
+            void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
-                memset(_histogram.data(), 0, _histogram.size()*sizeof(float));
-
+                SetZero(_histogram);
                 for (size_t row = 1; row < height - 1; ++row)
                 {
                     const uint8_t * src1 = src + stride*row;
@@ -349,54 +353,41 @@ namespace Simd
                 }
             }
 
-            void SetNorm()
+            void EstimateNorm()
             {
-                for (size_t y = 0, i = 0; y < _sy; y++)
+                SetZero(_norm);
+                for (size_t y = 0; y < _sy; ++y)
                 {
-                    for (size_t x = 0; x < _sx; x++, i++)
+                    const float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    float * pn = _norm.data() + (y + 1)*_hs + 1;
+                    for (size_t x = 0; x < _sx; ++x)
                     {
-                        const float * h = _histogram.data() + ((y + 1)*_hs + x + 1)*Q2;
+                        const float * h = ph + x*Q2;
                         for (int o = 0; o < Q; ++o)
-                            _norm[i] += Simd::Square(h[o] + h[o + Q]);
+                            pn[x] += Simd::Square(h[o] + h[o + Q]);
                     }
                 }
             }
 
-        public:
-            void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+            void ExtractFeatures(float * features)
             {
-                Init(width, height);
-
-                SetHistogram(src, stride, width, height);
-
-                SetNorm();
-
                 float eps = 0.0001f;
                 for (size_t y = 0; y < _sy; y++)
                 {
                     for (size_t x = 0; x < _sx; x++)
                     {
-                        float * dst = features + (y*_sx + x)*31;
+                        float * dst = features + (y*_sx + x) * 31;
 
-                        float *psrc, *p, n1, n2, n3, n4,
-                            x0y0 = 0.0f, x1y0 = 0.0f, x2y0 = 0.0f, x0y1 = 0.0f, x1y1 = 0.0f, x2y1 = 0.0f, x0y2 = 0.0f, x1y2 = 0.0f, x2y2 = 0.0f;
-                        ptrdiff_t xx = x - 1, yy = y - 1;
+                        float *psrc, n1, n2, n3, n4;
 
-                        p = _norm.data() + yy*_sx + xx;
-                        if (xx > 0 && yy > 0) 		x0y0 = *p;
-                        if (yy > 0)				x1y0 = *(p + 1);
-                        if (xx + 2 < (int)_sx && yy > 0)	x2y0 = *(p + 2);
-                        if (xx > 0) 				x0y1 = *(p + _sx);
-                        x1y1 = *(p + _sx + 1);
-                        if (xx + 2 < (int)_sx) 			x2y1 = *(p + 2 + _sx);
-                        if (xx > 0 && yy + 2 < (int)_sy)	x0y2 = *(p + 2 * _sx);
-                        if (yy + 2 < (int)_sy) 			    x1y2 = *(p + 1 + 2 * _sx);
-                        if (xx + 2 < (int)_sx && yy + 2 < (int)_sy) x2y2 = *(p + 2 + 2 * _sx);
+                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p1 = p0 + _hs;
+                        float * p2 = p1 + _hs;
 
-                        n1 = 1.0f / sqrt(x1y1 + x2y1 + x1y2 + x2y2 + eps);
-                        n2 = 1.0f / sqrt(x1y0 + x2y0 + x1y1 + x2y1 + eps);
-                        n3 = 1.0f / sqrt(x0y1 + x1y1 + x0y2 + x1y2 + eps);
-                        n4 = 1.0f / sqrt(x0y0 + x1y0 + x0y1 + x1y1 + eps);
+                        n1 = 1.0f / sqrt(p1[1] + p1[2] + p2[1] + p2[2] + eps);
+                        n2 = 1.0f / sqrt(p0[1] + p0[2] + p1[1] + p1[2] + eps);
+                        n3 = 1.0f / sqrt(p1[0] + p1[1] + p2[0] + p2[1] + eps);
+                        n4 = 1.0f / sqrt(p0[0] + p0[1] + p1[0] + p1[1] + eps);
 
                         float t1 = 0;
                         float t2 = 0;
@@ -439,9 +430,20 @@ namespace Simd
                         *dst = 0.2357f * t3;
                         dst++;
                         *dst = 0.2357f * t4;
-
                     }
                 }
+            }
+
+        public:
+            void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+            {
+                Init(width, height);
+
+                EstimateHistogram(src, stride, width, height);
+
+                EstimateNorm();
+
+                ExtractFeatures(features);
             }
         };
 

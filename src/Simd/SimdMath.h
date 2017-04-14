@@ -74,6 +74,11 @@ namespace Simd
     }
 #endif
 
+    template<class Vector> SIMD_INLINE void SetZero(Vector & dst)
+    {
+        memset(dst.data(), 0, dst.size()*sizeof(typename Vector::value_type));
+    }
+
     namespace Base
     {
         SIMD_INLINE int Min(int a, int b)
@@ -429,6 +434,11 @@ namespace Simd
         SIMD_INLINE __m128i DivideBy16(__m128i value)
         {
             return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
+        }
+
+        template <int index> static SIMD_INLINE __m128 Broadcast(__m128 a)
+        {
+            return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
         }
 	}
 #endif// SIMD_SSE2_ENABLE
