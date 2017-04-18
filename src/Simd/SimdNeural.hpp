@@ -1475,12 +1475,14 @@ namespace Simd
 
                 \note The network has to be created previously with using of methods Clear/Add.
 
-                \param [in] ifs - a input file stream.
+                \param [in] is - a input stream.
                 \param [in] train - a boolean flag (True - if we need to load temporary training data, False - otherwise). By default it is equal to False.
                 \return a result of loading.
             */
-            bool Load(std::ifstream & ifs, bool train = false)
+            bool Load(std::istream & is, bool train = false)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 if (train)
                 {
                     for (size_t i = 0; i < _layers.size(); ++i)
@@ -1490,9 +1492,9 @@ namespace Simd
                 {
                     Layer & layer = *_layers[i];
                     for (size_t j = 0; j < layer._weight.size(); ++j)
-                        ifs >> layer._weight[j];
+                        Load(is, layer._weight[j]);
                     for (size_t j = 0; j < layer._bias.size(); ++j)
-                        ifs >> layer._bias[j];
+                        Load(is, layer._bias[j]);
                 }
                 if (train)
                 {
@@ -1500,9 +1502,9 @@ namespace Simd
                     {
                         Layer & level = *_layers[i];
                         for (size_t j = 0; j < level._gWeight.size(); ++j)
-                            ifs >> level._gWeight[j];
+                            Load(is, level._gWeight[j]);
                         for (size_t j = 0; j < level._gBias.size(); ++j)
-                            ifs >> level._gBias[j];
+                            Load(is, level._gBias[j]);
                     }
                 }
                 return true;
@@ -1532,30 +1534,30 @@ namespace Simd
             /*!
                 \short Saves the neural network to file stream.
 
-                \param [out] ofs - a output file stream.
+                \param [out] os - a output stream.
                 \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
                 \return a result of saving.
             */
-            bool Save(std::ofstream & ofs, bool train = false) const
+            bool Save(std::ostream & os, bool train = false) const
             {
                 for (size_t i = 0; i < _layers.size(); ++i)
                 {
                     const Layer & layer = *_layers[i];
                     for (size_t j = 0; j < layer._weight.size(); ++j)
-                        ofs << layer._weight[j] << " ";
+                        os << layer._weight[j] << " ";
                     for (size_t j = 0; j < layer._bias.size(); ++j)
-                        ofs << layer._bias[j] << " ";
+                        os << layer._bias[j] << " ";
                 }
                 if (train)
                 {
-                    ofs << std::endl;
+                    os << std::endl;
                     for (size_t i = 0; i < _layers.size(); ++i)
                     {
                         const Layer & level = *_layers[i];
                         for (size_t j = 0; j < level._gWeight.size(); ++j)
-                            ofs << level._gWeight[j] << " ";
+                            os << level._gWeight[j] << " ";
                         for (size_t j = 0; j < level._gBias.size(); ++j)
-                            ofs << level._gBias[j] << " ";
+                            os << level._gBias[j] << " ";
                     }
                 }
                 return true;
@@ -1602,6 +1604,13 @@ namespace Simd
 
  private:
             LayerPtrs _layers;
+
+            static SIMD_INLINE void Load(std::istream & is, float & value)
+            {
+                char buffer[64];
+                is >> buffer;
+                value = (float)::atof(buffer);
+            }
 
             const Vector & Forward(const Vector & src, size_t thread, Layer::Method method)
             {
