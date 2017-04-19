@@ -653,17 +653,17 @@ namespace Simd
                 \param [in] bias - a boolean flag (enabling of bias). By default its True.
                 \param [in] connection - a table of connections between input and output channels. By default all channels are connected.
             */
-            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, size_t coreSize, 
+            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, Size coreSize, 
                 bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
             {
                 _valid = valid;
                 _indent = coreSize/2;
-                Size pad(coreSize - 1, coreSize - 1);
+                Size pad = coreSize - Size(1, 1);
                 _src.Resize(srcSize, srcDepth);
                 _dst.Resize(srcSize - (_valid ? pad : Size()), dstDepth);
                 _padded.Resize(srcSize + (_valid ? Size() : pad), srcDepth);
-                _core.Resize(coreSize, coreSize, srcDepth*dstDepth);
+                _core.Resize(coreSize, srcDepth*dstDepth);
                 _weight.resize(_core.Volume());
                 if (bias)
                     _bias.resize(dstDepth);
@@ -865,7 +865,7 @@ namespace Simd
                     for (ptrdiff_t c = 0; c < _src.depth; ++c)
                     {
                         for (ptrdiff_t y = 0; y < _src.height; ++y)
-                            memcpy(_padded.Get(padded, _indent, _indent + y, c), _src.Get(src, 0, y, c), size);
+                            memcpy(_padded.Get(padded, _indent.x, _indent.y + y, c), _src.Get(src, 0, y, c), size);
                     }
                     return padded;
                 }
@@ -880,7 +880,7 @@ namespace Simd
                     for (ptrdiff_t c = 0; c < _src.depth; c++)
                     {
                         for (ptrdiff_t y = 0; y < _src.height; ++y)
-                            memcpy(_src.Get(dst, 0, y, c), _padded.Get(src, _indent, _indent + y, c), size);
+                            memcpy(_src.Get(dst, 0, y, c), _padded.Get(src, _indent.x, _indent.y + y, c), size);
                     }
                 }
             }
@@ -893,7 +893,7 @@ namespace Simd
 
             Index _core;
             Index _padded;
-            size_t _indent;
+            Size _indent;
             bool _valid;
             View _connection;
         };

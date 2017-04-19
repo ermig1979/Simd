@@ -1961,28 +1961,37 @@ namespace Test
        return false; \
     }
 
-    bool CreateNetwork(Network & net, bool dropout)
+    bool CreateNetwork(Network & net, bool dropout, bool experimental)
     {
         using namespace Simd::Neural;
         net.Clear();
-        TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, 5)));
-        TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
-        if(dropout)
-            TEST_ADD_LAYER(net, (new DropoutLayer(6*6*12, 0.9f)));
-        TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, 3)));
-        if (dropout)
-            TEST_ADD_LAYER(net, (new DropoutLayer(4 * 4 * 24, 0.8f)));
-        TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
-        if (dropout)
-            TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.7f)));
-        TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+        if (experimental)
+        {
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 3))));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 14), 12, 2)));
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 7), 12, 24, Size(3, 3))));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 5 * 24, 96)));
+            if (dropout)
+                TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.9f)));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+        }
+        else
+        {
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 5))));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, Size(3, 3))));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
+            if (dropout)
+                TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.9f)));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+        }
         return true;
     }
 
     bool NeuralPredictSpecialTest()
     {
         Network net;
-        if (!CreateNetwork(net, false))
+        if (!CreateNetwork(net, false, false))
         {
             TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
             return false;
@@ -2038,7 +2047,7 @@ namespace Test
     bool NeuralTrainSpecialTest()
     {
         Network net;
-        if (!CreateNetwork(net, true))
+        if (!CreateNetwork(net, true, true))
         {
             TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
             return false;
