@@ -1961,12 +1961,15 @@ namespace Test
        return false; \
     }
 
+#define SIMD_NEURAL_EXPERIMENT_VERSION 1
+
     bool CreateNetwork(Network & net, bool dropout, bool experimental)
     {
         using namespace Simd::Neural;
         net.Clear();
         if (experimental)
         {
+#if SIMD_NEURAL_EXPERIMENT_VERSION == 0 // not square shape of convolution core.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 3))));
             TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 14), 12, 2)));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 7), 12, 24, Size(3, 3))));
@@ -1974,6 +1977,15 @@ namespace Test
             if (dropout)
                 TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.9f)));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+#elif SIMD_NEURAL_EXPERIMENT_VERSION == 1 // using of average layer.
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 5))));
+            TEST_ADD_LAYER(net, (new AveragePoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, Size(3, 3))));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
+            if (dropout)
+                TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.9f)));
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
+#endif
         }
         else
         {

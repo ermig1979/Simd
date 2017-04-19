@@ -485,6 +485,7 @@ namespace Simd
                 MaxPooling, /*!< \brief Layer type corresponding to Simd::Neural::MaxPoolingLayer. */
                 FullyConnected, /*!< \brief Layer type corresponding to Simd::Neural::FullyConnectedLayer. */
                 Dropout, /*!< \brief Layer type corresponding to Simd::Neural::DropoutLayer. */
+                AveragePooling, /*!< \brief Layer type corresponding to Simd::Neural::AveragePooling. */
             };
 
             /*!
@@ -587,6 +588,7 @@ namespace Simd
             friend class MaxPoolingLayer;
             friend class FullyConnectedLayer;
             friend class DropoutLayer;
+            friend class AveragePoolingLayer;
             friend class Network;
         };
         typedef std::shared_ptr<Layer> LayerPtr;
@@ -1207,6 +1209,91 @@ namespace Simd
                 size_t start = Detail::RandomUniform(0, int(RANDOM_SIZE*_src.Volume()));
                 return _mask.data() + start;
             }
+        };
+
+        /*! @ingroup cpp_neural
+
+            \short AveragePoolingLayer class.
+
+            Average pooling layer in neural network.
+        */
+        class AveragePoolingLayer : public Layer
+        {
+        public:
+            /*!
+            \short Creates new AveragePoolingLayer class.
+
+            \param [in] f - a type of activation function used in this layer.
+            \param [in] srcSize - a size (width and height) of input image.
+            \param [in] srcDepth - a number of input channels (images).
+            \param [in] poolingSize - a pooling size.
+            */
+            AveragePoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t poolingSize)
+                : Layer(AveragePooling, f)
+            {
+                _poolingSize = poolingSize;
+                _scaleFactor = 1.0f / float(poolingSize*poolingSize);
+                _src.Resize(srcSize, srcDepth);
+                _dst.Resize(srcSize / _poolingSize, srcDepth);
+                SetThreadNumber(1, false);
+            }
+
+            void Forward(const Vector & src, size_t thread, Method method) override
+            {
+                Vector & sum = _common[thread].sum;
+                Vector & dst = _common[thread].dst;
+                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
+                {
+                    for (ptrdiff_t y = 0; y < _dst.height; y++)
+                    {
+                        for (ptrdiff_t x = 0; x < _dst.width; x++)
+                        {
+                            const float * psrc = _src.Get(src, x*_poolingSize, y*_poolingSize, c);
+                            float average = 0;
+                            for (size_t dy = 0; dy < _poolingSize; dy++)
+                                for (size_t dx = 0; dx < _poolingSize; dx++)
+                                    average += psrc[dy*_src.width + dx];
+                             _dst.Get(sum, x, y, c)[0] = average*_scaleFactor;
+                        }
+                    }
+                }                
+                _function.function(sum.data(), sum.size(), dst.data());
+            }
+
+            void Backward(const Vector & currDelta, size_t thread) override
+            {
+                const Vector & prevDst = _prev->Dst(thread);
+                Vector & prevDelta = _common[thread].prevDelta;
+                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
+                {
+                    for (ptrdiff_t y = 0; y < _dst.height; y++)
+                    {
+                        for (ptrdiff_t x = 0; x < _dst.width; x++)
+                        {
+                            float delta = _dst.Get(currDelta, x, y, c)[0]*_scaleFactor;
+                            float * prev = _src.Get(prevDelta, x*_poolingSize, y*_poolingSize, c);
+                            for (size_t dy = 0; dy < _poolingSize; dy++)
+                                for (size_t dx = 0; dx < _poolingSize; dx++)
+                                    prev[dy*_src.width + dx] = delta;
+                        }
+                    }
+                }
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+            }
+
+            size_t FanSrc() const override
+            {
+                return _poolingSize*_poolingSize;
+            }
+
+            size_t FanDst() const override
+            {
+                return 1;
+            }
+
+        protected:
+            size_t _poolingSize;
+            float _scaleFactor;
         };
 
         /*! @ingroup cpp_neural
