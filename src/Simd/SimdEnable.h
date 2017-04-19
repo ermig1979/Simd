@@ -42,7 +42,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/auxv.h>
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #include <asm/hwcap.h>
+#endif
 #endif
 
 #else

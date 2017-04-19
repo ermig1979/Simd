@@ -841,102 +841,102 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3AutoTest()
+    bool NeuralAddConvolution3x3ForwardAutoTest()
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Base::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Base::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Neon::NeuralAddConvolution3x3), FUNC_C2(SimdNeuralAddConvolution3x3));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, true, FUNC_C2(Simd::Neon::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 #endif
 
         return result;
     }
 
-    bool NeuralAddConvolution5x5AutoTest()
+    bool NeuralAddConvolution5x5ForwardAutoTest()
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Base::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Base::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx2::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Avx2::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Neon::NeuralAddConvolution5x5), FUNC_C2(SimdNeuralAddConvolution5x5));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, true, FUNC_C2(Simd::Neon::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 #endif
 
         return result;
     }
 
-    bool NeuralAddConvolution3x3BackAutoTest()
+    bool NeuralAddConvolution3x3BackwardAutoTest()
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Base::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Base::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Sse::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Neon::NeuralAddConvolution3x3Back), FUNC_C2(SimdNeuralAddConvolution3x3Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 1, false, FUNC_C2(Simd::Neon::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 #endif
 
         return result;
     }
 
-    bool NeuralAddConvolution5x5BackAutoTest()
+    bool NeuralAddConvolution5x5BackwardAutoTest()
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Base::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
+        result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Base::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Sse::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Neon::NeuralAddConvolution5x5Back), FUNC_C2(SimdNeuralAddConvolution5x5Back));
+            result = result && NeuralAddConvolutionAutoTest(EPS, 2, false, FUNC_C2(Simd::Neon::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 #endif
 
         return result;
@@ -1642,38 +1642,38 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolution3x3DataTest(bool create)
+    bool NeuralAddConvolution3x3ForwardDataTest(bool create)
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, true, FUNC_C2(SimdNeuralAddConvolution3x3));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, true, FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 
         return result;
     }
 
-    bool NeuralAddConvolution5x5DataTest(bool create)
+    bool NeuralAddConvolution5x5ForwardDataTest(bool create)
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdNeuralAddConvolution5x5));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, true, FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 
         return result;
     }
 
-    bool NeuralAddConvolution3x3BackDataTest(bool create)
+    bool NeuralAddConvolution3x3BackwardDataTest(bool create)
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, false, FUNC_C2(SimdNeuralAddConvolution3x3Back));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 1, false, FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 
         return result;
     }
 
-    bool NeuralAddConvolution5x5BackDataTest(bool create)
+    bool NeuralAddConvolution5x5BackwardDataTest(bool create)
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdNeuralAddConvolution5x5Back));
+        result = result && NeuralAddConvolutionDataTest(create, DW, DH, EPS, 2, false, FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 
         return result;
     }

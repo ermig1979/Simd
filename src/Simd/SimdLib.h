@@ -3022,7 +3022,7 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        \fn void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 3x3 convolution of 32-bit float image.
 
@@ -3036,11 +3036,11 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */
-    SIMD_API void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        \fn void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (forward propagation).
 
@@ -3054,11 +3054,11 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */
-    SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        \fn void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 3x3 convolution of 32-bit float image (backward propagation).
 
@@ -3072,11 +3072,11 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */
-    SIMD_API void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+        \fn void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (backward propagation).
 
@@ -3090,7 +3090,7 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */
-    SIMD_API void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+    SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
     /*! @ingroup neural
 

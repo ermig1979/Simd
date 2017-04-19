@@ -216,8 +216,8 @@ namespace Simd
                     float dy = (float)(src2[col] - src0[col]);
                     float dx = (float)(src1[col + 1] - src1[col - 1]);
                     float value = (float)::sqrt(dx*dx + dy*dy);
-                    float ady = abs(dy);
-                    float adx = abs(dx);
+                    float ady = std::abs(dy);
+                    float adx = std::abs(dx);
 
                     float bestDot = 0;
                     int index = 0;
@@ -326,8 +326,8 @@ namespace Simd
                         float dy = (float)(src2[col] - src0[col]);
                         float dx = (float)(src1[col + 1] - src1[col - 1]);
                         float value = (float)::sqrt(dx*dx + dy*dy);
-                        float ady = abs(dy);
-                        float adx = abs(dx);
+                        float ady = std::abs(dy);
+                        float adx = std::abs(dx);
 
                         float bestDot = 0;
                         int index = 0;

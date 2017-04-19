@@ -197,7 +197,7 @@ namespace Simd
             return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2];
         }
 
-        SIMD_INLINE float Convolution3x3(const float * src, size_t stride, const float * weights)
+        SIMD_INLINE float Convolution3x3Forward(const float * src, size_t stride, const float * weights)
         {
             return
                 Convolution3(src, weights) +
@@ -205,12 +205,12 @@ namespace Simd
                 Convolution3(src + 2 * stride, weights + 6);
         }
 
-        void NeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < width; ++col)
-                    dst[col] += Convolution3x3(src + col, srcStride, weights);
+                    dst[col] += Convolution3x3Forward(src + col, srcStride, weights);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -221,7 +221,7 @@ namespace Simd
             return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2] + src[3] * weights[3] + src[4] * weights[4];
         }
 
-        SIMD_INLINE float Convolution5x5(const float * src, size_t stride, const float * weights)
+        SIMD_INLINE float Convolution5x5Forward(const float * src, size_t stride, const float * weights)
         {
             return
                 Convolution5(src, weights) +
@@ -231,18 +231,18 @@ namespace Simd
                 Convolution5(src + 4 * stride, weights + 20);
         }
 
-        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < width; ++col)
-                    dst[col] += Convolution5x5(src + col, srcStride, weights);
+                    dst[col] += Convolution5x5Forward(src + col, srcStride, weights);
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
-        void NeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
@@ -259,7 +259,7 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)

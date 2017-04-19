@@ -38,7 +38,14 @@
  <li>Improving of SSE4.1 optimization of function HogDirectionHistograms.</li>
  <li>Improving of AVX2 optimization of function HogDirectionHistograms.</li>
  <li>Base implementation, SSE4.1 and AVX2 optimizations of function HogExtractFeatures.</li>
- <li>Improving performance of Simd::Neural::Load.</li>
+ <li>Improving performance of method Neural::Network::Load.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Function NeuralAddConvolution3x3 to NeuralAddConvolution3x3Forward.</li>
+ <li>Function NeuralAddConvolution5x5 to NeuralAddConvolution5x5Forward.</li>
+ <li>Function NeuralAddConvolution3x3Back to NeuralAddConvolution3x3Backward.</li>
+ <li>Function NeuralAddConvolution5x5Back to NeuralAddConvolution5x5Backward.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -48,6 +55,7 @@
  <li>Visual Studio 2017 compiler warning in function Avx2::TexturePerformCompensation.</li>
  <li>Float point number overflow in function Neural::Function::SoftmaxFunction.</li>
  <li>Float point number overflow in function Avx2::HogDirectionHistograms.</li>
+ <li>Compiler error in SimdEnable.h on PowerPC platform.</li>
 </ul>
 
 <h4>Test framework</h4>

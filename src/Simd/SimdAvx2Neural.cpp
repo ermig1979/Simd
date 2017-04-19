@@ -242,14 +242,14 @@ namespace Simd
                 _mm256_fmadd_ps(s4, weights[4], _mm256_mul_ps(Alignr<3>(s0, s4), weights[3]))));
         }
 
-        template <bool align> SIMD_INLINE __m256 Convolution5x5(const float * src, size_t stride, const __m256 * weights)
+        template <bool align> SIMD_INLINE __m256 Convolution5x5Forward(const float * src, size_t stride, const __m256 * weights)
         {
             return _mm256_add_ps(Convolution5<align>(src, weights), _mm256_add_ps(
                 _mm256_add_ps(Convolution5<align>(src + stride, weights + 5), Convolution5<align>(src + 2 * stride, weights + 10)),
                 _mm256_add_ps(Convolution5<align>(src + 3 * stride, weights + 15), Convolution5<align>(src + 4 * stride, weights + 20))));
         }
 
-        template <bool align> void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <bool align> void NeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);
             __m256 tailMask = RightNotZero(width - alignedWidth);
@@ -260,14 +260,14 @@ namespace Simd
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
                     __m256 _dst = Load<align>(dst + col);
-                    _dst = _mm256_add_ps(_dst, Convolution5x5<align>(src + col, srcStride, _weights));
+                    _dst = _mm256_add_ps(_dst, Convolution5x5Forward<align>(src + col, srcStride, _weights));
                     Avx::Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
                     __m256 _dst = Load<false>(dst + col);
-                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5<false>(src + col, srcStride, _weights)));
+                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5Forward<false>(src + col, srcStride, _weights)));
                     Avx::Store<false>(dst + col, _dst);
                 }
                 src += srcStride;
@@ -275,12 +275,12 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        void NeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution5x5<true>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
             else
-                NeuralAddConvolution5x5<false>(src, srcStride, width, height, weights, dst, dstStride);
+                NeuralAddConvolution5x5Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m256 & dst, __m256 * sums)

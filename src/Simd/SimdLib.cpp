@@ -2313,65 +2313,65 @@ SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size,
     simdNeuralAdaptiveGradientUpdate(delta, size, batch, alpha, epsilon, gradient, weight);
 }
 
-SIMD_API void SimdNeuralAddConvolution3x3(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable && width >= Avx::F)
-        Avx::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+        Avx::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable && width >= Sse::F)
-        Sse::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+        Sse::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F)
-        Neon::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+        Neon::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
-        Base::NeuralAddConvolution3x3(src, srcStride, width, height, weights, dst, dstStride);
+        Base::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
-SIMD_API void SimdNeuralAddConvolution5x5(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::F)
-        Avx2::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+        Avx2::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable && width >= Avx::F)
-        Avx::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+        Avx::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable && width >= Sse::F)
-        Sse::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+        Sse::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::F)
-        Neon::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+        Neon::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
-        Base::NeuralAddConvolution5x5(src, srcStride, width, height, weights, dst, dstStride);
+        Base::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
-typedef void(*SimdNeuralAddConvolution3x3BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-SimdNeuralAddConvolution3x3BackPtr simdNeuralAddConvolution3x3Back = SIMD_FUNC3(NeuralAddConvolution3x3Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+typedef void(*SimdNeuralAddConvolution3x3BackwardPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdNeuralAddConvolution3x3BackwardPtr simdNeuralAddConvolution3x3Backward = SIMD_FUNC3(NeuralAddConvolution3x3Backward, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdNeuralAddConvolution3x3Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
-    simdNeuralAddConvolution3x3Back(src, srcStride, width, height, weights, dst, dstStride);
+    simdNeuralAddConvolution3x3Backward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
-typedef void(*SimdNeuralAddConvolution5x5BackPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
-SimdNeuralAddConvolution5x5BackPtr simdNeuralAddConvolution5x5Back = SIMD_FUNC3(NeuralAddConvolution5x5Back, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+typedef void(*SimdNeuralAddConvolution5x5BackwardPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdNeuralAddConvolution5x5BackwardPtr simdNeuralAddConvolution5x5Backward = SIMD_FUNC3(NeuralAddConvolution5x5Backward, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdNeuralAddConvolution5x5Back(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
-    simdNeuralAddConvolution5x5Back(src, srcStride, width, height, weights, dst, dstStride);
+    simdNeuralAddConvolution5x5Backward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
 SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)

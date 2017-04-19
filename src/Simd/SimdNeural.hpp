@@ -695,11 +695,11 @@ namespace Simd
 
                         if (_core.width == 3 && _core.height == 3)
                         {
-                            ::SimdNeuralAddConvolution3x3(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                            ::SimdNeuralAddConvolution3x3Forward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
                         else if (_core.width == 5 && _core.height == 5)
                         {
-                            ::SimdNeuralAddConvolution5x5(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                            ::SimdNeuralAddConvolution5x5Forward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
                         else
                         {
@@ -752,11 +752,11 @@ namespace Simd
 
                         if (_core.width == 3 && _core.height == 3)
                         {
-                            ::SimdNeuralAddConvolution3x3Back(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
+                            ::SimdNeuralAddConvolution3x3Backward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
                         }
                         else if (_core.width == 5 && _core.height == 5)
                         {
-                            ::SimdNeuralAddConvolution5x5Back(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
+                            ::SimdNeuralAddConvolution5x5Backward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
                         }
                         else
                         {

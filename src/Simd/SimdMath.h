@@ -439,6 +439,7 @@ namespace Simd
         template <int index> static SIMD_INLINE __m128 Broadcast(__m128 a)
         {
             return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
+            //return _mm_shuffle_ps(a, a, index*0x55);
         }
 	}
 #endif// SIMD_SSE2_ENABLE

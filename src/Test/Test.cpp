@@ -216,10 +216,10 @@ namespace Test
     TEST_ADD_GROUP(NeuralDerivativeRelu);
     TEST_ADD_GROUP(NeuralUpdateWeights);
     TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Back);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Back);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Forward);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Forward);
+    TEST_ADD_GROUP(NeuralAddConvolution3x3Backward);
+    TEST_ADD_GROUP(NeuralAddConvolution5x5Backward);
     TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
     TEST_ADD_GROUP(NeuralMax2x2);
