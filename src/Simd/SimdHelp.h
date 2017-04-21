@@ -35,7 +35,7 @@
     This documentation have been generated using the tool <a href="http://www.doxygen.org">doxygen</a>.
     It contains a detailed description of all classes and functions of the %Simd Library.
     If you have downloaded the %Simd Library package, you actually have a local copy of these pages in the
-    \c simd/doc/help/ directory.
+    \c simd/docs/help/ directory.
 
     Use the menu above to navigate through the documentation pages.
     As a first step, you may look at the list of <a href="modules.html">available modules</a>.
@@ -71,8 +71,7 @@
      - \c simd/data/cascade/ - contains OpenCV cascades (HAAR and LBP).
      - \c simd/data/image/ - contains image samples.
      - \c simd/data/network/ - contains examples of trained networks.
-     - \c simd/doc/ - contains documentation of the library.
-     - \c simd/doc/src/ - contains scripts for generation of this documentation by <a href="http://www.doxygen.org">doxygen</a>.
+     - \c simd/docs/ - contains documentation of the library.
 
 	\section s2 The library building for Windows
 

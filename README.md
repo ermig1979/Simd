@@ -31,8 +31,7 @@ The Simd Library has next folder's structure:
 * `simd/data/cascade/` - contains OpenCV cascades (HAAR and LBP).
 * `simd/data/image/` - contains image samples.
 * `simd/data/network/` - contains examples of trained networks.
-* `simd/doc/` - contains documentation of the library.
-* `simd/doc/src/` - contains scripts for generation of this documentation by doxygen.
+* `simd/docs/` - contains documentation of the library.
 
 The library building for Windows
 ================================

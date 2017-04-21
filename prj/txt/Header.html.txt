@@ -1,0 +1,26 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
+<title>Simd Library Documentation.</title>
+<link href="doxygen.css" rel="stylesheet" type="text/css">
+<link href="tabs.css" rel="stylesheet" type="text/css">
+</head>
+
+<body><table align="center" cellpadding="12" cellspacing="0" width="1024"><tr><td>
+
+<center>
+<img width="200" height="100" src="../logo.png">
+<h1>Simd Library Documentation.</h1>
+<a href="../index.html">Home</a> |
+<a href="../2017.html">Release Notes</a> | 
+<a href="../download.html">Download</a> |  
+<a href="index.html">Documentation</a> |  
+<a href="http://sourceforge.net/p/simd/discussion/english/" target="_top">Forum</a> |  
+<a href="http://sourceforge.net/projects/simd/?source=directory" target="_top">SourceForge</a> |
+<a href="http://github.com/ermig1979/Simd" target="_top">GitHub</a> 
+</center>
+
+</td></tr>
+<tr><td>
+
+
