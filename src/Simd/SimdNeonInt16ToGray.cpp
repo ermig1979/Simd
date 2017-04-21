@@ -39,7 +39,7 @@ namespace Simd
         {
             assert(width >= HA);
             if (align)
-                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width, HA);
             for (size_t row = 0; row < height; ++row)
