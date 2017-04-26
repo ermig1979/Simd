@@ -1,13 +1,19 @@
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<meta name="generator" content="Doxygen $doxygenversion"/>
 <title>Simd Library Documentation.</title>
 <link href="doxygen.css" rel="stylesheet" type="text/css">
 <link href="tabs.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="dynsections.js"></script>
 </head>
-
+<style>
+  code {font-size:85%; color:black; background-color:#F8F8FF; border: 1px solid #E0E0F0; padding: 1px 1px; margin: 1px 2px 1px 2px;}
+</style>
 <body><table align="center" cellpadding="12" cellspacing="0" width="1024"><tr><td>
-
 <center>
 <img width="200" height="100" src="../logo.png">
 <h1>Simd Library Documentation.</h1>
@@ -18,9 +24,9 @@
 <a href="http://sourceforge.net/p/simd/discussion/english/" target="_top">Forum</a> |  
 <a href="http://sourceforge.net/projects/simd/?source=directory" target="_top">SourceForge</a> |
 <a href="http://github.com/ermig1979/Simd" target="_top">GitHub</a> 
-</center>
-
-</td></tr>
-<tr><td>
-
+</center> </td></tr> <tr><td>
+<div id="top"> <div class="content" id="content"> <div class="container"> <div class="row"> 
+ <div class="col-sm-12 panel " style="padding-bottom: 15px;"> <div style="margin-bottom: 15px;">
+					
+					
 

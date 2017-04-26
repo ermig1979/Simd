@@ -1,0 +1,11 @@
+<div id="nav-path" class="navpath">
+  <ul>
+    <li class="footer">$generatedby
+    <a href="http://www.doxygen.org/index.html">
+    <img class="footer" src="$relpath^doxygen.png" alt="doxygen"/></a> $doxygenversion </li>
+  </ul>
+</div></div></div></div></div></div>
+</td> </tr> </table>
+</body>
+</html>
+
