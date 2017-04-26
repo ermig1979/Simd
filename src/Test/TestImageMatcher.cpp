@@ -1,5 +1,5 @@
 /*
-* Tests for Simd Library (http://simd.sourceforge.net).
+* Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *

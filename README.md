@@ -1,7 +1,7 @@
 Introduction
 ============
 
-The [Simd Library](http://simd.sourceforge.net) is a free open source image processing library, designed for C and C++ programmers. 
+The [Simd Library](http://ermig1979.github.io/Simd) is a free open source image processing library, designed for C and C++ programmers. 
 It provides many useful high performance algorithms for image processing such as: 
 pixel format conversion, image scaling and filtration, extraction of statistic information from images, motion detection,
 object detection (HAAR and LBP classifier cascades) and classification, neural network.
@@ -104,7 +104,7 @@ And to use the library from C++ code you must include:
 
     #include "Simd/SimdLib.hpp"
 
-In order to use [Simd::Detection](http://simd.sourceforge.net/help/struct_simd_1_1_detection.html) you must include:
+In order to use [Simd::Detection](http://ermig1979.github.io/Simd/help/struct_simd_1_1_detection.html) you must include:
 
     #include "Simd/SimdDetection.hpp"
 	

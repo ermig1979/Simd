@@ -1,5 +1,5 @@
 /*
-* Simd Library (http://simd.sourceforge.net).
+* Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
