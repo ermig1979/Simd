@@ -44,6 +44,17 @@ namespace Test
         FPoint fp(1.4, 3.6);
     }
 
+    static void TestRectangle()
+    {
+        typedef Simd::Point<ptrdiff_t> Point;
+        typedef Simd::Rectangle<ptrdiff_t> Rect;
+
+        Rect r1(0, 0, 100, 100), r2(10, 10, 90, 90);
+        Point p(50, 50);
+        r1 &= r2;
+        r1 &= p;
+    }
+
     static void TestView()
     {
         typedef Simd::View<Simd::Allocator> View;
@@ -87,6 +98,8 @@ namespace Test
     void CheckCpp()
     {
         TestPoint();
+
+        TestRectangle();
 
         TestView();
 

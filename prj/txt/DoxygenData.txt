@@ -34,11 +34,11 @@
 
 	To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2015 (or 2017). 
 	These project files are in the directory: 
-	`simd/prj/vs2015/.`
+	\n`simd/prj/vs2015/.`
 	\n By default the library is built as	a DLL (Dynamic Linked Library).
 	You also may build it as a static library. 
-	To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also uncomment \#define SIMD_STATIC in file:
-	`simd/src/Simd/SimdConfig.h.`
+	To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also define macro `SIMD_STATIC` in file:
+	\n`simd/src/Simd/SimdConfig.h.`
 
     \section s3 The library building for Android
 
@@ -99,16 +99,16 @@
 
     \section s6 Interaction with OpenCV:
 
-    If you need use mutual conversion between %Simd and OpenCV types you just have to define macro SIMD_OPENCV_ENABLE before including of %Simd headers:
+    If you need use mutual conversion between %Simd and OpenCV types you just have to define macro `SIMD_OPENCV_ENABLE` before including of %Simd headers:
     \code
     #include <opencv2/core/core.hpp>
     #define SIMD_OPENCV_ENABLE
     #include "Simd/SimdLib.hpp"
     \endcode
     And you can converse next types:
-     - `cv::Point`, `cv::Size` <--> `Simd::Point`
-     - `cv::Rect` <--> `Simd::Rectangle`
-     - `cv::Mat` <--> `Simd::View`
+     - `cv::Point`, `cv::Size` <--> Simd::Point
+     - `cv::Rect` <--> Simd::Rectangle
+     - `cv::Mat` <--> Simd::View
 
     \section s7 Test Framework
 

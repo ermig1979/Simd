@@ -1,6 +1,6 @@
 <div id="nav-path" class="navpath">
   <ul>
-    <li class="footer">$generatedby
+    <li class="footer">Generated for Simd Library by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="$relpath^doxygen.png" alt="doxygen"/></a> $doxygenversion </li>
   </ul>
