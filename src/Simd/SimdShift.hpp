@@ -146,6 +146,8 @@ namespace Simd
             Build(_background, ::SimdReduce2x2);
         }
 
+        static const ptrdiff_t REGION_CORRELATION_AREA_MIN = 25;
+
         /*!
             Estimates shift of current image relative to background image.
 
@@ -153,17 +155,18 @@ namespace Simd
             \param [in] region - a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region.
             \param [in] maxShift - a 2D-point which characterizes maximal possible shift of the region (along X and Y axes).
             \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+            \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. By default is equal to 25.
             \return a result of shift estimation.
         */
-        bool Estimate(const View & current, const Rect & region, const Point & maxShift, double hiddenAreaPenalty = 0)
+        bool Estimate(const View & current, const Rect & region, const Point & maxShift, double hiddenAreaPenalty = 0, ptrdiff_t regionAreaMin = REGION_CORRELATION_AREA_MIN)
         {
             assert(current.Size() == region.Size() && region.Area() > 0);
             assert(_current.Size() && _current[0].width >= current.width && _current[0].height >= current.height);
 
-            if (region.Area() < REGION_CORRELATION_AREA_MIN)
+            if (region.Area() < regionAreaMin)
                 return false;
 
-            InitLevels(region, maxShift);
+            InitLevels(region, maxShift, regionAreaMin);
             SetCurrent(current, region);
 
             Point shift;
@@ -185,11 +188,12 @@ namespace Simd
             \param [in] region - a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region.
             \param [in] maxShift - a maximal distance which characterizes maximal possible shift of the region.
             \param [in] hiddenAreaPenalty - a parameter used to restrict searching of the shift at the border of background image.
+            \param [in] regionAreaMin - a parameter used to set minimal area of region use for shift estimation. By default is equal to 25.
             \return a result of shift estimation.
         */
-        bool Estimate(const View & current, const Rect & region, int maxShift, double hiddenAreaPenalty = 0)
+        bool Estimate(const View & current, const Rect & region, int maxShift, double hiddenAreaPenalty = 0, ptrdiff_t regionAreaMin = REGION_CORRELATION_AREA_MIN)
         {
-            return Estimate(current, region, Point(maxShift, maxShift), hiddenAreaPenalty);
+            return Estimate(current, region, Point(maxShift, maxShift), hiddenAreaPenalty, regionAreaMin);
         }
 
         /*!
@@ -236,9 +240,8 @@ namespace Simd
                 return 1.0 - ::sqrt(difference) / 255;
         }
 
-    private:
-        static const ptrdiff_t REGION_CORRELATION_AREA_MIN = 25;
 
+    private:
         typedef Simd::Pyramid<A> Pyramid;
 
         Pyramid _background;
@@ -441,7 +444,7 @@ namespace Simd
             return size & ~(align - 1);
         }
 
-        void InitLevels(const Rect & region, const Point & maxShift)
+        void InitLevels(const Rect & region, const Point & maxShift, ptrdiff_t regionAreaMin)
         {
             const Point & size = _current[0].Size();
             assert(region.Left() >= 0 && region.Top() >= 0 && region.Right() <= size.x && region.Bottom() <= size.y);
@@ -450,7 +453,7 @@ namespace Simd
             for (size_t i = 0; i < _current.Size(); ++i)
             {
                 Rect rect(region.left >> i, region.top >> i, region.right >> i, region.bottom >> i);
-                if (rect.Area() >= REGION_CORRELATION_AREA_MIN)
+                if (rect.Area() >= regionAreaMin)
                     levelCount = i + 1;
             }
             assert(levelCount);

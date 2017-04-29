@@ -655,7 +655,7 @@ namespace Simd
                 \param [in] bias - a boolean flag (enabling of bias). By default its True.
                 \param [in] connection - a table of connections between input and output channels. By default all channels are connected.
             */
-            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, Size coreSize, 
+            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, const Size & coreSize, 
                 bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
             {

@@ -86,10 +86,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a3d7a25cb6a9f5e4e593fd4dd2abacaef"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aed64d51cb0bda22fa0bf1fe75b02a715"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#aed64d51cb0bda22fa0bf1fe75b02a715">SetBackground</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;background)</td></tr>
 <tr class="separator:aed64d51cb0bda22fa0bf1fe75b02a715"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2486dca9f3e896afeb3df39208bb02c2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a2486dca9f3e896afeb3df39208bb02c2">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;maxShift, double hiddenAreaPenalty=0)</td></tr>
-<tr class="separator:a2486dca9f3e896afeb3df39208bb02c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a102fca323d0293ea1c04535c1f1dd0f5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a102fca323d0293ea1c04535c1f1dd0f5">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, int maxShift, double hiddenAreaPenalty=0)</td></tr>
-<tr class="separator:a102fca323d0293ea1c04535c1f1dd0f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
+<tr class="separator:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a06da86af4457f22f2e90c1e703fba677"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a06da86af4457f22f2e90c1e703fba677">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, int maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
+<tr class="separator:a06da86af4457f22f2e90c1e703fba677"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d3148e9af959bbb13fce12257493faa"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a3d3148e9af959bbb13fce12257493faa">Shift</a> () const</td></tr>
 <tr class="separator:a3d3148e9af959bbb13fce12257493faa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a672ebce9c5ffa7e13a21c522b449941a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_shift_detector.html#a90124e23390c2e0389b8ffd488c07295">FPoint</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a672ebce9c5ffa7e13a21c522b449941a">ProximateShift</a> () const</td></tr>
@@ -326,8 +326,8 @@ int main()
 
 </div>
 </div>
-<a id="a2486dca9f3e896afeb3df39208bb02c2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2486dca9f3e896afeb3df39208bb02c2">&#9670;&nbsp;</a></span>Estimate() <span class="overload">[1/2]</span></h2>
+<a id="acd1e8f5d44376cb3a8b8bc4f7e876e1f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd1e8f5d44376cb3a8b8bc4f7e876e1f">&#9670;&nbsp;</a></span>Estimate() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -354,7 +354,13 @@ int main()
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>hiddenAreaPenalty</em> = <code>0</code>&#160;</td>
+          <td class="paramname"><em>hiddenAreaPenalty</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>regionAreaMin</em> = <code>REGION_CORRELATION_AREA_MIN</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -370,6 +376,7 @@ int main()
     <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- a 2D-point which characterizes maximal possible shift of the region (along X and Y axes). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. By default is equal to 25. </td></tr>
   </table>
   </dd>
 </dl>
@@ -377,8 +384,8 @@ int main()
 
 </div>
 </div>
-<a id="a102fca323d0293ea1c04535c1f1dd0f5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a102fca323d0293ea1c04535c1f1dd0f5">&#9670;&nbsp;</a></span>Estimate() <span class="overload">[2/2]</span></h2>
+<a id="a06da86af4457f22f2e90c1e703fba677"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a06da86af4457f22f2e90c1e703fba677">&#9670;&nbsp;</a></span>Estimate() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -405,7 +412,13 @@ int main()
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">double&#160;</td>
-          <td class="paramname"><em>hiddenAreaPenalty</em> = <code>0</code>&#160;</td>
+          <td class="paramname"><em>hiddenAreaPenalty</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>regionAreaMin</em> = <code>REGION_CORRELATION_AREA_MIN</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -421,6 +434,7 @@ int main()
     <tr><td class="paramdir">[in]</td><td class="paramname">region</td><td>- a region at the background where the algorithm start to search current image. Estimated shift is taken relative of the region. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maxShift</td><td>- a maximal distance which characterizes maximal possible shift of the region. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">hiddenAreaPenalty</td><td>- a parameter used to restrict searching of the shift at the border of background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">regionAreaMin</td><td>- a parameter used to set minimal area of region use for shift estimation. By default is equal to 25. </td></tr>
   </table>
   </dd>
 </dl>
