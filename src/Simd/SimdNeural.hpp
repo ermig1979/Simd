@@ -69,12 +69,6 @@ namespace Simd
                 memset(vector.data(), 0, vector.size()*sizeof(T));
             }
 
-            SIMD_INLINE void AddTo(const Vector & src, Vector & dst)
-            {
-                const float one = 1;
-                ::SimdNeuralAddVectorMultipliedByValue(src.data(), src.size(), &one, dst.data());
-            }
-
             SIMD_INLINE int RandomUniform(int min, int max)
             {
                 static std::mt19937 gen(1);
@@ -1073,12 +1067,9 @@ namespace Simd
                     for (size_t i = 0; i < src.size(); i++)
                         ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
-
                 if (_bias.size())
-                {
-                    for (size_t i = 0; i < sum.size(); ++i)
-                        sum[i] += _bias[i];
-                }
+                    ::SimdNeuralAddVector(sum.data(), sum.size(), _bias.data());
+
                 _function.function(sum.data(), sum.size(), dst.data());
             }
 
@@ -1098,10 +1089,7 @@ namespace Simd
                     ::SimdNeuralAddVectorMultipliedByValue(&currDelta[0], _dst.width, &prevDst[i], &dWeight[i*_dst.width]);
 
                 if (_bias.size())
-                {
-                    for (ptrdiff_t i = 0; i < _dst.width; ++i)
-                        dBias[i] += currDelta[i];
-                }
+                    ::SimdNeuralAddVector(currDelta.data(), _dst.width, dBias.data());
             }
 
             size_t FanSrc() const override
@@ -1811,8 +1799,8 @@ namespace Simd
                     Layer & layer = *_layers[l];
                     for (size_t t = 1; t < layer._common.size(); ++t)
                     {
-                        Detail::AddTo(layer._common[t].dWeight, layer._common[0].dWeight);
-                        Detail::AddTo(layer._common[t].dBias, layer._common[0].dBias);
+                        ::SimdNeuralAddVector(layer._common[t].dWeight.data(), layer._common[t].dWeight.size(), layer._common[0].dWeight.data());
+                        ::SimdNeuralAddVector(layer._common[t].dBias.data(), layer._common[t].dBias.size(), layer._common[0].dBias.data());
                     }
                     Detail::UpdateWeight<type>(options, layer._common[0].dWeight, layer._gWeight, layer._weight);
                     Detail::UpdateWeight<type>(options, layer._common[0].dBias, layer._gBias, layer._bias);

@@ -297,6 +297,82 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncAddVec
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, float * dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncAddVec(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, (float*)dstDst.data);
+            }
+        };
+    }
+#define FUNC_ADDVEC(function) FuncAddVec(function, #function)
+
+    bool NeuralAddVectorAutoTest(int size, float eps, const FuncAddVec & f1, const FuncAddVec & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(src);
+
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(dstSrc);
+
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dstSrc, dstDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dstSrc, dstDst2));
+
+        result = Compare(dstDst1, dstDst2, eps, true);
+
+        return result;
+    }
+
+    bool NeuralAddVectorAutoTest(float eps, const FuncAddVec & f1, const FuncAddVec & f2)
+    {
+        bool result = true;
+
+        result = result && NeuralAddVectorAutoTest(W*H, eps, f1, f2);
+        result = result && NeuralAddVectorAutoTest(W*H + O, eps, f1, f2);
+        result = result && NeuralAddVectorAutoTest(W*H - O, eps, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralAddVectorAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Base::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Sse::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+#endif
+
+        return result;
+    }
+
+
 	namespace
 	{
 		struct FuncAF
@@ -1296,6 +1372,57 @@ namespace Test
         bool result = true;
 
         result = result && NeuralAddVectorMultipliedByValueDataTest(create, DH, EPS, FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
+
+        return result;
+    }
+
+    bool NeuralAddVectorDataTest(bool create, int size, float eps, const FuncAddVec & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(src);
+            FillRandom32f(dstSrc);
+
+            TEST_SAVE(src);
+            TEST_SAVE(dstSrc);
+
+            f.Call(src, dstSrc, dstDst1);
+
+            TEST_SAVE(dstDst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(dstSrc);
+
+            TEST_LOAD(dstDst1);
+
+            f.Call(src, dstSrc, dstDst2);
+
+            TEST_SAVE(dstDst2);
+
+            result = result && Compare(dstDst1, dstDst2, eps, true);
+        }
+
+        return result;
+    }
+
+    bool NeuralAddVectorDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && NeuralAddVectorDataTest(create, DH, EPS, FUNC_ADDVEC(SimdNeuralAddVector));
 
         return result;
     }

@@ -2963,6 +2963,27 @@ extern "C"
 
     /*! @ingroup neural
 
+        \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
+
+        \short Adds the a vector to given vector.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] += src[i];
+        \endverbatim
+
+        \note This function is used in Simd::Neural.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of the arrays.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
+    */
+    SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst);
+
+    /*! @ingroup neural
+
         \fn void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 
         \short Updates ANN weights.
