@@ -1082,7 +1082,7 @@ namespace Simd
                         ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
                 }
                 if (_bias.size())
-                    ::SimdNeuralAddVector(sum.data(), sum.size(), _bias.data());
+                    ::SimdNeuralAddVector(_bias.data(), sum.size(), sum.data());
 
                 _function.function(sum.data(), sum.size(), dst.data());
             }
