@@ -689,7 +689,11 @@ namespace Simd
                         const float * psrc = _padded.Get(padded, 0, 0, sc);
                         float * psum = _dst.Get(sum, 0, 0, dc);
 
-                        if (_core.width == 3 && _core.height == 3)
+                        if (_core.width == 1 && _core.height == 1)
+                        {
+                            ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
+                        }
+                        else if (_core.width == 3 && _core.height == 3)
                         {
                             ::SimdNeuralAddConvolution3x3Forward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
                         }
@@ -746,7 +750,11 @@ namespace Simd
                         const float * psrc = _dst.Get(currDelta, 0, 0, dc);
                         float * pdst = _padded.Get(prevDelta, 0, 0, sc);
 
-                        if (_core.width == 3 && _core.height == 3)
+                        if (_core.width == 1 && _core.height == 1)
+                        {
+                            ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, pdst);
+                        }
+                        else if (_core.width == 3 && _core.height == 3)
                         {
                             ::SimdNeuralAddConvolution3x3Backward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
                         }
@@ -782,6 +790,12 @@ namespace Simd
                         const float * prevo = _padded.Get(prevDst, 0, 0, sc);
                         float * sums = _core.Get(dWeight, 0, 0, _src.depth*dc + sc);
 
+                        if (_core.width == 1 && _core.height == 1)
+                        {
+                            float sum;
+                            ::SimdNeuralProductSum(_padded.Get(prevDst, 0, 0, sc), delta, _dst.width*_dst.height, &sum);
+                            _core.Get(dWeight, 0, 0, _src.depth*dc + sc)[0] += sum;
+                        }
                         if (_core.width == 3 && _core.height == 3)
                         {
                             ::SimdNeuralAddConvolution3x3Sum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
