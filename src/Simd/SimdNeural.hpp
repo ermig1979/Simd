@@ -1362,6 +1362,7 @@ namespace Simd
             size_t batchSize; /*!< \brief A batch size. */
             float alpha; /*!< \brief Describes training speed. */
             float epsilon; /*!< \brief Used to prevent division by zero. */
+            bool shuffle; /*!< \brief A flag to shuffle training set. */
 
             /*!
                 \short Default constructor.
@@ -1376,6 +1377,7 @@ namespace Simd
                 , batchSize(64)
                 , alpha(0.01f)
                 , epsilon(0.0001f)
+                , shuffle(true)
             {
             }
         };
@@ -1528,11 +1530,17 @@ namespace Simd
                 if (options.epochStart == 0)
                     InitWeight(options);
 
+                Labels index(src.size());
+                for (size_t i = 0; i < index.size(); ++i)
+                    index[i] = i;
+                if (options.shuffle)
+                    std::random_shuffle(index.begin(), index.end());
+
                 for (size_t epoch = options.epochStart; epoch < options.epochFinish; ++epoch)
                 {
                     for (size_t i = 0; i < src.size(); i += options.batchSize)
                     {
-                        Propagate(src, dst, i, std::min(i + options.batchSize, src.size()), options);
+                        Propagate(src, dst, index, i, std::min(i + options.batchSize, src.size()), options);
                         UpdateWeight(options);
                     }
                     logger();
@@ -1756,7 +1764,7 @@ namespace Simd
                     _layers[i]->Backward(_layers[i + 1]->Delta(thread), thread);
             }
 
-            void Propagate(const Vectors & src, const Vectors & dst, size_t start, size_t finish, const TrainOptions & options)
+            void Propagate(const Vectors & src, const Vectors & dst, const Labels & index, size_t start, size_t finish, const TrainOptions & options)
             {
                 SIMD_CHECK_PERFORMANCE();
 
@@ -1764,8 +1772,8 @@ namespace Simd
                 {
                     for (size_t i = begin; i < end; ++i)
                     {
-                        Vector current = Forward(src[i], thread, Layer::Train);
-                        Backward(current, dst[i], thread, options);
+                        Vector current = Forward(src[index[i]], thread, Layer::Train);
+                        Backward(current, dst[index[i]], thread, options);
                     }
                 }, options.threadNumber);
             }
