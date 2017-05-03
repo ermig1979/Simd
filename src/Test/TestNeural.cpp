@@ -372,6 +372,79 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncAddVal
+        {
+            typedef void(*FuncPtr)(const float * value, float * dst, size_t size);
+
+            FuncPtr func;
+            String description;
+
+            FuncAddVal(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const float & value, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(&value, (float*)dstDst.data, dstDst.width);
+            }
+        };
+    }
+#define FUNC_ADDVAL(function) FuncAddVal(function, #function)
+
+    bool NeuralAddValueAutoTest(int size, float eps, const FuncAddVal & f1, const FuncAddVal & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(dstSrc);
+
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        const float value = 3.14f;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(value, dstSrc, dstDst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, dstSrc, dstDst2));
+
+        result = Compare(dstDst1, dstDst2, eps, true);
+
+        return result;
+    }
+
+    bool NeuralAddValueAutoTest(float eps, const FuncAddVal & f1, const FuncAddVal & f2)
+    {
+        bool result = true;
+
+        result = result && NeuralAddValueAutoTest(W*H, eps, f1, f2);
+        result = result && NeuralAddValueAutoTest(W*H + O, eps, f1, f2);
+        result = result && NeuralAddValueAutoTest(W*H - O, eps, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralAddValueAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Base::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Sse::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
+#endif
+
+        return result;
+    }
 
 	namespace
 	{
@@ -1423,6 +1496,55 @@ namespace Test
         bool result = true;
 
         result = result && NeuralAddVectorDataTest(create, DH, EPS, FUNC_ADDVEC(SimdNeuralAddVector));
+
+        return result;
+    }
+
+    bool NeuralAddValueDataTest(bool create, int size, float eps, const FuncAddVal & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+
+        const float value = 3.14f;
+
+        View dstSrc(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dstDst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        if (create)
+        {
+            FillRandom32f(dstSrc);
+
+            TEST_SAVE(dstSrc);
+
+            f.Call(value, dstSrc, dstDst1);
+
+            TEST_SAVE(dstDst1);
+        }
+        else
+        {
+            TEST_LOAD(dstSrc);
+
+            TEST_LOAD(dstDst1);
+
+            f.Call(value, dstSrc, dstDst2);
+
+            TEST_SAVE(dstDst2);
+
+            result = result && Compare(dstDst1, dstDst2, eps, true);
+        }
+
+        return result;
+    }
+
+    bool NeuralAddValueDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && NeuralAddValueDataTest(create, DH, EPS, FUNC_ADDVAL(SimdNeuralAddValue));
 
         return result;
     }

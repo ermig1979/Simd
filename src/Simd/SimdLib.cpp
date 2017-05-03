@@ -2233,6 +2233,14 @@ SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
     simdNeuralAddVector(src, size, dst);
 }
 
+typedef void(*SimdNeuralAddValuePtr) (const float * value, float * dst, size_t size);
+SimdNeuralAddValuePtr simdNeuralAddValue = SIMD_FUNC2(NeuralAddValue, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
+{
+    simdNeuralAddValue(value, dst, size);
+}
+
 typedef void(*SimdNeuralSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
 SimdNeuralSigmoidPtr simdNeuralSigmoid = SIMD_FUNC0(NeuralSigmoid);
 

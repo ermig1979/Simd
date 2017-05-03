@@ -2965,7 +2965,7 @@ extern "C"
 
         \fn void SimdNeuralAddVector(const float * src, size_t size, float * dst);
 
-        \short Adds the a vector to given vector.
+        \short Adds a vector to given vector.
 
         All arrays must have the same size.
 
@@ -2981,6 +2981,25 @@ extern "C"
         \param [in, out] dst - a pointer to cumulative 32-bit float array.
     */
     SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralAddValue(const float * value, float * dst, size_t size);
+
+        \short Adds a value to each elements of given vector.
+
+        For every element:
+        \verbatim
+        dst[i] += value;
+        \endverbatim
+
+        \note This function is used in Simd::Neural.
+
+        \param [in] value - a pointer to the scalar 32-bit float value.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array.
+        \param [in] size - a size of the array.
+    */
+    SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size);
 
     /*! @ingroup neural
 

@@ -719,13 +719,7 @@ namespace Simd
                         }
                     }
                     if (_bias.size())
-                    {
-                        float bias = _bias[dc];
-                        size_t size = _dst.Area();
-                        float * psum = _dst.Get(sum, 0, 0, dc);
-                        for (size_t i = 0; i < size; ++i)
-                            psum[i] += bias;
-                    }
+                        ::SimdNeuralAddValue(_bias.data() + dc, _dst.Get(sum, 0, 0, dc), _dst.Area());
                 }
                 _function.function(sum.data(), sum.size(), dst.data());
             }
@@ -793,8 +787,8 @@ namespace Simd
                         if (_core.width == 1 && _core.height == 1)
                         {
                             float sum;
-                            ::SimdNeuralProductSum(_padded.Get(prevDst, 0, 0, sc), delta, _dst.width*_dst.height, &sum);
-                            _core.Get(dWeight, 0, 0, _src.depth*dc + sc)[0] += sum;
+                            ::SimdNeuralProductSum(prevo, delta, _dst.width*_dst.height, &sum);
+                            sums[0] += sum;
                         }
                         if (_core.width == 3 && _core.height == 3)
                         {

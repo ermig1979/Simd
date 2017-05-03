@@ -206,6 +206,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralProductSum);
     TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
     TEST_ADD_GROUP(NeuralAddVector);
+    TEST_ADD_GROUP(NeuralAddValue);
     TEST_ADD_GROUP(NeuralSigmoid);
     TEST_ADD_GROUP(NeuralRoughSigmoid);
     TEST_ADD_GROUP(NeuralRoughSigmoid2);

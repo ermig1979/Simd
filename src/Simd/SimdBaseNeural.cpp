@@ -103,6 +103,22 @@ namespace Simd
                 dst[i] += src[i];
         }
 
+        void NeuralAddValue(const float * value, float * dst, size_t size)
+        {
+            const float val = value[0];
+            size_t aligned = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < aligned; i += 4)
+            {
+                dst[i + 0] += val;
+                dst[i + 1] += val;
+                dst[i + 2] += val;
+                dst[i + 3] += val;
+            }
+            for (; i < size; ++i)
+                dst[i] += val;
+        }
+
 		void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			float s = slope[0];
