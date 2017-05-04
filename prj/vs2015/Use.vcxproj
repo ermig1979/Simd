@@ -5,9 +5,9 @@
     <Import Project="Ocv.props" Condition="exists('Ocv.props')" Label="Ocv" />
   </ImportGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{423128F2-9D4E-408D-9123-49CE57A32B0A}</ProjectGuid>
+    <ProjectGuid>{3FCB4B0B-9A10-46AB-9BC7-C5492492DF79}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Test</RootNamespace>
+    <RootNamespace>Use</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -22,16 +22,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Test\Test*.h" />
-    <ClCompile Include="..\..\src\Test\Test*.cpp" />
-    <ClCompile Include="..\..\src\Test\Test*.c" />
+    <ClInclude Include="..\..\src\Use\Use*.h" />
+    <ClCompile Include="..\..\src\Use\Use*.cpp" />
+    <ClCompile Include="..\..\src\Use\Use*.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Simd.vcxproj">
       <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Alg.vcxproj">
-      <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
