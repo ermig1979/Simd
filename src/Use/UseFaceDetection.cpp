@@ -23,15 +23,18 @@
 *
 * In order to be enable of this example for Visual Studio 2015 you have to rename file 'Ocv.prop.default' into 'Ocv.prop' and set there correct paths to OpenCV.
 */
-#ifdef SIMD_OPENCV_ENABLE
-#undef SIMD_OPENCV_ENABLE
+#if !(defined(SIMD_USE_INSIDE) && !defined(SIMD_OPENCV_ENABLE))
+#ifdef SIMD_USE_INSIDE
 #define main UseFaceDetection
+#endif
 
 #include <iostream>
 #include <string>
 
 #include "opencv2/opencv.hpp"
+#ifndef SIMD_OPENCV_ENABLE
 #define SIMD_OPENCV_ENABLE
+#endif
 #include "Simd/SimdDetection.hpp"
 #include "Simd/SimdDrawing.hpp"
 
@@ -88,5 +91,5 @@ int main(int argc, char * argv[])
     return 0;
 }
 
-#endif //SIMD_OPENCV_ENABLE
+#endif
 
