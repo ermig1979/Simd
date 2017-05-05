@@ -31,6 +31,8 @@
 #include <map>
 #include <memory>
 
+#include <limits.h>
+
 namespace Simd
 {
 	/*! @ingroup cpp_detection
