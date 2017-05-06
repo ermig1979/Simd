@@ -26,6 +26,8 @@
 
 #include "Simd/SimdView.hpp"
 
+#include <vector>
+
 namespace Simd
 {
     /*! @ingroup cpp_drawing
@@ -202,6 +204,52 @@ namespace Simd
         DrawLine(canvas, rect.right, rect.top, rect.right, rect.bottom, color, width);
         DrawLine(canvas, rect.right, rect.bottom, rect.left, rect.bottom, color, width);
         DrawLine(canvas, rect.left, rect.bottom, rect.left, rect.top, color, width);
+    }
+
+    /*! @ingroup cpp_drawing
+
+        \fn void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
+
+        \short Draws a filled polygon at the image.
+
+        \param [out] canvas - a canvas (image where we draw filled polygon).
+        \param [in] polygon - a polygon.
+        \param [in] color - a color of the rectangle's frame.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
+    {
+        typedef Simd::Point<ptrdiff_t> Point;
+        typedef std::vector<ptrdiff_t> Vector;
+
+        ptrdiff_t top = canvas.height, bottom = 0;
+        for (size_t i = 0; i < polygon.size(); ++i)
+        {
+            top = std::min(top, polygon[i].y);
+            bottom = std::max(bottom, polygon[i].y);
+        }
+        top = std::max<ptrdiff_t>(0, top);
+        bottom = std::min<ptrdiff_t>(bottom, canvas.height);
+
+        for (ptrdiff_t y = top; y < bottom; ++y)
+        {
+            Vector intersections;
+            for (size_t i = 0; i < polygon.size(); ++i)
+            {
+                const Point & p0 = (i ? polygon[i - 1] : polygon.back()), p1 = polygon[i];
+                if (y >= p0.y && y < p1.y || y >= p1.y && y < p0.y)
+                    intersections.push_back(p0.x + (y - p0.y)*(p1.x - p0.x) / (p1.y - p0.y));
+            }
+            assert(intersections.size() % 2 == 0);
+            std::sort(intersections.begin(), intersections.end());
+            for (size_t i = 0; i < intersections.size(); i += 2)
+            {
+                ptrdiff_t left = std::max<ptrdiff_t>(0, intersections[i + 0]);
+                ptrdiff_t right = std::min<ptrdiff_t>(canvas.width, intersections[i + 1]);
+                Color * dst = & At<A, Color>(canvas, 0, y);
+                for (ptrdiff_t x = left; x < right; ++x)
+                    dst[x] = color;
+            }
+        }
     }
 }
 
