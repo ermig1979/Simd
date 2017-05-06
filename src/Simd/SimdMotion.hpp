@@ -442,16 +442,13 @@ namespace Simd
 
             void GenerateSearchRegionScanlines(Model & model)
             {
-                //static const int ROI_EMPTY = 0;
+                static const int ROI_EMPTY = 0;
                 static const int ROI_NON_EMPTY = 255;
 
                 model.roiMask.Recreate(model.frameSize, model.levelCount);
-
-                //model.roiMask.Fill(ROI_EMPTY);
-                //Alg::DrawFilledPolygon<Channel> drawFilledPolygon(model.roiMask[0], ROI_NON_EMPTY);
-                //drawFilledPolygon(model.roi);
-                //Simd::Build(model.roiMask, SimdReduce4x4);
-                Simd::Fill(model.roiMask, ROI_NON_EMPTY);
+                Simd::Fill(model.roiMask, ROI_EMPTY);
+                DrawFilledPolygon(model.roiMask[0], model.roi, ROI_NON_EMPTY);
+                Simd::Build(model.roiMask, SimdReduce4x4);
 
                 for (size_t i = 0; i < model.searchRegions.size(); ++i)
                 {
