@@ -81,10 +81,12 @@ namespace Simd
             // Ecx:
             SSE3 = 1 << 0,
             SSSE3 =	1 << 9,
+            FMA = 1 << 12,
             SSE41 = 1 << 19,
             SSE42 = 1 << 20,
             OSXSAVE = 1 << 27,
             AVX = 1 << 28,
+            F16C = 1 << 29,
 
             // Extended:
             // Ebx:
@@ -356,7 +358,9 @@ namespace Simd
         {
             return
                 Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2);
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2) &&
+                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::FMA) &&
+                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::F16C);
         }
 
         SIMD_INLINE bool SupportedByOS()

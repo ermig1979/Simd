@@ -2005,6 +2005,30 @@ extern "C"
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+    /*! @ingroup float16
+
+        \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
+
+        \short Converts numbers in the array from 32-bit float to 16-bit float format.
+
+        \param [in] src - a pointer to the input array with 32-bit float point numbers.
+        \param [in] size - a size of input and output array.
+        \param [out] dst - a pointer to the output array with 16-bit float point numbers.
+    */
+    SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);
+
+    /*! @ingroup float16
+
+        \fn void SimdFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
+
+        \short Converts numbers in the array from 16-bit float to 32-bit float format.
+
+        \param [in] src - a pointer to the input array with 16-bit float point numbers.
+        \param [in] size - a size of input and output array.
+        \param [out] dst - a pointer to the output array with 32-bit float point numbers.
+    */
+    SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst);
+
     /*! @ingroup other_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);

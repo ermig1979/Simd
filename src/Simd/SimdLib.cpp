@@ -1544,6 +1544,26 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
 }
 
+SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && size >= Avx2::F)
+        Avx2::Float32ToFloat16(src, size, dst);
+    else
+#endif
+        Base::Float32ToFloat16(src, size, dst);
+}
+
+SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && size >= Avx2::F)
+        Avx2::Float16ToFloat32(src, size, dst);
+    else
+#endif
+        Base::Float16ToFloat32(src, size, dst);
+}
+
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {

@@ -463,3 +463,8 @@
     @defgroup contour Contour Extraction
     \short Contour extraction functions for accelerating of Simd::ContourDetector.
 */
+
+/*! @ingroup functions
+    @defgroup float16 Half-Precision (16-bit) Float Point Numbers
+    \short Functions for conversion between 16-bit and 32-bit float numbers and other.
+*/
