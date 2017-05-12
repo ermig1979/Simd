@@ -221,6 +221,8 @@ namespace Simd
 
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst);
 
+        void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
+
         void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
             size_t channelCount, uint8_t * dst, size_t dstStride);
 

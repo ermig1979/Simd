@@ -1564,6 +1564,16 @@ SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * ds
         Base::Float16ToFloat32(src, size, dst);
 }
 
+SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && size >= Avx2::F)
+        Avx2::SquaredDifferenceSum16f(a, b, size, sum);
+    else
+#endif
+        Base::SquaredDifferenceSum16f(a, b, size, sum);
+}
+
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {

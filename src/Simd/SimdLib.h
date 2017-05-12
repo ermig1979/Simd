@@ -2029,6 +2029,26 @@ extern "C"
     */
     SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * dst);
 
+    /*! @ingroup float16
+
+        \fn void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
+
+        \short Calculates sum of squared differences for two 16-bit float arrays.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        sum += (a[i] - b[i])*(a[i] - b[i]);
+        \endverbatim
+
+        \param [in] a - a pointer to the first 16-bit float array.
+        \param [in] b - a pointer to the second 16-bit float array.
+        \param [in] size - a size of arrays.
+        \param [out] sum - a pointer to 32-bit float point sum of squared differences.
+    */
+    SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
+
     /*! @ingroup other_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
