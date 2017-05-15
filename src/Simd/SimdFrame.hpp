@@ -115,6 +115,24 @@ namespace Simd
 		*/
 		Frame(const Point<ptrdiff_t> & size, Format format_, bool flipped_ = false, double timestamp_ = 0);
 
+        /*!
+            Creates a new Frame structure with specified width, height and pixel format around external buffers.
+
+            \param [in] width_ - a width of created frame.
+            \param [in] height_ - a height of created frame.
+            \param [in] format_ - a pixel format of created frame.
+            \param [in] data0 - a pointer to the pixel data of first image plane.
+            \param [in] stride0 - a row size of first image plane.
+            \param [in] data1 - a pointer to the pixel data of second image plane.
+            \param [in] stride1 - a row size of second image plane.
+            \param [in] data2 - a pointer to the pixel data of third image plane.
+            \param [in] stride2 - a row size of third image plane.
+            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+        */
+        Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
+            uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_ = false, double timestamp_ = 0);
+
 		/*!
 			A Frame destructor.
 		*/
@@ -374,6 +392,41 @@ namespace Simd
 	{
 		Recreate(size, format_);
 	}
+
+    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, uint8_t * data0, size_t stride0,
+        uint8_t * data1, size_t stride1, uint8_t * data2, size_t stride2, bool flipped_, double timestamp_)
+        : width(width_)
+        , height(height_)
+        , format(format_)
+        , flipped(flipped_)
+        , timestamp(timestamp_)
+    {
+        switch (format)
+        {
+        case None:
+            break;
+        case Nv12:
+            assert((width & 1) == 0 && (height & 1) == 0);
+            planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
+            planes[1] = View<A>(width / 2, height / 2, stride1,  View<A>::Uv16, data1);
+            break;
+        case Yuv420p:
+            assert((width & 1) == 0 && (height & 1) == 0);
+            planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
+            planes[1] = View<A>(width / 2, height / 2, stride1, View<A>::Gray8, data1);
+            planes[2] = View<A>(width / 2, height / 2, stride2, View<A>::Gray8, data2);
+            break;
+        case Bgra32:
+            planes[0] = View<A>(width, height, stride0, View<A>::Bgra32, data0);
+            break;
+        case Bgr24:
+            planes[0] = View<A>(width, height, stride0, View<A>::Bgr24, data0);
+            break;
+        case Gray8:
+            planes[0] = View<A>(width, height, stride0, View<A>::Gray8, data0);
+            break;
+        }
+    }
 
 	template <template<class> class A> SIMD_INLINE Frame<A>::~Frame()
 	{

@@ -88,6 +88,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a0285b254b6bbee0c5b9262478311f73f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac460af5bcca6e39f886450fad8f04eda"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ac460af5bcca6e39f886450fad8f04eda">Frame</a> (const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;size, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_, bool flipped_=false, double timestamp_=0)</td></tr>
 <tr class="separator:ac460af5bcca6e39f886450fad8f04eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a233ef800a3040b8ca2f0d4d09a0452d3"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a233ef800a3040b8ca2f0d4d09a0452d3">Frame</a> (size_t width_, size_t height_, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_, uint8_t *data0, size_t stride0, uint8_t *data1, size_t stride1, uint8_t *data2, size_t stride2, bool flipped_=false, double timestamp_=0)</td></tr>
+<tr class="separator:a233ef800a3040b8ca2f0d4d09a0452d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ae4707759c7424c6cb4369bf2a8155f6e">~Frame</a> ()</td></tr>
 <tr class="separator:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Clone</a> () const</td></tr>
@@ -214,7 +216,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aaf76740a026591e429b03123c093fd52"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaf76740a026591e429b03123c093fd52">&#9670;&nbsp;</a></span>Frame() <span class="overload">[1/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aaf76740a026591e429b03123c093fd52">&#9670;&nbsp;</a></span>Frame() <span class="overload">[1/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -232,7 +234,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 </div>
 <a id="a366cb50380e5a324986050c7770e9eec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a366cb50380e5a324986050c7770e9eec">&#9670;&nbsp;</a></span>Frame() <span class="overload">[2/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a366cb50380e5a324986050c7770e9eec">&#9670;&nbsp;</a></span>Frame() <span class="overload">[2/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -258,7 +260,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 </div>
 <a id="ab1ede85bdcf0ca1ebbed005632043a69"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab1ede85bdcf0ca1ebbed005632043a69">&#9670;&nbsp;</a></span>Frame() <span class="overload">[3/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab1ede85bdcf0ca1ebbed005632043a69">&#9670;&nbsp;</a></span>Frame() <span class="overload">[3/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -302,7 +304,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 </div>
 <a id="a0285b254b6bbee0c5b9262478311f73f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0285b254b6bbee0c5b9262478311f73f">&#9670;&nbsp;</a></span>Frame() <span class="overload">[4/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a0285b254b6bbee0c5b9262478311f73f">&#9670;&nbsp;</a></span>Frame() <span class="overload">[4/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -359,7 +361,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 </div>
 <a id="ac460af5bcca6e39f886450fad8f04eda"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac460af5bcca6e39f886450fad8f04eda">&#9670;&nbsp;</a></span>Frame() <span class="overload">[5/5]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac460af5bcca6e39f886450fad8f04eda">&#9670;&nbsp;</a></span>Frame() <span class="overload">[5/6]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -400,6 +402,105 @@ struct Simd::Frame&lt; A &gt;</h3>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size (width and height) of created frame. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format_</td><td>- a pixel format of created frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a233ef800a3040b8ca2f0d4d09a0452d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a233ef800a3040b8ca2f0d4d09a0452d3">&#9670;&nbsp;</a></span>Frame() <span class="overload">[6/6]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE <a class="el" href="struct_simd_1_1_frame.html">Frame</a> </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>&#160;</td>
+          <td class="paramname"><em>format_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>data2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride2</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>flipped_</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>timestamp_</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Creates a new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images). ">Frame</a> structure with specified width, height and pixel format around external buffers.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">width_</td><td>- a width of created frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height_</td><td>- a height of created frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format_</td><td>- a pixel format of created frame. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data0</td><td>- a pointer to the pixel data of first image plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride0</td><td>- a row size of first image plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data1</td><td>- a pointer to the pixel data of second image plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride1</td><td>- a row size of second image plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">data2</td><td>- a pointer to the pixel data of third image plane. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride2</td><td>- a row size of third image plane. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">flipped_</td><td>- a flag of vertically flipped image of created frame. It is equal to false by default. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">timestamp_</td><td>- a timestamp of created frame. It is equal to 0 by default. </td></tr>
   </table>
