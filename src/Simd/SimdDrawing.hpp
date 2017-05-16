@@ -236,7 +236,7 @@ namespace Simd
             for (size_t i = 0; i < polygon.size(); ++i)
             {
                 const Point & p0 = (i ? polygon[i - 1] : polygon.back()), p1 = polygon[i];
-                if (y >= p0.y && y < p1.y || y >= p1.y && y < p0.y)
+                if ((y >= p0.y && y < p1.y) || (y >= p1.y && y < p0.y))
                     intersections.push_back(p0.x + (y - p0.y)*(p1.x - p0.x) / (p1.y - p0.y));
             }
             assert(intersections.size() % 2 == 0);
