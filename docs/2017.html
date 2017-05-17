@@ -42,6 +42,7 @@
  <li>Base implementation and AVX2 optimizations of function Float16ToFloat32.</li>
  <li>Base implementation and AVX2 optimizations of function SquaredDifferenceSum16f.</li>
  <li>New constructor in structure Frame.</li>
+ <li>MSA optimization of function OperationBinary8u.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -62,6 +63,7 @@
  <li>Tests for verifying functionality of function Float32ToFloat16.</li>
  <li>Tests for verifying functionality of function Float16ToFloat32.</li>
  <li>Tests for verifying functionality of function SquaredDifferenceSum16f.</li>
+ <li>Tests for verifying functionality of MSA version of function OperationBinary8u.</li>
 </ul>
 
 <h4>The use examples</h4>
@@ -80,6 +82,8 @@
 <h5>New features</h5>
 <ul>
  <li>Use.vcxprj (Visual Studio 2015 project) for the use examples.</li>
+ <li>Added to CMakeLists.txt a section for building of the library for MIPS CPU architecture.</li>
+ <li>Msa project for MIPS MSA extension (CMake and Visual Studio).</li>
 </ul>
 
 <a href="#HOME">Home</a> 

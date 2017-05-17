@@ -63,6 +63,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
+#include "Simd/SimdMsa.h"
 
 using namespace Simd;
 
@@ -2527,6 +2528,11 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
 	if (Neon::Enable && width*channelCount >= Neon::A)
 		Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 	else
+#endif
+#ifdef SIMD_MSA_ENABLE
+    if (Msa::Enable && width*channelCount >= Msa::A)
+        Msa::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+    else
 #endif
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }

@@ -49,21 +49,21 @@ namespace Simd
 #endif//SIMD_SSE_ENABLE
 
 #ifdef SIMD_SSE2_ENABLE
-	namespace Sse2
-	{
+    namespace Sse2
+    {
         using namespace Sse;
 
-		template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
+        template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
 
-		template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
-		{
-			_mm_storeu_si128(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
+        {
+            _mm_storeu_si128(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
-		{
-			_mm_store_si128(p, a);
-		}
+        template <> SIMD_INLINE void Store<true>(__m128i * p, __m128i a)
+        {
+            _mm_store_si128(p, a);
+        }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
         {
@@ -79,7 +79,7 @@ namespace Simd
             __m128i hi = AlphaBlendingI16(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
             Store<align>(dst, _mm_packus_epi16(lo, hi));
         }
-	}
+    }
 #endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
@@ -100,21 +100,21 @@ namespace Simd
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         using namespace Avx;
 
-		template <bool align> SIMD_INLINE void Store(__m256i * p, __m256i a);
+        template <bool align> SIMD_INLINE void Store(__m256i * p, __m256i a);
 
-		template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
-		{
-			_mm256_storeu_si256(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(__m256i * p, __m256i a)
+        {
+            _mm256_storeu_si256(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(__m256i * p, __m256i a)
-		{
-			_mm256_store_si256(p, a);
-		}
+        template <> SIMD_INLINE void Store<true>(__m256i * p, __m256i a)
+        {
+            _mm256_store_si256(p, a);
+        }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
         {
@@ -247,7 +247,7 @@ namespace Simd
             SIMD_INLINE void Flush()
             {
                 v128_u8 background = vec_ld(A, _ptr);
-                v128_u8 foreground = vec_perm(_last, _last, _perm); 
+                v128_u8 foreground = vec_perm(_last, _last, _perm);
                 vec_st(vec_sel(foreground, background, _mask), A, _ptr);
             }
 
@@ -290,10 +290,10 @@ namespace Simd
             Store<align, first>(storer, (v128_u8)value);
         }
 
-		template <bool align, bool first> void Store(Storer<align> & storer, v128_f32 value)
-		{
-			Store<align, first>(storer, (v128_u8)value);
-		}
+        template <bool align, bool first> void Store(Storer<align> & storer, v128_f32 value)
+        {
+            Store<align, first>(storer, (v128_u8)value);
+        }
 
         template <bool align> SIMD_INLINE void Flush(Storer<align> & s0)
         {
@@ -318,17 +318,17 @@ namespace Simd
 #endif//SIMD_VMX_ENABLE
 
 #ifdef SIMD_NEON_ENABLE
-	namespace Neon
-	{
-		template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x16_t a);
+    namespace Neon
+    {
+        template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x16_t a);
 
-		template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x16_t a)
-		{
-			vst1q_u8(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x16_t a)
+        {
+            vst1q_u8(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x16_t a)
-		{
+        template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x16_t a)
+        {
 #if defined(__GNUC__)
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             vst1q_u8(_p, a);
@@ -337,17 +337,17 @@ namespace Simd
 #else
             vst1q_u8(p, a);
 #endif
-		}
+        }
 
-		template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x8_t a);
+        template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x8_t a);
 
-		template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x8_t a)
-		{
-			vst1_u8(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(uint8_t * p, uint8x8_t a)
+        {
+            vst1_u8(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x8_t a)
-		{
+        template <> SIMD_INLINE void Store<true>(uint8_t * p, uint8x8_t a)
+        {
 #if defined(__GNUC__)
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
             vst1_u8(_p, a);
@@ -356,37 +356,37 @@ namespace Simd
 #else
             vst1_u8(p, a);
 #endif
-		}
+        }
 
-		template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x8_t a)
-		{
-			Store<align>((uint8_t*)p, (uint8x16_t)a);
-		}
+        template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x8_t a)
+        {
+            Store<align>((uint8_t*)p, (uint8x16_t)a);
+        }
 
-		template <bool align> SIMD_INLINE void Store(int16_t * p, int16x8_t a)
-		{
-			Store<align>((uint8_t*)p, (uint8x16_t)a);
-		}
+        template <bool align> SIMD_INLINE void Store(int16_t * p, int16x8_t a)
+        {
+            Store<align>((uint8_t*)p, (uint8x16_t)a);
+        }
 
-		template <bool align> SIMD_INLINE void Store(uint32_t * p, uint32x4_t a)
-		{
-			Store<align>((uint8_t*)p, (uint8x16_t)a);
-		}
+        template <bool align> SIMD_INLINE void Store(uint32_t * p, uint32x4_t a)
+        {
+            Store<align>((uint8_t*)p, (uint8x16_t)a);
+        }
 
         template <bool align> SIMD_INLINE void Store(int32_t * p, int32x4_t a)
         {
             Store<align>((uint8_t*)p, (uint8x16_t)a);
         }
 
-		template <bool align> SIMD_INLINE void Store2(uint8_t * p, uint8x16x2_t a);
+        template <bool align> SIMD_INLINE void Store2(uint8_t * p, uint8x16x2_t a);
 
-		template <> SIMD_INLINE void Store2<false>(uint8_t * p, uint8x16x2_t a)
-		{
-			vst2q_u8(p, a);
-		}
+        template <> SIMD_INLINE void Store2<false>(uint8_t * p, uint8x16x2_t a)
+        {
+            vst2q_u8(p, a);
+        }
 
-		template <> SIMD_INLINE void Store2<true>(uint8_t * p, uint8x16x2_t a)
-		{
+        template <> SIMD_INLINE void Store2<true>(uint8_t * p, uint8x16x2_t a)
+        {
 #if defined(__GNUC__)
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             vst2q_u8(_p, a);
@@ -395,17 +395,17 @@ namespace Simd
 #else
             vst2q_u8(p, a);
 #endif
-		}
+        }
 
-		template <bool align> SIMD_INLINE void Store2(int16_t * p, int16x8x2_t a);
+        template <bool align> SIMD_INLINE void Store2(int16_t * p, int16x8x2_t a);
 
-		template <> SIMD_INLINE void Store2<false>(int16_t * p, int16x8x2_t a)
-		{
-			vst2q_s16(p, a);
-		}
+        template <> SIMD_INLINE void Store2<false>(int16_t * p, int16x8x2_t a)
+        {
+            vst2q_s16(p, a);
+        }
 
-		template <> SIMD_INLINE void Store2<true>(int16_t * p, int16x8x2_t a)
-		{
+        template <> SIMD_INLINE void Store2<true>(int16_t * p, int16x8x2_t a)
+        {
 #if defined(__GNUC__)
             int16_t * _p = (int16_t *)__builtin_assume_aligned(p, 16);
             vst2q_s16(_p, a);
@@ -414,17 +414,17 @@ namespace Simd
 #else
             vst2q_s16(p, a);
 #endif
-		}
+        }
 
-		template <bool align> SIMD_INLINE void Store3(uint8_t * p, uint8x16x3_t a);
+        template <bool align> SIMD_INLINE void Store3(uint8_t * p, uint8x16x3_t a);
 
-		template <> SIMD_INLINE void Store3<false>(uint8_t * p, uint8x16x3_t a)
-		{
-			vst3q_u8(p, a);
-		}
+        template <> SIMD_INLINE void Store3<false>(uint8_t * p, uint8x16x3_t a)
+        {
+            vst3q_u8(p, a);
+        }
 
-		template <> SIMD_INLINE void Store3<true>(uint8_t * p, uint8x16x3_t a)
-		{
+        template <> SIMD_INLINE void Store3<true>(uint8_t * p, uint8x16x3_t a)
+        {
 #if defined(__GNUC__)
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             vst3q_u8(_p, a);
@@ -433,17 +433,17 @@ namespace Simd
 #else
             vst3q_u8(p, a);
 #endif
-		}
+        }
 
-		template <bool align> SIMD_INLINE void Store4(uint8_t * p, uint8x16x4_t a);
+        template <bool align> SIMD_INLINE void Store4(uint8_t * p, uint8x16x4_t a);
 
-		template <> SIMD_INLINE void Store4<false>(uint8_t * p, uint8x16x4_t a)
-		{
-			vst4q_u8(p, a);
-		}
+        template <> SIMD_INLINE void Store4<false>(uint8_t * p, uint8x16x4_t a)
+        {
+            vst4q_u8(p, a);
+        }
 
-		template <> SIMD_INLINE void Store4<true>(uint8_t * p, uint8x16x4_t a)
-		{
+        template <> SIMD_INLINE void Store4<true>(uint8_t * p, uint8x16x4_t a)
+        {
 #if defined(__GNUC__)
             uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 16);
             vst4q_u8(_p, a);
@@ -472,7 +472,24 @@ namespace Simd
             vst1q_f32(p, a);
 #endif
         }
-	}
+    }
 #endif//SIMD_NEON_ENABLE
+
+#ifdef SIMD_MSA_ENABLE
+    namespace Msa
+    {
+        template <bool align> SIMD_INLINE void Store(uint8_t * p, v16u8 a);
+
+        template <> SIMD_INLINE void Store<false>(uint8_t * p, v16u8 a)
+        {
+            __msa_st_b((v16i8)a, p, 0);
+        }
+
+        template <> SIMD_INLINE void Store<true>(uint8_t * p, v16u8 a)
+        {
+            __msa_st_b((v16i8)a, p, 0);
+        }
+    }
+#endif//SIMD_MSA_ENABLE
 }
 #endif//__SimdStore_h__

@@ -29,20 +29,20 @@
 
 namespace Simd
 {
-	const size_t HISTOGRAM_SIZE = UCHAR_MAX + 1;
+    const size_t HISTOGRAM_SIZE = UCHAR_MAX + 1;
 
     namespace Base
     {
         const int LINEAR_SHIFT = 4;
         const int LINEAR_ROUND_TERM = 1 << (LINEAR_SHIFT - 1);
 
-        const int BILINEAR_SHIFT = LINEAR_SHIFT*2;
+        const int BILINEAR_SHIFT = LINEAR_SHIFT * 2;
         const int BILINEAR_ROUND_TERM = 1 << (BILINEAR_SHIFT - 1);
 
         const int FRACTION_RANGE = 1 << LINEAR_SHIFT;
-        const double FRACTION_ROUND_TERM = 0.5/FRACTION_RANGE;
+        const double FRACTION_ROUND_TERM = 0.5 / FRACTION_RANGE;
 
-        const float KF_255_DIV_6 = 255.0f/6.0f;
+        const float KF_255_DIV_6 = 255.0f / 6.0f;
 
         const int BGR_TO_GRAY_AVERAGING_SHIFT = 14;
         const int BGR_TO_GRAY_ROUND_TERM = 1 << (BGR_TO_GRAY_AVERAGING_SHIFT - 1);
@@ -50,39 +50,39 @@ namespace Simd
         const int GREEN_TO_GRAY_WEIGHT = int(0.587*(1 << BGR_TO_GRAY_AVERAGING_SHIFT) + 0.5);
         const int RED_TO_GRAY_WEIGHT = int(0.299*(1 << BGR_TO_GRAY_AVERAGING_SHIFT) + 0.5);
 
-        const int Y_ADJUST = 16; 
+        const int Y_ADJUST = 16;
         const int UV_ADJUST = 128;
         const int YUV_TO_BGR_AVERAGING_SHIFT = 13;
-        const int YUV_TO_BGR_ROUND_TERM = 1 << (YUV_TO_BGR_AVERAGING_SHIFT - 1); 
+        const int YUV_TO_BGR_ROUND_TERM = 1 << (YUV_TO_BGR_AVERAGING_SHIFT - 1);
         const int Y_TO_RGB_WEIGHT = int(1.164*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int U_TO_BLUE_WEIGHT = int(2.018*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int U_TO_GREEN_WEIGHT = -int(0.391*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int V_TO_GREEN_WEIGHT = -int(0.813*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
         const int V_TO_RED_WEIGHT = int(1.596*(1 << YUV_TO_BGR_AVERAGING_SHIFT) + 0.5);
 
-		const int BGR_TO_YUV_AVERAGING_SHIFT = 14;
-		const int BGR_TO_YUV_ROUND_TERM = 1 << (BGR_TO_YUV_AVERAGING_SHIFT - 1);
-		const int BLUE_TO_Y_WEIGHT = int(0.098*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int GREEN_TO_Y_WEIGHT = int(0.504*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int RED_TO_Y_WEIGHT = int(0.257*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int BLUE_TO_U_WEIGHT = int(0.439*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int GREEN_TO_U_WEIGHT = -int(0.291*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int RED_TO_U_WEIGHT = -int(0.148*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int BLUE_TO_V_WEIGHT = -int(0.071*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int GREEN_TO_V_WEIGHT = -int(0.368*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
-		const int RED_TO_V_WEIGHT = int(0.439*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int BGR_TO_YUV_AVERAGING_SHIFT = 14;
+        const int BGR_TO_YUV_ROUND_TERM = 1 << (BGR_TO_YUV_AVERAGING_SHIFT - 1);
+        const int BLUE_TO_Y_WEIGHT = int(0.098*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int GREEN_TO_Y_WEIGHT = int(0.504*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int RED_TO_Y_WEIGHT = int(0.257*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int BLUE_TO_U_WEIGHT = int(0.439*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int GREEN_TO_U_WEIGHT = -int(0.291*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int RED_TO_U_WEIGHT = -int(0.148*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int BLUE_TO_V_WEIGHT = -int(0.071*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int GREEN_TO_V_WEIGHT = -int(0.368*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
+        const int RED_TO_V_WEIGHT = int(0.439*(1 << BGR_TO_YUV_AVERAGING_SHIFT) + 0.5);
 
-		const int DIVISION_BY_9_SHIFT = 16;
-		const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
+        const int DIVISION_BY_9_SHIFT = 16;
+        const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
     }
 
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        const size_t F = sizeof(__m128)/sizeof(float);
-        const size_t DF = 2*F;
-        const size_t QF = 4*F;
-        const size_t HF = F/2;
+        const size_t F = sizeof(__m128) / sizeof(float);
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
     }
 #endif// SIMD_SSE_ENABLE
 
@@ -92,18 +92,18 @@ namespace Simd
         using namespace Sse;
 
         const size_t A = sizeof(__m128i);
-        const size_t DA = 2*A;
-        const size_t QA = 4*A;
-        const size_t OA = 8*A;
-        const size_t HA = A/2;
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
 
         const __m128i K_ZERO = SIMD_MM_SET1_EPI8(0);
-		const __m128i K_INV_ZERO = SIMD_MM_SET1_EPI8(0xFF);
+        const __m128i K_INV_ZERO = SIMD_MM_SET1_EPI8(0xFF);
 
-		const __m128i K8_01 = SIMD_MM_SET1_EPI8(0x01);
+        const __m128i K8_01 = SIMD_MM_SET1_EPI8(0x01);
         const __m128i K8_02 = SIMD_MM_SET1_EPI8(0x02);
         const __m128i K8_04 = SIMD_MM_SET1_EPI8(0x04);
-		const __m128i K8_08 = SIMD_MM_SET1_EPI8(0x08);
+        const __m128i K8_08 = SIMD_MM_SET1_EPI8(0x08);
         const __m128i K8_10 = SIMD_MM_SET1_EPI8(0x10);
         const __m128i K8_20 = SIMD_MM_SET1_EPI8(0x20);
         const __m128i K8_40 = SIMD_MM_SET1_EPI8(0x40);
@@ -111,15 +111,15 @@ namespace Simd
 
         const __m128i K8_01_FF = SIMD_MM_SET2_EPI8(0x01, 0xFF);
 
-		const __m128i K16_0001 = SIMD_MM_SET1_EPI16(0x0001);
-		const __m128i K16_0002 = SIMD_MM_SET1_EPI16(0x0002);
-		const __m128i K16_0003 = SIMD_MM_SET1_EPI16(0x0003);
-		const __m128i K16_0004 = SIMD_MM_SET1_EPI16(0x0004);
-		const __m128i K16_0005 = SIMD_MM_SET1_EPI16(0x0005);
+        const __m128i K16_0001 = SIMD_MM_SET1_EPI16(0x0001);
+        const __m128i K16_0002 = SIMD_MM_SET1_EPI16(0x0002);
+        const __m128i K16_0003 = SIMD_MM_SET1_EPI16(0x0003);
+        const __m128i K16_0004 = SIMD_MM_SET1_EPI16(0x0004);
+        const __m128i K16_0005 = SIMD_MM_SET1_EPI16(0x0005);
         const __m128i K16_0006 = SIMD_MM_SET1_EPI16(0x0006);
-		const __m128i K16_0008 = SIMD_MM_SET1_EPI16(0x0008);
-		const __m128i K16_0020 = SIMD_MM_SET1_EPI16(0x0020);
-		const __m128i K16_0080 = SIMD_MM_SET1_EPI16(0x0080);
+        const __m128i K16_0008 = SIMD_MM_SET1_EPI16(0x0008);
+        const __m128i K16_0020 = SIMD_MM_SET1_EPI16(0x0020);
+        const __m128i K16_0080 = SIMD_MM_SET1_EPI16(0x0080);
         const __m128i K16_00FF = SIMD_MM_SET1_EPI16(0x00FF);
         const __m128i K16_FF00 = SIMD_MM_SET1_EPI16(0xFF00);
 
@@ -133,9 +133,9 @@ namespace Simd
         const __m128i K32_01000000 = SIMD_MM_SET1_EPI32(0x01000000);
         const __m128i K32_FFFFFF00 = SIMD_MM_SET1_EPI32(0xFFFFFF00);
 
-		const __m128i K64_00000000FFFFFFFF = SIMD_MM_SET2_EPI32(0xFFFFFFFF, 0);
+        const __m128i K64_00000000FFFFFFFF = SIMD_MM_SET2_EPI32(0xFFFFFFFF, 0);
 
-        const __m128i K16_Y_ADJUST = SIMD_MM_SET1_EPI16(Base::Y_ADJUST); 
+        const __m128i K16_Y_ADJUST = SIMD_MM_SET1_EPI16(Base::Y_ADJUST);
         const __m128i K16_UV_ADJUST = SIMD_MM_SET1_EPI16(Base::UV_ADJUST);
 
         const __m128i K16_YRGB_RT = SIMD_MM_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
@@ -150,7 +150,7 @@ namespace Simd
         const __m128i K16_BV_RV = SIMD_MM_SET2_EPI16(Base::BLUE_TO_V_WEIGHT, Base::RED_TO_V_WEIGHT);
         const __m128i K16_GV_RT = SIMD_MM_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
 
-		const __m128i K16_DIVISION_BY_9_FACTOR = SIMD_MM_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
+        const __m128i K16_DIVISION_BY_9_FACTOR = SIMD_MM_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -170,29 +170,29 @@ namespace Simd
         const __m128i K8_SHUFFLE_GRAY_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA);
         const __m128i K8_SHUFFLE_GRAY_TO_BGR2 = SIMD_MM_SETR_EPI8(0xA, 0xB, 0xB, 0xB, 0xC, 0xC, 0xC, 0xD, 0xD, 0xD, 0xE, 0xE, 0xE, 0xF, 0xF, 0xF);
 
-        const __m128i K8_SHUFFLE_BLUE_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5);
-        const __m128i K8_SHUFFLE_BLUE_TO_BGR1 = SIMD_MM_SETR_EPI8( -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1);
-        const __m128i K8_SHUFFLE_BLUE_TO_BGR2 = SIMD_MM_SETR_EPI8( -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1,  -1);
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1, -1, 0x5);
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR1 = SIMD_MM_SETR_EPI8(-1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA, -1);
+        const __m128i K8_SHUFFLE_BLUE_TO_BGR2 = SIMD_MM_SETR_EPI8(-1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF, -1, -1);
 
-        const __m128i K8_SHUFFLE_GREEN_TO_BGR0 = SIMD_MM_SETR_EPI8( -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1);
-        const __m128i K8_SHUFFLE_GREEN_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA);
-        const __m128i K8_SHUFFLE_GREEN_TO_BGR2 = SIMD_MM_SETR_EPI8( -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1);
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR0 = SIMD_MM_SETR_EPI8(-1, 0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1, -1);
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA);
+        const __m128i K8_SHUFFLE_GREEN_TO_BGR2 = SIMD_MM_SETR_EPI8(-1, -1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF, -1);
 
-        const __m128i K8_SHUFFLE_RED_TO_BGR0 = SIMD_MM_SETR_EPI8( -1,  -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1);
-        const __m128i K8_SHUFFLE_RED_TO_BGR1 = SIMD_MM_SETR_EPI8( -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1);
-        const __m128i K8_SHUFFLE_RED_TO_BGR2 = SIMD_MM_SETR_EPI8(0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF);
+        const __m128i K8_SHUFFLE_RED_TO_BGR0 = SIMD_MM_SETR_EPI8(-1, -1, 0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1);
+        const __m128i K8_SHUFFLE_RED_TO_BGR1 = SIMD_MM_SETR_EPI8(-1, 0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1);
+        const __m128i K8_SHUFFLE_RED_TO_BGR2 = SIMD_MM_SETR_EPI8(0xA, -1, -1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF);
 
-        const __m128i K8_SHUFFLE_BGR0_TO_BLUE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR1_TO_BLUE = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR2_TO_BLUE = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD);
+        const __m128i K8_SHUFFLE_BGR0_TO_BLUE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR1_TO_BLUE = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR2_TO_BLUE = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD);
 
-        const __m128i K8_SHUFFLE_BGR0_TO_GREEN = SIMD_MM_SETR_EPI8(0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR1_TO_GREEN = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR2_TO_GREEN = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE);
+        const __m128i K8_SHUFFLE_BGR0_TO_GREEN = SIMD_MM_SETR_EPI8(0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR1_TO_GREEN = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR2_TO_GREEN = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE);
 
-        const __m128i K8_SHUFFLE_BGR0_TO_RED = SIMD_MM_SETR_EPI8(0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR1_TO_RED = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
+        const __m128i K8_SHUFFLE_BGR0_TO_RED = SIMD_MM_SETR_EPI8(0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR1_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
     }
 #endif// SIMD_SSSE3_ENABLE
 
@@ -213,26 +213,26 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        const size_t F = sizeof(__m256)/sizeof(float);
-        const size_t DF = 2*F;
-        const size_t QF = 4*F;
-        const size_t HF = F/2;
+        const size_t F = sizeof(__m256) / sizeof(float);
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
     }
 #endif// SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         using namespace Avx;
 
-		const size_t A = sizeof(__m256i);
-		const size_t DA = 2*A;
-		const size_t QA = 4*A;
-		const size_t OA = 8*A;
-		const size_t HA = A/2;
+        const size_t A = sizeof(__m256i);
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
 
-		const __m256i K_ZERO = SIMD_MM256_SET1_EPI8(0);
-		const __m256i K_INV_ZERO = SIMD_MM256_SET1_EPI8(0xFF);
+        const __m256i K_ZERO = SIMD_MM256_SET1_EPI8(0);
+        const __m256i K_INV_ZERO = SIMD_MM256_SET1_EPI8(0xFF);
 
         const __m256i K8_01 = SIMD_MM256_SET1_EPI8(0x01);
         const __m256i K8_02 = SIMD_MM256_SET1_EPI8(0x02);
@@ -245,7 +245,7 @@ namespace Simd
 
         const __m256i K8_01_FF = SIMD_MM256_SET2_EPI8(0x01, 0xFF);
 
-		const __m256i K16_0001 = SIMD_MM256_SET1_EPI16(0x0001);
+        const __m256i K16_0001 = SIMD_MM256_SET1_EPI16(0x0001);
         const __m256i K16_0002 = SIMD_MM256_SET1_EPI16(0x0002);
         const __m256i K16_0003 = SIMD_MM256_SET1_EPI16(0x0003);
         const __m256i K16_0004 = SIMD_MM256_SET1_EPI16(0x0004);
@@ -269,7 +269,7 @@ namespace Simd
         const __m256i K32_01000000 = SIMD_MM256_SET1_EPI32(0x01000000);
         const __m256i K32_FFFFFF00 = SIMD_MM256_SET1_EPI32(0xFFFFFF00);
 
-        const __m256i K16_Y_ADJUST = SIMD_MM256_SET1_EPI16(Base::Y_ADJUST); 
+        const __m256i K16_Y_ADJUST = SIMD_MM256_SET1_EPI16(Base::Y_ADJUST);
         const __m256i K16_UV_ADJUST = SIMD_MM256_SET1_EPI16(Base::UV_ADJUST);
 
         const __m256i K16_YRGB_RT = SIMD_MM256_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
@@ -284,7 +284,7 @@ namespace Simd
         const __m256i K16_BV_RV = SIMD_MM256_SET2_EPI16(Base::BLUE_TO_V_WEIGHT, Base::RED_TO_V_WEIGHT);
         const __m256i K16_GV_RT = SIMD_MM256_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
 
-		const __m256i K16_DIVISION_BY_9_FACTOR = SIMD_MM256_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
+        const __m256i K16_DIVISION_BY_9_FACTOR = SIMD_MM256_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
 
         const __m256i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM256_SETR_EPI8(
             0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5,
@@ -297,69 +297,69 @@ namespace Simd
             0xA, 0xB, 0xB, 0xB, 0xC, 0xC, 0xC, 0xD, 0xD, 0xD, 0xE, 0xE, 0xE, 0xF, 0xF, 0xF);
 
         const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR0 = SIMD_MM256_SETR_EPI8(
-            0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,
-             -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1);
+            0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1, -1, 0x5,
+            -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA, -1);
         const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR1 = SIMD_MM256_SETR_EPI8(
-              -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1,
-             0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD);
+            -1, 0x3, -1, -1, 0x4, -1, -1, 0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1,
+            0x8, -1, -1, 0x9, -1, -1, 0xA, -1, -1, 0xB, -1, -1, 0xC, -1, -1, 0xD);
         const __m256i K8_SHUFFLE_PERMUTED_BLUE_TO_BGR2 = SIMD_MM256_SETR_EPI8(
-            -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,
-            -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1,  -1);
+            -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA, -1,
+            -1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF, -1, -1);
 
         const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR0 = SIMD_MM256_SETR_EPI8(
-            -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1,
-            0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA);
+            -1, 0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1, -1,
+            0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA);
         const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR1 = SIMD_MM256_SETR_EPI8(
-            -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,
-            -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1);
+            -1, -1, 0x3, -1, -1, 0x4, -1, -1, 0x5, -1, -1, 0x6, -1, -1, 0x7, -1,
+            -1, 0x8, -1, -1, 0x9, -1, -1, 0xA, -1, -1, 0xB, -1, -1, 0xC, -1, -1);
         const __m256i K8_SHUFFLE_PERMUTED_GREEN_TO_BGR2 = SIMD_MM256_SETR_EPI8(
-            0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,
-             -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF,  -1);
+            0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA,
+            -1, -1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF, -1);
 
         const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR0 = SIMD_MM256_SETR_EPI8(
-            -1,  -1, 0x0,  -1,  -1, 0x1,  -1,  -1, 0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,
-            -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1);
+            -1, -1, 0x0, -1, -1, 0x1, -1, -1, 0x2, -1, -1, 0x3, -1, -1, 0x4, -1,
+            -1, 0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1);
         const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR1 = SIMD_MM256_SETR_EPI8(
-            0x2,  -1,  -1, 0x3,  -1,  -1, 0x4,  -1,  -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,
-             -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1, 0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1);
+            0x2, -1, -1, 0x3, -1, -1, 0x4, -1, -1, 0x5, -1, -1, 0x6, -1, -1, 0x7,
+            -1, -1, 0x8, -1, -1, 0x9, -1, -1, 0xA, -1, -1, 0xB, -1, -1, 0xC, -1);
         const __m256i K8_SHUFFLE_PERMUTED_RED_TO_BGR2 = SIMD_MM256_SETR_EPI8(
-             -1, 0x5,  -1,  -1, 0x6,  -1,  -1, 0x7,  -1,  -1, 0x8,  -1,  -1, 0x9,  -1,  -1,
-            0xA,  -1,  -1, 0xB,  -1,  -1, 0xC,  -1,  -1, 0xD,  -1,  -1, 0xE,  -1,  -1, 0xF);
+            -1, 0x5, -1, -1, 0x6, -1, -1, 0x7, -1, -1, 0x8, -1, -1, 0x9, -1, -1,
+            0xA, -1, -1, 0xB, -1, -1, 0xC, -1, -1, 0xD, -1, -1, 0xE, -1, -1, 0xF);
 
         const __m256i K8_SHUFFLE_BGR0_TO_BLUE = SIMD_MM256_SETR_EPI8(
-            0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1);
+            0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR1_TO_BLUE = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD,
-            0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD,
+            0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR2_TO_BLUE = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD);
+            -1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD);
 
         const __m256i K8_SHUFFLE_BGR0_TO_GREEN = SIMD_MM256_SETR_EPI8(
-            0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1);
+            0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR1_TO_GREEN = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE,
-            0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE,
+            0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR2_TO_GREEN = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x2, 0x5, 0x8, 0xB, 0xE);
+            -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x2, 0x5, 0x8, 0xB, 0xE);
 
         const __m256i K8_SHUFFLE_BGR0_TO_RED = SIMD_MM256_SETR_EPI8(
-            0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1);
+            0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR1_TO_RED = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF,
-            0x2, 0x5, 0x8, 0xB, 0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF,
+            0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m256i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM256_SETR_EPI8(
-            -1,  -1,  -1,  -1,  -1, 0x1, 0x4, 0x7, 0xA, 0xD,  -1,  -1,  -1,  -1,  -1,  -1,
-            -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
+            -1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
 
         const __m256i K8_BGRA_TO_BGR_SHUFFLE = SIMD_MM256_SETR_EPI8(
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
             0x4, 0x5, 0x6, -1, 0x7, 0x8, 0x9, -1, 0xA, 0xB, 0xC, -1, 0xD, 0xE, 0xF, -1);
-	}
+    }
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_VMX_ENABLE    
@@ -374,10 +374,10 @@ namespace Simd
         typedef __vector float v128_f32;
 
         const size_t A = sizeof(v128_u8);
-        const size_t DA = 2*A;
-        const size_t QA = 4*A;
-        const size_t OA = 8*A;
-        const size_t HA = A/2;
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
 
         const v128_u8 K8_00 = SIMD_VEC_SET1_EPI8(0x00);
         const v128_u8 K8_01 = SIMD_VEC_SET1_EPI8(0x01);
@@ -406,7 +406,7 @@ namespace Simd
 
         const v128_u32 K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
 
-        const v128_s16 K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST); 
+        const v128_s16 K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST);
         const v128_s16 K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);
 
         const v128_s16 K16_YRGB_RT = SIMD_VEC_SET2_EPI16(Base::Y_TO_RGB_WEIGHT, Base::YUV_TO_BGR_ROUND_TERM);
@@ -425,7 +425,7 @@ namespace Simd
 
         const v128_u32 K32_BGR_TO_YUV_AVERAGING_SHIFT = SIMD_VEC_SET1_EPI32(Base::BGR_TO_YUV_AVERAGING_SHIFT);
 
-		const v128_u16 K16_DIVISION_BY_9_FACTOR = SIMD_VEC_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
+        const v128_u16 K16_DIVISION_BY_9_FACTOR = SIMD_VEC_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
 
         //(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF);
         const v128_u8 K8_PERM_LOAD_BEFORE_FIRST_1 = SIMD_VEC_SETR_EPI8(0x0, 0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE);
@@ -471,52 +471,52 @@ namespace Simd
     {
         using namespace Vmx;
 
-		const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
+        const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
     }
 #endif//SIMD_VSX_ENABLE
 
 #ifdef SIMD_NEON_ENABLE    
-	namespace Neon
-	{
-		const size_t A = sizeof(uint8x16_t);
-		const size_t DA = 2*A;
-		const size_t QA = 4*A;
-		const size_t OA = 8*A;
-		const size_t HA = A/2;
+    namespace Neon
+    {
+        const size_t A = sizeof(uint8x16_t);
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
 
         const size_t F = sizeof(float32x4_t) / sizeof(float);
-        const size_t DF = 2*F;
-        const size_t QF = 4*F;
-        const size_t HF = F/2;
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
 
-		const uint8x16_t K8_00 = SIMD_VEC_SET1_EPI8(0x00);
-		const uint8x16_t K8_01 = SIMD_VEC_SET1_EPI8(0x01);
-		const uint8x16_t K8_02 = SIMD_VEC_SET1_EPI8(0x02);
-		const uint8x16_t K8_04 = SIMD_VEC_SET1_EPI8(0x04);
-		const uint8x16_t K8_08 = SIMD_VEC_SET1_EPI8(0x08);
-		const uint8x16_t K8_10 = SIMD_VEC_SET1_EPI8(0x10);
-		const uint8x16_t K8_20 = SIMD_VEC_SET1_EPI8(0x20);
-		const uint8x16_t K8_40 = SIMD_VEC_SET1_EPI8(0x40);
-		const uint8x16_t K8_80 = SIMD_VEC_SET1_EPI8(0x80);
-		const uint8x16_t K8_FF = SIMD_VEC_SET1_EPI8(0xFF);
+        const uint8x16_t K8_00 = SIMD_VEC_SET1_EPI8(0x00);
+        const uint8x16_t K8_01 = SIMD_VEC_SET1_EPI8(0x01);
+        const uint8x16_t K8_02 = SIMD_VEC_SET1_EPI8(0x02);
+        const uint8x16_t K8_04 = SIMD_VEC_SET1_EPI8(0x04);
+        const uint8x16_t K8_08 = SIMD_VEC_SET1_EPI8(0x08);
+        const uint8x16_t K8_10 = SIMD_VEC_SET1_EPI8(0x10);
+        const uint8x16_t K8_20 = SIMD_VEC_SET1_EPI8(0x20);
+        const uint8x16_t K8_40 = SIMD_VEC_SET1_EPI8(0x40);
+        const uint8x16_t K8_80 = SIMD_VEC_SET1_EPI8(0x80);
+        const uint8x16_t K8_FF = SIMD_VEC_SET1_EPI8(0xFF);
 
-		const uint16x8_t K16_0000 = SIMD_VEC_SET1_EPI16(0x0000);
-		const uint16x8_t K16_0001 = SIMD_VEC_SET1_EPI16(0x0001);
-		const uint16x8_t K16_0002 = SIMD_VEC_SET1_EPI16(0x0002);
-		const uint16x8_t K16_0003 = SIMD_VEC_SET1_EPI16(0x0003);
-		const uint16x8_t K16_0004 = SIMD_VEC_SET1_EPI16(0x0004);
-		const uint16x8_t K16_0005 = SIMD_VEC_SET1_EPI16(0x0005);
-		const uint16x8_t K16_0006 = SIMD_VEC_SET1_EPI16(0x0006);
-		const uint16x8_t K16_0008 = SIMD_VEC_SET1_EPI16(0x0008);
+        const uint16x8_t K16_0000 = SIMD_VEC_SET1_EPI16(0x0000);
+        const uint16x8_t K16_0001 = SIMD_VEC_SET1_EPI16(0x0001);
+        const uint16x8_t K16_0002 = SIMD_VEC_SET1_EPI16(0x0002);
+        const uint16x8_t K16_0003 = SIMD_VEC_SET1_EPI16(0x0003);
+        const uint16x8_t K16_0004 = SIMD_VEC_SET1_EPI16(0x0004);
+        const uint16x8_t K16_0005 = SIMD_VEC_SET1_EPI16(0x0005);
+        const uint16x8_t K16_0006 = SIMD_VEC_SET1_EPI16(0x0006);
+        const uint16x8_t K16_0008 = SIMD_VEC_SET1_EPI16(0x0008);
         const uint16x8_t K16_0010 = SIMD_VEC_SET1_EPI16(0x0010);
         const uint16x8_t K16_0020 = SIMD_VEC_SET1_EPI16(0x0020);
-		const uint16x8_t K16_0080 = SIMD_VEC_SET1_EPI16(0x0080);
-		const uint16x8_t K16_00FF = SIMD_VEC_SET1_EPI16(0x00FF);
-		const uint16x8_t K16_0101 = SIMD_VEC_SET1_EPI16(0x0101);
+        const uint16x8_t K16_0080 = SIMD_VEC_SET1_EPI16(0x0080);
+        const uint16x8_t K16_00FF = SIMD_VEC_SET1_EPI16(0x00FF);
+        const uint16x8_t K16_0101 = SIMD_VEC_SET1_EPI16(0x0101);
         const uint16x8_t K16_0800 = SIMD_VEC_SET1_EPI16(0x0800);
         const uint16x8_t K16_FF00 = SIMD_VEC_SET1_EPI16(0xFF00);
 
-		const uint32x4_t K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
+        const uint32x4_t K32_00000000 = SIMD_VEC_SET1_EPI32(0x00000000);
         const uint32x4_t K32_00000001 = SIMD_VEC_SET1_EPI32(0x00000001);
         const uint32x4_t K32_00000002 = SIMD_VEC_SET1_EPI32(0x00000002);
         const uint32x4_t K32_00000004 = SIMD_VEC_SET1_EPI32(0x00000004);
@@ -529,40 +529,51 @@ namespace Simd
         const uint32x4_t K32_08080800 = SIMD_VEC_SET1_EPI32(0x08080800);
         const uint32x4_t K32_FFFFFF00 = SIMD_VEC_SET1_EPI32(0xFFFFFF00);
 
-		const uint64x2_t K64_0000000000000000 = SIMD_VEC_SET1_EPI64(0x0000000000000000);
+        const uint64x2_t K64_0000000000000000 = SIMD_VEC_SET1_EPI64(0x0000000000000000);
 
-		const uint16x4_t K16_BLUE_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_GRAY_WEIGHT);
-		const uint16x4_t K16_GREEN_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_GRAY_WEIGHT);
-		const uint16x4_t K16_RED_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_GRAY_WEIGHT);
-		const uint32x4_t K32_BGR_TO_GRAY_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
+        const uint16x4_t K16_BLUE_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_GRAY_WEIGHT);
+        const uint16x4_t K16_GREEN_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_GRAY_WEIGHT);
+        const uint16x4_t K16_RED_TO_GRAY_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_GRAY_WEIGHT);
+        const uint32x4_t K32_BGR_TO_GRAY_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
 
-		const int16x8_t K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST);
-		const int16x8_t K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);
+        const int16x8_t K16_Y_ADJUST = SIMD_VEC_SET1_EPI16(Base::Y_ADJUST);
+        const int16x8_t K16_UV_ADJUST = SIMD_VEC_SET1_EPI16(Base::UV_ADJUST);
 
-		const int16x4_t K16_BLUE_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_Y_WEIGHT);
-		const int16x4_t K16_GREEN_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_Y_WEIGHT);
-		const int16x4_t K16_RED_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_Y_WEIGHT);
+        const int16x4_t K16_BLUE_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_Y_WEIGHT);
+        const int16x4_t K16_GREEN_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_Y_WEIGHT);
+        const int16x4_t K16_RED_TO_Y_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_Y_WEIGHT);
 
-		const int16x4_t K16_BLUE_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_U_WEIGHT);
-		const int16x4_t K16_GREEN_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_U_WEIGHT);
-		const int16x4_t K16_RED_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_U_WEIGHT);
+        const int16x4_t K16_BLUE_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_U_WEIGHT);
+        const int16x4_t K16_GREEN_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_U_WEIGHT);
+        const int16x4_t K16_RED_TO_U_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_U_WEIGHT);
 
-		const int16x4_t K16_BLUE_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_V_WEIGHT);
-		const int16x4_t K16_GREEN_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_V_WEIGHT);
-		const int16x4_t K16_RED_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_V_WEIGHT);
+        const int16x4_t K16_BLUE_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::BLUE_TO_V_WEIGHT);
+        const int16x4_t K16_GREEN_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::GREEN_TO_V_WEIGHT);
+        const int16x4_t K16_RED_TO_V_WEIGHT = SIMD_VEC_SET1_PI16(Base::RED_TO_V_WEIGHT);
 
-		const int32x4_t K32_BGR_TO_YUV_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::BGR_TO_YUV_ROUND_TERM);
+        const int32x4_t K32_BGR_TO_YUV_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::BGR_TO_YUV_ROUND_TERM);
 
-		const int16x4_t K16_Y_TO_RGB_WEIGHT = SIMD_VEC_SET1_PI16(Base::Y_TO_RGB_WEIGHT);
+        const int16x4_t K16_Y_TO_RGB_WEIGHT = SIMD_VEC_SET1_PI16(Base::Y_TO_RGB_WEIGHT);
 
-		const int16x4_t K16_U_TO_BLUE_WEIGHT = SIMD_VEC_SET1_PI16(Base::U_TO_BLUE_WEIGHT);
-		const int16x4_t K16_U_TO_GREEN_WEIGHT = SIMD_VEC_SET1_PI16(Base::U_TO_GREEN_WEIGHT);
+        const int16x4_t K16_U_TO_BLUE_WEIGHT = SIMD_VEC_SET1_PI16(Base::U_TO_BLUE_WEIGHT);
+        const int16x4_t K16_U_TO_GREEN_WEIGHT = SIMD_VEC_SET1_PI16(Base::U_TO_GREEN_WEIGHT);
 
-		const int16x4_t K16_V_TO_GREEN_WEIGHT = SIMD_VEC_SET1_PI16(Base::V_TO_GREEN_WEIGHT);
-		const int16x4_t K16_V_TO_RED_WEIGHT = SIMD_VEC_SET1_PI16(Base::V_TO_RED_WEIGHT);
+        const int16x4_t K16_V_TO_GREEN_WEIGHT = SIMD_VEC_SET1_PI16(Base::V_TO_GREEN_WEIGHT);
+        const int16x4_t K16_V_TO_RED_WEIGHT = SIMD_VEC_SET1_PI16(Base::V_TO_RED_WEIGHT);
 
-		const int32x4_t K32_YUV_TO_BGR_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_ROUND_TERM);
-	}
+        const int32x4_t K32_YUV_TO_BGR_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_ROUND_TERM);
+    }
 #endif//SIMD_NEON_ENABLE
+
+#ifdef SIMD_MSA_ENABLE    
+    namespace Msa
+    {
+        const size_t A = sizeof(v16u8);
+        const size_t DA = 2 * A;
+        const size_t QA = 4 * A;
+        const size_t OA = 8 * A;
+        const size_t HA = A / 2;
+    }
+#endif//SIMD_Msa_ENABLE
 }
 #endif//__SimdConst_h__

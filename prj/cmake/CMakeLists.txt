@@ -147,6 +147,36 @@ else()
  set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
 endif()
 
+elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "mips"))
+
+set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
+
+set(CXX_MSA_FLAG "-mmsa -mhard-float -mfp64")
+
+file(GLOB_RECURSE SIMD_BASE_SOURCES ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
+add_library(SimdBase STATIC ${SIMD_BASE_SOURCES})
+set_target_properties(SimdBase PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
+
+file(GLOB_RECURSE SIMD_MSA_SOURCES ${TRUNK_DIR}/src/Simd/SimdMsa*.cpp)
+add_library(SimdMsa STATIC ${SIMD_MSA_SOURCES})
+set_target_properties(SimdMsa PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG}")
+
+file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
+add_library(Simd STATIC ${SIMD_SOURCES})
+target_link_libraries(Simd SimdBase SimdMsa)
+set_target_properties(Simd PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG}")
+
+add_library(TestCheckC STATIC ${TRUNK_DIR}/src/Test/TestCheckC.c)
+
+file(GLOB_RECURSE TEST_SOURCES ${TRUNK_DIR}/src/Test/*.cpp)
+add_executable(Test ${TEST_SOURCES})
+target_link_libraries(Test Simd TestCheckC -lpthread)
+if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG} -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+else()
+ set_target_properties(Test PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11 -D_GLIBCXX_USE_NANOSLEEP")
+endif()
+
 else()
 message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
 endif()

@@ -445,6 +445,23 @@ namespace Simd
 	}
 #endif
 
+#ifdef SIMD_MSA_ENABLE
+    namespace Msa
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return true;
+        }
+
+        SIMD_INLINE bool SupportedByOS()
+        {
+            return true;
+        }
+
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
+#endif
+
     SIMD_INLINE size_t Alignment()
     {
 #ifdef SIMD_AVX2_ENABLE
@@ -490,6 +507,11 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
         if (Neon::Enable)
             return sizeof(uint8x16_t);
+        else
+#endif
+#ifdef SIMD_MSA_ENABLE
+        if (Msa::Enable)
+            return sizeof(v16u8);
         else
 #endif
             return sizeof(void *);

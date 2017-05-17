@@ -201,6 +201,11 @@ namespace Test
 			result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Neon::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
+#ifdef SIMD_MSA_ENABLE
+        if (Simd::Msa::Enable)
+            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Msa::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
+#endif 
+
 		return result;
 	}
 
