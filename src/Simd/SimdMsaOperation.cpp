@@ -128,6 +128,70 @@ namespace Simd
 			else
 				OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 		}
+
+        template <SimdOperationBinary16iType type> SIMD_INLINE v8i16 OperationBinary16i(const v8i16 & a, const v8i16 & b);
+
+        template <> SIMD_INLINE v8i16 OperationBinary16i<SimdOperationBinary16iAddition>(const v8i16 & a, const v8i16 & b)
+        {
+            return __msa_addv_h(a, b);
+        }
+
+        template <> SIMD_INLINE v8i16 OperationBinary16i<SimdOperationBinary16iSubtraction>(const v8i16 & a, const v8i16 & b)
+        {
+            return __msa_subv_h(a, b);
+        }
+
+        template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+            size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            assert(width*sizeof(int16_t) >= A);
+            if (align)
+                assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
+
+            size_t size = width*sizeof(int16_t);
+            size_t alignedSize = Simd::AlignLo(size, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t offset = 0; offset < alignedSize; offset += A)
+                {
+                    const v8i16 a_ = (v8i16)Load<align>(a + offset);
+                    const v8i16 b_ = (v8i16)Load<align>(b + offset);
+                    Store<align>(dst + offset, (v16u8)OperationBinary16i<type>(a_, b_));
+                }
+                if (alignedSize != size)
+                {
+                    const v8i16 a_ = (v8i16)Load<false>(a + size - A);
+                    const v8i16 b_ = (v8i16)Load<false>(b + size - A);
+                    Store<false>(dst + size - A, (v16u8)OperationBinary16i<type>(a_, b_));
+                }
+                a += aStride;
+                b += bStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            switch (type)
+            {
+            case SimdOperationBinary16iAddition:
+                return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+            case SimdOperationBinary16iSubtraction:
+                return OperationBinary16i<align, SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+            default:
+                assert(0);
+            }
+        }
+
+        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+        {
+            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+                OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+            else
+                OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+        }
     }
 #endif// SIMD_MSA_ENABLE
 }

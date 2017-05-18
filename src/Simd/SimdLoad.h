@@ -906,6 +906,18 @@ namespace Simd
         {
             return (v16u8)__msa_ld_b((v16i8*)p, 0);
         }
+
+        template <bool align> SIMD_INLINE v8i16 Load(const int16_t * p);
+
+        template <> SIMD_INLINE v8i16 Load<false>(const int16_t * p)
+        {
+            return __msa_ld_h((v8i16*)p, 0);
+        }
+
+        template <> SIMD_INLINE v8i16 Load<true>(const int16_t * p)
+        {
+            return __msa_ld_h((v8i16*)p, 0);
+        }
     }
 #endif//SIMD_MSA_ENABLE
 }

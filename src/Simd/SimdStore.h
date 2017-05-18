@@ -489,6 +489,18 @@ namespace Simd
         {
             __msa_st_b((v16i8)a, p, 0);
         }
+
+        template <bool align> SIMD_INLINE void Store(int16_t * p, v8i16 a);
+
+        template <> SIMD_INLINE void Store<false>(int16_t * p, v8i16 a)
+        {
+            __msa_st_h(a, p, 0);
+        }
+
+        template <> SIMD_INLINE void Store<true>(int16_t * p, v8i16 a)
+        {
+            __msa_st_h(a, p, 0);
+        }
     }
 #endif//SIMD_MSA_ENABLE
 }
