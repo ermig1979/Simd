@@ -854,6 +854,7 @@ namespace Simd
         return Rectangle(l, t, r, b);
     }
 
+    /*! \cond PRIVATE */
     template <typename T> template <typename TP> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator &= (const Point<TP> & p)
     {
@@ -892,6 +893,7 @@ namespace Simd
             bottom = std::max(_r.bottom, top);
         return *this;
     }
+    /*! \endcond */
 
     template <typename T> template <typename TP> 
     SIMD_INLINE Rectangle<T> & Rectangle<T>::operator |= (const Point<TP> & p)
