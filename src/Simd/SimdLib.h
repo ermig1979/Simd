@@ -2049,6 +2049,25 @@ extern "C"
     */
     SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
+    /*! @ingroup other_conversion
+
+        \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * min, const float * max, uint8_t * dst);
+
+        \short Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.
+
+        For every element:
+        \verbatim
+        dst[i] = (min(max(src[i], lower), upper) - lower)*255/(upper - lower);
+        \endverbatim
+
+        \param [in] src - a pointer to the input array with 32-bit float point numbers.
+        \param [in] size - a size of input and output array.
+        \param [in] min - a pointer to lower saturated bound of the input array.
+        \param [in] max - a pointer to upper saturated bound of the input array.
+        \param [out] dst - a pointer to the output array with 8-bit unsigned integer numbers.
+    */
+    SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+
     /*! @ingroup other_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);

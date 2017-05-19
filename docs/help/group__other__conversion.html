@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga930ab667ac2a8a956f93a801f074e677"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#ga930ab667ac2a8a956f93a801f074e677">SimdDeinterleaveBgra</a> (const uint8_t *bgra, size_t bgraStride, size_t width, size_t height, uint8_t *b, size_t bStride, uint8_t *g, size_t gStride, uint8_t *r, size_t rStride, uint8_t *a, size_t aStride)</td></tr>
 <tr class="memdesc:ga930ab667ac2a8a956f93a801f074e677"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deinterleaves 32-bit BGRA interleaved image into separated 8-bit Blue, Green, Red and Alpha planar images.  <a href="#ga930ab667ac2a8a956f93a801f074e677">More...</a><br /></td></tr>
 <tr class="separator:ga930ab667ac2a8a956f93a801f074e677"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae2d8800553d2b36e4f3a358e2d89f56b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#gae2d8800553d2b36e4f3a358e2d89f56b">SimdFloat32ToUint8</a> (const float *src, size_t size, const float *lower, const float *upper, uint8_t *dst)</td></tr>
+<tr class="memdesc:gae2d8800553d2b36e4f3a358e2d89f56b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.  <a href="#gae2d8800553d2b36e4f3a358e2d89f56b">More...</a><br /></td></tr>
+<tr class="separator:gae2d8800553d2b36e4f3a358e2d89f56b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5a2b53e16e1053435ff50195e7005086"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__conversion.html#ga5a2b53e16e1053435ff50195e7005086">SimdInt16ToGray</a> (const uint8_t *src, size_t width, size_t height, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga5a2b53e16e1053435ff50195e7005086"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 16-bit signed integer image to 8-bit gray image with saturation.  <a href="#ga5a2b53e16e1053435ff50195e7005086">More...</a><br /></td></tr>
 <tr class="separator:ga5a2b53e16e1053435ff50195e7005086"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -491,6 +494,65 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rStride</td><td>- a row size of the r image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">a</td><td>- a pointer to pixels data of 8-bit Alpha planar image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">aStride</td><td>- a row size of the a image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae2d8800553d2b36e4f3a358e2d89f56b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae2d8800553d2b36e4f3a358e2d89f56b">&#9670;&nbsp;</a></span>SimdFloat32ToUint8()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdFloat32ToUint8 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>min</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>max</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts numbers in the array from 32-bit float to 8-bit unsigned integer format. </p>
+<p>For every element: </p><pre class="fragment">dst[i] = (min(max(src[i], lower), upper) - lower)*255/(upper - lower);
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input array with 32-bit float point numbers. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">min</td><td>- a pointer to lower saturated bound of the input array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">max</td><td>- a pointer to upper saturated bound of the input array. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with 8-bit unsigned integer numbers. </td></tr>
   </table>
   </dd>
 </dl>

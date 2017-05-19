@@ -144,7 +144,9 @@ namespace Simd
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+
+        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
         void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);

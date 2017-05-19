@@ -166,6 +166,8 @@ namespace Test
     TEST_ADD_GROUP(Float16ToFloat32);
     TEST_ADD_GROUP(SquaredDifferenceSum16f);
 
+    TEST_ADD_GROUP(Float32ToUint8);
+
     TEST_ADD_GROUP(MeanFilter3x3);
     TEST_ADD_GROUP(MedianFilterRhomb3x3);
     TEST_ADD_GROUP(MedianFilterRhomb5x5);
