@@ -1590,6 +1590,21 @@ SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * l
         Base::Float32ToUint8(src, size, lower, upper, dst);
 }
 
+SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && size >= Avx2::HA)
+        Avx2::Uint8ToFloat32(src, size, lower, upper, dst);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && size >= Sse2::A)
+        Sse2::Uint8ToFloat32(src, size, lower, upper, dst);
+    else
+#endif
+        Base::Uint8ToFloat32(src, size, lower, upper, dst);
+}
+
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {

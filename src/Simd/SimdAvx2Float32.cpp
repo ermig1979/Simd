@@ -51,7 +51,7 @@ namespace Simd
 
             __m256 _lower = _mm256_set1_ps(lower[0]);
             __m256 _upper = _mm256_set1_ps(upper[0]);
-            __m256 boost = _mm256_set1_ps(255.0f/(upper[0] -lower[0]));
+            __m256 boost = _mm256_set1_ps(255.0f/(upper[0] - lower[0]));
 
             size_t alignedSize = AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)
@@ -66,6 +66,42 @@ namespace Simd
                 Float32ToUint8<true>(src, size, lower, upper, dst);
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
+        }
+
+        SIMD_INLINE __m256 Uint8ToFloat32(const __m128i & value, const __m256 & lower, const __m256 & boost)
+        {
+            return _mm256_sub_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(value)), boost), lower);
+        }
+
+        template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)
+        {
+            __m128i _src = Sse2::Load<align>((__m128i*)src);
+            Avx::Store<align>(dst + 0, Uint8ToFloat32(_src, lower, boost));
+            Avx::Store<align>(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
+        }
+
+        template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            assert(size >= HA);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            __m256 _lower = _mm256_set1_ps(lower[0]);
+            __m256 boost = _mm256_set1_ps((upper[0] - lower[0]) / 255.0f);
+
+            size_t alignedSize = AlignLo(size, HA);
+            for (size_t i = 0; i < alignedSize; i += HA)
+                Uint8ToFloat32<align>(src + i, _lower, boost, dst + i);
+            if (alignedSize != size)
+                Uint8ToFloat32<false>(src + size - HA, _lower, boost, dst + size - HA);
+        }
+
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Uint8ToFloat32<true>(src, size, lower, upper, dst);
+            else
+                Uint8ToFloat32<false>(src, size, lower, upper, dst);
         }
     }
 #endif// SIMD_AVX2_ENABLE

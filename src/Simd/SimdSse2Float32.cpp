@@ -51,7 +51,7 @@ namespace Simd
 
             __m128 _lower = _mm_set1_ps(lower[0]);
             __m128 _upper = _mm_set1_ps(upper[0]);
-            __m128 boost = _mm_set1_ps(255.0f/(upper[0] -lower[0]));
+            __m128 boost = _mm_set1_ps(255.0f/(upper[0] - lower[0]));
 
             size_t alignedSize = AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)
@@ -66,6 +66,46 @@ namespace Simd
                 Float32ToUint8<true>(src, size, lower, upper, dst);
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
+        }
+
+        SIMD_INLINE __m128 Uint8ToFloat32(const __m128i & value, const __m128 & lower, const __m128 & boost)
+        {
+            return _mm_sub_ps(_mm_mul_ps(_mm_cvtepi32_ps(value), boost), lower);
+        }
+
+        template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m128 & lower, const __m128 & boost, float * dst)
+        {
+            __m128i _src = Load<align>((__m128i*)src);
+            __m128i lo = UnpackU8<0>(_src);
+            __m128i hi = UnpackU8<1>(_src);
+            Sse::Store<align>(dst + F * 0, Uint8ToFloat32(UnpackU16<0>(lo), lower, boost));
+            Sse::Store<align>(dst + F * 1, Uint8ToFloat32(UnpackU16<1>(lo), lower, boost));
+            Sse::Store<align>(dst + F * 2, Uint8ToFloat32(UnpackU16<0>(hi), lower, boost));
+            Sse::Store<align>(dst + F * 3, Uint8ToFloat32(UnpackU16<1>(hi), lower, boost));
+        }
+
+        template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            assert(size >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            __m128 _lower = _mm_set1_ps(lower[0]);
+            __m128 boost = _mm_set1_ps((upper[0] - lower[0])/255.0f);
+
+            size_t alignedSize = AlignLo(size, A);
+            for (size_t i = 0; i < alignedSize; i += A)
+                Uint8ToFloat32<align>(src + i, _lower, boost, dst + i);
+            if (alignedSize != size)
+                Uint8ToFloat32<false>(src + size - A, _lower, boost, dst + size - A);
+        }
+
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Uint8ToFloat32<true>(src, size, lower, upper, dst);
+            else
+                Uint8ToFloat32<false>(src, size, lower, upper, dst);
         }
     }
 #endif// SIMD_SSE2_ENABLE

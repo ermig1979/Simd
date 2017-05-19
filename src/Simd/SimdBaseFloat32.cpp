@@ -48,5 +48,26 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Float32ToUint8(src[i], _lower, _upper, boost);
         }
+
+        SIMD_INLINE float Uint8ToFloat32(int value, float lower, float boost)
+        {
+            return value*boost - lower;
+        }
+
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            float _lower = lower[0], boost = (upper[0] - lower[0])/255.0f;
+            size_t alignedSize = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < alignedSize; i += 4)
+            {
+                dst[i + 0] = Uint8ToFloat32(src[i + 0], _lower, boost);
+                dst[i + 1] = Uint8ToFloat32(src[i + 1], _lower, boost);
+                dst[i + 2] = Uint8ToFloat32(src[i + 2], _lower, boost);
+                dst[i + 3] = Uint8ToFloat32(src[i + 3], _lower, boost);
+            }
+            for (; i < size; ++i)
+                dst[i] = Uint8ToFloat32(src[i], _lower, boost);
+        }
     }
 }

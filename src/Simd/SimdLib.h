@@ -2051,7 +2051,7 @@ extern "C"
 
     /*! @ingroup other_conversion
 
-        \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * min, const float * max, uint8_t * dst);
+        \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
         \short Converts numbers in the array from 32-bit float to 8-bit unsigned integer format.
 
@@ -2062,11 +2062,30 @@ extern "C"
 
         \param [in] src - a pointer to the input array with 32-bit float point numbers.
         \param [in] size - a size of input and output array.
-        \param [in] min - a pointer to lower saturated bound of the input array.
-        \param [in] max - a pointer to upper saturated bound of the input array.
+        \param [in] lower - a pointer to lower saturated bound of the input array.
+        \param [in] upper - a pointer to upper saturated bound of the input array.
         \param [out] dst - a pointer to the output array with 8-bit unsigned integer numbers.
     */
     SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+
+    /*! @ingroup other_conversion
+
+        \fn void SimdUint8ToFloat32(const uint8_t* src, size_t size, const float * lower, const float * upper, float * dst);
+
+        \short Converts numbers in the array from 8-bit unsigned integer to 32-bit float format.
+
+        For every element:
+        \verbatim
+        dst[i] = src[i]*(upper - lower)/255 + lower;
+        \endverbatim
+
+        \param [in] src - a pointer to the input array with 8-bit unsigned integer numbers.
+        \param [in] size - a size of input and output array.
+        \param [in] lower - a pointer to lower bound of the output array.
+        \param [in] upper - a pointer to upper bound of the output array.
+        \param [out] dst - a pointer to the output array with 32-bit float point numbers.
+    */
+    SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst);
 
     /*! @ingroup other_filter
 
