@@ -170,9 +170,17 @@ namespace Simd
 
 #define SIMD_LOG1(value) Log<uint8_t>(value, #value)
 
+#define SIMD_LOG_SS(message) \
+{ \
+    std::cout << __FUNCTION__  << " : " << message << std::endl; \
+    std::cout.flush(); \
+}
+
 #else//SIMD_LOG_ENABLE
 
 #define SIMD_LOG(value)
+
+#define SIMD_LOG_SS(message)
 
 #endif//SIMD_LOG_ENABLE 
 

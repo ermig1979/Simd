@@ -454,5 +454,94 @@ namespace Simd
             HogFeatureExtractor extractor;
             extractor.Run(src, stride, width, height, features);
         }
+
+        namespace HogSeparableFilter_Detail
+        {
+            template <int add> void Set(float & dst, float value);
+
+            template <> SIMD_INLINE void Set<0>(float & dst, float value)
+            {
+                dst = value;
+            }
+
+            template <> SIMD_INLINE void Set<1>(float & dst, float value)
+            {
+                dst += value;
+            }        
+        }
+
+        class HogSeparableFilter
+        {
+            typedef std::vector<float, Simd::Allocator<float> > Vector;
+
+            size_t _w, _h;
+            Vector _buffer;
+
+            void Init(size_t w, size_t h, size_t cs, size_t rs)
+            {
+                _w = w - cs + 1;
+                _h = h - rs + 1;
+                _buffer.resize(_w*h);
+            }
+
+            void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        const float * s = src + col;
+                        float sum = 0;
+                        for (size_t i = 0; i < size; ++i)
+                            sum += s[i] * filter[i];
+                        dst[col] = sum;
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+
+            template <int add> void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        const float * s = src + col;
+                        float sum = 0;
+                        for (size_t i = 0; i < size; ++i)
+                            sum += s[i*srcStride] * filter[i];
+                        HogSeparableFilter_Detail::Set<add>(dst[col], sum);
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t width, size_t height,
+                const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+            {
+                Init(width, height, colSize, rowSize);
+
+                FilterCols(src, srcStride, _w, height, colFilter, colSize, _buffer.data(), _w);
+
+                if(add)
+                    FilterRows<1>(_buffer.data(), _w, _w, _h, rowFilter, rowSize, dst, dstStride);
+                else
+                    FilterRows<0>(_buffer.data(), _w, _w, _h, rowFilter, rowSize, dst, dstStride);
+            }
+        };
+
+        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
+            const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+        {
+            assert(width >= colSize - 1 && height >= rowSize - 1);
+
+            HogSeparableFilter filter;
+            filter.Run(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
+        }
     }
 }

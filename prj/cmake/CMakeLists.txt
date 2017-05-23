@@ -63,7 +63,7 @@ if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL 
 
     file(GLOB_RECURSE SIMD_AVX2_SOURCES ${TRUNK_DIR}/src/Simd/SimdAvx2*.cpp)
     add_library(SimdAvx2 STATIC ${SIMD_AVX2_SOURCES})
-    set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c")
+    set_target_properties(SimdAvx2 PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -fabi-version=4")
 
     file(GLOB_RECURSE SIMD_SOURCES ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
     add_library(Simd STATIC ${SIMD_SOURCES})

@@ -2314,6 +2314,40 @@ extern "C"
     */
     SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
+    /*! @ingroup face_recognition
+
+        \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add);
+
+        \short Applies separable filter to given image of 32-bit float point format.
+
+        For every point (except border):
+        \verbatim
+        sum = 0;
+        for(dy = 0; dy < rowSize; dy++)
+            for(dx = 0; dx < colSize; dx++)
+                sum += src[x + dx, y + dy]*rowFilter[dy]*colFilter[dx];
+        if(add)
+            dst[x, y] += sum;
+        else
+            dst[x, y] = sum;
+        \endverbatim
+
+        \note Input image has to have size at least not less then size of filter: (width <= colSize and height <= rowSize).
+
+        \param [in] src - a pointer to input 32-bit float point image.
+        \param [in] srcStride - a row size of input image. 
+        \param [in] width - a width of input image. It must be not less then size of column filter.
+        \param [in] height - a height of input image. It must be not less then size of row filter.
+        \param [in] colFilter - a pointer to 32-bit float point array with column filter.
+        \param [in] colSize- a size of column filter.
+        \param [in] rowFilter - a pointer to 32-bit float point array with row filter.
+        \param [in] rowSize- a size of row filter.
+        \param [out] dst - a pointer to output 32-bit float point image.
+        \param [in] dstStride - a row size of output image.
+        \param [in] add - a flag which signalizes that result has to be added to existing image.
+    */
+    SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add);
+
     /*! @ingroup other_conversion
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);

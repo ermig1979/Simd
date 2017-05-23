@@ -163,6 +163,12 @@ namespace Test
         }
     }
 
+    void FillRandom32f(Buffer32f & buffer, float lo, float hi)
+    {
+        for (size_t i = 0; i < buffer.size(); ++i)
+            buffer[i] = lo + (hi - lo)*(float)Random();
+    }
+
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle, 
         const String & description)
     {

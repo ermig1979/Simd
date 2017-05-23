@@ -255,6 +255,9 @@ namespace Simd
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
+            const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add);
+
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
         void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 

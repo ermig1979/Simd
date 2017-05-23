@@ -193,6 +193,7 @@ namespace Test
 
     TEST_ADD_GROUP(HogDirectionHistograms);
     TEST_ADD_GROUP(HogExtractFeatures);
+    TEST_ADD_GROUP(HogFilterSeparable);
 
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 

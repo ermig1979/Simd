@@ -228,10 +228,6 @@ namespace Simd
                 dst[i] = _mm256_set1_ps(src[i]);
         }
 
-        template<int shift> SIMD_INLINE __m256 Alignr(const __m256 & s0, const __m256 & s4)
-        {
-            return _mm256_castsi256_ps(_mm256_alignr_epi8(_mm256_castps_si256(s4), _mm256_castps_si256(s0), shift*4));
-        }
         template <bool align> SIMD_INLINE __m256 Convolution3(const float * src, const __m256 * weights)
         {
             return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],

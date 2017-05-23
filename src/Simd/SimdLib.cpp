@@ -50,6 +50,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdVersion.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdLog.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
@@ -1812,6 +1813,22 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
     else
 #endif
         Base::HogExtractFeatures(src, stride, width, height, features);
+}
+
+SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
+    const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F + colSize - 1)
+        Avx2::HogFilterSeparable(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse41::F + colSize - 1)
+        Sse::HogFilterSeparable(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
+    else
+#endif
+        Base::HogFilterSeparable(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
 }
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)

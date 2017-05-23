@@ -691,6 +691,179 @@ namespace Simd
             HogFeatureExtractor extractor;
             extractor.Run(src, stride, width, height, features);
         }
+
+        namespace HogSeparableFilter_Detail
+        {
+            template <int add, bool end> SIMD_INLINE void Set(float * dst, const __m256 & value, const __m256 & mask)
+            {
+                Avx::Store<false>(dst, value);
+            }
+
+            template <> SIMD_INLINE void Set<1, false>(float * dst, const __m256 & value, const __m256 & mask)
+            {
+                Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), value));
+            }
+
+            template <> SIMD_INLINE void Set<1, true>(float * dst, const __m256 & value, const __m256 & mask)
+            {
+                Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), _mm256_and_ps(value, mask)));
+            }
+        }
+
+        class HogSeparableFilter
+        {
+            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+            typedef std::vector<__m256, Simd::Allocator<__m256> > Vector256f;
+
+            size_t _w, _h, _s;
+            Vector32f _buffer;
+            Vector256f _filter;
+
+            void Init(size_t w, size_t h, size_t cs, size_t rs)
+            {
+                _w = w - cs + 1;
+                _s = AlignHi(_w, F);
+                _h = h - rs + 1;
+                _buffer.resize(_s*h);
+            }
+
+            template <bool align> void FilterCols(const float * src, const __m256 * filter, size_t size, float * dst)
+            {
+                __m256 sum = _mm256_setzero_ps();
+                for (size_t i = 0; i < size; ++i)
+                    sum = _mm256_fmadd_ps(Avx::Load<false>(src + i), filter[i], sum);
+                Avx::Store<align>(dst, sum);
+            }
+
+            void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                _filter.resize(size);
+                for (size_t i = 0; i < size; ++i)
+                    _filter[i] = _mm256_set1_ps(filter[i]);
+
+                size_t alignedWidth = AlignLo(width, F);
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += F)
+                        FilterCols<true>(src + col, _filter.data(), size, dst + col);
+                    if (alignedWidth != width)
+                        FilterCols<false>(src + width - F, _filter.data(), size, dst + width - F);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align> void FilterCols_10(const float * src, const __m256 * filter, float * dst)
+            {
+                __m256 sum0 = _mm256_setzero_ps(), sum1 = _mm256_setzero_ps();
+                __m256  src0 = Avx::Load<false>(src + 0);
+                __m256  src4 = Avx::Load<false>(src + 4);
+                __m256  src8 = Avx::Load<false>(src + 8);
+                sum0 = _mm256_fmadd_ps(src0, filter[0], sum0);
+                sum1 = _mm256_fmadd_ps(Alignr<1>(src0, src4), filter[1], sum1);
+                sum0 = _mm256_fmadd_ps(Alignr<2>(src0, src4), filter[2], sum0);
+                sum1 = _mm256_fmadd_ps(Alignr<3>(src0, src4), filter[3], sum1);
+                sum0 = _mm256_fmadd_ps(src4, filter[4], sum0);
+                sum1 = _mm256_fmadd_ps(Alignr<1>(src4, src8), filter[5], sum1);
+                sum0 = _mm256_fmadd_ps(Alignr<2>(src4, src8), filter[6], sum0);
+                sum1 = _mm256_fmadd_ps(Alignr<3>(src4, src8), filter[7], sum1);
+                sum0 = _mm256_fmadd_ps(src8, filter[8], sum0);
+                sum1 = _mm256_fmadd_ps(Avx::Load<false>(src + 9), filter[9], sum1);
+                Avx::Store<align>(dst, _mm256_add_ps(sum0, sum1));
+            }
+
+            void FilterCols_10(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, float * dst, size_t dstStride)
+            {
+                __m256 _filter[10];
+                for (size_t i = 0; i < 10; ++i)
+                    _filter[i] = _mm256_set1_ps(filter[i]);
+
+                size_t alignedWidth = AlignLo(width, F);
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += F)
+                        FilterCols_10<true>(src + col, _filter, dst + col);
+                    if (alignedWidth != width)
+                        FilterCols_10<false>(src + width - F, _filter, dst + width - F);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template <int add, bool end> void FilterRows(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
+            {
+                __m256 sum = _mm256_setzero_ps();
+                for (size_t i = 0; i < size; ++i, src += stride)
+                    sum = _mm256_fmadd_ps(Avx::Load<!end>(src), filter[i], sum);
+                HogSeparableFilter_Detail::Set<add, end>(dst, sum, mask);
+            }
+
+            template <int add, bool end> void FilterRows2x(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
+            {
+                __m256 sums[2] = { _mm256_setzero_ps(), _mm256_setzero_ps()};
+                for (size_t i = 0; i < size; ++i, src += stride)
+                {
+                    __m256 f = filter[i];
+                    sums[0] = _mm256_fmadd_ps(Avx::Load<!end>(src + 0), f, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(Avx::Load<!end>(src + F), f, sums[1]);
+                }
+                HogSeparableFilter_Detail::Set<add, end>(dst + 0, sums[0], mask);
+                HogSeparableFilter_Detail::Set<add, end>(dst + F, sums[1], mask);
+            }
+
+            template <int add> void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                _filter.resize(size);
+                for (size_t i = 0; i < size; ++i)
+                    _filter[i] = _mm256_set1_ps(filter[i]);
+
+                size_t fullAlignedWidth =  AlignLo(width, DF);
+                size_t partialAlignedWidth = AlignLo(width, F);
+                __m256 tailMask = RightNotZero(width - partialAlignedWidth);
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < fullAlignedWidth; col += DF)
+                        FilterRows2x<add, false>(src + col, srcStride, _filter.data(), size, dst + col, tailMask);
+                    for (; col < partialAlignedWidth; col += F)
+                        FilterRows<add, false>(src + col, srcStride, _filter.data(), size, dst + col, tailMask);
+                    if (partialAlignedWidth != width)
+                        FilterRows<add, true>(src + width - F, srcStride, _filter.data(), size, dst + width - F, tailMask);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t width, size_t height,
+                const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+            {
+                Init(width, height, colSize, rowSize);
+
+                if (colSize == 10)
+                    FilterCols_10(src, srcStride, _w, height, colFilter, _buffer.data(), _s);
+                else
+                    FilterCols(src, srcStride, _w, height, colFilter, colSize, _buffer.data(), _s);
+
+                if (add)
+                    FilterRows<1>(_buffer.data(), _s, _w, _h, rowFilter, rowSize, dst, dstStride);
+                else
+                    FilterRows<0>(_buffer.data(), _s, _w, _h, rowFilter, rowSize, dst, dstStride);
+            }
+        };
+
+        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
+            const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+        {
+            assert(width >= F + colSize - 1 && height >= rowSize - 1);
+
+            HogSeparableFilter filter;
+            filter.Run(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
+        }
 	}
 #endif
 }
