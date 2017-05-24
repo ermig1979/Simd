@@ -477,14 +477,14 @@ namespace Simd
             size_t _w, _h;
             Vector _buffer;
 
-            void Init(size_t w, size_t h, size_t cs, size_t rs)
+            void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
-                _w = w - cs + 1;
-                _h = h - rs + 1;
+                _w = w - rs + 1;
+                _h = h - cs + 1;
                 _buffer.resize(_w*h);
             }
 
-            void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
                 for (size_t row = 0; row < height; ++row)
                 {
@@ -502,7 +502,7 @@ namespace Simd
             }
 
 
-            template <int add> void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            template <int add> void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
                 for (size_t row = 0; row < height; ++row)
                 {
@@ -522,26 +522,26 @@ namespace Simd
         public:
 
             void Run(const float * src, size_t srcStride, size_t width, size_t height,
-                const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+                const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
             {
-                Init(width, height, colSize, rowSize);
+                Init(width, height, rowSize, colSize);
 
-                FilterCols(src, srcStride, _w, height, colFilter, colSize, _buffer.data(), _w);
+                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data(), _w);
 
                 if(add)
-                    FilterRows<1>(_buffer.data(), _w, _w, _h, rowFilter, rowSize, dst, dstStride);
+                    FilterCols<1>(_buffer.data(), _w, _w, _h, colFilter, colSize, dst, dstStride);
                 else
-                    FilterRows<0>(_buffer.data(), _w, _w, _h, rowFilter, rowSize, dst, dstStride);
+                    FilterCols<0>(_buffer.data(), _w, _w, _h, colFilter, colSize, dst, dstStride);
             }
         };
 
         void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
-            const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add)
+            const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
         {
             assert(width >= colSize - 1 && height >= rowSize - 1);
 
             HogSeparableFilter filter;
-            filter.Run(src, srcStride, width, height, colFilter, colSize, rowFilter, rowSize, dst, dstStride, add);
+            filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
         }
     }
 }

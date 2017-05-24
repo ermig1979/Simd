@@ -194,7 +194,7 @@ namespace Test
     {
         struct FuncHSF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add);
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
             FuncPtr func;
             String description;
@@ -203,18 +203,18 @@ namespace Test
 
             FuncHSF(const FuncHSF & f, int add) : func(f.func), description(f.description + (add ? "<1>" : "<0>")) {}
 
-            void Call(const View & src, const Buffer32f & col, const Buffer32f & row, const View & dstSrc, View & dstDst, int add) const
+            void Call(const View & src, const Buffer32f & row, const Buffer32f & col, const View & dstSrc, View & dstDst, int add) const
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/4, src.width, src.height, col.data(), col.size(), row.data(), row.size(), (float*)dstDst.data, dstDst.stride/4, add);
+                func((float*)src.data, src.stride/4, src.width, src.height, row.data(), row.size(), col.data(), col.size(), (float*)dstDst.data, dstDst.stride/4, add);
             }
         };
     }
 
 #define FUNC_HSF(function) FuncHSF(function, #function)
 
-    bool HogFilterSeparableAutoTest(int width, int height, int add, const FuncHSF & f1, const FuncHSF & f2)
+    bool HogFilterSeparableAutoTest(int width, int height, int rowSize, int colSize, int add, const FuncHSF & f1, const FuncHSF & f2)
     {
         bool result = true;
 
@@ -223,15 +223,14 @@ namespace Test
         View src(width, height, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(src, -10.0f, 10.0f);
 
-        const size_t colSize = 10, rowSize = 10;
         Buffer32f col(colSize), row(rowSize);
         FillRandom32f(col, -1.0f, 1.0f);
         FillRandom32f(row, -1.0f, 1.0f);
 
-        View dstSrc(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstSrc(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(dstSrc, -10.0f, 10.0f);
-        View dstDst1(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst2(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst1(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, col, row, dstSrc, dstDst1, add));
 
@@ -248,8 +247,8 @@ namespace Test
 
         for (int add = 0; result && add < 2; ++add)
         {
-            result = result && HogFilterSeparableAutoTest(W, H, add, FuncHSF(f1, add), FuncHSF(f2, add));
-            result = result && HogFilterSeparableAutoTest(W + 1, H - 1, add, FuncHSF(f1, add), FuncHSF(f2, add));
+            result = result && HogFilterSeparableAutoTest(W, H, 10, 10, add, FuncHSF(f1, add), FuncHSF(f2, add));
+            result = result && HogFilterSeparableAutoTest(W + 1, H - 1, 11, 9, add, FuncHSF(f1, add), FuncHSF(f2, add));
         }
 
         return result;
@@ -387,9 +386,9 @@ namespace Test
         const size_t colSize = 10, rowSize = 10;
         Buffer32f col(colSize), row(rowSize);
 
-        View dstSrc(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst1(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
-        View dstDst2(width - colSize + 1, height - rowSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstSrc(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst1(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
+        View dstDst2(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
 
         if (create)
         {

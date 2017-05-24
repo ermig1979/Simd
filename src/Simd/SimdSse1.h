@@ -31,8 +31,7 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
 	namespace Sse
 	{
-        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
-            const float * colFilter, size_t colSize, const float * rowFilter, size_t rowSize, float * dst, size_t dstStride, int add);
+        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 

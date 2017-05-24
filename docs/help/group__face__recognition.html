@@ -56,9 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga12aa4948ab141ccce6c285daf6276ca9">SimdHogExtractFeatures</a> (const uint8_t *src, size_t stride, size_t width, size_t height, float *features)</td></tr>
 <tr class="memdesc:ga12aa4948ab141ccce6c285daf6276ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="#ga12aa4948ab141ccce6c285daf6276ca9">More...</a><br /></td></tr>
 <tr class="separator:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae5bdb348f69e658a17150d0dbc649bbf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#gae5bdb348f69e658a17150d0dbc649bbf">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *colFilter, size_t colSize, const float *rowFilter, size_t rowSize, float *dst, size_t dstStride, int add)</td></tr>
-<tr class="memdesc:gae5bdb348f69e658a17150d0dbc649bbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to given image of 32-bit float point format.  <a href="#gae5bdb348f69e658a17150d0dbc649bbf">More...</a><br /></td></tr>
-<tr class="separator:gae5bdb348f69e658a17150d0dbc649bbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga59f186f7578a091b31dd568a0a92ad23"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga59f186f7578a091b31dd568a0a92ad23">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *rowFilter, size_t rowSize, const float *colFilter, size_t colSize, float *dst, size_t dstStride, int add)</td></tr>
+<tr class="memdesc:ga59f186f7578a091b31dd568a0a92ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to given image of 32-bit float point format.  <a href="#ga59f186f7578a091b31dd568a0a92ad23">More...</a><br /></td></tr>
+<tr class="separator:ga59f186f7578a091b31dd568a0a92ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
 <tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__face__recognition.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
@@ -208,8 +208,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gae5bdb348f69e658a17150d0dbc649bbf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae5bdb348f69e658a17150d0dbc649bbf">&#9670;&nbsp;</a></span>SimdHogFilterSeparable()</h2>
+<a id="ga59f186f7578a091b31dd568a0a92ad23"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga59f186f7578a091b31dd568a0a92ad23">&#9670;&nbsp;</a></span>SimdHogFilterSeparable()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -242,18 +242,6 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>colFilter</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>colSize</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>rowFilter</em>, </td>
         </tr>
         <tr>
@@ -261,6 +249,18 @@ Functions</h2></td></tr>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>rowSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>colFilter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>colSize</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -290,24 +290,24 @@ Functions</h2></td></tr>
 
 <p>Applies separable filter to given image of 32-bit float point format. </p>
 <p>For every point (except border): </p><pre class="fragment">sum = 0;
-for(dy = 0; dy &lt; rowSize; dy++)
-    for(dx = 0; dx &lt; colSize; dx++)
-        sum += src[x + dx, y + dy]*rowFilter[dy]*colFilter[dx];
+for(dy = 0; dy &lt; colSize; dy++)
+    for(dx = 0; dx &lt; rowSize; dx++)
+        sum += src[x + dx, y + dy]*colFilter[dy]*rowFilter[dx];
 if(add)
     dst[x, y] += sum;
 else
     dst[x, y] = sum;
-</pre><dl class="section note"><dt>Note</dt><dd>Input image has to have size at least not less then size of filter: (width &lt;= colSize and height &lt;= rowSize).</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>Input image has to have size at least not less then size of filter: (width &lt;= rowSize and height &lt;= colSize).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input 32-bit float point image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be not less then size of column filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be not less then size of row filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">colFilter</td><td>- a pointer to 32-bit float point array with column filter. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">colSize-</td><td>a size of column filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image. It must be not less then size of row filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image. It must be not less then size of column filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rowFilter</td><td>- a pointer to 32-bit float point array with row filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">rowSize-</td><td>a size of row filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">colFilter</td><td>- a pointer to 32-bit float point array with column filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">colSize-</td><td>a size of column filter. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float point image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag which signalizes that result has to be added to existing image. </td></tr>
