@@ -56,6 +56,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga12aa4948ab141ccce6c285daf6276ca9">SimdHogExtractFeatures</a> (const uint8_t *src, size_t stride, size_t width, size_t height, float *features)</td></tr>
 <tr class="memdesc:ga12aa4948ab141ccce6c285daf6276ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="#ga12aa4948ab141ccce6c285daf6276ca9">More...</a><br /></td></tr>
 <tr class="separator:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga36551f924cff995432f14cfcd085baa3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga36551f924cff995432f14cfcd085baa3">SimdHogDeinterleave</a> (const float *src, size_t srcStride, size_t width, size_t height, size_t count, float **dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga36551f924cff995432f14cfcd085baa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Separates one interleaved 32-bit float point image to separate planes.  <a href="#ga36551f924cff995432f14cfcd085baa3">More...</a><br /></td></tr>
+<tr class="separator:ga36551f924cff995432f14cfcd085baa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga59f186f7578a091b31dd568a0a92ad23"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga59f186f7578a091b31dd568a0a92ad23">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *rowFilter, size_t rowSize, const float *colFilter, size_t colSize, float *dst, size_t dstStride, int add)</td></tr>
 <tr class="memdesc:ga59f186f7578a091b31dd568a0a92ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to given image of 32-bit float point format.  <a href="#ga59f186f7578a091b31dd568a0a92ad23">More...</a><br /></td></tr>
 <tr class="separator:ga59f186f7578a091b31dd568a0a92ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -202,6 +205,78 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. It must be a multiple of 8. Its minimal value is 16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. It must be a multiple of 8. Its minimal value is 16. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga36551f924cff995432f14cfcd085baa3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga36551f924cff995432f14cfcd085baa3">&#9670;&nbsp;</a></span>SimdHogDeinterleave()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdHogDeinterleave </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float **&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Separates one interleaved 32-bit float point image to separate planes. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input interleaved 32-bit float point image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output images. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output images. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- the number of output planes. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to array with pointers to output planes. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output images. </td></tr>
   </table>
   </dd>
 </dl>

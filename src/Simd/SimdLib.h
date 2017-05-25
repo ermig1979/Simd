@@ -2316,6 +2316,22 @@ extern "C"
 
     /*! @ingroup face_recognition
 
+        \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
+
+        \short Separates one interleaved 32-bit float point image to separate planes.
+
+        \param [in] src - a pointer to the input interleaved 32-bit float point image. 
+        \param [in] srcStride - a row size of input image.
+        \param [in] width - a width of input and output images.
+        \param [in] height - a height of input and output images.
+        \param [in] count - the number of output planes.
+        \param [out] dst - a pointer to array with pointers to output planes.  
+        \param [in] dstStride - a row size of output images.
+    */
+    SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
+
+    /*! @ingroup face_recognition
+
         \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
         \short Applies separable filter to given image of 32-bit float point format.

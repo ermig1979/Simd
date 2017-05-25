@@ -470,6 +470,20 @@ namespace Simd
             }        
         }
 
+        void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                const float * psrc = src + row*srcStride;
+                size_t offset = row*dstStride;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    for (size_t i = 0; i < count; ++i)
+                        dst[i][offset + col] = *psrc++;
+                }
+            }
+        }
+
         class HogSeparableFilter
         {
             typedef std::vector<float, Simd::Allocator<float> > Vector;

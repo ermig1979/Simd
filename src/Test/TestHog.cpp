@@ -192,6 +192,88 @@ namespace Test
 
     namespace
     {
+        struct FuncHD
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncHD(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const size_t width, size_t count, float ** dst, size_t dstStride) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride/4, width, src.height, count, dst, dstStride);
+            }
+        };
+    }
+
+#define FUNC_HD(function) FuncHD(function, #function)
+
+    bool HogDeinterleaveAutoTest(size_t width, size_t height, size_t count, const FuncHD & f1, const FuncHD & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << ", " << count << "].");
+
+        View src(width*count, height, View::Float, NULL, TEST_ALIGN(width*count));
+        for (size_t row = 0; row < height; ++row)
+            for (size_t col = 0; col < width; ++col)
+                for (size_t i = 0; i < count; ++i)
+                    src.At<float>(count*col + i, row) = float(row*100000 + col*100 + i);
+
+        View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
+        std::vector<float*> d1(count), d2(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+            d1[i] = (float*)(dst1.data + dst1.stride*height*i);
+            d2[i] = (float*)(dst2.data + dst2.stride*height*i);
+        }
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, width, count, d1.data(), dst1.stride / 4));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, width, count, d2.data(), dst2.stride / 4));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogDeinterleaveAutoTest(const FuncHD & f1, const FuncHD & f2)
+    {
+        bool result = true;
+
+        size_t w = Simd::AlignHi(W/8, SIMD_ALIGN), h = H/8, c = 31;
+
+        result = result && HogDeinterleaveAutoTest(w, h, c, f1, f2);
+        result = result && HogDeinterleaveAutoTest(w - 1, h + 1, c, f1, f2);
+
+        return result;
+    }
+
+    bool HogDeinterleaveAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Base::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx2::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncHSF
         {
             typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
@@ -369,6 +451,63 @@ namespace Test
         bool result = true;
 
         result = result && HogExtractFeaturesDataTest(create, DW, DH, FUNC_HEF(SimdHogExtractFeatures));
+
+        return result;
+    }
+
+    bool HogDeinterleaveDataTest(bool create, int width, int height, int count, const FuncHD & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << ", " << count << "].");
+
+        View src(width*count, height, View::Float, NULL, TEST_ALIGN(width*count));
+
+        View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
+        std::vector<float*> d1(count), d2(count);
+        for (size_t i = 0; i < count; ++i)
+        {
+            d1[i] = (float*)(dst1.data + dst1.stride*height*i);
+            d2[i] = (float*)(dst2.data + dst2.stride*height*i);
+        }
+
+        if (create)
+        {
+            for (size_t row = 0; row < height; ++row)
+                for (size_t col = 0; col < width; ++col)
+                    for (size_t i = 0; i < count; ++i)
+                        src.At<float>(count*col + i, row) = float(row * 100000 + col * 100 + i);
+
+            TEST_SAVE(src);
+
+            f.Call(src, width, count, d1.data(), dst1.stride / 4);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, width, count, d2.data(), dst2.stride / 4);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 64);
+        }
+
+        return result;
+    }
+
+    bool HogDeinterleaveDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && HogDeinterleaveDataTest(create, DW, DH, 9, FUNC_HD(SimdHogDeinterleave));
 
         return result;
     }

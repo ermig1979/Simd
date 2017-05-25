@@ -202,7 +202,7 @@
 
 #if defined(SIMD_MIPS_ENABLE)
 
-#if defined(__mips_msa) 
+#if !defined(SIMD_MSA_DISABLE) && defined(__mips_msa) 
 #define SIMD_MSA_ENABLE
 #endif
 

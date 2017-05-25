@@ -1815,6 +1815,21 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
         Base::HogExtractFeatures(src, stride, width, height, features);
 }
 
+SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F && count >= Avx2::HF)
+        Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F && count >= Sse::F)
+        Sse::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+    else
+#endif
+        Base::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+}
+
 SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
     const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
 {

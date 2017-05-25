@@ -33,6 +33,56 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
 	namespace Sse
 	{
+        SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
+        {
+            src += i;
+            __m128 a0 = Load<false>(src + 0 * count);
+            __m128 a1 = Load<false>(src + 1 * count);
+            __m128 a2 = Load<false>(src + 2 * count);
+            __m128 a3 = Load<false>(src + 3 * count);
+            __m128 b0 = _mm_unpacklo_ps(a0, a2);
+            __m128 b1 = _mm_unpackhi_ps(a0, a2);
+            __m128 b2 = _mm_unpacklo_ps(a1, a3);
+            __m128 b3 = _mm_unpackhi_ps(a1, a3);
+            Store<false>(dst[i + 0] + offset, _mm_unpacklo_ps(b0, b2));
+            Store<false>(dst[i + 1] + offset, _mm_unpackhi_ps(b0, b2));
+            Store<false>(dst[i + 2] + offset, _mm_unpacklo_ps(b1, b3));
+            Store<false>(dst[i + 3] + offset, _mm_unpackhi_ps(b1, b3));
+        }
+
+        void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
+        {
+            assert(width >= F && count >= F);
+
+            size_t alignedCount = AlignLo(count, F);
+            size_t alignedWidth = AlignLo(width, F);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t rowOffset = row*dstStride;
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    const float * s = src + count*col;
+                    size_t offset = rowOffset + col;
+                    for (size_t i = 0; i < alignedCount; i += F)
+                        HogDeinterleave(s, count, dst, offset, i);
+                    if (alignedCount != count)
+                        HogDeinterleave(s, count, dst, offset, count - F);                
+                }
+                if (alignedWidth != width)
+                {
+                    size_t col = width - F;
+                    const float * s = src + count*col;
+                    size_t offset = rowOffset + col;
+                    for (size_t i = 0; i < alignedCount; i += F)
+                        HogDeinterleave(s, count, dst, offset, i);
+                    if (alignedCount != count)
+                        HogDeinterleave(s, count, dst, offset, count - F);
+                }
+                src += srcStride;
+            }
+        }
+
         namespace HogSeparableFilter_Detail
         {
             template <int add, bool end> SIMD_INLINE void Set(float * dst, const __m128 & value, const __m128 & mask)

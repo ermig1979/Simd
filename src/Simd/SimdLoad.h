@@ -159,6 +159,11 @@ namespace Simd
         {
             return _mm256_load_ps(p); 
         }
+
+        template<bool align> SIMD_INLINE __m256 Load(const float * p0, const float * p1)
+        {
+            return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1);
+        }
     }
 #endif//SIMD_AVX_ENABLE
 
