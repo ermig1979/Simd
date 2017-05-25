@@ -859,7 +859,7 @@ namespace Simd
         void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
             const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
         {
-            assert(width >= F + colSize - 1 && height >= rowSize - 1);
+            assert(width >= F + rowSize - 1 && height >= colSize - 1);
 
             HogSeparableFilter filter;
             filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);

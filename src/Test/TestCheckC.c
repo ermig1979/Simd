@@ -28,3 +28,7 @@
 */
 
 #include "Simd/SimdLib.h"
+
+void test()
+{
+}
