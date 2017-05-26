@@ -296,7 +296,7 @@ namespace Test
 
 #define FUNC_HSF(function) FuncHSF(function, #function)
 
-    bool HogFilterSeparableAutoTest(int width, int height, int rowSize, int colSize, int add, const FuncHSF & f1, const FuncHSF & f2)
+    bool HogFilterSeparableAutoTest(size_t width, size_t height, int rowSize, int colSize, int add, const FuncHSF & f1, const FuncHSF & f2)
     {
         bool result = true;
 
@@ -327,10 +327,12 @@ namespace Test
     {
         bool result = true;
 
+        size_t w = Simd::AlignHi(W / 4, SIMD_ALIGN), h = H / 4;
+
         for (int add = 0; result && add < 2; ++add)
         {
-            result = result && HogFilterSeparableAutoTest(W, H, 10, 10, add, FuncHSF(f1, add), FuncHSF(f2, add));
-            result = result && HogFilterSeparableAutoTest(W + 1, H - 1, 11, 9, add, FuncHSF(f1, add), FuncHSF(f2, add));
+            result = result && HogFilterSeparableAutoTest(w, h, 10, 10, add, FuncHSF(f1, add), FuncHSF(f2, add));
+            result = result && HogFilterSeparableAutoTest(w + 1, h - 1, 11, 9, add, FuncHSF(f1, add), FuncHSF(f2, add));
         }
 
         return result;
