@@ -844,7 +844,7 @@ namespace Simd
             template <int add, bool end> void FilterCols(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
             {
                 __m256 sum = _mm256_setzero_ps();
-                for (size_t i = 1; i < size; ++i, src += stride)
+                for (size_t i = 0; i < size; ++i, src += stride)
                     sum = _mm256_fmadd_ps(Avx::Load<!end>(src), filter[i], sum);
                 HogSeparableFilter_Detail::Set<add, end>(dst, sum, mask);
             }
