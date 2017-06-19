@@ -470,7 +470,7 @@ namespace Test
         View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
         View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
         std::vector<float*> d1(count), d2(count);
-        for (size_t i = 0; i < count; ++i)
+        for (int i = 0; i < count; ++i)
         {
             d1[i] = (float*)(dst1.data + dst1.stride*height*i);
             d2[i] = (float*)(dst2.data + dst2.stride*height*i);
@@ -478,9 +478,9 @@ namespace Test
 
         if (create)
         {
-            for (size_t row = 0; row < height; ++row)
-                for (size_t col = 0; col < width; ++col)
-                    for (size_t i = 0; i < count; ++i)
+            for (int row = 0; row < height; ++row)
+                for (int col = 0; col < width; ++col)
+                    for (int i = 0; i < count; ++i)
                         src.At<float>(count*col + i, row) = float(row * 100000 + col * 100 + i);
 
             TEST_SAVE(src);

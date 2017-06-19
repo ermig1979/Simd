@@ -39,7 +39,7 @@ namespace Test
     typedef Simd::Point<double> FPoint;
     typedef std::shared_ptr<View> ViewPtr;
     typedef std::vector<ViewPtr> ViewPtrs;
-    typedef std::vector<size_t> Indexes;
+    typedef Test::Sums Indexes;
 
     void Fill(View & dst)
     {
@@ -111,7 +111,7 @@ namespace Test
             if (!matcher.Find(hash, results))
             {
                 matcher.Add(hash);
-                dst.push_back(i);
+                dst.push_back((uint32_t)i);
             }
             if (i % 100 == 0)
             {
