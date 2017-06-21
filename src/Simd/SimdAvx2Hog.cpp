@@ -478,7 +478,7 @@ namespace Simd
                 Avx::Store<align>(_value.data() + col, Avx::Sqrt<0>(_mm256_fmadd_ps(adx, adx, _mm256_mul_ps(ady, ady))));
             }
 
-            template <int part> SIMD_INLINE __m256 CovertDifference(const __m128i & a, const __m128i & b)
+            template <int part> SIMD_INLINE __m256 ConvertDifference(const __m128i & a, const __m128i & b)
             {
                 return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Ssse3::SubUnpackedU8<part>(a, b)));
             }
@@ -490,8 +490,8 @@ namespace Simd
                 __m128i l = Sse2::Load<false>((__m128i*)(s - 1));
                 __m128i r = Sse2::Load<false>((__m128i*)(s + 1));
                 __m128i b = Sse2::Load<false>((__m128i*)(s + stride));
-                GetHistogram<align>(CovertDifference<0>(r, l), CovertDifference<0>(b, t), col + 0);
-                GetHistogram<align>(CovertDifference<1>(r, l), CovertDifference<1>(b, t), col + 8);
+                GetHistogram<align>(ConvertDifference<0>(r, l), ConvertDifference<0>(b, t), col + 0);
+                GetHistogram<align>(ConvertDifference<1>(r, l), ConvertDifference<1>(b, t), col + 8);
             }
 
             void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
