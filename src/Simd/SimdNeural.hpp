@@ -670,6 +670,25 @@ namespace Simd
                     Simd::Copy(connection, _connection);
                 else
                     Simd::Fill(_connection, 1);
+
+                if (_core.width == 3 && _core.height == 3)
+                {
+                    _functionForward = ::SimdNeuralAddConvolution3x3Forward;
+                    _functionBackward = ::SimdNeuralAddConvolution3x3Backward;
+                    _functionSum = ::SimdNeuralAddConvolution3x3Sum;
+                }
+                else if (_core.width == 5 && _core.height == 5)
+                {
+                    _functionForward = ::SimdNeuralAddConvolution5x5Forward;
+                    _functionBackward = ::SimdNeuralAddConvolution5x5Backward;
+                    _functionSum = ::SimdNeuralAddConvolution5x5Sum;
+                }
+                else
+                {
+                    _functionForward = 0;
+                    _functionBackward = 0;
+                    _functionSum = 0;
+                }
             }
 
             void Forward(const Vector & src, size_t thread, Method method) override
@@ -689,18 +708,10 @@ namespace Simd
                         const float * psrc = _padded.Get(padded, 0, 0, sc);
                         float * psum = _dst.Get(sum, 0, 0, dc);
 
-                        if (_core.width == 1 && _core.height == 1)
-                        {
+                        if (_functionForward)
+                            _functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                        else if (_core.width == 1 && _core.height == 1)
                             ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
-                        }
-                        else if (_core.width == 3 && _core.height == 3)
-                        {
-                            ::SimdNeuralAddConvolution3x3Forward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
-                        }
-                        else if (_core.width == 5 && _core.height == 5)
-                        {
-                            ::SimdNeuralAddConvolution5x5Forward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
-                        }
                         else
                         {
                             for (ptrdiff_t y = 0; y < _dst.height; y++)
@@ -744,18 +755,10 @@ namespace Simd
                         const float * psrc = _dst.Get(currDelta, 0, 0, dc);
                         float * pdst = _padded.Get(prevDelta, 0, 0, sc);
 
-                        if (_core.width == 1 && _core.height == 1)
-                        {
+                        if (_functionBackward)
+                            _functionBackward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
+                        else if (_core.width == 1 && _core.height == 1)
                             ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, pdst);
-                        }
-                        else if (_core.width == 3 && _core.height == 3)
-                        {
-                            ::SimdNeuralAddConvolution3x3Backward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
-                        }
-                        else if (_core.width == 5 && _core.height == 5)
-                        {
-                            ::SimdNeuralAddConvolution5x5Backward(psrc, _dst.width, _dst.width, _dst.height, pweight, pdst, _padded.width);
-                        }
                         else
                         {
                             for (ptrdiff_t y = 0; y < _dst.height; y++)
@@ -784,19 +787,13 @@ namespace Simd
                         const float * prevo = _padded.Get(prevDst, 0, 0, sc);
                         float * sums = _core.Get(dWeight, 0, 0, _src.depth*dc + sc);
 
-                        if (_core.width == 1 && _core.height == 1)
+                        if (_functionSum)
+                            _functionSum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
+                        else if (_core.width == 1 && _core.height == 1)
                         {
                             float sum;
                             ::SimdNeuralProductSum(prevo, delta, _dst.width*_dst.height, &sum);
                             sums[0] += sum;
-                        }
-                        if (_core.width == 3 && _core.height == 3)
-                        {
-                            ::SimdNeuralAddConvolution3x3Sum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
-                        }
-                        else if (_core.width == 5 && _core.height == 5)
-                        {
-                            ::SimdNeuralAddConvolution5x5Sum(prevo, _padded.width, delta, _dst.width, _dst.width, _dst.height, sums);
                         }
                         else
                         {
@@ -900,6 +897,15 @@ namespace Simd
             Size _indent;
             bool _valid;
             View _connection;
+
+            typedef void (*FunctionForwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+            FunctionForwardPtr _functionForward;
+
+            typedef void(*FunctionBackwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+            FunctionBackwardPtr _functionBackward;
+
+            typedef void(*FunctionSumPtr)(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums);
+            FunctionSumPtr _functionSum;
         };
 
         /*! @ingroup cpp_neural
@@ -1693,7 +1699,7 @@ namespace Simd
                 }
             }       
 
- private:
+        private:
             LayerPtrs _layers;
 
             static SIMD_INLINE void Load(std::istream & is, float & value)
