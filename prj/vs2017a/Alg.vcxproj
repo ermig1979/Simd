@@ -60,8 +60,8 @@
 	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx</AdditionalOptions>
     </ClCompile>
 	<ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
- 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2 -mfma</AdditionalOptions>
-	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2 -mfma</AdditionalOptions>
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2 -mfma -mf16c</AdditionalOptions>
+	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2 -mfma -mf16c</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeon*.cpp">
         <EnableNeonCodegen Condition="'$(Platform)'=='ARM'">true</EnableNeonCodegen>

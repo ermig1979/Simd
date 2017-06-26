@@ -2215,7 +2215,7 @@ namespace Test
        return false; \
     }
 
-#define SIMD_NEURAL_EXPERIMENT_VERSION 2
+#define SIMD_NEURAL_EXPERIMENT_VERSION 3
 
     bool CreateNetwork(Network & net, bool dropout, bool experimental)
     {

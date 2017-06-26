@@ -369,6 +369,11 @@ namespace Simd
             Store<align>((uint8_t*)p, (uint8x16_t)a);
         }
 
+        template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x4_t a)
+        {
+            Store<align>((uint8_t*)p, (uint8x8_t)a);
+        }
+
         template <bool align> SIMD_INLINE void Store(int16_t * p, int16x8_t a)
         {
             Store<align>((uint8_t*)p, (uint8x16_t)a);

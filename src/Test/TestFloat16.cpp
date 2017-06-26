@@ -90,6 +90,11 @@ namespace Test
             result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Avx2::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 #endif 
 
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Neon::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
+#endif 
+
         return result;
     }
 

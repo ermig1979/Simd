@@ -198,6 +198,10 @@
 #define SIMD_NEON_ASM_ENABLE
 #endif
 
+#if defined(__ARM_FP) && (__ARM_FP & 0x2) != 0
+#define SIMD_NEON_FP16_ENABLE
+#endif
+
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
 #if defined(SIMD_MIPS_ENABLE)
