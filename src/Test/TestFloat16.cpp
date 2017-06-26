@@ -161,6 +161,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Avx2::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
+#endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Neon::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
 #endif 
 
         return result;

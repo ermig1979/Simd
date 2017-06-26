@@ -760,6 +760,36 @@ namespace Simd
 #endif
 		}
 
+        template <bool align> SIMD_INLINE uint8x8_t LoadHalf(const uint8_t * p);
+
+        template <> SIMD_INLINE uint8x8_t LoadHalf<false>(const uint8_t * p)
+        {
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld1_u8(p);
+        }
+
+        template <> SIMD_INLINE uint8x8_t LoadHalf<true>(const uint8_t * p)
+        {
+#if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            return vld1_u8(_p);
+#elif defined(_MSC_VER)
+            return vld1_u8_ex(p, 64);
+#else
+            return vld1_u8(p);
+#endif
+        }
+
+        template <bool align> SIMD_INLINE uint16x4_t LoadHalf(const uint16_t * p)
+        {
+            return (uint16x4_t)LoadHalf<align>((const uint8_t*)p);
+        }
+
 		template <bool align> SIMD_INLINE uint8x8x3_t LoadHalf3(const uint8_t * p);
 
 		template <> SIMD_INLINE uint8x8x3_t LoadHalf3<false>(const uint8_t * p)

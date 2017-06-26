@@ -182,7 +182,11 @@ namespace Simd
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+#ifdef SIMD_NEON_FP16_ENABLE
         void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
+
+        void Float16ToFloat32(const uint16_t * src, size_t size, float * dst);
+#endif
 
         void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			size_t channelCount, uint8_t * dst, size_t dstStride);

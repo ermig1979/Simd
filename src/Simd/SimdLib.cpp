@@ -1568,6 +1568,11 @@ SIMD_API void SimdFloat16ToFloat32(const uint16_t * src, size_t size, float * ds
         Avx2::Float16ToFloat32(src, size, dst);
     else
 #endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Neon::Enable && size >= Neon::F)
+        Neon::Float16ToFloat32(src, size, dst);
+    else
+#endif
         Base::Float16ToFloat32(src, size, dst);
 }
 

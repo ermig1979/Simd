@@ -64,6 +64,42 @@ namespace Simd
 			else
                 Float32ToFloat16<false>(src, size, dst);
 		}
+
+        template<bool align> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
+        {
+            Store<align>(dst, vcvt_f32_f16((float16x4_t)LoadHalf<align>(src)));
+        }
+
+        template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
+        {
+            assert(size >= F);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t fullAlignedSize = Simd::AlignLo(size, QF);
+            size_t partialAlignedSize = Simd::AlignLo(size, F);
+
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                Float16ToFloat32<align>(src + i + F * 0, dst + i + F * 0);
+                Float16ToFloat32<align>(src + i + F * 1, dst + i + F * 1);
+                Float16ToFloat32<align>(src + i + F * 2, dst + i + F * 2);
+                Float16ToFloat32<align>(src + i + F * 3, dst + i + F * 3);
+            }
+            for (; i < partialAlignedSize; i += F)
+                Float16ToFloat32<align>(src + i, dst + i);
+            if (partialAlignedSize != size)
+                Float16ToFloat32<false>(src + size - F, dst + size - F);
+        }
+
+        void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Float16ToFloat32<true>(src, size, dst);
+            else
+                Float16ToFloat32<false>(src, size, dst);
+        }
 	}
 #endif // defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
 }
