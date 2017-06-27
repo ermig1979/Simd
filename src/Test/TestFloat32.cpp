@@ -96,6 +96,11 @@ namespace Test
             result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Avx2::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Neon::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
+#endif 
+
         return result;
     }
 

@@ -190,6 +190,8 @@ namespace Simd
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 #endif
 
+        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+
         void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			size_t channelCount, uint8_t * dst, size_t dstStride);
 
