@@ -67,6 +67,46 @@ namespace Simd
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
         }
+
+        template<int part> SIMD_INLINE float32x4_t Uint16ToFloat32(const uint16x8_t & value, const float32x4_t & lower, const float32x4_t & boost)
+        {
+            return vsubq_f32(vmulq_f32(vcvtq_f32_u32(UnpackU16<part>(value)), boost), lower);
+        }
+
+        template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const float32x4_t & lower, const float32x4_t & boost, float * dst)
+        {
+            uint8x16_t _src = Load<align>(src);
+            uint16x8_t lo = UnpackU8<0>(_src);
+            Store<align>(dst + F * 0, Uint16ToFloat32<0>(lo, lower, boost));
+            Store<align>(dst + F * 1, Uint16ToFloat32<1>(lo, lower, boost));
+            uint16x8_t hi = UnpackU8<1>(_src);
+            Store<align>(dst + F * 2, Uint16ToFloat32<0>(hi, lower, boost));
+            Store<align>(dst + F * 3, Uint16ToFloat32<1>(hi, lower, boost));
+        }
+
+        template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            assert(size >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            float32x4_t _lower = vdupq_n_f32(lower[0]);
+            float32x4_t boost = vdupq_n_f32((upper[0] - lower[0]) / 255.0f);
+
+            size_t alignedSize = AlignLo(size, A);
+            for (size_t i = 0; i < alignedSize; i += A)
+                Uint8ToFloat32<align>(src + i, _lower, boost, dst + i);
+            if (alignedSize != size)
+                Uint8ToFloat32<false>(src + size - A, _lower, boost, dst + size - A);
+        }
+
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                Uint8ToFloat32<true>(src, size, lower, upper, dst);
+            else
+                Uint8ToFloat32<false>(src, size, lower, upper, dst);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }

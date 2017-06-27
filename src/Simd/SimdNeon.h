@@ -192,6 +192,8 @@ namespace Simd
 
         void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
+        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst);
+
         void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			size_t channelCount, uint8_t * dst, size_t dstStride);
 
