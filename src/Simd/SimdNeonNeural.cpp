@@ -203,6 +203,41 @@ namespace Simd
                 AddVector<false>(src, aligned, partial, size, dst);
         }
 
+        template <bool align> SIMD_INLINE void AddValue(const float32x4_t & value, float * dst)
+        {
+            Store<align>(dst, vaddq_f32(Load<align>(dst), value));
+        }
+
+        template <bool align> SIMD_INLINE void AddValue(const float * value, float * dst, size_t aligned, size_t partial, size_t full)
+        {
+            size_t i = 0;
+            if (partial)
+            {
+                float32x4_t _value = vdupq_n_f32(value[0]);
+                for (; i < aligned; i += QF)
+                {
+                    AddValue<align>(_value, dst + i + F * 0);
+                    AddValue<align>(_value, dst + i + F * 1);
+                    AddValue<align>(_value, dst + i + F * 2);
+                    AddValue<align>(_value, dst + i + F * 3);
+                }
+                for (; i < partial; i += F)
+                    AddValue<align>(_value, dst + i);
+            }
+            for (; i < full; ++i)
+                dst[i] += value[0];
+        }
+
+        void NeuralAddValue(const float * value, float * dst, size_t size)
+        {
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
+            if (Aligned(dst))
+                AddValue<true>(value, dst, aligned, partial, size);
+            else
+                AddValue<false>(value, dst, aligned, partial, size);
+        }
+
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
