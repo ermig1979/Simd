@@ -30,6 +30,52 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
 	namespace Neon
 	{
+        SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
+        {
+            src += i;
+            float32x4x2_t a01 = vzipq_f32(Load<false>(src + 0 * count), Load<false>(src + 2 * count));
+            float32x4x2_t a23 = vzipq_f32(Load<false>(src + 1 * count), Load<false>(src + 3 * count));
+            float32x4x2_t b01 = vzipq_f32(a01.val[0], a23.val[0]);
+            float32x4x2_t b23 = vzipq_f32(a01.val[1], a23.val[1]);
+            Store<false>(dst[i + 0] + offset, b01.val[0]);
+            Store<false>(dst[i + 1] + offset, b01.val[1]);
+            Store<false>(dst[i + 2] + offset, b23.val[0]);
+            Store<false>(dst[i + 3] + offset, b23.val[1]);
+        }
+
+        void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
+        {
+            assert(width >= F && count >= F);
+
+            size_t alignedCount = AlignLo(count, F);
+            size_t alignedWidth = AlignLo(width, F);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t rowOffset = row*dstStride;
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    const float * s = src + count*col;
+                    size_t offset = rowOffset + col;
+                    for (size_t i = 0; i < alignedCount; i += F)
+                        HogDeinterleave(s, count, dst, offset, i);
+                    if (alignedCount != count)
+                        HogDeinterleave(s, count, dst, offset, count - F);
+                }
+                if (alignedWidth != width)
+                {
+                    size_t col = width - F;
+                    const float * s = src + count*col;
+                    size_t offset = rowOffset + col;
+                    for (size_t i = 0; i < alignedCount; i += F)
+                        HogDeinterleave(s, count, dst, offset, i);
+                    if (alignedCount != count)
+                        HogDeinterleave(s, count, dst, offset, count - F);
+                }
+                src += srcStride;
+            }
+        }
+
         namespace
         {
             struct Buffer
