@@ -212,6 +212,8 @@ namespace Simd
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
+        void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
+
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
         void InterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);

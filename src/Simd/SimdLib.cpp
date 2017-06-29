@@ -1864,8 +1864,13 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse41::F + colSize - 1)
+    if (Sse::Enable && width >= Sse::F + colSize - 1)
         Sse::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F + colSize - 1)
+        Neon::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
     else
 #endif
         Base::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
