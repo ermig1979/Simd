@@ -24,6 +24,8 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdAllocator.hpp"
 
 #include <vector>
@@ -175,6 +177,288 @@ namespace Simd
                 HogDirectionHistograms<false>(s, stride, buffer, width - 1 - A);
                 Base::AddRowToHistograms(buffer.index, buffer.value, row, width, height, cellX, cellY, quantization, histograms);
             }
+        }
+
+        class HogFeatureExtractor
+        {
+            static const size_t C = 8;
+            static const size_t Q = 9;
+            static const size_t Q2 = 18;
+
+            typedef std::vector<int, Simd::Allocator<int> > Vector32i;
+            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+
+            size_t _sx, _sy, _hs;
+
+            int32x4_t _pos[5];
+            float32x4_t _cos[5], _sin[5];
+            float32x4_t _kx[8], _ky[8];
+            int32x4_t _Q, _Q2;
+
+            Vector32i _index;
+            Vector32f _value;
+            Vector32f _buffer;
+            Vector32f _histogram;
+            Vector32f _norm;
+
+            void Init(size_t w, size_t h)
+            {
+                _sx = w / C;
+                _hs = _sx + 2;
+                _sy = h / C;
+                for (int i = 0; i < 5; ++i)
+                {
+                    _cos[i] = vdupq_n_f32((float)::cos(i*M_PI / Q));
+                    _sin[i] = vdupq_n_f32((float)::sin(i*M_PI / Q));
+                    _pos[i] = vdupq_n_s32(i);
+                }
+                for (int i = 0; i < C; ++i)
+                {
+                    float k0 = float((15 - i * 2) / 16.0f);
+                    float k1 = 1.0f - k0;
+                    _kx[i] = SetF32(k0, k1, k0, k1);
+                    _ky[i] = SetF32(k0, k0, k1, k1);
+                }
+                _Q = vdupq_n_s32(Q);
+                _Q2 = vdupq_n_s32(Q2);
+
+                _index.resize(w);
+                _value.resize(w);
+                _buffer.resize((_sx + 1) * 4 * Q2);
+                _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
+                _norm.resize((_sx + 2)*(_sy + 2));
+            }
+
+            template <bool align> SIMD_INLINE void GetHistogram(const float32x4_t & dx, const float32x4_t & dy, size_t col)
+            {
+                float32x4_t _0 = vdupq_n_f32(0);
+                float32x4_t bestDot = _0;
+                int32x4_t bestIndex = vdupq_n_s32(0);
+                float32x4_t adx = vabsq_f32(dx);
+                float32x4_t ady = vabsq_f32(dy);
+                for (int i = 0; i < 5; ++i)
+                {
+                    float32x4_t dot = vmlaq_f32(vmulq_f32(adx, _cos[i]), ady, _sin[i]);
+                    uint32x4_t mask = vcgtq_f32(dot, bestDot);
+                    bestDot = vmaxq_f32(dot, bestDot);
+                    bestIndex = vbslq_s32(mask, _pos[i], bestIndex);
+                }
+                uint32x4_t maskDx = vcltq_f32(dx, _0);
+                bestIndex = vbslq_s32(maskDx, vsubq_s32(_Q, bestIndex), bestIndex);
+
+                uint32x4_t maskDy = vcltq_f32(dy, _0);
+                uint32x4_t corr = vandq_u32(vceqq_f32(adx, _0), K32_00000001);
+                bestIndex = vbslq_s32(maskDy, vsubq_s32(_Q2, vaddq_s32(bestIndex, (int32x4_t)corr)), bestIndex);
+
+                bestIndex = vbslq_s32(vceqq_s32(bestIndex, _Q2), (int32x4_t)K32_00000000, bestIndex);
+
+                Store<false>(_index.data() + col, bestIndex); // fixed program crash.
+                Store<align>(_value.data() + col, Sqrt<SIMD_NEON_RCP_ITER>(vmlaq_f32(vmulq_f32(adx, adx), ady, ady)));
+            }
+
+            template <bool align> SIMD_INLINE void GetHistogram(const int16x8_t & dx, const int16x8_t & dy, size_t col)
+            {
+                GetHistogram<align>(ToFloat<0>(dx), ToFloat<0>(dy), col + 0);
+                GetHistogram<align>(ToFloat<1>(dx), ToFloat<1>(dy), col + 4);
+            }
+
+            template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
+            {
+                const uint8_t * s = src + col;
+                uint8x16_t t = Load<false>(s - stride);
+                uint8x16_t l = Load<false>(s - 1);
+                uint8x16_t r = Load<false>(s + 1);
+                uint8x16_t b = Load<false>(s + stride);
+                GetHistogram<align>(Sub<0>(r, l), Sub<0>(b, t), col + 0);
+                GetHistogram<align>(Sub<1>(r, l), Sub<1>(b, t), col + 8);
+            }
+
+            void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
+            {
+                const uint8_t * s = src + stride*row;
+                GetHistogram<false>(s, stride, 1);
+                for (size_t col = A; col < aligned; col += A)
+                    GetHistogram<true>(s, stride, col);
+                GetHistogram<false>(s, stride, width - 1 - A);
+                
+                float32x4_t * buffer = (float32x4_t*)_buffer.data();
+                float32x4_t ky = _ky[(row + 4) & 7];
+                for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
+                {
+                    for (; i < n; ++i, ++col)
+                    {
+                        int index = _index[col];
+                        float32x4_t value = vdupq_n_f32(_value[col]);
+                        buffer[index] = vmlaq_f32(buffer[index], value, vmulq_f32(ky, _kx[i]));
+                    }
+                    buffer += Q2;
+                }
+            }
+
+            void AddToHistogram(size_t row, size_t width, size_t height)
+            {
+                typedef float f18_t[18];
+                const float * src = _buffer.data();
+                f18_t * h0 = (f18_t*)_histogram.data() + row*_hs;
+                f18_t * h1 = h0 + _hs;
+                for (size_t cell = 0; cell <= width; ++cell)
+                {
+                    for (size_t i = 0; i < 16; i += 4)
+                    {
+                        float32x4x4_t s = Load4<true>(src + 4 * i);
+                        Store<false>(h0[0] + i, vaddq_f32(Load<false>(h0[0] + i), s.val[0]));
+                        Store<false>(h0[1] + i, vaddq_f32(Load<false>(h0[1] + i), s.val[1]));
+                        Store<false>(h1[0] + i, vaddq_f32(Load<false>(h1[0] + i), s.val[2]));
+                        Store<false>(h1[1] + i, vaddq_f32(Load<false>(h1[1] + i), s.val[3]));
+                    }
+                    float32x2x4_t s = LoadHalf4<true>(src + 64);
+                    Store<false>(h0[0] + 16, vadd_f32(LoadHalf<false>(h0[0] + 16), s.val[0]));
+                    Store<false>(h0[1] + 16, vadd_f32(LoadHalf<false>(h0[1] + 16), s.val[1]));
+                    Store<false>(h1[0] + 16, vadd_f32(LoadHalf<false>(h1[0] + 16), s.val[2]));
+                    Store<false>(h1[1] + 16, vadd_f32(LoadHalf<false>(h1[1] + 16), s.val[3]));
+                    h0++;
+                    h1++;
+                    src += 4 * Q2;
+                }
+                SetZero(_buffer);
+            }
+
+            void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
+            {
+                SetZero(_histogram);
+
+                size_t aligned = AlignHi(width - 1, A) - A;
+
+                SetZero(_buffer);
+                for (size_t row = 1; row < 4; ++row)
+                    AddRowToBuffer(src, stride, row, width, aligned);
+                AddToHistogram(0, _sx, _sy);
+                for (size_t row = 4, cell = 1; row < height - 4; ++row)
+                {
+                    AddRowToBuffer(src, stride, row, width, aligned);
+                    if ((row & 7) == 3)
+                        AddToHistogram(cell++, _sx, _sy);
+                }
+                for (size_t row = height - 4; row < height - 1; ++row)
+                    AddRowToBuffer(src, stride, row, width, aligned);
+                AddToHistogram(_sy, _sx, _sy);
+            }
+
+            SIMD_INLINE float GetNorm(const float * src)
+            {
+                float32x4_t norm = vdupq_n_f32(0);
+                for (size_t i = 0; i < 8; i += 4)
+                {
+                    float32x4_t sum = vaddq_f32(Load<false>(src + i + 0), Load<false>(src + i + Q));
+                   norm = vmlaq_f32(norm, sum, sum);
+                }
+                return ExtractSum32f(norm) + Simd::Square(src[Q - 1] + src[Q2 - 1]);
+            }
+
+            void EstimateNorm()
+            {
+                SetZero(_norm);
+                for (size_t y = 0, i = 0; y < _sy; y++)
+                {
+                    const float * h = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    float * n = _norm.data() + (y + 1)*_hs + 1;
+                    for (size_t x = 0; x < _sx; x++, i++)
+                        n[x] = GetNorm(h + x*Q2);
+                }
+            }
+
+            void ExtractFeatures(float * features)
+            {
+                float32x4_t _02 = vdupq_n_f32(0.2f);
+                float32x4_t _05 = vdupq_n_f32(0.5f);
+                float32x4_t _02357 = vdupq_n_f32(0.2357f);
+                float32x4_t eps = vdupq_n_f32(0.0001f);
+                for (size_t y = 0; y < _sy; y++)
+                {
+                    float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    for (size_t x = 0; x < _sx; x++)
+                    {
+                        float * dst = features + (y*_sx + x) * 31;
+
+                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p1 = p0 + _hs;
+                        float * p2 = p1 + _hs;
+
+                        float32x4_t n = SetF32(
+                            p1[1] + p1[2] + p2[1] + p2[2],
+                            p0[1] + p0[2] + p1[1] + p1[2],
+                            p1[0] + p1[1] + p2[0] + p2[1],
+                            p0[0] + p0[1] + p1[0] + p1[1]);
+
+                        n = ReciprocalSqrt<SIMD_NEON_RCP_ITER>(vaddq_f32(n, eps));
+
+                        float32x4_t t = vdupq_n_f32(0);
+
+                        float * src = ph + x*Q2;
+                        for (int o = 0; o < 16; o += 4)
+                        {
+                            float32x4_t s = Load<false>(src);
+                            float32x4_t h0 = vminq_f32(vmulq_f32(Broadcast<0>(s), n), _02);
+                            float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
+                            float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
+                            float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
+                            t = vaddq_f32(t, vaddq_f32(vaddq_f32(h0, h1), vaddq_f32(h2, h3)));
+                            Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                            dst += 4;
+                            src += 4;
+                        }
+                        {
+                            float32x4_t h0 = vminq_f32(vmulq_f32(vdupq_n_f32(*src++), n), _02);
+                            float32x4_t h1 = vminq_f32(vmulq_f32(vdupq_n_f32(*src++), n), _02);
+                            t = vaddq_f32(t, vaddq_f32(h0, h1));
+                            float32x4_t h = Hadd(h0, h1);
+                            Store<false>(dst, vmulq_f32(_05, Hadd(h, h)));
+                            dst += 2;
+                        }
+
+                        src = ph + x*Q2;
+                        for (int o = 0; o < 8; o += 4)
+                        {
+                            float32x4_t s = vaddq_f32(Load<false>(src), Load<false>(src + Q));
+                            float32x4_t h0 = vminq_f32(vmulq_f32(Broadcast<0>(s), n), _02);
+                            float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
+                            float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
+                            float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
+                            Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                            dst += 4;
+                            src += 4;
+                        }
+                        {
+                            float32x4_t s = vdupq_n_f32(src[0] + src[Q]);
+                            float32x4_t h = vminq_f32(vmulq_f32(s, n), _02);
+                            h = vmulq_f32(_05, h);
+                            *dst++ = ExtractSum32f(h);
+                        }
+                        Store<false>(dst, vmulq_f32(t, _02357));
+                    }
+                }
+            }
+
+        public:
+
+            void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+            {
+                Init(width, height); 
+
+                EstimateHistogram(src, stride, width, height); 
+
+                EstimateNorm(); 
+
+                ExtractFeatures(features); 
+            }
+        };
+
+        void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+        {
+            assert(width % 8 == 0 && height % 8 == 0 && width >= 16 && height >= 16);
+
+            HogFeatureExtractor extractor;
+            extractor.Run(src, stride, width, height, features);
         }
 
         namespace HogSeparableFilter_Detail

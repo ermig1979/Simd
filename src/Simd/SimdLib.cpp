@@ -1832,6 +1832,11 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
         Sse41::HogExtractFeatures(src, stride, width, height, features);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A + 2)
+        Neon::HogExtractFeatures(src, stride, width, height, features);
+    else
+#endif
         Base::HogExtractFeatures(src, stride, width, height, features);
 }
 

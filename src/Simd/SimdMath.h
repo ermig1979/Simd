@@ -796,6 +796,18 @@ namespace Simd
 			return vget_high_s16(a);
 		}
 
+        template <int part> SIMD_INLINE float32x2_t Half(float32x4_t a);
+
+        template <> SIMD_INLINE float32x2_t Half<0>(float32x4_t a)
+        {
+            return vget_low_f32(a);
+        }
+
+        template <> SIMD_INLINE float32x2_t Half<1>(float32x4_t a)
+        {
+            return vget_high_f32(a);
+        }
+
 		template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a)
 		{
 			return vmovl_u8(Half<part>(a));
@@ -972,6 +984,16 @@ namespace Simd
         SIMD_INLINE float32x4_t And(float32x4_t a, float32x4_t b)
         {
             return (float32x4_t)vandq_u32((uint32x4_t)a, (uint32x4_t)b);
+        }
+
+        template <int index> SIMD_INLINE float32x4_t Broadcast(float32x4_t a)
+        {
+            return vdupq_lane_f32(Half<index/2>(a), index&1);
+        }
+
+        SIMD_INLINE float32x4_t Hadd(float32x4_t a, float32x4_t b)
+        {
+            return vcombine_f32(vpadd_f32(Half<0>(a), Half<1>(a)), vpadd_f32(Half<0>(b), Half<1>(b)));
         }
 	}
 #endif//SIMD_NEON_ENABLE

@@ -145,6 +145,17 @@ namespace Simd
         }
     }
 #endif// SIMD_VMX_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE float32x4_t SetF32(float a0, float a1, float a2, float a3)
+        {
+            const float a[4] = {a0, a1, a2, a3};
+            return vld1q_f32(a);
+        }
+    }
+#endif// SIMD_NEON_ENABLE
 }
 
 #endif//__SimdSet_h__

@@ -420,11 +420,6 @@ namespace Simd
                 }
             }
 
-            static SIMD_INLINE __m128 Add(__m128 a, __m128 b)
-            {
-                return _mm_add_ps(a, _mm_castsi128_ps(_mm_srli_si128(_mm_castps_si128(b), 4)));
-            }
-
             void AddToHistogram(size_t row, size_t width, size_t height)
             {
                 typedef float f18_t[18];
