@@ -676,7 +676,7 @@ namespace Simd
 
                 if (_core.width == 2 && _core.height == 2)
                 {
-                    _functionForward = ::SimdNeuralAddConvolution3x3Forward;
+                    _functionForward = ::SimdNeuralAddConvolution2x2Forward;
                 }
                 if (_core.width == 3 && _core.height == 3)
                 {
