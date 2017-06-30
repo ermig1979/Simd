@@ -223,6 +223,29 @@ namespace Simd
                 AdaptiveGradientUpdate(delta, i, norm, _alpha, _epsilon, gradient, weight);
         }
 
+        SIMD_INLINE float Convolution2(const float * src, const float * weights)
+        {
+            return src[0] * weights[0] + src[1] * weights[1];
+        }
+
+        SIMD_INLINE float Convolution2x2Forward(const float * src, size_t stride, const float * weights)
+        {
+            return 
+                Convolution2(src, weights) + 
+                Convolution2(src + stride, weights + 2);
+        }
+
+        void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] += Convolution2x2Forward(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
         SIMD_INLINE float Convolution3(const float * src, const float * weights)
         {
             return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2];

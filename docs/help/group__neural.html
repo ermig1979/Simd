@@ -98,6 +98,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gade619c9169f4b7275bff34ebba417f09"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gade619c9169f4b7275bff34ebba417f09">SimdNeuralAdaptiveGradientUpdate</a> (const float *delta, size_t size, size_t batch, const float *alpha, const float *epsilon, float *gradient, float *weight)</td></tr>
 <tr class="memdesc:gade619c9169f4b7275bff34ebba417f09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates neural network weights with using of adaptive gradients method.  <a href="#gade619c9169f4b7275bff34ebba417f09">More...</a><br /></td></tr>
 <tr class="separator:gade619c9169f4b7275bff34ebba417f09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaae81f4cb68a01bb7dbd9b70c823b2a80"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gaae81f4cb68a01bb7dbd9b70c823b2a80">SimdNeuralAddConvolution2x2Forward</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *weights, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:gaae81f4cb68a01bb7dbd9b70c823b2a80"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds 2x2 convolution of 32-bit float image.  <a href="#gaae81f4cb68a01bb7dbd9b70c823b2a80">More...</a><br /></td></tr>
+<tr class="separator:gaae81f4cb68a01bb7dbd9b70c823b2a80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa19f17bf917baf91088e2791849e8962"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gaa19f17bf917baf91088e2791849e8962">SimdNeuralAddConvolution3x3Forward</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *weights, float *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gaa19f17bf917baf91088e2791849e8962"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds 3x3 convolution of 32-bit float image.  <a href="#gaa19f17bf917baf91088e2791849e8962">More...</a><br /></td></tr>
 <tr class="separator:gaa19f17bf917baf91088e2791849e8962"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1042,6 +1045,79 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
     <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>- a pointer to epsilon parameter (a small number used to avoid division by zero). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">gradient</td><td>- a pointer to the array with gradients. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">weight</td><td>- a pointer to the array with weights. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gaae81f4cb68a01bb7dbd9b70c823b2a80"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaae81f4cb68a01bb7dbd9b70c823b2a80">&#9670;&nbsp;</a></span>SimdNeuralAddConvolution2x2Forward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNeuralAddConvolution2x2Forward </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>weights</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds 2x2 convolution of 32-bit float image. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network. ">Simd::Neural</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in 32-float values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the output image (input image width must be equal to output image width + 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the output image (input image height must be equal to output image height + 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>- a pointer to the array with weights (its size must be at least 4). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
   </table>
   </dd>
 </dl>

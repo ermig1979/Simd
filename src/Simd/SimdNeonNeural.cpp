@@ -95,7 +95,7 @@ namespace Simd
         {
             float32x4_t _a = Load<align>(a + offset);
             float32x4_t _b = Load<align>(b + offset);
-            sum = vaddq_f32(sum, vmulq_f32(_a, _b));
+            sum = vmlaq_f32(sum, _a, _b);
         }
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
@@ -137,7 +137,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float * src, const float32x4_t & value, float * dst)
         {
-            Store<align>(dst, vaddq_f32(Load<align>(dst), vmulq_f32(value, Load<align>(src))));
+            Store<align>(dst, vmlaq_f32(Load<align>(dst), value, Load<align>(src)));
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t partial, size_t full, float value, float * dst)
@@ -255,7 +255,7 @@ namespace Simd
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
                 float32x4_t x2 = vmulq_f32(x, x);
                 float32x4_t x4 = vmulq_f32(x2, x2);
-                float32x4_t series = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _a), vmulq_f32(x4, _b)));
+                float32x4_t series = vaddq_f32(vmlaq_f32(_1, x2, _a), vmlaq_f32(x, x4, _b));
                 uint32x4_t mask = vcgtq_f32(_src, _0);
                 float32x4_t exp = vbslq_f32(mask, Reciprocal<1>(series), series);
                 float32x4_t sigmoid = Reciprocal<1>(vaddq_f32(_1, exp));
@@ -276,14 +276,14 @@ namespace Simd
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const float32x4_t & k, const float32x4_t & o, const float32x4_t & m, float * dst)
         {
             float32x4_t _src = Load<align>(src);
-            float32x4_t e1 = vmaxq_f32(m, vsubq_f32(o, vmulq_f32(_src, k)));
+            float32x4_t e1 = vmaxq_f32(m, vmlsq_f32(o, _src, k));
             float32x4_t e2 = vmulq_f32(e1, e1);
             float32x4_t e4 = vmulq_f32(e2, e2);
             float32x4_t e8 = vmulq_f32(e4, e4);
             float32x4_t e16 = vmulq_f32(e8, e8);
             float32x4_t e32 = vmulq_f32(e16, e16);
             float32x4_t e64 = vmulq_f32(e32, e32);
-            float32x4_t sigmoid = Reciprocal<1>(vaddq_f32(o, vmulq_f32(e64, e64)));
+            float32x4_t sigmoid = Reciprocal<1>(vmlaq_f32(o, e64, e64));
             Store<align>(dst, sigmoid);
         }
 
@@ -361,7 +361,7 @@ namespace Simd
                 float32x4_t x = vabsq_f32(vmulq_f32(_src, _slope));
                 float32x4_t x2 = vmulq_f32(x, x);
                 float32x4_t x4 = vmulq_f32(x2, x2);
-                float32x4_t pe = vaddq_f32(vaddq_f32(_1, x), vaddq_f32(vmulq_f32(x2, _a), vmulq_f32(x4, _b)));
+                float32x4_t pe = vaddq_f32(vmlaq_f32(_1, x2, _a), vmlaq_f32(x, x4, _b));
                 float32x4_t ne = Reciprocal<1>(pe);
                 float32x4_t absTanh = vmulq_f32(vsubq_f32(pe, ne), Reciprocal<1>(vaddq_f32(pe, ne)));
                 float32x4_t tanh = (float32x4_t)veorq_u32((uint32x4_t)absTanh, vandq_u32((uint32x4_t)_0, vcgtq_f32(_0, _src)));
@@ -581,6 +581,59 @@ namespace Simd
         {
             for (size_t i = 0; i < size; ++i)
                 dst[i] = vdupq_n_f32(src[i]);
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Convolution2(const float * src, const float32x4_t * weights)
+        {
+            float32x4_t _src[2];
+            _src[0] = Load<align>(src + 0);
+            _src[1] = vld1q_f32(src + 1);
+            return vmlaq_f32(vmulq_f32(_src[0], weights[0]), _src[1], weights[1]);
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Convolution2x2Forward(const float * src, size_t stride, const float32x4_t * weights)
+        {
+            return vaddq_f32(Convolution2<align>(src, weights),
+                Convolution2<align>(src + stride, weights + 2));
+        }
+
+        template <bool align> void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            assert(width >= Neon::F);
+            if (align)
+                assert(Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F));
+
+            size_t alignedWidth = AlignLo(width, F);
+            float32x4_t tailMask = RightNotZero(width - alignedWidth);
+            float32x4_t _weights[4];
+            LoadWeightsForward<4>(weights, _weights);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += F)
+                {
+                    float32x4_t _dst = Load<align>(dst + col);
+                    _dst = vaddq_f32(_dst, Convolution2x2Forward<align>(src + col, srcStride, _weights));
+                    Store<align>(dst + col, _dst);
+                }
+
+                if (width - alignedWidth)
+                {
+                    size_t col = width - F;
+                    float32x4_t _dst = Load<false>(dst + col);
+                    _dst = vaddq_f32(_dst, And(tailMask, Convolution2x2Forward<false>(src + col, srcStride, _weights)));
+                    Store<false>(dst + col, _dst);
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolution2x2Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
+            else
+                NeuralAddConvolution2x2Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         template <bool align> SIMD_INLINE float32x4_t Convolution3(const float * src, const float32x4_t * weights)

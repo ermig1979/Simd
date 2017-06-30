@@ -652,6 +652,9 @@ namespace Simd
             ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, const Size & coreSize, 
                 bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
+                , _functionForward(0)
+                , _functionBackward(0)
+                , _functionSum(0)
             {
                 _valid = valid;
                 _indent = coreSize/2;
@@ -671,23 +674,21 @@ namespace Simd
                 else
                     Simd::Fill(_connection, 1);
 
+                if (_core.width == 2 && _core.height == 2)
+                {
+                    _functionForward = ::SimdNeuralAddConvolution3x3Forward;
+                }
                 if (_core.width == 3 && _core.height == 3)
                 {
                     _functionForward = ::SimdNeuralAddConvolution3x3Forward;
                     _functionBackward = ::SimdNeuralAddConvolution3x3Backward;
                     _functionSum = ::SimdNeuralAddConvolution3x3Sum;
                 }
-                else if (_core.width == 5 && _core.height == 5)
+                if (_core.width == 5 && _core.height == 5)
                 {
                     _functionForward = ::SimdNeuralAddConvolution5x5Forward;
                     _functionBackward = ::SimdNeuralAddConvolution5x5Backward;
                     _functionSum = ::SimdNeuralAddConvolution5x5Sum;
-                }
-                else
-                {
-                    _functionForward = 0;
-                    _functionBackward = 0;
-                    _functionSum = 0;
                 }
             }
 
