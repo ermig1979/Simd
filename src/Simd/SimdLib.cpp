@@ -2507,6 +2507,31 @@ SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcSt
         Base::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F)
+        Avx2::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F)
+        Neon::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+    else
+#endif
+        Base::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+}
+
 SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX2_ENABLE

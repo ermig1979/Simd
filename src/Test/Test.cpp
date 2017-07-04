@@ -229,6 +229,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
     TEST_ADD_GROUP(NeuralAddConvolution2x2Forward);
     TEST_ADD_GROUP(NeuralAddConvolution3x3Forward);
+    TEST_ADD_GROUP(NeuralAddConvolution4x4Forward);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Forward);
     TEST_ADD_GROUP(NeuralAddConvolution3x3Backward);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Backward);

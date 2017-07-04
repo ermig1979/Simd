@@ -3230,6 +3230,25 @@ extern "C"
 
     /*! @ingroup neural
 
+        \fn void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 4x4 convolution of 32-bit float image.
+
+        \note This function is used in Simd::Neural.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the output image (input image width must be equal to output image width + 3).
+        \param [in] height - a height of the output image (input image height must be equal to output image height + 3).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 16).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+
+    /*! @ingroup neural
+
         \fn void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 5x5 convolution of 32-bit float image (forward propagation).

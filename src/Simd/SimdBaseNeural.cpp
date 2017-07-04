@@ -270,6 +270,31 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE float Convolution4(const float * src, const float * weights)
+        {
+            return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2] + src[3] * weights[3];
+        }
+
+        SIMD_INLINE float Convolution4x4Forward(const float * src, size_t stride, const float * weights)
+        {
+            return
+                Convolution4(src, weights) +
+                Convolution4(src + stride, weights + 4) +
+                Convolution4(src + 2 * stride, weights + 8) +
+                Convolution4(src + 3 * stride, weights + 12);
+        }
+
+        void NeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    dst[col] += Convolution4x4Forward(src + col, srcStride, weights);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
         SIMD_INLINE float Convolution5(const float * src, const float * weights)
         {
             return src[0] * weights[0] + src[1] * weights[1] + src[2] * weights[2] + src[3] * weights[3] + src[4] * weights[4];

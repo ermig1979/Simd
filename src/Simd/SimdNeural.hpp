@@ -684,6 +684,10 @@ namespace Simd
                     _functionBackward = ::SimdNeuralAddConvolution3x3Backward;
                     _functionSum = ::SimdNeuralAddConvolution3x3Sum;
                 }
+                if (_core.width == 4 && _core.height == 4)
+                {
+                    _functionForward = ::SimdNeuralAddConvolution4x4Forward;
+                }
                 if (_core.width == 5 && _core.height == 5)
                 {
                     _functionForward = ::SimdNeuralAddConvolution5x5Forward;

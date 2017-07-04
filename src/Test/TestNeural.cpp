@@ -1060,6 +1060,36 @@ namespace Test
         return result;
     }
 
+    bool NeuralAddConvolution4x4ForwardAutoTest()
+    {
+        Size core(4, 4);
+        bool result = true;
+
+        result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Base::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Sse::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx2::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Neon::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+#endif
+
+        return result;
+    }
+
     bool NeuralAddConvolution5x5ForwardAutoTest()
     {
         Size core(5, 5);
@@ -1947,20 +1977,17 @@ namespace Test
 
     bool NeuralAddConvolution3x3ForwardDataTest(bool create)
     {
-        bool result = true;
+        return NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(3, 3), true, FUNC_C2(SimdNeuralAddConvolution3x3Forward));
+    }
 
-        result = result && NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(3, 3), true, FUNC_C2(SimdNeuralAddConvolution3x3Forward));
-
-        return result;
+    bool NeuralAddConvolution4x4ForwardDataTest(bool create)
+    {
+        return NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(4, 4), true, FUNC_C2(SimdNeuralAddConvolution4x4Forward));
     }
 
     bool NeuralAddConvolution5x5ForwardDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(5, 5), true, FUNC_C2(SimdNeuralAddConvolution5x5Forward));
-
-        return result;
+        return NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(5, 5), true, FUNC_C2(SimdNeuralAddConvolution5x5Forward));
     }
 
     bool NeuralAddConvolution3x3BackwardDataTest(bool create)
