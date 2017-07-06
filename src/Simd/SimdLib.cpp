@@ -2573,6 +2573,14 @@ SIMD_API void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcS
     simdNeuralAddConvolution3x3Backward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+typedef void(*SimdNeuralAddConvolution4x4BackwardPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+SimdNeuralAddConvolution4x4BackwardPtr simdNeuralAddConvolution4x4Backward = SIMD_FUNC3(NeuralAddConvolution4x4Backward, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdNeuralAddConvolution4x4Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+{
+    simdNeuralAddConvolution4x4Backward(src, srcStride, width, height, weights, dst, dstStride);
+}
+
 typedef void(*SimdNeuralAddConvolution5x5BackwardPtr) (const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 SimdNeuralAddConvolution5x5BackwardPtr simdNeuralAddConvolution5x5Backward = SIMD_FUNC3(NeuralAddConvolution5x5Backward, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
