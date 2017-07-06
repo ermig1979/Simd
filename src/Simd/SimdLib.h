@@ -3267,6 +3267,24 @@ extern "C"
 
     /*! @ingroup neural
 
+        \fn void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+        \short Adds 2x2 convolution of 32-bit float image (backward propagation).
+
+        \note This function is used in Simd::Neural.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must be equal to input image width + 1).
+        \param [in] height - a height of the input image (output image height must be equal to input image height + 1).
+        \param [in] weights - a pointer to the array with weights (its size must be at least 4).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
         \fn void SimdNeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
 
         \short Adds 3x3 convolution of 32-bit float image (backward propagation).

@@ -231,6 +231,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralAddConvolution3x3Forward);
     TEST_ADD_GROUP(NeuralAddConvolution4x4Forward);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Forward);
+    TEST_ADD_GROUP(NeuralAddConvolution2x2Backward);
     TEST_ADD_GROUP(NeuralAddConvolution3x3Backward);
     TEST_ADD_GROUP(NeuralAddConvolution5x5Backward);
     TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);

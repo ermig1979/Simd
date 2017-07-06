@@ -321,16 +321,16 @@ namespace Simd
             }
         }
 
-        void NeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        template <size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionBackward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t dy = 0; dy < 3; ++dy)
+                for (size_t dy = 0; dy < coreY; ++dy)
                 {
-                    const float * w = weights + dy * 3;
+                    const float * w = weights + dy * coreX;
                     float * d = dst + dy*dstStride;
-                    for (size_t dx = 0; dx < 3; ++dx)
+                    for (size_t dx = 0; dx < coreX; ++dx)
                         AddMultiplied(src, aligned, width, w[dx], d + dx);
                 }
                 src += srcStride;
@@ -338,21 +338,19 @@ namespace Simd
             }
         }
 
+        void NeuralAddConvolution2x2Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            NeuralAddConvolutionBackward<2, 2>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
+        void NeuralAddConvolution3x3Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+        {
+            NeuralAddConvolutionBackward<3, 3>(src, srcStride, width, height, weights, dst, dstStride);
+        }
+
         void NeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
-            size_t aligned = Simd::AlignLo(width, 4);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t dy = 0; dy < 5; ++dy)
-                {
-                    const float * w = weights + dy * 5;
-                    float * d = dst + dy*dstStride;
-                    for (size_t dx = 0; dx < 5; ++dx)
-                        AddMultiplied(src, aligned, width, w[dx], d + dx);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
+            NeuralAddConvolutionBackward<5, 5>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
         void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
