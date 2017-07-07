@@ -2589,6 +2589,36 @@ SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcS
     simdNeuralAddConvolution5x5Backward(src, srcStride, width, height, weights, dst, dstStride);
 }
 
+SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F)
+        Avx2::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable && width >= Avx::F)
+        Avx::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable && width >= Sse3::F)
+        Sse3::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width >= Sse::F)
+        Sse::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::F)
+        Neon::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+    else
+#endif
+        Base::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+}
+
 SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
 #ifdef SIMD_AVX2_ENABLE

@@ -358,42 +358,36 @@ namespace Simd
             NeuralAddConvolutionBackward<5, 5>(src, srcStride, width, height, weights, dst, dstStride);
         }
 
-        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        template <size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t aligned = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t dy = 0; dy < 3; ++dy)
+                for (size_t dy = 0; dy < coreY; ++dy)
                 {
                     const float * s = src + dy*srcStride;
-                    float * sum = sums + dy * 3;
-                    sum[0] += ProductSum(s + 0, dst, aligned, width);
-                    sum[1] += ProductSum(s + 1, dst, aligned, width);
-                    sum[2] += ProductSum(s + 2, dst, aligned, width);
+                    float * sum = sums + dy * coreX;
+                    for (size_t dx = 0; dx < coreX; ++dx)
+                        sum[dx] += ProductSum(s + dx, dst, aligned, width);
                 }
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
+        void NeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            NeuralAddConvolutionSum<2, 2>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
+        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            NeuralAddConvolutionSum<3, 3>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
-            size_t aligned = Simd::AlignLo(width, 4);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t dy = 0; dy < 5; ++dy)
-                {
-                    const float * s = src + dy*srcStride;
-                    float * sum = sums + dy * 5;
-                    sum[0] += ProductSum(s + 0, dst, aligned, width);
-                    sum[1] += ProductSum(s + 1, dst, aligned, width);
-                    sum[2] += ProductSum(s + 2, dst, aligned, width);
-                    sum[3] += ProductSum(s + 3, dst, aligned, width);
-                    sum[4] += ProductSum(s + 4, dst, aligned, width);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
+            NeuralAddConvolutionSum<5, 5>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         SIMD_INLINE float Max2(const float * src)

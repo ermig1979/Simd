@@ -1241,23 +1241,23 @@ namespace Test
     }
 #define FUNC_CS(function) FuncCS(function, #function)
 
-    bool NeuralAddConvolutionSumAutoTest(int width, int height, float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    bool NeuralAddConvolutionSumAutoTest(const Size & size, float eps, const Size & core, const FuncCS & f1, const FuncCS & f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size.x << ", " << size.y << "].");
 
-        View src(width + 2*half, height + 2*half, View::Float, NULL, TEST_ALIGN(width));
+        View src(size.x + core.x - 1, size.y + core.y - 1, View::Float, NULL, TEST_ALIGN(size.x));
         FillRandom32f(src, -1, 1);
 
-        View dst(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View dst(size.x, size.y, View::Float, NULL, TEST_ALIGN(size.x));
         FillRandom32f(dst, -1, 1);
 
-        View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View sumsSrc(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
         FillRandom32f(sumsSrc, 2000, 3000);
 
-        View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
-        View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View sumsDst1(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
+        View sumsDst2(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst, sumsSrc, sumsDst1));
 
@@ -1268,46 +1268,82 @@ namespace Test
         return result;
     }
 
-    bool NeuralAddConvolutionSumAutoTest(float eps, int half, const FuncCS & f1, const FuncCS & f2)
+    bool NeuralAddConvolutionSumAutoTest(float eps, const Size & core, const FuncCS & f1, const FuncCS & f2)
     {
         bool result = true;
 
-        result = result && NeuralAddConvolutionSumAutoTest(W, H, eps, half, f1, f2);
-        result = result && NeuralAddConvolutionSumAutoTest(W - O, H + O, eps, half, f1, f2);
-        result = result && NeuralAddConvolutionSumAutoTest(W + O, H - O, eps, half, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(Size(W, H), eps, core, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(Size(W - O, H + O), eps, core, f1, f2);
+        result = result && NeuralAddConvolutionSumAutoTest(Size(W + O, H - O), eps, core, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralAddConvolution2x2SumAutoTest()
+    {
+        Size core(2, 2);
+        bool result = true;
+
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Base::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif 
+
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx2::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#endif
 
         return result;
     }
 
     bool NeuralAddConvolution3x3SumAutoTest()
     {
+        Size core(3, 3);
         bool result = true;
 
-        result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Base::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Base::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Sse3::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Avx::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Avx2::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx2::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 1, FUNC_CS(Simd::Neon::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif
 
         return result;
@@ -1315,33 +1351,34 @@ namespace Test
 
     bool NeuralAddConvolution5x5SumAutoTest()
     {
+        Size core(5, 5);
         bool result = true;
 
-        result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Base::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Base::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Sse3::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Avx2::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx2::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, 2, FUNC_CS(Simd::Neon::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
         return result;
@@ -2060,19 +2097,19 @@ namespace Test
         return NeuralAddConvolutionDataTest(create, Size(DW, DH), EPS, Size(5, 5), false, FUNC_C2(SimdNeuralAddConvolution5x5Backward));
     }
 
-    bool NeuralAddConvolutionSumDataTest(bool create, int width, int height, float eps, int half, const FuncCS & f)
+    bool NeuralAddConvolutionSumDataTest(bool create, const Size & size, float eps, const Size & core, const FuncCS & f)
     {
         bool result = true;
 
         Data data(f.description);
 
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size.x << ", " << size.y << "].");
 
-        View src(width + 2 * half, height + 2 * half, View::Float, NULL, TEST_ALIGN(width));
-        View dst(width, height, View::Float, NULL, TEST_ALIGN(width));
-        View sumsSrc(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
-        View sumsDst1(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
-        View sumsDst2(Simd::Square(1 + 2 * half), 1, View::Float, NULL, TEST_ALIGN(width));
+        View src(size.x + core.x - 1, size.y + core.y - 1, View::Float, NULL, TEST_ALIGN(size.x));
+        View dst(size.x, size.y, View::Float, NULL, TEST_ALIGN(size.x));
+        View sumsSrc(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
+        View sumsDst1(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
+        View sumsDst2(core.x*core.y, 1, View::Float, NULL, TEST_ALIGN(size.x));
 
         if (create)
         {
@@ -2106,22 +2143,19 @@ namespace Test
         return result;
     }
 
+    bool NeuralAddConvolution2x2SumDataTest(bool create)
+    {
+        return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(2, 2), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+    }
+
     bool NeuralAddConvolution3x3SumDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralAddConvolutionSumDataTest(create, DW, DH, EPS, 1, FUNC_CS(SimdNeuralAddConvolution3x3Sum));
-
-        return result;
+        return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(3, 3), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
     }
 
     bool NeuralAddConvolution5x5SumDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralAddConvolutionSumDataTest(create, DW, DH, EPS, 2, FUNC_CS(SimdNeuralAddConvolution5x5Sum));
-
-        return result;
+        return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(5, 5), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
     }
 
     bool NeuralMax2x2DataTest(bool create, int width, int height, float eps, const FuncM & f)

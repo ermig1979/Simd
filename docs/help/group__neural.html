@@ -122,6 +122,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0548af0776b44580fdbd1cebacb02d8a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga0548af0776b44580fdbd1cebacb02d8a">SimdNeuralAddConvolution5x5Backward</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *weights, float *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga0548af0776b44580fdbd1cebacb02d8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds 5x5 convolution of 32-bit float image (backward propagation).  <a href="#ga0548af0776b44580fdbd1cebacb02d8a">More...</a><br /></td></tr>
 <tr class="separator:ga0548af0776b44580fdbd1cebacb02d8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga228a15cf84f0515d7198f7e0832bc3cf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga228a15cf84f0515d7198f7e0832bc3cf">SimdNeuralAddConvolution2x2Sum</a> (const float *src, size_t srcStride, const float *dst, size_t dstStride, size_t width, size_t height, float *sums)</td></tr>
+<tr class="memdesc:ga228a15cf84f0515d7198f7e0832bc3cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulates changes of weights for 2x2 convolution of 32-bit float image during backward propagation.  <a href="#ga228a15cf84f0515d7198f7e0832bc3cf">More...</a><br /></td></tr>
+<tr class="separator:ga228a15cf84f0515d7198f7e0832bc3cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1b5aa0e3ff401d1a3397eb6a85fd337b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga1b5aa0e3ff401d1a3397eb6a85fd337b">SimdNeuralAddConvolution3x3Sum</a> (const float *src, size_t srcStride, const float *dst, size_t dstStride, size_t width, size_t height, float *sums)</td></tr>
 <tr class="memdesc:ga1b5aa0e3ff401d1a3397eb6a85fd337b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulates changes of weights for 3x3 convolution of 32-bit float image during backward propagation.  <a href="#ga1b5aa0e3ff401d1a3397eb6a85fd337b">More...</a><br /></td></tr>
 <tr class="separator:ga1b5aa0e3ff401d1a3397eb6a85fd337b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1638,6 +1641,79 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
     <tr><td class="paramdir">[in]</td><td class="paramname">weights</td><td>- a pointer to the array with weights (its size must be at least 25). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga228a15cf84f0515d7198f7e0832bc3cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga228a15cf84f0515d7198f7e0832bc3cf">&#9670;&nbsp;</a></span>SimdNeuralAddConvolution2x2Sum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNeuralAddConvolution2x2Sum </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>sums</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Accumulates changes of weights for 2x2 convolution of 32-bit float image during backward propagation. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network. ">Simd::Neural</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in 32-float values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the output image (input image width must be equal to output image width + 1). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the output image (input image height must be equal to output image height + 1). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">sums</td><td>- a pointer to the array with changes of weights (its size must be at least 4). </td></tr>
   </table>
   </dd>
 </dl>

@@ -36,115 +36,124 @@ namespace Simd
         using Sse::RightNotZero;
 #endif
 
-        template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m128 & dst, __m128 * sums)
+        template<size_t coreX, size_t coreY> struct Convolution
         {
-            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
-            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
-            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
-        }
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums);
+        };
 
-        template <bool align> SIMD_INLINE void AddMultiplied3x3(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
+        template<> struct Convolution<2, 2>
         {
-            AddMultiplied3<align>(src + stride*0, dst, sums + 0);
-            AddMultiplied3<align>(src + stride*1, dst, sums + 3);
-            AddMultiplied3<align>(src + stride*2, dst, sums + 6);
-        }
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
+            {
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
+            {
+                Sum<align>(src + stride * 0, dst, sums + 0);
+                Sum<align>(src + stride * 1, dst, sums + 2);
+            }
+        };
+
+        template<> struct Convolution<3, 3>
+        {
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
+            {
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
+            {
+                Sum<align>(src + stride * 0, dst, sums + 0);
+                Sum<align>(src + stride * 1, dst, sums + 3);
+                Sum<align>(src + stride * 2, dst, sums + 6);
+            }
+        };
+
+        template<> struct Convolution<4, 4>
+        {
+        };
+
+        template<> struct Convolution<5, 5>
+        {
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
+            {
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
+                sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Load<false>(src + 3)));
+                sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Load<align>(src + 4)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
+            {
+                Sum<align>(src + stride * 0, dst, sums + 0);
+                Sum<align>(src + stride * 1, dst, sums + 5);
+                Sum<align>(src + stride * 2, dst, sums + 10);
+                Sum<align>(src + stride * 3, dst, sums + 15);
+                Sum<align>(src + stride * 4, dst, sums + 20);
+            }
+        };
 
         SIMD_INLINE void Add4ExtractedSums(const __m128 * src, float * dst)
         {
             _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), _mm_hadd_ps(_mm_hadd_ps(src[0], src[1]), _mm_hadd_ps(src[2], src[3]))));
         }
 
-        template <bool align> void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
-            __m128 _sums[9];
+            __m128 _sums[coreX*coreY];
             memset(_sums, 0, sizeof(_sums));
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
                     __m128 _dst = Load<align>(dst + col);
-                    AddMultiplied3x3<align>(src + col, srcStride, _dst, _sums);
+                    Convolution<coreX, coreY>::template Sum<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
                     __m128 _dst = _mm_and_ps(tailMask, Load<false>(dst + col));
-                    AddMultiplied3x3<false>(src + col, srcStride, _dst, _sums);
+                    Convolution<coreX, coreY>::template Sum<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;
                 dst += dstStride;
             }
-            Add4ExtractedSums(_sums + 0, sums + 0);
-            Add4ExtractedSums(_sums + 4, sums + 4);
-            sums[8] += ExtractSum(_sums[8]);
+            size_t i = 0, n = Simd::AlignLo(coreX*coreY, F);
+            for (; i < n; i += F)
+                Add4ExtractedSums(_sums + i, sums + i);
+            for (; i < coreX*coreY; ++i)
+                sums[i] += ExtractSum(_sums[i]);
+        }
+
+        void NeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolutionSum<true, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
+            else
+                NeuralAddConvolutionSum<false, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution3x3Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolutionSum<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
             else
-                NeuralAddConvolution3x3Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied5(const float * src, const __m128 & dst, __m128 * sums)
-        {
-            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
-            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
-            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
-            sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Load<false>(src + 3)));
-            sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Load<false>(src + 4)));
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied5x5(const float * src, size_t stride, const __m128 & dst, __m128 * sums)
-        {
-            AddMultiplied5<align>(src + stride * 0, dst, sums + 0);
-            AddMultiplied5<align>(src + stride * 1, dst, sums + 5);
-            AddMultiplied5<align>(src + stride * 2, dst, sums + 10);
-            AddMultiplied5<align>(src + stride * 3, dst, sums + 15);
-            AddMultiplied5<align>(src + stride * 4, dst, sums + 20);
-        }
-
-        template <bool align> void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            size_t alignedWidth = Simd::AlignLo(width, F);
-            __m128 tailMask = RightNotZero(width - alignedWidth);
-            __m128 _sums[25];
-            memset(_sums, 0, sizeof(_sums));
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m128 _dst = Load<align>(dst + col);
-                    AddMultiplied5x5<align>(src + col, srcStride, _dst, _sums);
-                }
-                if (alignedWidth < width)
-                {
-                    size_t col = width - F;
-                    __m128 _dst = _mm_and_ps(tailMask, Load<false>(dst + col));
-                    AddMultiplied5x5<false>(src + col, srcStride, _dst, _sums);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-            Add4ExtractedSums(_sums + 0, sums + 0);
-            Add4ExtractedSums(_sums + 4, sums + 4);
-            Add4ExtractedSums(_sums + 8, sums + 8);
-            Add4ExtractedSums(_sums + 12, sums + 12);
-            Add4ExtractedSums(_sums + 16, sums + 16);
-            Add4ExtractedSums(_sums + 20, sums + 20);
-            sums[24] += ExtractSum(_sums[24]);
+                NeuralAddConvolutionSum<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution5x5Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolutionSum<true, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
             else
-                NeuralAddConvolution5x5Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
+                NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
         }
     }
 #endif// SIMD_SSE3_ENABLE
