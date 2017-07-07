@@ -557,6 +557,8 @@ namespace Simd
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights);
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<coreX> & buffer, size_t offset, const __m256 * weights);
+ 
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m256 & dst, __m256 * sums);
         };
 
         template<> struct Convolution<2, 2>
@@ -652,6 +654,22 @@ namespace Simd
                     Convolution4<align>(buffer.rows[1] + offset, weights + 4)),
                     _mm256_add_ps(Convolution4<align>(buffer.rows[2] + offset, weights + 8),
                     Convolution4<align>(buffer.rows[3] + offset, weights + 12)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
+            {
+                sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm256_add_ps(sums[2], _mm256_mul_ps(dst, Load<false>(src + 2)));
+                sums[3] = _mm256_add_ps(sums[3], _mm256_mul_ps(dst, Load<false>(src + 3)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
+            {
+                Sum<align>(src + stride * 0, dst, sums + 0);
+                Sum<align>(src + stride * 1, dst, sums + 4);
+                Sum<align>(src + stride * 2, dst, sums + 8);
+                Sum<align>(src + stride * 3, dst, sums + 12);
             }
         };
 
@@ -910,6 +928,14 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
+        void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolutionSum<true, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
+            else
+                NeuralAddConvolutionSum<false, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)

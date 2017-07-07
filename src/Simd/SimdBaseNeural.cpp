@@ -385,6 +385,11 @@ namespace Simd
             NeuralAddConvolutionSum<3, 3>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
+        void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            NeuralAddConvolutionSum<4, 4>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             NeuralAddConvolutionSum<5, 5>(src, srcStride, dst, dstStride, width, height, sums);

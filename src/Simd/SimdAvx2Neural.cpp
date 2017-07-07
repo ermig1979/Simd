@@ -221,310 +221,6 @@ namespace Simd
             else
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
-#if 0
-        template <size_t size> SIMD_INLINE void LoadWeights(const float * src, __m256 * dst)
-        {
-            for (size_t i = 0; i < size; ++i)
-                dst[i] = _mm256_set1_ps(src[i]);
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution2(const float * src, const __m256 * weights)
-        {
-            return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],
-                _mm256_mul_ps(Avx::Load<false>(src + 1), weights[1]));
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution2x2Forward(const float * src, size_t stride, const __m256 * weights)
-        {
-            return _mm256_add_ps(Convolution2<align>(src, weights),
-                Convolution2<align>(src + stride, weights + 2));
-        }
-
-        template <bool align> void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _weights[4];
-            LoadWeights<4>(weights, _weights);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Load<align>(dst + col);
-                    _dst = _mm256_add_ps(_dst, Convolution2x2Forward<align>(src + col, srcStride, _weights));
-                    Avx::Store<align>(dst + col, _dst);
-                }
-                if (width - alignedWidth)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = Load<false>(dst + col);
-                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution2x2Forward<false>(src + col, srcStride, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        void NeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution2x2Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
-            else
-                NeuralAddConvolution2x2Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution3(const float * src, const __m256 * weights)
-        {
-            return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],
-                _mm256_fmadd_ps(Avx::Load<false>(src + 1), weights[1],
-                    _mm256_mul_ps(Avx::Load<false>(src + 2), weights[2])));
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution3x3Forward(const float * src, size_t stride, const __m256 * weights)
-        {
-            return _mm256_add_ps(Convolution3<align>(src, weights),
-                _mm256_add_ps(Convolution3<align>(src + stride, weights + 3),
-                    Convolution3<align>(src + 2 * stride, weights + 6)));
-        }
-
-        template <bool align> void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _weights[9];
-            LoadWeights<9>(weights, _weights);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Load<align>(dst + col);
-                    _dst = _mm256_add_ps(_dst, Convolution3x3Forward<align>(src + col, srcStride, _weights));
-                    Avx::Store<align>(dst + col, _dst);
-                }
-                if (width - alignedWidth)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = Load<false>(dst + col);
-                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution3x3Forward<false>(src + col, srcStride, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution3x3Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
-            else
-                NeuralAddConvolution3x3Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution4(const float * src, const __m256 * weights)
-        {
-            return _mm256_add_ps(
-                _mm256_fmadd_ps(Load<align>(src + 0), weights[0], _mm256_mul_ps(Load<false>(src + 1), weights[1])),
-                _mm256_fmadd_ps(Load<false>(src + 2), weights[2], _mm256_mul_ps(Load<false>(src + 3), weights[3])));
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution4x4Forward(const float * src, size_t stride, const __m256 * weights)
-        {
-            return _mm256_add_ps(_mm256_add_ps(Convolution4<align>(src, weights), Convolution4<align>(src + stride, weights + 4)),
-                _mm256_add_ps(Convolution4<align>(src + 2 * stride, weights + 8), Convolution4<align>(src + 3 * stride, weights + 12)));
-        }
-
-        template <bool align> void NeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _weights[16];
-            LoadWeights<16>(weights, _weights);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Avx::Load<align>(dst + col);
-                    _dst = _mm256_add_ps(_dst, Convolution4x4Forward<align>(src + col, srcStride, _weights));
-                    Avx::Store<align>(dst + col, _dst);
-                }
-                if (width - alignedWidth)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = Avx::Load<false>(dst + col);
-                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution4x4Forward<false>(src + col, srcStride, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        void NeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution4x4Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
-            else
-                NeuralAddConvolution4x4Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution5(const float * src, const __m256 * weights)
-        {
-            __m256 s0 = Load<align>(src + 0);
-            __m256 s4 = Load<false>(src + 4);
-            return _mm256_fmadd_ps(s0, weights[0], _mm256_add_ps(
-                _mm256_fmadd_ps(Alignr<1>(s0, s4), weights[1], _mm256_mul_ps(Alignr<2>(s0, s4), weights[2])),
-                _mm256_fmadd_ps(s4, weights[4], _mm256_mul_ps(Alignr<3>(s0, s4), weights[3]))));
-        }
-
-        template <bool align> SIMD_INLINE __m256 Convolution5x5Forward(const float * src, size_t stride, const __m256 * weights)
-        {
-            return _mm256_add_ps(Convolution5<align>(src, weights), _mm256_add_ps(
-                _mm256_add_ps(Convolution5<align>(src + stride, weights + 5), Convolution5<align>(src + 2 * stride, weights + 10)),
-                _mm256_add_ps(Convolution5<align>(src + 3 * stride, weights + 15), Convolution5<align>(src + 4 * stride, weights + 20))));
-        }
-
-        template <bool align> void NeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _weights[25];
-            LoadWeights<25>(weights, _weights);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Load<align>(dst + col);
-                    _dst = _mm256_add_ps(_dst, Convolution5x5Forward<align>(src + col, srcStride, _weights));
-                    Avx::Store<align>(dst + col, _dst);
-                }
-                if (width - alignedWidth)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = Load<false>(dst + col);
-                    _dst = _mm256_add_ps(_dst, _mm256_and_ps(tailMask, Convolution5x5Forward<false>(src + col, srcStride, _weights)));
-                    Avx::Store<false>(dst + col, _dst);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        void NeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution5x5Forward<true>(src, srcStride, width, height, weights, dst, dstStride);
-            else
-                NeuralAddConvolution5x5Forward<false>(src, srcStride, width, height, weights, dst, dstStride);
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied3(const float * src, const __m256 & dst, __m256 * sums)
-        {
-            __m256 s0 = Load<align>(src + 0);
-            __m256 s4 = Load<false>(src + 4);
-            sums[0] = _mm256_fmadd_ps(dst, s0, sums[0]);
-            sums[1] = _mm256_fmadd_ps(dst, Alignr<1>(s0, s4), sums[1]);
-            sums[2] = _mm256_fmadd_ps(dst, Alignr<2>(s0, s4), sums[2]);
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied3x3(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
-        {
-            AddMultiplied3<align>(src + stride * 0, dst, sums + 0);
-            AddMultiplied3<align>(src + stride * 1, dst, sums + 3);
-            AddMultiplied3<align>(src + stride * 2, dst, sums + 6);
-        }
-
-        template <bool align> void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            size_t alignedWidth = Simd::AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _sums[9];
-            memset(_sums, 0, sizeof(_sums));
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Load<align>(dst + col);
-                    AddMultiplied3x3<align>(src + col, srcStride, _dst, _sums);
-                }
-                if (alignedWidth < width)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
-                    AddMultiplied3x3<false>(src + col, srcStride, _dst, _sums);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-            Add8ExtractedSums(_sums, sums);
-            sums[8] += Avx::ExtractSum(_sums[8]);
-        }
-
-        void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution3x3Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
-            else
-                NeuralAddConvolution3x3Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied5(const float * src, const __m256 & dst, __m256 * sums)
-        {
-            __m256 s0 = Load<align>(src + 0);
-            __m256 s4 = Load<false>(src + 4);
-            sums[0] = _mm256_fmadd_ps(dst, s0, sums[0]);
-            sums[1] = _mm256_fmadd_ps(dst, Alignr<1>(s0, s4), sums[1]);
-            sums[2] = _mm256_fmadd_ps(dst, Alignr<2>(s0, s4), sums[2]);
-            sums[3] = _mm256_fmadd_ps(dst, Alignr<3>(s0, s4), sums[3]);
-            sums[4] = _mm256_fmadd_ps(dst, s4, sums[4]);
-        }
-
-        template <bool align> SIMD_INLINE void AddMultiplied5x5(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
-        {
-            AddMultiplied5<align>(src + stride * 0, dst, sums + 0);
-            AddMultiplied5<align>(src + stride * 1, dst, sums + 5);
-            AddMultiplied5<align>(src + stride * 2, dst, sums + 10);
-            AddMultiplied5<align>(src + stride * 3, dst, sums + 15);
-            AddMultiplied5<align>(src + stride * 4, dst, sums + 20);
-        }
-
-        template <bool align> void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            size_t alignedWidth = Simd::AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
-            __m256 _sums[25];
-            memset(_sums, 0, sizeof(_sums));
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    __m256 _dst = Load<align>(dst + col);
-                    AddMultiplied5x5<align>(src + col, srcStride, _dst, _sums);
-                }
-                if (alignedWidth < width)
-                {
-                    size_t col = width - F;
-                    __m256 _dst = _mm256_and_ps(tailMask, Load<false>(dst + col));
-                    AddMultiplied5x5<false>(src + col, srcStride, _dst, _sums);
-                }
-                src += srcStride;
-                dst += dstStride;
-            }
-            Add8ExtractedSums(_sums + 0, sums + 0);
-            Add8ExtractedSums(_sums + 8, sums + 8);
-            Add8ExtractedSums(_sums + 16, sums + 16);
-            sums[24] += Avx::ExtractSum(_sums[24]);
-        }
-
-        void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
-        {
-            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralAddConvolution5x5Sum<true>(src, srcStride, dst, dstStride, width, height, sums);
-            else
-                NeuralAddConvolution5x5Sum<false>(src, srcStride, dst, dstStride, width, height, sums);
-        }
-#endif
 
         template <size_t size> SIMD_INLINE void LoadWeightsForward(const float * src, __m256 * dst)
         {
@@ -583,6 +279,8 @@ namespace Simd
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights);
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<coreX> & buffer, size_t offset, const __m256 * weights);
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m256 & dst, __m256 * sums);
         };
 
         template<> struct Convolution<2, 2>
@@ -681,6 +379,24 @@ namespace Simd
                     Convolution4<align>(buffer.rows[1] + offset, weights + 4)),
                     _mm256_add_ps(Convolution4<align>(buffer.rows[2] + offset, weights + 8),
                     Convolution4<align>(buffer.rows[3] + offset, weights + 12)));
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
+            {
+                __m256 s0 = Load<align>(src + 0);
+                __m256 s4 = Load<false>(src + 4);
+                sums[0] = _mm256_fmadd_ps(dst, s0, sums[0]);
+                sums[1] = _mm256_fmadd_ps(dst, Alignr<1>(s0, s4), sums[1]);
+                sums[2] = _mm256_fmadd_ps(dst, Alignr<2>(s0, s4), sums[2]);
+                sums[3] = _mm256_fmadd_ps(dst, Alignr<3>(s0, s4), sums[3]);
+            }
+
+            template <bool align> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m256 & dst, __m256 * sums)
+            {
+                Sum<align>(src + stride * 0, dst, sums + 0);
+                Sum<align>(src + stride * 1, dst, sums + 4);
+                Sum<align>(src + stride * 2, dst, sums + 8);
+                Sum<align>(src + stride * 3, dst, sums + 12);
             }
         };
 
@@ -943,6 +659,14 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
+        void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralAddConvolutionSum<true, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
+            else
+                NeuralAddConvolutionSum<false, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
         void NeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)

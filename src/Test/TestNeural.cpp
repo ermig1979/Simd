@@ -1349,6 +1349,41 @@ namespace Test
         return result;
     }
 
+    bool NeuralAddConvolution4x4SumAutoTest()
+    {
+        Size core(4, 4);
+        bool result = true;
+
+        result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Base::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#endif 
+
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx2::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Neon::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#endif
+
+        return result;
+    }
+
     bool NeuralAddConvolution5x5SumAutoTest()
     {
         Size core(5, 5);
@@ -2151,6 +2186,11 @@ namespace Test
     bool NeuralAddConvolution3x3SumDataTest(bool create)
     {
         return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(3, 3), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+    }
+
+    bool NeuralAddConvolution4x4SumDataTest(bool create)
+    {
+        return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(4, 4), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
     }
 
     bool NeuralAddConvolution5x5SumDataTest(bool create)
