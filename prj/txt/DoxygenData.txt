@@ -106,7 +106,7 @@
     #define SIMD_OPENCV_ENABLE
     #include "Simd/SimdLib.hpp"
     \endcode
-    And you can converse next types:
+    And you can convert next types:
      - `cv::Point`, `cv::Size` <--> Simd::Point
      - `cv::Rect` <--> Simd::Rectangle
      - `cv::Mat` <--> Simd::View

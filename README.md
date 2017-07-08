@@ -118,7 +118,7 @@ If you need use mutual conversion between Simd and OpenCV types you just have to
     #define SIMD_OPENCV_ENABLE
     #include "Simd/SimdLib.hpp"
 
-And you can converse next types:
+And you can convert next types:
 	
 * `cv::Point`, `cv::Size` <--> `Simd::Point`.
 * `cv::Rect` <--> `Simd::Rectangle`.
