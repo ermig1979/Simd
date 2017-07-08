@@ -1137,6 +1137,11 @@ namespace Test
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx::NeuralAddConvolution2x2Backward), FUNC_C2(SimdNeuralAddConvolution2x2Backward));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx2::NeuralAddConvolution2x2Backward), FUNC_C2(SimdNeuralAddConvolution2x2Backward));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Neon::NeuralAddConvolution2x2Backward), FUNC_C2(SimdNeuralAddConvolution2x2Backward));
@@ -1160,6 +1165,11 @@ namespace Test
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx2::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1187,6 +1197,11 @@ namespace Test
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx::NeuralAddConvolution4x4Backward), FUNC_C2(SimdNeuralAddConvolution4x4Backward));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx2::NeuralAddConvolution4x4Backward), FUNC_C2(SimdNeuralAddConvolution4x4Backward));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Neon::NeuralAddConvolution4x4Backward), FUNC_C2(SimdNeuralAddConvolution4x4Backward));
@@ -1210,6 +1225,11 @@ namespace Test
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
             result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx2::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
