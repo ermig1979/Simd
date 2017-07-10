@@ -110,7 +110,8 @@ namespace Simd
             double BackgroundGrowTime;
             double BackgroundIncrementTime;
 
-            bool DebugAnnotateDifference;
+            int DebugDrawLevel;
+            int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
             bool DebugAnnotateMovingRegions;
 
             Options()
@@ -127,7 +128,8 @@ namespace Simd
                 BackgroundGrowTime = 1.0;
                 BackgroundIncrementTime = 1.0;
 
-                DebugAnnotateDifference = false;
+                DebugDrawLevel = 1;
+                DebugDrawBottomRight = 1;
                 DebugAnnotateMovingRegions = true;
             }
         };
@@ -415,9 +417,16 @@ namespace Simd
                 if (model.frameSize == frameSize)
                     return true;
 
-                model.frameSize = frameSize;
-                model.roi = _model.roi;
-                model.levelCount = 3;
+                if (model.frameSize == Size())
+                {
+                    model.frameSize = frameSize;
+                    model.roi.clear();
+                    model.roi.push_back(Point(0, 0));
+                    model.roi.push_back(Point(frameSize.x, 0));
+                    model.roi.push_back(Point(frameSize.x, frameSize.y));
+                    model.roi.push_back(Point(0, frameSize.y));
+                    model.levelCount = 3;
+                }
 
                 GenerateSearchRegion(model);
                 GenerateSearchRegionScanlines(model);
@@ -442,8 +451,8 @@ namespace Simd
 
             void GenerateSearchRegionScanlines(Model & model)
             {
-                static const int ROI_EMPTY = 0;
-                static const int ROI_NON_EMPTY = 255;
+                static const uint8_t ROI_EMPTY = 0;
+                static const uint8_t ROI_NON_EMPTY = 255;
 
                 model.roiMask.Recreate(model.frameSize, model.levelCount);
                 Simd::Fill(model.roiMask, ROI_EMPTY);
@@ -830,9 +839,16 @@ namespace Simd
 
                 if (output && output->format == Frame::Bgr24)
                 {
-                    if (_options.DebugAnnotateDifference)
+                    if (_options.DebugDrawBottomRight)
                     {
-                        const View & src = _scene.difference[1];
+                        View src;
+                        switch (_options.DebugDrawBottomRight)
+                        {
+                        case 1: src = _scene.difference[_options.DebugDrawLevel]; break;
+                        case 2: src = _scene.texture.gray.value[_options.DebugDrawLevel]; break;
+                        case 3: src = _scene.texture.dx.value[_options.DebugDrawLevel]; break;
+                        case 4: src = _scene.texture.dy.value[_options.DebugDrawLevel]; break;
+                        }
                         Simd::GrayToBgr(src, output->planes[0].Region(src.Size(), View::BottomRight).Ref());
                     }
 

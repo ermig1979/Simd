@@ -2324,7 +2324,7 @@ namespace Test
         }
     };
 
-    Error Check(Network & net, const TrainSample & sample, float politive, bool train)
+    Error Check(Network & net, const TrainSample & sample, float positive, bool train)
     {
         double sum = 0;
         size_t count = 0, size = net.OutputIndex().Volume();
@@ -2340,12 +2340,12 @@ namespace Test
                 difference += Simd::Square(dst[j] - cur[j]);
             sum += difference / size;
 
-            float negative = lbl < size ? dst[lbl] : politive;
+            float negative = lbl < size ? dst[lbl] : positive;
             for (size_t j = 0; j < size; ++j)
             {
                 if (j == lbl)
                 {
-                    if (cur[j] < politive)
+                    if (cur[j] < positive)
                     {
                         count++;
                         break;

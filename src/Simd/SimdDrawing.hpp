@@ -218,6 +218,8 @@ namespace Simd
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
     {
+        assert(canvas.PixelSize() == sizeof(color));
+
         typedef Simd::Point<ptrdiff_t> Point;
         typedef std::vector<ptrdiff_t> Vector;
 
