@@ -239,4 +239,31 @@ namespace Test
 
         return true;
     }
+
+    bool DrawPolygonSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 255, s = 10, w = 3;
+
+        for (size_t i = o; i < n; i += 25)
+        {
+            Points polygon(3 + Random(s));
+            ptrdiff_t x0 = Random(W) - W / 8;
+            ptrdiff_t y0 = Random(H) - H / 8;
+            for (size_t j = 0; j < polygon.size(); ++j)
+            {
+                ptrdiff_t x = x0 + Random(W/4);
+                ptrdiff_t y = y0 + Random(H/4);
+                polygon[j] = Point(x, y);
+            }
+            Simd::DrawPolygon(image, polygon, uint8_t(i), Random(w) + 1);
+        }
+
+        image.Save("polygons.pgm");
+
+        return true;
+    }
 }

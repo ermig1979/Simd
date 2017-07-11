@@ -208,13 +208,37 @@ namespace Simd
 
     /*! @ingroup cpp_drawing
 
+        \fn void DrawPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color, size_t width = 1)
+
+        \short Draws a polygon at the image.
+
+        \param [out] canvas - a canvas (image where we draw polygon).
+        \param [in] polygon - a polygon.
+        \param [in] color - a color of the polygon.
+        \param [in] width - a width of the polygon. By default it is equal to 1.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color, size_t width = 1)
+    {
+        assert(canvas.PixelSize() == sizeof(color));
+
+        typedef Simd::Point<ptrdiff_t> Point;
+
+        for (size_t i = 0; i < polygon.size(); ++i)
+        {
+            const Point & p1 = (i ? polygon[i - 1] : polygon.back()), p2 = polygon[i];
+            DrawLine(canvas, p1, p2, color, width);
+        }
+    }
+
+    /*! @ingroup cpp_drawing
+
         \fn void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
 
         \short Draws a filled polygon at the image.
 
         \param [out] canvas - a canvas (image where we draw filled polygon).
         \param [in] polygon - a polygon.
-        \param [in] color - a color of the rectangle's frame.
+        \param [in] color - a color of the polygon frame.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawFilledPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color)
     {

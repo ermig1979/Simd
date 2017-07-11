@@ -72,6 +72,7 @@ namespace Test
     typedef std::vector<String> Strings;
 	typedef Simd::View<Simd::Allocator> View;
     typedef Simd::Point<ptrdiff_t> Point;
+    typedef std::vector<Point> Points;
 	typedef Point Size;
     typedef Simd::Rectangle<ptrdiff_t> Rect;
 	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
