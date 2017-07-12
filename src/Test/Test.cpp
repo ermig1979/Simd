@@ -147,6 +147,8 @@ namespace Test
 
     TEST_ADD_GROUP(AlphaBlending);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawLine);
+    TEST_ADD_GROUP_ONLY_SPECIAL(DrawRectangle);
+    TEST_ADD_GROUP_ONLY_SPECIAL(DrawFilledRectangle);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawPolygon);
 
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);

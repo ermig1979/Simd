@@ -240,6 +240,29 @@ namespace Test
         return true;
     }
 
+    bool DrawFilledRectangleSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 256;
+
+        for (size_t i = o; i < n; i += 25)
+        {
+            ptrdiff_t x1 = Random(W * 5 / 4) - W / 8;
+            ptrdiff_t y1 = Random(H * 5 / 4) - H / 8;
+            ptrdiff_t x2 = Random(W * 5 / 4) - W / 8;
+            ptrdiff_t y2 = Random(H * 5 / 4) - H / 8;
+
+            Simd::DrawFilledRectangle(image, Rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2)), uint8_t(i));
+        }
+
+        image.Save("filled_rectangles.pgm");
+
+        return true;
+    }
+
     bool DrawPolygonSpecialTest()
     {
         View image(W, H, View::Gray8);

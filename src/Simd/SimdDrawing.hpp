@@ -208,6 +208,30 @@ namespace Simd
 
     /*! @ingroup cpp_drawing
 
+        \fn void DrawFilledRectangle(View<A> & canvas, Rectangle<ptrdiff_t> rect, const Color & color)
+
+        \short Draws a filled rectangle at the image.
+
+        \param [out] canvas - a canvas (image where we draw filled rectangle).
+        \param [in] rect - a rectangle to fill.
+        \param [in] color - a color of the filled rectangle.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawFilledRectangle(View<A> & canvas, Rectangle<ptrdiff_t> rect, const Color & color)
+    {
+        assert(canvas.PixelSize() == sizeof(color));
+
+        rect &= Rectangle<ptrdiff_t>(canvas.Size());
+
+        for (ptrdiff_t row = rect.top; row < rect.bottom; ++row)
+        {
+            Color * dst = & At<A, Color>(canvas, 0, row);
+            for (ptrdiff_t col = rect.left; col < rect.right; ++col)
+                dst[col] = color;
+        }
+    }
+
+    /*! @ingroup cpp_drawing
+
         \fn void DrawPolygon(View<A> & canvas, const std::vector<Simd::Point<ptrdiff_t>> & polygon, const Color & color, size_t width = 1)
 
         \short Draws a polygon at the image.
