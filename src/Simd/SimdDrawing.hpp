@@ -195,8 +195,8 @@ namespace Simd
 
         \param [out] canvas - a canvas (image where we draw rectangle).
         \param [in] rect - a rectangle.
-        \param [in] color - a color of the rectangle's frame.
-        \param [in] width - a width of the rectangle's frame. By default it is equal to 1.
+        \param [in] color - a color of the rectangle frame.
+        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
     */
     template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Rectangle<ptrdiff_t> & rect, const Color & color, size_t width = 1)
     {
@@ -299,6 +299,44 @@ namespace Simd
                 for (ptrdiff_t x = left; x < right; ++x)
                     dst[x] = color;
             }
+        }
+    }
+
+    /*! @ingroup cpp_drawing
+
+        \fn void DrawEllipse(View<A> & canvas, const Point<ptrdiff_t> & center, const Point<ptrdiff_t> & axes, double slope, const Color & color, size_t width = 1)
+
+        \short Draws an ellipse at the image.
+
+        \param [out] canvas - a canvas (image where we draw ellipse).
+        \param [in] center - a center of the ellipse.
+        \param [in] axes - axes of the ellipse.
+        \param [in] slope - a slope of the ellipse.
+        \param [in] color - a color of the ellipse.
+        \param [in] width - a width of the ellipse.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawEllipse(View<A> & canvas, const Point<ptrdiff_t> & center, const Point<ptrdiff_t> & axes, double slope, const Color & color, size_t width = 1)
+    {
+        assert(canvas.PixelSize() == sizeof(color));
+
+        const size_t n = 8*std::max((size_t)1, (size_t)::pow(axes.x*axes.x + axes.y*axes.y, 0.25));
+
+        double ss = ::sin(slope);
+        double sc = ::cos(slope);
+        double da = 2*M_PI / n;
+
+        double px, py;
+        for (size_t i = 0; i <= n; ++i)
+        {
+            double a = i*da;
+            double ax = ::sin(a)*axes.x;
+            double ay = ::cos(a)*axes.y;
+            double cx = ax*sc + ay*ss + center.x;
+            double cy = ay*sc - ax*ss + center.y;
+            if (i > 0)
+                DrawLine(canvas, (ptrdiff_t)cx, (ptrdiff_t)cy, (ptrdiff_t)px, (ptrdiff_t)py, color, width);
+            px = cx;
+            py = cy;
         }
     }
 }

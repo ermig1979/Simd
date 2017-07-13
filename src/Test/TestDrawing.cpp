@@ -289,4 +289,57 @@ namespace Test
 
         return true;
     }
+
+    bool DrawFilledPolygonSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 255, s = 10;
+
+        for (size_t i = o; i < n; i += 25)
+        {
+            Points polygon(3 + Random(s));
+            ptrdiff_t x0 = Random(W) - W / 8;
+            ptrdiff_t y0 = Random(H) - H / 8;
+            for (size_t j = 0; j < polygon.size(); ++j)
+            {
+                ptrdiff_t x = x0 + Random(W / 4);
+                ptrdiff_t y = y0 + Random(H / 4);
+                polygon[j] = Point(x, y);
+            }
+            Simd::DrawFilledPolygon(image, polygon, uint8_t(i));
+        }
+
+        image.Save("filled_polygons.pgm");
+
+        return true;
+    }
+
+    bool DrawEllipseSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 255, s = 10, w = 3;
+
+        Point c, a;
+        for (size_t i = o; i < n; i += 100)
+        {
+            c.x = Random(W * 5 / 4) - W / 8;
+            c.y = Random(H * 5 / 4) - H / 8;
+            a.x = Random(W/4);
+            a.y = Random(H/4);
+            Simd::DrawEllipse(image, c, a, Random(s)*M_PI/s, uint8_t(i), Random(w) + 1);
+        }
+
+        Simd::DrawEllipse(image, Point(50, 50), Point(10, 20), M_PI / 6, uint8_t(255), 1);
+
+
+        image.Save("ellipses.pgm");
+
+        return true;
+    }
 }
