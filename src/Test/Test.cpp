@@ -152,6 +152,7 @@ namespace Test
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawPolygon);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawFilledPolygon);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawEllipse);
+    TEST_ADD_GROUP_ONLY_SPECIAL(DrawCircle);
 
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeFast);

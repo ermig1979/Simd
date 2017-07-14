@@ -326,7 +326,7 @@ namespace Test
         const size_t o = 55, n = 255, s = 10, w = 3;
 
         Point c, a;
-        for (size_t i = o; i < n; i += 100)
+        for (size_t i = o; i < n; i += 25)
         {
             c.x = Random(W * 5 / 4) - W / 8;
             c.y = Random(H * 5 / 4) - H / 8;
@@ -335,10 +335,29 @@ namespace Test
             Simd::DrawEllipse(image, c, a, Random(s)*M_PI/s, uint8_t(i), Random(w) + 1);
         }
 
-        Simd::DrawEllipse(image, Point(50, 50), Point(10, 20), M_PI / 6, uint8_t(255), 1);
-
-
         image.Save("ellipses.pgm");
+
+        return true;
+    }
+
+    bool DrawCircleSpecialTest()
+    {
+        View image(W, H, View::Gray8);
+
+        Simd::Fill(image, 0);
+
+        const size_t o = 55, n = 255, s = 10, w = 3;
+
+        Point c;
+        for (size_t i = o; i < n; i += 25)
+        {
+            c.x = Random(W * 5 / 4) - W / 8;
+            c.y = Random(H * 5 / 4) - H / 8;
+            ptrdiff_t r = Random(H / 4);
+            Simd::DrawCircle(image, c, r, uint8_t(i), Random(w) + 1);
+        }
+
+        image.Save("circles.pgm");
 
         return true;
     }

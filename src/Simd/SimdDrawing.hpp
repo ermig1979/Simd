@@ -320,12 +320,9 @@ namespace Simd
         assert(canvas.PixelSize() == sizeof(color));
 
         const size_t n = 8*std::max((size_t)1, (size_t)::pow(axes.x*axes.x + axes.y*axes.y, 0.25));
-
         double ss = ::sin(slope);
         double sc = ::cos(slope);
-        double da = 2*M_PI / n;
-
-        double px, py;
+        double px, py, da = 2*M_PI / n;
         for (size_t i = 0; i <= n; ++i)
         {
             double a = i*da;
@@ -333,6 +330,36 @@ namespace Simd
             double ay = ::cos(a)*axes.y;
             double cx = ax*sc + ay*ss + center.x;
             double cy = ay*sc - ax*ss + center.y;
+            if (i > 0)
+                DrawLine(canvas, (ptrdiff_t)cx, (ptrdiff_t)cy, (ptrdiff_t)px, (ptrdiff_t)py, color, width);
+            px = cx;
+            py = cy;
+        }
+    }
+
+    /*! @ingroup cpp_drawing
+
+        \fn void DrawCircle(View<A> & canvas, const Point<ptrdiff_t> & center, ptrdiff_t radius, const Color & color, size_t width = 1)
+
+        \short Draws a circle at the image.
+
+        \param [out] canvas - a canvas (image where we draw circle).
+        \param [in] center - a center of the circle.
+        \param [in] radius - a radius of the circle.
+        \param [in] color - a color of the circle.
+        \param [in] width - a width of the circle.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawCircle(View<A> & canvas, const Point<ptrdiff_t> & center, ptrdiff_t radius, const Color & color, size_t width = 1)
+    {
+        assert(canvas.PixelSize() == sizeof(color));
+
+        const size_t n = 8 * std::max((size_t)1, (size_t)::pow(radius, 0.5));
+        double px, py, da = 2 * M_PI / n;
+        for (size_t i = 0; i <= n; ++i)
+        {
+            double a = i*da;
+            double cx = radius*::cos(a) + center.x;
+            double cy = radius*::sin(a) + center.y;
             if (i > 0)
                 DrawLine(canvas, (ptrdiff_t)cx, (ptrdiff_t)cy, (ptrdiff_t)px, (ptrdiff_t)py, color, width);
             px = cx;

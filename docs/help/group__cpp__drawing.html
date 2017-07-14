@@ -78,6 +78,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2ff730c34232d22b059cda47d2bad29d"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__drawing.html#ga2ff730c34232d22b059cda47d2bad29d">DrawEllipse</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;canvas, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;center, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;axes, double slope, const Color &amp;color, size_t width=1)</td></tr>
 <tr class="memdesc:ga2ff730c34232d22b059cda47d2bad29d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws an ellipse at the image.  <a href="group__cpp__drawing.html#ga2ff730c34232d22b059cda47d2bad29d">More...</a><br /></td></tr>
 <tr class="separator:ga2ff730c34232d22b059cda47d2bad29d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga22aa2296b7ff5657bacf78f65e7ec04d"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A, class Color &gt; </td></tr>
+<tr class="memitem:ga22aa2296b7ff5657bacf78f65e7ec04d"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__drawing.html#ga22aa2296b7ff5657bacf78f65e7ec04d">DrawCircle</a> (<a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;canvas, const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;center, ptrdiff_t radius, const Color &amp;color, size_t width=1)</td></tr>
+<tr class="memdesc:ga22aa2296b7ff5657bacf78f65e7ec04d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Draws a circle at the image.  <a href="group__cpp__drawing.html#ga22aa2296b7ff5657bacf78f65e7ec04d">More...</a><br /></td></tr>
+<tr class="separator:ga22aa2296b7ff5657bacf78f65e7ec04d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Drawing functions. </p>
@@ -461,6 +465,64 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a slope of the ellipse. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the ellipse. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the ellipse. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga22aa2296b7ff5657bacf78f65e7ec04d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga22aa2296b7ff5657bacf78f65e7ec04d">&#9670;&nbsp;</a></span>DrawCircle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void DrawCircle </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>center</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">ptrdiff_t&#160;</td>
+          <td class="paramname"><em>radius</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Color &amp;&#160;</td>
+          <td class="paramname"><em>color</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Draws a circle at the image. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas (image where we draw circle). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">center</td><td>- a center of the circle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">radius</td><td>- a radius of the circle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the circle. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the circle. </td></tr>
   </table>
   </dd>
 </dl>
