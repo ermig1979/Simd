@@ -90,6 +90,14 @@
 #define SIMD_MADDUBS_ERROR // Visual Studio 2012/2013 release mode compiler bug in function _mm256_maddubs_epi16:
 #endif
 
+#if !defined(SIMD_AVX512F_DISABLE) && _MSC_VER >= 1900
+#define SIMD_AVX512F_ENABLE
+#endif
+
+#if !defined(SIMD_AVX512BW_DISABLE) && _MSC_VER >= 1911
+#define SIMD_AVX512BW_ENABLE
+#endif
+
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE)
@@ -174,6 +182,14 @@
 #define SIMD_AVX2_ENABLE
 #endif
 
+#if !defined(SIMD_AVX512F_DISABLE) && defined(__AVX512F__)
+#define SIMD_AVX512F_ENABLE
+#endif
+
+#if !defined(SIMD_AVX512BW_DISABLE) && defined(__AVX512BW__)
+#define SIMD_AVX512BW_ENABLE
+#endif
+
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE)
@@ -250,7 +266,8 @@
 #include <nmmintrin.h>
 #endif
 
-#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
+#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
+    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) 
 #include <immintrin.h>
 #endif
 
@@ -272,7 +289,9 @@
 #include <msa.h>
 #endif
 
-#if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
+#if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE)
+#define SIMD_ALIGN 64
+#elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE_ENABLE) || defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE3_ENABLE)  || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) \
     || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
