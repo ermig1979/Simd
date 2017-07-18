@@ -90,7 +90,7 @@
 #define SIMD_MADDUBS_ERROR // Visual Studio 2012/2013 release mode compiler bug in function _mm256_maddubs_epi16:
 #endif
 
-#if !defined(SIMD_AVX512F_DISABLE) && _MSC_VER >= 1900
+#if !defined(SIMD_AVX512F_DISABLE) && _MSC_VER >= 1910
 #define SIMD_AVX512F_ENABLE
 #endif
 

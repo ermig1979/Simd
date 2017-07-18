@@ -346,7 +346,7 @@ namespace Test
 
         Simd::Fill(image, 0);
 
-        const size_t o = 55, n = 255, s = 10, w = 3;
+        const size_t o = 55, n = 255, w = 3;
 
         Point c;
         for (size_t i = o; i < n; i += 25)

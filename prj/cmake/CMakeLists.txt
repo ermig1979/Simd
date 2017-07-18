@@ -8,13 +8,14 @@ if(CMAKE_BUILD_TYPE STREQUAL "")
 endif()
 
 if((NOT TOOLCHAIN STREQUAL "") AND (NOT ${TARGET} STREQUAL ""))
-    message("Use crossplatform toolchain '${TOOLCHAIN}' for '${TARGET}' platform.")
     set(CMAKE_C_COMPILER ${TOOLCHAIN})
     set(CMAKE_CXX_COMPILER ${TOOLCHAIN})
     set(CMAKE_SYSTEM_PROCESSOR ${TARGET})
-else()
-    message("Use default toolchain '${CMAKE_CXX_COMPILER}' for current '${CMAKE_SYSTEM_PROCESSOR}' platform.")
+	execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion OUTPUT_VARIABLE CMAKE_CXX_COMPILER_VERSION)
 endif()
+message("Target: ${CMAKE_SYSTEM_PROCESSOR}")
+message("Toolchain: ${CMAKE_CXX_COMPILER}")
+message("Version: ${CMAKE_CXX_COMPILER_VERSION}")
 
 include_directories(${TRUNK_DIR}/src)
 
@@ -23,8 +24,6 @@ if((CHECK_VERSION STREQUAL "") OR (NOT (CHECK_VERSION STREQUAL "0")))
 else()
     message("Skip version checking.")
 endif()
-
-message("CMAKE_SYSTEM_PROCESSOR = '${CMAKE_SYSTEM_PROCESSOR}'")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -O3")
@@ -66,15 +65,29 @@ if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL 
 	else()
 		set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -fabi-version=4")
 	endif()
+	
+	set(SIMD_CXX_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
+	set(SIMD_ALG_SRC ${SIMD_BASE_SRC} ${SIMD_SSE1_SRC} ${SIMD_SSE2_SRC} ${SIMD_SSE3_SRC} ${SIMD_SSSE3_SRC} ${SIMD_SSE41_SRC} ${SIMD_SSE42_SRC} ${SIMD_AVX1_SRC} ${SIMD_AVX2_SRC})
+	
+	if(((CMAKE_CXX_COMPILER MATCHES "gnu") AND (NOT(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.0.0"))) OR (CMAKE_CXX_COMPILER MATCHES "clang"))	
+		file(GLOB_RECURSE SIMD_AVX512F_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512f*.cpp)
+		set_source_files_properties(${SIMD_AVX512F_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f")
+	
+		file(GLOB_RECURSE SIMD_AVX512BW_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512bw*.cpp)
+		set_source_files_properties(${SIMD_AVX512BW_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512bw")
+		
+		set(SIMD_CXX_FLAGS "${SIMD_CXX_FLAGS} -mavx512bw")
+		set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512F_SRC} ${SIMD_AVX512BW_SRC})
+	endif()
 
     file(GLOB_RECURSE SIMD_LIB_SRC ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
-	set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2")
-    add_library(Simd STATIC ${SIMD_LIB_SRC} ${SIMD_BASE_SRC} ${SIMD_SSE1_SRC} ${SIMD_SSE2_SRC} ${SIMD_SSE3_SRC} ${SIMD_SSSE3_SRC} ${SIMD_SSE41_SRC} ${SIMD_SSE42_SRC} ${SIMD_AVX1_SRC} ${SIMD_AVX2_SRC})
+	set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${SIMD_CXX_FLAGS}")
+    add_library(Simd STATIC ${SIMD_LIB_SRC} ${SIMD_ALG_SRC})
 
 	file(GLOB_RECURSE TEST_SRC_C ${TRUNK_DIR}/src/Test/*.c)
     file(GLOB_RECURSE TEST_SRC_CPP ${TRUNK_DIR}/src/Test/*.cpp)
     if((NOT (TARGET STREQUAL "")) AND (NOT (TOOLCHAIN STREQUAL "")))
-		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -std=c++11")
+		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${SIMD_CXX_FLAGS} -std=c++11")
     else()
 		set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mtune=native -std=c++11")
     endif()	
