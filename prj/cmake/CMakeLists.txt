@@ -128,9 +128,9 @@ elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQU
     add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
     target_link_libraries(Test Simd -lpthread)
 
-elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
+elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
 
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm")
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
         set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16")
     else()
         set(CXX_NEON_FLAG "")
