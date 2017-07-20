@@ -61,6 +61,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
@@ -2346,7 +2347,7 @@ SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size
 }
 
 typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC4(NeuralAddVectorMultipliedByValue, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC5(NeuralAddVectorMultipliedByValue, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
 {

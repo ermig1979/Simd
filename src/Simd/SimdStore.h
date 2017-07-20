@@ -157,6 +157,23 @@ namespace Simd
     }
 #endif//SIMD_SAVX2_ENABLE
 
+#ifdef SIMD_AVX512F_ENABLE
+	namespace Avx512f
+	{
+		template <bool align> SIMD_INLINE void Store(float * p, __m512 a);
+
+		template <> SIMD_INLINE void Store<false>(float * p, __m512 a)
+		{
+			_mm512_storeu_ps(p, a);
+		}
+
+		template <> SIMD_INLINE void Store<true>(float * p, __m512 a)
+		{
+			_mm512_store_ps(p, a);
+		}
+	}
+#endif
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {

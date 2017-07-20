@@ -354,6 +354,29 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
+#ifdef SIMD_AVX512F_ENABLE
+	namespace Avx512f
+	{
+		template <bool align> SIMD_INLINE __m512 Load(const float * p);
+
+		template <> SIMD_INLINE __m512 Load<false>(const float * p)
+		{
+			return _mm512_loadu_ps(p);
+		}
+
+		template <> SIMD_INLINE __m512 Load<true>(const float * p)
+		{
+			return _mm512_load_ps(p);
+		}
+	}
+#endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE
+	namespace Avx512bw
+	{
+	}
+#endif//SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
