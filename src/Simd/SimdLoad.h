@@ -366,7 +366,11 @@ namespace Simd
 
 		template <> SIMD_INLINE __m512 Load<true>(const float * p)
 		{
+#if defined(__clang__) && (__clang_major__ == 3) && (__clang_minor__ == 8) && (__clang_patchlevel__ == 0)
+			return _mm512_load_ps((const double *)p);
+#else
 			return _mm512_load_ps(p);
+#endif
 		}
 	}
 #endif//SIMD_AVX512F_ENABLE
