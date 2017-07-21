@@ -374,6 +374,11 @@ namespace Test
             result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
 #endif
 
+#ifdef SIMD_AVX512F_ENABLE
+		if (Simd::Avx512f::Enable)
+			result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx512f::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Neon::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));

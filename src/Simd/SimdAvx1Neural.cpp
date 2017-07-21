@@ -111,7 +111,6 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-
         template <bool align> SIMD_INLINE void AddVector(const float * src, float * dst)
         {
             Store<align>(dst, _mm256_add_ps(Load<align>(dst), Load<align>(src)));
