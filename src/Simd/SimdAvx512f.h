@@ -34,7 +34,9 @@ namespace Simd
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
 		void NeuralAddVector(const float * src, size_t size, float * dst);
-    }
+
+		void NeuralAddValue(const float * value, float * dst, size_t size);
+	}
 #endif// SIMD_AVX512F_ENABLE
 }
 #endif//__SimdAvx512f_h__
