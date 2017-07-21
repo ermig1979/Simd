@@ -2339,7 +2339,7 @@ SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t wi
 }
 
 typedef void(*SimdNeuralProductSumPtr) (const float * a, const float * b, size_t size, float * sum);
-SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC5(NeuralProductSum, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+SimdNeuralProductSumPtr simdNeuralProductSum = SIMD_FUNC6(NeuralProductSum, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum)
 {
