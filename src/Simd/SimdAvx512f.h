@@ -38,6 +38,8 @@ namespace Simd
 		void NeuralAddVector(const float * src, size_t size, float * dst);
 
 		void NeuralAddValue(const float * value, float * dst, size_t size);
+
+		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 	}
 #endif// SIMD_AVX512F_ENABLE
 }
