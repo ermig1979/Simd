@@ -51,8 +51,11 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#gae04f3a0b6c983cfbfbecc36bf58aff64">SimdVersion</a> ()</td></tr>
-<tr class="memdesc:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets version of <a class="el" href="namespace_simd.html">Simd</a> Library.  <a href="#gae04f3a0b6c983cfbfbecc36bf58aff64">More...</a><br /></td></tr>
+<tr class="memdesc:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets version of Simd Library.  <a href="#gae04f3a0b6c983cfbfbecc36bf58aff64">More...</a><br /></td></tr>
 <tr class="separator:gae04f3a0b6c983cfbfbecc36bf58aff64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="memItemLeft" align="right" valign="top">SIMD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga05e32f68b1fa2ce1c160afc5e91de3e3">SimdCpuInfo</a> ()</td></tr>
+<tr class="memdesc:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets info about SIMD extensions supported by CPU and Simd Library.  <a href="#ga05e32f68b1fa2ce1c160afc5e91de3e3">More...</a><br /></td></tr>
+<tr class="separator:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions with information about library. </p>
@@ -72,8 +75,51 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Gets version of <a class="el" href="namespace_simd.html">Simd</a> Library. </p>
-<dl class="section return"><dt>Returns</dt><dd>string with version of <a class="el" href="namespace_simd.html">Simd</a> Library (major version number, minor version number, release number, number of SVN's commits). </dd></dl>
+<p>Gets version of Simd Library. </p>
+<dl class="section return"><dt>Returns</dt><dd>string with version of Simd Library (major version number, minor version number, release number, number of SVN's commits). </dd></dl>
+
+</div>
+</div>
+<a id="ga05e32f68b1fa2ce1c160afc5e91de3e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga05e32f68b1fa2ce1c160afc5e91de3e3">&#9670;&nbsp;</a></span>SimdCpuInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int SimdCpuInfo </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets info about SIMD extensions supported by CPU and Simd Library. </p>
+<dl class="section note"><dt>Note</dt><dd>See enumeration <a class="el" href="group__c__types.html#ga682ee0277c90a21524d1b1e0eb2d95b2">SimdCpuInfoFlags</a>.</dd></dl>
+<p>Using example: </p><pre class="fragment">#include "Simd/SimdLib.h"
+#include &lt;iostream&gt;
+
+int main()
+{
+    int info = SimdCpuInfo();
+    std::cout &lt;&lt; "SSE: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSse) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "SSE2: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSse2) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "SSE3: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSse3) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "SSSE3: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSsse3) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "SSE4.1: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSse41) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "SSE4.2: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoSse42) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AVX: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoAvx) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AVX2: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoAvx2) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AVX-512F: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoAvx512f) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AVX-512BW: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoAvx512bw) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "PowerPC-Altivec: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoVmx) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "PowerPC-VSX: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoVsx) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "ARM-NEON: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoNeon) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "MIPS-MSA: " &lt;&lt; (info&amp;(1 &lt;&lt; SimdCpuInfoMsa) ? "Yes" : "No") &lt;&lt; std::endl;
+    return 0;
+}
+</pre><dl class="section return"><dt>Returns</dt><dd>an integer value which bits contains information about SIMD extensions supported by CPU and Simd Library. </dd></dl>
 
 </div>
 </div>

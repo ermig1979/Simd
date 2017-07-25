@@ -50,6 +50,37 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:ga682ee0277c90a21524d1b1e0eb2d95b2"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#ga682ee0277c90a21524d1b1e0eb2d95b2">SimdCpuInfoFlags</a> { <br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a8e2c5278aeaa8792cea2ec34d06386cf">SimdCpuInfoSse</a> = 0, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2adbdf94b3af6ddb0e361f810e30c7fb50">SimdCpuInfoSse2</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a34c3bb9e052644075f62c3ee25ae242f">SimdCpuInfoSse3</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a73dbe4e8af77d6091ca4206613252495">SimdCpuInfoSsse3</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a6c4e5315db7b0a910636adda67031456">SimdCpuInfoSse41</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a12161058f10f082ed6fa43b1cc256a1f">SimdCpuInfoSse42</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a07db457f1de2f54c70c80cd0219bb605">SimdCpuInfoAvx</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2ae1d99d6bf08d8cf40e95dc981b4f09f0">SimdCpuInfoAvx2</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a2cdb7cb4f017481b7ec53e06d0cf45f5">SimdCpuInfoAvx512f</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a13d311fe603e1797f99bd17d28ddcf8a">SimdCpuInfoAvx512bw</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a5efc54efd616d06446c809cb5f858cb8">SimdCpuInfoVmx</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a384bfe553b6895a1cdc179830d64e147">SimdCpuInfoVsx</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2ac4b7909d8ef1479ca6667c21d94a9808">SimdCpuInfoNeon</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__c__types.html#gga682ee0277c90a21524d1b1e0eb2d95b2a6f6726418c4b1e07843d8996cd6e62a1">SimdCpuInfoMsa</a>
+<br />
+ }</td></tr>
+<tr class="separator:ga682ee0277c90a21524d1b1e0eb2d95b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gacc0482a1811a1028062f6e4ed877804a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a> { <br />
 &#160;&#160;<a class="el" href="group__c__types.html#ggacc0482a1811a1028062f6e4ed877804aa732e31dd58949283bbbaae2915b3cfdf">SimdCompareEqual</a>, 
 <br />
@@ -152,6 +183,51 @@ Enumerations</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Types of Simd Library C API. </p>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga682ee0277c90a21524d1b1e0eb2d95b2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga682ee0277c90a21524d1b1e0eb2d95b2">&#9670;&nbsp;</a></span>SimdCpuInfoFlags</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__c__types.html#ga682ee0277c90a21524d1b1e0eb2d95b2">SimdCpuInfoFlags</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Describes types of SIMD extensions which supported by current CPU and <a class="el" href="namespace_simd.html">Simd</a> Library (see function <a class="el" href="group__info.html#ga05e32f68b1fa2ce1c160afc5e91de3e3" title="Gets info about SIMD extensions supported by CPU and Simd Library. ">SimdCpuInfo</a>). </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a8e2c5278aeaa8792cea2ec34d06386cf"></a>SimdCpuInfoSse&#160;</td><td class="fielddoc"><p>SSE (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2adbdf94b3af6ddb0e361f810e30c7fb50"></a>SimdCpuInfoSse2&#160;</td><td class="fielddoc"><p>SSE2 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a34c3bb9e052644075f62c3ee25ae242f"></a>SimdCpuInfoSse3&#160;</td><td class="fielddoc"><p>SSE3 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a73dbe4e8af77d6091ca4206613252495"></a>SimdCpuInfoSsse3&#160;</td><td class="fielddoc"><p>SSSE3 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a6c4e5315db7b0a910636adda67031456"></a>SimdCpuInfoSse41&#160;</td><td class="fielddoc"><p>SSE4.1 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a12161058f10f082ed6fa43b1cc256a1f"></a>SimdCpuInfoSse42&#160;</td><td class="fielddoc"><p>SSE4.2 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a07db457f1de2f54c70c80cd0219bb605"></a>SimdCpuInfoAvx&#160;</td><td class="fielddoc"><p>AVX (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2ae1d99d6bf08d8cf40e95dc981b4f09f0"></a>SimdCpuInfoAvx2&#160;</td><td class="fielddoc"><p>AVX2 (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a2cdb7cb4f017481b7ec53e06d0cf45f5"></a>SimdCpuInfoAvx512f&#160;</td><td class="fielddoc"><p>AVX-512F (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a13d311fe603e1797f99bd17d28ddcf8a"></a>SimdCpuInfoAvx512bw&#160;</td><td class="fielddoc"><p>AVX-512BW (x86). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a5efc54efd616d06446c809cb5f858cb8"></a>SimdCpuInfoVmx&#160;</td><td class="fielddoc"><p>VMX or Altivec (PowerPC). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a384bfe553b6895a1cdc179830d64e147"></a>SimdCpuInfoVsx&#160;</td><td class="fielddoc"><p>VSX (PowerPC). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2ac4b7909d8ef1479ca6667c21d94a9808"></a>SimdCpuInfoNeon&#160;</td><td class="fielddoc"><p>NEON (ARM). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga682ee0277c90a21524d1b1e0eb2d95b2a6f6726418c4b1e07843d8996cd6e62a1"></a>SimdCpuInfoMsa&#160;</td><td class="fielddoc"><p>MSA (MIPS). </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <a id="gacc0482a1811a1028062f6e4ed877804a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gacc0482a1811a1028062f6e4ed877804a">&#9670;&nbsp;</a></span>SimdCompareType</h2>
 

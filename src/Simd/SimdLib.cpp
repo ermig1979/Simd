@@ -69,6 +69,54 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 using namespace Simd;
 
+SIMD_API int SimdCpuInfo()
+{
+    int info = 0;
+#ifdef SIMD_SSE_ENABLE
+    info |= Sse::Enable ? (1 << SimdCpuInfoSse) : 0;
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    info |= Sse2::Enable ? (1 << SimdCpuInfoSse2) : 0;
+#endif
+#ifdef SIMD_SSE3_ENABLE
+    info |= Sse3::Enable ? (1 << SimdCpuInfoSse3) : 0;
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    info |= Ssse3::Enable ? (1 << SimdCpuInfoSsse3) : 0;
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    info |= Sse41::Enable ? (1 << SimdCpuInfoSse41) : 0;
+#endif
+#ifdef SIMD_SSE42_ENABLE
+    info |= Sse42::Enable ? (1 << SimdCpuInfoSse42) : 0;
+#endif
+#ifdef SIMD_AVX_ENABLE
+    info |= Avx::Enable ? (1 << SimdCpuInfoAvx) : 0;
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    info |= Avx2::Enable ? (1 << SimdCpuInfoAvx2) : 0;
+#endif
+#ifdef SIMD_AVX512F_ENABLE
+    info |= Avx512f::Enable ? (1 << SimdCpuInfoAvx512f) : 0;
+#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    info |= Avx512bw::Enable ? (1 << SimdCpuInfoAvx512bw) : 0;
+#endif
+#ifdef SIMD_VMX_ENABLE
+    info |= Vmx::Enable ? (1 << SimdCpuInfoVmx) : 0;
+#endif
+#ifdef SIMD_VSX_ENABLE
+    info |= Vsx::Enable ? (1 << SimdCpuInfoVsx) : 0;
+#endif
+#ifdef SIMD_NEON_ENABLE
+    info |= Neon::Enable ? (1 << SimdCpuInfoNeon) : 0;
+#endif
+#ifdef SIMD_MSA_ENABLE
+    info |= Msa::Enable ? (1 << SimdCpuInfoMsa) : 0;
+#endif
+    return info;
+}
+
 SIMD_API const char * SimdVersion()
 {
     return SIMD_VERSION;

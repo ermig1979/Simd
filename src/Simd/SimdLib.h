@@ -67,6 +67,27 @@ typedef unsigned __int64  uint64_t;
 #endif
 
 /*! @ingroup c_types
+    Describes types of SIMD extensions which supported by current CPU and Simd Library (see function ::SimdCpuInfo).
+*/
+typedef enum
+{
+    SimdCpuInfoSse = 0, /*!< SSE (x86). */
+    SimdCpuInfoSse2, /*!< SSE2 (x86). */
+    SimdCpuInfoSse3, /*!< SSE3 (x86). */
+    SimdCpuInfoSsse3, /*!< SSSE3 (x86). */
+    SimdCpuInfoSse41, /*!< SSE4.1 (x86). */
+    SimdCpuInfoSse42, /*!< SSE4.2 (x86). */
+    SimdCpuInfoAvx, /*!< AVX (x86). */
+    SimdCpuInfoAvx2, /*!< AVX2 (x86). */
+    SimdCpuInfoAvx512f, /*!< AVX-512F (x86). */
+    SimdCpuInfoAvx512bw, /*!< AVX-512BW (x86). */
+    SimdCpuInfoVmx, /*!< VMX or Altivec (PowerPC). */
+    SimdCpuInfoVsx, /*!< VSX (PowerPC). */
+    SimdCpuInfoNeon, /*!< NEON (ARM). */
+    SimdCpuInfoMsa, /*!< MSA (MIPS). */
+} SimdCpuInfoFlags;
+
+/*! @ingroup c_types
     Describes types of compare operation.
     Operation compare(a, b) is 
 */
@@ -209,11 +230,49 @@ extern "C"
 
         \fn const char * SimdVersion();
 
-        \short Gets version of Simd Library.
+        \short Gets version of %Simd Library.
 
-        \return string with version of Simd Library (major version number, minor version number, release number, number of SVN's commits).
+        \return string with version of %Simd Library (major version number, minor version number, release number, number of SVN's commits).
     */
     SIMD_API const char * SimdVersion();
+
+    /*! @ingroup info
+
+        \fn int SimdCpuInfo();
+
+        \short Gets info about SIMD extensions supported by CPU and %Simd Library.
+
+        \note See enumeration ::SimdCpuInfoFlags.
+
+        Using example:
+        \verbatim
+        #include "Simd/SimdLib.h"
+        #include <iostream>
+
+        int main()
+        {
+            int info = SimdCpuInfo();
+            std::cout << "SSE: " << (info&(1 << SimdCpuInfoSse) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE2: " << (info&(1 << SimdCpuInfoSse2) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE3: " << (info&(1 << SimdCpuInfoSse3) ? "Yes" : "No") << std::endl;
+            std::cout << "SSSE3: " << (info&(1 << SimdCpuInfoSsse3) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE4.1: " << (info&(1 << SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE4.2: " << (info&(1 << SimdCpuInfoSse42) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX: " << (info&(1 << SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX2: " << (info&(1 << SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX-512F: " << (info&(1 << SimdCpuInfoAvx512f) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX-512BW: " << (info&(1 << SimdCpuInfoAvx512bw) ? "Yes" : "No") << std::endl;
+            std::cout << "PowerPC-Altivec: " << (info&(1 << SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
+            std::cout << "PowerPC-VSX: " << (info&(1 << SimdCpuInfoVsx) ? "Yes" : "No") << std::endl;
+            std::cout << "ARM-NEON: " << (info&(1 << SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
+            std::cout << "MIPS-MSA: " << (info&(1 << SimdCpuInfoMsa) ? "Yes" : "No") << std::endl;
+            return 0;
+        }
+        \endverbatim
+
+        \return an integer value which bits contains information about SIMD extensions supported by CPU and %Simd Library.
+    */
+    SIMD_API int SimdCpuInfo();
 
     /*! @ingroup memory
 
