@@ -2485,7 +2485,7 @@ namespace Test
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
 #elif SIMD_NEURAL_EXPERIMENT_VERSION == 1 // using of average layer.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 5))));
-            TEST_ADD_LAYER(net, (new AveragePoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new AveragePoolingLayer(Function::Relu, Size(12, 12), 12, Size(2, 2), Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, Size(3, 3))));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
             if (dropout)

@@ -1242,14 +1242,17 @@ namespace Simd
             \param [in] srcSize - a size (width and height) of input image.
             \param [in] srcDepth - a number of input channels (images).
             \param [in] poolingSize - a pooling size.
+            \param [in] poolingStride - a pooling stride.
             */
-            AveragePoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t poolingSize)
+            AveragePoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride)
                 : Layer(AveragePooling, f)
             {
                 _poolingSize = poolingSize;
-                _scaleFactor = 1.0f / float(poolingSize*poolingSize);
+                _poolingStride = poolingStride;
                 _src.Resize(srcSize, srcDepth);
-                _dst.Resize(srcSize / _poolingSize, srcDepth);
+                Size dstSize = (srcSize - _poolingSize + 2 * _poolingStride - Size(1, 1)) / _poolingStride;
+                _dst.Resize(dstSize, srcDepth);
+                _scaleFactor = 1.0f / float(_poolingSize.x*poolingSize.y);
                 SetThreadNumber(1, false);
             }
 
@@ -1263,10 +1266,10 @@ namespace Simd
                     {
                         for (ptrdiff_t x = 0; x < _dst.width; x++)
                         {
-                            const float * psrc = _src.Get(src, x*_poolingSize, y*_poolingSize, c);
+                            const float * psrc = _src.Get(src, x*_poolingStride.x, y*_poolingStride.y, c);
                             float average = 0;
-                            for (size_t dy = 0; dy < _poolingSize; dy++)
-                                for (size_t dx = 0; dx < _poolingSize; dx++)
+                            for (ptrdiff_t dy = 0; dy < _poolingSize.y; dy++)
+                                for (ptrdiff_t dx = 0; dx < _poolingSize.x; dx++)
                                     average += psrc[dy*_src.width + dx];
                              _dst.Get(sum, x, y, c)[0] = average*_scaleFactor;
                         }
@@ -1286,9 +1289,9 @@ namespace Simd
                         for (ptrdiff_t x = 0; x < _dst.width; x++)
                         {
                             float delta = _dst.Get(currDelta, x, y, c)[0]*_scaleFactor;
-                            float * prev = _src.Get(prevDelta, x*_poolingSize, y*_poolingSize, c);
-                            for (size_t dy = 0; dy < _poolingSize; dy++)
-                                for (size_t dx = 0; dx < _poolingSize; dx++)
+                            float * prev = _src.Get(prevDelta, x*_poolingStride.x, y*_poolingStride.y, c);
+                            for (ptrdiff_t dy = 0; dy < _poolingSize.y; dy++)
+                                for (ptrdiff_t dx = 0; dx < _poolingSize.x; dx++)
                                     prev[dy*_src.width + dx] = delta;
                         }
                     }
@@ -1298,7 +1301,7 @@ namespace Simd
 
             size_t FanSrc() const override
             {
-                return _poolingSize*_poolingSize;
+                return _poolingSize.x*_poolingSize.y;
             }
 
             size_t FanDst() const override
@@ -1307,7 +1310,8 @@ namespace Simd
             }
 
         protected:
-            size_t _poolingSize;
+            Size _poolingSize;
+            Size _poolingStride;
             float _scaleFactor;
         };
 
