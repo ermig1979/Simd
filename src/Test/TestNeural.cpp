@@ -1489,17 +1489,19 @@ namespace Test
     }
 #define FUNC_M(function) FuncM(function, #function)
 
-    bool NeuralMax2x2AutoTest(int width, int height, float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralMaxAutoTest(const Size & size, const Size & pooling, float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        Size srcSize(size + pooling - Size(2, 2));
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcSize.x << ", " << srcSize.y << "].");
 
-        View src(width, height, View::Float, NULL, TEST_ALIGN(width));
+        View src(srcSize.x, srcSize.y, View::Float, NULL, TEST_ALIGN(size.x));
         FillRandom32f(src, -1, 1);
 
-        View dst1(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
-        View dst2(width / 2, height / 2, View::Float, NULL, TEST_ALIGN(width));
+        Size dstSize((srcSize - pooling + Size(3, 3)) / 2);
+        View dst1(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
+        View dst2(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
@@ -1510,13 +1512,12 @@ namespace Test
         return result;
     }
 
-    bool NeuralMax2x2AutoTest(float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralMaxAutoTest(const Size & pooling, float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        result = result && NeuralMax2x2AutoTest(W, H, eps, f1, f2);
-        result = result && NeuralMax2x2AutoTest(W - E, H + E, eps, f1, f2);
-        result = result && NeuralMax2x2AutoTest(W + E, H - E, eps, f1, f2);
+        result = result && NeuralMaxAutoTest(Size(W, H), pooling, eps, f1, f2);
+        result = result && NeuralMaxAutoTest(Size(W - O, H + O), pooling, eps, f1, f2);
 
         return result;
     }
@@ -1524,22 +1525,23 @@ namespace Test
     bool NeuralMax2x2AutoTest()
     {
         bool result = true;
+        Size pooling(2, 2);
 
-        result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Base::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
+        result = result && NeuralMaxAutoTest(pooling, EPS, FUNC_M(Simd::Base::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Sse::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
+            result = result && NeuralMaxAutoTest(pooling, EPS, FUNC_M(Simd::Sse::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Avx::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
+            result = result && NeuralMaxAutoTest(pooling, EPS, FUNC_M(Simd::Avx::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralMax2x2AutoTest(EPS, FUNC_M(Simd::Neon::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
+            result = result && NeuralMaxAutoTest(pooling, EPS, FUNC_M(Simd::Neon::NeuralMax2x2), FUNC_M(SimdNeuralMax2x2));
 #endif
 
         return result;

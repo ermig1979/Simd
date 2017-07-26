@@ -963,22 +963,43 @@ namespace Simd
             return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
         }
 
+        template <bool align> SIMD_INLINE __m128 Max2(const float * src)
+        {
+            __m128 _src0 = Load<align>(src + 0);
+            __m128 _src1 = Load<align>(src + F);
+            return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
+        }
+
         template <bool align> void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
             size_t alignedWidth = AlignLo(width, DF);
-            for (size_t row = 0; row < height; row += 2)
+            for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                {
                     Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
-                }
-                if (width - alignedWidth)
+                if (widthEven - alignedWidth)
                 {
-                    size_t col = width - DF;
+                    size_t col = widthEven - DF;
                     Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
                 }
-                src += 2*srcStride;
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
+                src += 2 * srcStride;
                 dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < alignedWidth; col += DF)
+                    Store<align>(dst + (col >> 1), Max2<align>(src + col));
+                if (widthEven - alignedWidth)
+                {
+                    size_t col = widthEven - DF;
+                    Store<false>(dst + (col >> 1), Max2<false>(src + col));
+                }
+                if (width - widthEven)
+                    dst[widthEven >> 1] = src[widthEven];
             }
         }
 

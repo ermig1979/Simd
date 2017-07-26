@@ -3474,12 +3474,12 @@ extern "C"
 
         \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
 
-        \note This function is used in Simd::Neural.
+        \note This function is used in Simd::Neural. 
 
         \param [in] src - a pointer to the input 32-bit float image.
         \param [in] srcStride - a row size of the input image (in 32-float values).
-        \param [in] width - a width of the input image (output image width must be lesser in 2 times).
-        \param [in] height - a height of the input image (output image height must be lesser in 2 times).
+        \param [in] width - a width of the input image (output image width must have size (width + 1)/2).
+        \param [in] height - a height of the input image (output image height must have size (height + 1)/2).
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */

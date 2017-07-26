@@ -1998,8 +1998,8 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in 32-float values). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the input image (output image width must be lesser in 2 times). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input image (output image height must be lesser in 2 times). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the input image (output image width must have size (width + 1)/2). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input image (output image height must have size (height + 1)/2). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
   </table>

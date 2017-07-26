@@ -407,12 +407,23 @@ namespace Simd
 
         void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
-            for (size_t row = 0; row < height; row += 2)
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            for (size_t row = 0; row < heightEven; row += 2)
             {
-                for (size_t col = 0; col < width; col += 2)
+                for (size_t col = 0; col < widthEven; col += 2)
                     dst[col>>1] = Max2x2(src + col, srcStride);
+                if(width - widthEven)
+                    dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
                 src += 2*srcStride;
                 dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < widthEven; col += 2)
+                    dst[col >> 1] = Simd::Max(src[col], src[col + 1]);
+                if (width - widthEven)
+                    dst[widthEven >> 1] = src[widthEven];
             }
         }
     }

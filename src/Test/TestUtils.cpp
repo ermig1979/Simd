@@ -325,31 +325,40 @@ namespace Test
         return result;
     }
 
-    bool Compare(const float * a, const float * b, size_t size, float relativeDifferenceMax, bool printError, 
+    bool Compare(const float * a, size_t aStride, const float * b, size_t bStride, size_t width, size_t height, float relativeDifferenceMax, bool printError,
         int errorCountMax, bool relative, const String & description)
     {
         std::stringstream message;
         int errorCount = 0;
-        for(size_t i = 0; i < size; ++i)
+        for (size_t row = 0; row < height; ++row)
         {
-            float relativeDifference = relative ? ::fabs(a[i] - b[i]) /Simd::Max(::fabs(a[i]), ::fabs(b[i])) : ::fabs(a[i] - b[i]);
-            if(relativeDifference >= relativeDifferenceMax)
+            for (size_t col = 0; col < width; ++col)
             {
-                errorCount++;
-                if(printError)
+                float relativeDifference = relative ? ::fabs(a[col] - b[col]) / Simd::Max(::fabs(a[col]), ::fabs(b[col])) : ::fabs(a[col] - b[col]);
+                if (relativeDifference >= relativeDifferenceMax)
                 {
-                    if(errorCount == 1)
-                        message << std::endl << "Fail comparison: " << description << std::endl;
-                    message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
-                }
-                if(errorCount > errorCountMax)
-                {
-                    if(printError)
-                        message << "Stop comparison." << std::endl;
-                    break;
+                    errorCount++;
+                    if (printError)
+                    {
+                        if (errorCount == 1)
+                            message << std::endl << "Fail comparison: " << description << std::endl;
+                        message << "Error at [";
+                        if (height > 1)
+                            message << row << ", ";
+                        message << col << "] : " << a[col] << " != " << b[col] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
+                    }
+                    if (errorCount > errorCountMax)
+                    {
+                        if (printError)
+                            message << "Stop comparison." << std::endl;
+                        goto tooMuchErrors;
+                    }
                 }
             }
+            a += aStride;
+            b += bStride;
         }
+tooMuchErrors:
         if(printError && errorCount > 0)
             TEST_LOG_SS(Error, message.str());
         return errorCount == 0;
@@ -358,7 +367,7 @@ namespace Test
     bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), b.data(), a.size(), relativeDifferenceMax, printError, errorCountMax, true, description);
+        return Compare(a.data(), 0, b.data(), 0, a.size(), 1, relativeDifferenceMax, printError, errorCountMax, true, description);
     }
 
     bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
@@ -406,13 +415,13 @@ namespace Test
 
 	bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
 	{
-		assert(a.width == b.width);
-		return Compare((float*)a.data, (float*)b.data, a.width, relativeDifferenceMax, printError, errorCountMax, relative, description);
+		assert(Simd::EqualSize(a, b) && a.format == View::Float);
+		return Compare((float*)a.data, a.stride/4, (float*)b.data, b.stride/4, a.width, a.height, relativeDifferenceMax, printError, errorCountMax, relative, description);
 	}
 
     bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError, const String & description)
     {
-        return Compare(&a, &b, 1, relativeDifferenceMax, printError, 0, true, description);
+        return Compare(&a, 0, &b, 0, 1, 1, relativeDifferenceMax, printError, 0, true, description);
     }
     
 	String ColorDescription(View::Format format)
