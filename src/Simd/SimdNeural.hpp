@@ -933,13 +933,16 @@ namespace Simd
                 \param [in] srcSize - a size (width and height) of input image.
                 \param [in] srcDepth - a number of input channels (images).
                 \param [in] poolingSize - a pooling size.
+                \param [in] poolingStride - a pooling stride.
             */
-            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t poolingSize)
+            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride)
                 : Layer(MaxPooling, f)
             {
                 _poolingSize = poolingSize;
+                _poolingStride = poolingStride;
                 _src.Resize(srcSize, srcDepth);
-                _dst.Resize(srcSize/_poolingSize, srcDepth);
+                Size dstSize = (srcSize - _poolingSize + 2*_poolingStride - Size(1, 1))/_poolingStride;
+                _dst.Resize(dstSize, srcDepth);
                 SetThreadNumber(1, false);
             }
 
@@ -947,7 +950,7 @@ namespace Simd
             {
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                if (method != Layer::Train && _poolingSize == 2)
+                if (method != Layer::Train && _poolingSize == Size(2, 2) && _poolingStride == Size(2, 2))
                 {
                     ::SimdNeuralMax2x2(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
                 }
@@ -960,13 +963,13 @@ namespace Simd
                         {
                             for (ptrdiff_t x = 0; x < _dst.width; x++)
                             {
-                                ptrdiff_t srcOffset = _src.Offset(x*_poolingSize, y*_poolingSize, c);
+                                ptrdiff_t srcOffset = _src.Offset(x*_poolingStride.x, y*_poolingStride.y, c);
                                 const float * psrc = src.data() + srcOffset;
                                 ptrdiff_t maxIndex = 0;
                                 float maxValue = std::numeric_limits<float>::lowest();
-                                for (size_t dy = 0; dy < _poolingSize; dy++)
+                                for (ptrdiff_t dy = 0; dy < _poolingSize.y; dy++)
                                 {
-                                    for (size_t dx = 0; dx < _poolingSize; dx++)
+                                    for (ptrdiff_t dx = 0; dx < _poolingSize.x; dx++)
                                     {
                                         ptrdiff_t index = dy*_src.width + dx;
                                         float value = psrc[index];
@@ -1003,7 +1006,7 @@ namespace Simd
 
             size_t FanSrc() const override
             {
-                return _poolingSize*_poolingSize;
+                return _poolingSize.x*_poolingSize.y;
             }
 
             size_t FanDst() const override
@@ -1014,7 +1017,7 @@ namespace Simd
             virtual void SetThreadNumber(size_t number, bool train) override
             {
                 Layer::SetThreadNumber(number, train);
-                if (train || _poolingSize != 2)
+                if (train || _poolingSize != Size(2, 2))
                 {
                     _specific.resize(number);
                     for (size_t i = 0; i < _specific.size(); ++i)
@@ -1032,7 +1035,8 @@ namespace Simd
             };
             std::vector<Specific> _specific;
 
-            size_t _poolingSize;
+            Size _poolingSize;
+            Size _poolingStride;
         };
 
         /*! @ingroup cpp_neural

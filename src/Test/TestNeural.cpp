@@ -2477,7 +2477,7 @@ namespace Test
         {
 #if SIMD_NEURAL_EXPERIMENT_VERSION == 0 // not square shape of convolutional core.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 3))));
-            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 14), 12, 2)));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 14), 12, Size(2, 2), Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 7), 12, 24, Size(3, 3))));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 5 * 24, 96)));
             if (dropout)
@@ -2494,7 +2494,7 @@ namespace Test
 #elif SIMD_NEURAL_EXPERIMENT_VERSION == 2 // using of convolutional layer with core 1x1.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 5))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(12, 12), 12, 12, Size(1, 1))));
-            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, Size(2, 2), Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, Size(3, 3))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(4, 4), 24, 24, Size(1, 1))));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
@@ -2504,7 +2504,7 @@ namespace Test
 #elif SIMD_NEURAL_EXPERIMENT_VERSION == 3 // using of convolutional layer with core 2x2 and 4x4.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 8, Size(4, 4))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(13, 13), 8, 12, Size(2, 2))));
-            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, Size(2, 2), Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 18, Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(5, 5), 18, 24, Size(2, 2))));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
@@ -2516,7 +2516,7 @@ namespace Test
         else
         {
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 12, Size(5, 5))));
-            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, 2)));
+            TEST_ADD_LAYER(net, (new MaxPoolingLayer(Function::Relu, Size(12, 12), 12, Size(2, 2), Size(2, 2))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(6, 6), 12, 24, Size(3, 3))));
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
             if (dropout)
