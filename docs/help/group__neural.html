@@ -134,9 +134,12 @@ Functions</h2></td></tr>
 <tr class="memitem:ga7eac64c21711afede239266605f1618a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga7eac64c21711afede239266605f1618a">SimdNeuralAddConvolution5x5Sum</a> (const float *src, size_t srcStride, const float *dst, size_t dstStride, size_t width, size_t height, float *sums)</td></tr>
 <tr class="memdesc:ga7eac64c21711afede239266605f1618a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Accumulates changes of weights for 5x5 convolution of 32-bit float image during backward propagation.  <a href="#ga7eac64c21711afede239266605f1618a">More...</a><br /></td></tr>
 <tr class="separator:ga7eac64c21711afede239266605f1618a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga612935a6b4522a64a8987af960302e7d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga612935a6b4522a64a8987af960302e7d">SimdNeuralMax2x2</a> (const float *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga612935a6b4522a64a8987af960302e7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).  <a href="#ga612935a6b4522a64a8987af960302e7d">More...</a><br /></td></tr>
-<tr class="separator:ga612935a6b4522a64a8987af960302e7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9bab6bfe06ea20505e5e987c634e541e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga9bab6bfe06ea20505e5e987c634e541e">SimdNeuralPooling2x2Max2x2</a> (const float *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga9bab6bfe06ea20505e5e987c634e541e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).  <a href="#ga9bab6bfe06ea20505e5e987c634e541e">More...</a><br /></td></tr>
+<tr class="separator:ga9bab6bfe06ea20505e5e987c634e541e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab51e09e7cbedcf15fdf031f96aed3446"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gab51e09e7cbedcf15fdf031f96aed3446">SimdNeuralPooling2x2Max3x3</a> (const float *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:gab51e09e7cbedcf15fdf031f96aed3446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 32-bit float image in two times (takes maximum value in 3x3 window and copies to the output image).  <a href="#gab51e09e7cbedcf15fdf031f96aed3446">More...</a><br /></td></tr>
+<tr class="separator:gab51e09e7cbedcf15fdf031f96aed3446"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">NeuralConvert</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *dst, size_t stride, bool inversion)</td></tr>
 <tr class="memdesc:gad952004516e404b3352b04a2cf1c29af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">More...</a><br /></td></tr>
@@ -1942,14 +1945,14 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
 
 </div>
 </div>
-<a id="ga612935a6b4522a64a8987af960302e7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga612935a6b4522a64a8987af960302e7d">&#9670;&nbsp;</a></span>SimdNeuralMax2x2()</h2>
+<a id="ga9bab6bfe06ea20505e5e987c634e541e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9bab6bfe06ea20505e5e987c634e541e">&#9670;&nbsp;</a></span>SimdNeuralPooling2x2Max2x2()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdNeuralMax2x2 </td>
+          <td class="memname">void SimdNeuralPooling2x2Max2x2 </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -2000,6 +2003,72 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in 32-float values). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the input image (output image width must have size (width + 1)/2). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input image (output image height must have size (height + 1)/2). </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gab51e09e7cbedcf15fdf031f96aed3446"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab51e09e7cbedcf15fdf031f96aed3446">&#9670;&nbsp;</a></span>SimdNeuralPooling2x2Max3x3()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNeuralPooling2x2Max3x3 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Reduces input 32-bit float image in two times (takes maximum value in 3x3 window and copies to the output image). </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="namespace_simd_1_1_neural.html" title="Contains Framework for learning of Convolutional Neural Network. ">Simd::Neural</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image (in 32-float values). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of the input image (output image width must have size width/2). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input image (output image height must have size height/2). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
   </table>

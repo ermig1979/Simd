@@ -54,10 +54,15 @@
  <li>SimdCpuInfo function.</li>
  <li>Parameter poolingStride in constructor of Neural::MaxPoolingLayer.</li>
  <li>Parameter poolingStride in constructor of Neural::AveragePoolingLayer.</li>
+ <li>Base implementation, SSE, AVX2 and NEON optimizations of function NeuralPooling2x2Max3x3.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
- <li>Removed restriction of input image size in function NeuralMax2x2.</li>
+ <li>Removed restriction of input image size in function NeuralPooling2x2Max2x2.</li>
+</ul>
+<h5>Renaming</h5>
+<ul>
+ <li>Function NeuralMax2x2 to NeuralPooling2x2Max2x2.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -81,6 +86,7 @@
  <li>Tests for verifying functionality of AVX-512F version of function NeuralProductSum.</li>
  <li>Tests for verifying functionality of AVX-512F version of function NeuralRoughSigmoid.</li>
  <li>Tests for verifying functionality of AVX-512F version of function NeuralRoughSigmoid2.</li>
+ <li>Tests for verifying functionality of function NeuralPooling2x2Max3x3.</li>
 </ul>
 
 <h4>Infrastructure</h4>

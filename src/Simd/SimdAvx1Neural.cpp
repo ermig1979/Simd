@@ -963,7 +963,7 @@ namespace Simd
             return _mm256_max_ps(_mm256_shuffle_ps(_lo, _hi, 0x88), _mm256_shuffle_ps(_lo, _hi, 0xDD));
         }
 
-        template <bool align> void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        template <bool align> void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             size_t heightEven = Simd::AlignLo(height, 2);
             size_t widthEven = Simd::AlignLo(width, 2);
@@ -996,12 +996,12 @@ namespace Simd
             }
         }
 
-        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-                NeuralMax2x2<true>(src, srcStride, width, height, dst, dstStride);
+                NeuralPooling2x2Max2x2<true>(src, srcStride, width, height, dst, dstStride);
             else
-                NeuralMax2x2<false>(src, srcStride, width, height, dst, dstStride);
+                NeuralPooling2x2Max2x2<false>(src, srcStride, width, height, dst, dstStride);
         }
     }
 #endif// SIMD_AVX_ENABLE

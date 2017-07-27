@@ -947,7 +947,9 @@ namespace Simd
                 SetThreadNumber(1, false);
 
                 if (_poolingSize == Size(2, 2) && _poolingStride == Size(2, 2))
-                    _functionForward = ::SimdNeuralMax2x2;
+                    _functionForward = ::SimdNeuralPooling2x2Max2x2;
+                if (_poolingSize == Size(3, 3) && _poolingStride == Size(2, 2))
+                    _functionForward = ::SimdNeuralPooling2x2Max3x3;
             }
 
             void Forward(const Vector & src, size_t thread, Method method) override
@@ -955,7 +957,10 @@ namespace Simd
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
                 if (method != Layer::Train && _functionForward)
-                    _functionForward(src.data(), _src.width, _src.width, _src.height*_src.depth, sum.data(), _dst.width);
+                {
+                    for (ptrdiff_t c = 0; c < _dst.depth; ++c)
+                        _functionForward(_src.Get(src, 0, 0, c), _src.width, _src.width, _src.height, _dst.Get(sum, 0, 0, c), _dst.width);
+                }
                 else
                 {
                     ptrdiff_t * idx = _specific[thread].index.data();
@@ -1021,7 +1026,7 @@ namespace Simd
             virtual void SetThreadNumber(size_t number, bool train) override
             {
                 Layer::SetThreadNumber(number, train);
-                if (train || _poolingSize != Size(2, 2))
+                if (train || _functionForward == 0)
                 {
                     _specific.resize(number);
                     for (size_t i = 0; i < _specific.size(); ++i)

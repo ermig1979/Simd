@@ -2758,24 +2758,44 @@ SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride
         Base::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
 }
 
-SIMD_API void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable && width >= Avx::DF)
-        Avx::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+        Avx::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable && width >= Sse::DF)
-        Sse::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+        Sse::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::DF)
-        Neon::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+        Neon::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-        Base::NeuralMax2x2(src, srcStride, width, height, dst, dstStride);
+        Base::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width > Avx2::DF)
+        Avx2::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width > Sse::DF)
+        Sse::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width > Neon::DF)
+        Neon::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
 }
 
 SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

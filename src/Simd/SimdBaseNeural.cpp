@@ -405,7 +405,7 @@ namespace Simd
             return Simd::Max(Max2(src), Max2(src + stride));
         }
 
-        void NeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             size_t heightEven = Simd::AlignLo(height, 2);
             size_t widthEven = Simd::AlignLo(width, 2);
@@ -424,6 +424,50 @@ namespace Simd
                     dst[col >> 1] = Simd::Max(src[col], src[col + 1]);
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
+            }
+        }
+
+        SIMD_INLINE float Max3(const float * src)
+        {
+            return Simd::Max(src[0], Simd::Max(src[1], src[2]));
+        }
+
+        SIMD_INLINE float Max3x3(const float * src, size_t stride)
+        {
+            return Simd::Max(Max3(src), Simd::Max(Max3(src + stride), Max3(src + 2*stride)));
+        }
+
+        SIMD_INLINE float Max2x3(const float * src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
+        }
+
+        SIMD_INLINE float Max3x2(const float * src, size_t stride)
+        {
+            return Simd::Max(Max3(src), Max3(src + stride));
+        }
+
+        void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            height -= 1;
+            width -= 1;
+            size_t heightEven = Simd::AlignLo(height, 2);
+            size_t widthEven = Simd::AlignLo(width, 2);
+            for (size_t row = 0; row < heightEven; row += 2)
+            {
+                for (size_t col = 0; col < widthEven; col += 2)
+                    dst[col >> 1] = Max3x3(src + col, srcStride);
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Max2x3(src + widthEven, srcStride);
+                src += 2 * srcStride;
+                dst += dstStride;
+            }
+            if (height - heightEven)
+            {
+                for (size_t col = 0; col < widthEven; col += 2)
+                    dst[col >> 1] = Max3x2(src + col, srcStride);
+                if (width - widthEven)
+                    dst[widthEven >> 1] = Max2x2(src + widthEven, srcStride);
             }
         }
     }

@@ -3470,7 +3470,7 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+        \fn void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
         \short Reduces input 32-bit float image in two times (takes maximum value in 2x2 window and copies to the output image).
 
@@ -3483,7 +3483,24 @@ extern "C"
         \param [in, out] dst - a pointer to the output 32-bit float image.
         \param [in] dstStride - a row size of the output image (in 32-float values).
     */
-    SIMD_API void SimdNeuralMax2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+    SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+    /*! @ingroup neural
+
+        \fn void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+        \short Reduces input 32-bit float image in two times (takes maximum value in 3x3 window and copies to the output image).
+
+        \note This function is used in Simd::Neural.
+
+        \param [in] src - a pointer to the input 32-bit float image.
+        \param [in] srcStride - a row size of the input image (in 32-float values).
+        \param [in] width - a width of the input image (output image width must have size width/2).
+        \param [in] height - a height of the input image (output image height must have size height/2).
+        \param [in, out] dst - a pointer to the output 32-bit float image.
+        \param [in] dstStride - a row size of the output image (in 32-float values).
+    */
+    SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
     /*! @ingroup operation
 
