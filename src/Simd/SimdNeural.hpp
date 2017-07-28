@@ -477,9 +477,9 @@ namespace Simd
                 Input, /*!< \brief Layer type corresponding to Simd::Neural::InputLayer. */
                 Convolutional, /*!< \brief Layer type corresponding to Simd::Neural::ConvolutionalLayer. */
                 MaxPooling, /*!< \brief Layer type corresponding to Simd::Neural::MaxPoolingLayer. */
+                AveragePooling, /*!< \brief Layer type corresponding to Simd::Neural::AveragePooling. */
                 FullyConnected, /*!< \brief Layer type corresponding to Simd::Neural::FullyConnectedLayer. */
                 Dropout, /*!< \brief Layer type corresponding to Simd::Neural::DropoutLayer. */
-                AveragePooling, /*!< \brief Layer type corresponding to Simd::Neural::AveragePooling. */
             };
 
             /*!
@@ -579,10 +579,11 @@ namespace Simd
 
             friend class InputLayer;
             friend class ConvolutionalLayer;
+            friend class PoolingLayer;
             friend class MaxPoolingLayer;
+            friend class AveragePoolingLayer;
             friend class FullyConnectedLayer;
             friend class DropoutLayer;
-            friend class AveragePoolingLayer;
             friend class Network;
         };
         typedef std::shared_ptr<Layer> LayerPtr;
@@ -919,11 +920,50 @@ namespace Simd
 
         /*! @ingroup cpp_neural
 
+            \short PoolingLayer class.
+
+            Abstract class pooling layer (base for MaxPoolingLayer and AveragePoolingLayer) in neural network.
+        */
+        class PoolingLayer : public Layer
+        {
+        public:
+            size_t FanSrc() const override
+            {
+                return _poolingSize.x*_poolingSize.y;
+            }
+
+            size_t FanDst() const override
+            {
+                return 1;
+            }
+
+        protected:
+            PoolingLayer(Layer::Type t, Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride, const Size & poolingPad)
+                : Layer(t, f)
+                , _poolingSize(poolingSize)
+                , _poolingStride(poolingStride)
+                , _poolingPad(poolingPad)
+            {
+                assert(t == Layer::MaxPooling || t == Layer::AveragePooling);
+
+                _src.Resize(srcSize, srcDepth);
+                Size dstSize = (srcSize - _poolingSize + 2 * _poolingStride - 2 * _poolingPad - Size(1, 1)) / _poolingStride;
+                _dst.Resize(dstSize, srcDepth);
+                SetThreadNumber(1, false);
+            }
+
+            Size _poolingSize;
+            Size _poolingStride;
+            Size _poolingPad;
+        };
+
+        /*! @ingroup cpp_neural
+
             \short MaxPoolingLayer class.
 
             Max pooling layer in neural network.
         */
-        class MaxPoolingLayer : public Layer
+        class MaxPoolingLayer : public PoolingLayer
         {
         public:
             /*!
@@ -934,21 +974,15 @@ namespace Simd
                 \param [in] srcDepth - a number of input channels (images).
                 \param [in] poolingSize - a pooling size.
                 \param [in] poolingStride - a pooling stride.
+                \param [in] poolingPad - a pooling pad. By default it is equal to (0, 0).
             */
-            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride)
-                : Layer(MaxPooling, f)
+            MaxPoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride, const Size & poolingPad = Size())
+                : PoolingLayer(Layer::MaxPooling, f, srcSize, srcDepth, poolingSize, poolingStride, poolingPad)
                 , _functionForward(0)
             {
-                _poolingSize = poolingSize;
-                _poolingStride = poolingStride;
-                _src.Resize(srcSize, srcDepth);
-                Size dstSize = (srcSize - _poolingSize + 2*_poolingStride - Size(1, 1))/_poolingStride;
-                _dst.Resize(dstSize, srcDepth);
-                SetThreadNumber(1, false);
-
-                if (_poolingSize == Size(2, 2) && _poolingStride == Size(2, 2))
+                if (_poolingSize == Size(2, 2) && _poolingStride == Size(2, 2) && _poolingPad == Size(0, 0))
                     _functionForward = ::SimdNeuralPooling2x2Max2x2;
-                if (_poolingSize == Size(3, 3) && _poolingStride == Size(2, 2))
+                if (_poolingSize == Size(3, 3) && _poolingStride == Size(2, 2) && _poolingPad == Size(0, 0))
                     _functionForward = ::SimdNeuralPooling2x2Max3x3;
             }
 
@@ -968,17 +1002,19 @@ namespace Simd
                     {
                         for (ptrdiff_t y = 0; y < _dst.height; y++)
                         {
-                            ptrdiff_t poolingHeight = std::min(_poolingSize.y, _src.height - y*_poolingStride.y);
+                            ptrdiff_t dyStart = std::max(ptrdiff_t(0), y - _poolingPad.y);
+                            ptrdiff_t dyEnd = std::min(dyStart + _poolingSize.y, _src.height);
                             for (ptrdiff_t x = 0; x < _dst.width; x++)
                             {
-                                ptrdiff_t poolingWidth = std::min(_poolingSize.x, _src.width - x*_poolingStride.x);
+                                ptrdiff_t dxStart = std::max(ptrdiff_t(0), y - _poolingPad.x);
+                                ptrdiff_t dxEnd = std::min(dxStart + _poolingSize.x, _src.width);
                                 ptrdiff_t srcOffset = _src.Offset(x*_poolingStride.x, y*_poolingStride.y, c);
                                 const float * psrc = src.data() + srcOffset;
                                 ptrdiff_t maxIndex = 0;
                                 float maxValue = std::numeric_limits<float>::lowest();
-                                for (ptrdiff_t dy = 0; dy < poolingHeight; dy++)
+                                for (ptrdiff_t dy = dyStart; dy < dyEnd; dy++)
                                 {
-                                    for (ptrdiff_t dx = 0; dx < poolingWidth; dx++)
+                                    for (ptrdiff_t dx = dxStart; dx < dxEnd; dx++)
                                     {
                                         ptrdiff_t index = dy*_src.width + dx;
                                         float value = psrc[index];
@@ -1013,16 +1049,6 @@ namespace Simd
                 _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
             }
 
-            size_t FanSrc() const override
-            {
-                return _poolingSize.x*_poolingSize.y;
-            }
-
-            size_t FanDst() const override
-            {
-                return 1;
-            }
-
             virtual void SetThreadNumber(size_t number, bool train) override
             {
                 Layer::SetThreadNumber(number, train);
@@ -1044,11 +1070,88 @@ namespace Simd
             };
             std::vector<Specific> _specific;
 
-            Size _poolingSize;
-            Size _poolingStride;
-
             typedef void(*FunctionForwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
             FunctionForwardPtr _functionForward;
+        };
+
+        /*! @ingroup cpp_neural
+
+            \short AveragePoolingLayer class.
+
+            Average pooling layer in neural network.
+        */
+        class AveragePoolingLayer : public PoolingLayer
+        {
+        public:
+            /*!
+                \short Creates new AveragePoolingLayer class.
+
+                \param [in] f - a type of activation function used in this layer.
+                \param [in] srcSize - a size (width and height) of input image.
+                \param [in] srcDepth - a number of input channels (images).
+                \param [in] poolingSize - a pooling size.
+                \param [in] poolingStride - a pooling stride.
+                \param [in] poolingPad - a pooling pad. By default it is equal to (0, 0).
+            */
+            AveragePoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride, const Size & poolingPad = Size())
+                : PoolingLayer(Layer::AveragePooling, f, srcSize, srcDepth, poolingSize, poolingStride, poolingPad)
+            {
+                _scaleFactor = 1.0f / float(_poolingSize.x*poolingSize.y);
+            }
+
+            void Forward(const Vector & src, size_t thread, Method method) override
+            {
+                Vector & sum = _common[thread].sum;
+                Vector & dst = _common[thread].dst;
+                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
+                {
+                    for (ptrdiff_t y = 0; y < _dst.height; y++)
+                    {
+                        ptrdiff_t dyStart = std::max(ptrdiff_t(0), y - _poolingPad.y);
+                        ptrdiff_t dyEnd = std::min(dyStart + _poolingSize.y, _src.height);
+                        for (ptrdiff_t x = 0; x < _dst.width; x++)
+                        {
+                            ptrdiff_t dxStart = std::max(ptrdiff_t(0), y - _poolingPad.x);
+                            ptrdiff_t dxEnd = std::min(dxStart + _poolingSize.x, _src.width);
+                            const float * psrc = _src.Get(src, x*_poolingStride.x, y*_poolingStride.y, c);
+                            float average = 0;
+                            for (ptrdiff_t dy = dyStart; dy < dyEnd; dy++)
+                                for (ptrdiff_t dx = dxStart; dx < dxEnd; dx++)
+                                    average += psrc[dy*_src.width + dx];
+                            _dst.Get(sum, x, y, c)[0] = average*_scaleFactor;
+                        }
+                    }
+                }
+                _function.function(sum.data(), sum.size(), dst.data());
+            }
+
+            void Backward(const Vector & currDelta, size_t thread) override
+            {
+                const Vector & prevDst = _prev->Dst(thread);
+                Vector & prevDelta = _common[thread].prevDelta;
+                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
+                {
+                    for (ptrdiff_t y = 0; y < _dst.height; y++)
+                    {
+                        ptrdiff_t dyStart = std::max(ptrdiff_t(0), y - _poolingPad.y);
+                        ptrdiff_t dyEnd = std::min(dyStart + _poolingSize.y, _src.height);
+                        for (ptrdiff_t x = 0; x < _dst.width; x++)
+                        {
+                            ptrdiff_t dxStart = std::max(ptrdiff_t(0), y - _poolingPad.x);
+                            ptrdiff_t dxEnd = std::min(dxStart + _poolingSize.x, _src.width);
+                            float delta = _dst.Get(currDelta, x, y, c)[0] * _scaleFactor;
+                            float * prev = _src.Get(prevDelta, x*_poolingStride.x, y*_poolingStride.y, c);
+                            for (ptrdiff_t dy = dyStart; dy < dyEnd; dy++)
+                                for (ptrdiff_t dx = dxStart; dx < dxEnd; dx++)
+                                    prev[dy*_src.width + dx] = delta;
+                        }
+                    }
+                }
+                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
+            }
+
+        protected:
+            float _scaleFactor;
         };
 
         /*! @ingroup cpp_neural
@@ -1236,95 +1339,6 @@ namespace Simd
                 size_t start = Detail::RandomUniform(0, int(RANDOM_SIZE*_src.Volume()));
                 return _mask.data() + start;
             }
-        };
-
-        /*! @ingroup cpp_neural
-
-            \short AveragePoolingLayer class.
-
-            Average pooling layer in neural network.
-        */
-        class AveragePoolingLayer : public Layer
-        {
-        public:
-            /*!
-            \short Creates new AveragePoolingLayer class.
-
-            \param [in] f - a type of activation function used in this layer.
-            \param [in] srcSize - a size (width and height) of input image.
-            \param [in] srcDepth - a number of input channels (images).
-            \param [in] poolingSize - a pooling size.
-            \param [in] poolingStride - a pooling stride.
-            */
-            AveragePoolingLayer(Function::Type f, const Size & srcSize, size_t srcDepth, const Size & poolingSize, const Size & poolingStride)
-                : Layer(AveragePooling, f)
-            {
-                _poolingSize = poolingSize;
-                _poolingStride = poolingStride;
-                _src.Resize(srcSize, srcDepth);
-                Size dstSize = (srcSize - _poolingSize + 2 * _poolingStride - Size(1, 1)) / _poolingStride;
-                _dst.Resize(dstSize, srcDepth);
-                _scaleFactor = 1.0f / float(_poolingSize.x*poolingSize.y);
-                SetThreadNumber(1, false);
-            }
-
-            void Forward(const Vector & src, size_t thread, Method method) override
-            {
-                Vector & sum = _common[thread].sum;
-                Vector & dst = _common[thread].dst;
-                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
-                {
-                    for (ptrdiff_t y = 0; y < _dst.height; y++)
-                    {
-                        for (ptrdiff_t x = 0; x < _dst.width; x++)
-                        {
-                            const float * psrc = _src.Get(src, x*_poolingStride.x, y*_poolingStride.y, c);
-                            float average = 0;
-                            for (ptrdiff_t dy = 0; dy < _poolingSize.y; dy++)
-                                for (ptrdiff_t dx = 0; dx < _poolingSize.x; dx++)
-                                    average += psrc[dy*_src.width + dx];
-                             _dst.Get(sum, x, y, c)[0] = average*_scaleFactor;
-                        }
-                    }
-                }                
-                _function.function(sum.data(), sum.size(), dst.data());
-            }
-
-            void Backward(const Vector & currDelta, size_t thread) override
-            {
-                const Vector & prevDst = _prev->Dst(thread);
-                Vector & prevDelta = _common[thread].prevDelta;
-                for (ptrdiff_t c = 0; c < _dst.depth; ++c)
-                {
-                    for (ptrdiff_t y = 0; y < _dst.height; y++)
-                    {
-                        for (ptrdiff_t x = 0; x < _dst.width; x++)
-                        {
-                            float delta = _dst.Get(currDelta, x, y, c)[0]*_scaleFactor;
-                            float * prev = _src.Get(prevDelta, x*_poolingStride.x, y*_poolingStride.y, c);
-                            for (ptrdiff_t dy = 0; dy < _poolingSize.y; dy++)
-                                for (ptrdiff_t dx = 0; dx < _poolingSize.x; dx++)
-                                    prev[dy*_src.width + dx] = delta;
-                        }
-                    }
-                }
-                _prev->_function.derivative(&prevDst[0], prevDst.size(), &prevDelta[0]);
-            }
-
-            size_t FanSrc() const override
-            {
-                return _poolingSize.x*_poolingSize.y;
-            }
-
-            size_t FanDst() const override
-            {
-                return 1;
-            }
-
-        protected:
-            Size _poolingSize;
-            Size _poolingStride;
-            float _scaleFactor;
         };
 
         /*! @ingroup cpp_neural
