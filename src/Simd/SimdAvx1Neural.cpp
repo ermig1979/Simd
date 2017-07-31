@@ -945,7 +945,7 @@ namespace Simd
                 NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
-        template <bool align> SIMD_INLINE __m256 Max2x2(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE __m256 Pooling2x2Max2x2(const float * src, size_t stride)
         {
             __m256 lo = _mm256_max_ps(Load<align>(src + 0), Load<align>(src + stride + 0));
             __m256 hi = _mm256_max_ps(Load<align>(src + F), Load<align>(src + stride + F));
@@ -954,7 +954,7 @@ namespace Simd
             return _mm256_max_ps(_mm256_shuffle_ps(_lo, _hi, 0x88), _mm256_shuffle_ps(_lo, _hi, 0xDD));
         }
 
-        template <bool align> SIMD_INLINE __m256 Max2(const float * src)
+        template <bool align> SIMD_INLINE __m256 Pooling2x2Max2(const float * src)
         {
             __m256 lo = Load<align>(src + 0);
             __m256 hi = Load<align>(src + F);
@@ -971,11 +971,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
@@ -985,11 +985,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max2<align>(src + col));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max2<false>(src + col));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];

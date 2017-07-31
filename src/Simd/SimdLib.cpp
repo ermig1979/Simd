@@ -2758,6 +2758,26 @@ SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride
         Base::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
 }
 
+SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width > Avx2::F)
+        Avx2::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable && width > Sse::F)
+        Sse::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width > Neon::F)
+        Neon::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX_ENABLE

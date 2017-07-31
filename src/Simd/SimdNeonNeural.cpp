@@ -1050,14 +1050,115 @@ namespace Simd
                 NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max2x2(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE float32x4_t Pooling1x1Max3x1Body(const float * src)
+        {
+            return vmaxq_f32(vmaxq_f32(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));
+        }
+
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x3Body(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Body<align>(src - stride);
+            float32x4_t src1 = Pooling1x1Max3x1Body<align>(src);
+            float32x4_t src2 = Pooling1x1Max3x1Body<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(vmaxq_f32(src0, src1), src2));
+        }
+
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x2Body(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Body<align>(src);
+            float32x4_t src1 = Pooling1x1Max3x1Body<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(src0, src1));
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Pooling1x1Max3x1Nose(const float * src)
+        {
+            float32x4_t src1 = Load<align>(src);
+            float32x4_t src0 = vextq_f32(vextq_f32(src1, src1, 1), src1, 3);
+            float32x4_t src2 = Load<false>(src + 1);
+            return vmaxq_f32(vmaxq_f32(src0, src1), src2);
+        }
+
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x3Nose(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Nose<align>(src - stride);
+            float32x4_t src1 = Pooling1x1Max3x1Nose<align>(src);
+            float32x4_t src2 = Pooling1x1Max3x1Nose<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(vmaxq_f32(src0, src1), src2));
+        }
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x2Nose(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Nose<align>(src);
+            float32x4_t src1 = Pooling1x1Max3x1Nose<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(src0, src1));
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Pooling1x1Max3x1Tail(const float * src)
+        {
+            float32x4_t src0 = Load<false>(src - 1);
+            float32x4_t src1 = Load<align>(src);
+            float32x4_t src2 = vextq_f32(src1, vextq_f32(src1, src1, 3), 1);
+            return vmaxq_f32(vmaxq_f32(src0, src1), src2);
+        }
+
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x3Tail(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Tail<align>(src - stride);
+            float32x4_t src1 = Pooling1x1Max3x1Tail<align>(src);
+            float32x4_t src2 = Pooling1x1Max3x1Tail<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(vmaxq_f32(src0, src1), src2));
+        }
+        template <bool align> SIMD_INLINE void Pooling1x1Max3x2Tail(const float * src, size_t stride, float * dst)
+        {
+            float32x4_t src0 = Pooling1x1Max3x1Tail<align>(src);
+            float32x4_t src1 = Pooling1x1Max3x1Tail<align>(src + stride);
+            Store<align>(dst, vmaxq_f32(src0, src1));
+        }
+
+        template <bool align> void NeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            assert(width > F && height > 1);
+
+            size_t alignedWidth = AlignHi(width, F) - F;
+            height -= 1;
+
+            Pooling1x1Max3x2Nose<align>(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                Pooling1x1Max3x2Body<align>(src + col, srcStride, dst + col);
+            Pooling1x1Max3x2Tail<false>(src + width - F, srcStride, dst + width - F);
+
+            for (size_t row = 1; row < height; ++row)
+            {
+                src += srcStride;
+                dst += dstStride;
+                Pooling1x1Max3x3Nose<align>(src, srcStride, dst);
+                for (size_t col = F; col < alignedWidth; col += F)
+                    Pooling1x1Max3x3Body<align>(src + col, srcStride, dst + col);
+                Pooling1x1Max3x3Tail<false>(src + width - F, srcStride, dst + width - F);
+            }
+
+            dst += dstStride;
+            Pooling1x1Max3x2Nose<align>(src, srcStride, dst);
+            for (size_t col = F; col < alignedWidth; col += F)
+                Pooling1x1Max3x2Body<align>(src + col, srcStride, dst + col);
+            Pooling1x1Max3x2Tail<false>(src + width - F, srcStride, dst + width - F);
+        }
+
+        void NeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+                NeuralPooling1x1Max3x3<true>(src, srcStride, width, height, dst, dstStride);
+            else
+                NeuralPooling1x1Max3x3<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max2x2(const float * src, size_t stride)
         {
             float32x4_t s0 = vmaxq_f32(Load<align>(src + 0), Load<align>(src + stride + 0));
             float32x4_t s1 = vmaxq_f32(Load<align>(src + F), Load<align>(src + stride + F));
             return vcombine_f32(vpmax_f32(vget_low_f32(s0), vget_high_f32(s0)), vpmax_f32(vget_low_f32(s1), vget_high_f32(s1)));
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max2(const float * src)
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max2(const float * src)
         {
             float32x4_t s0 = Load<align>(src + 0);
             float32x4_t s1 = Load<align>(src + F);
@@ -1075,11 +1176,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max2x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max2x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
@@ -1089,11 +1190,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max2<align>(src + col));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max2<false>(src + col));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
@@ -1123,7 +1224,7 @@ namespace Simd
             return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max1x3(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max1x3(const float * src, size_t stride)
         {
             return vmaxq_f32(vmaxq_f32(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
         }
@@ -1131,33 +1232,33 @@ namespace Simd
         const uint8x8_t K8_TBL_BITS_LO = SIMD_VEC_SETR_EPI16(0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B);
         const uint8x8_t K8_TBL_BITS_HI = SIMD_VEC_SETR_EPI16(0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D, 0x0E, 0x0F);
 
-        SIMD_INLINE float32x4_t Combine(const float32x4_t & lo, const float32x4_t & hi)
+        SIMD_INLINE float32x4_t CombineFor2x2(const float32x4_t & lo, const float32x4_t & hi)
         {
             return vcombine_f32((float32x2_t)vtbl2_u8((const uint8x8x2_t &)lo, K8_TBL_BITS_LO), (float32x2_t)vtbl2_u8((const uint8x8x2_t &)hi, K8_TBL_BITS_HI));
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max3x3(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max3x3(const float * src, size_t stride)
         {
-            float32x4_t _0123 = Max1x3<align>(src, stride);
-            float32x4_t _4567 = Max1x3<align>(src + F, stride);
-            float32x4_t _5678 = Max1x3<false>(src + F + 1, stride);
+            float32x4_t _0123 = Pooling2x2Max1x3<align>(src, stride);
+            float32x4_t _4567 = Pooling2x2Max1x3<align>(src + F, stride);
+            float32x4_t _5678 = Pooling2x2Max1x3<false>(src + F + 1, stride);
             float32x4x2_t _02461357 = vuzpq_f32(_0123, _4567);
-            float32x4_t _2468 = Combine(_02461357.val[0], _5678);
+            float32x4_t _2468 = CombineFor2x2(_02461357.val[0], _5678);
             return vmaxq_f32(vmaxq_f32(_02461357.val[0], _02461357.val[1]), _2468);
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max1x2(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max1x2(const float * src, size_t stride)
         {
             return vmaxq_f32(Load<align>(src), Load<align>(src + stride));
         }
 
-        template <bool align> SIMD_INLINE float32x4_t Max3x2(const float * src, size_t stride)
+        template <bool align> SIMD_INLINE float32x4_t Pooling2x2Max3x2(const float * src, size_t stride)
         {
-            float32x4_t _0123 = Max1x2<align>(src, stride);
-            float32x4_t _4567 = Max1x2<align>(src + F, stride);
-            float32x4_t _5678 = Max1x2<false>(src + F + 1, stride);
+            float32x4_t _0123 = Pooling2x2Max1x2<align>(src, stride);
+            float32x4_t _4567 = Pooling2x2Max1x2<align>(src + F, stride);
+            float32x4_t _5678 = Pooling2x2Max1x2<false>(src + F + 1, stride);
             float32x4x2_t _02461357 = vuzpq_f32(_0123, _4567);
-            float32x4_t _2468 = Combine(_02461357.val[0], _5678);
+            float32x4_t _2468 = CombineFor2x2(_02461357.val[0], _5678);
             return vmaxq_f32(vmaxq_f32(_02461357.val[0], _02461357.val[1]), _2468);
         }
 
@@ -1171,11 +1272,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max3x3<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x3<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max3x3<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x3(src + widthEven, srcStride);
@@ -1185,11 +1286,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Store<align>(dst + (col >> 1), Max3x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Store<false>(dst + (col >> 1), Max3x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x2(src + widthEven, srcStride);

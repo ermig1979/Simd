@@ -405,6 +405,54 @@ namespace Simd
             return Simd::Max(Max2(src), Max2(src + stride));
         }
 
+        SIMD_INLINE float Max3(const float * src)
+        {
+            return Simd::Max(src[0], Simd::Max(src[1], src[2]));
+        }
+
+        SIMD_INLINE float Max3x3(const float * src, size_t stride)
+        {
+            return Simd::Max(Max3(src), Simd::Max(Max3(src + stride), Max3(src + 2 * stride)));
+        }
+
+        SIMD_INLINE float Max2x3(const float * src, size_t stride)
+        {
+            return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
+        }
+
+        SIMD_INLINE float Max3x2(const float * src, size_t stride)
+        {
+            return Simd::Max(Max3(src), Max3(src + stride));
+        }
+
+        void NeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            height -= 1;
+            width -= 1;
+            src -= 1;
+
+            dst[0] = Max2x2(src + 1, srcStride);
+            for (size_t col = 1; col < width; ++col)
+                dst[col] = Max3x2(src + col, srcStride);
+            dst[width] = Max2x2(src + width, srcStride);
+            dst += dstStride;
+
+            for (size_t row = 1; row < height; ++row)
+            {
+                dst[0] = Max2x3(src + 1, srcStride);
+                for (size_t col = 1; col < width; ++col)
+                    dst[col] = Max3x3(src + col, srcStride);
+                dst[width] = Max2x3(src + width, srcStride);
+                src += srcStride;
+                dst += dstStride;
+            }
+
+            dst[0] = Max2x2(src + 1, srcStride);
+            for (size_t col = 1; col < width; ++col)
+                dst[col] = Max3x2(src + col, srcStride);
+            dst[width] = Max2x2(src + width, srcStride);
+        }
+
         void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             size_t heightEven = Simd::AlignLo(height, 2);
@@ -425,26 +473,6 @@ namespace Simd
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
             }
-        }
-
-        SIMD_INLINE float Max3(const float * src)
-        {
-            return Simd::Max(src[0], Simd::Max(src[1], src[2]));
-        }
-
-        SIMD_INLINE float Max3x3(const float * src, size_t stride)
-        {
-            return Simd::Max(Max3(src), Simd::Max(Max3(src + stride), Max3(src + 2*stride)));
-        }
-
-        SIMD_INLINE float Max2x3(const float * src, size_t stride)
-        {
-            return Simd::Max(Max2(src), Simd::Max(Max2(src + stride), Max2(src + 2 * stride)));
-        }
-
-        SIMD_INLINE float Max3x2(const float * src, size_t stride)
-        {
-            return Simd::Max(Max3(src), Max3(src + stride));
         }
 
         void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)

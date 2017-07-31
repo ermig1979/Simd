@@ -1489,19 +1489,18 @@ namespace Test
     }
 #define FUNC_M(function) FuncM(function, #function)
 
-    bool NeuralPooling2x2MaxAutoTest(const Size & size, const Size & pooling, float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralPoolingMaxAutoTest(const Size & srcSize, const Size & stride, const Size & pooling, const Size & pad, float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        Size srcSize(size + pooling - Size(2, 2));
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcSize.x << ", " << srcSize.y << "].");
 
-        View src(srcSize.x, srcSize.y, View::Float, NULL, TEST_ALIGN(size.x));
+        View src(srcSize.x, srcSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
         FillRandom32f(src, -1, 1);
 
-        Size dstSize((srcSize - pooling + Size(3, 3)) / 2);
-        View dst1(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
-        View dst2(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
+        Size dstSize((srcSize - pooling + 2 * stride + 2 * pad - Size(1, 1)) / stride);
+        View dst1(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
+        View dst2(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
@@ -1512,12 +1511,37 @@ namespace Test
         return result;
     }
 
-    bool NeuralPooling2x2MaxAutoTest(const Size & pooling, float eps, const FuncM & f1, const FuncM & f2)
+    bool NeuralPoolingMaxAutoTest(const Size & stride, const Size & pooling, const Size & pad, float eps, const FuncM & f1, const FuncM & f2)
     {
         bool result = true;
 
-        result = result && NeuralPooling2x2MaxAutoTest(Size(W, H), pooling, eps, f1, f2);
-        result = result && NeuralPooling2x2MaxAutoTest(Size(W - O, H + O), pooling, eps, f1, f2);
+        result = result && NeuralPoolingMaxAutoTest(Size(W, H), stride, pooling, pad, eps, f1, f2);
+        result = result && NeuralPoolingMaxAutoTest(Size(W - O, H + O), stride, pooling, pad, eps, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralPooling1x1Max3x3AutoTest()
+    {
+        bool result = true;
+        Size stride(1, 1), pooling(3, 3), pad(1, 1);
+
+        result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx2::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Neon::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+#endif
 
         return result;
     }
@@ -1525,23 +1549,23 @@ namespace Test
     bool NeuralPooling2x2Max2x2AutoTest()
     {
         bool result = true;
-        Size pooling(2, 2);
+        Size stride(2, 2), pooling(2, 2), pad(0, 0);
 
-        result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+        result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Avx::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Neon::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Neon::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif
 
         return result;
@@ -1550,23 +1574,23 @@ namespace Test
     bool NeuralPooling2x2Max3x3AutoTest()
     {
         bool result = true;
-        Size pooling(3, 3);
+        Size stride(2, 2), pooling(3, 3), pad(0, 0);
 
-        result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+        result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Avx2::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx2::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralPooling2x2MaxAutoTest(pooling, EPS, FUNC_M(Simd::Neon::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Neon::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 #endif
 
         return result;
@@ -2275,20 +2299,18 @@ namespace Test
         return NeuralAddConvolutionSumDataTest(create, Size(DW, DH), EPS, Size(5, 5), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
     }
 
-    bool NeuralPooling2x2MaxDataTest(bool create, const Size & size, const Size & pooling, float eps, const FuncM & f)
+    bool NeuralPoolingMaxDataTest(bool create, const Size & srcSize, const Size & stride, const Size & pooling, const Size & pad, float eps, const FuncM & f)
     {
         bool result = true;
 
         Data data(f.description);
 
-        Size srcSize(size + pooling - Size(2, 2));
-        Size dstSize((srcSize - pooling + Size(3, 3)) / 2);
-
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcSize.x << ", " << srcSize.y << "].");
 
-        View src(srcSize.x, srcSize.y, View::Float, NULL, TEST_ALIGN(size.x));
-        View dst1(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
-        View dst2(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(size.x));
+        Size dstSize((srcSize - pooling + 2 * stride + 2 * pad - Size(1, 1)) / stride);
+        View src(srcSize.x, srcSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
+        View dst1(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
+        View dst2(dstSize.x, dstSize.y, View::Float, NULL, TEST_ALIGN(srcSize.x));
 
         if (create)
         {
@@ -2316,14 +2338,19 @@ namespace Test
         return result;
     }
 
+    bool NeuralPooling1x1Max3x3DataTest(bool create)
+    {
+        return NeuralPoolingMaxDataTest(create, Size(DW, DH), Size(1, 1), Size(3, 3), Size(1, 1), EPS, FUNC_M(SimdNeuralPooling1x1Max3x3));
+    }
+
     bool NeuralPooling2x2Max2x2DataTest(bool create)
     {
-        return NeuralPooling2x2MaxDataTest(create, Size(DW, DH), Size(2, 2), EPS, FUNC_M(SimdNeuralPooling2x2Max2x2));
+        return NeuralPoolingMaxDataTest(create, Size(DW, DH), Size(2, 2), Size(2, 2), Size(0, 0), EPS, FUNC_M(SimdNeuralPooling2x2Max2x2));
     }
 
     bool NeuralPooling2x2Max3x3DataTest(bool create)
     {
-        return NeuralPooling2x2MaxDataTest(create, Size(DW, DH), Size(3, 3), EPS, FUNC_M(SimdNeuralPooling2x2Max3x3));
+        return NeuralPoolingMaxDataTest(create, Size(DW, DH), Size(2, 2), Size(3, 3), Size(0, 0), EPS, FUNC_M(SimdNeuralPooling2x2Max3x3));
     }
 }
 

@@ -947,7 +947,7 @@ namespace Simd
                 assert(t == Layer::MaxPooling || t == Layer::AveragePooling);
 
                 _src.Resize(srcSize, srcDepth);
-                Size dstSize = (srcSize - _poolingSize + 2 * _poolingStride - 2 * _poolingPad - Size(1, 1)) / _poolingStride;
+                Size dstSize = (srcSize - _poolingSize + 2 * _poolingStride + 2 * _poolingPad - Size(1, 1)) / _poolingStride;
                 _dst.Resize(dstSize, srcDepth);
                 SetThreadNumber(1, false);
             }
