@@ -143,6 +143,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gab51e09e7cbedcf15fdf031f96aed3446"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gab51e09e7cbedcf15fdf031f96aed3446">SimdNeuralPooling2x2Max3x3</a> (const float *src, size_t srcStride, size_t width, size_t height, float *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gab51e09e7cbedcf15fdf031f96aed3446"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reduces input 32-bit float image in two times (takes maximum value in 3x3 window and copies to the output image).  <a href="#gab51e09e7cbedcf15fdf031f96aed3446">More...</a><br /></td></tr>
 <tr class="separator:gab51e09e7cbedcf15fdf031f96aed3446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6533ece3a8eef3bf48681690f6239ad0"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga6533ece3a8eef3bf48681690f6239ad0">SimdNeuralConvolutionForward</a> (const float *src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float *weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float *dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)</td></tr>
+<tr class="memdesc:ga6533ece3a8eef3bf48681690f6239ad0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds convolution of the input multichannel 32-bit float image to the output multichannel 32-bit float image.  <a href="#ga6533ece3a8eef3bf48681690f6239ad0">More...</a><br /></td></tr>
+<tr class="separator:ga6533ece3a8eef3bf48681690f6239ad0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gad952004516e404b3352b04a2cf1c29af"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">NeuralConvert</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *dst, size_t stride, bool inversion)</td></tr>
 <tr class="memdesc:gad952004516e404b3352b04a2cf1c29af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a 8-bit gray image to the 32-bit float array.  <a href="group__neural.html#gad952004516e404b3352b04a2cf1c29af">More...</a><br /></td></tr>
@@ -2140,6 +2143,158 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input image (output image height must have size height/2). </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image (in 32-float values). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga6533ece3a8eef3bf48681690f6239ad0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6533ece3a8eef3bf48681690f6239ad0">&#9670;&nbsp;</a></span>SimdNeuralConvolutionForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNeuralConvolutionForward </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcDepth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>weight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dilationX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dilationY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstDepth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>add</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds convolution of the input multichannel 32-bit float image to the output multichannel 32-bit float image. </p>
+<dl class="section note"><dt>Note</dt><dd>There is a restriction to the size of output image: <pre class="fragment">dstWidth = (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1.
+dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1.
+</pre></dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input multichannel 32-bit float image. Total size of the input image is equal to srcWidth*srcHeight*srcDepth. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcDepth</td><td>- a number of channels in the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the convolution weights. Total size of the weights is equal to coreX*coreY*srcDepth*dstDepth. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the convolution kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the convolution kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the x-coordinate of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the y-coordinate of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationX</td><td>- a x-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationY</td><td>- a y-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to dstWidth*dstHeight*dstDepth. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstDepth</td><td>- a number of channels in the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag which signalizes that we want add or assign value of convolution to the output image. </td></tr>
   </table>
   </dd>
 </dl>

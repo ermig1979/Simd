@@ -247,6 +247,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralPooling1x1Max3x3);
     TEST_ADD_GROUP(NeuralPooling2x2Max2x2);
     TEST_ADD_GROUP(NeuralPooling2x2Max3x3);
+    TEST_ADD_GROUP(NeuralConvolutionForward);
     TEST_ADD_GROUP_ONLY_SPECIAL(NeuralPredict);
     TEST_ADD_GROUP_ONLY_SPECIAL(NeuralTrain);
 

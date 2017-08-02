@@ -79,7 +79,7 @@ namespace Test
 	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
-    typedef std::vector<float> Buffer32f;
+    typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	const int W = 1920;

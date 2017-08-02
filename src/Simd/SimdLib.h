@@ -3519,6 +3519,39 @@ extern "C"
     */
     SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
+    /*! @ingroup neural
+
+        \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+
+        \short Adds convolution of the input multichannel 32-bit float image to the output multichannel 32-bit float image.
+
+        \note There is a restriction to the size of output image:
+        \verbatim
+        dstWidth = (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1.
+        dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1.
+        \endverbatim
+
+        \param [in] src - a pointer to the input multichannel 32-bit float image. Total size of the input image is equal to srcWidth*srcHeight*srcDepth.
+        \param [in] srcWidth - a width of the input image.
+        \param [in] srcHeight - a height of the input image.
+        \param [in] srcDepth - a number of channels in the input image.
+        \param [in] weight - a pointer to the convolution weights. Total size of the weights is equal to coreX*coreY*srcDepth*dstDepth.
+        \param [in] kernelX - a width of the convolution kernel.
+        \param [in] kernelY - a height of the convolution kernel.
+        \param [in] padX - a pad to the x-coordinate of the input image.
+        \param [in] padY - a pad to the y-coordinate of the input image.
+        \param [in] strideX - a x-stride of the convolution.
+        \param [in] strideY - a y-stride of the convolution.
+        \param [in] dilationX - a x-stride of the convolution.
+        \param [in] dilationY - a y-stride of the convolution.
+        \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to dstWidth*dstHeight*dstDepth.
+        \param [in] dstWidth - a width of the output image.
+        \param [in] dstHeight - a height of the output image.
+        \param [in] dstDepth - a number of channels in the output image.
+        \param [in] add - a flag which signalizes that we want add or assign value of convolution to the output image.
+    */
+    SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+
     /*! @ingroup operation
 
         \fn void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
