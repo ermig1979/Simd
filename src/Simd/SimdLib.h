@@ -3521,7 +3521,7 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+        \fn void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
         \short Adds convolution of the input multichannel 32-bit float image to the output multichannel 32-bit float image.
 
@@ -3535,7 +3535,7 @@ extern "C"
         \param [in] srcWidth - a width of the input image.
         \param [in] srcHeight - a height of the input image.
         \param [in] srcDepth - a number of channels in the input image.
-        \param [in] weight - a pointer to the convolution weights. Total size of the weights is equal to coreX*coreY*srcDepth*dstDepth.
+        \param [in] weight - a pointer to the convolution weights. Total size of the weights is equal to `kernelX*kernelY*srcDepth*dstDepth`.
         \param [in] kernelX - a width of the convolution kernel.
         \param [in] kernelY - a height of the convolution kernel.
         \param [in] padX - a pad to the x-coordinate of the input image.
@@ -3544,13 +3544,15 @@ extern "C"
         \param [in] strideY - a y-stride of the convolution.
         \param [in] dilationX - a x-stride of the convolution.
         \param [in] dilationY - a y-stride of the convolution.
-        \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to dstWidth*dstHeight*dstDepth.
+        \param [in, out] buffer - a pointer to the external temporal buffer used by the algorithm. Can be NULL (the algorithm uses internal buffer). 
+        \param [in, out] size - a pointer to the size of the external temporal buffer. If the size is too small it will contain required value. Required size is approximately equal to `dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float)`. Can be NULL.
+        \param [in, out] dst - a pointer to the output multichannel 32-bit float image. Total size of the output image is equal to `dstWidth*dstHeight*dstDepth`.
         \param [in] dstWidth - a width of the output image.
         \param [in] dstHeight - a height of the output image.
         \param [in] dstDepth - a number of channels in the output image.
         \param [in] add - a flag which signalizes that we want add or assign value of convolution to the output image.
     */
-    SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+    SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
     /*! @ingroup operation
 

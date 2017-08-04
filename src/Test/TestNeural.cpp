@@ -1609,7 +1609,9 @@ namespace Test
     {
         struct FuncCF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+            typedef void(*FuncPtr)(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
+                const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
+                void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
             FuncPtr func;
             String description;
@@ -1623,7 +1625,7 @@ namespace Test
                 return Index(w, h, src.depth);
             }
 
-            void Update(const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, const Index & dstIndex, bool add)
+            void Update(const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, const Index & dstIndex, int add)
             {
                 std::stringstream ss;
                 ss << description;
@@ -1631,27 +1633,29 @@ namespace Test
 #if 0
                 ss << "-" << kernel.x << "x" << kernel.y << "-" << pad.x << "x" << pad.y;
                 ss << "-" << stride.x << "x" << stride.y << "-" << dilation.x << "x" << dilation.y;
-                ss << "-" << dstIndex.width << "x" << dstIndex.height << "x" << dstIndex.depth << "]-" << (int)add;
+                ss << "-" << dstIndex.width << "x" << dstIndex.height << "x" << dstIndex.depth << "]-" << add;
 #else
                 ss << "-" << kernel.x << "x" << kernel.y << "-" << pad.x << "-" << stride.x << "]";
 #endif
                 description = ss.str();
             }
 
-            void Call(const Vector & src, const Index & srcIndex, const Vector & weight, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, const Vector & dstSrc, Vector & dstDst, const Index & dstIndex, bool add) const
+            void Call(const Vector & src, const Index & srcIndex, const Vector & weight, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, 
+                Vector & buffer, const Vector & dstSrc, Vector & dstDst, const Index & dstIndex, int add) const
             {
                 if (add)
                     memcpy(dstDst.data(), dstSrc.data(), dstDst.size() *sizeof(float));
+                size_t size = buffer.size()*sizeof(float);
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data(), srcIndex.width, srcIndex.height, srcIndex.depth,
                     weight.data(), kernel.x, kernel.y, pad.x, pad.y, stride.x, stride.y, dilation.x, dilation.y,
-                    dstDst.data(), dstIndex.width, dstIndex.height, dstIndex.depth, (add ? 1 : 0));
+                    buffer.data(), &size, dstDst.data(), dstIndex.width, dstIndex.height, dstIndex.depth, add);
             }
         };
     }
 #define FUNC_CF(function) FuncCF(function, #function)
 
-    bool NeuralConvolutionForwardAutoTest(const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, bool add, float eps, FuncCF f1, FuncCF f2)
+    bool NeuralConvolutionForwardAutoTest(const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, int add, float eps, FuncCF f1, FuncCF f2)
     {
         bool result = true;
 
@@ -1669,14 +1673,15 @@ namespace Test
         Vector dstSrc(dstIndex.Volume());
         Vector dstDst1(dstIndex.Volume());
         Vector dstDst2(dstIndex.Volume());
+        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y);
 
         FillRandom32f(src, 0, 1);
         FillRandom32f(weight, -1, 1);
         FillRandom32f(dstSrc, -1000, 1000);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, dstSrc, dstDst1, dstIndex, add));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcIndex, weight, kernel, pad, stride, dilation, dstSrc, dstDst2, dstIndex, add));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst2, dstIndex, add));
 
         result = Compare(dstDst1, dstDst2, eps, true, 32);
 
@@ -1686,18 +1691,34 @@ namespace Test
     bool NeuralConvolutionForwardAutoTest(float eps, const FuncCF & f1, const FuncCF & f2)
     {
         bool result = true;
-        Size _1(1, 1), _3(3, 3);
+        Size _0(0, 0), _1(1, 1), _3(3, 3), _5(5, 5);
 
 #ifdef NDEBUG
-        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 16), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 32), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 128), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 256), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 512), _3, _1, _1, _1, true, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 1024), _3, _1, _1, _1, true, eps, f1, f2);
+       //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 96), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 192), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 384), _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 768), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 1536), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
+
+        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 16), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 32), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 128), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 256), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 512), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 1024), _3, _1, _1, _1, 1, eps, f1, f2);
+
+        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 160), _5, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _1, _1, _1, 1, eps, f1, f2);
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, true, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        
 
         return result;
@@ -1708,6 +1729,11 @@ namespace Test
         bool result = true;
 
         result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Base::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
 
         return result;
     }
@@ -2469,7 +2495,7 @@ namespace Test
         return NeuralPoolingMaxDataTest(create, Size(DW, DH), Size(2, 2), Size(3, 3), Size(0, 0), EPS, FUNC_M(SimdNeuralPooling2x2Max3x3));
     }
 
-    bool NeuralConvolutionForwardDataTest(bool create, const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, bool add, float eps, FuncCF f)
+    bool NeuralConvolutionForwardDataTest(bool create, const Index & srcIndex, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, int add, float eps, FuncCF f)
     {
         bool result = true;
 
@@ -2488,6 +2514,7 @@ namespace Test
         Vector dstSrc(dstIndex.Volume());
         Vector dstDst1(dstIndex.Volume());
         Vector dstDst2(dstIndex.Volume());
+        Vector buffer;
 
         if (create)
         {
@@ -2499,7 +2526,7 @@ namespace Test
             TEST_SAVE(weight);
             TEST_SAVE(dstSrc);
 
-            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, srcIndex, weight, kernel, pad, stride, dilation, dstSrc, dstDst1, dstIndex, add));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
             TEST_SAVE(dstDst1);
         }
@@ -2511,7 +2538,7 @@ namespace Test
 
             TEST_LOAD(dstDst1);
 
-            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, srcIndex, weight, kernel, pad, stride, dilation, dstSrc, dstDst2, dstIndex, add));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst2, dstIndex, add));
 
             TEST_SAVE(dstDst2);
 
@@ -2524,7 +2551,7 @@ namespace Test
     bool NeuralConvolutionForwardDataTest(bool create)
     {
         Size _1(1, 1), _3(3, 3);
-        return NeuralConvolutionForwardDataTest(create, Index(64, 64, 4), _3, _1, _1, _1, true, EPS, FUNC_CF(SimdNeuralConvolutionForward));
+        return NeuralConvolutionForwardDataTest(create, Index(64, 64, 4), _3, _1, _1, _1, 1, EPS, FUNC_CF(SimdNeuralConvolutionForward));
     }
 }
 

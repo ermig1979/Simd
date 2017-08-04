@@ -499,12 +499,12 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE bool Valid(ptrdiff_t a, ptrdiff_t b)
+        SIMD_INLINE bool NeuralConvolutionForwardValid(ptrdiff_t a, ptrdiff_t b)
         {
             return size_t(a) < size_t(b);
         }
 
-        void Convert(const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY,
+        void NeuralConvolutionForwardConvert(const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY,
             ptrdiff_t padX, ptrdiff_t padY, ptrdiff_t strideX, ptrdiff_t strideY, ptrdiff_t dilationX, ptrdiff_t dilationY, float * dst)
         {
             const ptrdiff_t dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1;
@@ -519,7 +519,7 @@ namespace Simd
                         ptrdiff_t srcRow = kernelRow*dilationY - padY;
                         for (ptrdiff_t dstRow = dstHeight; dstRow; dstRow--)
                         {
-                            if (!Valid(srcRow, srcHeight)) 
+                            if (!NeuralConvolutionForwardValid(srcRow, srcHeight))
                             {
                                 for (ptrdiff_t dstCol = dstWidth; dstCol; dstCol--)
                                     *(dst++) = 0;
@@ -529,7 +529,7 @@ namespace Simd
                                 ptrdiff_t srcCol = kernelCol*dilationX - padX;
                                 for (ptrdiff_t dstCol = dstWidth; dstCol; dstCol--)
                                 {
-                                    if (Valid(srcCol, srcWidth)) 
+                                    if (NeuralConvolutionForwardValid(srcCol, srcWidth))
                                         *(dst++) = src[srcRow*srcWidth + srcCol];
                                     else
                                         *(dst++) = 0;
@@ -543,37 +543,72 @@ namespace Simd
             }
         }
 
-        void Gemm(size_t M, size_t N, size_t K, const float * a, size_t lda, const float * b, size_t ldb, float * c, size_t ldc)
+        void NeuralConvolutionForwardGemm_v0(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
         {
-            for (int i = 0; i < M; ++i) 
+            for (size_t i = 0; i < M; ++i)
             {
-                for (int k = 0; k < K; ++k)
+                for (size_t k = 0; k < K; ++k)
                 {
-                    float _a = a[i*lda + k];
+                    float va = a[i*K + k];
                     for (int j = 0; j < N; ++j)
-                        c[i*ldc + j] += _a*b[k*ldb + j];
+                        c[i*N + j] += va*b[k*N + j];
+                }
+            }
+        }
+
+        void NeuralConvolutionForwardGemm(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+        {
+            for (size_t i = 0; i < M; ++i)
+            {
+                for (size_t k = 0; k < K; ++k)
+                {
+                    float va = a[i*K + k];
+                    const float * pb = b + k*N;
+                    float * pc = c + i*N;
+                    for (size_t j = 0; j < N; ++j)
+                        pc[j] += va*pb[j];
                 }
             }
         }
 
         void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
             const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
-            float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
+            void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
         {
             assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
+            float * temporal = NULL;
+            void * internal = NULL;
+
+            if (kernelX == 1 && kernelY == 1)
+                temporal = (float*)src;
+            else
+            {
+                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                if (buffer != AlignHi(buffer, SIMD_ALIGN))
+                    required += SIMD_ALIGN;
+                if (buffer == NULL || size == NULL || *size < required)
+                {
+                    internal = Allocate(required);
+                    if (size)
+                        *size = required;
+                    temporal = (float*)internal;
+                }
+                else
+                    temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
+
+                NeuralConvolutionForwardConvert(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
+            }
+
             if (!add)
                 memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
 
-            float * buffer = (float*)Allocate(dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float));
-
-            Convert(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, buffer);
-
             size_t M = dstDepth, N = dstHeight*dstWidth, K = kernelX*kernelY*srcDepth;
-            Gemm(M, N, K, weight, K, buffer, N, dst, N);
+            NeuralConvolutionForwardGemm(M, N, K, weight, temporal, dst);
 
-            Free(buffer);
+            if(internal)
+                Free(internal);
         }
     }
 }

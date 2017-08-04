@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -1200,6 +1201,61 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
+        void NeuralConvolutionForwardGemm(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+        {
+            for (size_t i = 0; i < M; ++i)
+            {
+                for (size_t k = 0; k < K; ++k)
+                {
+                    float va = a[i*K + k];
+                    const float * pb = b + k*N;
+                    float * pc = c + i*N;
+                    for (size_t j = 0; j < N; ++j)
+                        pc[j] += va*pb[j];
+                }
+            }
+        }
+
+        void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+            const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
+            void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
+        {
+            assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
+            assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
+
+            float * temporal = NULL;
+            void * internal = NULL;
+
+            if (kernelX == 1 && kernelY == 1)
+                temporal = (float*)src;
+            else
+            {
+                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                if (buffer != AlignHi(buffer, SIMD_ALIGN))
+                    required += SIMD_ALIGN;
+                if (buffer == NULL || size == NULL || *size < required)
+                {
+                    internal = Allocate(required);
+                    if (size)
+                        *size = required;
+                    temporal = (float*)internal;
+                }
+                else
+                    temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
+
+                Base::NeuralConvolutionForwardConvert(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
+            }
+
+            if (!add)
+                memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
+
+            size_t M = dstDepth, N = dstHeight*dstWidth, K = kernelX*kernelY*srcDepth;
+            NeuralConvolutionForwardGemm(M, N, K, weight, temporal, dst);
+
+            if (internal)
+                Free(internal);
         }
     }
 #endif// SIMD_SSE_ENABLE
