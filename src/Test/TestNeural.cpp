@@ -1738,6 +1738,16 @@ namespace Test
             result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse3::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Avx::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Avx2::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
+
         return result;
     }
 
