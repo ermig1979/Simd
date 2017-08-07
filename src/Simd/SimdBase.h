@@ -367,7 +367,14 @@ namespace Simd
 
         void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
-        void NeuralConvolutionForwardConvert(const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY,
+        void NeuralConvolutionForwardGemmNN(size_t M, size_t N, size_t K, const float * a, const float * b, float * c);
+
+        void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c);
+
+        void NeuralConvolutionForwardConvertN(const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY,
+            ptrdiff_t padX, ptrdiff_t padY, ptrdiff_t strideX, ptrdiff_t strideY, ptrdiff_t dilationX, ptrdiff_t dilationY, float * dst);
+
+        void NeuralConvolutionForwardConvertT(const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY,
             ptrdiff_t padX, ptrdiff_t padY, ptrdiff_t strideX, ptrdiff_t strideY, ptrdiff_t dilationX, ptrdiff_t dilationY, float * dst);
 
         void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float * weight, 

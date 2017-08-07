@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -177,6 +178,119 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
+        }
+
+        template <bool align> static SIMD_INLINE void AddProductSum4x4(const __m128 & a, size_t K, const float * b, __m128 * sums)
+        {
+            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a, Load<align>(b + 0 * K)));
+            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a, Load<align>(b + 1 * K)));
+            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(a, Load<align>(b + 2 * K)));
+            sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(a, Load<align>(b + 3 * K)));
+        }
+
+        template <bool align> static SIMD_INLINE void AddProductSum1x4(const __m128 & a, const float * b, __m128 & sum)
+        {
+            sum = _mm_add_ps(sum, _mm_mul_ps(a, Load<align>(b)));
+        }
+
+        template <bool align> void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+        {
+            size_t alignedN = Simd::AlignLo(N, 4);
+            size_t alignedK = Simd::AlignLo(K, 4);
+            __m128 tailMask = RightNotZero(K - alignedK);
+            for (size_t i = 0; i < M; ++i)
+            {
+                const float * pa = a + i*K;
+                float * pc = c + i*N;
+                size_t j = 0;
+                for (; j < alignedN; j += 4)
+                {
+                    const float * pb = b + j*K;
+                    __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    for (size_t k = 0; k < alignedK; k += 4)
+                    {
+                        __m128 _a = Load<false>(pa + k);
+                        AddProductSum4x4<align>(_a, K, pb + k, sums);
+                    }
+                    if (alignedK < K)
+                    {
+                        size_t k = K - 4;
+                        __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
+                        AddProductSum4x4<false>(_a, K, pb + k, sums);
+                    }
+                    Add4ExtractedSums(sums, pc + j);
+                }
+                for (; j < N; ++j)
+                {
+                    const float * pb = b + j*K;
+                    __m128 sum = _mm_setzero_ps();
+                    for (size_t k = 0; k < alignedK; k += 4)
+                    {
+                        __m128 _a = Load<false>(pa + k);
+                        AddProductSum1x4<align>(_a, pb + k, sum);
+                    }
+                    if (alignedK < K)
+                    {
+                        size_t k = K - 4;
+                        __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
+                        AddProductSum1x4<false>(_a, pb + k, sum);
+                    }
+                    pc[j] += ExtractSum(sum);
+                }
+            }
+        }
+
+        void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+            const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
+            void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
+        {
+            assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
+            assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
+
+            if (!add)
+                memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
+
+            float * temporal = NULL;
+            void * internal = NULL;
+
+            bool transpose = srcWidth*srcHeight <= 1024;
+
+            if (kernelX == 1 && kernelY == 1 && !transpose)
+                temporal = (float*)src;
+            else
+            {
+                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                if (buffer != AlignHi(buffer, SIMD_ALIGN))
+                    required += SIMD_ALIGN;
+                if (buffer == NULL || size == NULL || *size < required)
+                {
+                    internal = Allocate(required);
+                    if (size)
+                        *size = required;
+                    temporal = (float*)internal;
+                }
+                else
+                    temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
+
+                if (transpose)
+                    Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
+                else
+                    Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
+            }
+
+            size_t M = dstDepth, N = dstHeight*dstWidth, K = kernelX*kernelY*srcDepth;
+            if (transpose)
+            {
+                if (Aligned(K, F))
+                    NeuralConvolutionForwardGemmNT<true>(M, N, K, weight, temporal, dst);
+                else
+                    NeuralConvolutionForwardGemmNT<false>(M, N, K, weight, temporal, dst);
+            }
+            else
+                Base::NeuralConvolutionForwardGemmNN(M, N, K, weight, temporal, dst);
+
+            if (internal)
+                Free(internal);
         }
     }
 #endif// SIMD_SSE3_ENABLE

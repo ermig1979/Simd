@@ -1666,7 +1666,7 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " .");
 
-        Test::PerformanceMeasurerStorage::s_storage.Align(SIMD_ALIGN);
+        Test::PerformanceMeasurerStorage::s_storage.Align(SIMD_ALIGN*(srcIndex.depth%SIMD_ALIGN == 0));
 
         Vector src(srcIndex.Volume());
         Vector weight(kernel.x*kernel.y*srcIndex.depth*dstIndex.depth);
@@ -1677,7 +1677,7 @@ namespace Test
 
         FillRandom32f(src, 0, 1);
         FillRandom32f(weight, -1, 1);
-        FillRandom32f(dstSrc, -1000, 1000);
+        FillRandom32f(dstSrc, 500, 1500);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
@@ -1696,21 +1696,23 @@ namespace Test
 #ifdef NDEBUG
        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 96), _1, _0, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 192), _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 192), _1, _0, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 384), _1, _0, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 768), _1, _0, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 1536), _1, _0, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
+
 
         //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 16), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 32), _3, _1, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(127, 129, 31), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 128), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 256), _3, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 512), _3, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 1024), _3, _1, _1, _1, 1, eps, f1, f2);
 
-        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _1, _1, _1, 1, eps, f1, f2);
@@ -1718,7 +1720,8 @@ namespace Test
         //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _1, _1, _1, 1, eps, f1, f2);
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 0, eps, f1, f2);
 #endif        
 
         return result;
@@ -1730,9 +1733,9 @@ namespace Test
 
         result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Base::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse3::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
         return result;
