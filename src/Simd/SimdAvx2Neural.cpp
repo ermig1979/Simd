@@ -926,29 +926,26 @@ namespace Simd
 
         template <bool align> void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
         {
-            size_t alignedM = Simd::AlignLo(M, 2);
-            size_t alignedN = Simd::AlignLo(N, 4);
-            size_t alignedK = Simd::AlignLo(K, 8);
-            __m256 tailMask = RightNotZero(K - alignedK);
+            size_t M2 = Simd::AlignLo(M, 2);
+            size_t N4 = Simd::AlignLo(N, 4);
+            size_t K8 = Simd::AlignLo(K, 8);
+            __m256 tailMask = RightNotZero(K - K8);
             size_t i = 0;
-            for (; i < alignedM; i += 2)
+            for (; i < M2; i += 2)
             {
                 const float * pa0 = a + i*K;
                 const float * pa1 = a + i*K + K;
                 float * pc0 = c + i*N;
                 float * pc1 = c + i*N + N;
                 size_t j = 0;
-                for (; j < alignedN; j += 4)
+                for (; j < N4; j += 4)
                 {
                     const float * pb = b + j*K;
                     __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    for (size_t k = 0; k < alignedK; k += 8)
-                    {
-                        __m256 _a0 = Avx::Load<false>(pa0 + k);
-                        __m256 _a1 = Avx::Load<false>(pa1 + k);
-                        AddProductSum2x4x8<align>(_a0, _a1, K, pb + k, sums);
-                    }
-                    if (alignedK < K)
+                    size_t k = 0;
+                    for (; k < K8; k += 8)
+                        AddProductSum2x4x8<align>(Avx::Load<false>(pa0 + k), Avx::Load<false>(pa1 + k), K, pb + k, sums);
+                    if (K8 < K)
                     {
                         size_t k = K - 8;
                         __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
@@ -962,13 +959,13 @@ namespace Simd
                 {
                     const float * pb = b + j*K;
                     __m256 sums[2] = { _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    for (size_t k = 0; k < alignedK; k += 8)
+                    for (size_t k = 0; k < K8; k += 8)
                     {
                         __m256 _a0 = Avx::Load<false>(pa0 + k);
                         __m256 _a1 = Avx::Load<false>(pa1 + k);
                         AddProductSum2x1x8<align>(_a0, _a1, pb + k, sums);
                     }
-                    if (alignedK < K)
+                    if (K8 < K)
                     {
                         size_t k = K - 8;
                         __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
@@ -984,16 +981,16 @@ namespace Simd
                 const float * pa = a + i*K;
                 float * pc = c + i*N;
                 size_t j = 0;
-                for (; j < alignedN; j += 4)
+                for (; j < N4; j += 4)
                 {
                     const float * pb = b + j*K;
                     __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    for (size_t k = 0; k < alignedK; k += 8)
+                    for (size_t k = 0; k < K8; k += 8)
                     {
                         __m256 _a = Avx::Load<false>(pa + k);
                         AddProductSum1x4x8<align>(_a, K, pb + k, sums);
                     }
-                    if (alignedK < K)
+                    if (K8 < K)
                     {
                         size_t k = K - 8;
                         __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
@@ -1005,12 +1002,12 @@ namespace Simd
                 {
                     const float * pb = b + j*K;
                     __m256 sum = _mm256_setzero_ps();
-                    for (size_t k = 0; k < alignedK; k += 8)
+                    for (size_t k = 0; k < K8; k += 8)
                     {
                         __m256 _a = Avx::Load<false>(pa + k);
                         AddProductSum1x1x8<align>(_a, pb + k, sum);
                     }
-                    if (alignedK < K)
+                    if (K8 < K)
                     {
                         size_t k = K - 8;
                         __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));

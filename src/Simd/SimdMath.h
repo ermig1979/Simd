@@ -297,6 +297,18 @@ namespace Simd
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
             return _mm_loadu_ps((float*)(mask + count));
         }
+
+        template <bool condition> SIMD_INLINE __m128 Masked(const __m128 & value, const __m128 & mask);
+
+        template <> SIMD_INLINE __m128 Masked<false>(const __m128 & value, const __m128 & mask)
+        {
+            return value;
+        }
+
+        template <> SIMD_INLINE __m128 Masked<true>(const __m128 & value, const __m128 & mask)
+        {
+            return _mm_and_ps(value, mask);
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
