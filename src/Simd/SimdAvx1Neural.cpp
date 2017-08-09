@@ -1157,7 +1157,7 @@ namespace Simd
             float * temporal = NULL;
             void * internal = NULL;
 
-            bool transpose = dstWidth*dstHeight <= 1024;
+            bool transpose = dstWidth*dstHeight / kernelX <= 8388;// 4192;
 
             if (kernelX == 1 && kernelY == 1 && !transpose)
                 temporal = (float*)src;

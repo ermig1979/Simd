@@ -180,133 +180,181 @@ namespace Simd
                 NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
         }
 
-        template <bool align> static SIMD_INLINE void AddProductSum1x4x4(const __m128 & a, size_t K, const float * b, __m128 * sums)
+        namespace Ncf
         {
-            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a, Load<align>(b + 0 * K)));
-            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a, Load<align>(b + 1 * K)));
-            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(a, Load<align>(b + 2 * K)));
-            sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(a, Load<align>(b + 3 * K)));
-        }
-
-        template <bool align> static SIMD_INLINE void AddProductSum1x1x4(const __m128 & a, const float * b, __m128 & sum)
-        {
-            sum = _mm_add_ps(sum, _mm_mul_ps(a, Load<align>(b)));
-        }
-
-        template <bool align> static SIMD_INLINE void AddProductSum2x4x4(const __m128 & a0, const __m128 & a1, size_t K, const float * b, __m128 * sums)
-        {
-            __m128 b0 = Load<align>(b + 0 * K);
-            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a0, b0));
-            sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(a1, b0));
-            __m128 b1 = Load<align>(b + 1 * K);
-            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a0, b1));
-            sums[5] = _mm_add_ps(sums[5], _mm_mul_ps(a1, b1));
-            __m128 b2 = Load<align>(b + 2 * K);
-            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(a0, b2));
-            sums[6] = _mm_add_ps(sums[6], _mm_mul_ps(a1, b2));
-            __m128 b3 = Load<align>(b + 3 * K);
-            sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(a0, b3));
-            sums[7] = _mm_add_ps(sums[7], _mm_mul_ps(a1, b3));
-        }
-
-        template <bool align> static SIMD_INLINE void AddProductSum2x1x4(const __m128 & a0, const __m128 & a1, const float * b, __m128 * sums)
-        {
-            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a0, Load<align>(b)));
-            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a1, Load<align>(b)));
-        }
-
-        template <bool align> void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
-        {
-            size_t M2 = Simd::AlignLo(M, 2);
-            size_t N4 = Simd::AlignLo(N, 4);
-            size_t K4 = Simd::AlignLo(K, 4);
-            __m128 tailMask = RightNotZero(K - K4);
-            size_t i = 0;
-            for (; i < M2; i += 2)
+            namespace Ver0
             {
-                const float * pa0 = a + i*K;
-                const float * pa1 = a + i*K + K;
-                float * pc0 = c + i*N;
-                float * pc1 = c + i*N + N;
-                size_t j = 0;
-                for (; j < N4; j += 4)
+                template <bool align> static SIMD_INLINE void AddProductSum1x4x4(const __m128 & a, size_t K, const float * b, __m128 * sums)
                 {
-                    const float * pb = b + j*K;
-                    __m128 sums[8] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
-                    size_t k = 0;
-                    for (; k < K4; k += 4)
-                        AddProductSum2x4x4<align>(Load<false>(pa0 + k), Load<false>(pa1 + k), K, pb + k, sums);
-                    if (K4 < K)
-                    {
-                        size_t k = K - 4;
-                        __m128 _a0 = _mm_and_ps(tailMask, Load<false>(pa0 + k));
-                        __m128 _a1 = _mm_and_ps(tailMask, Load<false>(pa1 + k));
-                        AddProductSum2x4x4<false>(_a0, _a1, K, pb + k, sums);
-                    }
-                    Add4ExtractedSums(sums + 0, pc0 + j);
-                    Add4ExtractedSums(sums + 4, pc1 + j);
+                    sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a, Load<align>(b + 0 * K)));
+                    sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a, Load<align>(b + 1 * K)));
+                    sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(a, Load<align>(b + 2 * K)));
+                    sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(a, Load<align>(b + 3 * K)));
                 }
-                for (; j < N; ++j)
+
+                template <bool align> static SIMD_INLINE void AddProductSum1x1x4(const __m128 & a, const float * b, __m128 & sum)
                 {
-                    const float * pb = b + j*K;
-                    __m128 sums[2] = { _mm_setzero_ps(), _mm_setzero_ps() };
-                    for (size_t k = 0; k < K4; k += 4)
+                    sum = _mm_add_ps(sum, _mm_mul_ps(a, Load<align>(b)));
+                }
+
+                template <bool align> static SIMD_INLINE void AddProductSum2x4x4(const __m128 & a0, const __m128 & a1, size_t K, const float * b, __m128 * sums)
+                {
+                    __m128 b0 = Load<align>(b + 0 * K);
+                    sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a0, b0));
+                    sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(a1, b0));
+                    __m128 b1 = Load<align>(b + 1 * K);
+                    sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a0, b1));
+                    sums[5] = _mm_add_ps(sums[5], _mm_mul_ps(a1, b1));
+                    __m128 b2 = Load<align>(b + 2 * K);
+                    sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(a0, b2));
+                    sums[6] = _mm_add_ps(sums[6], _mm_mul_ps(a1, b2));
+                    __m128 b3 = Load<align>(b + 3 * K);
+                    sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(a0, b3));
+                    sums[7] = _mm_add_ps(sums[7], _mm_mul_ps(a1, b3));
+                }
+
+                template <bool align> static SIMD_INLINE void AddProductSum2x1x4(const __m128 & a0, const __m128 & a1, const float * b, __m128 * sums)
+                {
+                    sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(a0, Load<align>(b)));
+                    sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(a1, Load<align>(b)));
+                }
+
+                template <bool align> void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M2 = Simd::AlignLo(M, 2);
+                    size_t N4 = Simd::AlignLo(N, 4);
+                    size_t K4 = Simd::AlignLo(K, 4);
+                    __m128 tailMask = RightNotZero(K - K4);
+                    size_t i = 0;
+                    for (; i < M2; i += 2)
                     {
-                        __m128 _a0 = Load<false>(pa0 + k);
-                        __m128 _a1 = Load<false>(pa1 + k);
-                        AddProductSum2x1x4<align>(_a0, _a1, pb + k, sums);
+                        const float * pa0 = a + i*K;
+                        const float * pa1 = a + i*K + K;
+                        float * pc0 = c + i*N;
+                        float * pc1 = c + i*N + N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float * pb = b + j*K;
+                            __m128 sums[8] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                            size_t k = 0;
+                            for (; k < K4; k += 4)
+                                AddProductSum2x4x4<align>(Load<false>(pa0 + k), Load<false>(pa1 + k), K, pb + k, sums);
+                            if (K4 < K)
+                            {
+                                size_t k = K - 4;
+                                __m128 _a0 = _mm_and_ps(tailMask, Load<false>(pa0 + k));
+                                __m128 _a1 = _mm_and_ps(tailMask, Load<false>(pa1 + k));
+                                AddProductSum2x4x4<false>(_a0, _a1, K, pb + k, sums);
+                            }
+                            Add4ExtractedSums(sums + 0, pc0 + j);
+                            Add4ExtractedSums(sums + 4, pc1 + j);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float * pb = b + j*K;
+                            __m128 sums[2] = { _mm_setzero_ps(), _mm_setzero_ps() };
+                            for (size_t k = 0; k < K4; k += 4)
+                            {
+                                __m128 _a0 = Load<false>(pa0 + k);
+                                __m128 _a1 = Load<false>(pa1 + k);
+                                AddProductSum2x1x4<align>(_a0, _a1, pb + k, sums);
+                            }
+                            if (K4 < K)
+                            {
+                                size_t k = K - 4;
+                                __m128 _a0 = _mm_and_ps(tailMask, Load<false>(pa0 + k));
+                                __m128 _a1 = _mm_and_ps(tailMask, Load<false>(pa1 + k));
+                                AddProductSum2x1x4<false>(_a0, _a1, pb + k, sums);
+                            }
+                            pc0[j] += ExtractSum(sums[0]);
+                            pc1[j] += ExtractSum(sums[1]);
+                        }
                     }
-                    if (K4 < K)
+                    for (; i < M; ++i)
                     {
-                        size_t k = K - 4;
-                        __m128 _a0 = _mm_and_ps(tailMask, Load<false>(pa0 + k));
-                        __m128 _a1 = _mm_and_ps(tailMask, Load<false>(pa1 + k));
-                        AddProductSum2x1x4<false>(_a0, _a1, pb + k, sums);
+                        const float * pa = a + i*K;
+                        float * pc = c + i*N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float * pb = b + j*K;
+                            __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                            for (size_t k = 0; k < K4; k += 4)
+                            {
+                                __m128 _a = Load<false>(pa + k);
+                                AddProductSum1x4x4<align>(_a, K, pb + k, sums);
+                            }
+                            if (K4 < K)
+                            {
+                                size_t k = K - 4;
+                                __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
+                                AddProductSum1x4x4<false>(_a, K, pb + k, sums);
+                            }
+                            Add4ExtractedSums(sums + 0, pc + j);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float * pb = b + j*K;
+                            __m128 sum = _mm_setzero_ps();
+                            for (size_t k = 0; k < K4; k += 4)
+                            {
+                                __m128 _a = Load<false>(pa + k);
+                                AddProductSum1x1x4<align>(_a, pb + k, sum);
+                            }
+                            if (K4 < K)
+                            {
+                                size_t k = K - 4;
+                                __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
+                                AddProductSum1x1x4<false>(_a, pb + k, sum);
+                            }
+                            pc[j] += ExtractSum(sum);
+                        }
                     }
-                    pc0[j] += ExtractSum(sums[0]);
-                    pc1[j] += ExtractSum(sums[1]);
+                }
+
+                void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    if (Aligned(K, F))
+                        NeuralConvolutionForwardGemmNT<true>(M, N, K, a, b, c);
+                    else
+                        NeuralConvolutionForwardGemmNT<false>(M, N, K, a, b, c);
                 }
             }
-            for (; i < M; ++i)
+
+            struct Manager
             {
-                const float * pa = a + i*K;
-                float * pc = c + i*N;
-                size_t j = 0;
-                for (; j < N4; j += 4)
+                size_t size;
+
+                void (*prepare) (const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY, 
+                    ptrdiff_t padX, ptrdiff_t padY, ptrdiff_t strideX, ptrdiff_t strideY, ptrdiff_t dilationX, ptrdiff_t dilationY, float * dst);
+
+                void (*execute)(size_t M, size_t N, size_t K, const float * a, const float * b, float * c);
+
+                Manager(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                    : size(0)
+                    , prepare(0)
+                    , execute(0)
                 {
-                    const float * pb = b + j*K;
-                    __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
-                    for (size_t k = 0; k < K4; k += 4)
+                    if (dstWidth*dstHeight / kernelX <= 2000)
                     {
-                        __m128 _a = Load<false>(pa + k);
-                        AddProductSum1x4x4<align>(_a, K, pb + k, sums);
+                        size = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                        prepare = Base::NeuralConvolutionForwardConvertT;
+                        execute = Ver0::NeuralConvolutionForwardGemmNT;
                     }
-                    if (K4 < K)
+                    else
                     {
-                        size_t k = K - 4;
-                        __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
-                        AddProductSum1x4x4<false>(_a, K, pb + k, sums);
+                        if (kernelX > 1 || kernelY > 1)
+                        {
+                            size = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                            prepare = Base::NeuralConvolutionForwardConvertN;
+                        }
+                        execute = Base::NeuralConvolutionForwardGemmNN;
                     }
-                    Add4ExtractedSums(sums + 0, pc + j);
                 }
-                for (; j < N; ++j)
-                {
-                    const float * pb = b + j*K;
-                    __m128 sum = _mm_setzero_ps();
-                    for (size_t k = 0; k < K4; k += 4)
-                    {
-                        __m128 _a = Load<false>(pa + k);
-                        AddProductSum1x1x4<align>(_a, pb + k, sum);
-                    }
-                    if (K4 < K)
-                    {
-                        size_t k = K - 4;
-                        __m128 _a = _mm_and_ps(tailMask, Load<false>(pa + k));
-                        AddProductSum1x1x4<false>(_a, pb + k, sum);
-                    }
-                    pc[j] += ExtractSum(sum);
-                }
-            }
+
+            private:
+            };
         }
 
         void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
@@ -322,41 +370,28 @@ namespace Simd
             float * temporal = NULL;
             void * internal = NULL;
 
-            bool transpose = dstWidth*dstHeight <= 1024;
+            Ncf::Manager manager(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
 
-            if (kernelX == 1 && kernelY == 1 && !transpose)
-                temporal = (float*)src;
-            else
+            if(manager.prepare)
             {
-                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
                 if (buffer != AlignHi(buffer, SIMD_ALIGN))
-                    required += SIMD_ALIGN;
-                if (buffer == NULL || size == NULL || *size < required)
+                    manager.size += SIMD_ALIGN;
+                if (buffer == NULL || size == NULL || *size < manager.size)
                 {
-                    internal = Allocate(required);
+                    internal = Allocate(manager.size);
                     if (size)
-                        *size = required;
+                        *size = manager.size;
                     temporal = (float*)internal;
                 }
                 else
                     temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
 
-                if (transpose)
-                    Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
-                else
-                    Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
-            }
-
-            size_t M = dstDepth, N = dstHeight*dstWidth, K = kernelX*kernelY*srcDepth;
-            if (transpose)
-            {
-                if (Aligned(K, F))
-                    NeuralConvolutionForwardGemmNT<true>(M, N, K, weight, temporal, dst);
-                else
-                    NeuralConvolutionForwardGemmNT<false>(M, N, K, weight, temporal, dst);
+                manager.prepare(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
             }
             else
-                Base::NeuralConvolutionForwardGemmNN(M, N, K, weight, temporal, dst);
+                temporal = (float*)src;
+
+            manager.execute(dstDepth, dstHeight*dstWidth, kernelX*kernelY*srcDepth, weight, temporal, dst);
 
             if (internal)
                 Free(internal);
