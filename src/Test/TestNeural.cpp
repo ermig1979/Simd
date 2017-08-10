@@ -1673,11 +1673,12 @@ namespace Test
         Vector dstSrc(dstIndex.Volume());
         Vector dstDst1(dstIndex.Volume());
         Vector dstDst2(dstIndex.Volume());
-        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y);
+        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y + dstIndex.Area()*2);
 
         FillRandom32f(src, 0, 1);
         FillRandom32f(weight, -1, 1);
-        FillRandom32f(dstSrc, 500, 1500);
+        const float level = 1000;
+        FillRandom32f(dstSrc, level, level);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
@@ -1691,7 +1692,7 @@ namespace Test
     bool NeuralConvolutionForwardAutoTest(float eps, const FuncCF & f1, const FuncCF & f2)
     {
         bool result = true;
-        Size _0(0, 0), _1(1, 1), _3(3, 3), _5(5, 5);
+        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5);
 
 #ifdef NDEBUG
         result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
@@ -1702,7 +1703,6 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 1536), _1, _0, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
 
-
         result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 16), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 32), _3, _1, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(127, 129, 31), _3, _1, _1, _1, 1, eps, f1, f2);
@@ -1712,16 +1712,17 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 512), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 1024), _3, _1, _1, _1, 1, eps, f1, f2);
 
-        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 160), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 160), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 0, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(127, 129, 31), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        
 
         return result;

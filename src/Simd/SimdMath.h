@@ -298,6 +298,12 @@ namespace Simd
             return _mm_loadu_ps((float*)(mask + count));
         }
 
+        SIMD_INLINE __m128 LeftNotZero(size_t count)
+        {
+            const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
+            return _mm_loadu_ps((float*)(mask + 4 - count));
+        }
+
         template <bool condition> SIMD_INLINE __m128 Masked(const __m128 & value, const __m128 & mask);
 
         template <> SIMD_INLINE __m128 Masked<false>(const __m128 & value, const __m128 & mask)

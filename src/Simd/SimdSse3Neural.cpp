@@ -322,38 +322,329 @@ namespace Simd
                 }
             }
 
-            struct Manager
+            namespace Ver1
             {
-                size_t size;
-
-                void (*prepare) (const float * src, ptrdiff_t srcWidth, ptrdiff_t srcHeight, ptrdiff_t srcDepth, ptrdiff_t kernelX, ptrdiff_t kernelY, 
-                    ptrdiff_t padX, ptrdiff_t padY, ptrdiff_t strideX, ptrdiff_t strideY, ptrdiff_t dilationX, ptrdiff_t dilationY, float * dst);
-
-                void (*execute)(size_t M, size_t N, size_t K, const float * a, const float * b, float * c);
-
-                Manager(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
-                    : size(0)
-                    , prepare(0)
-                    , execute(0)
+                void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
                 {
-                    if (dstWidth*dstHeight / kernelX <= 2000)
+                    for (size_t i = 0; i < M; i += cell)
                     {
-                        size = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
-                        prepare = Base::NeuralConvolutionForwardConvertT;
-                        execute = Ver0::NeuralConvolutionForwardGemmNT;
-                    }
-                    else
-                    {
-                        if (kernelX > 1 || kernelY > 1)
+                        size_t n = Simd::Min(cell, M - i);
+                        for (size_t k = 0; k < K; ++k)
                         {
-                            size = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
-                            prepare = Base::NeuralConvolutionForwardConvertN;
+                            for (size_t c = 0; c < n; ++c)
+                                *(dst++) = src[c*K + k];
                         }
-                        execute = Base::NeuralConvolutionForwardGemmNN;
+                        src += cell*K;
                     }
                 }
 
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, 
+                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * dst)
+                {
+                    size_t channelSize = srcHeight * srcWidth;
+                    size_t K = kernelX*kernelY*srcDepth;
+                    for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                    {
+                        for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                        {
+                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                            {
+                                size_t srcRow = kernelRow*dilationY - padY;
+                                for (size_t dstRow = 0, j = 0; dstRow < dstHeight; ++dstRow)
+                                {
+                                    size_t srcCol = kernelCol*dilationX - padX;
+                                    for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol, ++j)
+                                    {
+                                        size_t offset = (j / cell)*K*cell + k*cell + j%cell;
+                                        if (srcCol < srcWidth && srcRow < srcHeight)
+                                            dst[offset] = src[srcRow*srcWidth + srcCol];
+                                        else
+                                            dst[offset] = 0;
+                                        srcCol += strideX;
+                                    }
+                                    srcRow += strideY;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                SIMD_INLINE void AddSum(const __m128 & sum, float * dst)
+                {
+                    Store<false>(dst, _mm_add_ps(Load<false>(dst), sum));
+                }
+
+                SIMD_INLINE void AddSums4(const __m128 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                {
+                    if (mask)
+                    {
+                        __m128 _mask = _mm_loadu_ps(mask);
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                            AddSum(_mm_and_ps(_mask, sums[i]), dst);
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                            AddSum(sums[i], dst);
+                    }
+                }
+
+                template <bool align> SIMD_INLINE void KernelMx4(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                {
+                    __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m128 b0 = Load<align>(b);
+                        for (size_t s = 0; s < m; ++s)
+                            sums[s] = _mm_add_ps(sums[s], _mm_mul_ps(_mm_set1_ps(a[s]), b0));
+                        b += 4;
+                        a += m;
+                    }
+                    AddSums4(sums, m, mask, c, N);
+                }
+
+                template <bool align> SIMD_INLINE void Kernel4x4(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                {
+                    __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m128 b0 = Load<align>(b);
+                        sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(_mm_set1_ps(a[0]), b0));
+                        sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(_mm_set1_ps(a[1]), b0));
+                        sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(_mm_set1_ps(a[2]), b0));
+                        sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(_mm_set1_ps(a[3]), b0));
+                        b += 4;
+                        a += 4;
+                    }
+                    AddSums4(sums, 4, mask, c, N);
+                }
+
+                template <bool align> void Execute4x4(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N4 = Simd::AlignLo(N, 4);
+                    const int32_t mask[8] = { -1, -1, -1, -1, 0, 0, 0, 0 };
+                    const float * tail = (float*)mask + 4 - N + N4;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                            Kernel4x4<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
+                        if(N4 < N)
+                            Kernel4x4<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
+                    }
+                    if(M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                            KernelMx4<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
+                        if (N4 < N)
+                            KernelMx4<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
+                    }
+                }
+
+                SIMD_INLINE void AddSums8(const __m128 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                {
+                    if (mask)
+                    {
+                        __m128 mask0 = _mm_loadu_ps(mask + 0);
+                        __m128 mask1 = _mm_loadu_ps(mask + 4);
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(_mm_and_ps(mask0, sums[i + 0]), dst + 0);
+                            AddSum(_mm_and_ps(mask1, sums[i + 4]), dst + 4);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(sums[i + 0], dst + 0);
+                            AddSum(sums[i + 4], dst + 4);
+                        }
+                    }
+                }
+
+                template <bool align> SIMD_INLINE void KernelMx8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                {
+                    __m128 sums[8] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m128 b0 = Load<align>(b + 0);
+                        __m128 b1 = Load<align>(b + 4);
+                        for (size_t s = 0; s < m; ++s)
+                        {
+                            __m128 a0 = _mm_set1_ps(a[s]);
+                            sums[s + 0] = _mm_add_ps(sums[s + 0], _mm_mul_ps(b0, a0));
+                            sums[s + 4] = _mm_add_ps(sums[s + 4], _mm_mul_ps(b1, a0));
+                        }
+                        b += 8;
+                        a += m;
+                    }
+                    AddSums8(sums, m, mask, c, N);
+                }
+
+                template <bool align> SIMD_INLINE void Kernel4x8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                {
+                    __m128 sums[8] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m128 b0 = Load<align>(b + 0);
+                        __m128 b1 = Load<align>(b + 4);
+                        __m128 a0 = _mm_set1_ps(a[0]);
+                        sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(b0, a0));
+                        sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(b1, a0));
+                        __m128 a1 = _mm_set1_ps(a[1]);
+                        sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(b0, a1));
+                        sums[5] = _mm_add_ps(sums[5], _mm_mul_ps(b1, a1));
+                        __m128 a2 = _mm_set1_ps(a[2]);
+                        sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(b0, a2));
+                        sums[6] = _mm_add_ps(sums[6], _mm_mul_ps(b1, a2));
+                        __m128 a3 = _mm_set1_ps(a[3]);
+                        sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(b0, a3));
+                        sums[7] = _mm_add_ps(sums[7], _mm_mul_ps(b1, a3));
+                        b += 8;
+                        a += 4;
+                    }
+                    AddSums8(sums, 4, mask, c, N);
+                }
+
+                template <bool align> void Execute4x8(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N8 = Simd::AlignLo(N, 8);
+                    const int32_t mask[16] = { -1, -1, -1, -1,  -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    const float * tail = (float*)mask + 8 - N + N8;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N8; j += 8)
+                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
+                        if (N8 < N)
+                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
+                    }
+                    if (M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N8; j += 8)
+                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
+                        if (N8 < N)
+                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
+                    }
+                }
+
+                void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c, size_t cellA, size_t cellB)
+                {
+                    if (cellA == 4)
+                    {
+                        if(cellB == 4)
+                            Execute4x4<false>(M, N, K, a, b, c);
+                        if (cellB == 8)                           
+                            Execute4x8<false>(M, N, K, a, b, c);
+                    }
+                }
+            }
+
+            struct Opt
+            {
+                enum Alg
+                {
+                    Base,
+                    Ver0,
+                    Ver1,
+                } alg;
+
+                size_t sizeA;
+                size_t sizeB;
+
+                size_t cellA;
+                size_t cellB;
+
+                size_t M, N, K;
+                size_t strideB;
+
+                Opt(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    alg = Base;
+                    sizeA = 0;
+                    sizeB = 0;
+                    cellA = 1;
+                    cellB = 1;
+
+                    M = dstDepth;
+                    N = dstHeight*dstWidth;
+                    K = kernelX*kernelY*srcDepth;
+
+                    if (dstWidth*dstHeight / kernelX <= 2000)
+                        alg = Ver0;
+                    else if(kernelX*kernelY == 1)
+                        alg = Ver1;
+
+                    switch (alg)
+                    {
+                    case Base: 
+                        if (kernelX > 1 || kernelY > 1)
+                            sizeB = N*K;
+                        break;
+                    case Ver0:
+                        sizeB = N*K;
+                        break;
+                    case Ver1:
+                        cellA = 4;
+                        cellB = 8;
+                        sizeA = M*K;
+                        strideB = Simd::AlignHi(N, cellB);
+                        sizeB = strideB*K;
+                        break;
+                    default: 
+                        break;
+                    }
+                }
+            };
+
+            struct Data
+            {
+                float * a;
+                float * b;
+
+                Data(size_t sizeA, size_t sizeB, void * externalData, size_t * externalSize)
+                    : a(0)
+                    , b(0)
+                    , _data(0)
+                {
+                    sizeA = AlignHi(sizeA, F);
+                    sizeB = AlignHi(sizeB, F);
+                    size_t size = (sizeA + sizeB)*sizeof(float);
+                    if (size == 0)
+                        return;
+                    if (externalData != AlignHi(externalData, SIMD_ALIGN))
+                        size += SIMD_ALIGN;
+                    float * data = NULL;
+                    if (externalData == NULL || externalSize == NULL || *externalSize < size)
+                    {
+                        _data = Simd::Allocate(size);
+                        if (externalSize)
+                            *externalSize = size;
+                        data = (float*)_data;
+                    }
+                    else
+                        data = (float*)AlignHi(externalData, SIMD_ALIGN);
+                    if (sizeA)
+                        a = data;
+                    if (sizeB)
+                        b = data + sizeA;
+                }
+
+                ~Data()
+                {
+                    if (_data)
+                        Simd::Free(_data);
+                }
+
             private:
+                void * _data;
             };
         }
 
@@ -361,40 +652,50 @@ namespace Simd
             const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
             void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
         {
+            using namespace Ncf;
+
             assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
             if (!add)
                 memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
 
-            float * temporal = NULL;
-            void * internal = NULL;
+            Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
 
-            Ncf::Manager manager(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
+            Data data(opt.sizeA, opt.sizeB, buffer, size);
 
-            if(manager.prepare)
+            if (opt.sizeA)
             {
-                if (buffer != AlignHi(buffer, SIMD_ALIGN))
-                    manager.size += SIMD_ALIGN;
-                if (buffer == NULL || size == NULL || *size < manager.size)
+                switch (opt.alg)
                 {
-                    internal = Allocate(manager.size);
-                    if (size)
-                        *size = manager.size;
-                    temporal = (float*)internal;
+                case Opt::Ver1: Ver1::PrepareA(weight, opt.M, opt.K, opt.cellA, data.a);
+                default:
+                    break;
                 }
-                else
-                    temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
-
-                manager.prepare(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
             }
             else
-                temporal = (float*)src;
+                data.a = (float*)weight;
 
-            manager.execute(dstDepth, dstHeight*dstWidth, kernelX*kernelY*srcDepth, weight, temporal, dst);
+            if (opt.sizeB)
+            {
+                switch (opt.alg)
+                {
+                case Opt::Base: Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
+                case Opt::Ver0: Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
+                case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.b); break;
+                default: break;
+                }
+            }
+            else
+                data.b = (float*)src;
 
-            if (internal)
-                Free(internal);
+            switch (opt.alg)
+            {
+            case Opt::Base: Base::NeuralConvolutionForwardGemmNN(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
+            case Opt::Ver0: Ver0::NeuralConvolutionForwardGemmNT(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
+            case Opt::Ver1: Ver1::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst, opt.cellA, opt.cellB); break;
+            default: break;
+            }
         }
     }
 #endif// SIMD_SSE3_ENABLE
