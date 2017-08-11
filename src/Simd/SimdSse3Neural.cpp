@@ -37,13 +37,25 @@ namespace Simd
         using Sse::RightNotZero;
 #endif
 
-        template<size_t coreX, size_t coreY> struct Convolution
+        template<size_t kernelX, size_t kernelY> struct Convolution
         {
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums);
         };
 
         template<> struct Convolution<2, 2>
         {
+            template <bool align> static SIMD_INLINE __m128 Convolution2(const float * src, const __m128 * weights)
+            {
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
+                    _mm_mul_ps(Load<false>(src + 1), weights[1]));
+            }
+
+            template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
+            {
+                return _mm_add_ps(Convolution2<align>(src, weights),
+                    Convolution2<align>(src + stride, weights + 2));
+            }
+
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
             {
                 sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
@@ -59,6 +71,20 @@ namespace Simd
 
         template<> struct Convolution<3, 3>
         {
+            template <bool align> static SIMD_INLINE __m128 Convolution3(const float * src, const __m128 * weights)
+            {
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]),
+                        _mm_mul_ps(Load<false>(src + 2), weights[2])));
+            }
+
+            template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
+            {
+                return _mm_add_ps(Convolution3<align>(src, weights),
+                    _mm_add_ps(Convolution3<align>(src + stride, weights + 3),
+                        Convolution3<align>(src + 2 * stride, weights + 6)));
+            }
+
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
             {
                 sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
@@ -76,6 +102,20 @@ namespace Simd
 
         template<> struct Convolution<4, 4>
         {
+            template <bool align> static SIMD_INLINE __m128 Convolution4(const float * src, const __m128 * weights)
+            {
+                return _mm_add_ps(_mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), _mm_mul_ps(Load<false>(src + 1), weights[1])),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 2), weights[2]), _mm_mul_ps(Load<false>(src + 3), weights[3])));
+            }
+
+            template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
+            {
+                return _mm_add_ps(_mm_add_ps(Convolution4<align>(src, weights),
+                    Convolution4<align>(src + stride, weights + 4)),
+                    _mm_add_ps(Convolution4<align>(src + 2 * stride, weights + 8),
+                        Convolution4<align>(src + 3 * stride, weights + 12)));
+            }
+
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
             {
                 sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
@@ -95,6 +135,22 @@ namespace Simd
 
         template<> struct Convolution<5, 5>
         {
+            template <bool align> static SIMD_INLINE __m128 Convolution5(const float * src, const __m128 * weights)
+            {
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), _mm_add_ps(
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]), _mm_mul_ps(Load<false>(src + 2), weights[2])),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 3), weights[3]), _mm_mul_ps(Load<align>(src + 4), weights[4]))));
+            }
+
+            template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
+            {
+                return _mm_add_ps(Convolution5<align>(src, weights),
+                    _mm_add_ps(_mm_add_ps(Convolution5<align>(src + stride, weights + 5),
+                        Convolution5<align>(src + 2 * stride, weights + 10)),
+                        _mm_add_ps(Convolution5<align>(src + 3 * stride, weights + 15),
+                            Convolution5<align>(src + 4 * stride, weights + 20))));
+            }
+
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
             {
                 sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
@@ -119,32 +175,32 @@ namespace Simd
             _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), _mm_hadd_ps(_mm_hadd_ps(src[0], src[1]), _mm_hadd_ps(src[2], src[3]))));
         }
 
-        template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+        template <bool align, size_t kernelX, size_t kernelY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
             __m128 tailMask = RightNotZero(width - alignedWidth);
-            __m128 _sums[coreX*coreY];
+            __m128 _sums[kernelX*kernelY];
             memset(_sums, 0, sizeof(_sums));
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
                     __m128 _dst = Load<align>(dst + col);
-                    Convolution<coreX, coreY>::template Sum<align>(src + col, srcStride, _dst, _sums);
+                    Convolution<kernelX, kernelY>::template Sum<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
                     __m128 _dst = _mm_and_ps(tailMask, Load<false>(dst + col));
-                    Convolution<coreX, coreY>::template Sum<false>(src + col, srcStride, _dst, _sums);
+                    Convolution<kernelX, kernelY>::template Sum<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;
                 dst += dstStride;
             }
-            size_t i = 0, n = Simd::AlignLo(coreX*coreY, F);
+            size_t i = 0, n = Simd::AlignLo(kernelX*kernelY, F);
             for (; i < n; i += F)
                 Add4ExtractedSums(_sums + i, sums + i);
-            for (; i < coreX*coreY; ++i)
+            for (; i < kernelX*kernelY; ++i)
                 sums[i] += ExtractSum(_sums[i]);
         }
 
@@ -573,6 +629,100 @@ namespace Simd
                 }
             }
 
+            namespace Ver2
+            {
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t padX, size_t padY, float * dst, size_t dstWidth, size_t dstHeight)
+                {
+                    for (size_t channel = 0; channel < srcDepth; ++channel)
+                    {
+                        const float * s = src;
+                        float * d = dst;
+                        memset(d, 0, padY*dstWidth*4);
+                        d += padY*dstWidth;
+                        for (size_t row = padY; row < dstHeight - padY; ++row)
+                        {
+                            memset(d, 0, padX*4);
+                            memcpy(d + padX, s, srcWidth * 4);
+                            memset(d + padX + srcWidth, 0, padX * 4);
+                            d += dstWidth;
+                            s += srcWidth;
+                        }
+                        memset(dst, 0, padY*dstWidth * 4);
+                        src += srcWidth*srcHeight;
+                        dst += dstWidth*dstHeight;
+                    }
+                }
+
+                template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m128 * dst)
+                {
+                    for (size_t i = 0; i < size; ++i)
+                        dst[i] = _mm_set1_ps(src[i]);
+                }
+
+                template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    __m128 tailMask = RightNotZero(dstWidth - alignedWidth);
+                    __m128 _weight[kernelX*kernelY];
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                            const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
+                            float * pdst = dst + dstWidth*dstHeight*dstChannel;
+                            LoadWeight<kernelX*kernelY>(pweight, _weight);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    __m128 _dst = Load<align>(pdst + col);
+                                    _dst = _mm_add_ps(_dst, Convolution<kernelX, kernelY>::template Forward<align>(psrc + col, srcWidth, _weight));
+                                    Store<align>(pdst + col, _dst);
+                                }
+                                if (dstWidth - alignedWidth)
+                                {
+                                    size_t col = dstWidth - F;
+                                    __m128 _dst = Load<false>(pdst + col);
+                                    _dst = _mm_add_ps(_dst, _mm_and_ps(tailMask, Convolution<kernelX, kernelY>::template Forward<false>(psrc + col, srcWidth, _weight)));
+                                    Store<false>(pdst + col, _dst);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                void Execute(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, size_t kernelX, size_t kernelY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    assert(kernelX == kernelY);
+                    if (kernelX == 2)
+                        AddConvolution<false, 2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 3)
+                        AddConvolution<false, 3, 3>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 4)
+                        AddConvolution<false, 4, 4>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 5)
+                        AddConvolution<false, 5, 5>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else
+                        assert(0);
+                }
+
+                bool Preferable(size_t srcDepth, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
+                    {
+                        if (dstWidth*dstHeight*kernelX*kernelY >= 64*64*3*3)
+                            return true;
+                    }
+                    return false;
+                }
+            }
+
             struct Opt
             {
                 enum Alg
@@ -580,6 +730,7 @@ namespace Simd
                     Base,
                     Ver0,
                     Ver1,
+                    Ver2,
                 } alg;
 
                 size_t sizeA;
@@ -591,6 +742,8 @@ namespace Simd
 
                 size_t M, N, K;
                 size_t strideB;
+                size_t paddedW;
+                size_t paddedH;
 
                 Opt(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
@@ -610,6 +763,9 @@ namespace Simd
                     else if (kernelX*kernelY < 5*5 || dstHeight*dstWidth < 256*256)
                         alg = Ver1;
 
+                    if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
+                        alg = Ver2;
+
                     switch (alg)
                     {
                     case Base: 
@@ -628,6 +784,13 @@ namespace Simd
                         if (kernelX*kernelY > 1)
                             sizeT = sizeB;
                         break;
+                    case Ver2:
+                        if (padX > 0 || padY > 0)
+                        {
+                            paddedW = Simd::AlignHi(srcWidth + 2 * padX, F);
+                            paddedH = srcHeight + 2 * padY;
+                            sizeB = paddedW*paddedH*srcDepth;
+                        }
                     default: 
                         break;
                     }
@@ -717,6 +880,7 @@ namespace Simd
                 case Opt::Base: Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
                 case Opt::Ver0: Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
                 case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.t, data.b); break;
+                case Opt::Ver2: Ver2::PrepareB(src, srcWidth, srcHeight, srcDepth, padX, padY, data.b, opt.paddedW, opt.paddedH); break;
                 default: break;
                 }
             }
@@ -728,6 +892,7 @@ namespace Simd
             case Opt::Base: Base::NeuralConvolutionForwardGemmNN(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
             case Opt::Ver0: Ver0::NeuralConvolutionForwardGemmNT(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
             case Opt::Ver1: Ver1::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst, opt.cellA, opt.cellB); break;
+            case Opt::Ver2: Ver2::Execute(data.b, opt.paddedW, opt.paddedH, srcDepth, weight, kernelX, kernelY, dst, dstWidth, dstHeight, dstDepth); break;
             default: break;
             }
         }
