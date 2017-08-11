@@ -66,7 +66,7 @@ namespace Test
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
 
     bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax = EPS,
-        bool printError = false, int errorCountMax = 0, const String & description = "");
+        bool printError = false, int errorCountMax = 0, bool relative = true, const String & description = "");
 
     bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax = EPS,
         bool printError = false, int errorCountMax = 0, const String & description = "");

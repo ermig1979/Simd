@@ -1673,18 +1673,18 @@ namespace Test
         Vector dstSrc(dstIndex.Volume());
         Vector dstDst1(dstIndex.Volume());
         Vector dstDst2(dstIndex.Volume());
-        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y + dstIndex.Area()*2);
+        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y*2 + dstIndex.Area()*2);
 
         FillRandom32f(src, 0, 1);
         FillRandom32f(weight, -1, 1);
-        const float level = 1000;
+        const float level = 100;
         FillRandom32f(dstSrc, level, level);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst2, dstIndex, add));
 
-        result = Compare(dstDst1, dstDst2, eps, true, 32);
+        result = Compare(dstDst1, dstDst2, eps, true, 32, false);
 
         return result;
     }
@@ -1720,7 +1720,8 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(127, 129, 31), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 7), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        

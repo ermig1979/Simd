@@ -325,7 +325,7 @@ namespace Test
         return result;
     }
 
-    bool Compare(const float * a, size_t aStride, const float * b, size_t bStride, size_t width, size_t height, float relativeDifferenceMax, bool printError,
+    bool Compare(const float * a, size_t aStride, const float * b, size_t bStride, size_t width, size_t height, float differenceMax, bool printError,
         int errorCountMax, bool relative, const String & description)
     {
         std::stringstream message;
@@ -334,8 +334,8 @@ namespace Test
         {
             for (size_t col = 0; col < width; ++col)
             {
-                float relativeDifference = relative ? ::fabs(a[col] - b[col]) / Simd::Max(::fabs(a[col]), ::fabs(b[col])) : ::fabs(a[col] - b[col]);
-                if (relativeDifference >= relativeDifferenceMax)
+                float difference = relative ? ::fabs(a[col] - b[col]) / Simd::Max(::fabs(a[col]), ::fabs(b[col])) : ::fabs(a[col] - b[col]);
+                if (difference >= differenceMax)
                 {
                     errorCount++;
                     if (printError)
@@ -345,7 +345,7 @@ namespace Test
                         message << "Error at [";
                         if (height > 1)
                             message << row << ", ";
-                        message << col << "] : " << a[col] << " != " << b[col] << "; (relative difference = " << relativeDifference << ")!" << std::endl;
+                        message << col << "] : " << a[col] << " != " << b[col] << "; (" << (relative ? "relative" : "absolute") << " difference = " << difference << ")!" << std::endl;
                     }
                     if (errorCount > errorCountMax)
                     {
@@ -364,10 +364,10 @@ tooMuchErrors:
         return errorCount == 0;
     }
 
-    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), 0, b.data(), 0, a.size(), 1, relativeDifferenceMax, printError, errorCountMax, true, description);
+        return Compare(a.data(), 0, b.data(), 0, a.size(), 1, relativeDifferenceMax, printError, errorCountMax, relative, description);
     }
 
     bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)

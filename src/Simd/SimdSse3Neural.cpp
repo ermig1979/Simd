@@ -339,34 +339,60 @@ namespace Simd
                 }
 
                 void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, 
-                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * dst)
+                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * tmp, float * dst)
                 {
-                    size_t channelSize = srcHeight * srcWidth;
-                    size_t K = kernelX*kernelY*srcDepth;
-                    for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (kernelX*kernelY != 1)
                     {
-                        for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                        float * dst = tmp;
+                        size_t channelSize = srcHeight * srcWidth;
+                        for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
                         {
-                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                            for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
                             {
-                                size_t srcRow = kernelRow*dilationY - padY;
-                                for (size_t dstRow = 0, j = 0; dstRow < dstHeight; ++dstRow)
+                                for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
                                 {
-                                    size_t srcCol = kernelCol*dilationX - padX;
-                                    for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol, ++j)
+                                    size_t srcRow = kernelRow*dilationY - padY;
+                                    for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                                     {
-                                        size_t offset = (j / cell)*K*cell + k*cell + j%cell;
-                                        if (srcCol < srcWidth && srcRow < srcHeight)
-                                            dst[offset] = src[srcRow*srcWidth + srcCol];
+                                        if (srcRow < srcHeight)
+                                        {
+                                            size_t srcCol = kernelCol*dilationX - padX;
+                                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                            {
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = src[srcRow*srcWidth + srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                                srcCol += strideX;
+                                            }
+                                        } 
                                         else
-                                            dst[offset] = 0;
-                                        srcCol += strideX;
+                                        {
+                                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                *(dst++) = 0;
+                                        }
+                                        srcRow += strideY;
                                     }
-                                    srcRow += strideY;
                                 }
                             }
                         }
+                        src = tmp;
                     }
+                    for (size_t j = 0; j < N; j += cell)
+                    {
+                        size_t n = Simd::Min(cell, N - j);
+                        for (size_t k = 0; k < K; ++k)
+                        {
+                            const float * psrc = src + k*N;
+                            size_t c = 0;
+                            for (; c < n; ++c)
+                                *(dst++) = *(psrc++);
+                            for (; c < cell; ++c)
+                                *(dst++) = 0;
+                        }
+                        src += cell;
+                    }                    
                 }
 
                 SIMD_INLINE void AddSum(const __m128 & sum, float * dst)
@@ -558,6 +584,7 @@ namespace Simd
 
                 size_t sizeA;
                 size_t sizeB;
+                size_t sizeT;
 
                 size_t cellA;
                 size_t cellB;
@@ -570,6 +597,7 @@ namespace Simd
                     alg = Base;
                     sizeA = 0;
                     sizeB = 0;
+                    sizeT = 0;
                     cellA = 1;
                     cellB = 1;
 
@@ -579,7 +607,7 @@ namespace Simd
 
                     if (dstWidth*dstHeight / kernelX <= 2000)
                         alg = Ver0;
-                    else if(kernelX*kernelY == 1)
+                    else if (kernelX*kernelY < 5*5 || dstHeight*dstWidth < 256*256)
                         alg = Ver1;
 
                     switch (alg)
@@ -597,6 +625,8 @@ namespace Simd
                         sizeA = M*K;
                         strideB = Simd::AlignHi(N, cellB);
                         sizeB = strideB*K;
+                        if (kernelX*kernelY > 1)
+                            sizeT = sizeB;
                         break;
                     default: 
                         break;
@@ -608,15 +638,17 @@ namespace Simd
             {
                 float * a;
                 float * b;
+                float * t;
 
-                Data(size_t sizeA, size_t sizeB, void * externalData, size_t * externalSize)
+                Data(size_t sizeA, size_t sizeB, size_t sizeT, void * externalData, size_t * externalSize)
                     : a(0)
                     , b(0)
                     , _data(0)
                 {
                     sizeA = AlignHi(sizeA, F);
                     sizeB = AlignHi(sizeB, F);
-                    size_t size = (sizeA + sizeB)*sizeof(float);
+                    sizeT = AlignHi(sizeT, F);
+                    size_t size = (sizeA + sizeB + sizeT)*sizeof(float);
                     if (size == 0)
                         return;
                     if (externalData != AlignHi(externalData, SIMD_ALIGN))
@@ -635,6 +667,8 @@ namespace Simd
                         a = data;
                     if (sizeB)
                         b = data + sizeA;
+                    if (sizeT)
+                        t = data + sizeA + sizeB;
                 }
 
                 ~Data()
@@ -662,7 +696,7 @@ namespace Simd
 
             Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
 
-            Data data(opt.sizeA, opt.sizeB, buffer, size);
+            Data data(opt.sizeA, opt.sizeB, opt.sizeT, buffer, size);
 
             if (opt.sizeA)
             {
@@ -682,7 +716,7 @@ namespace Simd
                 {
                 case Opt::Base: Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
                 case Opt::Ver0: Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
-                case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.b); break;
+                case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.t, data.b); break;
                 default: break;
                 }
             }
