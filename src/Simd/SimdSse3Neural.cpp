@@ -760,9 +760,8 @@ namespace Simd
 
                     if (dstWidth*dstHeight / kernelX <= 2000)
                         alg = Ver0;
-                    else if (kernelX*kernelY < 5*5 || dstHeight*dstWidth < 256*256)
+                    else 
                         alg = Ver1;
-
                     if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
                         alg = Ver2;
 
