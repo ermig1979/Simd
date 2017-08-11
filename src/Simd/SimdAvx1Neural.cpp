@@ -1009,7 +1009,39 @@ namespace Simd
         {
             namespace Ver0
             {
-                template <bool align> static SIMD_INLINE void AddProductSum1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
+                    size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, float * dst)
+                {
+                    const size_t dstHeight = (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1;
+                    const size_t dstWidth = (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1;
+                    for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                    {
+                        size_t srcRow0 = dstRow*strideY - padY;
+                        for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                        {
+                            size_t srcCol0 = dstCol*strideX - padX;
+                            for (size_t channel = 0; channel < srcDepth; ++channel)
+                            {
+                                size_t dstChannelOffset = ((dstRow*dstWidth + dstCol)*srcDepth + channel)*kernelY*kernelX;
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    size_t srcRow = srcRow0 + kernelRow*dilationY;
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                    {
+                                        size_t srcCol = srcCol0 + kernelCol*dilationX;
+                                        size_t dstOffset = dstChannelOffset + kernelRow*kernelX + kernelCol;
+                                        if (srcRow < srcHeight && srcCol < srcWidth)
+                                            dst[dstOffset] = src[(channel*srcHeight + srcRow)*srcWidth + srcCol];
+                                        else
+                                            dst[dstOffset] = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
                 {
                     sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(a, Load<align>(b + 0 * K)));
                     sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(a, Load<align>(b + 1 * K)));
@@ -1017,7 +1049,7 @@ namespace Simd
                     sums[3] = _mm256_add_ps(sums[3], _mm256_mul_ps(a, Load<align>(b + 3 * K)));
                 }
 
-                template <bool align> static SIMD_INLINE void AddProductSum1x1x8(const __m256 & a, const float * b, __m256 & sum)
+                template <bool align> static SIMD_INLINE void Kernel1x1x8(const __m256 & a, const float * b, __m256 & sum)
                 {
                     sum = _mm256_add_ps(sum, _mm256_mul_ps(a, Load<align>(b)));
                 }
@@ -1029,7 +1061,7 @@ namespace Simd
                     _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), sum128));
                 }
 
-                template <bool align> static SIMD_INLINE void AddProductSum2x4x8(const __m256 & a0, const __m256 & a1, size_t K, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel2x4x8(const __m256 & a0, const __m256 & a1, size_t K, const float * b, __m256 * sums)
                 {
                     __m256 b0 = Avx::Load<align>(b + 0 * K);
                     sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(a0, b0));
@@ -1045,13 +1077,13 @@ namespace Simd
                     sums[7] = _mm256_add_ps(sums[7], _mm256_mul_ps(a1, b3));
                 }
 
-                template <bool align> static SIMD_INLINE void AddProductSum2x1x8(const __m256 & a0, const __m256 & a1, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel2x1x8(const __m256 & a0, const __m256 & a1, const float * b, __m256 * sums)
                 {
                     sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(a0, Load<align>(b)));
                     sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(a1, Load<align>(b)));
                 }
 
-                template <bool align> void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                template <bool align> void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
                     size_t M2 = Simd::AlignLo(M, 2);
                     size_t N4 = Simd::AlignLo(N, 4);
@@ -1073,14 +1105,14 @@ namespace Simd
                             {
                                 __m256 _a0 = Avx::Load<false>(pa0 + k);
                                 __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                AddProductSum2x4x8<align>(_a0, _a1, K, pb + k, sums);
+                                Kernel2x4x8<align>(_a0, _a1, K, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
                                 __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
                                 __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                AddProductSum2x4x8<false>(_a0, _a1, K, pb + k, sums);
+                                Kernel2x4x8<false>(_a0, _a1, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc0 + j);
                             Add4ExtractedSums(sums + 4, pc1 + j);
@@ -1093,14 +1125,14 @@ namespace Simd
                             {
                                 __m256 _a0 = Avx::Load<false>(pa0 + k);
                                 __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                AddProductSum2x1x8<align>(_a0, _a1, pb + k, sums);
+                                Kernel2x1x8<align>(_a0, _a1, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
                                 __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
                                 __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                AddProductSum2x1x8<false>(_a0, _a1, pb + k, sums);
+                                Kernel2x1x8<false>(_a0, _a1, pb + k, sums);
                             }
                             pc0[j] += Avx::ExtractSum(sums[0]);
                             pc1[j] += Avx::ExtractSum(sums[1]);
@@ -1118,13 +1150,13 @@ namespace Simd
                             for (size_t k = 0; k < K8; k += 8)
                             {
                                 __m256 _a = Avx::Load<false>(pa + k);
-                                AddProductSum1x4x8<align>(_a, K, pb + k, sums);
+                                Kernel1x4x8<align>(_a, K, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
                                 __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
-                                AddProductSum1x4x8<false>(_a, K, pb + k, sums);
+                                Kernel1x4x8<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j);
                         }
@@ -1135,25 +1167,25 @@ namespace Simd
                             for (size_t k = 0; k < K8; k += 8)
                             {
                                 __m256 _a = Avx::Load<false>(pa + k);
-                                AddProductSum1x1x8<align>(_a, pb + k, sum);
+                                Kernel1x1x8<align>(_a, pb + k, sum);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
                                 __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
-                                AddProductSum1x1x8<false>(_a, pb + k, sum);
+                                Kernel1x1x8<false>(_a, pb + k, sum);
                             }
                             pc[j] += Avx::ExtractSum(sum);
                         }
                     }
                 }
 
-                void NeuralConvolutionForwardGemmNT(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
                     if (Aligned(K, F))
-                        NeuralConvolutionForwardGemmNT<true>(M, N, K, a, b, c);
+                        Execute<true>(M, N, K, a, b, c);
                     else
-                        NeuralConvolutionForwardGemmNT<false>(M, N, K, a, b, c);
+                        Execute<false>(M, N, K, a, b, c);
                 }
             }
 
@@ -1428,16 +1460,10 @@ namespace Simd
                             d += dstWidth;
                             s += srcWidth;
                         }
-                        memset(dst, 0, padY*dstWidth * 4);
+                        memset(d, 0, padY*dstWidth * 4);
                         src += srcWidth*srcHeight;
                         dst += dstWidth*dstHeight;
                     }
-                }
-
-                template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m128 * dst)
-                {
-                    for (size_t i = 0; i < size; ++i)
-                        dst[i] = _mm_set1_ps(src[i]);
                 }
 
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
@@ -1497,7 +1523,7 @@ namespace Simd
                 {
                     if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (dstWidth*dstHeight*kernelX*kernelY >= 64 * 64 * 3 * 3)
+                        if (dstWidth*dstHeight*kernelX*kernelY >= 32 * 32 * 3 * 3)
                             return true;
                     }
                     return false;
@@ -1508,7 +1534,7 @@ namespace Simd
             {
                 enum Alg
                 {
-                    Base,
+                    None,
                     Ver0,
                     Ver1,
                     Ver2,
@@ -1528,7 +1554,7 @@ namespace Simd
 
                 Opt(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
-                    alg = Base;
+                    alg = None;
                     sizeA = 0;
                     sizeB = 0;
                     sizeT = 0;
@@ -1548,10 +1574,6 @@ namespace Simd
 
                     switch (alg)
                     {
-                    case Base:
-                        if (kernelX > 1 || kernelY > 1)
-                            sizeB = N*K;
-                        break;
                     case Ver0:
                         sizeB = N*K;
                         break;
@@ -1572,6 +1594,7 @@ namespace Simd
                             sizeB = paddedW*paddedH*srcDepth;
                         }
                     default:
+                        assert(0);
                         break;
                     }
                 }
@@ -1657,8 +1680,7 @@ namespace Simd
             {
                 switch (opt.alg)
                 {
-                case Opt::Base: Base::NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
-                case Opt::Ver0: Base::NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
+                case Opt::Ver0: Ver0::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, data.b); break;
                 case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.t, data.b); break;
                 case Opt::Ver2: Ver2::PrepareB(src, srcWidth, srcHeight, srcDepth, padX, padY, data.b, opt.paddedW, opt.paddedH); break;
                 default: break;
@@ -1669,8 +1691,7 @@ namespace Simd
 
             switch (opt.alg)
             {
-            case Opt::Base: Base::NeuralConvolutionForwardGemmNN(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
-            case Opt::Ver0: Ver0::NeuralConvolutionForwardGemmNT(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
+            case Opt::Ver0: Ver0::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
             case Opt::Ver1: Ver1::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst, opt.cellA, opt.cellB); break;
             case Opt::Ver2: Ver2::Execute(data.b, opt.paddedW, opt.paddedH, srcDepth, weight, kernelX, kernelY, dst, dstWidth, dstHeight, dstDepth); break;
             default: break;
