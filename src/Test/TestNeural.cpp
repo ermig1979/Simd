@@ -1020,7 +1020,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, size, (float*)weights.data, dstSrc, dstDst2));
 
-        result = Compare(dstDst1, dstDst2, eps, true, 32);
+        result = Compare(dstDst1, dstDst2, eps, true, 32, false);
 
         return result;
     }
