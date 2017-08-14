@@ -242,7 +242,8 @@ namespace Test
         T sse41;
         T avx;
         T avx2;
-        T vmx;
+		T avx512;
+		T vmx;
         T vsx;
 		T neon;
     };
@@ -274,12 +275,13 @@ namespace Test
         if(enable.sse41) ss << printer.Average(printer.data.sse41) << " ";
         if(enable.avx) ss << printer.Average(printer.data.avx) << " ";
         if(enable.avx2) ss << printer.Average(printer.data.avx2) << " ";
-        if(enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
+		if(enable.avx512) ss << printer.Average(printer.data.avx512) << " ";
+		if(enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
         if(enable.vsx) ss << printer.Average(printer.data.vsx) << " ";
 		if(enable.neon) ss << printer.Average(printer.data.neon) << " ";
 		ss << "| ";
 
-        if(enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2 || enable.vmx || enable.vsx || enable.neon)
+        if(enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2 || enable.avx512 || enable.vmx || enable.vsx || enable.neon)
         {
             if(enable.sse) ss << printer.Relation(printer.data.base, printer.data.sse) << " ";
             if(enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2) << " ";
@@ -287,21 +289,23 @@ namespace Test
             if(enable.sse41) ss << printer.Relation(printer.data.base, printer.data.sse41) << " ";
             if(enable.avx) ss << printer.Relation(printer.data.base, printer.data.avx) << " ";
             if(enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2) << " ";
-            if(enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
+			if(enable.avx512) ss << printer.Relation(printer.data.base, printer.data.avx512) << " ";
+			if(enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
             if(enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx) << " ";
 			if(enable.neon) ss << printer.Relation(printer.data.base, printer.data.neon) << " ";
 			ss << "| ";
         }
 
-        if (enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2)
+        if (enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2 || enable.avx512)
         {
-            if (enable.sse) ss << printer.Improving(printer.data.sse) << " ";
-            if (enable.sse2) ss << printer.Improving(printer.data.sse2) << " ";
-            if (enable.ssse3) ss << printer.Improving(printer.data.ssse3) << " ";
-            if (enable.sse41) ss << printer.Improving(printer.data.sse41) << " ";
-            if (enable.avx) ss << printer.Improving(printer.data.avx) << " ";
-            if (enable.avx2) ss << printer.Improving(printer.data.avx2) << " ";
-            ss << "| ";
+            if(enable.sse) ss << printer.Improving(printer.data.sse) << " ";
+            if(enable.sse2) ss << printer.Improving(printer.data.sse2) << " ";
+            if(enable.ssse3) ss << printer.Improving(printer.data.ssse3) << " ";
+            if(enable.sse41) ss << printer.Improving(printer.data.sse41) << " ";
+            if(enable.avx) ss << printer.Improving(printer.data.avx) << " ";
+            if(enable.avx2) ss << printer.Improving(printer.data.avx2) << " ";
+			if(enable.avx512) ss << printer.Improving(printer.data.avx512) << " ";
+			ss << "| ";
         }
 
         if(align)
@@ -314,7 +318,8 @@ namespace Test
             if(enable.sse41) ss << printer.Alignment(printer.data.sse41) << " ";
             if(enable.avx) ss << printer.Alignment(printer.data.avx) << " ";
             if(enable.avx2) ss << printer.Alignment(printer.data.avx2) << " ";
-            if(enable.vmx) ss << printer.Alignment(printer.data.vmx) << " ";
+			if(enable.avx512) ss << printer.Alignment(printer.data.avx512) << " ";
+			if(enable.vmx) ss << printer.Alignment(printer.data.vmx) << " ";
             if(enable.vsx) ss << printer.Alignment(printer.data.vsx) << " ";
 			if(enable.neon) ss << printer.Alignment(printer.data.neon) << " ";
 			ss << "| ";
@@ -381,39 +386,41 @@ namespace Test
         }
     };
 
-    static inline bool AddToFunction(const PerformanceMeasurer & src, Function & dst)
+    static inline void AddToFunction(const PerformanceMeasurer & src, Function & dst, bool & enable)
     {
         const String & desc = src.Description();
         bool align = desc[desc.size() - 2] == 'a';
         (align ? dst.first : dst.second) = src; 
-        return true;
+        enable = true;
     }
 
     static inline void AddToFunction(const PerformanceMeasurer & src, FunctionStatistic & dst, StatisticEnable & enable)
     {
         const String & desc = src.Description();
         if(desc.find("Simd::") == std::string::npos && desc.find("Simd") == 0)
-            enable.simd = AddToFunction(src, dst.simd);
+            AddToFunction(src, dst.simd, enable.simd);
         if(desc.find("Simd::Base::") != std::string::npos)
-            enable.base = AddToFunction(src, dst.base);
+            AddToFunction(src, dst.base, enable.base);
         if (desc.find("Simd::Sse::") != std::string::npos)
-            enable.sse = AddToFunction(src, dst.sse);
+            AddToFunction(src, dst.sse, enable.sse);
         if(desc.find("Simd::Sse2::") != std::string::npos)
-            enable.sse2 = AddToFunction(src, dst.sse2);
+            AddToFunction(src, dst.sse2, enable.sse2);
         if(desc.find("Simd::Ssse3::") != std::string::npos || desc.find("Simd::Sse3::") != std::string::npos)
-            enable.ssse3 = AddToFunction(src, dst.ssse3);
+            AddToFunction(src, dst.ssse3, enable.ssse3);
         if(desc.find("Simd::Sse41::") != std::string::npos || desc.find("Simd::Sse42::") != std::string::npos)
-            enable.sse41 = AddToFunction(src, dst.sse41);
+            AddToFunction(src, dst.sse41, enable.sse41);
         if (desc.find("Simd::Avx::") != std::string::npos)
-            enable.avx = AddToFunction(src, dst.avx);
+            AddToFunction(src, dst.avx, enable.avx);
         if(desc.find("Simd::Avx2::") != std::string::npos)
-            enable.avx2 = AddToFunction(src, dst.avx2);
-        if(desc.find("Simd::Vmx::") != std::string::npos)
-            enable.vmx = AddToFunction(src, dst.vmx);
+            AddToFunction(src, dst.avx2, enable.avx2);
+		if (desc.find("Simd::Avx512f::") != std::string::npos || desc.find("Simd::Avx512bw::") != std::string::npos)
+			AddToFunction(src, dst.avx512, enable.avx512);
+		if(desc.find("Simd::Vmx::") != std::string::npos)
+            AddToFunction(src, dst.vmx, enable.vmx);
         if(desc.find("Simd::Vsx::") != std::string::npos)
-            enable.vsx = AddToFunction(src, dst.vsx);
+            AddToFunction(src, dst.vsx, enable.vsx);
 		if(desc.find("Simd::Neon::") != std::string::npos)
-			enable.neon = AddToFunction(src, dst.neon);
+			AddToFunction(src, dst.neon, enable.neon);
 	}
 
     static inline const Function & Cond(const Function & a, const Function & b)
@@ -437,7 +444,8 @@ namespace Test
         if(enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))), d.sse41);
         if(enable.avx) Add(Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))), d.avx);
         if(enable.avx2) Add(Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))))), d.avx2);
-        if(enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
+		if(enable.avx512) Add(Cond(s.avx512, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))))), d.avx512);
+		if(enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if(enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
 		if(enable.neon) Add(Cond(s.neon, s.base), d.neon);
 	}
@@ -460,8 +468,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = {false, false, false, false, false, false, false, false, false, false, false};
-        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, { "Sse", "S1" }, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S4"}, { "Avx", "A1" }, {"Avx2", "A2"}, {"Vmx", "Vm"}, {"Vsx", "Vs"}, { "Neon", "N"}};
+        StatisticEnable enable = {false, false, false, false, false, false, false, false, false, false, false, false};
+        StatisticNames names = {{"Simd", "S"}, {"Base", "B"}, { "Sse", "S1" }, {"Sse2", "S2"}, {"Ssse3", "S3"}, {"Sse41", "S4"}, { "Avx", "A1" }, {"Avx2", "A2"}, { "Avx5", "A5" }, {"Vmx", "Vm"}, {"Vsx", "Vs"}, { "Neon", "N"}};
         double timeMax = 0;
         size_t sizeMax = 8;
         for(FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
