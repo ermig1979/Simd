@@ -186,11 +186,20 @@ namespace Simd
 #endif
 		}
 
+		SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
 		template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
 			size_t alignedSize = Simd::AlignLo(size, F);
 			__m512 _slope = _mm512_set1_ps(*slope);
-			__m512 _0 = _mm512_set1_ps(0.0);
+			__m512 _0 = _mm512_set1_ps(-0.0f);
 			__m512 _1 = _mm512_set1_ps(1.0f);
 			__m512 _a = _mm512_set1_ps(0.5417f);
 			__m512 _b = _mm512_set1_ps(0.1460f);
@@ -198,7 +207,7 @@ namespace Simd
 			for (; i < alignedSize; i += F)
 			{
 				__m512 _src = Load<align>(src + i);
-				__m512 x = _mm512_abs_ps(_mm512_mul_ps(_src, _slope));
+				__m512 x = AndNot(_0, _mm512_mul_ps(_src, _slope));
 				__m512 x2 = _mm512_mul_ps(x, x);
 				__m512 x4 = _mm512_mul_ps(x2, x2);
 				__m512 series = _mm512_add_ps(_mm512_add_ps(_1, x), _mm512_add_ps(_mm512_mul_ps(x2, _a), _mm512_mul_ps(x4, _b)));
