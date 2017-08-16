@@ -413,16 +413,37 @@ namespace Simd
             {
                 void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
                 {
-                    for (size_t i = 0; i < M; i += cell)
-                    {
-                        size_t n = Simd::Min(cell, M - i);
-                        for (size_t k = 0; k < K; ++k)
-                        {
-                            for (size_t c = 0; c < n; ++c)
-                                *(dst++) = src[c*K + k];
-                        }
-                        src += cell*K;
-                    }
+					size_t K4 = AlignLo(K, 4);
+					for (size_t i = 0; i < M; i += cell)
+					{
+						size_t n = Simd::Min(cell, M - i), k = 0;
+						if (cell == 4 && n == 4)
+						{
+							for (; k < K4; k += 4)
+							{
+								const float * ps = src + k;
+								__m128 s0 = Load<false>(ps + 0 * K);
+								__m128 s1 = Load<false>(ps + 1 * K);
+								__m128 s2 = Load<false>(ps + 2 * K);
+								__m128 s3 = Load<false>(ps + 3 * K);
+								__m128 s00 = _mm_unpacklo_ps(s0, s2);
+								__m128 s01 = _mm_unpacklo_ps(s1, s3);
+								__m128 s10 = _mm_unpackhi_ps(s0, s2);
+								__m128 s11 = _mm_unpackhi_ps(s1, s3);
+								Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
+								Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
+								Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
+								Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
+								dst += 16;
+							}
+						}
+						for (; k < K; ++k)
+						{
+							for (size_t c = 0; c < n; ++c)
+								*(dst++) = src[c*K + k];
+						}
+						src += cell*K;
+					}	
                 }
 
                 void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, 
@@ -877,7 +898,7 @@ namespace Simd
                     if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
                         alg = Ver2;
 
-                    switch (alg)
+					switch (alg)
                     {
                     case Ver0:
                         sizeB = N*K;
