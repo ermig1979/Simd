@@ -278,7 +278,7 @@ namespace Simd
 
             for (size_t i = 0; i < _levels.size(); ++i)
             {
-                Level & level = _levels[i];
+                Level & level = *_levels[i];
                 View mask = level.roi;
                 Rect rect = level.rect;
                 if (motionMask)
@@ -378,13 +378,14 @@ namespace Simd
                     ::SimdDetectionFree(hids[i].handle);
             }
         };
-        typedef std::vector<Level> Levels;
+		typedef std::unique_ptr<Level> LevelPtr;
+        typedef std::vector<LevelPtr> LevelPtrs;
 
         std::vector<Data> _data;
         Size _imageSize;
         bool _needNormalization;
         ptrdiff_t _threadNumber;
-        Levels _levels;
+        LevelPtrs _levels;
 
         bool InitLevels(double scaleFactor, const Size & sizeMin, const Size & sizeMax, const View & roi)
         {
@@ -412,8 +413,8 @@ namespace Simd
 
                 if (insert)
                 {
-                    _levels.push_back(Level());
-                    Level & level = _levels.back();
+                    _levels.push_back(LevelPtr(new Level()));
+                    Level & level = *_levels.back();
 
                     level.scale = scale;
                     level.throughColumn = scale <= 2.0;
@@ -484,14 +485,14 @@ namespace Simd
                 src = gray;
             }
 
-            Simd::ResizeBilinear(src, _levels[0].src);
+            Simd::ResizeBilinear(src, _levels[0]->src);
             if (_needNormalization)
-                Simd::NormalizeHistogram(_levels[0].src, _levels[0].src);
-            EstimateIntegral(_levels[0]);
+                Simd::NormalizeHistogram(_levels[0]->src, _levels[0]->src);
+            EstimateIntegral(*_levels[0]);
             for (size_t i = 1; i < _levels.size(); ++i)
             {
-                Simd::ResizeBilinear(_levels[0].src, _levels[i].src);
-                EstimateIntegral(_levels[i]);
+                Simd::ResizeBilinear(_levels[0]->src, _levels[i]->src);
+                EstimateIntegral(*_levels[i]);
             }
         }
 
