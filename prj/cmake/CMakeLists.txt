@@ -131,7 +131,7 @@ elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQU
 elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
 
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
-        set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16")
+        set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16 -mfp16-format=ieee")
     else()
         set(CXX_NEON_FLAG "")
     endif() 

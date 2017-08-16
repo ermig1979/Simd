@@ -214,7 +214,7 @@
 #define SIMD_NEON_ASM_ENABLE
 #endif
 
-#if defined(__ARM_FP) && (__ARM_FP & 0x2) != 0
+#if defined(__ARM_FP16_FORMAT_IEEE) || defined(__ARM_FP16_FORMAT_ALTERNATIVE)
 #define SIMD_NEON_FP16_ENABLE
 #endif
 
