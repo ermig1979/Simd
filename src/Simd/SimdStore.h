@@ -171,6 +171,21 @@ namespace Simd
 		{
 			_mm512_store_ps(p, a);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void Store(float * p, __m512 a, __mmask16 m)
+		{
+			return Store<align>(p, a);
+		}
+
+		template <> SIMD_INLINE void Store<false, true>(float * p, __m512 a, __mmask16 m)
+		{
+			return _mm512_mask_storeu_ps(p, m, a);
+		}
+
+		template <> SIMD_INLINE void Store<true, true>(float * p, __m512 a, __mmask16 m)
+		{
+			return _mm512_mask_store_ps(p, m, a);
+		}
 	}
 #endif
 

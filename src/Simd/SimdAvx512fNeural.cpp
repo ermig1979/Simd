@@ -30,10 +30,10 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-		template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, __m512 & sum)
+		template <bool align, bool mask> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t offset, __m512 & sum, __mmask16 m = -1)
 		{
-			__m512 _a = Load<align>(a + offset);
-			__m512 _b = Load<align>(b + offset);
+			__m512 _a = Load<align, mask>(a + offset, m);
+			__m512 _b = Load<align, mask>(b + offset, m);
 			sum = _mm512_fmadd_ps(_a, _b, sum);
 		}
 
@@ -42,30 +42,32 @@ namespace Simd
 			if (align)
 				assert(Aligned(a) && Aligned(b));
 
-			*sum = 0;
 			size_t partialAlignedSize = AlignLo(size, F);
 			size_t fullAlignedSize = AlignLo(size, QF);
 			size_t i = 0;
-			if (partialAlignedSize)
+			__m512 sum0 = _mm512_setzero_ps();
+			if (fullAlignedSize)
 			{
-				__m512 sums[4] = {_mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps()};
-				if (fullAlignedSize)
+				__m512 sum1 = _mm512_setzero_ps();
+				__m512 sum2 = _mm512_setzero_ps();
+				__m512 sum3 = _mm512_setzero_ps();
+				for (; i < fullAlignedSize; i += QF)
 				{
-					for (; i < fullAlignedSize; i += QF)
-					{
-						NeuralProductSum<align>(a, b, i + F * 0, sums[0]);
-						NeuralProductSum<align>(a, b, i + F * 1, sums[1]);
-						NeuralProductSum<align>(a, b, i + F * 2, sums[2]);
-						NeuralProductSum<align>(a, b, i + F * 3, sums[3]);
-					}
-					sums[0] = _mm512_add_ps(_mm512_add_ps(sums[0], sums[1]), _mm512_add_ps(sums[2], sums[3]));
+					NeuralProductSum<align, false>(a, b, i + F * 0, sum0);
+					NeuralProductSum<align, false>(a, b, i + F * 1, sum1);
+					NeuralProductSum<align, false>(a, b, i + F * 2, sum2);
+					NeuralProductSum<align, false>(a, b, i + F * 3, sum3);
 				}
-				for (; i < partialAlignedSize; i += F)
-					NeuralProductSum<align>(a, b, i, sums[0]);
-				*sum += ExtractSum(sums[0]);
+				sum0 = _mm512_add_ps(_mm512_add_ps(sum0, sum1), _mm512_add_ps(sum2, sum3));
 			}
-			for (; i < size; ++i)
-				*sum += a[i] * b[i];
+			for (; i < partialAlignedSize; i += F)
+				NeuralProductSum<align, false>(a, b, i, sum0);			
+			if (i < size)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+				NeuralProductSum<align, true>(a, b, i, sum0, tailMask);
+			}
+			*sum = ExtractSum(sum0);
 		}
 
 		void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
