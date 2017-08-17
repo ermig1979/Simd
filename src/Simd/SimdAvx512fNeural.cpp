@@ -78,29 +78,31 @@ namespace Simd
 				NeuralProductSum<false>(a, b, size, sum);
 		}
 
-        template <bool align> SIMD_INLINE void AddMultiplied(const float * src, const __m512 & value, float * dst)
+        template <bool align, bool mask> SIMD_INLINE void AddMultiplied(const float * src, const __m512 & value, float * dst, __mmask16 m = -1)
         {
-            Store<align>(dst, _mm512_fmadd_ps(value, Load<align>(src), Load<align>(dst)));
+			__m512 _src = Load<align, mask>(src, m);
+			__m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_fmadd_ps(value, _src, _dst), m);
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float * src, size_t aligned, size_t partial, size_t full, float value, float * dst)
         {
             size_t i = 0;
-            if (partial)
+            __m512 _value = _mm512_set1_ps(value);
+            for (; i < aligned; i += QF)
             {
-                __m512 _value = _mm512_set1_ps(value);
-                for (; i < aligned; i += QF)
-                {
-                    AddMultiplied<align>(src + i + F*0, _value, dst + i + F*0);
-                    AddMultiplied<align>(src + i + F*1, _value, dst + i + F*1);
-                    AddMultiplied<align>(src + i + F*2, _value, dst + i + F*2);
-                    AddMultiplied<align>(src + i + F*3, _value, dst + i + F*3);
-                }
-                for (; i < partial; i += F)
-                    AddMultiplied<align>(src + i, _value, dst + i);
+                AddMultiplied<align, false>(src + i + F*0, _value, dst + i + F*0);
+                AddMultiplied<align, false>(src + i + F*1, _value, dst + i + F*1);
+                AddMultiplied<align, false>(src + i + F*2, _value, dst + i + F*2);
+                AddMultiplied<align, false>(src + i + F*3, _value, dst + i + F*3);
             }
-            for (; i < full; ++i)
-                dst[i] += src[i] * value;
+            for (; i < partial; i += F)
+                AddMultiplied<align, false>(src + i, _value, dst + i);
+			if (i < full)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - full);
+				AddMultiplied<align, true>(src + i, _value, dst + i, tailMask);
+			}
         }
 
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
