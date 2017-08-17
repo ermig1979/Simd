@@ -115,9 +115,11 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-		template <bool align> SIMD_INLINE void AddVector(const float * src, float * dst)
+		template <bool align, bool mask> SIMD_INLINE void AddVector(const float * src, float * dst, __mmask16 m = -1)
 		{
-			Store<align>(dst, _mm512_add_ps(Load<align>(dst), Load<align>(src)));
+			__m512 _src = Load<align, mask>(src, m);
+			__m512 _dst = Load<align, mask>(dst, m);
+			Store<align, mask>(dst, _mm512_add_ps(_src, _dst), m);
 		}
 
 		template <bool align> SIMD_INLINE void AddVector(const float * src, size_t aligned, size_t partial, size_t full, float * dst)
@@ -125,15 +127,18 @@ namespace Simd
 			size_t i = 0;
 			for (; i < aligned; i += QF)
 			{
-				AddVector<align>(src + i + F * 0, dst + i + F * 0);
-				AddVector<align>(src + i + F * 1, dst + i + F * 1);
-				AddVector<align>(src + i + F * 2, dst + i + F * 2);
-				AddVector<align>(src + i + F * 3, dst + i + F * 3);
+				AddVector<align, false>(src + i + F * 0, dst + i + F * 0);
+				AddVector<align, false>(src + i + F * 1, dst + i + F * 1);
+				AddVector<align, false>(src + i + F * 2, dst + i + F * 2);
+				AddVector<align, false>(src + i + F * 3, dst + i + F * 3);
 			}
 			for (; i < partial; i += F)
-				AddVector<align>(src + i, dst + i);
-			for (; i < full; ++i)
-				dst[i] += src[i];
+				AddVector<align, false>(src + i, dst + i);
+			if (i < full)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - full);
+				AddVector<align, true>(src + i, dst + i, tailMask);
+			}
 		}
 
 		void NeuralAddVector(const float * src, size_t size, float * dst)

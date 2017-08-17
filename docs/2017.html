@@ -40,12 +40,14 @@
 <ul>
  <li>Tail processing in AVX-512F version of function NeuralProductSum.</li>
  <li>Tail processing in AVX-512F version of function NeuralAddVectorMultipliedByValue.</li>
+ <li>Tail processing in AVX-512F version of function NeuralAddVector.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>GCC compiler bug in function Allocator::Alignment.</li>
  <li>Program crashes in Simd::Detection when small value of parameter scaleFactor is used.</li>
  <li>ARM FP16 GCC compiler error in file SimdNeonFloat16.cpp.</li>
+ <li>Error in function Neural::MaxPoolingLayer::Forward.</li>
 </ul>
 
 <h4>Test framework</h4>

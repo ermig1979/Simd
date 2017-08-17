@@ -1002,22 +1002,22 @@ namespace Simd
                     {
                         for (ptrdiff_t y = 0; y < _dst.height; y++)
                         {
-                            ptrdiff_t dyStart = std::max(ptrdiff_t(0), y - _poolingPad.y);
+                            ptrdiff_t dyStart = y*_poolingStride.y - _poolingPad.y;
                             ptrdiff_t dyEnd = std::min(dyStart + _poolingSize.y, _src.height);
+							dyStart = std::max(ptrdiff_t(0), dyStart);
                             for (ptrdiff_t x = 0; x < _dst.width; x++)
                             {
-                                ptrdiff_t dxStart = std::max(ptrdiff_t(0), y - _poolingPad.x);
+                                ptrdiff_t dxStart = x*_poolingStride.x - _poolingPad.x;
                                 ptrdiff_t dxEnd = std::min(dxStart + _poolingSize.x, _src.width);
-                                ptrdiff_t srcOffset = _src.Offset(x*_poolingStride.x, y*_poolingStride.y, c);
-                                const float * psrc = src.data() + srcOffset;
-                                ptrdiff_t maxIndex = 0;
+								dxStart = std::max(ptrdiff_t(0), dxStart);
+                                ptrdiff_t maxIndex = _src.Offset(dxStart, dyStart, c);
                                 float maxValue = std::numeric_limits<float>::lowest();
                                 for (ptrdiff_t dy = dyStart; dy < dyEnd; dy++)
                                 {
                                     for (ptrdiff_t dx = dxStart; dx < dxEnd; dx++)
                                     {
-                                        ptrdiff_t index = dy*_src.width + dx;
-                                        float value = psrc[index];
+                                        ptrdiff_t index = _src.Offset(dx, dy, c);
+                                        float value = src[index];
                                         if (value > maxValue)
                                         {
                                             maxValue = value;
@@ -1027,7 +1027,8 @@ namespace Simd
                                 }
                                 ptrdiff_t dstOffset = _dst.Offset(x, y, c);
                                 sum[dstOffset] = maxValue;
-                                idx[dstOffset] = srcOffset + maxIndex;
+                                idx[dstOffset] = maxIndex;
+								assert(idx[dstOffset] < _common[thread].prevDelta.size());
                             }
                         }
                     }                    
