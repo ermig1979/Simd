@@ -205,29 +205,43 @@ namespace Simd
 #endif
 		}
 
+		template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid(const float * src, const __m512 & _0, const __m512 & _1, 
+			const __m512 & a, const __m512 & b, const __m512 & slope , float * dst, __mmask16 m = -1)
+		{
+			__m512 _src = Load<align, mask>(src, m);
+			__m512 x = AndNot(_0, _mm512_mul_ps(_src, slope));
+			__m512 x2 = _mm512_mul_ps(x, x);
+			__m512 x4 = _mm512_mul_ps(x2, x2);
+			__m512 series = _mm512_add_ps(_mm512_fmadd_ps(x2, a, _1), _mm512_fmadd_ps(x4, b, x));
+			__m512 exp = _mm512_mask_blend_ps(_mm512_cmp_ps_mask(_src, _0, _CMP_GT_OS), series, Rcp14(series));
+			__m512 sigmoid = Rcp14(_mm512_add_ps(_1, exp));
+			Store<align, mask>(dst, sigmoid, m);
+		}
+
 		template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 		{
-			size_t alignedSize = Simd::AlignLo(size, F);
 			__m512 _slope = _mm512_set1_ps(*slope);
 			__m512 _0 = _mm512_set1_ps(-0.0f);
 			__m512 _1 = _mm512_set1_ps(1.0f);
 			__m512 _a = _mm512_set1_ps(0.5417f);
 			__m512 _b = _mm512_set1_ps(0.1460f);
 			size_t i = 0;
-			for (; i < alignedSize; i += F)
+			size_t partialAlignedSize = Simd::AlignLo(size, F);
+			size_t fullAlignedSize = Simd::AlignLo(size, QF);
+			for (; i < fullAlignedSize; i += QF)
 			{
-				__m512 _src = Load<align>(src + i);
-				__m512 x = AndNot(_0, _mm512_mul_ps(_src, _slope));
-				__m512 x2 = _mm512_mul_ps(x, x);
-				__m512 x4 = _mm512_mul_ps(x2, x2);
-				__m512 series = _mm512_add_ps(_mm512_add_ps(_1, x), _mm512_add_ps(_mm512_mul_ps(x2, _a), _mm512_mul_ps(x4, _b)));
-				__mmask16 mask = _mm512_cmp_ps_mask(_src, _0, _CMP_GT_OS);
-				__m512 exp = _mm512_mask_blend_ps(mask, series, Rcp14(series));
-				__m512 sigmoid = Rcp14(_mm512_add_ps(_1, exp));
-				Store<align>(dst + i, sigmoid);
+				NeuralRoughSigmoid<align, false>(src + i + 0 * F, _0, _1, _a, _b, _slope, dst + i + 0 * F);
+				NeuralRoughSigmoid<align, false>(src + i + 1 * F, _0, _1, _a, _b, _slope, dst + i + 1 * F);
+				NeuralRoughSigmoid<align, false>(src + i + 2 * F, _0, _1, _a, _b, _slope, dst + i + 2 * F);
+				NeuralRoughSigmoid<align, false>(src + i + 3 * F, _0, _1, _a, _b, _slope, dst + i + 3 * F);
 			}
-			for (; i < size; ++i)
-				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+			for (; i < partialAlignedSize; i += F)
+				NeuralRoughSigmoid<align, false>(src + i, _0, _1, _a, _b, _slope, dst + i);
+			if (i < size)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i -size);
+				NeuralRoughSigmoid<align, true>(src + i, _0, _1, _a, _b, _slope, dst + i, tailMask);
+			}
 		}
 
 		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
