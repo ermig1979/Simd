@@ -151,29 +151,30 @@ namespace Simd
 				AddVector<false>(src, aligned, partial, size, dst);
 		}
 
-		template <bool align> SIMD_INLINE void AddValue(const __m512 & value, float * dst)
+		template <bool align, bool mask> SIMD_INLINE void AddValue(const __m512 & value, float * dst, __mmask16 m = -1)
 		{
-			Store<align>(dst, _mm512_add_ps(Load<align>(dst), value));
+			__m512 _dst = Load<align, mask>(dst, m);
+			Store<align, mask>(dst, _mm512_add_ps(_dst, value), m);
 		}
 
 		template <bool align> SIMD_INLINE void AddValue(const float * value, float * dst, size_t aligned, size_t partial, size_t full)
 		{
 			size_t i = 0;
-			if (partial)
+			__m512 _value = _mm512_set1_ps(value[0]);
+			for (; i < aligned; i += QF)
 			{
-				__m512 _value = _mm512_set1_ps(value[0]);
-				for (; i < aligned; i += QF)
-				{
-					AddValue<align>(_value, dst + i + F * 0);
-					AddValue<align>(_value, dst + i + F * 1);
-					AddValue<align>(_value, dst + i + F * 2);
-					AddValue<align>(_value, dst + i + F * 3);
-				}
-				for (; i < partial; i += F)
-					AddValue<align>(_value, dst + i);
+				AddValue<align, false>(_value, dst + i + F * 0);
+				AddValue<align, false>(_value, dst + i + F * 1);
+				AddValue<align, false>(_value, dst + i + F * 2);
+				AddValue<align, false>(_value, dst + i + F * 3);
 			}
-			for (; i < full; ++i)
-				dst[i] += value[0];
+			for (; i < partial; i += F)
+				AddValue<align, false>(_value, dst + i);
+			if (i < full)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - full);
+				AddValue<align, true>(_value, dst + i, tailMask);
+			}
 		}
 
 		void NeuralAddValue(const float * value, float * dst, size_t size)
