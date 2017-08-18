@@ -850,11 +850,11 @@ namespace Simd
                     size_t alignedWidth = AlignLo(dstWidth, F);
                     __m128 tailMask = RightNotZero(dstWidth - alignedWidth);
                     __m128 _weight[kernelX*kernelY];
-                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
-                    {
-                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
-                        {
-                            const float * psrc = src + srcWidth*srcHeight*srcChannel;
+					for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+					{
+						for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+						{
+							const float * psrc = src + srcWidth*srcHeight*srcChannel;
                             const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
                             float * pdst = dst + dstWidth*dstHeight*dstChannel;
                             LoadWeight<kernelX*kernelY>(pweight, _weight);

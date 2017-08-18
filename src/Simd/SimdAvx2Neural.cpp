@@ -286,7 +286,7 @@ namespace Simd
 
         template<> struct Convolution<2, 2>
         {
-            template <bool align> static SIMD_INLINE __m256 Convolution2(const float * src, const __m256 * weights)
+            template <bool align> static SIMD_INLINE __m256 RowConvolution(const float * src, const __m256 * weights)
             {
                 return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],
                     _mm256_mul_ps(Avx::Load<false>(src + 1), weights[1]));
@@ -294,14 +294,14 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
-                return _mm256_add_ps(Convolution2<align>(src, weights),
-                    Convolution2<align>(src + stride, weights + 2));
+                return _mm256_add_ps(RowConvolution<align>(src, weights),
+					RowConvolution<align>(src + stride, weights + 2));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<2> & buffer, size_t offset, const __m256 * weights)
             {
-                return _mm256_add_ps(Convolution2<align>(buffer.rows[0] + offset, weights),
-                    Convolution2<align>(buffer.rows[1] + offset, weights + 2));
+                return _mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
+					RowConvolution<align>(buffer.rows[1] + offset, weights + 2));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -319,7 +319,7 @@ namespace Simd
 
         template<> struct Convolution<3, 3>
         {
-            template <bool align> static SIMD_INLINE __m256 Convolution3(const float * src, const __m256 * weights)
+            template <bool align> static SIMD_INLINE __m256 RowConvolution(const float * src, const __m256 * weights)
             {
                 return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],
                     _mm256_fmadd_ps(Avx::Load<false>(src + 1), weights[1],
@@ -328,16 +328,16 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
-                return _mm256_add_ps(Convolution3<align>(src, weights),
-                    _mm256_add_ps(Convolution3<align>(src + stride, weights + 3),
-                    Convolution3<align>(src + 2 * stride, weights + 6)));
+                return _mm256_add_ps(RowConvolution<align>(src, weights),
+                    _mm256_add_ps(RowConvolution<align>(src + stride, weights + 3),
+						RowConvolution<align>(src + 2 * stride, weights + 6)));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<3> & buffer, size_t offset, const __m256 * weights)
             {
-                return _mm256_add_ps(Convolution3<align>(buffer.rows[0] + offset, weights),
-                    _mm256_add_ps(Convolution3<align>(buffer.rows[1] + offset, weights + 3),
-                    Convolution3<align>(buffer.rows[2] + offset, weights + 6)));
+                return _mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
+                    _mm256_add_ps(RowConvolution<align>(buffer.rows[1] + offset, weights + 3),
+						RowConvolution<align>(buffer.rows[2] + offset, weights + 6)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -359,7 +359,7 @@ namespace Simd
 
         template<> struct Convolution<4, 4>
         {
-            template <bool align> static SIMD_INLINE __m256 Convolution4(const float * src, const __m256 * weights)
+            template <bool align> static SIMD_INLINE __m256 RowConvolution(const float * src, const __m256 * weights)
             {
                 return _mm256_add_ps(
                     _mm256_fmadd_ps(Load<align>(src + 0), weights[0], _mm256_mul_ps(Load<false>(src + 1), weights[1])),
@@ -368,18 +368,18 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
-                return _mm256_add_ps(_mm256_add_ps(Convolution4<align>(src, weights),
-                    Convolution4<align>(src + stride, weights + 4)),
-                    _mm256_add_ps(Convolution4<align>(src + 2 * stride, weights + 8),
-                    Convolution4<align>(src + 3 * stride, weights + 12)));
+                return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(src, weights),
+					RowConvolution<align>(src + stride, weights + 4)),
+                    _mm256_add_ps(RowConvolution<align>(src + 2 * stride, weights + 8),
+						RowConvolution<align>(src + 3 * stride, weights + 12)));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<4> & buffer, size_t offset, const __m256 * weights)
             {
-                return _mm256_add_ps(_mm256_add_ps(Convolution4<align>(buffer.rows[0] + offset, weights),
-                    Convolution4<align>(buffer.rows[1] + offset, weights + 4)),
-                    _mm256_add_ps(Convolution4<align>(buffer.rows[2] + offset, weights + 8),
-                    Convolution4<align>(buffer.rows[3] + offset, weights + 12)));
+                return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
+					RowConvolution<align>(buffer.rows[1] + offset, weights + 4)),
+                    _mm256_add_ps(RowConvolution<align>(buffer.rows[2] + offset, weights + 8),
+						RowConvolution<align>(buffer.rows[3] + offset, weights + 12)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -403,7 +403,7 @@ namespace Simd
 
         template<> struct Convolution<5, 5>
         {
-            template <bool align> static SIMD_INLINE __m256 Convolution5(const float * src, const __m256 * weights)
+            template <bool align> static SIMD_INLINE __m256 RowConvolution(const float * src, const __m256 * weights)
             {
                 __m256 s0 = Load<align>(src + 0);
                 __m256 s4 = Load<false>(src + 4);
@@ -414,20 +414,20 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
-                return _mm256_add_ps(Convolution5<align>(src, weights),
-                    _mm256_add_ps(_mm256_add_ps(Convolution5<align>(src + stride, weights + 5),
-                    Convolution5<align>(src + 2 * stride, weights + 10)),
-                    _mm256_add_ps(Convolution5<align>(src + 3 * stride, weights + 15),
-                    Convolution5<align>(src + 4 * stride, weights + 20))));
+                return _mm256_add_ps(RowConvolution<align>(src, weights),
+                    _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(src + stride, weights + 5),
+						RowConvolution<align>(src + 2 * stride, weights + 10)),
+                    _mm256_add_ps(RowConvolution<align>(src + 3 * stride, weights + 15),
+						RowConvolution<align>(src + 4 * stride, weights + 20))));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<5> & buffer, size_t offset, const __m256 * weights)
             {
-                return _mm256_add_ps(_mm256_add_ps(Convolution5<align>(buffer.rows[0] + offset, weights),
-                    _mm256_add_ps(Convolution5<align>(buffer.rows[1] + offset, weights + 5),
-                   Convolution5<align>(buffer.rows[2] + offset, weights + 10))),
-                    _mm256_add_ps(Convolution5<align>(buffer.rows[3] + offset, weights + 15),
-                   Convolution5<align>(buffer.rows[4] + offset, weights + 20)));
+                return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
+                    _mm256_add_ps(RowConvolution<align>(buffer.rows[1] + offset, weights + 5),
+						RowConvolution<align>(buffer.rows[2] + offset, weights + 10))),
+                    _mm256_add_ps(RowConvolution<align>(buffer.rows[3] + offset, weights + 15),
+						RowConvolution<align>(buffer.rows[4] + offset, weights + 20)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -1518,15 +1518,67 @@ namespace Simd
                     }
                 }
 
+				template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+					const float * weight, float * dst, size_t dstDepth)
+				{
+					__m256 _weight[kernelX*kernelY];
+					for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+					{
+						__m256 _dst[8];
+						float * pdst = dst;
+						for (size_t row = 0; row < 8; ++row, pdst += 8)
+							_dst[row] = Avx::Load<align>(pdst);
+						if (kernelY < 4)
+						{
+							for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+							{
+								const float * psrc = src + srcWidth*srcHeight*srcChannel;
+								LoadWeightsForward<kernelX*kernelY>(weight, _weight);
+								for (size_t row = 0; row < 8; ++row)
+								{
+									_dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template Forward<align>(psrc, srcWidth, _weight));
+									psrc += srcWidth;
+								}
+								weight += kernelX*kernelY;
+							}						
+						}
+						else
+						{
+							for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+							{
+								const float * psrc = src + srcWidth*srcHeight*srcChannel;
+								for (size_t dy = 0; dy < kernelY; dy++)
+								{
+									const float * ps = psrc + dy*srcWidth;
+									LoadWeightsForward<kernelX>(weight, _weight);
+									for (size_t row = 0; row < 8; ++row)
+									{
+										_dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template RowConvolution<align>(ps, _weight));
+										ps += srcWidth;
+									}
+									weight += kernelX;
+								}
+							}						
+						}
+						for (size_t row = 0; row < 8; ++row, dst += 8)
+							Avx::Store<align>(dst, _dst[row]);
+					}
+				}
+
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
+					if (dstWidth == 8 && dstHeight == 8)
+					{
+						AddConvolution8x8<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
+						return;
+					}
                     size_t alignedWidth = AlignLo(dstWidth, F);
                     __m256 tailMask = RightNotZero(dstWidth - alignedWidth);
                     __m256 _weight[kernelX*kernelY];
-                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
                     {
-                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+						for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                         {
                             const float * psrc = src + srcWidth*srcHeight*srcChannel;
                             const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
@@ -1575,7 +1627,7 @@ namespace Simd
                 {
                     if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (dstWidth*dstHeight*kernelX*kernelY >= 8*8*5*5)
+                        if (dstWidth*dstHeight*kernelX*kernelY >= 8*8*3*3)
                             return true;
                     }
                     return false;
