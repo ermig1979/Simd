@@ -55,7 +55,8 @@ namespace Simd
     namespace Neural
     {
         typedef Point<ptrdiff_t> Size; /*!< \brief 2D-size (width and height). */
-        typedef std::vector<float, Allocator<float>> Vector; /*!< \brief Vector with 32-bit float point values. */
+		typedef std::vector<uint8_t, Allocator<uint8_t>> Buffer; /*!< \brief Vector with 8-bit unsigned integer values. */
+		typedef std::vector<float, Allocator<float>> Vector; /*!< \brief Vector with 32-bit float point values. */
         typedef std::vector<ptrdiff_t, Allocator<ptrdiff_t>> VectorI; /*!< \brief Vector with integer values. */
         typedef std::vector<Vector> Vectors; /*!< \brief Vector of vectors with 32-bit float point values. */
         typedef size_t Label; /*!< \brief Integer name (label) of object class. */
@@ -670,9 +671,10 @@ namespace Simd
                 SetThreadNumber(1, false);
 
                 _connection.Recreate(dstDepth, srcDepth, View::Gray8);
-                if (Simd::Compatible(connection, _connection))
+				_partial = Simd::Compatible(connection, _connection);
+                if (_partial)
                     Simd::Copy(connection, _connection);
-                else
+				else
                     Simd::Fill(_connection, 1);
 
                 if (_core.width == 2 && _core.height == 2)
@@ -706,39 +708,54 @@ namespace Simd
                 const Vector & padded = PaddedSrc(src, thread);
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-                Detail::SetZero(sum);
-                for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
-                {
-                    for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
-                    {
-                        if (!_connection.At<bool>(dc, sc))
-                            return;
+				if (_partial)
+				{
+					Detail::SetZero(sum);
+					for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+					{
+						for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
+						{
+							if (!_connection.At<bool>(dc, sc))
+								return;
 
-                        const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
-                        const float * psrc = _padded.Get(padded, 0, 0, sc);
-                        float * psum = _dst.Get(sum, 0, 0, dc);
+							const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
+							const float * psrc = _padded.Get(padded, 0, 0, sc);
+							float * psum = _dst.Get(sum, 0, 0, dc);
 
-                        if (_functionForward)
-                            _functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
-                        else if (_core.width == 1 && _core.height == 1)
-                            ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
-                        else
-                        {
-                            for (ptrdiff_t y = 0; y < _dst.height; y++)
-                            {
-                                for (ptrdiff_t x = 0; x < _dst.width; x++)
-                                {
-                                    const float * pw = pweight;
-                                    const float * ps = psrc + y * _padded.width + x;
-                                    float s = 0;
-                                    for (ptrdiff_t wy = 0; wy < _core.height; wy++)
-                                        for (ptrdiff_t wx = 0; wx < _core.width; wx++)
-                                            s += *pw++ * ps[wy * _padded.width + wx];
-                                    psum[y * _dst.width + x] += s;
-                                }
-                            }
-                        }
-                    }
+							if (_functionForward)
+								_functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+							else if (_core.width == 1 && _core.height == 1)
+								::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
+							else
+							{
+								for (ptrdiff_t y = 0; y < _dst.height; y++)
+								{
+									for (ptrdiff_t x = 0; x < _dst.width; x++)
+									{
+										const float * pw = pweight;
+										const float * ps = psrc + y * _padded.width + x;
+										float s = 0;
+										for (ptrdiff_t wy = 0; wy < _core.height; wy++)
+											for (ptrdiff_t wx = 0; wx < _core.width; wx++)
+												s += *pw++ * ps[wy * _padded.width + wx];
+										psum[y * _dst.width + x] += s;
+									}
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					Buffer & buffer = _specific[thread].buffer;
+					size_t size = buffer.size();
+					::SimdNeuralConvolutionForward(padded.data(), _padded.width, _padded.height, _padded.depth, _weight.data(),
+						_core.width, _core.height, 0, 0, 1, 1, 1, 1, buffer.data(), &size, sum.data(), _dst.width, _dst.height, _dst.depth, 0);
+					if (size > buffer.size())
+						buffer.resize(size);
+				}
+				for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+				{
                     if (_bias.size())
                         ::SimdNeuralAddValue(_bias.data() + dc, _dst.Get(sum, 0, 0, dc), _dst.Area());
                 }
@@ -898,7 +915,8 @@ namespace Simd
 
             struct Specific
             {
-                Vector paddedSrc, paddedDelta;
+				Vector paddedSrc, paddedDelta;
+				Buffer buffer;
             };
             std::vector<Specific> _specific;
 
@@ -906,6 +924,7 @@ namespace Simd
             Index _padded;
             Size _indent;
             bool _valid;
+			bool _partial;
             View _connection;
 
             typedef void (*FunctionForwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);

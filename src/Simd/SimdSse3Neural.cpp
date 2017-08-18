@@ -971,6 +971,11 @@ namespace Simd
                             paddedH = srcHeight + 2 * padY;
                             sizeB = paddedW*paddedH*srcDepth;
                         }
+						else
+						{
+							paddedW = srcWidth;
+							paddedH = srcHeight;
+						}
 						break;
 					default:
                         assert(0);
