@@ -504,14 +504,19 @@ namespace Simd
 				NeuralDerivativeRelu<false>(src, size, slope, dst);
 		}
 
+		template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float * x, const __m512 & a, const __m512 & b, float * d, float * w, __mmask16 m)
+		{
+			__m512 _x = Load<align, mask>(x, m);
+			__m512 _d = Load<align, mask>(d, m);
+			_d = _mm512_fmadd_ps(a, _d, _mm512_mul_ps(b, _x));
+			Store<align, mask>(d, _d, m);
+			__m512 _w = Load<align, mask>(w, m);
+			Store<align, mask>(w, _mm512_add_ps(_w, _d), m);
+		}
+
 		template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float * x, size_t offset, const __m512 & a, const __m512 & b, float * d, float * w, __mmask16 m = -1)
 		{
-			__m512 _x = Load<align, mask>(x + offset, m);
-			__m512 _d = Load<align, mask>(d + offset, m);
-			_d = _mm512_fmadd_ps(a, _d, _mm512_mul_ps(b, _x));
-			Store<align, mask>(d + offset, _d, m);
-			__m512 _w = Load<align, mask>(w + offset, m);
-			Store<align, mask>(w + offset, _mm512_add_ps(_w, _d), m);
+			NeuralUpdateWeights<align, mask>(x + offset, a, b, d + offset, w + offset, m);
 		}
 
 		template <bool align> SIMD_INLINE void NeuralUpdateWeights(const float * x, size_t size, const float & a, const float & b, float * d, float * w)
@@ -546,6 +551,58 @@ namespace Simd
 				NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
 			else
 				NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, const __m512 & norm, const __m512 & alpha, const __m512 & epsilon, float * gradient, float * weight, __mmask16 m)
+		{
+			__m512 _delta = Load<align, mask>(delta, m);
+			__m512 d = _mm512_mul_ps(_delta, norm);
+			__m512 _gradient = Load<align, mask>(gradient, m);
+			_gradient = _mm512_fmadd_ps(d, d, _gradient);
+			Store<align, mask>(gradient, _gradient, m);
+			__m512 _weight = Load<align, mask>(weight, m);
+			Store<align, mask>(weight, _mm512_sub_ps(_weight, _mm512_mul_ps(_mm512_mul_ps(alpha, d), Rsqrt14(_mm512_add_ps(_gradient, epsilon)))), m);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, const __m512 & norm, const __m512 & alpha, const __m512 & epsilon, float * gradient, float * weight, __mmask16 m = -1)
+		{
+			AdaptiveGradientUpdate<align, mask>(delta + offset, norm, alpha, epsilon, gradient + offset, weight + offset, m);
+		}
+
+		template <bool align> void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+		{
+			if (align)
+				assert(Aligned(delta) && Aligned(gradient) && Aligned(weight));
+
+			const float norm = (float)(1.0 / batch);
+			__m512 _norm = _mm512_set1_ps(norm);
+			__m512 _alpha = _mm512_set1_ps(*alpha);
+			__m512 _epsilon = _mm512_set1_ps(*epsilon);
+			size_t partialAlignedSize = AlignLo(size, F);
+			size_t fullAlignedSize = AlignLo(size, QF);
+			size_t i = 0;
+			for (; i < fullAlignedSize; i += QF)
+			{
+				AdaptiveGradientUpdate<align, false>(delta, i + F * 0, _norm, _alpha, _epsilon, gradient, weight);
+				AdaptiveGradientUpdate<align, false>(delta, i + F * 1, _norm, _alpha, _epsilon, gradient, weight);
+				AdaptiveGradientUpdate<align, false>(delta, i + F * 2, _norm, _alpha, _epsilon, gradient, weight);
+				AdaptiveGradientUpdate<align, false>(delta, i + F * 3, _norm, _alpha, _epsilon, gradient, weight);
+			}
+			for (; i < partialAlignedSize; i += F)
+				AdaptiveGradientUpdate<align, false>(delta, i, _norm, _alpha, _epsilon, gradient, weight);
+			if (i < size)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+				AdaptiveGradientUpdate<align, true>(delta, i, _norm, _alpha, _epsilon, gradient, weight, tailMask);
+			}
+		}
+
+		void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
+		{
+			if (Aligned(delta) && Aligned(gradient) && Aligned(weight))
+				NeuralAdaptiveGradientUpdate<true>(delta, size, batch, alpha, epsilon, gradient, weight);
+			else
+				NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
 		}
     }
 #endif// SIMD_AVX512F_ENABLE

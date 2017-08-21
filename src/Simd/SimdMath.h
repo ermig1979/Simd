@@ -699,6 +699,15 @@ namespace Simd
 			return _mm512_rcp14_ps(a);
 #endif
 		}
+
+		SIMD_INLINE __m512 Rsqrt14(const __m512 & a)
+		{
+#if defined(_MSC_VER)
+			return _mm512_maskz_rsqrt14_ps(_MM_K0_REG, a);
+#else
+			return _mm512_rsqrt14_ps(a);
+#endif
+		}
 	}
 #endif //SIMD_AVX512F_ENABLE
 
