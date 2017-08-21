@@ -42,6 +42,8 @@ namespace Simd
 		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
 		void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
+
+		void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
 	}
 #endif// SIMD_AVX512F_ENABLE
 }

@@ -298,6 +298,44 @@ namespace Simd
 			else
 				NeuralRoughSigmoid2<false>(src, size, slope, dst);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, const __m512 & _1, const __m512 & slope, float * dst, __mmask16 m = -1)
+		{
+			__m512 _src = Load<align, mask>(src, m);
+			__m512 _dst = Load<align, mask>(dst, m);
+			Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_mul_ps(_mm512_sub_ps(_1, _src), _src)), m);
+		}
+
+		template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			size_t partialAlignedSize = Simd::AlignLo(size, F);
+			size_t fullAlignedSize = Simd::AlignLo(size, QF);
+			__m512 _1 = _mm512_set1_ps(1.0f);
+			__m512 _slope = _mm512_set1_ps(*slope);
+			size_t i = 0;
+			for (; i < fullAlignedSize; i += QF)
+			{
+				NeuralDerivativeSigmoid<align, true>(src + i + 0 * F, _1, _slope, dst + i + 0 * F);
+				NeuralDerivativeSigmoid<align, true>(src + i + 1 * F, _1, _slope, dst + i + 1 * F);
+				NeuralDerivativeSigmoid<align, true>(src + i + 2 * F, _1, _slope, dst + i + 2 * F);
+				NeuralDerivativeSigmoid<align, true>(src + i + 3 * F, _1, _slope, dst + i + 3 * F);
+			}
+			for (; i < partialAlignedSize; i += F)
+				NeuralDerivativeSigmoid<align, true>(src + i, _1, _slope, dst + i);
+			if (i < size)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+				NeuralDerivativeSigmoid<align, true>(src + i, _1, _slope, dst + i, tailMask);
+			}
+		}
+
+		void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				NeuralDerivativeSigmoid<true>(src, size, slope, dst);
+			else
+				NeuralDerivativeSigmoid<false>(src, size, slope, dst);
+		}
     }
 #endif// SIMD_AVX512F_ENABLE
 }
