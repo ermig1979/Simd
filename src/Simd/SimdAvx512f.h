@@ -52,6 +52,8 @@ namespace Simd
 		void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
 
 		void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
+
+		void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 	}
 #endif// SIMD_AVX512F_ENABLE
 }
