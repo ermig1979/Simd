@@ -404,6 +404,65 @@ namespace Simd
 			else
 				NeuralDerivativeTanh<false>(src, size, slope, dst);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void NeuralRelu(const float * src, const __m512 & slope, float * dst, __mmask16 m = -1)
+		{
+			__m512 _src = Load<align, mask>(src, m);
+			Store<align, mask>(dst, _mm512_max_ps(_mm512_mul_ps(slope, _src), _src), m);
+		}
+
+		template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
+		{
+			assert(slope[0] >= 0.0f && slope[0] <= 1.0f);
+			size_t partialAlignedSize = Simd::AlignLo(size, F);
+			size_t fullAlignedSize = Simd::AlignLo(size, QF);
+			size_t i = 0;
+			if (slope[0] == 0)
+			{
+				__m512 _0 = _mm512_set1_ps(0.0f);
+				for (; i < fullAlignedSize; i += QF)
+				{
+					Store<align>(dst + i + 0 * F, _mm512_max_ps(_0, Load<align>(src + i + 0 * F)));
+					Store<align>(dst + i + 1 * F, _mm512_max_ps(_0, Load<align>(src + i + 1 * F)));
+					Store<align>(dst + i + 2 * F, _mm512_max_ps(_0, Load<align>(src + i + 2 * F)));
+					Store<align>(dst + i + 3 * F, _mm512_max_ps(_0, Load<align>(src + i + 3 * F)));
+				}
+				for (; i < partialAlignedSize; i += F)
+					Store<align>(dst + i, _mm512_max_ps(_0, Load<align>(src + i)));
+				if (i < size)
+				{
+					__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+					__m512 _src = Load<align, true>(src + i, tailMask);
+					Store<align, true>(dst + i, _mm512_max_ps(_0, _src), tailMask);
+				}
+			}
+			else
+			{
+				__m512 _slope = _mm512_set1_ps(*slope);
+				for (; i < fullAlignedSize; i += QF)
+				{
+					NeuralRelu<align, true>(src + i + 0 * F, _slope, dst + i + 0 * F);
+					NeuralRelu<align, true>(src + i + 1 * F, _slope, dst + i + 1 * F);
+					NeuralRelu<align, true>(src + i + 2 * F, _slope, dst + i + 2 * F);
+					NeuralRelu<align, true>(src + i + 3 * F, _slope, dst + i + 3 * F);
+				}
+				for (; i < partialAlignedSize; i += F)
+					NeuralRelu<align, true>(src + i, _slope, dst + i);
+				if (i < size)
+				{
+					__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+					NeuralRelu<align, true>(src + i, _slope, dst + i, tailMask);
+				}
+			}
+		}
+
+		void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				NeuralRelu<true>(src, size, slope, dst);
+			else
+				NeuralRelu<false>(src, size, slope, dst);
+		}
     }
 #endif// SIMD_AVX512F_ENABLE
 }

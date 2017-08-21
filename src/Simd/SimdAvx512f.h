@@ -48,6 +48,8 @@ namespace Simd
 		void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
 
 		void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+
+		void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
 	}
 #endif// SIMD_AVX512F_ENABLE
 }
