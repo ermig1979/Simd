@@ -643,6 +643,65 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
+#ifdef SIMD_AVX512F_ENABLE
+	namespace Avx512f
+	{
+		SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_and_epi32((__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
+		SIMD_INLINE __m512 AndMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_maskz_and_epi32(m, (__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_maskz_and_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
+		SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
+		SIMD_INLINE __m512 AndNotMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_maskz_andnot_epi32(m, (__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_maskz_andnot_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
+		SIMD_INLINE __m512 Xor(const __m512 & a, const __m512 & b)
+		{
+#if defined(__clang__)
+			return (__m512)_mm512_xor_epi32((__m512i)a, (__m512i)b);
+#else
+			return _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+		}
+
+		SIMD_INLINE __m512 Rcp14(const __m512 & a)
+		{
+#if defined(_MSC_VER)
+			return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
+#else
+			return _mm512_rcp14_ps(a);
+#endif
+		}
+	}
+#endif //SIMD_AVX512F_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {

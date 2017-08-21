@@ -187,24 +187,6 @@ namespace Simd
 				AddValue<false>(value, dst, aligned, partial, size);
 		}
 
-		SIMD_INLINE __m512 Rcp14(const __m512 & a)
-		{
-#if defined(_MSC_VER)
-			return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
-#else
-			return _mm512_rcp14_ps(a);
-#endif
-		}
-
-		SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
-		{
-#if defined(__clang__)
-			return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
-#else
-			return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
-#endif
-		}
-
 		template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid(const float * src, const __m512 & _0, const __m512 & _1, 
 			const __m512 & a, const __m512 & b, const __m512 & slope , float * dst, __mmask16 m = -1)
 		{
@@ -347,7 +329,7 @@ namespace Simd
 			__m512 pe = _mm512_add_ps(_mm512_fmadd_ps(x2, a, _1), _mm512_fmadd_ps(x4, b, x));
 			__m512 ne = Rcp14(pe);
 			__m512 absTanh = _mm512_mul_ps(_mm512_sub_ps(pe, ne), Rcp14(_mm512_add_ps(pe, ne)));
-			__m512 tanh = _mm512_xor_ps(absTanh, _mm512_maskz_and_ps(_mm512_cmp_ps_mask(_0, _src, _CMP_GT_OS), _0, _0));
+			__m512 tanh = Xor(absTanh, AndMaskZ(_0, _0, _mm512_cmp_ps_mask(_0, _src, _CMP_GT_OS)));
 			Store<align, mask>(dst, tanh, m);
 		}
 
@@ -383,6 +365,44 @@ namespace Simd
 				NeuralRoughTanh<true>(src, size, slope, dst);
 			else
 				NeuralRoughTanh<false>(src, size, slope, dst);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeTanh(const float * src, const __m512 & _1, const __m512 & slope, float * dst, __mmask16 m = -1)
+		{
+			__m512 _src = Load<align, mask>(src, m);
+			__m512 _dst = Load<align, mask>(dst, m);
+			Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_sub_ps(_1, _mm512_mul_ps(_src, _src))), m);
+		}
+
+		template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+		{
+			size_t partialAlignedSize = Simd::AlignLo(size, F);
+			size_t fullAlignedSize = Simd::AlignLo(size, QF);
+			__m512 _1 = _mm512_set1_ps(1.0f);
+			__m512 _slope = _mm512_set1_ps(*slope);
+			size_t i = 0;
+			for (; i < fullAlignedSize; i += QF)
+			{
+				NeuralDerivativeTanh<align, true>(src + i + 0 * F, _1, _slope, dst + i + 0 * F);
+				NeuralDerivativeTanh<align, true>(src + i + 1 * F, _1, _slope, dst + i + 1 * F);
+				NeuralDerivativeTanh<align, true>(src + i + 2 * F, _1, _slope, dst + i + 2 * F);
+				NeuralDerivativeTanh<align, true>(src + i + 3 * F, _1, _slope, dst + i + 3 * F);
+			}
+			for (; i < partialAlignedSize; i += F)
+				NeuralDerivativeTanh<align, true>(src + i, _1, _slope, dst + i);
+			if (i < size)
+			{
+				__mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+				NeuralDerivativeTanh<align, true>(src + i, _1, _slope, dst + i, tailMask);
+			}
+		}
+
+		void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				NeuralDerivativeTanh<true>(src, size, slope, dst);
+			else
+				NeuralDerivativeTanh<false>(src, size, slope, dst);
 		}
     }
 #endif// SIMD_AVX512F_ENABLE
