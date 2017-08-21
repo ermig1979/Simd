@@ -62,6 +62,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
@@ -2363,6 +2364,11 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 
 SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512f::F)
+		Avx512bw::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx::F)
         Avx2::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);

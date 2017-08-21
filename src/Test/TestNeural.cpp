@@ -109,6 +109,14 @@ namespace Test
 		}
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+		{
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+	}
+#endif
+
 #ifdef SIMD_VSX_ENABLE
 		if (Simd::Vsx::Enable)
 		{

@@ -137,5 +137,32 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE
+	namespace Avx512f
+	{
+		template <bool align, bool stream> SIMD_INLINE void Stream(float  * p, __m512 a);
+
+		template <> SIMD_INLINE void Stream<false, false>(float  * p, __m512 a)
+		{
+			_mm512_storeu_ps(p, a);
+		}
+
+		template <> SIMD_INLINE void Stream<false, true>(float  * p, __m512 a)
+		{
+			_mm512_storeu_ps(p, a);
+		}
+
+		template <> SIMD_INLINE void Stream<true, false>(float  * p, __m512 a)
+		{
+			_mm512_store_ps(p, a);
+		}
+
+		template <> SIMD_INLINE void Stream<true, true>(float  * p, __m512 a)
+		{
+			_mm512_stream_ps(p, a);
+		}
+	}
+#endif//SIMD_AVX512F_ENABLE
 }
 #endif//__SimdStream_h__

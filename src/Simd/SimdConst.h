@@ -372,6 +372,18 @@ namespace Simd
 	}
 #endif// SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE    
+	namespace Avx512bw
+	{
+		using namespace Avx512f;
+
+		const size_t A = sizeof(__m512i);
+		const size_t DA = 2 * A;
+		const size_t QA = 4 * A;
+		const size_t HA = A / 2;
+	}
+#endif// SIMD_AVX512F_ENABLE
+
 #ifdef SIMD_VMX_ENABLE    
     namespace Vmx
     {

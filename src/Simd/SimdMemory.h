@@ -170,6 +170,13 @@ namespace Simd
 	}
 #endif// SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE
+	namespace Avx512bw
+	{
+		using Avx512f::Aligned;
+	}
+#endif// SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
