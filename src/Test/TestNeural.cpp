@@ -1587,6 +1587,11 @@ namespace Test
             result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx2::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
 #endif
 
+#ifdef SIMD_AVX512F_ENABLE
+		if (Simd::Avx512f::Enable)
+			result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Neon::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
