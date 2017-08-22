@@ -85,6 +85,8 @@ namespace Test
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
 	const int W = 1920;
 	const int H = 1080;
+	//const int W = 1024;
+	//const int H = 128;
 #else
     const int W = 128;
     const int H = 96;
