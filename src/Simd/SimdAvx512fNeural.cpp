@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdStream.h"
 
 namespace Simd
 {
@@ -666,6 +667,7 @@ namespace Simd
 			__m512 src2 = Pooling1x1Max3x1Tail<align>(src + stride);
 			Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
 		}
+
 		template <bool align> SIMD_INLINE void Pooling1x1Max3x2Tail(const float * src, size_t stride, float * dst)
 		{
 			__m512 src0 = Pooling1x1Max3x1Tail<align>(src);
@@ -694,7 +696,7 @@ namespace Simd
 					Pooling1x1Max3x3Body<align>(src + col, srcStride, dst + col);
 				Pooling1x1Max3x3Tail<false>(src + width - F, srcStride, dst + width - F);
 			}
-
+			
 			dst += dstStride;
 			Pooling1x1Max3x2Nose<align>(src, srcStride, dst);
 			for (size_t col = F; col < alignedWidth; col += F)
@@ -709,6 +711,10 @@ namespace Simd
 			else
 				NeuralPooling1x1Max3x3<false>(src, srcStride, width, height, dst, dstStride);
 		}
+
+		__m512i K32_PERMUTE_2_0 = SIMD_MM512_SETR_EPI32(0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30);
+		__m512i K32_PERMUTE_2_1 = SIMD_MM512_SETR_EPI32(1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31);
+		__m512i K32_PERMUTE_2_2 = SIMD_MM512_SETR_EPI32(2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 0);
 
 		template <bool align> SIMD_INLINE __m512 Pooling2x2Max2x2(const float * src, size_t stride)
 		{
@@ -767,6 +773,80 @@ namespace Simd
 				NeuralPooling2x2Max2x2<true>(src, srcStride, width, height, dst, dstStride);
 			else
 				NeuralPooling2x2Max2x2<false>(src, srcStride, width, height, dst, dstStride);
+		}
+
+		template <bool align> SIMD_INLINE __m512 Pooling2x2Max1x3(const float * src, size_t stride)
+		{
+			return _mm512_max_ps(_mm512_max_ps(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
+		}
+
+		template <bool align> SIMD_INLINE __m512 Pooling2x2Max3x3(const float * src, size_t stride)
+		{
+			__m512 s0 = Pooling2x2Max1x3<align>(src + 0, stride);
+			__m512 sf = Pooling2x2Max1x3<align>(src + F, stride);
+			__m512 p0 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_0, sf);
+			__m512 p1 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_1, sf);
+			__m512 p2 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_2, sf);
+			return _mm512_max_ps(_mm512_max_ps(p0, p1), p2);
+		}
+
+		template <bool align> SIMD_INLINE __m512 Pooling2x2Max1x2(const float * src, size_t stride)
+		{
+			return _mm512_max_ps(Load<align>(src), Load<align>(src + stride));
+		}
+
+		template <bool align> SIMD_INLINE __m512 Pooling2x2Max3x2(const float * src, size_t stride)
+		{
+			__m512 s0 = Pooling2x2Max1x2<align>(src + 0, stride);
+			__m512 sf = Pooling2x2Max1x2<align>(src + F, stride);
+			__m512 p0 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_0, sf);
+			__m512 p1 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_1, sf);
+			__m512 p2 = _mm512_permutex2var_ps(s0, K32_PERMUTE_2_2, sf);
+			return _mm512_max_ps(_mm512_max_ps(p0, p1), p2);
+		}
+
+		template <bool align> void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+		{
+			height -= 1;
+			width -= 1;
+			size_t heightEven = Simd::AlignLo(height, 2);
+			size_t widthEven = Simd::AlignLo(width, 2);
+			size_t step = DF - 2;
+			size_t alignedWidth = width/step*step;
+			for (size_t row = 0; row < heightEven; row += 2)
+			{
+				for (size_t col = 0; col < alignedWidth; col += step)
+					Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
+				if (widthEven - alignedWidth)
+				{
+					size_t col = widthEven - step;
+					Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
+				}
+				if (width - widthEven)
+					Sse::Max2x3s(src + widthEven, srcStride, dst + (widthEven >> 1));
+				src += 2 * srcStride;
+				dst += dstStride;
+			}
+			if (height - heightEven)
+			{
+				for (size_t col = 0; col < alignedWidth; col += step)
+					Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
+				if (widthEven - alignedWidth)
+				{
+					size_t col = widthEven - step;
+					Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
+				}
+				if (width - widthEven)
+					Sse::Max2x2s(src + widthEven, srcStride, dst + (widthEven >> 1));
+			}
+		}
+
+		void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
+			else
+				NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
 		}
     }
 #endif// SIMD_AVX512F_ENABLE

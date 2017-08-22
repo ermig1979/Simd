@@ -160,7 +160,11 @@ namespace Simd
 
 		template <> SIMD_INLINE void Stream<true, true>(float  * p, __m512 a)
 		{
+#if defined(__clang__)
+			_mm512_store_ps(p, a);
+#else
 			_mm512_stream_ps(p, a);
+#endif
 		}
 	}
 #endif//SIMD_AVX512F_ENABLE

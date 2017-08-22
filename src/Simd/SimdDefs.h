@@ -182,11 +182,11 @@
 #define SIMD_AVX2_ENABLE
 #endif
 
-#if !defined(SIMD_AVX512F_DISABLE) && defined(__AVX512F__)
+#if !defined(SIMD_AVX512F_DISABLE) && defined(__AVX512F__) && !defined(__clang__)
 #define SIMD_AVX512F_ENABLE
 #endif
 
-#if !defined(SIMD_AVX512BW_DISABLE) && defined(__AVX512BW__)
+#if !defined(SIMD_AVX512BW_DISABLE) && defined(__AVX512BW__) && !defined(__clang__)
 #define SIMD_AVX512BW_ENABLE
 #endif
 

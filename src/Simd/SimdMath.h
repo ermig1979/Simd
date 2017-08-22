@@ -315,6 +315,25 @@ namespace Simd
         {
             return _mm_and_ps(value, mask);
         }
+
+		SIMD_INLINE void Max2x3s(const float * src, size_t stride, float * dst)
+		{
+			__m128 z = _mm_setzero_ps();
+			__m128 s0 = _mm_loadl_pi(z, (__m64*)src);
+			__m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
+			__m128 s2 = _mm_loadl_pi(z, (__m64*)(src + 2 * stride));
+			__m128 m = _mm_max_ps(_mm_max_ps(s0, s1), s2);
+			return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
+		}
+
+		SIMD_INLINE void Max2x2s(const float * src, size_t stride, float * dst)
+		{
+			__m128 z = _mm_setzero_ps();
+			__m128 s0 = _mm_loadl_pi(z, (__m64*)src);
+			__m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
+			__m128 m = _mm_max_ps(s0, s1);
+			return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
+		}
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -646,6 +665,24 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE
 	namespace Avx512f
 	{
+		SIMD_INLINE __m512 Cast(const __m512i & value)
+		{
+#if defined(__clang__)
+			return (__m512)value;
+#else
+			return _mm512_castsi512_ps(value);
+#endif
+		}
+
+		SIMD_INLINE __m512i Cast(const __m512 & value)
+		{
+#if defined(__clang__)
+			return (__m512i)value;
+#else
+			return _mm512_castps_si512(value);
+#endif
+		}
+
 		SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
 		{
 #if defined(__clang__)
@@ -707,6 +744,11 @@ namespace Simd
 #else
 			return _mm512_rsqrt14_ps(a);
 #endif
+		}
+
+		template<int shift> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi)
+		{
+			return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
 		}
 	}
 #endif //SIMD_AVX512F_ENABLE

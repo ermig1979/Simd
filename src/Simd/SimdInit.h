@@ -272,7 +272,7 @@ namespace Simd
 
 #endif// SIMD_AVX2_ENABLE
 
-#if defined(SIMD_AVX512BW_ENABLE)
+#if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE)
 
 #if defined(_MSC_VER)
 
@@ -378,7 +378,7 @@ namespace Simd
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
-#endif//SIMD_AVX512BW_ENABLE
+#endif//defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE)
 
 #if defined(SIMD_VMX_ENABLE) || (defined(SIMD_NEON_ENABLE) && defined(__GNUC__))
 
