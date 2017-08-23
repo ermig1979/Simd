@@ -690,16 +690,99 @@ namespace Simd
 				return _mm512_add_ps(row0, row1);
 			}
 
-			template <bool align, bool mask> static SIMD_INLINE void RowSum(const float * src, const __m512 & dst, __m512 * sums, __mmask16 m = -1)
+			template <bool align, bool mask> static SIMD_INLINE void Sum1x1(const float * src0, size_t srcStride, const float * dst0, __m512 * sums, __mmask16 m = -1)
 			{
-				sums[0] = _mm512_fmadd_ps(dst, (Load<align, mask>(src + 0, m)), sums[0]);
-				sums[1] = _mm512_fmadd_ps(dst, (Load<false, mask>(src + 1, m)), sums[1]);
+				const float * src1 = src0 + srcStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				sums[0] = _mm512_fmadd_ps(dst00, (Load<align, mask>(src0 + 0, m)), sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, (Load<false, mask>(src0 + 1, m)), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, (Load<align, mask>(src1 + 0, m)), sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, (Load<false, mask>(src1 + 1, m)), sums[3]);
 			}
 
-			template <bool align, bool mask> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m512 & dst, __m512 * sums, __mmask16 m = -1)
+			template <bool align, bool mask> static SIMD_INLINE void Sum2x1(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums, __mmask16 m = -1)
 			{
-				RowSum<align, mask>(src + stride * 0, dst, sums + 0, m);
-				RowSum<align, mask>(src + stride * 1, dst, sums + 2, m);
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				const float * dst1 = dst0 + dstStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				__m512 src00 = Load<align, mask>(src0, m);
+				__m512 src01 = Load<false, mask>(src0 + 1, m);
+				__m512 src10 = Load<align, mask>(src1, m);
+				__m512 src11 = Load<false, mask>(src1 + 1, m);
+				sums[0] = _mm512_fmadd_ps(dst00, src00, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, src01, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, src10, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, src11, sums[3]);
+				__m512 dst10 = Load<align, mask>(dst1, m);
+				__m512 src20 = Load<align, mask>(src2, m);
+				__m512 src21 = Load<false, mask>(src2 + 1, m);
+				sums[0] = _mm512_fmadd_ps(dst10, src10, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst10, src11, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst10, src20, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst10, src21, sums[3]);
+			}
+
+			template <bool align> static SIMD_INLINE void Sum1x2(const float * src0, size_t srcStride, const float * dst0, __m512 * sums)
+			{
+				const float * src1 = src0 + srcStride;
+				__m512 dst00 = Load<align>(dst0);
+				__m512 src00 = Load<align>(src0);
+				__m512 src01 = Load<align>(src0 + F);
+				__m512 src10 = Load<align>(src1);
+				__m512 src11 = Load<align>(src1 + F);
+				sums[0] = _mm512_fmadd_ps(dst00, src00, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src00, src01), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, src10, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, Alignr<1>(src10, src11), sums[3]);
+				__m512 dst10 = Load<align>(dst0 + F);
+				__m512 src02 = Load<false>(src0 + F + 1);
+				__m512 src12 = Load<false>(src1 + F + 1);
+				sums[0] = _mm512_fmadd_ps(dst10, src01, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst10, src02, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst10, src11, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst10, src12, sums[3]);
+			}
+
+			template <bool align> static SIMD_INLINE void Sum2x2(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums)
+			{
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				const float * dst1 = dst0 + dstStride;
+
+				__m512 dst00 = Load<align>(dst0);
+				__m512 src000 = Load<align>(src0);
+				__m512 src010 = Load<align>(src0 + F);
+				__m512 src100 = Load<align>(src1);
+				__m512 src110 = Load<align>(src1 + F);
+				__m512 src101 = Alignr<1>(src100, src110);
+				sums[0] = _mm512_fmadd_ps(dst00, src000, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src000, src010), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, src100, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, src101, sums[3]);
+
+				__m512 dst01 = Load<align>(dst0 + F);
+				__m512 src011 = Load<false>(src0 + F + 1);
+				__m512 src111 = Load<false>(src1 + F + 1);
+				sums[0] = _mm512_fmadd_ps(dst01, src010, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst01, src011, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst01, src110, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst01, src111, sums[3]);
+
+				__m512 dst10 = Load<align>(dst1);
+				__m512 src200 = Load<align>(src2);
+				__m512 src210 = Load<align>(src2 + F);
+				sums[0] = _mm512_fmadd_ps(dst10, src100, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst10, src101, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst10, src200, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst10, Alignr<1>(src200, src210), sums[3]);
+
+				__m512 dst11 = Load<align>(dst1 + F);
+				__m512 src211 = Load<false>(src2 + F + 1);
+				sums[0] = _mm512_fmadd_ps(dst11, src110, sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst11, src111, sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst11, src210, sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst11, src211, sums[3]);
 			}
 		};
 
@@ -794,7 +877,7 @@ namespace Simd
 				}
 				if (col < width)
 				{
-					__m512 sum = Convolution<coreX, coreY>::template Backward<align, true>(buffer, col, _weights, tailMask);
+					__m512 sum = Convolution<coreX, coreY>::template Backward<false, true>(buffer, col, _weights, tailMask);
 					__m512 _dst = Load<align, true>(dst + col, tailMask);
 					Store<align, true>(dst + col, _mm512_add_ps(_dst, sum), tailMask);
 				}
@@ -838,23 +921,34 @@ namespace Simd
 
 		template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 		{
-			size_t alignedWidth = Simd::AlignLo(width, F);
-			__mmask16 tailMask = __mmask16(-1) >> (F + alignedWidth - width);
+			size_t alignedHeight = Simd::AlignLo(height, 2);
+			size_t fullAlignedWidth = Simd::AlignLo(width - 1, DF);
+			size_t partialAlignedWidth = Simd::AlignLo(width, F);
+			__mmask16 tailMask = __mmask16(-1) >> (F + partialAlignedWidth - width);
 			__m512 _sums[coreX*coreY];
 			memset(_sums, 0, sizeof(_sums));
-			for (size_t row = 0; row < height; ++row)
+			size_t row = 0;
+			for (; row < alignedHeight; row += 2)
 			{
 				size_t col = 0;
-				for (; col < alignedWidth; col += F)
-				{
-					__m512 _dst = Load<align>(dst + col);
-					Convolution<coreX, coreY>::template Sum<align, false>(src + col, srcStride, _dst, _sums);
-				}
+				for (; col < fullAlignedWidth; col += DF)
+					Convolution<coreX, coreY>::template Sum2x2<align>(src + col, srcStride, dst + col, dstStride, _sums);
+				for (; col < partialAlignedWidth; col += F)
+					Convolution<coreX, coreY>::template Sum2x1<align, false>(src + col, srcStride, dst + col, dstStride, _sums);
 				if (col < width)
-				{
-					__m512 _dst = Load<align, true>(dst + col, tailMask);
-					Convolution<coreX, coreY>::template Sum<align, true>(src + col, srcStride, _dst, _sums, tailMask);
-				}
+					Convolution<coreX, coreY>::template Sum2x1<align, true>(src + col, srcStride, dst + col, dstStride, _sums, tailMask);
+				src += 2*srcStride;
+				dst += 2*dstStride;
+			}
+			for (; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < fullAlignedWidth; col += DF)
+					Convolution<coreX, coreY>::template Sum1x2<align>(src + col, srcStride, dst + col, _sums);
+				for (; col < partialAlignedWidth; col += F)
+					Convolution<coreX, coreY>::template Sum1x1<align, false>(src + col, srcStride, dst + col, _sums);
+				if (col < width)
+					Convolution<coreX, coreY>::template Sum1x1<align, true>(src + col, srcStride, dst + col, _sums, tailMask);
 				src += srcStride;
 				dst += dstStride;
 			}
