@@ -664,7 +664,13 @@ namespace Simd
 
 			template<bool align, bool mask> static SIMD_INLINE __m512 Backward(const Buffer<coreX> & buffer, size_t offset, const __m512 * weights, __mmask16 m = -1);
 
-			template <bool align, bool mask> static SIMD_INLINE void Sum(const float * src, size_t stride, const __m512 & dst, __m512 * sums, __mmask16 m = -1);
+			template <bool align, bool mask> static SIMD_INLINE void Sum1x1(const float * src0, size_t srcStride, const float * dst0, __m512 * sums, __mmask16 m = -1);
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum2x1(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums, __mmask16 m = -1);
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum1x2(const float * src0, size_t srcStride, const float * dst0, __m512 * sums);
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum2x2(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums);
 		};
 
 		template<> struct Convolution<2, 2>
@@ -672,7 +678,7 @@ namespace Simd
 			template <bool align, bool mask> static SIMD_INLINE __m512 RowConvolution(const float * src, const __m512 * weights, __mmask16 m = -1)
 			{
 				__m512 src0 = Load<align, mask>(src, m);
-				__m512 src1 = Load<align, mask>(src + 1, m);
+				__m512 src1 = Load<false, mask>(src + 1, m);
 				return _mm512_fmadd_ps(src0, weights[0], _mm512_mul_ps(src1, weights[1]));
 			}
 
@@ -786,6 +792,25 @@ namespace Simd
 			}
 		};
 
+		template<> struct Convolution<3, 3>
+		{
+			template <bool align, bool mask> static SIMD_INLINE __m512 RowConvolution(const float * src, const __m512 * weights, __mmask16 m = -1)
+			{
+				__m512 src0 = Load<align, mask>(src, m);
+				__m512 src1 = Load<false, mask>(src + 1, m);
+				__m512 src2 = Load<false, mask>(src + 2, m);
+				return _mm512_fmadd_ps(src0, weights[0], _mm512_fmadd_ps(src1, weights[1], _mm512_mul_ps(src2, weights[2])));
+			}
+
+			template<bool align, bool mask> static SIMD_INLINE __m512 Forward(const float * src, size_t stride, const __m512 * weights, __mmask16 m = -1)
+			{
+				__m512 row0 = RowConvolution<align, mask>(src, weights, m);
+				__m512 row1 = RowConvolution<align, mask>(src + stride, weights + 3, m);
+				__m512 row2 = RowConvolution<align, mask>(src + 2*stride, weights + 6, m);
+				return _mm512_add_ps(_mm512_add_ps(row0, row1), row2);
+			}
+		};
+
 		template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 		{
 			size_t alignedWidth = AlignLo(width, F);
@@ -818,6 +843,14 @@ namespace Simd
 				NeuralAddConvolutionForward<true, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
 			else
 				NeuralAddConvolutionForward<false, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
+		}
+
+		void NeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralAddConvolutionForward<true, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
+			else
+				NeuralAddConvolutionForward<false, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
 		}
 
 		template<bool condition> struct If
