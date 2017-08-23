@@ -819,6 +819,29 @@ namespace Simd
 			}
 		};
 
+		template<> struct Convolution<4, 4>
+		{
+			template <bool align, bool mask> static SIMD_INLINE __m512 RowConvolution(const float * src, const __m512 * weights, __mmask16 m = -1)
+			{
+				__m512 src0 = Load<align, mask>(src, m);
+				__m512 srcf = Load<align, mask>(src + F, m);
+				__m512 src2 = Alignr<2>(src0, srcf);
+				__m512 src3 = Alignr<3>(src0, srcf);
+				__m512 sum0 = _mm512_fmadd_ps(Alignr<0>(src0, srcf), weights[0], _mm512_mul_ps(Alignr<1>(src0, srcf), weights[1]));
+				__m512 sum1 = _mm512_fmadd_ps(Alignr<2>(src0, srcf), weights[2], _mm512_mul_ps(Alignr<3>(src0, srcf), weights[3]));
+				return _mm512_add_ps(sum0, sum1);
+			}
+
+			template<bool align, bool mask> static SIMD_INLINE __m512 Forward(const float * src, size_t stride, const __m512 * weights, __mmask16 m = -1)
+			{
+				__m512 row0 = RowConvolution<align, mask>(src, weights, m);
+				__m512 row1 = RowConvolution<align, mask>(src + stride, weights + 4, m);
+				__m512 row2 = RowConvolution<align, mask>(src + 2 * stride, weights + 8, m);
+				__m512 row3 = RowConvolution<align, mask>(src + 3 * stride, weights + 12, m);
+				return _mm512_add_ps(_mm512_add_ps(row0, row1), _mm512_add_ps(row2, row3));
+			}
+		};
+
 		template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 		{
 			size_t alignedWidth = AlignLo(width, F);
@@ -836,7 +859,7 @@ namespace Simd
 				}
 				if (col < width)
 				{
-					__m512 sum = Convolution<coreX, coreY>::template Forward<align, true>(src + col, srcStride, _weights, tailMask);
+					__m512 sum = Convolution<coreX, coreY>::template Forward<align, true>(src + col, srcStride, _weights);
 					__m512 _dst = Load<align, true>(dst + col, tailMask);
 					Store<align, true>(dst + col, _mm512_add_ps(_dst, sum), tailMask);
 				}
@@ -859,6 +882,14 @@ namespace Simd
 				NeuralAddConvolutionForward<true, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
 			else
 				NeuralAddConvolutionForward<false, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
+		}
+
+		void NeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralAddConvolutionForward<true, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
+			else
+				NeuralAddConvolutionForward<false, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
 		}
 
 		template<bool condition> struct If

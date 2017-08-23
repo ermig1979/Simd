@@ -2574,6 +2574,11 @@ SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcSt
 
 SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512F_ENABLE
+	if (Avx512f::Enable && width >= Avx512f::F)
+		Avx512f::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::F)
         Avx2::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);

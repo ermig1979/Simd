@@ -750,6 +750,16 @@ namespace Simd
 		{
 			return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
 		}
+
+		template<> SIMD_INLINE __m512 Alignr<0>(const __m512 & lo, const __m512 & hi)
+		{
+			return lo;
+		}
+
+		template<> SIMD_INLINE __m512 Alignr<F>(const __m512 & lo, const __m512 & hi)
+		{
+			return hi;
+		}
 	}
 #endif //SIMD_AVX512F_ENABLE
 
