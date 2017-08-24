@@ -2895,7 +2895,7 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
                size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-	if (Avx512bw::Enable && width*channelCount >= Avx512bw::A)
+	if (Avx512bw::Enable)
 		Avx512bw::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 	else
 #endif
@@ -2930,6 +2930,11 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
 SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
                                     size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);

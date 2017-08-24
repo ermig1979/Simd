@@ -76,7 +76,6 @@ namespace Simd
 		template <bool align, SimdOperationBinary8uType type> void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, 
 			size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 		{
-			assert(width*channelCount >= A);
 			if(align)
 				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
 
@@ -135,6 +134,78 @@ namespace Simd
 				OperationBinary8u<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 			else
 				OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+		}
+
+		template <SimdOperationBinary16iType type> SIMD_INLINE __m512i OperationBinary16i(const __m512i & a, const __m512i & b);
+
+		template <> SIMD_INLINE __m512i OperationBinary16i<SimdOperationBinary16iAddition>(const __m512i & a, const __m512i & b)
+		{
+			return _mm512_add_epi16(a, b);
+		}
+
+		template <> SIMD_INLINE __m512i OperationBinary16i<SimdOperationBinary16iSubtraction>(const __m512i & a, const __m512i & b)
+		{
+			return _mm512_sub_epi16(a, b);
+		}
+
+		template <bool align, bool mask, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, const uint8_t * b, uint8_t * dst, size_t offset, __mmask32 m = -1)
+		{
+			const __m512i _a = Load<align, mask>((int16_t*)(a + offset), m);
+			const __m512i _b = Load<align, mask>((int16_t*)(b + offset), m);
+			Store<align, mask>((int16_t*)(dst + offset), OperationBinary16i<type>(_a, _b), m);
+		}
+
+		template <bool align, SimdOperationBinary16iType type> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			if (align)
+				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t size = width*sizeof(int16_t);
+			size_t fullAlignedSize = Simd::AlignLo(size, QA);
+			size_t partialAlignedSize = Simd::AlignLo(size, A);
+			__mmask32 tailMask = __mmask32(-1) >> ((A + partialAlignedSize - size)/sizeof(int16_t));
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t offset = 0;
+				for (; offset < fullAlignedSize; offset += QA)
+				{
+					OperationBinary16i<align, false, type>(a, b, dst, offset);
+					OperationBinary16i<align, false, type>(a, b, dst, offset + A);
+					OperationBinary16i<align, false, type>(a, b, dst, offset + 2 * A);
+					OperationBinary16i<align, false, type>(a, b, dst, offset + 3 * A);
+				}
+				for (; offset < partialAlignedSize; offset += A)
+					OperationBinary16i<align, false, type>(a, b, dst, offset);
+				for (; offset < size; offset += A)
+					OperationBinary16i<align, true, type>(a, b, dst, offset, tailMask);
+				a += aStride;
+				b += bStride;
+				dst += dstStride;
+			}
+		}
+
+		template <bool align> void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+		{
+			switch (type)
+			{
+			case SimdOperationBinary16iAddition:
+				return OperationBinary16i<align, SimdOperationBinary16iAddition>(a, aStride, b, bStride, width, height, dst, dstStride);
+			case SimdOperationBinary16iSubtraction:
+				return OperationBinary16i<align, SimdOperationBinary16iSubtraction>(a, aStride, b, bStride, width, height, dst, dstStride);
+			default:
+				assert(0);
+			}
+		}
+
+		void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type)
+		{
+			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(dst) && Aligned(dstStride))
+				OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+			else
+				OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
 		}
 	}
 #endif// SIMD_AVX512BW_ENABLE

@@ -268,6 +268,11 @@ namespace Test
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Avx2::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Avx512bw::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Vmx::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
