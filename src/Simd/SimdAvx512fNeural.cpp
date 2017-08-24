@@ -909,6 +909,100 @@ namespace Simd
 				__m512 row3 = RowConvolution<align, mask>(buffer.rows[3] + offset, weights + 12, m);
 				return _mm512_add_ps(_mm512_add_ps(row0, row1), _mm512_add_ps(row2, row3));
 			}
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum1x1(const float * src0, size_t srcStride, const float * dst0, __m512 * sums, __mmask16 m = -1)
+			{
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				const float * src3 = src2 + srcStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				__m512 src00 = Load<align>(src0);
+				__m512 src0f = Load<align>(src0 + F);
+				sums[0] = _mm512_fmadd_ps(dst00, Alignr<0>(src00, src0f), sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src00, src0f), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, Alignr<2>(src00, src0f), sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, Alignr<3>(src00, src0f), sums[3]);
+				__m512 src10 = Load<align>(src1);
+				__m512 src1f = Load<align>(src1 + F);
+				sums[4] = _mm512_fmadd_ps(dst00, Alignr<0>(src10, src1f), sums[4]);
+				sums[5] = _mm512_fmadd_ps(dst00, Alignr<1>(src10, src1f), sums[5]);
+				sums[6] = _mm512_fmadd_ps(dst00, Alignr<2>(src10, src1f), sums[6]);
+				sums[7] = _mm512_fmadd_ps(dst00, Alignr<3>(src10, src1f), sums[7]);
+				__m512 src20 = Load<align>(src2);
+				__m512 src2f = Load<align>(src2 + F);
+				sums[8] = _mm512_fmadd_ps(dst00, Alignr<0>(src20, src2f), sums[8]);
+				sums[9] = _mm512_fmadd_ps(dst00, Alignr<1>(src20, src2f), sums[9]);
+				sums[10] = _mm512_fmadd_ps(dst00, Alignr<2>(src20, src2f), sums[10]);
+				sums[11] = _mm512_fmadd_ps(dst00, Alignr<3>(src20, src2f), sums[11]);
+				__m512 src30 = Load<align>(src3);
+				__m512 src3f = Load<align>(src3 + F);
+				sums[12] = _mm512_fmadd_ps(dst00, Alignr<0>(src30, src3f), sums[12]);
+				sums[13] = _mm512_fmadd_ps(dst00, Alignr<1>(src30, src3f), sums[13]);
+				sums[14] = _mm512_fmadd_ps(dst00, Alignr<2>(src30, src3f), sums[14]);
+				sums[15] = _mm512_fmadd_ps(dst00, Alignr<3>(src30, src3f), sums[15]);
+			}
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum2x1(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums, __mmask16 m = -1)
+			{
+				const float * dst1 = dst0 + dstStride;
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				const float * src3 = src2 + srcStride;
+				const float * src4 = src3 + srcStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				__m512 src00 = Load<align>(src0);
+				__m512 src0f = Load<align>(src0 + F);
+				sums[0] = _mm512_fmadd_ps(dst00, Alignr<0>(src00, src0f), sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src00, src0f), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, Alignr<2>(src00, src0f), sums[2]);
+				sums[3] = _mm512_fmadd_ps(dst00, Alignr<3>(src00, src0f), sums[3]);
+				__m512 dst10 = Load<align, mask>(dst1, m);
+				__m512 src10 = Load<align>(src1);
+				__m512 src1f = Load<align>(src1 + F);
+				sums[0] = _mm512_fmadd_ps(dst10, src10, sums[0]);
+				sums[4] = _mm512_fmadd_ps(dst00, src10, sums[4]);
+				__m512 src11 = Alignr<1>(src10, src1f);
+				sums[1] = _mm512_fmadd_ps(dst10, src11, sums[1]);
+				sums[5] = _mm512_fmadd_ps(dst00, src11, sums[5]);
+				__m512 src12 = Alignr<2>(src10, src1f);
+				sums[2] = _mm512_fmadd_ps(dst10, src12, sums[2]);
+				sums[6] = _mm512_fmadd_ps(dst00, src12, sums[6]);
+				__m512 src13 = Alignr<3>(src10, src1f);
+				sums[3] = _mm512_fmadd_ps(dst10, src13, sums[3]);
+				sums[7] = _mm512_fmadd_ps(dst00, src13, sums[7]);
+				__m512 src20 = Load<align>(src2);
+				__m512 src2f = Load<align>(src2 + F);
+				sums[4] = _mm512_fmadd_ps(dst10, src20, sums[4]);
+				sums[8] = _mm512_fmadd_ps(dst00, src20, sums[8]);
+				__m512 src21 = Alignr<1>(src20, src2f);
+				sums[5] = _mm512_fmadd_ps(dst10, src21, sums[5]);
+				sums[9] = _mm512_fmadd_ps(dst00, src21, sums[9]);
+				__m512 src22 = Alignr<2>(src20, src2f);
+				sums[6] = _mm512_fmadd_ps(dst10, src22, sums[6]);
+				sums[10] = _mm512_fmadd_ps(dst00, src22, sums[10]);
+				__m512 src23 = Alignr<3>(src20, src2f);
+				sums[7] = _mm512_fmadd_ps(dst10, src23, sums[7]);
+				sums[11] = _mm512_fmadd_ps(dst00, src23, sums[11]);
+				__m512 src30 = Load<align>(src3);
+				__m512 src3f = Load<align>(src3 + F);
+				sums[8] = _mm512_fmadd_ps(dst10, src30, sums[8]);
+				sums[12] = _mm512_fmadd_ps(dst00, src30, sums[12]);
+				__m512 src31 = Alignr<1>(src30, src3f);
+				sums[9] = _mm512_fmadd_ps(dst10, src31, sums[9]);
+				sums[13] = _mm512_fmadd_ps(dst00, src31, sums[13]);
+				__m512 src32 = Alignr<2>(src30, src3f);
+				sums[10] = _mm512_fmadd_ps(dst10, src32, sums[10]);
+				sums[14] = _mm512_fmadd_ps(dst00, src32, sums[14]);
+				__m512 src33 = Alignr<3>(src30, src3f);
+				sums[11] = _mm512_fmadd_ps(dst10, src33, sums[11]);
+				sums[15] = _mm512_fmadd_ps(dst00, src33, sums[15]);
+				__m512 src40 = Load<align>(src4);
+				__m512 src4f = Load<align>(src4 + F);
+				sums[12] = _mm512_fmadd_ps(dst10, Alignr<0>(src40, src4f), sums[12]);
+				sums[13] = _mm512_fmadd_ps(dst10, Alignr<1>(src40, src4f), sums[13]);
+				sums[14] = _mm512_fmadd_ps(dst10, Alignr<2>(src40, src4f), sums[14]);
+				sums[15] = _mm512_fmadd_ps(dst10, Alignr<3>(src40, src4f), sums[15]);
+			}
 		};
 
 		template<> struct Convolution<5, 5>
@@ -1241,6 +1335,14 @@ namespace Simd
 				NeuralAddConvolutionSum2x1<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
 			else
 				NeuralAddConvolutionSum2x1<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
+		}
+
+		void NeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralAddConvolutionSum2x1<true, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
+			else
+				NeuralAddConvolutionSum2x1<false, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
 		}
 
 		template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Body(const float * src)
