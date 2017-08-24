@@ -82,16 +82,6 @@ namespace Test
     typedef std::vector<uint64_t> Sums64;
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
 
-#ifdef TEST_PERFORMANCE_TEST_ENABLE
-	const int W = 1920;
-	const int H = 1080;
-	//const int W = 1024;
-	//const int H = 128;
-#else
-    const int W = 128;
-    const int H = 96;
-#endif
-
     const int E = 10;
     const int O = 9;
 
@@ -101,6 +91,9 @@ namespace Test
     const int DH = 64;
 
     const float EPS = 0.001f;
+
+	extern int W;
+	extern int H;
 
     extern String ROOT_PATH;
     extern String SOURCE;

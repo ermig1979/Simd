@@ -132,9 +132,11 @@
 	 - `-o=log.txt` - a file name with test report. The test's report also will be output to console.
     
     Also you can use parameters:
-     - `-h` or `-?` in order to print help message.
+     - `-help` or `-?` in order to print help message.
      - `-r=../..` to set project root directory.
      - `-pa=1` to print alignment statistics.
+     - `-w=1920` width of test image for performance testing..
+     - `-h=1080` height of test image for performance testing..
 */
 
 /*! @defgroup c_types C Types

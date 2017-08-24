@@ -395,7 +395,7 @@ namespace Test
 			for (int i = 1; i < argc; ++i)
 			{
 				String arg = argv[i];
-                if (arg.substr(0, 2) == "-h" || arg.substr(0, 2) == "-?")
+                if (arg.substr(0, 2) == "-help" || arg.substr(0, 2) == "-?")
                 {
                     help = true;
                     break;
@@ -435,6 +435,14 @@ namespace Test
                 {
                     SOURCE = arg.substr(3, arg.size() - 3);
                 }
+				else if (arg.find("-w=") == 0)
+				{
+					W = FromString<int>(arg.substr(3, arg.size() - 3));
+				}
+				else if (arg.find("-h=") == 0)
+				{
+					H = FromString<int>(arg.substr(3, arg.size() - 3));
+				}
                 else if (arg.find("-pa=") == 0)
                 {
                     printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
@@ -578,14 +586,24 @@ namespace Test
         std::cout << "-o=log.txt - a file name with test report." << std::endl;
         std::cout << "             The test's report also will be output to console." << std::endl << std::endl;
         std::cout << "Also you can use parameters: " << std::endl << std::endl;
-        std::cout << "    -h or -? to print this help message." << std::endl << std::endl;
+        std::cout << "    -help or -? to print this help message." << std::endl << std::endl;
         std::cout << "    -r=../.. to set project root directory." << std::endl << std::endl;
         std::cout << "    -pa=1    to print alignment statistics." << std::endl << std::endl;
-        return 0;
+		std::cout << "    -w=1920  width of test image for performance testing." << std::endl << std::endl;
+		std::cout << "    -h=1080  height of test image for performance testing." << std::endl << std::endl;
+		return 0;
     }
 
     String ROOT_PATH = "../..";
     String SOURCE = "";
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+	int W = 1920;
+	int H = 1080;
+#else
+	int W = 128;
+	int H = 96;
+#endif
 
     void CheckCpp();
 }
