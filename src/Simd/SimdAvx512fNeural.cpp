@@ -868,6 +868,15 @@ namespace Simd
 					_mm512_add_ps((RowConvolution<align, mask>(src + 3 * stride, weights + 15, m)),
 					(RowConvolution<align, mask>(src + 4 * stride, weights + 20, m)))));
 			}
+
+			template<bool align, bool mask> static SIMD_INLINE __m512 Backward(const Buffer<5> & buffer, size_t offset, const __m512 * weights, __mmask16 m = -1)
+			{
+				return _mm512_add_ps((RowConvolution<align, mask>(buffer.rows[0] + offset, weights, m)),
+					_mm512_add_ps(_mm512_add_ps((RowConvolution<align, mask>(buffer.rows[1] + offset, weights + 5, m)),
+					(RowConvolution<align, mask>(buffer.rows[2] + offset, weights + 10, m))),
+					_mm512_add_ps((RowConvolution<align, mask>(buffer.rows[3] + offset, weights + 15, m)),
+					(RowConvolution<align, mask>(buffer.rows[4] + offset, weights + 20, m)))));
+			}
 		};
 
 		template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
@@ -1024,6 +1033,14 @@ namespace Simd
 				NeuralAddConvolutionBackward<true, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
 			else
 				NeuralAddConvolutionBackward<false, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
+		}
+
+		void NeuralAddConvolution5x5Backward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralAddConvolutionBackward<true, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
+			else
+				NeuralAddConvolutionBackward<false, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
 		}
 
 		SIMD_INLINE __m128 PartialSum(const __m512 & src)
