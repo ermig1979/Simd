@@ -187,7 +187,39 @@ namespace Simd
 			return _mm512_mask_store_ps(p, m, a);
 		}
 	}
-#endif
+#endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE
+	namespace Avx512bw
+	{
+		template <bool align> SIMD_INLINE void Store(void * p, __m512i a);
+
+		template <> SIMD_INLINE void Store<false>(void * p, __m512i a)
+		{
+			_mm512_storeu_si512(p, a);
+		}
+
+		template <> SIMD_INLINE void Store<true>(void * p, __m512i a)
+		{
+			_mm512_store_si512(p, a);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void Store(uint8_t * p, __m512i a, __mmask64 m)
+		{
+			return Store<align>(p, a);
+		}
+
+		template <> SIMD_INLINE void Store<false, true>(uint8_t * p, __m512i a, __mmask64 m)
+		{
+			return _mm512_mask_storeu_epi8(p, m, a);
+		}
+
+		template <> SIMD_INLINE void Store<true, true>(uint8_t * p, __m512i a, __mmask64 m)
+		{
+			return _mm512_mask_storeu_epi8(p, m, a);
+		}
+	}
+#endif//SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx

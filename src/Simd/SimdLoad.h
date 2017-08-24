@@ -393,6 +393,34 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
 	namespace Avx512bw
 	{
+		using namespace Avx512f;
+
+		template <bool align> SIMD_INLINE __m512i Load(const void * p);
+
+		template <> SIMD_INLINE __m512i Load<false>(const void * p)
+		{
+			return _mm512_loadu_si512(p);
+		}
+
+		template <> SIMD_INLINE __m512i Load<true>(const void * p)
+		{
+			return _mm512_load_si512(p);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE __m512i Load(const uint8_t * p, __mmask64 m)
+		{
+			return Load<align>(p);
+		}
+
+		template <> SIMD_INLINE __m512i Load<false, true>(const uint8_t * p, __mmask64 m)
+		{
+			return _mm512_maskz_loadu_epi8(m, p);
+		}
+
+		template <> SIMD_INLINE __m512i Load<true, true>(const uint8_t * p, __mmask64 m)
+		{
+			return _mm512_maskz_loadu_epi8(m, p);
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE
 
