@@ -817,6 +817,68 @@ namespace Simd
 				__m512 row2 = RowConvolution<align, mask>(buffer.rows[2] + offset, weights + 6, m);
 				return _mm512_add_ps(_mm512_add_ps(row0, row1), row2);
 			}
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum1x1(const float * src0, size_t srcStride, const float * dst0, __m512 * sums, __mmask16 m = -1)
+			{
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				__m512 src00 = Load<align>(src0);
+				__m512 src0f = Load<align>(src0 + F);
+				sums[0] = _mm512_fmadd_ps(dst00, Alignr<0>(src00, src0f), sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src00, src0f), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, Alignr<2>(src00, src0f), sums[2]);
+				__m512 src10 = Load<align>(src1);
+				__m512 src1f = Load<align>(src1 + F);
+				sums[3] = _mm512_fmadd_ps(dst00, Alignr<0>(src10, src1f), sums[3]);
+				sums[4] = _mm512_fmadd_ps(dst00, Alignr<1>(src10, src1f), sums[4]);
+				sums[5] = _mm512_fmadd_ps(dst00, Alignr<2>(src10, src1f), sums[5]);
+				__m512 src20 = Load<align>(src2);
+				__m512 src2f = Load<align>(src2 + F);
+				sums[6] = _mm512_fmadd_ps(dst00, Alignr<0>(src20, src2f), sums[6]);
+				sums[7] = _mm512_fmadd_ps(dst00, Alignr<1>(src20, src2f), sums[7]);
+				sums[8] = _mm512_fmadd_ps(dst00, Alignr<2>(src20, src2f), sums[8]);
+			}
+
+			template <bool align, bool mask> static SIMD_INLINE void Sum2x1(const float * src0, size_t srcStride, const float * dst0, size_t dstStride, __m512 * sums, __mmask16 m = -1)
+			{
+				const float * dst1 = dst0 + dstStride;
+				const float * src1 = src0 + srcStride;
+				const float * src2 = src1 + srcStride;
+				const float * src3 = src2 + srcStride;
+				__m512 dst00 = Load<align, mask>(dst0, m);
+				__m512 src00 = Load<align>(src0);
+				__m512 src0f = Load<align>(src0 + F);
+				sums[0] = _mm512_fmadd_ps(dst00, Alignr<0>(src00, src0f), sums[0]);
+				sums[1] = _mm512_fmadd_ps(dst00, Alignr<1>(src00, src0f), sums[1]);
+				sums[2] = _mm512_fmadd_ps(dst00, Alignr<2>(src00, src0f), sums[2]);
+				__m512 dst10 = Load<align, mask>(dst1, m);
+				__m512 src10 = Load<align>(src1);
+				__m512 src1f = Load<align>(src1 + F);
+				sums[0] = _mm512_fmadd_ps(dst10, src10, sums[0]);
+				sums[3] = _mm512_fmadd_ps(dst00, src10, sums[3]);
+				__m512 src11 = Alignr<1>(src10, src1f);
+				sums[1] = _mm512_fmadd_ps(dst10, src11, sums[1]);
+				sums[4] = _mm512_fmadd_ps(dst00, src11, sums[4]);
+				__m512 src12 = Alignr<2>(src10, src1f);
+				sums[2] = _mm512_fmadd_ps(dst10, src12, sums[2]);
+				sums[5] = _mm512_fmadd_ps(dst00, src12, sums[5]);
+				__m512 src20 = Load<align>(src2);
+				__m512 src2f = Load<align>(src2 + F);
+				sums[3] = _mm512_fmadd_ps(dst10, src20, sums[3]);
+				sums[6] = _mm512_fmadd_ps(dst00, src20, sums[6]);
+				__m512 src21 = Alignr<1>(src20, src2f);
+				sums[4] = _mm512_fmadd_ps(dst10, src21, sums[4]);
+				sums[7] = _mm512_fmadd_ps(dst00, src21, sums[7]);
+				__m512 src22 = Alignr<2>(src20, src2f);
+				sums[5] = _mm512_fmadd_ps(dst10, src22, sums[5]);
+				sums[8] = _mm512_fmadd_ps(dst00, src22, sums[8]);
+				__m512 src30 = Load<align>(src3);
+				__m512 src3f = Load<align>(src3 + F);
+				sums[6] = _mm512_fmadd_ps(dst10, Alignr<0>(src30, src3f), sums[6]);
+				sums[7] = _mm512_fmadd_ps(dst10, Alignr<1>(src30, src3f), sums[7]);
+				sums[8] = _mm512_fmadd_ps(dst10, Alignr<2>(src30, src3f), sums[8]);
+			}
 		};
 
 		template<> struct Convolution<4, 4>
@@ -1060,7 +1122,70 @@ namespace Simd
 			_mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), sums));
 		}
 
-		template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+		template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum1x1(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+		{
+			size_t alignedWidth = Simd::AlignLo(width, F);
+			__mmask16 tailMask = __mmask16(-1) >> (F + alignedWidth - width);
+			__m512 _sums[coreX*coreY];
+			memset(_sums, 0, sizeof(_sums));
+			size_t row = 0;
+			for (; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += F)
+					Convolution<coreX, coreY>::template Sum1x1<align, false>(src + col, srcStride, dst + col, _sums);
+				if (col < width)
+					Convolution<coreX, coreY>::template Sum1x1<align, true>(src + col, srcStride, dst + col, _sums, tailMask);
+				src += srcStride;
+				dst += dstStride;
+			}
+			size_t i = 0, n = Simd::AlignLo(coreX*coreY, 4);
+#ifndef _MSC_VER
+			for (; i < n; i += 4)
+				Add4ExtractedSums(_sums + i, sums + i);
+#endif
+			for (; i < coreX*coreY; ++i)
+				sums[i] += ExtractSum(_sums[i]);
+		}
+
+		template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum2x1(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+		{
+			size_t alignedHeight = Simd::AlignLo(height, 2);
+			size_t alignedWidth = Simd::AlignLo(width, F);
+			__mmask16 tailMask = __mmask16(-1) >> (F + alignedWidth - width);
+			__m512 _sums[coreX*coreY];
+			memset(_sums, 0, sizeof(_sums));
+			size_t row = 0;
+			for (; row < alignedHeight; row += 2)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += F)
+					Convolution<coreX, coreY>::template Sum2x1<align, false>(src + col, srcStride, dst + col, dstStride, _sums);
+				if (col < width)
+					Convolution<coreX, coreY>::template Sum2x1<align, true>(src + col, srcStride, dst + col, dstStride, _sums, tailMask);
+				src += 2 * srcStride;
+				dst += 2 * dstStride;
+			}
+			for (; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += F)
+					Convolution<coreX, coreY>::template Sum1x1<align, false>(src + col, srcStride, dst + col, _sums);
+				if (col < width)
+					Convolution<coreX, coreY>::template Sum1x1<align, true>(src + col, srcStride, dst + col, _sums, tailMask);
+				src += srcStride;
+				dst += dstStride;
+			}
+			size_t i = 0, n = Simd::AlignLo(coreX*coreY, 4);
+#ifndef _MSC_VER
+			for (; i < n; i += 4)
+				Add4ExtractedSums(_sums + i, sums + i);
+#endif
+			for (; i < coreX*coreY; ++i)
+				sums[i] += ExtractSum(_sums[i]);
+		}
+
+		template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum2x2(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 		{
 			size_t alignedHeight = Simd::AlignLo(height, 2);
 			size_t fullAlignedWidth = Simd::AlignLo(width - 1, DF);
@@ -1105,9 +1230,17 @@ namespace Simd
 		void NeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 		{
 			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
-				NeuralAddConvolutionSum<true, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
+				NeuralAddConvolutionSum2x2<true, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
 			else
-				NeuralAddConvolutionSum<false, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
+				NeuralAddConvolutionSum2x2<false, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
+		}
+
+		void NeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
+		{
+			if (Aligned(src) && Aligned(srcStride, F) && Aligned(dst) && Aligned(dstStride, F))
+				NeuralAddConvolutionSum2x1<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
+			else
+				NeuralAddConvolutionSum2x1<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
 		}
 
 		template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Body(const float * src)
