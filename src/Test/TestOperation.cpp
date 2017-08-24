@@ -341,6 +341,11 @@ namespace Test
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Avx2::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && VectorProductAutoTest(ARGS_VP(Simd::Avx512bw::VectorProduct), ARGS_VP(SimdVectorProduct));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && VectorProductAutoTest(ARGS_VP(Simd::Vmx::VectorProduct), ARGS_VP(SimdVectorProduct));

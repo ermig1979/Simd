@@ -207,6 +207,68 @@ namespace Simd
 			else
 				OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
 		}
+
+		SIMD_INLINE __m512i VectorProduct(const __m512i & vertical, const __m512i & horizontalLo, const __m512i & horizontalHi)
+		{
+			__m512i lo = DivideI16By255(_mm512_mullo_epi16(vertical, horizontalLo));
+			__m512i hi = DivideI16By255(_mm512_mullo_epi16(vertical, horizontalHi));
+			return _mm512_packus_epi16(lo, hi);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void VectorProduct2(const __m512i & vertical0, const __m512i & vertical1, const uint8_t * horizontal, uint8_t * dst, size_t stride, __mmask64 m = -1)
+		{
+			__m512i _horizontal = Load<align, mask>(horizontal, m);
+			__m512i horizontalLo = UnpackU8<0>(_horizontal);
+			__m512i horizontalHi = UnpackU8<1>(_horizontal);
+			Store<align, mask>(dst + 0*stride, VectorProduct(vertical0, horizontalLo, horizontalHi), m);
+			Store<align, mask>(dst + 1*stride, VectorProduct(vertical1, horizontalLo, horizontalHi), m);
+    	}
+
+		template <bool align, bool mask> SIMD_INLINE void VectorProduct1(const __m512i & vertical, const uint8_t * horizontal, uint8_t * dst, __mmask64 m = -1)
+		{
+			__m512i _horizontal = Load<align, mask>(horizontal, m);
+			Store<align, mask>(dst, VectorProduct(vertical, UnpackU8<0>(_horizontal), UnpackU8<1>(_horizontal)), m);
+		}
+
+		template <bool align> void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+		{
+			if (align)
+				assert(Aligned(horizontal) && Aligned(dst) && Aligned(stride));
+
+			size_t alignedHeight = Simd::AlignLo(height, 2);
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			__mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
+			size_t row = 0;
+			for (; row < alignedHeight; row += 2)
+			{
+				__m512i vertical0 = _mm512_set1_epi16(vertical[row + 0]);
+				__m512i vertical1 = _mm512_set1_epi16(vertical[row + 1]);
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					VectorProduct2<align, false>(vertical0, vertical1, horizontal + col, dst + col, stride);
+				if (col < width)
+					VectorProduct2<false, true>(vertical0, vertical1, horizontal + col, dst + col, stride, tailMask);
+				dst += 2*stride;
+			}
+			for (; row < height; ++row)
+			{
+				__m512i _vertical = _mm512_set1_epi16(vertical[row]);
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					VectorProduct1<align, false>(_vertical, horizontal + col, dst + col);
+				if ( col < width)
+					VectorProduct1<false, true>(_vertical, horizontal + col, dst + col, tailMask);
+				dst += stride;
+			}
+		}
+
+		void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
+		{
+			if (Aligned(horizontal) && Aligned(dst) && Aligned(stride))
+				VectorProduct<true>(vertical, horizontal, dst, stride, width, height);
+			else
+				VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -381,6 +381,11 @@ namespace Simd
 		const size_t DA = 2 * A;
 		const size_t QA = 4 * A;
 		const size_t HA = A / 2;
+
+		const __m512i K_ZERO = SIMD_MM512_SET1_EPI8(0);
+		const __m512i K_INV_ZERO = SIMD_MM512_SET1_EPI8(0xFF);
+
+		const __m512i K16_0001 = SIMD_MM512_SET1_EPI16(0x0001);
 	}
 #endif// SIMD_AVX512F_ENABLE
 

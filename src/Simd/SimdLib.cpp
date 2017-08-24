@@ -2965,6 +2965,11 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
 
 SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::VectorProduct(vertical, horizontal, dst, stride, width, height);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
