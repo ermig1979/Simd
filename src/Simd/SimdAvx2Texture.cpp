@@ -206,7 +206,7 @@ namespace Simd
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            __m256i tailMask = (src == dst ? SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF) : K_INV_ZERO);
+            __m256i tailMask = ((src == dst) ? SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF) : K_INV_ZERO);
             if(shift > 0)
             {
                 __m256i _shift = _mm256_set1_epi8((char)shift);
