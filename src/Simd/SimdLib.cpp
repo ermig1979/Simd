@@ -156,6 +156,11 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride,
                                    size_t width, size_t height, uint64_t * sum)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);

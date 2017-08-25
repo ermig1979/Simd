@@ -170,6 +170,31 @@ namespace Simd
 	}
 #endif//SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE
+	namespace Avx512bw
+	{
+		template <class T> SIMD_INLINE T ExtractSum(__m512i a)
+		{
+			const size_t size = A / sizeof(T);
+			T buffer[size];
+			_mm512_storeu_si512(buffer, a);
+			T sum = 0;
+			for (size_t i = 0; i < size; ++i)
+				sum += buffer[i];
+			return sum;
+		}
+
+#if defined(SIMD_X64_ENABLE)
+		template <> SIMD_INLINE uint64_t ExtractSum<uint64_t>(__m512i a)
+		{
+			__m256i b = _mm256_add_epi64(_mm512_extracti64x4_epi64(a, 0), _mm512_extracti64x4_epi64(a, 1));
+			__m128i c = _mm_add_epi64(_mm256_extractf128_si256(b, 0), _mm256_extractf128_si256(b, 1));
+			return _mm_extract_epi64(c, 0) + _mm_extract_epi64(c, 1);
+		}
+#endif
+	}
+#endif//SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
