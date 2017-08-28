@@ -374,6 +374,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Avx2::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Avx512bw::AbsDifferenceSums3x3Masked), FUNC_M(SimdAbsDifferenceSums3x3Masked), 9);
 #endif 
 
 #ifdef SIMD_VMX_ENABLE

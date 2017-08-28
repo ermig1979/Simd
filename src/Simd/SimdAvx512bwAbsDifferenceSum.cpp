@@ -287,6 +287,127 @@ namespace Simd
 			else
 				AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
 		}
+
+		template <bool align, int bits, bool mask> void AbsDifferenceSums3x3Masked(const uint8_t * current, const uint8_t * background, size_t backgroundStride, const uint8_t * m, const __m512i & index, __m512i sums[9], __mmask64 mm = -1)
+		{
+			__mmask64 m0 = _mm512_cmpeq_epu8_mask((Load<false, mask>(m, mm)), index) & mm;
+			const __m512i _current = Load<false, true>(current, m0);
+			AbsDifferenceSums3<align, bits, true>(_current, background - backgroundStride, sums + 0, m0);
+			AbsDifferenceSums3<align, bits, true>(_current, background, sums + 3, m0);
+			AbsDifferenceSums3<align, bits, true>(_current, background + backgroundStride, sums + 6, m0);
+		}
+
+		template <bool align, int bits, bool mask> void AbsDifferenceSums3x3x2(const uint8_t * current0, size_t currentStride, const uint8_t * background1, size_t backgroundStride, 
+			const uint8_t * mask0, size_t maskStride, const __m512i & index, __m512i sums[9], __mmask64 mm = -1)
+		{
+			__mmask64 m0 = mm & _mm512_cmpeq_epu8_mask((Load<false, mask>(mask0, mm)), index);
+			__m512i mask00 = _mm512_maskz_set1_epi8(m0, -1);
+			const __m512i current00 = Load<false, true>(current0, m0);
+			const uint8_t * background0 = background1 - backgroundStride;
+			const __m512i background00 = Load<align, true>(background0 - 1, m0);
+			const __m512i background01 = Load<false, true>(background0, m0);
+			const __m512i background02 = Load<false, true>(background0 + 1, m0);
+			Sum<bits>(sums[0], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background00)));
+			Sum<bits>(sums[1], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background01)));
+			Sum<bits>(sums[2], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background02)));
+			const uint8_t * mask1 = mask0 + maskStride;
+			__mmask64 m1 = mm & _mm512_cmpeq_epu8_mask((Load<false, mask>(mask1, mm)), index);
+			__m512i mask10 = _mm512_maskz_set1_epi8(m1, -1);
+			const uint8_t * current1 = current0 + currentStride;
+			const __m512i current10 = Load<false, true>(current1, m1);
+			const __m512i background10 = Load<align>(background1 - 1);
+			const __m512i background11 = Load<false>(background1);
+			const __m512i background12 = Load<false>(background1 + 1);
+			Sum<bits>(sums[0], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background10)));
+			Sum<bits>(sums[1], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background11)));
+			Sum<bits>(sums[2], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background12)));
+			Sum<bits>(sums[3], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background10)));
+			Sum<bits>(sums[4], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background11)));
+			Sum<bits>(sums[5], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background12)));
+			const uint8_t * background2 = background1 + backgroundStride;
+			const __m512i background20 = Load<align>(background2 - 1);
+			const __m512i background21 = Load<false>(background2);
+			const __m512i background22 = Load<false>(background2 + 1);
+			Sum<bits>(sums[3], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background20)));
+			Sum<bits>(sums[4], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background21)));
+			Sum<bits>(sums[5], _mm512_sad_epu8(current10, _mm512_and_si512(mask10, background22)));
+			Sum<bits>(sums[6], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background20)));
+			Sum<bits>(sums[7], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background21)));
+			Sum<bits>(sums[8], _mm512_sad_epu8(current00, _mm512_and_si512(mask00, background22)));
+			const uint8_t * background3 = background2 + backgroundStride;
+			const __m512i background30 = Load<align, true>(background3 - 1, m1);
+			const __m512i background31 = Load<false, true>(background3, m1);
+			const __m512i background32 = Load<false, true>(background3 + 1, m1);
+			Sum<bits>(sums[6], _mm512_sad_epu8(current10, background30));
+			Sum<bits>(sums[7], _mm512_sad_epu8(current10, background31));
+			Sum<bits>(sums[8], _mm512_sad_epu8(current10, background32));
+		}
+
+		template <bool align, int bits> void AbsDifferenceSums3x3Masked(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+			const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
+		{
+			if (align)
+				assert(Aligned(background) && Aligned(backgroundStride));
+
+			width -= 2;
+			height -= 2;
+			current += 1 + currentStride;
+			background += 1 + backgroundStride;
+			mask += 1 + maskStride;
+
+			__m512i _index = _mm512_set1_epi8(index);
+			size_t alignedHeight = AlignLo(height, 2);
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
+			__m512i _sums[9];
+			for (size_t i = 0; i < 9; ++i)
+				_sums[i] = _mm512_setzero_si512();
+
+			size_t row = 0;
+			for (; row < alignedHeight; row += 2)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					AbsDifferenceSums3x3x2<align, bits, false>(current + col, currentStride, background + col, backgroundStride, mask + col, maskStride, _index, _sums);
+				if (col < width)
+					AbsDifferenceSums3x3x2<align, bits, true>(current + col, currentStride, background + col, backgroundStride, mask + col, maskStride, _index, _sums, tailMask);
+				current += 2 * currentStride;
+				background += 2 * backgroundStride;
+				mask += 2 * maskStride;
+			}
+			for (; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					AbsDifferenceSums3x3Masked<align, bits, false>(current + col, background + col, backgroundStride, mask + col, _index, _sums);
+				if (col < width)
+					AbsDifferenceSums3x3Masked<align, bits, true>(current + col, background + col, backgroundStride, mask + col, _index, _sums, tailMask);
+				current += currentStride;
+				background += backgroundStride;
+				mask += maskStride;
+			}
+
+			for (size_t i = 0; i < 9; ++i)
+				sums[i] = ExtractSum<uint64_t>(_sums[i]);
+		}
+
+		template <bool align> void AbsDifferenceSums3x3Masked(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+			const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
+		{
+			if (width*height >= 256 * 256 * 256 * 8)
+				AbsDifferenceSums3x3Masked<align, 64>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+			else
+				AbsDifferenceSums3x3Masked<align, 32>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+		}
+
+		void AbsDifferenceSums3x3Masked(const uint8_t * current, size_t currentStride, const uint8_t * background, size_t backgroundStride,
+			const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
+		{
+			if (Aligned(background) && Aligned(backgroundStride))
+				AbsDifferenceSums3x3Masked<true>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+			else
+				AbsDifferenceSums3x3Masked<false>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
