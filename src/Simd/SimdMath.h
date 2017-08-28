@@ -760,6 +760,11 @@ namespace Simd
 		{
 			return hi;
 		}
+
+		SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
+		{
+			return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
+		}
 	}
 #endif //SIMD_AVX512F_ENABLE
 
