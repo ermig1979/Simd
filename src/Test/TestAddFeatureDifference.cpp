@@ -110,6 +110,11 @@ namespace Test
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx512bw::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Vmx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));

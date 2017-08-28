@@ -312,6 +312,11 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
                                        const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
                                        uint16_t weight, uint8_t * difference, size_t differenceStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);

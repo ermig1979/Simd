@@ -43,6 +43,9 @@ namespace Simd
 
 		void AbsGradientSaturatedSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+		void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, uint16_t weight, uint8_t * difference, size_t differenceStride);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
