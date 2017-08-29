@@ -559,6 +559,11 @@ namespace Test
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx2::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx512bw::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundAdjustRangeAutoTest(FUNC3(Simd::Vmx::BackgroundAdjustRange), FUNC3(SimdBackgroundAdjustRange));

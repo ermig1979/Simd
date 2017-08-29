@@ -474,6 +474,12 @@ SIMD_API void SimdBackgroundAdjustRange(uint8_t * loCount, size_t loCountStride,
                                         uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
                                         uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,
+			hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundAdjustRange(loCount, loCountStride, width, height, loValue, loValueStride,

@@ -179,6 +179,76 @@ namespace Simd
 				BackgroundIncrementCount<false>(value, valueStride, width, height,
 					loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
 		}
+
+		SIMD_INLINE __m512i AdjustLo(const __m512i & count, const __m512i & value, const __m512i & threshold)
+		{
+			const __mmask64 dec = _mm512_cmpgt_epu8_mask(count, threshold);
+			const __mmask64 inc = _mm512_cmplt_epu8_mask(count, threshold);
+			__m512i added = _mm512_mask_adds_epu8(value, inc, value, K8_01);
+			return _mm512_mask_subs_epu8(added, dec, added, K8_01);
+		}
+
+		SIMD_INLINE __m512i AdjustHi(const __m512i & count, const __m512i & value, const __m512i & threshold)
+		{
+			const __mmask64 inc = _mm512_cmpgt_epu8_mask(count, threshold);
+			const __mmask64 dec = _mm512_cmplt_epu8_mask(count, threshold);
+			__m512i added = _mm512_mask_adds_epu8(value, inc, value, K8_01);
+			return _mm512_mask_subs_epu8(added, dec, added, K8_01);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void BackgroundAdjustRange(uint8_t * loCount, uint8_t * loValue,
+			uint8_t * hiCount, uint8_t * hiValue, const __m512i & threshold, __mmask64 m = -1)
+		{
+			const __m512i _loCount = Load<align, mask>(loCount, m);
+			const __m512i _loValue = Load<align, mask>(loValue, m);
+			const __m512i _hiCount = Load<align, mask>(hiCount, m);
+			const __m512i _hiValue = Load<align, mask>(hiValue, m);
+
+			Store<align, mask>(loValue, AdjustLo(_loCount, _loValue, threshold), m);
+			Store<align, mask>(hiValue, AdjustHi(_hiCount, _hiValue, threshold), m);
+			Store<align, mask>(loCount, K_ZERO, m);
+			Store<align, mask>(hiCount, K_ZERO, m);
+		}
+
+		template <bool align> void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+			uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+			uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+		{
+			if (align)
+			{
+				assert(Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride));
+				assert(Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride));
+			}
+
+			const __m512i _threshold = _mm512_set1_epi8((char)threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BackgroundAdjustRange<align, false>(loCount + col, loValue + col, hiCount + col, hiValue + col, _threshold);
+				if (col < width)
+					BackgroundAdjustRange<align, true>(loCount + col, loValue + col, hiCount + col, hiValue + col, _threshold, tailMask);
+				loValue += loValueStride;
+				hiValue += hiValueStride;
+				loCount += loCountStride;
+				hiCount += hiCountStride;
+			}
+		}
+
+		void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+			uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+			uint8_t * hiValue, size_t hiValueStride, uint8_t threshold)
+		{
+			if (Aligned(loValue) && Aligned(loValueStride) && Aligned(hiValue) && Aligned(hiValueStride) &&
+				Aligned(loCount) && Aligned(loCountStride) && Aligned(hiCount) && Aligned(hiCountStride))
+				BackgroundAdjustRange<true>(loCount, loCountStride, width, height, loValue, loValueStride,
+					hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+			else
+				BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride,
+					hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

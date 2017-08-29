@@ -59,6 +59,10 @@ namespace Simd
 			const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
 			uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
 
+		void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
+			uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
+			uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
