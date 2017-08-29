@@ -385,6 +385,8 @@ namespace Simd
 		const __m512i K_ZERO = SIMD_MM512_SET1_EPI8(0);
 		const __m512i K_INV_ZERO = SIMD_MM512_SET1_EPI8(0xFF);
 
+		const __m512i K8_01 = SIMD_MM512_SET1_EPI8(0x01);
+
 		const __m512i K16_0001 = SIMD_MM512_SET1_EPI16(0x0001);
 		const __m512i K16_00FF = SIMD_MM512_SET1_EPI16(0x00FF);
 
