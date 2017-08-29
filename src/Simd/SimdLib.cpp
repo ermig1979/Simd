@@ -512,6 +512,12 @@ SIMD_API void SimdBackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountS
                                               uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
                                               uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
+		hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundAdjustRangeMasked(loCount, loCountStride, width, height, loValue, loValueStride,
