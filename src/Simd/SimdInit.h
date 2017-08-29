@@ -44,6 +44,12 @@ namespace Simd
 	Simd::GetChar(int32_t(a), 0), Simd::GetChar(int32_t(a), 1), \
 	Simd::GetChar(int32_t(a), 2), Simd::GetChar(int32_t(a), 3)
 
+#define SIMD_AS_8CHARS(a) \
+	Simd::GetChar(int64_t(a), 0), Simd::GetChar(int64_t(a), 1), \
+	Simd::GetChar(int64_t(a), 2), Simd::GetChar(int64_t(a), 3), \
+	Simd::GetChar(int64_t(a), 4), Simd::GetChar(int64_t(a), 5), \
+	Simd::GetChar(int64_t(a), 6), Simd::GetChar(int64_t(a), 7)
+
 #elif defined(__GNUC__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
 
 #define SIMD_CHAR_AS_LONGLONG(a) (((long long)a) & 0xFF)
@@ -133,6 +139,15 @@ namespace Simd
 #define SIMD_MM_SETR_EPI32(a0, a1, a2, a3) \
     {SIMD_AS_4CHARS(a0), SIMD_AS_4CHARS(a1), SIMD_AS_4CHARS(a2), SIMD_AS_4CHARS(a3)}
 
+#define SIMD_MM_SET1_EPI64(a) \
+    {SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a)}
+
+#define SIMD_MM_SET2_EPI64(a0, a1) \
+    {SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1)}
+
+#define SIMD_MM_SETR_EPI64(a0, a1) \
+    {SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1)}
+
 #elif defined(__GNUC__)
 
 #define SIMD_MM_SET1_EPI8(a) \
@@ -161,6 +176,15 @@ namespace Simd
 
 #define SIMD_MM_SETR_EPI32(a0, a1, a2, a3) \
     {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a2, a3)}
+
+#define SIMD_MM_SET1_EPI64(a) \
+    {a, a}
+
+#define SIMD_MM_SET2_EPI64(a0, a1) \
+    {a0, a1}
+
+#define SIMD_MM_SETR_EPI64(a0, a1) \
+    {a0, a1}
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
@@ -230,6 +254,15 @@ namespace Simd
     {SIMD_AS_4CHARS(a0), SIMD_AS_4CHARS(a1), SIMD_AS_4CHARS(a2), SIMD_AS_4CHARS(a3), \
     SIMD_AS_4CHARS(a4), SIMD_AS_4CHARS(a5), SIMD_AS_4CHARS(a6), SIMD_AS_4CHARS(a7)}
 
+#define SIMD_MM256_SET1_EPI64(a) \
+	{SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a)}
+
+#define SIMD_MM256_SET2_EPI64(a0, a1) \
+	{SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1)}
+
+#define SIMD_MM256_SETR_EPI64(a0, a1, a2, a3) \
+    {SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a2), SIMD_AS_8CHARS(a3)}
+
 #elif defined(__GNUC__)
 
 #define SIMD_MM256_SET1_EPI8(a) \
@@ -267,6 +300,15 @@ namespace Simd
 #define SIMD_MM256_SETR_EPI32(a0, a1, a2, a3, a4, a5, a6, a7) \
     {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a2, a3), \
     SIMD_LL_SET2_EPI32(a4, a5), SIMD_LL_SET2_EPI32(a6, a7)}
+
+#define SIMD_MM256_SET1_EPI64(a) \
+    {a, a, a, a}
+
+#define SIMD_MM256_SET2_EPI64(a0, a1) \
+    {a0, a1, a0, a1}
+
+#define SIMD_MM256_SETR_EPI64(a0, a1, a2, a3) \
+    {a0, a1, a2, a3}
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
@@ -336,6 +378,15 @@ namespace Simd
     {SIMD_AS_4CHARS(a0), SIMD_AS_4CHARS(a1), SIMD_AS_4CHARS(a2), SIMD_AS_4CHARS(a3), SIMD_AS_4CHARS(a4), SIMD_AS_4CHARS(a5), SIMD_AS_4CHARS(a6), SIMD_AS_4CHARS(a7), \
 	SIMD_AS_4CHARS(a8), SIMD_AS_4CHARS(a9), SIMD_AS_4CHARS(aa), SIMD_AS_4CHARS(ab), SIMD_AS_4CHARS(ac), SIMD_AS_4CHARS(ad), SIMD_AS_4CHARS(ae), SIMD_AS_4CHARS(af)}
 
+#define SIMD_MM512_SET1_EPI64(a) \
+	{SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a), SIMD_AS_8CHARS(a)}
+
+#define SIMD_MM512_SET2_EPI64(a0, a1) \
+	{SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1)}
+
+#define SIMD_MM512_SETR_EPI64(a0, a1, a2, a3, a4, a5, a6, a7) \
+    {SIMD_AS_8CHARS(a0), SIMD_AS_8CHARS(a1), SIMD_AS_8CHARS(a2), SIMD_AS_8CHARS(a3), SIMD_AS_8CHARS(a4), SIMD_AS_8CHARS(a5), SIMD_AS_8CHARS(a6), SIMD_AS_8CHARS(a7)}
+
 #elif defined(__GNUC__)
 
 #define SIMD_MM512_SET1_EPI8(a) \
@@ -375,6 +426,15 @@ namespace Simd
 #define SIMD_MM512_SETR_EPI32(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) \
     {SIMD_LL_SET2_EPI32(a0, a1), SIMD_LL_SET2_EPI32(a2, a3), SIMD_LL_SET2_EPI32(a4, a5), SIMD_LL_SET2_EPI32(a6, a7), \
     SIMD_LL_SET2_EPI32(a8, a9), SIMD_LL_SET2_EPI32(aa, ab), SIMD_LL_SET2_EPI32(ac, ad), SIMD_LL_SET2_EPI32(ae, af)}
+
+#define SIMD_MM512_SET1_EPI64(a) \
+    {a, a, a, a, a, a, a, a}
+ 
+#define SIMD_MM512_SET2_EPI64(a0, a1) \
+    {a0, a1, a0, a1, a0, a1, a0, a1}
+
+#define SIMD_MM512_SETR_EPI64(a0, a1, a2, a3, a4, a5, a6, a7) \
+    {a0, a1, a2, a3, a4, a5, a6, a7}
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 

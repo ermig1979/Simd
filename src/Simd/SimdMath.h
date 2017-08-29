@@ -771,6 +771,11 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
 	namespace Avx512bw
 	{
+		__mmask64 SIMD_INLINE TailMask64(ptrdiff_t tail)
+		{
+			return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));
+		}
+
 		SIMD_INLINE __m512i DivideI16By255(__m512i value)
 		{
 			return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
