@@ -492,6 +492,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vmx::BackgroundGrowRangeFast), FUNC1(SimdBackgroundGrowRangeFast));

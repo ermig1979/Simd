@@ -410,6 +410,11 @@ SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStr
 SIMD_API void SimdBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundGrowRangeFast(value, valueStride, width, height, lo, loStride, hi, hiStride);

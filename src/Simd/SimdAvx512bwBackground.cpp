@@ -37,8 +37,8 @@ namespace Simd
             const __m512i _lo = Load<align, mask>(lo, m);
             const __m512i _hi = Load<align, mask>(hi, m);
 
-            const __mmask64 inc = _mm512_cmp_epu8_mask(_value, _hi, _MM_CMPINT_GT);
-            const __mmask64 dec = _mm512_cmp_epu8_mask(_value, _lo, _MM_CMPINT_LT);
+            const __mmask64 inc = _mm512_cmpgt_epu8_mask(_value, _hi);
+            const __mmask64 dec = _mm512_cmplt_epu8_mask(_value, _lo);
 
             Store<align, mask>(lo, _mm512_mask_subs_epu8(_lo, dec, _lo, K8_01), m);
             Store<align, mask>(hi, _mm512_mask_adds_epu8(_hi, inc, _hi, K8_01), m);
@@ -77,6 +77,50 @@ namespace Simd
             else
                 BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
         }
+
+		template <bool align, bool mask> SIMD_INLINE void BackgroundGrowRangeFast(const uint8_t * value, uint8_t * lo, uint8_t * hi, __mmask64 m = -1)
+		{
+			const __m512i _value = Load<align, mask>(value, m);
+			const __m512i _lo = Load<align, mask>(lo, m);
+			const __m512i _hi = Load<align, mask>(hi, m);
+
+			Store<align, mask>(lo, _mm512_min_epu8(_lo, _value), m);
+			Store<align, mask>(hi, _mm512_max_epu8(_hi, _value), m);
+		}
+
+		template <bool align> void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+		{
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BackgroundGrowRangeFast<align, false>(value + col, lo + col, hi + col);
+				if (col < width)
+					BackgroundGrowRangeFast<align, true>(value + col, lo + col, hi + col, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+		}
+
+		void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				BackgroundGrowRangeFast<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+			else
+				BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
