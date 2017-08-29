@@ -55,6 +55,10 @@ namespace Simd
 		void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
 			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
 
+		void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
+			uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

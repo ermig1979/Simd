@@ -525,6 +525,11 @@ namespace Test
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Avx2::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Avx512bw::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundIncrementCountAutoTest(FUNC2(Simd::Vmx::BackgroundIncrementCount), FUNC2(SimdBackgroundIncrementCount));
