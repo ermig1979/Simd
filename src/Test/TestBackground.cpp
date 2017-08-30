@@ -660,6 +660,11 @@ namespace Test
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx2::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx512bw::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Vmx::BackgroundShiftRangeMasked), FUNC5(SimdBackgroundShiftRangeMasked));

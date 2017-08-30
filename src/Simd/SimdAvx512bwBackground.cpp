@@ -356,6 +356,60 @@ namespace Simd
 			else
 				BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void BackgroundShiftRangeMasked(const uint8_t * value, uint8_t * lo, uint8_t * hi, 
+			const uint8_t * pmask, __mmask64 m = -1)
+		{
+			const __m512i _mask = Load<align, mask>(pmask, m);
+			const __mmask64 mm = _mm512_cmpneq_epu8_mask(_mask, K_ZERO) & m;
+
+			const __m512i _value = Load<align, mask>(value, m);
+			const __m512i _lo = Load<align, mask>(lo, m);
+			const __m512i _hi = Load<align, mask>(hi, m);
+
+			const __m512i add = _mm512_subs_epu8(_value, _hi);
+			const __m512i sub = _mm512_subs_epu8(_lo, _value);
+
+			Store<align, true>(lo, _mm512_subs_epu8(_mm512_adds_epu8(_lo, add), sub), mm);
+			Store<align, true>(hi, _mm512_subs_epu8(_mm512_adds_epu8(_hi, add), sub), mm);
+		}
+
+		template <bool align> void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
+		{
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(lo) && Aligned(loStride));
+				assert(Aligned(hi) && Aligned(hiStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BackgroundShiftRangeMasked<align, false>(value + col, lo + col, hi + col, mask + col);
+				if (col < width)
+					BackgroundShiftRangeMasked<align, true>(value + col, lo + col, hi + col, mask + col, tailMask);
+				value += valueStride;
+				lo += loStride;
+				hi += hiStride;
+				mask += maskStride;
+			}
+		}
+
+		void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
+				Aligned(hi) && Aligned(hiStride) && Aligned(mask) && Aligned(maskStride))
+				BackgroundShiftRangeMasked<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+			else
+				BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
