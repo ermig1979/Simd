@@ -671,6 +671,11 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
 
 SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+	else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
