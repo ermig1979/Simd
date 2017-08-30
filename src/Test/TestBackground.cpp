@@ -626,6 +626,11 @@ namespace Test
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundChangeRangeAutoTest(FUNC1(Simd::Vmx::BackgroundShiftRange), FUNC1(SimdBackgroundShiftRange));
