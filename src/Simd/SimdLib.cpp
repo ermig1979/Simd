@@ -611,6 +611,11 @@ SIMD_API void SimdBackgroundShiftRangeMasked(const uint8_t * value, size_t value
 SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BackgroundInitMask(src, srcStride, width, height, index, value, dst, dstStride);

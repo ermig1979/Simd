@@ -410,6 +410,47 @@ namespace Simd
 			else
 				BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void BackgroundInitMask(const uint8_t * src, uint8_t * dst, const __m512i & index, const __m512i & value, __mmask64 m = -1)
+		{
+			__m512i _src = Load<align, mask>(src, m);
+			__mmask64 mm = _mm512_cmpeq_epu8_mask(_src, index) & m;
+			Store<align, true>(dst, value, mm);
+		}
+
+		template <bool align> void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (align)
+			{
+				assert(Aligned(src) && Aligned(srcStride));
+				assert(Aligned(dst) && Aligned(dstStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			__m512i _index = _mm512_set1_epi8(index);
+			__m512i _value = _mm512_set1_epi8(value);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BackgroundInitMask<align, false>(src + col, dst + col, _index, _value);
+				if (col <  width)
+					BackgroundInitMask<align, true>(src + col, dst + col, _index, _value, tailMask);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
+			else
+				BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

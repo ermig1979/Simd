@@ -694,6 +694,11 @@ namespace Test
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Avx2::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Avx512bw::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BackgroundInitMaskAutoTest(FUNC6(Simd::Vmx::BackgroundInitMask), FUNC6(SimdBackgroundInitMask));

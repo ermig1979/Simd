@@ -72,6 +72,9 @@ namespace Simd
 		void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
 			uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
 
+		void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
