@@ -70,7 +70,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(blue, green, red, bgra2, alpha));
 
-        result = result && Compare(bgra1, bgra2, 0, true, 32);
+        result = result && Compare(bgra1, bgra2, 0, true, 64);
 
         return result;
     }
@@ -100,6 +100,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx512bw::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
