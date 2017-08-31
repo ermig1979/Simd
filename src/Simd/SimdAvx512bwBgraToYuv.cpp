@@ -200,6 +200,63 @@ namespace Simd
 			else
 				BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
 		}
+
+		SIMD_INLINE __m512i ConvertY16(__m512i b16_r16[2], __m512i g16_1[2])
+		{
+			return Saturate16iTo8u(_mm512_add_epi16(K16_Y_ADJUST, _mm512_packs_epi32(BgrToY32(b16_r16[0], g16_1[0]), BgrToY32(b16_r16[1], g16_1[1]))));
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v, const __mmask64 * ms)
+		{
+			__m512i _b16_r16[2][2], _g16_1[2][2];
+			LoadPreparedBgra16<align, mask>(bgra + 0 * A, _b16_r16[0][0], _g16_1[0][0], ms + 0);
+			LoadPreparedBgra16<align, mask>(bgra + 1 * A, _b16_r16[0][1], _g16_1[0][1], ms + 1);
+			LoadPreparedBgra16<align, mask>(bgra + 2 * A, _b16_r16[1][0], _g16_1[1][0], ms + 2);
+			LoadPreparedBgra16<align, mask>(bgra + 3 * A, _b16_r16[1][1], _g16_1[1][1], ms + 3);
+
+			Store<align, mask>(y, Permuted2Pack16iTo8u(ConvertY16(_b16_r16[0], _g16_1[0]), ConvertY16(_b16_r16[1], _g16_1[1])), ms[4]);
+			Store<align, mask>(u, Permuted2Pack16iTo8u(ConvertU16(_b16_r16[0], _g16_1[0]), ConvertU16(_b16_r16[1], _g16_1[1])), ms[4]);
+			Store<align, mask>(v, Permuted2Pack16iTo8u(ConvertV16(_b16_r16[0], _g16_1[0]), ConvertV16(_b16_r16[1], _g16_1[1])), ms[4]);
+		}
+
+		template <bool align> void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t tail = width - alignedWidth;
+			__mmask64 tailMasks[5];
+			for (size_t i = 0; i < 4; ++i)
+				tailMasks[i] = TailMask64(tail * 4 - A*i);
+			tailMasks[4] = TailMask64(tail);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BgraToYuv444p<align, false>(bgra + col * 4, y + col, u + col, v + col, tailMasks);
+				if (col < width)
+					BgraToYuv444p<align, true>(bgra + col * 4, y + col, u + col, v + col, tailMasks);
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgra += bgraStride;
+			}
+		}
+
+		void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+			else
+				BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
