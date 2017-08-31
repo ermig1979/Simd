@@ -151,6 +151,11 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Avx2::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Avx512bw::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Vmx::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
