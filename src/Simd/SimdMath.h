@@ -760,11 +760,6 @@ namespace Simd
 		{
 			return hi;
 		}
-
-		SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
-		{
-			return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
-		}
 	}
 #endif //SIMD_AVX512F_ENABLE
 
@@ -791,6 +786,28 @@ namespace Simd
 		template <> SIMD_INLINE __m512i UnpackU8<1>(__m512i a, __m512i b)
 		{
 			return _mm512_unpackhi_epi8(a, b);
+		}
+
+		SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
+		{
+			return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
+		}
+
+		SIMD_INLINE __m512i Saturate16iTo8u(__m512i value)
+		{
+			return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
+		}
+
+		SIMD_INLINE __m512i Hadd32(__m512i a, __m512i b)
+		{
+			__m512i ab0 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_0, b);
+			__m512i ab1 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_1, b);
+			return _mm512_add_epi32(ab0, ab1);
+		}
+
+		SIMD_INLINE __m512i Permuted2Pack16iTo8u(__m512i lo, __m512i hi)
+		{
+			return _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(lo, hi));
 		}
 	}
 #endif //SIMD_AVX512BW_ENABLE

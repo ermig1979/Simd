@@ -388,7 +388,33 @@ namespace Simd
 		const __m512i K8_01 = SIMD_MM512_SET1_EPI8(0x01);
 
 		const __m512i K16_0001 = SIMD_MM512_SET1_EPI16(0x0001);
+		const __m512i K16_0002 = SIMD_MM512_SET1_EPI16(0x0002);
 		const __m512i K16_00FF = SIMD_MM512_SET1_EPI16(0x00FF);
+
+		const __m512i K32_0000FFFF = SIMD_MM512_SET1_EPI32(0x0000FFFF);
+		const __m512i K32_00010000 = SIMD_MM512_SET1_EPI32(0x00010000);
+
+		const __m512i K16_Y_ADJUST = SIMD_MM512_SET1_EPI16(Base::Y_ADJUST);
+		const __m512i K16_UV_ADJUST = SIMD_MM512_SET1_EPI16(Base::UV_ADJUST);
+
+		const __m512i K16_BY_RY = SIMD_MM512_SET2_EPI16(Base::BLUE_TO_Y_WEIGHT, Base::RED_TO_Y_WEIGHT);
+		const __m512i K16_GY_RT = SIMD_MM512_SET2_EPI16(Base::GREEN_TO_Y_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
+		const __m512i K16_BU_RU = SIMD_MM512_SET2_EPI16(Base::BLUE_TO_U_WEIGHT, Base::RED_TO_U_WEIGHT);
+		const __m512i K16_GU_RT = SIMD_MM512_SET2_EPI16(Base::GREEN_TO_U_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
+		const __m512i K16_BV_RV = SIMD_MM512_SET2_EPI16(Base::BLUE_TO_V_WEIGHT, Base::RED_TO_V_WEIGHT);
+		const __m512i K16_GV_RT = SIMD_MM512_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
+
+		const __m512i K8_SUFFLE_BGRA_TO_G0A0 = SIMD_MM512_SETR_EPI8(
+			0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1,
+			0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1,
+			0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1,
+			0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1);
+
+		const __m512i K8_SUFFLE_BGRA_TO_G000 = SIMD_MM512_SETR_EPI8(
+			0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+			0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+			0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+			0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
 
 		const __m512i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM512_SETR_EPI8(
 			0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5,
@@ -407,6 +433,9 @@ namespace Simd
 			0xA, 0xB, 0xB, 0xB, 0xC, 0xC, 0xC, 0xD, 0xD, 0xD, 0xE, 0xE, 0xE, 0xF, 0xF, 0xF);
 
 		const __m512i K32_PERMUTE_FOR_TWO_UNPACK = SIMD_MM512_SETR_EPI32(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+
+		const __m512i K32_PERMUTE_FOR_HADD_0 = SIMD_MM512_SETR_EPI32(0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E);
+		const __m512i K32_PERMUTE_FOR_HADD_1 = SIMD_MM512_SETR_EPI32(0x01, 0x03, 0x05, 0x07, 0x09, 0x0B, 0x0D, 0x0F, 0x11, 0x13, 0x15, 0x17, 0x19, 0x1B, 0x1D, 0x1F);
 
 		const __m512i K64_PERMUTE_FOR_UNPACK = SIMD_MM512_SETR_EPI64(0, 4, 1, 5, 2, 6, 3, 7);
 	}

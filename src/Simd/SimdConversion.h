@@ -834,6 +834,24 @@ namespace Simd
 		{
 			return _mm512_shuffle_epi8(_mm512_shuffle_i64x2(gray, gray, 0xFE), K8_SHUFFLE_GRAY_TO_BGR2);
 		}	
+
+		SIMD_INLINE __m512i BgrToY32(__m512i b16_r16, __m512i g16_1)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, K16_BY_RY),
+				_mm512_madd_epi16(g16_1, K16_GY_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE __m512i BgrToU32(__m512i b16_r16, __m512i g16_1)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, K16_BU_RU),
+				_mm512_madd_epi16(g16_1, K16_GU_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE __m512i BgrToV32(__m512i b16_r16, __m512i g16_1)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, K16_BV_RV),
+				_mm512_madd_epi16(g16_1, K16_GV_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE 
 
