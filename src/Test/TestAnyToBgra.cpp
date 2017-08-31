@@ -97,6 +97,11 @@ namespace Test
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBgra), FUNC(SimdBgrToBgra));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBgra), FUNC(SimdBgrToBgra));
