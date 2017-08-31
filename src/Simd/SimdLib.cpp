@@ -917,6 +917,11 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
 
 SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
+	else
+#endif
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
