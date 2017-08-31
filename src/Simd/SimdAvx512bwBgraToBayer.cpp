@@ -29,10 +29,10 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE  
     namespace Avx512bw
     {
-        __m128i K8_SHUFFLE_GR = SIMD_MM_SETR_EPI8(0x1, 0x6, 0x9, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        __m128i K8_SHUFFLE_BG = SIMD_MM_SETR_EPI8(0x0, 0x5, 0x8, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        __m128i K8_SHUFFLE_GB = SIMD_MM_SETR_EPI8(0x1, 0x4, 0x9, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
-        __m128i K8_SHUFFLE_RG = SIMD_MM_SETR_EPI8(0x2, 0x5, 0xA, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m128i K8_SHUFFLE_GR = SIMD_MM_SETR_EPI8(0x1, 0x6, 0x9, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m128i K8_SHUFFLE_BG = SIMD_MM_SETR_EPI8(0x0, 0x5, 0x8, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m128i K8_SHUFFLE_GB = SIMD_MM_SETR_EPI8(0x1, 0x4, 0x9, 0xC, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m128i K8_SHUFFLE_RG = SIMD_MM_SETR_EPI8(0x2, 0x5, 0xA, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
 
 		const __m512i K32_PERMUTE_BGRA_TO_BAYER_0 = SIMD_MM512_SETR_EPI32(0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C, -1, -1, -1, -1, -1, -1, -1, -1);
 		const __m512i K32_PERMUTE_BGRA_TO_BAYER_1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C);

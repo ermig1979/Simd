@@ -831,6 +831,11 @@ SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t heigh
 
 SIMD_API void SimdBgrToBayer(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+	else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgrToBayer(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
