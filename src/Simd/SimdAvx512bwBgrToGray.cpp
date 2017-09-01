@@ -34,18 +34,6 @@ namespace Simd
 		const __m512i K16_GREEN_0000 = SIMD_MM512_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0x0000);
 		const __m512i K32_ROUND_TERM = SIMD_MM512_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
 
-		const __m512i K8_SUFFLE_BGR_TO_B0R0 = SIMD_MM512_SETR_EPI8(
-			0x0, -1, 0x2, -1, 0x3, -1, 0x5, -1, 0x6, -1, 0x8, -1, 0x9, -1, 0xB, -1,
-			0x0, -1, 0x2, -1, 0x3, -1, 0x5, -1, 0x6, -1, 0x8, -1, 0x9, -1, 0xB, -1,
-			0x0, -1, 0x2, -1, 0x3, -1, 0x5, -1, 0x6, -1, 0x8, -1, 0x9, -1, 0xB, -1,
-			0x0, -1, 0x2, -1, 0x3, -1, 0x5, -1, 0x6, -1, 0x8, -1, 0x9, -1, 0xB, -1);
-
-		const __m512i K8_SUFFLE_BGR_TO_G000 = SIMD_MM512_SETR_EPI8(
-			0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xA, -1, -1, -1,
-			0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xA, -1, -1, -1,
-			0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xA, -1, -1, -1,
-			0x1, -1, -1, -1, 0x4, -1, -1, -1, 0x7, -1, -1, -1, 0xA, -1, -1, -1);
-
 		SIMD_INLINE __m512i PermutedBgrToGray32(__m512i permutedBgr)
 		{
 			const __m512i b0r0 = _mm512_shuffle_epi8(permutedBgr, K8_SUFFLE_BGR_TO_B0R0);
