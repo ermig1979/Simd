@@ -214,6 +214,11 @@ namespace Test
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx512bw::AveragingBinarization), FUNC2(SimdAveragingBinarization));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Vmx::AveragingBinarization), FUNC2(SimdAveragingBinarization));

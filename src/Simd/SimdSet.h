@@ -91,6 +91,16 @@ namespace Simd
 	}
 #endif// SIMD_AVX2_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE
+	namespace Avx512bw
+	{
+		SIMD_INLINE __m512i SetInt16(short a0, short a1)
+		{
+			return _mm512_unpacklo_epi16(_mm512_set1_epi16(a0), _mm512_set1_epi16(a1));
+		}
+	}
+#endif// SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {

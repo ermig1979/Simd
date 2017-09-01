@@ -436,6 +436,21 @@ namespace Simd
 		{
 			return _mm512_maskz_loadu_epi16(m, p);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE __m512i Load(const uint32_t * p, __mmask16 m)
+		{
+			return Load<align>(p);
+		}
+
+		template <> SIMD_INLINE __m512i Load<false, true>(const uint32_t * p, __mmask16 m)
+		{
+			return _mm512_maskz_loadu_epi32(m, p);
+		}
+
+		template <> SIMD_INLINE __m512i Load<true, true>(const uint32_t * p, __mmask16 m)
+		{
+			return _mm512_maskz_loadu_epi32(m, p);
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE
 

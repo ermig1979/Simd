@@ -1085,6 +1085,11 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
                            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
                            uint8_t * dst, size_t dstStride, SimdCompareType compareType)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
