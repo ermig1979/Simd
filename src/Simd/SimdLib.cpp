@@ -1053,6 +1053,11 @@ SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height,
 SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                   uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);

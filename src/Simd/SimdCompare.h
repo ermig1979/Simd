@@ -313,6 +313,43 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE    
+	namespace Avx512bw
+	{
+		template<SimdCompareType compareType> SIMD_INLINE __mmask64 Compare8u(__m512i a, __m512i b);
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpeq_epu8_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareNotEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpneq_epu8_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreater>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpgt_epu8_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpge_epu8_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesser>(__m512i a, __m512i b)
+		{
+			return _mm512_cmplt_epu8_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmple_epu8_mask(a, b);
+		}
+	}
+#endif// SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_VMX_ENABLE    
     namespace Vmx
     {

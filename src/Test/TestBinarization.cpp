@@ -110,6 +110,11 @@ namespace Test
             result = result && BinarizationAutoTest(FUNC1(Simd::Avx2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && BinarizationAutoTest(FUNC1(Simd::Avx512bw::Binarization), FUNC1(SimdBinarization));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && BinarizationAutoTest(FUNC1(Simd::Vmx::Binarization), FUNC1(SimdBinarization));
