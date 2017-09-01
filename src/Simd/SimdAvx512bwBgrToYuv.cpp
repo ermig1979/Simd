@@ -137,6 +137,70 @@ namespace Simd
 			else
 				BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
 		}
+
+		SIMD_INLINE void Average16(__m512i a[2][2])
+		{
+			a[0][0] = _mm512_srli_epi16(_mm512_add_epi16(a[0][0], K16_0001), 1);
+			a[0][1] = _mm512_srli_epi16(_mm512_add_epi16(a[0][1], K16_0001), 1);
+			a[1][0] = _mm512_srli_epi16(_mm512_add_epi16(a[1][0], K16_0001), 1);
+			a[1][1] = _mm512_srli_epi16(_mm512_add_epi16(a[1][1], K16_0001), 1);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void BgrToYuv422p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v, const __mmask64 * ms)
+		{
+			__m512i _b16_r16[2][2], _g16_1[2][2];
+			Store<align, mask>(y + 0, LoadAndConvertY8<align, mask>(bgr + 0 * A, _b16_r16[0], _g16_1[0], ms + 0), ms[8]);
+			Store<align, mask>(y + A, LoadAndConvertY8<align, mask>(bgr + 3 * A, _b16_r16[1], _g16_1[1], ms + 4), ms[9]);
+
+			Average16(_b16_r16);
+			Average16(_g16_1);
+
+			Store<align, mask>(u, Permuted2Pack16iTo8u(ConvertU16(_b16_r16[0], _g16_1[0]), ConvertU16(_b16_r16[1], _g16_1[1])), ms[10]);
+			Store<align, mask>(v, Permuted2Pack16iTo8u(ConvertV16(_b16_r16[0], _g16_1[0]), ConvertV16(_b16_r16[1], _g16_1[1])), ms[10]);
+		}
+
+		template <bool align> void BgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			assert(width % 2 == 0);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			width /= 2;
+			size_t alignedWidth = AlignLo(width - 1, A);
+			size_t tail = width - alignedWidth;
+			__mmask64 tailMasks[11];
+			for (size_t i = 0; i < 8; ++i)
+				tailMasks[i] = TailMask64(tail * 8 - 48 * i) & 0x0000FFFFFFFFFFFF;
+			for (size_t i = 0; i < 2; ++i)
+				tailMasks[8 + i] = TailMask64(tail * 2 - A*i);
+			tailMasks[10] = TailMask64(tail);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					BgrToYuv422p<align, false>(bgr + col * 6, y + col * 2, u + col, v + col, tailMasks);
+				if (col < width)
+					BgrToYuv422p<align, true>(bgr + col * 6, y + col * 2, u + col, v + col, tailMasks);
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void BgrToYuv422p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride,
+			uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+				BgrToYuv422p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+			else
+				BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
