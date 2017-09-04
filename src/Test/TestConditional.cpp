@@ -472,6 +472,11 @@ namespace Test
 			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx2::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx512bw::ConditionalFill), FUNC_F(SimdConditionalFill));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
 		if (Simd::Vmx::Enable)
 			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Vmx::ConditionalFill), FUNC_F(SimdConditionalFill));

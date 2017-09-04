@@ -1270,6 +1270,11 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
 
 SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
 	if (Avx2::Enable && width >= Avx2::A)
 		Avx2::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);

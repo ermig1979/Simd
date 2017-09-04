@@ -122,6 +122,9 @@ namespace Simd
 		void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

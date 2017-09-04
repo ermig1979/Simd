@@ -465,6 +465,75 @@ namespace Simd
 				assert(0);
 			}
 		}
+
+		template <bool align, bool masked, SimdCompareType compareType> SIMD_INLINE void ConditionalFill(const uint8_t * src, const __m512i & threshold, const __m512i & value, uint8_t * dst, __mmask64 tail = -1)
+		{
+			Store<align, true>(dst, value, Compare8u<compareType>(Load<align, masked>(src, tail), threshold)&tail);
+		}
+
+		template <bool align, SimdCompareType compareType> SIMD_INLINE void ConditionalFill4(const uint8_t * src, const __m512i & threshold, const __m512i & value, uint8_t * dst)
+		{
+			Store<align, true>(dst + 0 * A, value, Compare8u<compareType>(Load<align>(src + 0 * A), threshold));
+			Store<align, true>(dst + 1 * A, value, Compare8u<compareType>(Load<align>(src + 1 * A), threshold));
+			Store<align, true>(dst + 2 * A, value, Compare8u<compareType>(Load<align>(src + 2 * A), threshold));
+			Store<align, true>(dst + 3 * A, value, Compare8u<compareType>(Load<align>(src + 3 * A), threshold));
+		}
+
+		template <bool align, SimdCompareType compareType>
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t threshold, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			__m512i _value = _mm512_set1_epi8(value);
+			__m512i _threshold = _mm512_set1_epi8(threshold);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < fullAlignedWidth; col += QA)
+					ConditionalFill4<align, compareType>(src + col, _threshold, _value, dst + col);
+				for (; col < alignedWidth; col += A)
+					ConditionalFill<align, false, compareType>(src + col, _threshold, _value, dst + col);
+				if (col < width)
+					ConditionalFill<align, true, compareType>(src + col, _threshold, _value, dst + col, tailMask);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		template <SimdCompareType compareType> void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ConditionalFill<true, compareType>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			else
+				ConditionalFill<false, compareType>(src, srcStride, width, height, threshold, value, dst, dstStride);
+		}
+
+		void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalFill<SimdCompareEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareNotEqual:
+				return ConditionalFill<SimdCompareNotEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareGreater:
+				return ConditionalFill<SimdCompareGreater>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalFill<SimdCompareGreaterOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareLesser:
+				return ConditionalFill<SimdCompareLesser>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			case SimdCompareLesserOrEqual:
+				return ConditionalFill<SimdCompareLesserOrEqual>(src, srcStride, width, height, threshold, value, dst, dstStride);
+			default:
+				assert(0);
+			}
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
