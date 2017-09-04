@@ -371,6 +371,11 @@ namespace Test
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vmx::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));

@@ -781,6 +781,11 @@ namespace Simd
 			return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));
 		}
 
+		__mmask64 SIMD_INLINE NoseMask64(ptrdiff_t nose)
+		{
+			return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
+		}
+
 		SIMD_INLINE __m512i DivideI16By255(__m512i value)
 		{
 			return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
@@ -818,6 +823,11 @@ namespace Simd
 		SIMD_INLINE __m512i Permuted2Pack16iTo8u(__m512i lo, __m512i hi)
 		{
 			return _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(lo, hi));
+		}
+
+		template<int part> SIMD_INLINE __m512i SubUnpackedU8(__m512i a, __m512i b)
+		{
+			return _mm512_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
 		}
 	}
 #endif //SIMD_AVX512BW_ENABLE
