@@ -1147,6 +1147,11 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
 SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height,
                                      int16_t value, SimdCompareType compareType, uint32_t * count)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::ConditionalCount16i(src, stride, width, height, value, compareType, count);

@@ -48,8 +48,7 @@ namespace Simd
 			counts[3] += _mm_popcnt_u64(Compare8u<compareType>(Load<align>(src + 3 * A), value));
 		}
 
-		template <bool align, SimdCompareType compareType>
-		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+		template <bool align, SimdCompareType compareType> void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
 		{
 			if (align)
 				assert(Aligned(src) && Aligned(stride));
@@ -86,8 +85,7 @@ namespace Simd
 			counts[0] += _mm_popcnt_u32(bits.m32[0]) + _mm_popcnt_u32(bits.m32[1]);
 		}
 
-		template <bool align, SimdCompareType compareType>
-		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+		template <bool align, SimdCompareType compareType> void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
 		{
 			if (align)
 				assert(Aligned(src) && Aligned(stride));
@@ -110,8 +108,7 @@ namespace Simd
 		}
 #endif//SIMD_X64_ENABLE
 
-		template <SimdCompareType compareType>
-		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
+		template <SimdCompareType compareType> void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
 		{
 			if (Aligned(src) && Aligned(stride))
 				ConditionalCount8u<true, compareType>(src, stride, width, height, value, count);
@@ -119,8 +116,7 @@ namespace Simd
 				ConditionalCount8u<false, compareType>(src, stride, width, height, value, count);
 		}
 
-		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
-			uint8_t value, SimdCompareType compareType, uint32_t * count)
+		void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count)
 		{
 			switch (compareType)
 			{
@@ -136,6 +132,76 @@ namespace Simd
 				return ConditionalCount8u<SimdCompareLesser>(src, stride, width, height, value, count);
 			case SimdCompareLesserOrEqual:
 				return ConditionalCount8u<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
+			default:
+				assert(0);
+			}
+		}
+
+		template <bool align, bool mask, SimdCompareType compareType> SIMD_INLINE void ConditionalCount16i(const uint8_t * src, __m512i value, uint32_t * counts, __mmask32 tail = -1)
+		{
+			const __m512i _src = Load<align, mask>((int16_t*)src, tail);
+			__mmask32 bits = Compare16i<compareType>(_src, value);
+			counts[0] += _mm_popcnt_u32(bits&tail);
+		}
+
+		template <bool align, SimdCompareType compareType> SIMD_INLINE void ConditionalCount16i4(const uint8_t * src, __m512i value, uint32_t * counts)
+		{
+			counts[0] += _mm_popcnt_u32(Compare16i<compareType>(Load<align>(src + 0 * A), value));
+			counts[1] += _mm_popcnt_u32(Compare16i<compareType>(Load<align>(src + 1 * A), value));
+			counts[2] += _mm_popcnt_u32(Compare16i<compareType>(Load<align>(src + 2 * A), value));
+			counts[3] += _mm_popcnt_u32(Compare16i<compareType>(Load<align>(src + 3 * A), value));
+		}
+
+		template <bool align, SimdCompareType compareType> void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(stride));
+
+			width *= 2;
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+			__mmask32 tailMask = TailMask32((width - alignedWidth)/2);
+
+			__m512i _value = _mm512_set1_epi16(value);
+			uint32_t counts[4] = { 0, 0, 0, 0 };
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < fullAlignedWidth; col += QA)
+					ConditionalCount16i4<align, compareType>(src + col, _value, counts);
+				for (; col < alignedWidth; col += A)
+					ConditionalCount16i<align, false, compareType>(src + col, _value, counts);
+				if (col < width)
+					ConditionalCount16i<align, true, compareType>(src + col, _value, counts, tailMask);
+				src += stride;
+			}
+			*count = counts[0] + counts[1] + counts[2] + counts[3];
+		}
+
+		template <SimdCompareType compareType> void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
+		{
+			if (Aligned(src) && Aligned(stride))
+				ConditionalCount16i<true, compareType>(src, stride, width, height, value, count);
+			else
+				ConditionalCount16i<false, compareType>(src, stride, width, height, value, count);
+		}
+
+		void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, SimdCompareType compareType, uint32_t * count)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalCount16i<SimdCompareEqual>(src, stride, width, height, value, count);
+			case SimdCompareNotEqual:
+				return ConditionalCount16i<SimdCompareNotEqual>(src, stride, width, height, value, count);
+			case SimdCompareGreater:
+				return ConditionalCount16i<SimdCompareGreater>(src, stride, width, height, value, count);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalCount16i<SimdCompareGreaterOrEqual>(src, stride, width, height, value, count);
+			case SimdCompareLesser:
+				return ConditionalCount16i<SimdCompareLesser>(src, stride, width, height, value, count);
+			case SimdCompareLesserOrEqual:
+				return ConditionalCount16i<SimdCompareLesserOrEqual>(src, stride, width, height, value, count);
 			default:
 				assert(0);
 			}

@@ -771,6 +771,11 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
 	namespace Avx512bw
 	{
+		__mmask32 SIMD_INLINE TailMask32(ptrdiff_t tail)
+		{
+			return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));
+		}
+
 		__mmask64 SIMD_INLINE TailMask64(ptrdiff_t tail)
 		{
 			return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));

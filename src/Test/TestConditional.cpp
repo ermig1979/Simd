@@ -81,7 +81,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareNotEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCount8uAutoTest(ARGS_C8U(W, H, type, f1, f2));
             result = result && ConditionalCount8uAutoTest(ARGS_C8U(W + O, H - O, type, f1, f2));
@@ -202,6 +202,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx512bw::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE

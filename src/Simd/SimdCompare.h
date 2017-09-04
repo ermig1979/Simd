@@ -347,6 +347,38 @@ namespace Simd
 		{
 			return _mm512_cmple_epu8_mask(a, b);
 		}
+
+		template<SimdCompareType compareType> SIMD_INLINE __mmask32 Compare16i(__m512i a, __m512i b);
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpeq_epi16_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareNotEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpneq_epi16_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreater>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpgt_epi16_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmpge_epi16_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesser>(__m512i a, __m512i b)
+		{
+			return _mm512_cmplt_epi16_mask(a, b);
+		}
+
+		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
+		{
+			return _mm512_cmple_epi16_mask(a, b);
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 
