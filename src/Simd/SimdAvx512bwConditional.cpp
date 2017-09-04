@@ -278,6 +278,93 @@ namespace Simd
 				assert(0);
 			}
 		}
+
+		SIMD_INLINE __m512i Square(__m512i value)
+		{
+			const __m512i lo = _mm512_unpacklo_epi8(value, K_ZERO);
+			const __m512i hi = _mm512_unpackhi_epi8(value, K_ZERO);
+			return _mm512_add_epi32(_mm512_madd_epi16(lo, lo), _mm512_madd_epi16(hi, hi));
+		}
+
+		template <bool align, bool masked, SimdCompareType compareType> void ConditionalSquareSum(const uint8_t * src, const uint8_t * mask, const __m512i & value, __m512i * sums, __mmask64 tail = -1)
+		{
+			const __m512i _mask = Load<align, masked>(mask, tail);
+			__mmask64 mmask = Compare8u<compareType>(_mask, value)&tail;
+			const __m512i _src = Load<align, true>(src, mmask);
+			sums[0] = _mm512_add_epi32(sums[0], Square(_src));
+		}
+
+		template <bool align, SimdCompareType compareType> void ConditionalSquareSum4(const uint8_t * src, const uint8_t * mask, const __m512i & value, __m512i * sums)
+		{
+			sums[0] = _mm512_add_epi32(sums[0], Square(Load<align, true>(src + A * 0, Compare8u<compareType>(Load<align>(mask + A * 0), value))));
+			sums[1] = _mm512_add_epi32(sums[1], Square(Load<align, true>(src + A * 1, Compare8u<compareType>(Load<align>(mask + A * 1), value))));
+			sums[2] = _mm512_add_epi32(sums[2], Square(Load<align, true>(src + A * 2, Compare8u<compareType>(Load<align>(mask + A * 2), value))));
+			sums[3] = _mm512_add_epi32(sums[3], Square(Load<align, true>(src + A * 3, Compare8u<compareType>(Load<align>(mask + A * 3), value))));
+		}
+
+		template <bool align, SimdCompareType compareType> void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+		{
+			assert(width < 256 * 256 * F);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			__m512i _value = _mm512_set1_epi8(value);
+			size_t blockSize = (256 * 256 * F)/width;
+			size_t blockCount = height / blockSize + 1;
+			__m512i _sum = _mm512_setzero_si512();
+			for (size_t block = 0; block < blockCount; ++block)
+			{
+				__m512i sums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+				for (size_t row = block*blockSize, endRow = Simd::Min(row + blockSize, height); row < endRow; ++row)
+				{
+					size_t col = 0;
+					for (; col < fullAlignedWidth; col += QA)
+						ConditionalSquareSum4<align, compareType>(src + col, mask + col, _value, sums);
+					for (; col < alignedWidth; col += A)
+						ConditionalSquareSum<align, false, compareType>(src + col, mask + col, _value, sums);
+					if (col < width)
+						ConditionalSquareSum<align, true, compareType>(src + col, mask + col, _value, sums, tailMask);
+					src += srcStride;
+					mask += maskStride;
+				}
+				sums[0] = _mm512_add_epi32(_mm512_add_epi32(sums[0], sums[1]), _mm512_add_epi32(sums[2], sums[3]));
+				_sum = _mm512_add_epi64(_sum, _mm512_add_epi64(_mm512_unpacklo_epi32(sums[0], K_ZERO), _mm512_unpackhi_epi32(sums[0], K_ZERO)));
+			}
+			*sum = ExtractSum<uint64_t>(_sum);
+		}
+
+		template <SimdCompareType compareType> void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+				ConditionalSquareSum<true, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+			else
+				ConditionalSquareSum<false, compareType>(src, srcStride, width, height, mask, maskStride, value, sum);
+		}
+
+		void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return ConditionalSquareSum<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareNotEqual:
+				return ConditionalSquareSum<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareGreater:
+				return ConditionalSquareSum<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareGreaterOrEqual:
+				return ConditionalSquareSum<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareLesser:
+				return ConditionalSquareSum<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, sum);
+			case SimdCompareLesserOrEqual:
+				return ConditionalSquareSum<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, sum);
+			default:
+				assert(0);
+			}
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
