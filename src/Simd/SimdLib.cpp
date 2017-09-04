@@ -1116,6 +1116,11 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
 SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
                                    uint8_t value, SimdCompareType compareType, uint32_t * count)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ConditionalCount8u(src, stride, width, height, value, compareType, count);

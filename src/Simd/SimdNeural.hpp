@@ -1047,7 +1047,7 @@ namespace Simd
                                 ptrdiff_t dstOffset = _dst.Offset(x, y, c);
                                 sum[dstOffset] = maxValue;
                                 idx[dstOffset] = maxIndex;
-								assert(idx[dstOffset] < _common[thread].prevDelta.size());
+								assert(idx[dstOffset] < (int)_common[thread].prevDelta.size());
                             }
                         }
                     }                    
