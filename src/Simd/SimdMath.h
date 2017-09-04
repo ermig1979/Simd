@@ -665,6 +665,11 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE
 	namespace Avx512f
 	{
+		__mmask16 SIMD_INLINE TailMask16(ptrdiff_t tail)
+		{
+			return tail <= 0 ? __mmask16(0) : (tail >= 16 ? __mmask16(-1) : __mmask16(-1) >> (16 - tail));
+		}
+
 		SIMD_INLINE __m512 Cast(const __m512i & value)
 		{
 #if defined(__clang__)

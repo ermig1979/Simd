@@ -133,13 +133,6 @@ namespace Simd
 			};
 		}
 
-		union Mask
-		{
-			__mmask64 m64[1];
-			__mmask32 m32[2];
-			__mmask16 m16[4];
-		};
-
 		template <bool align, bool mask, SimdCompareType compareType> SIMD_INLINE void AddRows(const uint8_t * src, uint8_t * sum, const __m512i & value, __mmask64 tail = -1)
 		{
 			__mmask64 inc = Compare8u<compareType>(Load<align, mask>(src, tail), value);
@@ -156,25 +149,29 @@ namespace Simd
 			Store<true, mask>(sum, _sum, tail);
 		}
 
-		template <bool mask> SIMD_INLINE void Unpack(const uint8_t * sum, const __m512i & area, uint32_t * s0a0, const Mask & tail)
+		template <bool mask> SIMD_INLINE void Unpack(const uint8_t * sum, const __m512i & area, uint32_t * s0a0, const __mmask16 * tailMasks)
 		{
-			const __m512i _sum = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<true, mask>(sum, tail.m64[0])));
+			const __m512i _sum = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<true>(sum)));
 			const __m512i saLo = _mm512_unpacklo_epi8(_sum, area);
 			const __m512i saHi = _mm512_unpackhi_epi8(_sum, area);
-			Store<true, mask>(s0a0 + 0 * F, _mm512_unpacklo_epi8(saLo, K_ZERO), tail.m16[0]);
-			Store<true, mask>(s0a0 + 1 * F, _mm512_unpackhi_epi8(saLo, K_ZERO), tail.m16[1]);
-			Store<true, mask>(s0a0 + 2 * F, _mm512_unpacklo_epi8(saHi, K_ZERO), tail.m16[2]);
-			Store<true, mask>(s0a0 + 3 * F, _mm512_unpackhi_epi8(saHi, K_ZERO), tail.m16[3]);
+			Store<true, mask>(s0a0 + 0 * F, _mm512_unpacklo_epi8(saLo, K_ZERO), tailMasks[0]);
+			Store<true, mask>(s0a0 + 1 * F, _mm512_unpackhi_epi8(saLo, K_ZERO), tailMasks[1]);
+			Store<true, mask>(s0a0 + 2 * F, _mm512_unpacklo_epi8(saHi, K_ZERO), tailMasks[2]);
+			Store<true, mask>(s0a0 + 3 * F, _mm512_unpackhi_epi8(saHi, K_ZERO), tailMasks[3]);
 		}
 
-		template <bool align, bool mask> SIMD_INLINE void Binarization(const uint32_t * sum, const __m512i & ff_threshold, const __m512i & positive, const __m512i & negative, uint8_t * dst, const Mask & tail)
+		template <bool align, bool mask> SIMD_INLINE void Binarization(const uint32_t * sum, const __m512i & ff_threshold, const __m512i & positive, const __m512i & negative, uint8_t * dst, __mmask64 tail = -1)
 		{
-			Mask mm;
-			mm.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true, mask>(sum + 0 * F, tail.m16[0])), ff_threshold), K_ZERO);
-			mm.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true, mask>(sum + 1 * F, tail.m16[1])), ff_threshold), K_ZERO);
-			mm.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true, mask>(sum + 2 * F, tail.m16[2])), ff_threshold), K_ZERO);
-			mm.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true, mask>(sum + 3 * F, tail.m16[3])), ff_threshold), K_ZERO);
-			Store<align, mask>(dst, _mm512_mask_blend_epi8(mm.m64[0], negative, positive), tail.m64[0]);
+			union Mask
+			{
+				__mmask16 m16[4];
+				__mmask64 m64[1];
+			} mm;
+			mm.m16[0] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 0 * F)), ff_threshold), K_ZERO);
+			mm.m16[1] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 1 * F)), ff_threshold), K_ZERO);
+			mm.m16[2] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 2 * F)), ff_threshold), K_ZERO);
+			mm.m16[3] = _mm512_cmpgt_epi32_mask(_mm512_madd_epi16((Load<true>(sum + 3 * F)), ff_threshold), K_ZERO);
+			Store<align, mask>(dst, _mm512_mask_blend_epi8(mm.m64[0], negative, positive), tail);
 		}
 
 		template <bool align, SimdCompareType compareType>
@@ -184,9 +181,11 @@ namespace Simd
 			assert(width > neighborhood && height > neighborhood && neighborhood < 0x7F);
 
 			size_t alignedWidth = Simd::AlignLo(width, A);
-			Mask body, tail;
-			body.m64[0] = __mmask64(-1);
-			tail.m64[0] = TailMask64(width - alignedWidth);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			__mmask16 tailMasks[4];
+			for (size_t c = 0; c < 4; ++c)
+				tailMasks[c] = TailMask16(width - alignedWidth - F*c);
+
 			const __m512i ff_threshold = SetInt16(0xFF, -threshold);
 			const __m512i _value = _mm512_set1_epi8(value);
 			const __m512i _positive = _mm512_set1_epi8(positive);
@@ -203,7 +202,7 @@ namespace Simd
 				for (col = 0; col < alignedWidth; col += A)
 					AddRows<align, false, compareType>(s + col, buffer.s + col, _value);
 				if (col < width)
-					AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tail.m64[0]);
+					AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
 			}
 
 			for (size_t row = 0; row < height; ++row)
@@ -215,7 +214,7 @@ namespace Simd
 					for (col = 0; col < alignedWidth; col += A)
 						AddRows<align, false, compareType>(s + col, buffer.s + col, _value);
 					if (col < width)
-						AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tail.m64[0]);
+						AddRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
 				}
 				if (row > neighborhood)
 				{
@@ -224,14 +223,14 @@ namespace Simd
 					for (col = 0; col < alignedWidth; col += A)
 						SubRows<align, false, compareType>(s + col, buffer.s + col, _value);
 					if (col < width)
-						SubRows<align, true, compareType>(s + col, buffer.s + col, _value, tail.m64[0]);
+						SubRows<align, true, compareType>(s + col, buffer.s + col, _value, tailMask);
 				}
 
 				__m512i _area = _mm512_set1_epi8(area);
 				for (col = 0; col < alignedWidth; col += A)
-					Unpack<false>(buffer.s + col, _area, buffer.s0a0 + col, body);
+					Unpack<false>(buffer.s + col, _area, buffer.s0a0 + col, tailMasks);
 				if(col < width)
-					Unpack<true>(buffer.s + col, _area, buffer.s0a0 + col, tail);
+					Unpack<true>(buffer.s + col, _area, buffer.s0a0 + col, tailMasks);
 
 				uint32_t sum = 0;
 				for (col = 0; col < neighborhood; ++col)
@@ -246,9 +245,9 @@ namespace Simd
 				}
 
 				for (col = 0; col < alignedWidth; col += A)
-					Binarization<align, false>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col, body);
+					Binarization<align, false>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col);
 				if (col < width)
-					Binarization<align, true>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col, tail);
+					Binarization<align, true>(buffer.sum + col, ff_threshold, _positive, _negative, dst + col, tailMask);
 
 				dst += dstStride;
 			}
