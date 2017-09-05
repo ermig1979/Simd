@@ -450,6 +450,11 @@ namespace Test
             result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx2::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Avx512bw::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && EdgeBackgroundAdjustRangeAutoTest(FUNC3(Simd::Vmx::EdgeBackgroundAdjustRange), FUNC3(SimdEdgeBackgroundAdjustRange));
