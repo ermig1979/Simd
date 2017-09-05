@@ -117,7 +117,7 @@ namespace Simd
 			const __m512i _value = Load<align, mask>(value + offset, m);
 			const __m512i _backgroundValue = Load<align, mask>(backgroundValue + offset, m);
 			const __m512i _backgroundCount = Load<align, mask>(backgroundCount + offset, m);
-			const __mmask64 inc = _mm512_cmplt_epu8_mask(_value, _backgroundValue);
+			const __mmask64 inc = _mm512_cmpgt_epu8_mask(_value, _backgroundValue);
 			Store<align, mask>(backgroundCount + offset, _mm512_mask_adds_epu8(_backgroundCount, inc, _backgroundCount, K8_01), m);
 		}
 
