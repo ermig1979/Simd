@@ -133,6 +133,8 @@ namespace Simd
 
 		void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
 
+		void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

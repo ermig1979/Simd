@@ -380,6 +380,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Avx2::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Avx512bw::EdgeBackgroundGrowRangeFast), FUNC1(SimdEdgeBackgroundGrowRangeFast));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE

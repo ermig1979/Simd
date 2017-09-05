@@ -71,6 +71,45 @@ namespace Simd
 			else
 				EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uint8_t * value, uint8_t * background, __mmask64 m = -1)
+		{
+			const __m512i _value = Load<align, mask>(value, m);
+			const __m512i _background = Load<align, mask>(background, m);
+			Store<align, mask>(background, _mm512_max_epu8(_background, _value), m);
+		}
+
+		template <bool align> void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride)
+		{
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(background) && Aligned(backgroundStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					EdgeBackgroundGrowRangeFast<align, false>(value + col, background + col);
+				if (col < width)
+					EdgeBackgroundGrowRangeFast<align, true>(value + col, background + col, tailMask);
+				value += valueStride;
+				background += backgroundStride;
+			}
+		}
+
+		void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			uint8_t * background, size_t backgroundStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) && Aligned(background) && Aligned(backgroundStride))
+				EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
+			else
+				EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
