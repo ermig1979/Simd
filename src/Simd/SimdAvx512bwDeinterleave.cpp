@@ -39,7 +39,7 @@ namespace Simd
 		const __m512i K64_PERMUTE_UV_U = SIMD_MM512_SETR_EPI64(0x0, 0x2, 0x4, 0x6, 0x8, 0xA, 0xC, 0xE);
 		const __m512i K64_PERMUTE_UV_V = SIMD_MM512_SETR_EPI64(0x1, 0x3, 0x5, 0x7, 0x9, 0xB, 0xD, 0xF);
 
-		template <bool align, bool mask> SIMD_INLINE void DeinterleavedUV(const uint8_t * uv, uint8_t * u, uint8_t * v, const __mmask64 * tailMasks)
+		template <bool align, bool mask> SIMD_INLINE void DeinterleaveUv(const uint8_t * uv, uint8_t * u, uint8_t * v, const __mmask64 * tailMasks)
 		{
 			const __m512i uv0 = Load<align, mask>(uv + 0, tailMasks[0]);
 			const __m512i uv1 = Load<align, mask>(uv + A, tailMasks[1]);
@@ -49,7 +49,7 @@ namespace Simd
 			Store<align, mask>(v, _mm512_permutex2var_epi64(shuffledUV0, K64_PERMUTE_UV_V, shuffledUV1), tailMasks[2]);
 		}
 
-		template <bool align> SIMD_INLINE void DeinterleavedUV2(const uint8_t * uv, uint8_t * u, uint8_t * v)
+		template <bool align> SIMD_INLINE void DeinterleaveUv2(const uint8_t * uv, uint8_t * u, uint8_t * v)
 		{ 
 			const __m512i uv0 = _mm512_shuffle_epi8(Load<align>(uv + 0 * A), K8_SHUFFLE_DEINTERLEAVE_UV);
 			const __m512i uv1 = _mm512_shuffle_epi8(Load<align>(uv + 1 * A), K8_SHUFFLE_DEINTERLEAVE_UV);
@@ -77,11 +77,11 @@ namespace Simd
             {
 				size_t col = 0;
 				for (; col < fullAlignedWidth; col += DA)
-					DeinterleavedUV2<align>(uv + col * 2, u + col, v + col);
+					DeinterleaveUv2<align>(uv + col * 2, u + col, v + col);
 				for (; col < alignedWidth; col += A)
-					DeinterleavedUV<align, false>(uv + col * 2, u + col, v + col, tailMasks);
+					DeinterleaveUv<align, false>(uv + col * 2, u + col, v + col, tailMasks);
 				if(col < width)
-					DeinterleavedUV<align, true>(uv + col * 2, u + col, v + col, tailMasks);
+					DeinterleaveUv<align, true>(uv + col * 2, u + col, v + col, tailMasks);
                 uv += uvStride;
                 u += uStride;
                 v += vStride;
@@ -96,6 +96,70 @@ namespace Simd
             else
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
+
+		const __m512i K8_SHUFFLE_DEINTERLEAVE_BGR = SIMD_MM512_SETR_EPI8(
+			0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+			0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+			0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+			0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1);
+
+		const __m512i K32_PERMUTE_BGR_B0 = SIMD_MM512_SETR_EPI32(0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m512i K32_PERMUTE_BGR_B1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x00, 0x04, 0x08, 0x0C, 0x10, 0x14, 0x18, 0x1C);
+		const __m512i K32_PERMUTE_BGR_G0 = SIMD_MM512_SETR_EPI32(0x01, 0x05, 0x09, 0x0D, 0x11, 0x15, 0x19, 0x1D, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m512i K32_PERMUTE_BGR_G1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x01, 0x05, 0x09, 0x0D, 0x11, 0x15, 0x19, 0x1D);
+		const __m512i K32_PERMUTE_BGR_R0 = SIMD_MM512_SETR_EPI32(0x02, 0x06, 0x0A, 0x0E, 0x12, 0x16, 0x1A, 0x1E, -1, -1, -1, -1, -1, -1, -1, -1);
+		const __m512i K32_PERMUTE_BGR_R1 = SIMD_MM512_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, -1, 0x02, 0x06, 0x0A, 0x0E, 0x12, 0x16, 0x1A, 0x1E);
+
+
+		template <bool align, bool mask> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, const __mmask64 * tailMasks)
+		{
+			const __m512i bgr0 = Load<align, mask>(bgr + 0 * A, tailMasks[0]);
+			const __m512i bgr1 = Load<align, mask>(bgr + 1 * A, tailMasks[1]);
+			const __m512i bgr2 = Load<align, mask>(bgr + 2 * A, tailMasks[2]);
+
+			const __m512i sp0 = _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, bgr0), K8_SHUFFLE_DEINTERLEAVE_BGR);
+			const __m512i sp1 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(bgr0, K32_PERMUTE_BGR_TO_BGRA_1, bgr1), K8_SHUFFLE_DEINTERLEAVE_BGR);
+			const __m512i sp2 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(bgr1, K32_PERMUTE_BGR_TO_BGRA_2, bgr2), K8_SHUFFLE_DEINTERLEAVE_BGR);
+			const __m512i sp3 = _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, bgr2), K8_SHUFFLE_DEINTERLEAVE_BGR);
+
+			Store<align, mask>(b, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_B0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_B1, sp3)), tailMasks[3]);
+			Store<align, mask>(g, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_G0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_G1, sp3)), tailMasks[3]);
+			Store<align, mask>(r, _mm512_or_si512(_mm512_permutex2var_epi32(sp0, K32_PERMUTE_BGR_R0, sp1), _mm512_permutex2var_epi32(sp2, K32_PERMUTE_BGR_R1, sp3)), tailMasks[3]);
+		}
+
+		template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+			uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
+		{
+			if (align)
+				assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMasks[4];
+			for (size_t c = 0; c < 3; ++c)
+				tailMasks[c] = TailMask64((width - alignedWidth) * 3 - A*c);
+			tailMasks[3] = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					DeinterleaveBgr<align, false>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
+				if (col < width)
+					DeinterleaveBgr<align, true>(bgr + col * 3, b + col, g + col, r + col, tailMasks);
+				bgr += bgrStride;
+				b += bStride;
+				g += gStride;
+				r += rStride;
+			}
+		}
+
+		void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
+			uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
+		{
+			if (Aligned(bgr) && Aligned(bgrStride) && Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride))
+				DeinterleaveBgr<true>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+			else
+				DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

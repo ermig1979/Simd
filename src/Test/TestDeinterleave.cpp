@@ -196,6 +196,11 @@ namespace Test
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Avx2::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Neon::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
