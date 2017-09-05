@@ -101,6 +101,11 @@ namespace Test
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx512bw::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Vmx::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));

@@ -1312,6 +1312,11 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
                     uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
