@@ -416,6 +416,11 @@ namespace Test
             result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Avx2::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Avx512bw::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && EdgeBackgroundIncrementCountAutoTest(FUNC2(Simd::Vmx::EdgeBackgroundIncrementCount), FUNC2(SimdEdgeBackgroundIncrementCount));

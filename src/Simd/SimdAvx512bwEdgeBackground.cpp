@@ -110,6 +110,53 @@ namespace Simd
 			else
 				EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void EdgeBackgroundIncrementCount(const uint8_t * value, 
+			const uint8_t * backgroundValue, uint8_t * backgroundCount, size_t offset, __mmask64 m = -1)
+		{
+			const __m512i _value = Load<align, mask>(value + offset, m);
+			const __m512i _backgroundValue = Load<align, mask>(backgroundValue + offset, m);
+			const __m512i _backgroundCount = Load<align, mask>(backgroundCount + offset, m);
+			const __mmask64 inc = _mm512_cmplt_epu8_mask(_value, _backgroundValue);
+			Store<align, mask>(backgroundCount + offset, _mm512_mask_adds_epu8(_backgroundCount, inc, _backgroundCount, K8_01), m);
+		}
+
+		template <bool align> void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+		{
+			if (align)
+			{
+				assert(Aligned(value) && Aligned(valueStride));
+				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+				assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					EdgeBackgroundIncrementCount<align, false>(value, backgroundValue, backgroundCount, col);
+				if (col < width)
+					EdgeBackgroundIncrementCount<align, true>(value, backgroundValue, backgroundCount, col, tailMask);
+				value += valueStride;
+				backgroundValue += backgroundValueStride;
+				backgroundCount += backgroundCountStride;
+			}
+		}
+
+		void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
+			const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride)
+		{
+			if (Aligned(value) && Aligned(valueStride) &&
+				Aligned(backgroundValue) && Aligned(backgroundValueStride) && Aligned(backgroundCount) && Aligned(backgroundCountStride))
+				EdgeBackgroundIncrementCount<true>(value, valueStride, width, height,
+					backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+			else
+				EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
+					backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
