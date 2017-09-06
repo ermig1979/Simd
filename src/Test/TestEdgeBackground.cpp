@@ -508,16 +508,6 @@ namespace Test
 
         result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Base::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
 
-#ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
-            result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Vmx::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
-#endif 
-
-#ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && EdgeBackgroundChangeRangeAutoTest(FUNC1(Simd::Neon::EdgeBackgroundShiftRange), FUNC1(SimdEdgeBackgroundShiftRange));
-#endif
-
         return result;
     }
 
@@ -535,6 +525,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx2::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && EdgeBackgroundShiftRangeMaskedAutoTest(FUNC5(Simd::Avx512bw::EdgeBackgroundShiftRangeMasked), FUNC5(SimdEdgeBackgroundShiftRangeMasked));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
