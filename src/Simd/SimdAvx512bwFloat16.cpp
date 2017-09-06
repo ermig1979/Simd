@@ -37,7 +37,7 @@ namespace Simd
 			Store<align, mask>(dst, _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1), dstTail);
         }
 
-		template<bool align> SIMD_INLINE void Float32ToFloat16x4(const float * src, uint16_t * dst)
+		template<bool align> SIMD_INLINE void Float32ToFloat16x2(const float * src, uint16_t * dst)
 		{
 			Store<align>(dst + 0 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Avx512f::Load<align>(src + 0 * F), 0)), _mm512_cvtps_ph(Avx512f::Load<align>(src + 1 * F), 0), 1));
 			Store<align>(dst + 1 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Avx512f::Load<align>(src + 2 * F), 0)), _mm512_cvtps_ph(Avx512f::Load<align>(src + 3 * F), 0), 1));
@@ -57,7 +57,7 @@ namespace Simd
 
             size_t i = 0;
 			for (; i < alignedSize; i += QF)
-				Float32ToFloat16x4<align>(src + i, dst + i);
+				Float32ToFloat16x2<align>(src + i, dst + i);
 			for (; i < alignedSize; i += DF)
                 Float32ToFloat16<align, false>(src + i, dst + i, srcTailMasks, dstTailMask);
             if(i < size)
@@ -71,6 +71,52 @@ namespace Simd
             else
                 Float32ToFloat16<false>(src, size, dst);
         }
+
+		template<bool align, bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
+		{
+			__m512i _src = Load<align, mask>(src, srcTail);
+			Avx512f::Store<align, mask>(dst + 0, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0)), dstTails[0]);
+			Avx512f::Store<align, mask>(dst + F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1)), dstTails[1]);
+		}
+
+		template<bool align> SIMD_INLINE void Float16ToFloat32x2(const uint16_t * src, float * dst)
+		{
+			const __m512i src0 = Load<align>(src + 00);
+			Avx512f::Store<align>(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
+			Avx512f::Store<align>(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
+			const __m512i src1 = Load<align>(src + HA);
+			Avx512f::Store<align>(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
+			Avx512f::Store<align>(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
+		}
+
+		template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(dst));
+
+			size_t fullAlignedSize = Simd::AlignLo(size, QF);
+			size_t alignedSize = Simd::AlignLo(size, DF);
+			__mmask32 srcTailMask = TailMask32(size - alignedSize);
+			__mmask16 dstTailMasks[2];
+			for (size_t c = 0; c < 2; ++c)
+				dstTailMasks[c] = TailMask16(size - alignedSize - F*c);
+
+			size_t i = 0;
+			for (; i < alignedSize; i += QF)
+				Float16ToFloat32x2<align>(src + i, dst + i);
+			for (; i < alignedSize; i += DF)
+				Float16ToFloat32<align, false>(src + i, dst + i, srcTailMask, dstTailMasks);
+			if (i < size)
+				Float16ToFloat32<align, true>(src + i, dst + i, srcTailMask, dstTailMasks);
+		}
+
+		void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				Float16ToFloat32<true>(src, size, dst);
+			else
+				Float16ToFloat32<false>(src, size, dst);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

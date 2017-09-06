@@ -153,6 +153,8 @@ namespace Simd
 
 		void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
+		void Float16ToFloat32(const uint16_t * src, size_t size, float * dst);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
