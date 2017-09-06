@@ -1708,27 +1708,7 @@ SIMD_API void SimdEdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, siz
 SIMD_API void SimdEdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                               uint8_t * background, size_t backgroundStride)
 {
-#ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
-        Avx2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
-    else
-#endif
-#ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
-        Vmx::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-	if (Neon::Enable && width >= Neon::A)
-		Neon::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
-	else
-#endif
-        Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
+	Base::EdgeBackgroundShiftRange(value, valueStride, width, height, background, backgroundStride);
 }
 
 SIMD_API void SimdEdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,

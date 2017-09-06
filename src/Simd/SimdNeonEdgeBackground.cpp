@@ -249,11 +249,6 @@ namespace Simd
 					threshold, mask, maskStride);
 		}
 
-		void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * background, size_t backgroundStride)
-		{
-			Base::Copy(value, valueStride, width, height, 1, background, backgroundStride);
-		}
-
 		template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, size_t offset)
 		{
 			const uint8x16_t _value = Load<align>(value + offset);

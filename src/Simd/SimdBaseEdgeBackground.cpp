@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -121,13 +122,7 @@ namespace Simd
         void EdgeBackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride)
         {
-            for(size_t row = 0; row < height; ++row)
-            {
-                for(size_t col = 0; col < width; ++col)
-                    background[col] = value[col];
-                value += valueStride;
-                background += backgroundStride;
-            }
+			Copy(value, valueStride, width, height, 1, background, backgroundStride);
         }
 
         void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
