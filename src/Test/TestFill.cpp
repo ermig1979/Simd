@@ -331,6 +331,11 @@ namespace Test
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx2::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx512bw::FillBgr), FUNC_BGR(SimdFillBgr));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Vmx::FillBgr), FUNC_BGR(SimdFillBgr));

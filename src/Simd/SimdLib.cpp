@@ -1755,6 +1755,11 @@ SIMD_API void SimdFillFrame(uint8_t * dst, size_t stride, size_t width, size_t h
 
 SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::FillBgr(dst, stride, width, height, blue, green, red);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::FillBgr(dst, stride, width, height, blue, green, red);
