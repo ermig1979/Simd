@@ -29,14 +29,14 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-		template <bool align, bool mask> void FillBgr(uint8_t * dst, const __m512i bgrs[3], const __mmask64 * tails)
+		template <bool align, bool mask> SIMD_INLINE void FillBgr(uint8_t * dst, const __m512i bgrs[3], const __mmask64 * tails)
 		{
 			Store<align, mask>(dst + 0 * A, bgrs[0], tails[0]);
 			Store<align, mask>(dst + 1 * A, bgrs[1], tails[1]);
 			Store<align, mask>(dst + 2 * A, bgrs[2], tails[2]);
 		}
 
-		template <bool align> void FillBgr2(uint8_t * dst, const __m512i bgrs[3])
+		template <bool align> SIMD_INLINE void FillBgr2(uint8_t * dst, const __m512i bgrs[3])
 		{
 			Store<align>(dst + 0 * A, bgrs[0]);
 			Store<align>(dst + 1 * A, bgrs[1]);
@@ -86,6 +86,42 @@ namespace Simd
             else
                 FillBgr<false>(dst, stride, width, height, blue, green, red);
         }
+
+		template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+		{
+			size_t size = width * 4;
+			size_t alignedSize = AlignLo(size, A);
+			size_t fullAlignedSize = AlignLo(size, QA);
+			__mmask64 tailMask = TailMask64(size - alignedSize);
+
+			uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
+			__m512i bgra512 = _mm512_set1_epi32(bgra32);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t offset = 0;
+				for (; offset < fullAlignedSize; offset += QA)
+				{
+					Store<align>(dst + offset + 0 * A, bgra512);
+					Store<align>(dst + offset + 1 * A, bgra512);
+					Store<align>(dst + offset + 2 * A, bgra512);
+					Store<align>(dst + offset + 3 * A, bgra512);
+				}
+				for (; offset < alignedSize; offset += A)
+					Store<align, false>(dst + offset, bgra512, tailMask);
+				if (offset < size)
+					Store<align, true>(dst + offset, bgra512, tailMask);
+				dst += stride;
+			}
+		}
+
+		void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
+		{
+			if (Aligned(dst) && Aligned(stride))
+				FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
+			else
+				FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
