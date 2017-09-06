@@ -210,7 +210,7 @@ namespace Test
         View a(size, 1, View::Int16, NULL, TEST_ALIGN(size));
         ::SimdFloat32ToFloat16((float*)aOrigin.data, a.width, (uint16_t*)a.data);
 
-        View bOrigin(size, 1, View::Float, NULL, TEST_ALIGN(size));
+		View bOrigin(size, 1, View::Float, NULL, TEST_ALIGN(size));
         FillRandom32f(bOrigin, -10.0, 10.0);
         View b(size, 1, View::Int16, NULL, TEST_ALIGN(size));
         ::SimdFloat32ToFloat16((float*)bOrigin.data, b.width, (uint16_t*)b.data);
@@ -247,6 +247,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx2::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
 #endif
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)

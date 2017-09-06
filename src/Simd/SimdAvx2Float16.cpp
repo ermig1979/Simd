@@ -136,13 +136,13 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 __m256 mask = RightNotZero(size - partialAlignedSize);
-                __m256 _a = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + size - F)));
-                __m256 _b = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + size - F)));
+                __m256 _a = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(a + size - F)));
+                __m256 _b = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(b + size - F)));
                 __m256 _d = _mm256_and_ps(_mm256_sub_ps(_a, _b), mask);
                 sums[0] = _mm256_fmadd_ps(_d, _d, sums[0]);
-            }
+			}
             *sum = Avx::ExtractSum(sums[0]);
-        }
+		}
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
         {
