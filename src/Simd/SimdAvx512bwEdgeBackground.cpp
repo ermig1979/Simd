@@ -209,6 +209,58 @@ namespace Simd
 				EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height,
 					backgroundValue, backgroundValueStride, threshold);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, uint8_t * backgroundValue,
+			const uint8_t * pmask, const __m512i & threshold, __mmask64 m = -1)
+		{
+			const __m512i _mask = Load<align, mask>(pmask, m);
+			const __mmask64 mm = _mm512_cmpneq_epu8_mask(_mask, K_ZERO) & m;
+
+			const __m512i _backgroundCount = Load<align, mask>(backgroundCount, m);
+			const __m512i _backgroundValue = Load<align, mask>(backgroundValue, m);
+
+			Store<align, true>(backgroundValue, AdjustEdge(_backgroundCount, _backgroundValue, threshold), mm);
+			Store<align, mask>(backgroundCount, K_ZERO, m);
+		}
+
+		template <bool align> void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+		{
+			if (align)
+			{
+				assert(Aligned(backgroundValue) && Aligned(backgroundValueStride));
+				assert(Aligned(backgroundCount) && Aligned(backgroundCountStride));
+				assert(Aligned(mask) && Aligned(maskStride));
+			}
+
+			const __m512i _threshold = _mm512_set1_epi8((char)threshold);
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					EdgeBackgroundAdjustRangeMasked<align, false>(backgroundCount + col, backgroundValue + col, mask + col, _threshold);
+				if (col < width)
+					EdgeBackgroundAdjustRangeMasked<align, true>(backgroundCount + col, backgroundValue + col, mask + col, _threshold, tailMask);
+				backgroundValue += backgroundValueStride;
+				backgroundCount += backgroundCountStride;
+				mask += maskStride;
+			}
+		}
+
+		void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+			uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride)
+		{
+			if (Aligned(backgroundValue) && Aligned(backgroundValueStride) &&
+				Aligned(backgroundCount) && Aligned(backgroundCountStride) &&
+				Aligned(mask) && Aligned(maskStride))
+				EdgeBackgroundAdjustRangeMasked<true>(backgroundCount, backgroundCountStride, width, height,
+					backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+			else
+				EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height,
+					backgroundValue, backgroundValueStride, threshold, mask, maskStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

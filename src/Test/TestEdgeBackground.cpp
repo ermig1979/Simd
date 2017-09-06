@@ -484,6 +484,11 @@ namespace Test
             result = result && EdgeBackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Avx2::EdgeBackgroundAdjustRangeMasked), FUNC4(SimdEdgeBackgroundAdjustRangeMasked));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && EdgeBackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Avx512bw::EdgeBackgroundAdjustRangeMasked), FUNC4(SimdEdgeBackgroundAdjustRangeMasked));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && EdgeBackgroundAdjustRangeMaskedAutoTest(FUNC4(Simd::Vmx::EdgeBackgroundAdjustRangeMasked), FUNC4(SimdEdgeBackgroundAdjustRangeMasked));
