@@ -234,6 +234,11 @@ namespace Simd
 			return _mm512_mask_storeu_epi16(p, m, a);
 		}
 
+		template <bool align, bool mask> SIMD_INLINE void Store(uint16_t * p, __m512i a, __mmask32 m)
+		{
+			return Store<align, mask>((int16_t*)p, a, m);
+		}
+
 		template <bool align, bool mask> SIMD_INLINE void Store(uint32_t * p, __m512i a, __mmask16 m)
 		{
 			return Store<align>(p, a);

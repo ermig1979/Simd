@@ -1815,6 +1815,11 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
 
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Float32ToFloat16(src, size, dst);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && size >= Avx2::F)
         Avx2::Float32ToFloat16(src, size, dst);
