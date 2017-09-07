@@ -1921,6 +1921,11 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && (width - 1)*channelCount >= Avx512bw::A)
+		Avx512bw::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && (width - 1)*channelCount >= Avx2::A)
         Avx2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);

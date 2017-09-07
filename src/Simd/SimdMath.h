@@ -786,6 +786,11 @@ namespace Simd
 			return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
 		}
 
+		SIMD_INLINE __m512i BinomialSum16(const __m512i & a, const __m512i & b, const __m512i & c)
+		{
+			return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));
+		}
+
 		SIMD_INLINE __m512i DivideI16By255(__m512i value)
 		{
 			return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
@@ -801,6 +806,11 @@ namespace Simd
 		template <> SIMD_INLINE __m512i UnpackU8<1>(__m512i a, __m512i b)
 		{
 			return _mm512_unpackhi_epi8(a, b);
+		}
+
+		SIMD_INLINE __m512i UnpackHalfU8(__m256i a, __m256i b = Avx2::K_ZERO)
+		{
+			return _mm512_unpacklo_epi8(_mm512_castsi256_si512(a), _mm512_castsi256_si512(b));
 		}
 
 		SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
