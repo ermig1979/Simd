@@ -72,6 +72,49 @@ namespace Simd
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
         }
+
+		template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const __m128i & value, const __m512 & lower, const __m512 & boost, float * dst, __mmask16 tail)
+		{
+			Avx512f::Store<align, mask>(dst, _mm512_sub_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m512 & lower, const __m512 & boost, float * dst, __mmask64 srcTail, const __mmask16 * dstTails)
+		{
+			__m512i _src = Load<align, mask>(src, srcTail);
+			Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 0), lower, boost, dst + 0 * F, dstTails[0]);
+			Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 1), lower, boost, dst + 1 * F, dstTails[1]);
+			Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 2), lower, boost, dst + 2 * F, dstTails[2]);
+			Uint8ToFloat32<align, mask>(_mm512_extracti32x4_epi32(_src, 3), lower, boost, dst + 3 * F, dstTails[3]);
+		}
+
+		template <bool align> void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(dst));
+
+			__m512 _lower = _mm512_set1_ps(lower[0]);
+			__m512 boost = _mm512_set1_ps((upper[0] - lower[0]) / 255.0f);
+
+			size_t alignedSize = AlignLo(size, A);
+			__mmask64 srcTailMask = TailMask64(size - alignedSize);
+			__mmask16 dstTailMasks[4];
+			for (size_t c = 0; c < 4; ++c)
+				dstTailMasks[c] = TailMask16(size - alignedSize - F*c);
+
+			size_t i = 0;
+			for (; i < alignedSize; i += A)
+				Uint8ToFloat32<align, false>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
+			if (i < size)
+				Uint8ToFloat32<align, true>(src + i, _lower, boost, dst + i, srcTailMask, dstTailMasks);
+		}
+
+		void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				Uint8ToFloat32<true>(src, size, lower, upper, dst);
+			else
+				Uint8ToFloat32<false>(src, size, lower, upper, dst);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -1895,6 +1895,11 @@ SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * l
 
 SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Uint8ToFloat32(src, size, lower, upper, dst);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && size >= Avx2::HA)
         Avx2::Uint8ToFloat32(src, size, lower, upper, dst);
