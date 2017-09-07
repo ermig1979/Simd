@@ -39,8 +39,21 @@ namespace Simd
 		{
 			std::cout << int(data[i]) << " ";
 		}
-		std::cout << "} " << std::endl;
+		std::cout << "} "<< std::endl << std::flush;
 	}
+
+#ifdef SIMD_SSE2_ENABLE
+	namespace Sse2
+	{
+		template<class T> SIMD_INLINE void Log(const __m128i & value, const std::string & name)
+		{
+			const size_t n = sizeof(__m128i) / sizeof(T);
+			T buffer[n];
+			_mm_storeu_si128((__m128i*)buffer, value);
+			Simd::Log<T>(buffer, n, name);
+		}
+	}
+#endif //SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
