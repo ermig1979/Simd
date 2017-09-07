@@ -157,6 +157,8 @@ namespace Simd
 
 		void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
+		void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

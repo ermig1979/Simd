@@ -81,12 +81,19 @@ namespace Simd
 
 		template<bool align> SIMD_INLINE void Float16ToFloat32x2(const uint16_t * src, float * dst)
 		{
+#if defined(_MSC_VER)
 			const __m512i src0 = Load<align>(src + 00);
 			Avx512f::Store<align>(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
 			Avx512f::Store<align>(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
 			const __m512i src1 = Load<align>(src + HA);
 			Avx512f::Store<align>(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
 			Avx512f::Store<align>(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
+#else
+			Avx512f::Store<align>(dst + 0 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 0)));
+			Avx512f::Store<align>(dst + 1 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 1)));
+			Avx512f::Store<align>(dst + 2 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 2)));
+			Avx512f::Store<align>(dst + 3 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 3)));
+#endif
 		}
 
 		template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)

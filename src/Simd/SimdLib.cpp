@@ -1870,6 +1870,11 @@ SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b
 
 SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Float32ToUint8(src, size, lower, upper, dst);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && size >= Avx2::A)
         Avx2::Float32ToUint8(src, size, lower, upper, dst);
