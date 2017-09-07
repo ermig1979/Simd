@@ -157,6 +157,69 @@ namespace Simd
             else
                 AbsSecondDerivativeHistogram<false>(src, width, height, stride, step, indent, histogram);
         }
+
+		template <bool srcAlign, bool dstAlign, bool masked> SIMD_INLINE void MaskSrc(const uint8_t * src, const uint8_t * mask, const __m512i & index, ptrdiff_t offset, uint16_t * dst, __mmask64 tail = -1)
+		{
+			__m512i _src = Load<srcAlign, masked>(src + offset, tail);
+			_src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _src);
+			__mmask64 mmask = _mm512_cmpeq_epi8_mask((Load<srcAlign, masked>(mask + offset, tail)), index);
+			__m512i src0 = UnpackU8<0>(_src);
+			__m512i src1 = UnpackU8<1>(_src);
+			__m512i lo = _mm512_maskz_add_epi16(__mmask32(mmask >> 00), src0, K16_0010);
+			__m512i hi = _mm512_maskz_add_epi16(__mmask32(mmask >> 32), src1, K16_0010);
+			Store<dstAlign>(dst + offset + 00, lo);
+			Store<dstAlign>(dst + offset + HA, hi);
+		}
+
+		template<bool align> void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
+		{
+			Buffer<uint16_t> buffer(AlignHi(width, A), HISTOGRAM_SIZE + F);
+			size_t widthAligned4 = Simd::AlignLo(width, 4);
+			size_t widthAlignedA = Simd::AlignLo(width, A);
+			size_t widthAlignedDA = Simd::AlignLo(width, DA);
+			__m512i _index = _mm512_set1_epi8(index);
+			__mmask64 tailMask = TailMask64(width - widthAlignedA);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < widthAlignedDA; col += DA)
+				{
+					MaskSrc<align, true, false>(src, mask, _index, col + 0, buffer.v);
+					MaskSrc<align, true, false>(src, mask, _index, col + A, buffer.v);
+				}
+				for (; col < widthAlignedA; col += A)
+					MaskSrc<align, true, false>(src, mask, _index, col, buffer.v);
+				if (col < width)
+					MaskSrc<align, true, true>(src, mask, _index, col, buffer.v, tailMask);
+
+				for (col = 0; col < widthAligned4; col += 4)
+				{
+					++buffer.h[0][buffer.v[col + 0]];
+					++buffer.h[1][buffer.v[col + 1]];
+					++buffer.h[2][buffer.v[col + 2]];
+					++buffer.h[3][buffer.v[col + 3]];
+				}
+				for (; col < width; ++col)
+					++buffer.h[0][buffer.v[col]];
+
+				src += srcStride;
+				mask += maskStride;
+			}
+
+			SumHistograms(buffer.h[0], F, histogram);
+		}
+
+		void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
+		{
+			assert(width >= A);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+				HistogramMasked<true>(src, srcStride, width, height, mask, maskStride, index, histogram);
+			else
+				HistogramMasked<false>(src, srcStride, width, height, mask, maskStride, index, histogram);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

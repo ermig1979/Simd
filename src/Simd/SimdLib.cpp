@@ -2017,7 +2017,7 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
 SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride, size_t step, size_t indent, uint32_t * histogram)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-	if (Avx512bw::Enable && width >= Avx2::A + 2 * indent)
+	if (Avx512bw::Enable && width >= Avx512bw::A + 2 * indent)
 		Avx512bw::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
 	else
 #endif
@@ -2052,6 +2052,11 @@ SIMD_API void SimdHistogram(const uint8_t *src, size_t width, size_t height, siz
 SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t width, size_t height, 
                                   const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512bw::A)
+		Avx512bw::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
