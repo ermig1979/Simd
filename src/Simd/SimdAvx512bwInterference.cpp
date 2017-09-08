@@ -175,6 +175,17 @@ namespace Simd
 			else
 				InterferenceChangeMasked<false, true>((int16_t*)statistic, statisticStride / 2, width, height, increment, saturation, mask, maskStride, index);
 		}
+
+		void InterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
+			uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
+		{
+			assert(Aligned(statisticStride, 2));
+
+			if (Aligned(statistic) && Aligned(statisticStride) && Aligned(mask) && Aligned(maskStride))
+				InterferenceChangeMasked<true, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
+			else
+				InterferenceChangeMasked<false, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
