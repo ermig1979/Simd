@@ -252,6 +252,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx2::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Neon::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
@@ -554,7 +559,7 @@ namespace Test
         double time = GetTime();
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_0.xml", 0);
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_1.xml", 1);
-        detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
+        //detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
         TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms " << std::endl);
 
         Objects os, om;
