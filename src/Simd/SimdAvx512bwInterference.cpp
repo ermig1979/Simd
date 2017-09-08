@@ -84,10 +84,20 @@ namespace Simd
             assert(Aligned(stride, 2));
 
             if(Aligned(statistic) && Aligned(stride))
-                InterferenceChange<true, true>((int16_t*)statistic, stride/2, width, height, increment, saturation);
+                InterferenceChange<true, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
             else
-                InterferenceChange<false, true>((int16_t*)statistic, stride/2, width, height, increment, saturation);
+                InterferenceChange<false, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
         }
+
+		void InterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation)
+		{
+			assert(Aligned(stride, 2));
+
+			if (Aligned(statistic) && Aligned(stride))
+				InterferenceChange<true, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
+			else
+				InterferenceChange<false, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
+		}
 
 		template<bool increment> __m512i InterferenceChangeMasked(__m512i statistic, __m512i value, __m512i saturation, __mmask32 mask);
 
@@ -106,12 +116,26 @@ namespace Simd
 			Store<align, masked>(statistic, InterferenceChangeMasked<increment>(Load<align, masked>(statistic, tail), value, saturation, mask), tail);
 		}
 
-		template<bool align, bool increment, bool masked> SIMD_INLINE 
-			void InterferenceChangeMasked(const uint8_t * mask, __m512i index, int16_t * statistic, __m512i value, __m512i saturation, __mmask64 tail = -1)
+		template<bool align, bool increment, bool masked> SIMD_INLINE void InterferenceChangeMasked(const uint8_t * mask, __m512i index, int16_t * statistic, __m512i value, __m512i saturation, __mmask64 tail = -1)
 		{
 			__mmask64 mask0 = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask, tail)), index) & tail;
 			InterferenceChangeMasked<align, increment, masked>(statistic + 00, value, saturation, __mmask32(mask0 >> 00), __mmask32(tail >> 00));
 			InterferenceChangeMasked<align, increment, masked>(statistic + HA, value, saturation, __mmask32(mask0 >> 32), __mmask32(tail >> 32));
+		}
+
+		template<bool align, bool increment> SIMD_INLINE void InterferenceChangeMasked(int16_t * statistic, __m512i value, __m512i saturation, __mmask32 mask)
+		{
+			Store<align>(statistic, InterferenceChangeMasked<increment>(Load<align>(statistic), value, saturation, mask));
+		}
+
+		template<bool align, bool increment> SIMD_INLINE void InterferenceChangeMasked2(const uint8_t * mask, __m512i index, int16_t * statistic, __m512i value, __m512i saturation)
+		{
+			__mmask64 mask0 = _mm512_cmpeq_epi8_mask(Load<align>(mask + 0), index);
+			InterferenceChangeMasked<align, increment>(statistic + 0 * HA, value, saturation, __mmask32(mask0 >> 00));
+			InterferenceChangeMasked<align, increment>(statistic + 1 * HA, value, saturation, __mmask32(mask0 >> 32));
+			__mmask64 mask1 = _mm512_cmpeq_epi8_mask(Load<align>(mask + A), index);
+			InterferenceChangeMasked<align, increment>(statistic + 2 * HA, value, saturation, __mmask32(mask1 >> 00));
+			InterferenceChangeMasked<align, increment>(statistic + 3 * HA, value, saturation, __mmask32(mask1 >> 32));
 		}
 
 		template <bool align, bool increment> void InterferenceChangeMasked(int16_t * statistic, size_t statisticStride, size_t width, size_t height,
@@ -121,6 +145,7 @@ namespace Simd
 				assert(Aligned(statistic) && Aligned(statisticStride, HA) && Aligned(mask) && Aligned(maskStride));
 
 			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = AlignLo(width, DA);
 			__mmask64 tailMask = TailMask64(width - alignedWidth);
 
 			__m512i _value = _mm512_set1_epi16(value);
@@ -129,6 +154,8 @@ namespace Simd
 			for (size_t row = 0; row < height; ++row)
 			{
 				size_t col = 0;
+				for (; col < fullAlignedWidth; col += DA)
+					InterferenceChangeMasked2<align, increment>(mask + col, _index, statistic + col, _value, _saturation);
 				for (; col < alignedWidth; col += A)
 					InterferenceChangeMasked<align, increment, false>(mask + col, _index, statistic + col, _value, _saturation);
 				if (col < width)

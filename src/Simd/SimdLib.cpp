@@ -2298,6 +2298,11 @@ SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statis
 
 SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);

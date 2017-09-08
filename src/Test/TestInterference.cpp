@@ -155,6 +155,11 @@ namespace Test
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx2::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx512bw::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
