@@ -2237,6 +2237,11 @@ SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, 
 
 SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::HA)
         Avx2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);

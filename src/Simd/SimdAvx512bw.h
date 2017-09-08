@@ -176,6 +176,8 @@ namespace Simd
 
 		void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
+		void InterferenceIncrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+
 		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
 		void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
