@@ -2053,7 +2053,7 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
                                   const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-	if (Avx512bw::Enable && width >= Avx512bw::A)
+	if (Avx512bw::Enable)
 		Avx512bw::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
 	else
 #endif
@@ -2083,6 +2083,11 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
 SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
     const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);

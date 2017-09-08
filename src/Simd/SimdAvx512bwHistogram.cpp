@@ -160,15 +160,10 @@ namespace Simd
 
 		template <bool srcAlign, bool dstAlign, bool masked> SIMD_INLINE void MaskSrc(const uint8_t * src, const uint8_t * mask, const __m512i & index, ptrdiff_t offset, uint16_t * dst, __mmask64 tail = -1)
 		{
-			__m512i _src = Load<srcAlign, masked>(src + offset, tail);
-			_src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _src);
+			__m512i _src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<srcAlign, masked>(src + offset, tail)));
 			__mmask64 mmask = _mm512_cmpeq_epi8_mask((Load<srcAlign, masked>(mask + offset, tail)), index);
-			__m512i src0 = UnpackU8<0>(_src);
-			__m512i src1 = UnpackU8<1>(_src);
-			__m512i lo = _mm512_maskz_add_epi16(__mmask32(mmask >> 00), src0, K16_0010);
-			__m512i hi = _mm512_maskz_add_epi16(__mmask32(mmask >> 32), src1, K16_0010);
-			Store<dstAlign>(dst + offset + 00, lo);
-			Store<dstAlign>(dst + offset + HA, hi);
+			Store<dstAlign>(dst + offset + 00, _mm512_maskz_add_epi16(__mmask32(mmask >> 00), UnpackU8<0>(_src), K16_0010));
+			Store<dstAlign>(dst + offset + HA, _mm512_maskz_add_epi16(__mmask32(mmask >> 32), UnpackU8<1>(_src), K16_0010));
 		}
 
 		template<bool align> void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -213,12 +208,90 @@ namespace Simd
 		void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
 		{
-			assert(width >= A);
-
 			if (Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
 				HistogramMasked<true>(src, srcStride, width, height, mask, maskStride, index, histogram);
 			else
 				HistogramMasked<false>(src, srcStride, width, height, mask, maskStride, index, histogram);
+		}
+
+		template <SimdCompareType compareType, bool srcAlign, bool dstAlign, bool masked>
+		SIMD_INLINE void ConditionalSrc(const uint8_t * src, const uint8_t * mask, const __m512i & value, ptrdiff_t offset, uint16_t * dst, __mmask64 tail = -1)
+		{
+			__m512i _src = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<srcAlign, masked>(src + offset, tail)));
+			__mmask64 mmask = Compare8u<compareType>(Load<srcAlign, masked>(mask + offset, tail), value) & tail;
+			Store<dstAlign>(dst + offset + 00, _mm512_maskz_add_epi16(__mmask32(mmask >> 00), UnpackU8<0>(_src), K16_0010));
+			Store<dstAlign>(dst + offset + HA, _mm512_maskz_add_epi16(__mmask32(mmask >> 32), UnpackU8<1>(_src), K16_0010));
+		}
+
+		template<SimdCompareType compareType, bool align> void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, uint32_t * histogram)
+		{
+			Buffer<uint16_t> buffer(AlignHi(width, A), HISTOGRAM_SIZE + F);
+			size_t widthAligned4 = Simd::AlignLo(width, 4);
+			size_t widthAlignedA = Simd::AlignLo(width, A);
+			size_t widthAlignedDA = Simd::AlignLo(width, DA);
+			__m512i _value = _mm512_set1_epi8(value);
+			__mmask64 tailMask = TailMask64(width - widthAlignedA);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < widthAlignedDA; col += DA)
+				{
+					ConditionalSrc<compareType, align, true, false>(src, mask, _value, col, buffer.v);
+					ConditionalSrc<compareType, align, true, false>(src, mask, _value, col + A, buffer.v);
+				}
+				for (; col < widthAlignedA; col += A)
+					ConditionalSrc<compareType, align, true, false>(src, mask, _value, col, buffer.v);
+				if (col < width)
+					ConditionalSrc<compareType, align, true, true>(src, mask, _value, col, buffer.v, tailMask);
+
+				for (col = 0; col < widthAligned4; col += 4)
+				{
+					++buffer.h[0][buffer.v[col + 0]];
+					++buffer.h[1][buffer.v[col + 1]];
+					++buffer.h[2][buffer.v[col + 2]];
+					++buffer.h[3][buffer.v[col + 3]];
+				}
+				for (; col < width; ++col)
+					++buffer.h[0][buffer.v[col]];
+
+				src += srcStride;
+				mask += maskStride;
+			}
+
+			SumHistograms(buffer.h[0], F, histogram);
+		}
+
+		template <SimdCompareType compareType>
+		void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, uint32_t * histogram)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(mask) && Aligned(maskStride))
+				return HistogramConditional<compareType, true>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			else
+				return HistogramConditional<compareType, false>(src, srcStride, width, height, mask, maskStride, value, histogram);
+		}
+
+		void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram)
+		{
+			switch (compareType)
+			{
+			case SimdCompareEqual:
+				return HistogramConditional<SimdCompareEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareNotEqual:
+				return HistogramConditional<SimdCompareNotEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareGreater:
+				return HistogramConditional<SimdCompareGreater>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareGreaterOrEqual:
+				return HistogramConditional<SimdCompareGreaterOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareLesser:
+				return HistogramConditional<SimdCompareLesser>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			case SimdCompareLesserOrEqual:
+				return HistogramConditional<SimdCompareLesserOrEqual>(src, srcStride, width, height, mask, maskStride, value, histogram);
+			default:
+				assert(0);
+			}
 		}
     }
 #endif// SIMD_AVX512BW_ENABLE
