@@ -2205,6 +2205,11 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::Int16ToGray(src, width, height, srcStride, dst, dstStride);

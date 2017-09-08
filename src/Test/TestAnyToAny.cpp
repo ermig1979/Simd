@@ -250,6 +250,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Avx2::Int16ToGray), FUNC(SimdInt16ToGray));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Avx512bw::Int16ToGray), FUNC(SimdInt16ToGray));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Neon::Int16ToGray), FUNC(SimdInt16ToGray));
