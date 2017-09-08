@@ -2085,7 +2085,7 @@ SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, si
 {
 #ifdef SIMD_AVX512BW_ENABLE
 	if (Avx512bw::Enable)
-		Avx2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+		Avx512bw::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
 	else
 #endif
 #ifdef SIMD_AVX2_ENABLE
@@ -2207,7 +2207,7 @@ SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, 
 {
 #ifdef SIMD_AVX512BW_ENABLE
 	if (Avx512bw::Enable)
-		Avx2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+		Avx512bw::Int16ToGray(src, width, height, srcStride, dst, dstStride);
 	else
 #endif
 #ifdef SIMD_AVX2_ENABLE
@@ -2239,7 +2239,7 @@ SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size
 {
 #ifdef SIMD_AVX512BW_ENABLE
 	if (Avx512bw::Enable)
-		Avx2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+		Avx512bw::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
 	else
 #endif
 #ifdef SIMD_AVX2_ENABLE
@@ -2268,6 +2268,11 @@ SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size
 SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
                                               uint8_t increment, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);

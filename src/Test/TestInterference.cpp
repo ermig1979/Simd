@@ -222,6 +222,11 @@ namespace Test
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx2::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx512bw::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
