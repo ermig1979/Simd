@@ -1444,6 +1444,11 @@ SIMD_API void SimdDetectionHaarDetect32fi(const void * hid, const uint8_t * mask
     ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 {
     size_t width = right - left;
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::DetectionHaarDetect32fi(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);

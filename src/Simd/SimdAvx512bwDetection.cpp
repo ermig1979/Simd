@@ -138,14 +138,14 @@ namespace Simd
             return _mm512_sub_epi32(_mm512_sub_epi32(s0, s1), _mm512_sub_epi32(s2, s3));
         }
 
-   //     SIMD_INLINE __m512i Sum32ii(uint32_t * const ptr[4], size_t offset)
-   //     {
-			//__m512i lo = Sum32ip(ptr, offset + 0);
-			//__m512i hi = Sum32ip(ptr, offset + 8);
-   //         return _mm256_permute2x128_si256(
-   //             _mm256_permutevar8x32_epi32(lo, K32_PERMUTE),
-   //             _mm256_permutevar8x32_epi32(hi, K32_PERMUTE), 0x20);
-   //     }
+		const __m512i K32_PERMUTE_EVEN = SIMD_MM512_SETR_EPI32(0x00, 0x02, 0x04, 0x06, 0x08, 0x0A, 0x0C, 0x0E, 0x10, 0x12, 0x14, 0x16, 0x18, 0x1A, 0x1C, 0x1E);
+
+		template <bool masked> SIMD_INLINE __m512i Sum32ii(uint32_t * const ptr[4], size_t offset, const __mmask16 * tails)
+        {
+			__m512i lo = Sum32ip<masked>(ptr, offset + 0, tails[0]);
+			__m512i hi = Sum32ip<masked>(ptr, offset + F, tails[1]);
+			return _mm512_permutex2var_epi32(lo, K32_PERMUTE_EVEN, hi);
+        }
 
 		template <bool masked> SIMD_INLINE __m512 Norm32fp(const HidHaarCascade & hid, size_t offset, __mmask16 tail = -1)
         {
@@ -155,13 +155,13 @@ namespace Simd
             return ValidSqrt(_mm512_sub_ps(_mm512_mul_ps(sqsum, area), _mm512_mul_ps(sum, sum)));
         }
 
-        //SIMD_INLINE __m256 Norm32fi(const HidHaarCascade & hid, size_t offset)
-        //{
-        //    __m256 area = _mm256_broadcast_ss(&hid.windowArea);
-        //    __m256 sum = _mm256_cvtepi32_ps(Sum32ii(hid.p, offset));
-        //    __m256 sqsum = _mm256_cvtepi32_ps(Sum32ii(hid.pq, offset));
-        //    return ValidSqrt(_mm256_sub_ps(_mm256_mul_ps(sqsum, area), _mm256_mul_ps(sum, sum)));
-        //}
+		template <bool masked> SIMD_INLINE __m512 Norm32fi(const HidHaarCascade & hid, size_t offset, const __mmask16 * tails)
+        {
+			__m512 area = _mm512_set1_ps(hid.windowArea);
+			__m512 sum = _mm512_cvtepi32_ps(Sum32ii<masked>(hid.p, offset, tails));
+			__m512 sqsum = _mm512_cvtepi32_ps(Sum32ii<masked>(hid.pq, offset, tails));
+            return ValidSqrt(_mm512_sub_ps(_mm512_mul_ps(sqsum, area), _mm512_mul_ps(sum, sum)));
+        }
 
 		template <bool masked> SIMD_INLINE __m512 WeightedSum32f(const WeightedRect & rect, size_t offset, __mmask16 tail = -1)
         {
@@ -233,8 +233,6 @@ namespace Simd
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, F);
 			__mmask16 tailMask = TailMask16(width - alignedWidth);
-			size_t evenWidth = Simd::AlignLo(width, 2);
-
             Buffer<uint32_t> buffer(width);
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
@@ -277,6 +275,68 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
+
+		void DetectionHaarDetect32fi(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
+		{
+			const size_t step = 2;
+			size_t width = rect.Width();
+			size_t alignedWidth = Simd::AlignLo(width, HA);
+			size_t evenWidth = Simd::AlignLo(width, 2);
+			__mmask16 tailMasks[3];
+			for (size_t c = 0; c < 2; ++c)
+				tailMasks[c] = TailMask16(width - alignedWidth - F*c);
+			tailMasks[2] = TailMask16((width - alignedWidth)/2);
+			Buffer<uint16_t> buffer(evenWidth);
+			for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+			{
+				size_t col = 0;
+				size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
+				size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
+
+				UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
+				memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
+				for (; col < alignedWidth; col += HA)
+				{
+					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512(Load<false>(buffer.m + col), K32_0000FFFF), K_ZERO);
+					if (result)
+					{
+						__m512 norm = Norm32fi<false>(hid, pq_offset + col, tailMasks);
+						result = Detect32f<false>(hid, p_offset + col/2, norm, result);
+						Store<false>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1));
+					}
+				}
+				if (col < evenWidth)
+				{
+					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512((Load<false, true>((uint16_t*)buffer.m + col, tailMasks[2])), K32_0000FFFF), K_ZERO);
+					if (result)
+					{
+						__m512 norm = Norm32fi<true>(hid, pq_offset + col, tailMasks);
+						result = Detect32f<true>(hid, p_offset + col/2, norm, result);
+						Store<false, true>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1), tailMasks[2]);
+					}
+					col += HA;
+				}
+				for (; col < width; col += step)
+				{
+					if (mask.At<uint8_t>(col + rect.left, row) == 0)
+						continue;
+					float norm = Base::Norm32f(hid, pq_offset + col);
+					if (Base::Detect32f(hid, p_offset + col / 2, 0, norm) > 0)
+						dst.At<uint8_t>(col + rect.left, row) = 1;
+				}
+				PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride + rect.left);
+			}
+		}
+
+		void DetectionHaarDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
+			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+		{
+			const HidHaarCascade & hid = *(HidHaarCascade*)_hid;
+			return DetectionHaarDetect32fi(hid,
+				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+				Rect(left, top, right, bottom),
+				Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
