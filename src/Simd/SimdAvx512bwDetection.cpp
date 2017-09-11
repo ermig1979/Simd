@@ -307,12 +307,12 @@ namespace Simd
 				}
 				if (col < evenWidth)
 				{
-					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512((Load<false, true>((uint16_t*)buffer.m + col, tailMasks[2])), K32_0000FFFF), K_ZERO);
+					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512((Load<false, true>((uint32_t*)buffer.m + col/2, tailMasks[2])), K32_0000FFFF), K_ZERO);
 					if (result)
 					{
 						__m512 norm = Norm32fi<true>(hid, pq_offset + col, tailMasks);
 						result = Detect32f<true>(hid, p_offset + col/2, norm, result);
-						Store<false, true>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1), tailMasks[2]);
+						Store<false, true>((uint32_t*)buffer.d + col/2, _mm512_maskz_set1_epi32(result, 1), tailMasks[2]);
 					}
 					col += HA;
 				}
@@ -484,6 +484,61 @@ namespace Simd
 		{
 			const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
 			return DetectionLbpDetect32fp(hid,
+				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
+				Rect(left, top, right, bottom),
+				Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
+		}
+
+		void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+		{
+			const size_t step = 2;
+			size_t width = rect.Width();
+			size_t alignedWidth = Simd::AlignLo(width, HA);
+			__mmask16 tailMask = TailMask16((width - alignedWidth)/2);
+			size_t evenWidth = Simd::AlignLo(width, 2);
+			Buffer<uint16_t> buffer(evenWidth);
+			for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
+			{
+				size_t col = 0;
+				size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
+
+				UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
+				memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
+				for (; col < alignedWidth; col += HA)
+				{
+					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512(Load<false>(buffer.m + col), K32_0000FFFF), K_ZERO);
+					if (result)
+					{
+						result = Detect<false>(hid, offset + col/2, 0, result);
+						Store<false>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1));
+					}
+				}
+				if (col < evenWidth)
+				{
+					__mmask16 result = _mm512_cmpneq_epi32_mask(_mm512_and_si512((Load<false, true>((uint32_t*)buffer.m + col/2, tailMask)), K32_0000FFFF), K_ZERO);
+					if (result)
+					{
+						result = Detect<true>(hid, offset + col / 2, 0, result);
+						Store<false, true>((uint32_t*)buffer.d + col / 2, _mm512_maskz_set1_epi32(result, 1), tailMask);
+					}
+					col += HA;
+				}
+				for (; col < width; col += step)
+				{
+					if (mask.At<uint8_t>(col + rect.left, row) == 0)
+						continue;
+					if (Base::Detect(hid, offset + col / 2, 0) > 0)
+						dst.At<uint8_t>(col + rect.left, row) = 1;
+				}
+				PackResult16i(buffer.d, evenWidth, dst.data + row*dst.stride + rect.left);
+			}
+		}
+
+		void DetectionLbpDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
+			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
+		{
+			const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+			return DetectionLbpDetect32fi(hid,
 				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
 				Rect(left, top, right, bottom),
 				Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
