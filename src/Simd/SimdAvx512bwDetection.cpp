@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdDetection.h"
 #include "Simd/SimdBase.h"
 
@@ -178,9 +179,8 @@ namespace Simd
             stageSum = _mm512_add_ps(stageSum, _mm512_mask_blend_ps(mask, _mm512_set1_ps(leaves[0]), _mm512_set1_ps(leaves[1])));
         }
 
-		template <bool masked> void Detect32f(const HidHaarCascade & hid, size_t offset, const __m512 & norm, __m512i & result, __mmask16 tail = -1)
+		template <bool masked> __mmask16 Detect32f(const HidHaarCascade & hid, size_t offset, const __m512 & norm, __mmask16 result)
         {
-			__mmask16 mresult = _mm512_cmpneq_epi32_mask(result, K_ZERO);
             typedef HidHaarCascade Hid;
             const float * leaves = hid.leaves.data();
             const Hid::Node * node = hid.nodes.data();
@@ -198,10 +198,10 @@ namespace Simd
                     {
                         const Hid::Feature & feature = hid.features[node->featureIdx];
                         __m512 sum = _mm512_add_ps(
-							WeightedSum32f<masked>(feature.rect[0], offset, tail), 
-							WeightedSum32f<masked>(feature.rect[1], offset, tail));
+							WeightedSum32f<masked>(feature.rect[0], offset, result),
+							WeightedSum32f<masked>(feature.rect[1], offset, result));
                         if (feature.rect[2].p0)
-                            sum = _mm512_add_ps(sum, WeightedSum32f<masked>(feature.rect[2], offset, tail));
+                            sum = _mm512_add_ps(sum, WeightedSum32f<masked>(feature.rect[2], offset, result));
                         StageSum32f(leaves, node->threshold, sum, norm, stageSum);
                     }
                 }
@@ -210,37 +210,22 @@ namespace Simd
                     for (; node < end; ++node, leaves += 2)
                     {
                         const Hid::Feature & feature = hid.features[node->featureIdx];
-                        __m512 sum = _mm512_add_ps(WeightedSum32f<masked>(feature.rect[0], offset, tail), 
-							WeightedSum32f<masked>(feature.rect[1], offset, tail));
+                        __m512 sum = _mm512_add_ps(WeightedSum32f<masked>(feature.rect[0], offset, result),
+							WeightedSum32f<masked>(feature.rect[1], offset, result));
                         StageSum32f(leaves, node->threshold, sum, norm, stageSum);
                     }
                 }
-				mresult = mresult & _mm512_cmp_ps_mask(stageSum, _mm512_set1_ps(stage.threshold), _CMP_GE_OQ);
-				result = _mm512_maskz_set1_epi32(mresult, 1);
-                int resultCount = _mm_popcnt_u32(mresult);
-				if (resultCount == 0)
-					return;
-                //else if (resultCount == 1)
-                //{
-                //    uint32_t SIMD_ALIGNED(32) _result[8];
-                //    float SIMD_ALIGNED(32) _norm[8];
-                //    Store<false>(_result, result);
-                //    _mm256_store_ps(_norm, norm);
-                //    for (int j = 0; j < 8; ++j)
-                //    {
-                //        if (_result[j])
-                //        {
-                //            _result[j] = Base::Detect32f(hid, offset + j, i + 1, _norm[j]) > 0 ? 1 : 0;
-                //            break;
-                //        }
-                //    }
-                //    result = _mm256_load_si256((__m256i*)_result);
-                //    return;
-                //}
+				result = result & _mm512_cmp_ps_mask(stageSum, _mm512_set1_ps(stage.threshold), _CMP_GE_OQ);
+				if (!result)
+					return result;
+                int resultCount = _mm_popcnt_u32(result);
+				if (resultCount == 1)
+				{
+					int j = _tzcnt_u32(result);
+					return Base::Detect32f(hid, offset + j, i + 1, Avx512f::Extract(norm, j)) > 0 ? result : __mmask16(0);
+				}
             }
-			if (mresult)
-				return;
-			//result = _mm512_maskz_set1_epi32(mresult, 1);
+			return result;
         }
 
         void DetectionHaarDetect32fp(const HidHaarCascade & hid, const Image & mask, const Rect & rect, Image & dst)
@@ -261,21 +246,22 @@ namespace Simd
                 memset(buffer.d, 0, width*sizeof(uint32_t));
                 for (; col < alignedWidth; col += F)
                 {
-                    __m512i result = Load<false>(buffer.m + col);
-                    if (_mm512_testn_epi32_mask(result, K32_00000001))
-                        continue;
-                    __m512 norm = Norm32fp<false>(hid, pq_offset + col);
-                    Detect32f<false>(hid, p_offset + col, norm, result);
-                    Store<false>(buffer.d + col, result);
+					__mmask16 result = _mm512_cmpneq_epi32_mask(Load<false>(buffer.m + col), K_ZERO);
+					if (result)
+					{
+						__m512 norm = Norm32fp<false>(hid, pq_offset + col);
+						result = Detect32f<false>(hid, p_offset + col, norm, result);
+						Store<false>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1));
+					}
                 }
                 if (col < width)
                 {
-					__m512i result = Load<false, true>(buffer.m + col, tailMask);
-					if (_mm512_test_epi32_mask(result, K32_00000001))
+					__mmask16 result = _mm512_cmpneq_epi32_mask((Load<false, true>(buffer.m + col, tailMask)), K_ZERO);
+					if (result)
 					{
 						__m512 norm = Norm32fp<true>(hid, pq_offset + col, tailMask);
-						Detect32f<true>(hid, p_offset + col, norm, result, tailMask);
-						Store<false, true>(buffer.d + col, result, tailMask);
+						result = Detect32f<true>(hid, p_offset + col, norm, result);
+						Store<false, true>(buffer.d + col, _mm512_maskz_set1_epi32(result, 1), tailMask);
 					}
                 }
                 PackResult32i(buffer.d, width, dst.data + row*dst.stride + rect.left);

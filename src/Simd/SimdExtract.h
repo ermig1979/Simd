@@ -161,6 +161,13 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE
 	namespace Avx512f
 	{
+		SIMD_INLINE float Extract(const __m512 & a, size_t index)
+		{
+			float buffer[F];
+			_mm512_storeu_ps(buffer, a);
+			return buffer[index];
+		}
+
 		SIMD_INLINE float ExtractSum(const __m512 & a)
 		{
 			__m128 lo = _mm_add_ps(_mm512_extractf32x4_ps(a, 0), _mm512_extractf32x4_ps(a, 1));
