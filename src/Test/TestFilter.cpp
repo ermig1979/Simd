@@ -316,7 +316,7 @@ namespace Test
 
 		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 32);
+		result = result && Compare(d1, d2, 0, true, 64);
 
 		return result;
 	}
@@ -579,6 +579,11 @@ namespace Test
         if(Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::Laplace), FUNC_G(SimdLaplace));
 #endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::Laplace), FUNC_G(SimdLaplace));
+#endif
 
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)

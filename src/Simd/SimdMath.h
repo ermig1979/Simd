@@ -839,6 +839,18 @@ namespace Simd
 		{
 			return _mm512_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
 		}
+
+		template <bool abs> __m512i ConditionalAbs(__m512i a);
+
+		template <> SIMD_INLINE __m512i ConditionalAbs<true>(__m512i a)
+		{
+			return _mm512_abs_epi16(a);
+		}
+
+		template <> SIMD_INLINE __m512i ConditionalAbs<false>(__m512i a)
+		{
+			return a;
+		}
 	}
 #endif //SIMD_AVX512BW_ENABLE
 
