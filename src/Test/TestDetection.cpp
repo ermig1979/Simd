@@ -403,6 +403,11 @@ namespace Test
             result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+#endif
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Neon::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
