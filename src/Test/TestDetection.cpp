@@ -108,6 +108,11 @@ namespace Test
             }
         }
         String path = desc;
+		for (size_t i = 0; i < path.size(); ++i)
+		{
+			if (path[i] == ':')
+				path[i] = '_';
+		}
         size_t s = path.length();
         if (path[s - 1] == '>')
         {
@@ -197,7 +202,8 @@ namespace Test
 
         SimdDetectionFree(hid);
 
-        //Annotate(src, dst1, w, h, f2.description);
+        //Annotate(src, dst1, w, h, f1.description);
+		//Annotate(src, dst2, w, h, f2.description);
 
         return result;
     }
@@ -366,6 +372,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx2::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -574,7 +585,7 @@ namespace Test
         double time = GetTime();
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_0.xml", 0);
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_1.xml", 1);
-        //detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
+        detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
         TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms " << std::endl);
 
         Objects os, om;
