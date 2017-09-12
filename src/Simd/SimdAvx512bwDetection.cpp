@@ -349,12 +349,12 @@ namespace Simd
 			return _mm512_sub_epi32(_mm512_sub_epi32(s0, s1), _mm512_sub_epi32(s2, s3));
 		}
 
-		template<int i, bool masked> SIMD_INLINE void Load(__m512i a[16], const HidLbpFeature<int> & feature, ptrdiff_t offset, __mmask16 tail = -1)
+		template<int i, bool masked> SIMD_INLINE void Load(__m512i a[16], const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset, __mmask16 tail = -1)
 		{
 			a[i] = Load<false, masked>(feature.p[i] + offset, tail);
 		}
 
-		template <bool masked> SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, __mmask16 & index, __m512i & shuffle, __m512i & mask, __mmask16 tail = -1)
+		template <bool masked> SIMD_INLINE void Calculate(const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset, __mmask16 & index, __m512i & shuffle, __m512i & mask, __mmask16 tail = -1)
 		{
 			__m512i a[16];
 			Load<5, masked>(a, feature, offset, tail);
@@ -366,31 +366,31 @@ namespace Simd
 			Load<0, masked>(a, feature, offset, tail);
 			Load<1, masked>(a, feature, offset, tail);
 			Load<4, masked>(a, feature, offset, tail);
-			index = _mm512_cmpge_epi32_mask(IntegralSum32i(a[0], a[1], a[4], a[5]), central);
+			index = _mm512_cmpge_epu32_mask(IntegralSum32i(a[0], a[1], a[4], a[5]), central);
 
 			shuffle = K32_FFFFFF00;
 			Load<2, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[1], a[2], a[5], a[6]), central), 8));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[1], a[2], a[5], a[6]), central), 8));
 			Load<3, masked>(a, feature, offset, tail);
 			Load<7, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[2], a[3], a[6], a[7]), central), 4));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[2], a[3], a[6], a[7]), central), 4));
 			Load<11, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[6], a[7], a[10], a[11]), central), 2));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[6], a[7], a[10], a[11]), central), 2));
 			Load<14, masked>(a, feature, offset, tail);
 			Load<15, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[10], a[11], a[14], a[15]), central), 1));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[10], a[11], a[14], a[15]), central), 1));
 
 			mask = K32_FFFFFF00;
 			Load<13, masked>(a, feature, offset, tail);
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[9], a[10], a[13], a[14]), central), 4));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[9], a[10], a[13], a[14]), central), 4));
 			Load<12, masked>(a, feature, offset, tail);
 			Load<8, masked>(a, feature, offset, tail);
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[8], a[9], a[12], a[13]), central), 2));
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epi32_mask(IntegralSum32i(a[4], a[5], a[8], a[9]), central), 1));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[8], a[9], a[12], a[13]), central), 2));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi32(_mm512_cmpge_epu32_mask(IntegralSum32i(a[4], a[5], a[8], a[9]), central), 1));
 			mask = _mm512_shuffle_epi8(K8_SHUFFLE_BITS, mask);
 		}
 
-		template <bool masked> SIMD_INLINE __mmask16 LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset, __mmask16 tail = -1)
+		template <bool masked> SIMD_INLINE __mmask16 LeafMask(const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset, const int * subset, __mmask16 tail = -1)
 		{
 			__mmask16 index;
 			__m512i shuffle, mask;
@@ -407,9 +407,9 @@ namespace Simd
 			return _mm512_cmpneq_epi32_mask(value, K_ZERO);
 		}
 
-		template<bool masked> __mmask16 Detect(const HidLbpCascade<float, int> & hid, size_t offset, int startStage, __mmask16 result)
+		template<bool masked> __mmask16 Detect(const HidLbpCascade<float, uint32_t> & hid, size_t offset, int startStage, __mmask16 result)
 		{
-			typedef HidLbpCascade<float, int> Hid;
+			typedef HidLbpCascade<float, uint32_t> Hid;
 
 			size_t subsetSize = (hid.ncategories + 31) / 32;
 			const int * subsets = hid.subsets.data();
@@ -444,7 +444,7 @@ namespace Simd
 			return result;
 		}
 
-		void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+		void DetectionLbpDetect32fp(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
 		{
 			size_t width = rect.Width();
 			size_t alignedWidth = Simd::AlignLo(width, F);
@@ -482,14 +482,14 @@ namespace Simd
 		void DetectionLbpDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
 			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 		{
-			const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+			const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
 			return DetectionLbpDetect32fp(hid,
 				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
 				Rect(left, top, right, bottom),
 				Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
 		}
 
-		void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+		void DetectionLbpDetect32fi(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
 		{
 			const size_t step = 2;
 			size_t width = rect.Width();
@@ -537,7 +537,7 @@ namespace Simd
 		void DetectionLbpDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
 			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 		{
-			const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+			const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
 			return DetectionLbpDetect32fi(hid,
 				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
 				Rect(left, top, right, bottom),
@@ -549,12 +549,12 @@ namespace Simd
 			return _mm512_sub_epi16(_mm512_sub_epi16(s0, s1), _mm512_sub_epi16(s2, s3));
 		}
 
-		template<int i, bool masked> SIMD_INLINE void Load(__m512i a[16], const HidLbpFeature<short> & feature, ptrdiff_t offset, __mmask32 tail = -1)
+		template<int i, bool masked> SIMD_INLINE void Load(__m512i a[16], const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset, __mmask32 tail = -1)
 		{
 			a[i] = Load<false, masked>(feature.p[i] + offset, tail);
 		}
 
-		template <bool masked> SIMD_INLINE void Calculate(const HidLbpFeature<short> & feature, ptrdiff_t offset, __mmask32 & index, __m512i & shuffle, __m512i & mask, __mmask32 tail = -1)
+		template <bool masked> SIMD_INLINE void Calculate(const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset, __mmask32 & index, __m512i & shuffle, __m512i & mask, __mmask32 tail = -1)
 		{
 			__m512i a[16];
 			Load<5, masked>(a, feature, offset, tail);
@@ -566,31 +566,31 @@ namespace Simd
 			Load<0, masked>(a, feature, offset, tail);
 			Load<1, masked>(a, feature, offset, tail);
 			Load<4, masked>(a, feature, offset, tail);
-			index = _mm512_cmpge_epi16_mask(IntegralSum16i(a[0], a[1], a[4], a[5]), central);
+			index = _mm512_cmpge_epu16_mask(IntegralSum16i(a[0], a[1], a[4], a[5]), central);
 
 			shuffle = K16_FF00;
 			Load<2, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[1], a[2], a[5], a[6]), central), 8));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[1], a[2], a[5], a[6]), central), 8));
 			Load<3, masked>(a, feature, offset, tail);
 			Load<7, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[2], a[3], a[6], a[7]), central), 4));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[2], a[3], a[6], a[7]), central), 4));
 			Load<11, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[6], a[7], a[10], a[11]), central), 2));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[6], a[7], a[10], a[11]), central), 2));
 			Load<14, masked>(a, feature, offset, tail);
 			Load<15, masked>(a, feature, offset, tail);
-			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[10], a[11], a[14], a[15]), central), 1));
+			shuffle = _mm512_or_si512(shuffle, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[10], a[11], a[14], a[15]), central), 1));
 
 			mask = K16_FF00;
 			Load<13, masked>(a, feature, offset, tail);
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[9], a[10], a[13], a[14]), central), 4));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[9], a[10], a[13], a[14]), central), 4));
 			Load<12, masked>(a, feature, offset, tail);
 			Load<8, masked>(a, feature, offset, tail);
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[8], a[9], a[12], a[13]), central), 2));
-			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epi16_mask(IntegralSum16i(a[4], a[5], a[8], a[9]), central), 1));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[8], a[9], a[12], a[13]), central), 2));
+			mask = _mm512_or_si512(mask, _mm512_maskz_set1_epi16(_mm512_cmpge_epu16_mask(IntegralSum16i(a[4], a[5], a[8], a[9]), central), 1));
 			mask = _mm512_shuffle_epi8(K8_SHUFFLE_BITS, mask);
 		}
 
-		template <bool masked> SIMD_INLINE __mmask32 LeafMask(const HidLbpFeature<short> & feature, ptrdiff_t offset, const int * subset, __mmask32 tail = -1)
+		template <bool masked> SIMD_INLINE __mmask32 LeafMask(const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset, const int * subset, __mmask32 tail = -1)
 		{
 			__mmask32 index;
 			__m512i shuffle, mask;
@@ -607,9 +607,9 @@ namespace Simd
 			return _mm512_cmpneq_epi16_mask(value, K_ZERO);
 		}
 
-		template<bool masked> __mmask32 Detect(const HidLbpCascade<int, short> & hid, size_t offset, int startStage, __mmask32 result)
+		template<bool masked> __mmask32 Detect(const HidLbpCascade<int, uint16_t> & hid, size_t offset, int startStage, __mmask32 result)
 		{
-			typedef HidLbpCascade<int, short> Hid;
+			typedef HidLbpCascade<int, uint16_t> Hid;
 
 			size_t subsetSize = (hid.ncategories + 31) / 32;
 			const int * subsets = hid.subsets.data();
@@ -643,7 +643,7 @@ namespace Simd
 			return result;
 		}
 
-		void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+		void DetectionLbpDetect16ip(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
 		{
 			size_t width = rect.Width();
 			size_t alignedWidth = Simd::AlignLo(width, HA);
@@ -681,14 +681,14 @@ namespace Simd
 		void DetectionLbpDetect16ip(const void * _hid, const uint8_t * mask, size_t maskStride,
 			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 		{
-			const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+			const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
 			return DetectionLbpDetect16ip(hid,
 				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
 				Rect(left, top, right, bottom),
 				Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
 		}
 
-		void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+		void DetectionLbpDetect16ii(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
 		{
 			const size_t step = 2;
 			size_t width = rect.Width();
@@ -734,7 +734,7 @@ namespace Simd
 		void DetectionLbpDetect16ii(const void * _hid, const uint8_t * mask, size_t maskStride,
 			ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
 		{
-			const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+			const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
 			return DetectionLbpDetect16ii(hid,
 				Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
 				Rect(left, top, right, bottom),

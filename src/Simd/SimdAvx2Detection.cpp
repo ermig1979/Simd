@@ -350,15 +350,15 @@ namespace Simd
 
         SIMD_INLINE __m256i GreaterOrEqual32i(__m256i a, __m256i b)
         {
-            return _mm256_cmpeq_epi32(_mm256_max_epi32(a, b), a);
+            return _mm256_cmpeq_epi32(_mm256_max_epu32(a, b), a);
         }
 
-        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<int> & feature, ptrdiff_t offset)
+        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset)
         {
             a[i] = _mm256_loadu_si256((__m256i*)(feature.p[i] + offset));
         }
 
-        SIMD_INLINE void Calculate(const HidLbpFeature<int> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
         {
             __m256i a[16];
             Load<5>(a, feature, offset);
@@ -394,7 +394,7 @@ namespace Simd
             mask = _mm256_shuffle_epi8(K8_SHUFFLE_BITS, mask);
         }
 
-        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<int> & feature, ptrdiff_t offset, const int * subset)
+        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<uint32_t> & feature, ptrdiff_t offset, const int * subset)
         {
             __m256i index, shuffle, mask;
             Calculate(feature, offset, index, shuffle, mask);
@@ -410,9 +410,9 @@ namespace Simd
             return _mm256_andnot_si256(_mm256_cmpeq_epi32(value, _mm256_setzero_si256()), K_INV_ZERO);
         }
 
-        void Detect(const HidLbpCascade<float, int> & hid, size_t offset, int startStage, __m256i & result)
+        void Detect(const HidLbpCascade<float, uint32_t> & hid, size_t offset, int startStage, __m256i & result)
         {
-            typedef HidLbpCascade<float, int> Hid;
+            typedef HidLbpCascade<float, uint32_t> Hid;
 
             size_t subsetSize = (hid.ncategories + 31) / 32;
             const int * subsets = hid.subsets.data();
@@ -456,7 +456,7 @@ namespace Simd
             }
         }
 
-        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, 8);
@@ -502,14 +502,14 @@ namespace Simd
         void DetectionLbpDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
             return DetectionLbpDetect32fp(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect32fi(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             const size_t step = 2;
             size_t width = rect.Width();
@@ -557,7 +557,7 @@ namespace Simd
         void DetectionLbpDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
             return DetectionLbpDetect32fi(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
@@ -571,15 +571,15 @@ namespace Simd
 
         SIMD_INLINE __m256i GreaterOrEqual16i(__m256i a, __m256i b)
         {
-            return _mm256_cmpeq_epi16(_mm256_max_epi16(a, b), a);
+            return _mm256_cmpeq_epi16(_mm256_max_epu16(a, b), a);
         }
 
-        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<short> & feature, ptrdiff_t offset)
+        template<int i> SIMD_INLINE void Load(__m256i a[16], const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset)
         {
             a[i] = _mm256_loadu_si256((__m256i*)(feature.p[i] + offset));
         }
 
-        SIMD_INLINE void Calculate(const HidLbpFeature<short> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
+        SIMD_INLINE void Calculate(const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset, __m256i & index, __m256i & shuffle, __m256i & mask)
         {
             __m256i a[16];
             Load<5>(a, feature, offset);
@@ -615,7 +615,7 @@ namespace Simd
             mask = _mm256_shuffle_epi8(K8_SHUFFLE_BITS, mask);
         }
 
-        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<short> & feature, ptrdiff_t offset, const int * subset)
+        SIMD_INLINE __m256i LeafMask(const HidLbpFeature<uint16_t> & feature, ptrdiff_t offset, const int * subset)
         {
             __m256i index, shuffle, mask;
             Calculate(feature, offset, index, shuffle, mask);
@@ -631,9 +631,9 @@ namespace Simd
             return _mm256_andnot_si256(_mm256_cmpeq_epi16(value, _mm256_setzero_si256()), Simd::Avx2::K_INV_ZERO);
         }
 
-        void Detect(const HidLbpCascade<int, short> & hid, size_t offset, __m256i & result)
+        void Detect(const HidLbpCascade<int, uint16_t> & hid, size_t offset, __m256i & result)
         {
-            typedef HidLbpCascade<int, short> Hid;
+            typedef HidLbpCascade<int, uint16_t> Hid;
 
             size_t subsetSize = (hid.ncategories + 31) / 32;
             const int * subsets = hid.subsets.data();
@@ -676,7 +676,7 @@ namespace Simd
             }
         }
 
-        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             size_t width = rect.Width();
             size_t alignedWidth = Simd::AlignLo(width, HA);
@@ -720,14 +720,14 @@ namespace Simd
         void DetectionLbpDetect16ip(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
             return DetectionLbpDetect16ip(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             const size_t step = 2;
             size_t width = rect.Width();
@@ -772,7 +772,7 @@ namespace Simd
         void DetectionLbpDetect16ii(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
             return DetectionLbpDetect16ii(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),

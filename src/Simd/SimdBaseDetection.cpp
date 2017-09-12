@@ -801,7 +801,7 @@ namespace Simd
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fp(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect32fp(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
@@ -819,14 +819,14 @@ namespace Simd
         void DetectionLbpDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
             return DetectionLbpDetect32fp(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect32fi(const HidLbpCascade<float, int> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect32fi(const HidLbpCascade<float, uint32_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
             {
@@ -844,18 +844,18 @@ namespace Simd
         void DetectionLbpDetect32fi(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<float, int> & hid = *(HidLbpCascade<float, int>*)_hid;
+            const HidLbpCascade<float, uint32_t> & hid = *(HidLbpCascade<float, uint32_t>*)_hid;
             return DetectionLbpDetect32fi(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ip(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect16ip(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 1)
             {
-                size_t offset = row * hid.isum.stride / sizeof(short);
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t);
                 for (ptrdiff_t col = rect.left; col < rect.right; col += 1)
                 {
                     if (mask.At<uint8_t>(col, row) == 0)
@@ -869,18 +869,18 @@ namespace Simd
         void DetectionLbpDetect16ip(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
             return DetectionLbpDetect16ip(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
 
-        void DetectionLbpDetect16ii(const HidLbpCascade<int, short> & hid, const Image & mask, const Rect & rect, Image & dst)
+        void DetectionLbpDetect16ii(const HidLbpCascade<int, uint16_t> & hid, const Image & mask, const Rect & rect, Image & dst)
         {
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += 2)
             {
-                size_t offset = row * hid.isum.stride / sizeof(short);
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t);
                 for (ptrdiff_t col = rect.left; col < rect.right; col += 2)
                 {
                     if (mask.At<uint8_t>(col, row) == 0)
@@ -894,7 +894,7 @@ namespace Simd
         void DetectionLbpDetect16ii(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
-            const HidLbpCascade<int, short> & hid = *(HidLbpCascade<int, short>*)_hid;
+            const HidLbpCascade<int, uint16_t> & hid = *(HidLbpCascade<int, uint16_t>*)_hid;
             return DetectionLbpDetect16ii(hid,
                 Image(hid.sum.width - 1, hid.sum.height - 1, maskStride, Image::Gray8, (uint8_t*)mask),
                 Rect(left, top, right, bottom),

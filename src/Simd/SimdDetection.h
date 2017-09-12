@@ -307,7 +307,7 @@ namespace Simd
 
         template< class T> SIMD_INLINE int Calculate(const HidLbpFeature<T> & feature, ptrdiff_t offset)
         {
-            int central = IntegralSum(feature.p[5], feature.p[6], feature.p[9], feature.p[10], offset);
+			T central = IntegralSum(feature.p[5], feature.p[6], feature.p[9], feature.p[10], offset);
 
             return
                 (IntegralSum(feature.p[0], feature.p[1], feature.p[4], feature.p[5], offset) >= central ? 128 : 0) |
