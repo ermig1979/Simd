@@ -2491,6 +2491,11 @@ SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, s
 
 SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width > Avx512bw::A)
+		Avx512bw::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A)
         Avx2::LaplaceAbs(src, srcStride, width, height, dst, dstStride);
