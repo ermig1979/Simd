@@ -2521,6 +2521,11 @@ SIMD_API void SimdLaplaceAbs(const uint8_t * src, size_t srcStride, size_t width
 
 SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width > Avx512bw::A)
+		Avx512bw::LaplaceAbsSum(src, stride, width, height, sum);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A)
         Avx2::LaplaceAbsSum(src, stride, width, height, sum);
