@@ -2389,6 +2389,11 @@ SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statis
 
 SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
 	if (Avx2::Enable && width >= Avx2::A)
 		Avx2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);

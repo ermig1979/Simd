@@ -98,6 +98,11 @@ namespace Test
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Avx2::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && InterleaveUvAutoTest(FUNC2(Simd::Avx512bw::InterleaveUv), FUNC2(SimdInterleaveUv));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Vmx::InterleaveUv), FUNC2(SimdInterleaveUv));
