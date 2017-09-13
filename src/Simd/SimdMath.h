@@ -786,6 +786,13 @@ namespace Simd
 			return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
 		}
 
+		SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
+		{
+			__m512i t = a;
+			a = _mm512_min_epu8(t, b);
+			b = _mm512_max_epu8(t, b);
+		}
+
 		SIMD_INLINE __m512i BinomialSum16(const __m512i & a, const __m512i & b, const __m512i & c)
 		{
 			return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));

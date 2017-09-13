@@ -2631,6 +2631,11 @@ SIMD_API void SimdMeanFilter3x3(const uint8_t * src, size_t srcStride, size_t wi
 
 SIMD_API void SimdMedianFilterRhomb3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && (width - 1)*channelCount >= Avx512bw::A)
+		Avx512bw::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && (width - 1)*channelCount >= Avx2::A)
         Avx2::MedianFilterRhomb3x3(src, srcStride, width, height, channelCount, dst, dstStride);
