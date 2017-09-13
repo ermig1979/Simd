@@ -480,6 +480,18 @@ namespace Simd
 			return _mm512_mask_blend_epi8(m, _mm512_inserti32x4(src, ss, 3), src);
 		}
 
+		template <size_t step> SIMD_INLINE __m512i LoadBeforeFirst2(const uint8_t * p)
+		{
+			__m512i src = Load<false, true>(p - 2 * step, __mmask64(-1) << 2 * step);
+			return _mm512_inserti32x4(src, Sse2::LoadBeforeFirst<step>(Sse2::LoadBeforeFirst<step>(Sse2::Load<false>((__m128i*)p + 0))), 0);
+		}
+
+		template <size_t step> SIMD_INLINE __m512i LoadAfterLast2(const uint8_t * p)
+		{
+			__m512i src = Load<false, true>(p + 2 * step, __mmask64(-1) >> 2 * step);
+			return _mm512_inserti32x4(src, Sse2::LoadAfterLast<step>(Sse2::LoadAfterLast<step>(Sse2::Load<false>((__m128i*)p + 3))), 3);
+		}
+		
 		template <bool align, size_t step> SIMD_INLINE void LoadNose3(const uint8_t * p, __m512i a[3])
 		{
 			a[0] = LoadBeforeFirst<step>(p);
@@ -499,6 +511,33 @@ namespace Simd
 			a[0] = Load<false>(p - step);
 			a[1] = Load<align>(p);
 			a[2] = LoadAfterLast<step>(p);
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadNose5(const uint8_t * p, __m512i a[5])
+		{
+			a[0] = LoadBeforeFirst2<step>(p);
+			a[1] = LoadBeforeFirst<step>(p);
+			a[2] = Load<align>(p);
+			a[3] = Load<false>(p + step);
+			a[4] = Load<false>(p + 2*step);
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadBody5(const uint8_t * p, __m512i a[5])
+		{
+			a[0] = Load<false>(p - 2*step);
+			a[1] = Load<false>(p - step);
+			a[2] = Load<align>(p);
+			a[3] = Load<false>(p + step);
+			a[4] = Load<false>(p + 2*step);
+		}
+
+		template <bool align, size_t step> SIMD_INLINE void LoadTail5(const uint8_t * p, __m512i a[5])
+		{
+			a[0] = Load<false>(p - 2*step);
+			a[1] = Load<false>(p - step);
+			a[2] = Load<align>(p);
+			a[3] = LoadAfterLast<step>(p);
+			a[4] = LoadAfterLast2<step>(p);
 		}
 	}
 #endif//SIMD_AVX512BW_ENABLE
