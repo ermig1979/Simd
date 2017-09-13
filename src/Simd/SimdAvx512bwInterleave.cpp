@@ -66,7 +66,7 @@ namespace Simd
 			{
 				size_t col = 0;
 				for (; col < fullAlignedWidth; col += DA)
-					InterleaveUv2<align>(u + col, v + col, uv + col *2);
+					InterleaveUv2<align>(u + col, v + col, uv + col * 2);
 				for (; col < alignedWidth; col += A)
 					InterleaveUv<align, false>(u + col, v + col, uv + col * 2, tailMasks);
 				if (col < width)
@@ -83,6 +83,52 @@ namespace Simd
 				InterleaveUv<true>(u, uStride, v, vStride, width, height, uv, uvStride);
 			else
 				InterleaveUv<false>(u, uStride, v, vStride, width, height, uv, uvStride);
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, uint8_t * bgr, const __mmask64 * tails)
+		{
+			__m512i _b = Load<align, mask>(b, tails[3]);
+			__m512i _g = Load<align, mask>(g, tails[3]);
+			__m512i _r = Load<align, mask>(r, tails[3]);
+			Store<align, mask>(bgr + 0 * A, InterleaveBgr<0>(_b, _g, _r), tails[0]);
+			Store<align, mask>(bgr + 1 * A, InterleaveBgr<1>(_b, _g, _r), tails[1]);
+			Store<align, mask>(bgr + 2 * A, InterleaveBgr<2>(_b, _g, _r), tails[2]);
+		}
+
+		template <bool align> void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (align)
+			{
+				assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride));
+				assert(Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMasks[4];
+			for (size_t c = 0; c < 3; ++c)
+				tailMasks[c] = TailMask64((width - alignedWidth) * 3 - A*c);
+			tailMasks[3] = TailMask64(width - alignedWidth);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					InterleaveBgr<align, false>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
+				if (col < width)
+					InterleaveBgr<align, true>(b + col, g + col, r + col, bgr + col * 3, tailMasks);
+				b += bStride;
+				g += gStride;
+				r += rStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void InterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride)
+				&& Aligned(r) && Aligned(rStride) && Aligned(bgr) && Aligned(bgrStride))
+				InterleaveBgr<true>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+			else
+				InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
 		}
     }
 #endif// SIMD_AVX512BW_ENABLE

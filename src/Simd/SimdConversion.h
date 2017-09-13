@@ -852,6 +852,32 @@ namespace Simd
 			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, K16_BV_RV),
 				_mm512_madd_epi16(g16_1, K16_GV_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
 		}
+
+		template <int index> __m512i InterleaveBgr(__m512i blue, __m512i green, __m512i red);
+
+		template<> SIMD_INLINE __m512i InterleaveBgr<0>(__m512i blue, __m512i green, __m512i red)
+		{
+			return
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, blue), K8_SHUFFLE_BLUE_TO_BGR0),
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, green), K8_SHUFFLE_GREEN_TO_BGR0),
+				_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, red), K8_SHUFFLE_RED_TO_BGR0)));
+		}
+
+		template<> SIMD_INLINE __m512i InterleaveBgr<1>(__m512i blue, __m512i green, __m512i red)
+		{
+			return
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, blue), K8_SHUFFLE_BLUE_TO_BGR1),
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, green), K8_SHUFFLE_GREEN_TO_BGR1),
+				_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, red), K8_SHUFFLE_RED_TO_BGR1)));
+		}
+
+		template<> SIMD_INLINE __m512i InterleaveBgr<2>(__m512i blue, __m512i green, __m512i red)
+		{
+			return
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, blue), K8_SHUFFLE_BLUE_TO_BGR2),
+				_mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, green), K8_SHUFFLE_GREEN_TO_BGR2),
+				_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, red), K8_SHUFFLE_RED_TO_BGR2)));
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE 
 

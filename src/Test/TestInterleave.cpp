@@ -157,7 +157,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(b, g, r, bgr2));
 
-        result = result && Compare(bgr1, bgr2, 0, true, 32);
+        result = result && Compare(bgr1, bgr2, 0, true, 64);
 
         return result;
     }
@@ -187,6 +187,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && InterleaveBgrAutoTest(FUNC3(Simd::Avx2::InterleaveBgr), FUNC3(SimdInterleaveBgr));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && InterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
