@@ -788,9 +788,15 @@ namespace Simd
 
 		SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
 		{
+#if 0
 			__m512i t = a;
 			a = _mm512_min_epu8(t, b);
 			b = _mm512_max_epu8(t, b);
+#else
+			__m512i d = _mm512_subs_epu8(a, b);
+			a = _mm512_sub_epi8(a, d);
+			b = _mm512_add_epi8(b, d);
+#endif
 		}
 
 		SIMD_INLINE __m512i BinomialSum16(const __m512i & a, const __m512i & b, const __m512i & c)

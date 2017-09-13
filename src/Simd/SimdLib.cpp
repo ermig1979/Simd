@@ -2721,6 +2721,11 @@ SIMD_API void SimdMedianFilterSquare3x3(const uint8_t * src, size_t srcStride, s
 
 SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && (width - 2)*channelCount >= Avx512bw::A)
+		Avx512bw::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && (width - 2)*channelCount >= Avx2::A)
         Avx2::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
