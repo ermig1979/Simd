@@ -41,14 +41,21 @@ namespace Simd
             return _mm256_srli_epi16(value, 4);
         }
 
-        template<bool align> SIMD_INLINE __m256i ReduceColNose(const uint8_t * p) 
-        {
-            const __m256i t = Load<align>((__m256i*)p);
-            return BinomialSum16(
-                _mm256_and_si256(LoadBeforeFirst<align, 1>(p), K16_00FF),
-                _mm256_and_si256(t, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t, 1), K16_00FF));
-        }
+		const __m256i K16_0102 = SIMD_MM256_SET1_EPI16(0x0102);
+
+		SIMD_INLINE __m256i BinomialSum8(const __m256i & s01, const __m256i & s12)
+		{
+#ifdef SIMD_MADDUBS_ERROR
+			return BinomialSum16(_mm256_and_si256(s01, K16_00FF), _mm256_and_si256(s12, K16_00FF), _mm256_and_si256(_mm256_srli_si256(s12, 1), K16_00FF));
+#else
+			return _mm256_add_epi16(_mm256_and_si256(s01, K16_00FF), _mm256_maddubs_epi16(s12, K16_0102));
+#endif
+		}
+
+		template<bool align> SIMD_INLINE __m256i ReduceColNose(const uint8_t * p)
+		{
+			return BinomialSum8(LoadBeforeFirst<align, 1>(p), Load<align>((__m256i*)p));
+		}
 
         template<bool align> SIMD_INLINE void ReduceColNose(const uint8_t * s[3], __m256i a[3]) 
         {
@@ -57,14 +64,10 @@ namespace Simd
             a[2] = ReduceColNose<align>(s[2]);
         }
 
-        template<bool align> SIMD_INLINE __m256i ReduceColBody(const uint8_t * p) 
-        {
-            const __m256i t = Load<align>((__m256i*)p);
-            return BinomialSum16(
-                _mm256_and_si256(_mm256_loadu_si256((__m256i*)(p - 1)), K16_00FF),
-                _mm256_and_si256(t, K16_00FF),
-                _mm256_and_si256(_mm256_srli_si256(t, 1), K16_00FF));
-        }
+		template<bool align> SIMD_INLINE __m256i ReduceColBody(const uint8_t * p)
+		{
+			return BinomialSum8(Load<false>((__m256i*)(p - 1)), Load<align>((__m256i*)p));
+		}
 
         template<bool align> SIMD_INLINE void ReduceColBody(const uint8_t * s[3], size_t offset, __m256i a[3]) 
         {
