@@ -179,6 +179,11 @@ namespace Test
             result = result && ReorderAutoTest(FUNC(Simd::Avx2::Reorder64bit), FUNC(SimdReorder64bit), 8);
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ReorderAutoTest(FUNC(Simd::Avx512bw::Reorder64bit), FUNC(SimdReorder64bit), 8);
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && ReorderAutoTest(FUNC(Simd::Vmx::Reorder64bit), FUNC(SimdReorder64bit), 8);

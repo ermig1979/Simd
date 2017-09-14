@@ -3586,6 +3586,11 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
 
 SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Reorder64bit(src, size, dst);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && size >= Avx2::A)
         Avx2::Reorder64bit(src, size, dst);

@@ -257,6 +257,8 @@ namespace Simd
 		void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
 
 		void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
+
+		void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
