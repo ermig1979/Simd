@@ -3383,6 +3383,11 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
 SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && srcWidth >= Avx2::DA)
         Avx2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);

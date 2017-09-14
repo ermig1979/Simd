@@ -241,6 +241,9 @@ namespace Simd
 			size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
 		void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
+
+		void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+			uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

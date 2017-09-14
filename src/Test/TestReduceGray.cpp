@@ -130,6 +130,11 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx2::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx512bw::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Vmx::ReduceGray2x2), FUNC1(SimdReduceGray2x2));
