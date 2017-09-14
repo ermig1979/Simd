@@ -3516,6 +3516,11 @@ SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcH
 
 SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::Reorder16bit(src, size, dst);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && size >= Avx2::A)
         Avx2::Reorder16bit(src, size, dst);
