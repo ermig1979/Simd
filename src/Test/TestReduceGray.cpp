@@ -171,6 +171,14 @@ namespace Test
         }
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+		{
+			result = result && ReduceGrayAutoTest(FUNC2(Simd::Avx512bw::ReduceGray3x3, true), FUNC2(SimdReduceGray3x3, true));
+			result = result && ReduceGrayAutoTest(FUNC2(Simd::Avx512bw::ReduceGray3x3, false), FUNC2(SimdReduceGray3x3, false));
+	}
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
         {
