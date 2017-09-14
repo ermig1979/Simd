@@ -71,6 +71,49 @@ namespace Simd
             else
                 Reorder16bit<false>(src, size, dst);
         }
+
+		const __m512i K8_SHUFFLE_REORDER_32 = SIMD_MM512_SETR_EPI8(
+			0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC,
+			0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC,
+			0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC,
+			0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC);
+
+		template <bool align, bool mask> SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst, __mmask64 tail = -1)
+		{
+			Store<align, mask>(dst, _mm512_shuffle_epi8((Load<align, mask>(src, tail)), K8_SHUFFLE_REORDER_32), tail);
+		}
+
+		template <bool align> SIMD_INLINE void Reorder32bit4(const uint8_t * src, uint8_t * dst)
+		{
+			Store<align>(dst + 0 * A, _mm512_shuffle_epi8(Load<align>(src + 0 * A), K8_SHUFFLE_REORDER_32));
+			Store<align>(dst + 1 * A, _mm512_shuffle_epi8(Load<align>(src + 1 * A), K8_SHUFFLE_REORDER_32));
+			Store<align>(dst + 2 * A, _mm512_shuffle_epi8(Load<align>(src + 2 * A), K8_SHUFFLE_REORDER_32));
+			Store<align>(dst + 3 * A, _mm512_shuffle_epi8(Load<align>(src + 3 * A), K8_SHUFFLE_REORDER_32));
+		}
+
+		template <bool align> void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+		{
+			assert(size % 2 == 0);
+
+			size_t alignedSize = AlignLo(size, A);
+			size_t fullAlignedSize = AlignLo(size, QA);
+			__mmask64 tailMask = TailMask64(size - alignedSize);
+			size_t i = 0;
+			for (; i < fullAlignedSize; i += QA)
+				Reorder32bit4<align>(src + i, dst + i);
+			for (; i < alignedSize; i += A)
+				Reorder32bit<align, false>(src + i, dst + i);
+			if (i < size)
+				Reorder32bit<align, true>(src + i, dst + i, tailMask);
+		}
+
+		void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
+		{
+			if (Aligned(src) && Aligned(dst))
+				Reorder32bit<true>(src, size, dst);
+			else
+				Reorder32bit<false>(src, size, dst);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
