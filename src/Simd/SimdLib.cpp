@@ -3714,6 +3714,12 @@ SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parent
                                            uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
                                            uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,
+		difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A + 1)
         Avx2::SegmentationPropagate2x2(parent, parentStride, width, height, child, childStride,

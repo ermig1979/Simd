@@ -360,6 +360,11 @@ namespace Test
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx512bw::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Vmx::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
