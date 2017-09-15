@@ -189,6 +189,101 @@ namespace Simd
 				SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride, 
 					difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
 		}
+
+		SIMD_INLINE bool RowHasIndex(const uint8_t * mask, size_t alignedSize, size_t fullSize, __m512i index, __mmask64 tail)
+		{
+			size_t col = 0;
+			for (; col < alignedSize; col += A)
+			{
+				if (_mm512_cmpeq_epi8_mask(_mm512_loadu_si512(mask + col), index))
+					return true;
+			}
+			if (col < fullSize)
+			{
+				if (_mm512_cmpeq_epi8_mask(_mm512_maskz_loadu_epi8(tail, mask + col), index))
+					return true;
+			}
+			return false;
+		}
+
+		template<bool masked> SIMD_INLINE void ColsHasIndex(const uint8_t * mask, size_t stride, size_t size, __m512i index, __mmask64 & cols, __mmask64 tail = -1)
+		{
+			for (size_t row = 0; row < size; ++row)
+			{
+				cols = cols | _mm512_cmpeq_epi8_mask((Load<false, masked>(mask, tail)), index);
+				mask += stride;
+			}
+		}
+
+		void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
+		{
+			assert(*left >= 0 && *right <= (ptrdiff_t)width && *top >= 0 && *bottom <= (ptrdiff_t)height);
+
+			size_t fullWidth = *right - *left;
+			ptrdiff_t alignedWidth = Simd::AlignLo(fullWidth, A);
+			ptrdiff_t alignedRight = *left + alignedWidth;
+			__mmask64 tailMask = TailMask64(fullWidth - alignedWidth);
+			ptrdiff_t alignedLeft = *right - alignedWidth;
+			__mmask64 noseMask = NoseMask64(fullWidth - alignedWidth);
+
+			__m512i _index = _mm512_set1_epi8(index);
+			bool search = true;
+			for (ptrdiff_t row = *top; search && row < *bottom; ++row)
+			{
+				if (RowHasIndex(mask + row*stride + *left, alignedWidth, fullWidth, _index, tailMask))
+				{
+					search = false;
+					*top = row;
+				}
+			}
+
+			if (search)
+			{
+				*left = 0;
+				*top = 0;
+				*right = 0;
+				*bottom = 0;
+				return;
+			}
+
+			for (ptrdiff_t row = *bottom - 1; row >= *top; --row)
+			{
+				if (RowHasIndex(mask + row*stride + *left, alignedWidth, fullWidth, _index, tailMask))
+				{
+					*bottom = row + 1;
+					break;
+				}
+			}
+
+			for (ptrdiff_t col = *left; col < *right; col += A)
+			{
+				__mmask64 cols = 0;
+				if (col < alignedRight)
+					ColsHasIndex<false>(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols);
+				else
+					ColsHasIndex<true>(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols, tailMask);
+				if (cols)
+				{
+					*left = col + FirstNotZero64(cols);
+					break;
+				}
+			}
+
+			for (ptrdiff_t col = *right - A; col >= *left; col -= A)
+			{
+				__mmask64 cols = 0;
+				if (col >= alignedLeft)
+					ColsHasIndex<false>(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols);
+				else
+					ColsHasIndex<true>(mask + (*top)*stride + col, stride, *bottom - *top, _index, cols, noseMask);
+				if (cols)
+				{
+					*right = col + LastNotZero64(cols);
+					break;
+				}
+			}
+		}
     }
 #endif//SIMD_AVX512BW_ENABLE
 }

@@ -771,20 +771,40 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
 	namespace Avx512bw
 	{
-		__mmask32 SIMD_INLINE TailMask32(ptrdiff_t tail)
+		SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)
 		{
 			return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));
 		}
 
-		__mmask64 SIMD_INLINE TailMask64(ptrdiff_t tail)
+		SIMD_INLINE __mmask64 TailMask64(ptrdiff_t tail)
 		{
 			return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));
 		}
 
-		__mmask64 SIMD_INLINE NoseMask64(ptrdiff_t nose)
+		SIMD_INLINE __mmask64 NoseMask64(ptrdiff_t nose)
 		{
 			return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
 		}
+
+#if defined(_MSC_VER) || (defined(__GNUC__) && defined(__LZCNT__))
+		SIMD_INLINE size_t FirstNotZero64(__mmask64 mask)
+		{
+#ifdef SIMD_X64_ENABLE
+			return _tzcnt_u64(mask);
+#else
+			return (__mmask32(col) ? _tzcnt_u32(__mmask32(cols)) : _tzcnt_u32(__mmask32(cols >> 32)) + 32);
+#endif
+		}
+
+		SIMD_INLINE size_t LastNotZero64(__mmask64 mask)
+		{
+#ifdef SIMD_X64_ENABLE
+			return 64 - _lzcnt_u64(mask);
+#else
+			return 64 - (__mmask32(col >> 32) ? _lzcnt_u32(__mmask32(cols >> 32)) : _lzcnt_u32(__mmask32(cols)) + 32);
+#endif
+		}
+#endif
 
 		SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
 		{

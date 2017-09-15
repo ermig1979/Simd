@@ -3751,6 +3751,11 @@ SIMD_API void SimdSegmentationPropagate2x2(const uint8_t * parent, size_t parent
 SIMD_API void SimdSegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                                            ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A && *right - *left >= (ptrdiff_t)Avx2::A)
         Avx2::SegmentationShrinkRegion(mask, stride, width, height, index, left, top, right, bottom);
