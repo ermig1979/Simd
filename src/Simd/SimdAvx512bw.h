@@ -261,6 +261,8 @@ namespace Simd
 		void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
 
 		void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
+
+		void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

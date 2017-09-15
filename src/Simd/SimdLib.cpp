@@ -3682,6 +3682,11 @@ SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t 
 
 SIMD_API void SimdSegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::SegmentationFillSingleHoles(mask, stride, width, height, index);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A + 2)
         Avx2::SegmentationFillSingleHoles(mask, stride, width, height, index);

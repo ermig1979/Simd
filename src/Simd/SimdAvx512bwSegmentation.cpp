@@ -46,7 +46,7 @@ namespace Simd
         template<bool align> void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
         {
 			if (align)
-				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+				assert(Aligned(mask) && Aligned(stride));
 
 			size_t alignedWidth = Simd::AlignLo(width, A);
 			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
@@ -75,6 +75,46 @@ namespace Simd
             else
                 SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
         }
+
+		template<bool align, bool masked> SIMD_INLINE void FillSingleHoles(uint8_t * mask, ptrdiff_t stride, __m512i index, __mmask64 edge = -1)
+		{
+			__mmask64 up = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask - stride, edge)), index);
+			__mmask64 left = _mm512_cmpeq_epi8_mask((Load<false, masked>(mask - 1, edge)), index);
+			__mmask64 right = _mm512_cmpeq_epi8_mask((Load<false, masked>(mask + 1, edge)), index);
+			__mmask64 down = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask + stride, edge)), index);
+			Store<align, true>(mask, index, up & left & right & down & edge);
+		}
+
+		template<bool align> void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+		{
+			assert(width > 2 && height > 2);
+
+			__m512i _index = _mm512_set1_epi8((char)index);
+			size_t alignedWidth = Simd::AlignLo(width - 1, A);
+			__mmask64 noseMask = NoseMask64(A - 1);
+			__mmask64 tailMask = TailMask64(width - 1 - alignedWidth);
+			if (alignedWidth < A)
+				noseMask = noseMask&tailMask;
+
+			for (size_t row = 2; row < height; ++row)
+			{
+				mask += stride;
+				size_t col = A;
+				FillSingleHoles<align, true>(mask, stride, _index, noseMask);
+				for (; col < alignedWidth; col += A)
+					FillSingleHoles<align, false>(mask + col, stride, _index);
+				if (col < width)
+					FillSingleHoles<align, true>(mask + col, stride, _index, tailMask);
+			}
+		}
+
+		void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index)
+		{
+			if (Aligned(mask) && Aligned(stride))
+				SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
+			else
+				SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
+		}
     }
 #endif//SIMD_AVX512BW_ENABLE
 }
