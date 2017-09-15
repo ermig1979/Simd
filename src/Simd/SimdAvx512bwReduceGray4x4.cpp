@@ -29,33 +29,6 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width)
-                {
-                    _p = Allocate(sizeof(uint16_t)*4*width);
-                    src0 = (uint16_t*)_p;
-                    src1 = src0 + width;
-                    src2 = src1 + width;
-                    src3 = src2 + width;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint16_t * src0;
-                uint16_t * src1;
-                uint16_t * src2;
-                uint16_t * src3;
-            private:
-                void * _p;
-            };	
-        }
-
         SIMD_INLINE __m512i DivideBy64(__m512i value)
         {
             return _mm512_srli_epi16(_mm512_add_epi16(value, K16_0020), 6);
@@ -79,10 +52,26 @@ namespace Simd
             return BinomialSum8(LoadBeforeFirst<1>(src), Load<false>(src + 1));
         }
 
+		SIMD_INLINE void ReduceColNose(const uint8_t * s[4], __m512i a[4])
+		{
+			a[0] = ReduceColNose(s[0]);
+			a[1] = ReduceColNose(s[1]);
+			a[2] = ReduceColNose(s[2]);
+			a[3] = ReduceColNose(s[3]);
+		}
+
         SIMD_INLINE __m512i ReduceColBody(const uint8_t * src)
         {
             return BinomialSum8(Load<false>(src - 1), Load<false>(src + 1));
         }
+
+		SIMD_INLINE void ReduceColBody(const uint8_t * s[4], size_t offset, __m512i a[4])
+		{
+			a[0] = ReduceColBody(s[0] + offset);
+			a[1] = ReduceColBody(s[1] + offset);
+			a[2] = ReduceColBody(s[2] + offset);
+			a[3] = ReduceColBody(s[3] + offset);
+		}
 
         template <bool even> SIMD_INLINE __m512i ReduceColTail(const uint8_t * src);
 
@@ -96,74 +85,50 @@ namespace Simd
             return BinomialSum8(Load<false>(src - 1), LoadAfterLast2<1>(src - 1));
         }
 
-        template <bool align> SIMD_INLINE __m512i ReduceRow16(const Buffer & buffer, size_t offset)
-        {
-            return _mm512_and_si512(DivideBy64(BinomialSum16(
-                Load<align>(buffer.src0 + offset), Load<align>(buffer.src1 + offset), 
-                Load<align>(buffer.src2 + offset), Load<align>(buffer.src3 + offset))), K16_00FF);
-        }
+		template <bool even> SIMD_INLINE void ReduceColTail(const uint8_t * s[4], size_t offset, __m512i a[4])
+		{
+			a[0] = ReduceColTail<even>(s[0] + offset);
+			a[1] = ReduceColTail<even>(s[1] + offset);
+			a[2] = ReduceColTail<even>(s[2] + offset);
+			a[3] = ReduceColTail<even>(s[3] + offset);
+		}
 
-        template <bool align> SIMD_INLINE __m512i ReduceRow8(const Buffer & buffer, size_t offset)
-        {
-            __m512i lo = ReduceRow16<align>(buffer, offset + 00);
-            __m512i hi = ReduceRow16<align>(buffer, offset + HA);
-            return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(lo, hi));
-        }
+		SIMD_INLINE __m512i ReduceRow(const __m512i lo[4], const __m512i hi[4])
+		{
+			return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(
+				DivideBy64(BinomialSum16(lo[0], lo[1], lo[2], lo[3])),
+				DivideBy64(BinomialSum16(hi[0], hi[1], hi[2], hi[3]))));
+		}
 
         template <bool even> void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth > DA);
 
-            size_t alignedDstWidth = Simd::AlignLo(dstWidth, A);
-            size_t srcTail = Simd::AlignHi(srcWidth - A, 2);
-
-            Buffer buffer(Simd::AlignHi(dstWidth, A));
-
-            __m512i tmp = ReduceColNose(src);
-            Store<true>(buffer.src0, tmp);
-            Store<true>(buffer.src1, tmp);
-            size_t srcCol = A, dstCol = HA;
-            for(; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
-            {
-                tmp = ReduceColBody(src + srcCol);
-                Store<true>(buffer.src0 + dstCol, tmp);
-                Store<true>(buffer.src1 + dstCol, tmp);
-            }
-            tmp = ReduceColTail<even>(src + srcTail);
-            Store<false>(buffer.src0 + dstWidth - HA, tmp);
-            Store<false>(buffer.src1 + dstWidth - HA, tmp);
+			size_t bodyWidth = AlignLo(srcWidth, DA);
+			size_t srcTail = Simd::AlignHi(srcWidth - DA, 2);
 
             for(size_t row = 0; row < srcHeight; row += 2, dst += dstStride)
             {
-                const uint8_t * src2 = src + srcStride*(row + 1);
-                const uint8_t * src3 = src2 + srcStride;
-                if(row >= srcHeight - 2)
+				const uint8_t * s[4];
+				s[1] = src + srcStride*row;
+				s[0] = s[1] - (row ? srcStride : 0);
+                s[2] = s[1] + (row < srcHeight - 1 ? srcStride : 0);
+                s[3] = s[2] + (row < srcHeight - 2 ? srcStride : 0);
+
+				__m512i lo[4], hi[4];
+				ReduceColNose(s, lo);
+				ReduceColBody(s, A, hi);
+				Store<false>(dst, ReduceRow(lo, hi));
+                for(size_t srcCol = DA, dstCol = A; srcCol < bodyWidth; srcCol += DA, dstCol += A)
                 {
-                    src2 = src + srcStride*(srcHeight - 1);
-                    src3 = src2;
+					ReduceColBody(s, srcCol + 0, lo);
+					ReduceColBody(s, srcCol + A, hi);
+					Store<false>(dst + dstCol, ReduceRow(lo, hi));
                 }
-
-                Store<true>(buffer.src2, ReduceColNose(src2));
-                Store<true>(buffer.src3, ReduceColNose(src3));
-                size_t srcCol = A, dstCol = HA;
-                for(; srcCol < srcWidth - A; srcCol += A, dstCol += HA)
-                {
-                    Store<true>(buffer.src2 + dstCol, ReduceColBody(src2 + srcCol));
-                    Store<true>(buffer.src3 + dstCol, ReduceColBody(src3 + srcCol));
-                }
-                Store<false>(buffer.src2 + dstWidth - HA, ReduceColTail<even>(src2 + srcTail));
-                Store<false>(buffer.src3 + dstWidth - HA, ReduceColTail<even>(src3 + srcTail));
-
-                Store<false>(dst, ReduceRow8<true>(buffer, 0));
-                for(size_t col = A; col < alignedDstWidth; col += A)
-                    Store<false>(dst + col, ReduceRow8<true>(buffer, col));
-
-                if(alignedDstWidth != dstWidth)
-                    Store<false>(dst + dstWidth - A, ReduceRow8<false>(buffer, dstWidth - A));
-
-                Swap(buffer.src0, buffer.src2);
-                Swap(buffer.src1, buffer.src3);
+				ReduceColBody(s, srcTail + 0, lo);
+				ReduceColTail<even>(s, srcTail + A, hi);
+				Store<false>(dst + dstWidth - A, ReduceRow(lo, hi));
             }
         }
 
