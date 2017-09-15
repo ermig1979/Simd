@@ -539,6 +539,24 @@ namespace Simd
 			a[3] = LoadAfterLast<step>(p);
 			a[4] = LoadAfterLast2<step>(p);
 		}
+
+		SIMD_INLINE void LoadNoseDx(const uint8_t * p, __m512i a[3])
+		{
+			a[0] = LoadBeforeFirst<1>(p);
+			a[2] = Load<false>(p + 1);
+		}
+
+		SIMD_INLINE void LoadBodyDx(const uint8_t * p, __m512i a[3])
+		{
+			a[0] = Load<false>(p - 1);
+			a[2] = Load<false>(p + 1);
+		}
+
+		SIMD_INLINE void LoadTailDx(const uint8_t * p, __m512i a[3])
+		{
+			a[0] = Load<false>(p - 1);
+			a[2] = LoadAfterLast<1>(p);
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE
 
