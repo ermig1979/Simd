@@ -3943,6 +3943,11 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
 
 SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width > Avx512bw::A)
+		Avx512bw::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A)
         Avx2::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
