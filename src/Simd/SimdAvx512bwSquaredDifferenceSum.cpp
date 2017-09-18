@@ -97,6 +97,74 @@ namespace Simd
 			else
 				SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
 		}
+
+		template <bool align, bool masked> SIMD_INLINE void SquaredDifferenceSumMasked(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums, __mmask64 tail)
+		{
+			const __mmask64 mask = _mm512_cmpeq_epi8_mask((Load<align, masked>(m, tail)), index) & tail;
+			const __m512i _a = Load<align, true>(a, mask);
+			const __m512i _b = Load<align, true>(b, mask);
+			sums[0] = _mm512_add_epi32(sums[0], SquaredDifference(_a, _b));
+		}
+
+		template <bool align, int idx> SIMD_INLINE void SquaredDifferenceSumMasked(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
+		{
+			const __mmask64 mask = _mm512_cmpeq_epi8_mask((Load<align>(m + A * idx)), index);
+			const __m512i _a = Load<align, true>(a + A * idx, mask);
+			const __m512i _b = Load<align, true>(b + A * idx, mask);
+			sums[idx] = _mm512_add_epi32(sums[idx], SquaredDifference(_b, _a));
+		}
+
+		template <bool align> void SquaredDifferenceSumMasked(
+			const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
+			const uint8_t * mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width < 256 * 256 * F);
+			if (align)
+				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			__m512i _index = _mm512_set1_epi8(index);
+			size_t blockSize = (256 * 256 * F) / width;
+			size_t blockCount = height / blockSize + 1;
+			__m512i _sum = _mm512_setzero_si512();
+			for (size_t block = 0; block < blockCount; ++block)
+			{
+				__m512i sums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+				for (size_t row = block*blockSize, endRow = Simd::Min(row + blockSize, height); row < endRow; ++row)
+				{
+					size_t col = 0;
+					for (; col < fullAlignedWidth; col += QA)
+					{
+						
+						SquaredDifferenceSumMasked<align, 0>(a + col, b + col, mask + col, _index, sums);
+						SquaredDifferenceSumMasked<align, 1>(a + col, b + col, mask + col, _index, sums);
+						SquaredDifferenceSumMasked<align, 2>(a + col, b + col, mask + col, _index, sums);
+						SquaredDifferenceSumMasked<align, 3>(a + col, b + col, mask + col, _index, sums);
+					}
+					for (; col < alignedWidth; col += A)
+						SquaredDifferenceSumMasked<align, false>(a + col, b + col, mask + col, _index, sums, -1);
+					if (col < width)
+						SquaredDifferenceSumMasked<align, true>(a + col, b + col, mask + col, _index, sums, tailMask);
+					a += aStride;
+					b += bStride;
+					mask += maskStride;
+				}
+				sums[0] = _mm512_add_epi32(_mm512_add_epi32(sums[0], sums[1]), _mm512_add_epi32(sums[2], sums[3]));
+				_sum = _mm512_add_epi64(_sum, _mm512_add_epi64(_mm512_unpacklo_epi32(sums[0], K_ZERO), _mm512_unpackhi_epi32(sums[0], K_ZERO)));
+			}
+			*sum = ExtractSum<uint64_t>(_sum);
+		}
+
+		void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+			const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(mask) && Aligned(maskStride))
+				SquaredDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+			else
+				SquaredDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+		}
     }
 #endif// SIMD_AVX2_ENABLE
 }
