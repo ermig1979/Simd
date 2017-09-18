@@ -323,6 +323,78 @@ namespace Simd
 			else
 				SobelDyAbsSum<false>(src, stride, width, height, sum);
 		}
+
+		SIMD_INLINE __m512i ContourMetrics(__m512i dx, __m512i dy)
+		{
+			return _mm512_add_epi16(_mm512_slli_epi16(_mm512_add_epi16(dx, dy), 1), _mm512_maskz_set1_epi16(_mm512_cmpgt_epi16_mask(dy, dx), 1));
+		}
+
+		SIMD_INLINE void ContourMetrics(__m512i a[3][3], __m512i & lo, __m512i & hi)
+		{
+			__m512i dxLo, dxHi, dyLo, dyHi;
+			SobelDx<true>(a, dxLo, dxHi);
+			SobelDy<true>(a, dyLo, dyHi);
+			lo = ContourMetrics(dxLo, dyLo);
+			hi = ContourMetrics(dxHi, dyHi);
+		}
+
+		template<bool align> SIMD_INLINE void ContourMetrics(__m512i a[3][3], int16_t * dst)
+		{
+			__m512i lo, hi;
+			ContourMetrics(a, lo, hi);
+			Store<align>(dst + 00, _mm512_permutex2var_epi64(lo, K64_PERMUTE_0, hi));
+			Store<align>(dst + HA, _mm512_permutex2var_epi64(lo, K64_PERMUTE_1, hi));
+		}
+
+		template <bool align> void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, int16_t * dst, size_t dstStride)
+		{
+			assert(width > A);
+			if (align)
+				assert(Aligned(dst) && Aligned(dstStride, HA));
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+			__m512i a[3][3];
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				src0 = src + srcStride*(row - 1);
+				src1 = src0 + srcStride;
+				src2 = src1 + srcStride;
+				if (row == 0)
+					src0 = src1;
+				if (row == height - 1)
+					src2 = src1;
+
+				LoadNose3<align, 1>(src0 + 0, a[0]);
+				LoadNose3<align, 1>(src1 + 0, a[1]);
+				LoadNose3<align, 1>(src2 + 0, a[2]);
+				ContourMetrics<align>(a, dst + 0);
+				for (size_t col = A; col < bodyWidth; col += A)
+				{
+					LoadBody3<align, 1>(src0 + col, a[0]);
+					LoadBody3<align, 1>(src1 + col, a[1]);
+					LoadBody3<align, 1>(src2 + col, a[2]);
+					ContourMetrics<align>(a, dst + col);
+				}
+				LoadTail3<false, 1>(src0 + width - A, a[0]);
+				LoadTail3<false, 1>(src1 + width - A, a[1]);
+				LoadTail3<false, 1>(src2 + width - A, a[2]);
+				ContourMetrics<false>(a, dst + width - A);
+
+				dst += dstStride;
+			}
+		}
+
+		void ContourMetrics(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+		{
+			assert(dstStride % sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+			else
+				ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
