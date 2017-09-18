@@ -261,6 +261,68 @@ namespace Simd
 			else
 				SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
+
+		SIMD_INLINE void SobelDyAbsSum(__m512i a[3][3], __m512i * sums)
+		{
+			__m512i lo, hi;
+			SobelDy<true>(a, lo, hi);
+			sums[0] = _mm512_add_epi32(sums[0], _mm512_madd_epi16(lo, K16_0001));
+			sums[1] = _mm512_add_epi32(sums[1], _mm512_madd_epi16(hi, K16_0001));
+		}
+
+		template <bool align> void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width > A);
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			const uint8_t *src0, *src1, *src2;
+
+			__m512i a[3][3];
+			__m512i tailMask = _mm512_mask_set1_epi8(K_INV_ZERO, TailMask64(A - width + bodyWidth), 0);
+
+			size_t blockSize = (256 * 256 * F) / width;
+			size_t blockCount = height / blockSize + 1;
+			__m512i _sum = _mm512_setzero_si512();
+			for (size_t block = 0; block < blockCount; ++block)
+			{
+				__m512i sums[2] = { _mm512_setzero_si512(), _mm512_setzero_si512() };
+				for (size_t row = block*blockSize, endRow = Simd::Min(row + blockSize, height); row < endRow; ++row)
+				{
+					src0 = src + stride*(row - 1);
+					src1 = src0 + stride;
+					src2 = src1 + stride;
+					if (row == 0)
+						src0 = src1;
+					if (row == height - 1)
+						src2 = src1;
+
+					LoadNose3<align, 1>(src0 + 0, a[0]);
+					LoadNose3<align, 1>(src2 + 0, a[2]);
+					SobelDyAbsSum(a, sums);
+					for (size_t col = A; col < bodyWidth; col += A)
+					{
+						LoadBody3<align, 1>(src0 + col, a[0]);
+						LoadBody3<align, 1>(src2 + col, a[2]);
+						SobelDyAbsSum(a, sums);
+					}
+					LoadTail3<false, 1>(src0 + width - A, a[0]);
+					LoadTail3<false, 1>(src2 + width - A, a[2]);
+					SetMask3x3(a, tailMask);
+					SobelDyAbsSum(a, sums);
+				}
+				sums[0] = _mm512_add_epi32(sums[0], sums[1]);
+				_sum = _mm512_add_epi64(_sum, _mm512_add_epi64(_mm512_unpacklo_epi32(sums[0], K_ZERO), _mm512_unpackhi_epi32(sums[0], K_ZERO)));
+			}
+
+			*sum = ExtractSum<uint64_t>(_sum);
+		}
+
+		void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(stride))
+				SobelDyAbsSum<true>(src, stride, width, height, sum);
+			else
+				SobelDyAbsSum<false>(src, stride, width, height, sum);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
