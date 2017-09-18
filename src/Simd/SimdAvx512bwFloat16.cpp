@@ -180,8 +180,8 @@ namespace Simd
 			if (align)
 				assert(Aligned(a) && Aligned(b));
 
-			size_t alignedSize = AlignLo(size, F);
-			__mmask16 tailMask = TailMask32(size - alignedSize);
+			size_t alignedSize = AlignLo(size, DF);
+			__mmask32 tailMask = TailMask32(size - alignedSize);
 			size_t fullAlignedSize = AlignLo(size, QF);
 			size_t i = 0;
 			__m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps()};

@@ -4095,6 +4095,11 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
 SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
                           size_t width, size_t height, uint64_t * sum)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
