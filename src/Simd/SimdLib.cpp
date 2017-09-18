@@ -4064,6 +4064,11 @@ SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, si
 
 SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width > Avx512bw::A)
+		Avx512bw::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width > Avx2::A)
         Avx2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);

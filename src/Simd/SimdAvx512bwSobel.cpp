@@ -460,6 +460,67 @@ namespace Simd
 			else
 				ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
 		}
+
+		template<bool align> SIMD_INLINE __mmask32 AnchorComponent(const int16_t * src, size_t step, const __m512i & current, const __m512i & threshold)
+		{
+			__m512i last = _mm512_srli_epi16(Load<align>(src - step), 1);
+			__m512i next = _mm512_srli_epi16(Load<align>(src + step), 1);
+			return _mm512_cmpge_epi16_mask(_mm512_sub_epi16(current, last), threshold) & _mm512_cmpge_epi16_mask(_mm512_sub_epi16(current, next), threshold);
+		}
+
+		template<bool align> SIMD_INLINE __mmask32 Anchor(const int16_t * src, size_t stride, const __m512i & threshold)
+		{
+			__m512i _src = Load<align>(src);
+			__m512i magnitude = _mm512_srli_epi16(_src, 1);
+			__mmask32 direction = _mm512_cmpeq_epi16_mask(_mm512_and_si512(_src, K16_0001), K16_0001);
+			__mmask32 vertical = AnchorComponent<false>(src, 1, magnitude, threshold) & direction;
+			__mmask32 horizontal = AnchorComponent<align>(src, stride, magnitude, threshold) & (~direction);
+			return _mm512_cmpneq_epi16_mask(magnitude, K_ZERO) & (vertical | horizontal);
+		}
+
+		template<bool align> SIMD_INLINE void Anchor(const int16_t * src, size_t stride, const __m512i & threshold, uint8_t * dst)
+		{
+			__mmask32 lo = Anchor<align>(src + 00, stride, threshold);
+			__mmask32 hi = Anchor<align>(src + HA, stride, threshold);
+			Store<align>(dst, _mm512_maskz_set1_epi8(__mmask64(lo) | (__mmask64(hi) << 32), -1));
+		}
+
+		template <bool align> void ContourAnchors(const int16_t * src, size_t srcStride, size_t width, size_t height,
+			size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
+		{
+			assert(width > A);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
+
+			size_t bodyWidth = Simd::AlignHi(width, A) - A;
+			__m512i _threshold = _mm512_set1_epi16(threshold);
+			memset(dst, 0, width);
+			memset(dst + dstStride*(height - 1), 0, width);
+			src += srcStride;
+			dst += dstStride;
+			for (size_t row = 1; row < height - 1; row += step)
+			{
+				dst[0] = 0;
+				Anchor<false>(src + 1, srcStride, _threshold, dst + 1);
+				for (size_t col = A; col < bodyWidth; col += A)
+					Anchor<align>(src + col, srcStride, _threshold, dst + col);
+				Anchor<false>(src + width - A - 1, srcStride, _threshold, dst + width - A - 1);
+				dst[width - 1] = 0;
+				src += step*srcStride;
+				dst += step*dstStride;
+			}
+		}
+
+		void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			size_t step, int16_t threshold, uint8_t * dst, size_t dstStride)
+		{
+			assert(srcStride % sizeof(int16_t) == 0);
+
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				ContourAnchors<true>((const int16_t *)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+			else
+				ContourAnchors<false>((const int16_t *)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
