@@ -48,7 +48,11 @@ namespace Simd
 				else
 					dividend = red - green + 4*range;
 
-				return int(KF_255_DIV_6*dividend/range);
+				return int(KF_255_DIV_6*float(dividend)/float(range)
+#if defined(_MSC_VER)
+					+ 0.00001f
+#endif
+					);
 			}
 			return 0;
 		}
