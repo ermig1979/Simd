@@ -363,8 +363,6 @@ namespace Simd
 					Sum16To32(buffer.sums16 + col, buffer.sums32 + col);
 			}
 			memcpy(sums, buffer.sums32, sizeof(uint32_t)*width);
-			//if (alignedLoWidth != width)
-			//	memcpy(sums + alignedLoWidth, buffer.sums32 + alignedLoWidth + alignedHiWidth - width, sizeof(uint32_t)*(width - alignedLoWidth));
 		}
 
 		void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
@@ -373,6 +371,44 @@ namespace Simd
 				GetColSums<true>(src, stride, width, height, sums);
 			else
 				GetColSums<false>(src, stride, width, height, sums);
+		}
+
+		template <bool align, bool masked> void GetAbsDyRowSums(const uint8_t * src0, const uint8_t * src1, __m512i & sum, __mmask64 tail = -1)
+		{
+			__m512i _src0 = Load<align, masked>(src0, tail);
+			__m512i _src1 = Load<align, masked>(src1, tail);
+			sum = _mm512_add_epi32(sum, _mm512_sad_epu8(_src0, _src1));
+		}
+
+		template <bool align> void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			memset(sums, 0, sizeof(uint32_t)*height);
+			const uint8_t * src0 = src;
+			const uint8_t * src1 = src + stride;
+			height--;
+			for (size_t row = 0; row < height; ++row)
+			{
+				__m512i sum = _mm512_setzero_si512();
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					GetAbsDyRowSums<align, false>(src0 + col, src1 + col, sum);
+				if (col < width)
+					GetAbsDyRowSums<align, true>(src0 + col, src1 + col, sum, tailMask);
+				sums[row] = ExtractSum<uint32_t>(sum);
+				src0 += stride;
+				src1 += stride;
+			}
+		}
+
+		void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			if (Aligned(src) && Aligned(stride))
+				GetAbsDyRowSums<true>(src, stride, width, height, sums);
+			else
+				GetAbsDyRowSums<false>(src, stride, width, height, sums);
 		}
     }
 #endif// SIMD_AVX512BW_ENABLE
