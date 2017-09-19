@@ -299,6 +299,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetRowSums), FUNC3(SimdGetRowSums), true);
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetRowSums), FUNC3(SimdGetRowSums), true);

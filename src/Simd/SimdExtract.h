@@ -191,6 +191,13 @@ namespace Simd
 			return sum;
 		}
 
+		template <> SIMD_INLINE uint32_t ExtractSum<uint32_t>(__m512i a)
+		{
+			__m256i b = _mm256_add_epi32(_mm512_extracti64x4_epi64(a, 0), _mm512_extracti64x4_epi64(a, 1));
+			__m128i c = _mm_add_epi32(_mm256_extractf128_si256(b, 0), _mm256_extractf128_si256(b, 1));
+			return _mm_extract_epi32(_mm_hadd_epi32(_mm_hadd_epi32(c, _mm_setzero_si128()), _mm_setzero_si128()), 0);
+		}
+
 #if defined(SIMD_X64_ENABLE)
 		template <> SIMD_INLINE uint64_t ExtractSum<uint64_t>(__m512i a)
 		{

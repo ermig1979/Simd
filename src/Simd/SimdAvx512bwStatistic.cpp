@@ -265,6 +265,33 @@ namespace Simd
 			else
 				GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 		}
+
+		template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			memset(sums, 0, sizeof(uint32_t)*height);
+			for (size_t row = 0; row < height; ++row)
+			{
+				__m512i sum = _mm512_setzero_si512();
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					sum = _mm512_add_epi32(sum, _mm512_sad_epu8(Load<align>(src + col), K_ZERO));
+				if (col < width)
+					sum = _mm512_add_epi32(sum, _mm512_sad_epu8(Load<align, true>(src + col, tailMask), K_ZERO));
+				sums[row] = ExtractSum<uint32_t>(sum);
+				src += stride;
+			}
+		}
+
+		void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
+		{
+			if (Aligned(src) && Aligned(stride))
+				GetRowSums<true>(src, stride, width, height, sums);
+			else
+				GetRowSums<false>(src, stride, width, height, sums);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
