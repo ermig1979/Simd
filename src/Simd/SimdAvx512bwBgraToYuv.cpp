@@ -37,7 +37,7 @@ namespace Simd
 			g16_1 = _mm512_or_si512(_mm512_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_G000), K32_00010000);
         }
 
-        template <bool align, bool mask> SIMD_INLINE __m512i LoadAndConvertY16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, const __mmask64 * ms)
+        template <bool align, bool mask> SIMD_INLINE __m512i LoadAndConvertBgraToY16(const uint8_t * bgra, __m512i & b16_r16, __m512i & g16_1, const __mmask64 * ms)
         {
             __m512i _b16_r16[2], _g16_1[2];
             LoadPreparedBgra16<align, mask>(bgra + 0, _b16_r16[0], _g16_1[0], ms + 0);
@@ -47,10 +47,10 @@ namespace Simd
             return Saturate16iTo8u(_mm512_add_epi16(K16_Y_ADJUST, _mm512_packs_epi32(BgrToY32(_b16_r16[0], _g16_1[0]), BgrToY32(_b16_r16[1], _g16_1[1]))));
         }
 
-        template <bool align, bool mask> SIMD_INLINE __m512i LoadAndConvertY8(const uint8_t * bgra, __m512i b16_r16[2], __m512i g16_1[2], const __mmask64 * ms)
+        template <bool align, bool mask> SIMD_INLINE __m512i LoadAndConvertBgraToY8(const uint8_t * bgra, __m512i b16_r16[2], __m512i g16_1[2], const __mmask64 * ms)
         {
-			__m512i lo = LoadAndConvertY16<align, mask>(bgra + 0*A, b16_r16[0], g16_1[0], ms + 0);
-			__m512i hi = LoadAndConvertY16<align, mask>(bgra + 2*A, b16_r16[1], g16_1[1], ms + 2);
+			__m512i lo = LoadAndConvertBgraToY16<align, mask>(bgra + 0*A, b16_r16[0], g16_1[0], ms + 0);
+			__m512i hi = LoadAndConvertBgraToY16<align, mask>(bgra + 2*A, b16_r16[1], g16_1[1], ms + 2);
             return Permuted2Pack16iTo8u(lo, hi);
         }
 
@@ -75,10 +75,10 @@ namespace Simd
             uint8_t * y1 = y0 + yStride;
 
             __m512i _b16_r16[2][2][2], _g16_1[2][2][2];
-            Store<align, mask>(y0 + 0, LoadAndConvertY8<align, mask>(bgra0 + 0 * A, _b16_r16[0][0], _g16_1[0][0], ms + 0), ms[8]);
-            Store<align, mask>(y0 + A, LoadAndConvertY8<align, mask>(bgra0 + 4 * A, _b16_r16[0][1], _g16_1[0][1], ms + 4), ms[9]);
-            Store<align, mask>(y1 + 0, LoadAndConvertY8<align, mask>(bgra1 + 0 * A, _b16_r16[1][0], _g16_1[1][0], ms + 0), ms[8]);
-            Store<align, mask>(y1 + A, LoadAndConvertY8<align, mask>(bgra1 + 4 * A, _b16_r16[1][1], _g16_1[1][1], ms + 4), ms[9]);
+            Store<align, mask>(y0 + 0, LoadAndConvertBgraToY8<align, mask>(bgra0 + 0 * A, _b16_r16[0][0], _g16_1[0][0], ms + 0), ms[8]);
+            Store<align, mask>(y0 + A, LoadAndConvertBgraToY8<align, mask>(bgra0 + 4 * A, _b16_r16[0][1], _g16_1[0][1], ms + 4), ms[9]);
+            Store<align, mask>(y1 + 0, LoadAndConvertBgraToY8<align, mask>(bgra1 + 0 * A, _b16_r16[1][0], _g16_1[1][0], ms + 0), ms[8]);
+            Store<align, mask>(y1 + A, LoadAndConvertBgraToY8<align, mask>(bgra1 + 4 * A, _b16_r16[1][1], _g16_1[1][1], ms + 4), ms[9]);
 
             Average16(_b16_r16[0][0][0], _b16_r16[1][0][0]);
             Average16(_b16_r16[0][0][1], _b16_r16[1][0][1]);
@@ -148,8 +148,8 @@ namespace Simd
 		template <bool align, bool mask> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, uint8_t * y, uint8_t * u, uint8_t * v, const __mmask64 * ms)
 		{
 			__m512i _b16_r16[2][2], _g16_1[2][2];
-			Store<align, mask>(y + 0, LoadAndConvertY8<align, mask>(bgra + 0*A, _b16_r16[0], _g16_1[0], ms + 0), ms[8]);
-			Store<align, mask>(y + A, LoadAndConvertY8<align, mask>(bgra + 4*A, _b16_r16[1], _g16_1[1], ms + 4), ms[9]);
+			Store<align, mask>(y + 0, LoadAndConvertBgraToY8<align, mask>(bgra + 0*A, _b16_r16[0], _g16_1[0], ms + 0), ms[8]);
+			Store<align, mask>(y + A, LoadAndConvertBgraToY8<align, mask>(bgra + 4*A, _b16_r16[1], _g16_1[1], ms + 4), ms[9]);
 
 			Average16(_b16_r16);
 			Average16(_g16_1);
