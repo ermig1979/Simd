@@ -4334,6 +4334,11 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
 
 SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::GetAbsDxColSums(src, stride, width, height, sums);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetAbsDxColSums(src, stride, width, height, sums);

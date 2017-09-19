@@ -308,6 +308,8 @@ namespace Simd
 		void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
 		void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+
+		void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -401,6 +401,11 @@ namespace Test
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
