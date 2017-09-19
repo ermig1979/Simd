@@ -99,6 +99,11 @@ namespace Test
             result = result && GetStatisticAutoTest(FUNC1(Simd::Avx2::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && GetStatisticAutoTest(FUNC1(Simd::Avx512bw::GetStatistic), FUNC1(SimdGetStatistic));
+#endif
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && GetStatisticAutoTest(FUNC1(Simd::Vmx::GetStatistic), FUNC1(SimdGetStatistic));

@@ -4183,6 +4183,11 @@ SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b,
 SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
                   uint8_t * min, uint8_t * max, uint8_t * average)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::GetStatistic(src, stride, width, height, min, max, average);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetStatistic(src, stride, width, height, min, max, average);
