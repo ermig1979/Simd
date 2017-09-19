@@ -332,7 +332,7 @@ namespace Simd
 					mask += maskStride;
 				}
 				sums[0] = _mm512_add_epi32(_mm512_add_epi32(sums[0], sums[1]), _mm512_add_epi32(sums[2], sums[3]));
-				_sum = _mm512_add_epi64(_sum, _mm512_add_epi64(_mm512_unpacklo_epi32(sums[0], K_ZERO), _mm512_unpackhi_epi32(sums[0], K_ZERO)));
+				_sum = _mm512_add_epi64(_sum, HorizontalSum32(sums[0]));
 			}
 			*sum = ExtractSum<uint64_t>(_sum);
 		}

@@ -4214,6 +4214,11 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width < SHRT_MAX && height < SHRT_MAX)
+		Avx512bw::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);

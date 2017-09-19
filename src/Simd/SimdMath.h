@@ -806,6 +806,17 @@ namespace Simd
 		}
 #endif
 
+#if defined(_MSC_VER) || (defined(__GNUC__) && defined(__POPCNT__))
+		SIMD_INLINE size_t Popcnt64(__mmask64 mask)
+		{
+#ifdef SIMD_X64_ENABLE
+			return _mm_popcnt_u64(mask);
+#else
+			return _mm_popcnt_u32(__mmask32(mask)) + _mm_popcnt_u32(__mmask32(mask >> 32));
+#endif
+		}
+#endif
+
 		SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
 		{
 #if 0
@@ -895,6 +906,11 @@ namespace Simd
 		template <> SIMD_INLINE __m512i ConditionalAbs<false>(__m512i a)
 		{
 			return a;
+		}
+
+		SIMD_INLINE __m512i HorizontalSum32(__m512i a)
+		{
+			return _mm512_add_epi64(_mm512_unpacklo_epi32(a, K_ZERO), _mm512_unpackhi_epi32(a, K_ZERO));
 		}
 	}
 #endif //SIMD_AVX512BW_ENABLE

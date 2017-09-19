@@ -189,7 +189,7 @@ namespace Test
 #ifdef NDEBUG
         result = result && GetMomentsAutoTest(Point(5, 2), f1, f2);
 #else
-        result = result && GetMomentsAutoTest(Point(50, 20), f1, f2);
+        result = result && GetMomentsAutoTest(Point(30, 20), f1, f2);
 #endif
 
         return result;
@@ -209,6 +209,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx2::GetMoments), FUNC_M(SimdGetMoments));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx512bw::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE

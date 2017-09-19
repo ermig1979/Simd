@@ -96,6 +96,175 @@ namespace Simd
             else
                 GetStatistic<false>(src, stride, width, height, min, max, average);
         }
+
+		SIMD_INLINE void GetMoments16Small(__m512i row, __m512i col,
+			__m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy)
+		{
+			x = _mm512_add_epi32(x, _mm512_madd_epi16(col, K16_0001));
+			y = _mm512_add_epi32(y, _mm512_madd_epi16(row, K16_0001));
+			xx = _mm512_add_epi32(xx, _mm512_madd_epi16(col, col));
+			xy = _mm512_add_epi32(xy, _mm512_madd_epi16(col, row));
+			yy = _mm512_add_epi32(yy, _mm512_madd_epi16(row, row));
+		}
+
+		SIMD_INLINE void GetMoments16Large(__m512i row, __m512i col,
+			__m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy)
+		{
+			x = _mm512_add_epi32(x, _mm512_madd_epi16(col, K16_0001));
+			y = _mm512_add_epi32(y, _mm512_madd_epi16(row, K16_0001));
+			xx = _mm512_madd_epi16(col, col);
+			xy = _mm512_madd_epi16(col, row);
+			yy = _mm512_madd_epi16(row, row);
+		}
+
+		template<bool align, bool masked> SIMD_INLINE void GetMoments8Small(const uint8_t * mask, const __m512i & index, __m512i & row, __m512i & col,
+			uint64_t & area, __m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy, __mmask64 tail = -1)
+		{
+			__mmask64 _mask = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask, tail)), index);
+			area += Popcnt64(_mask);
+
+			__mmask32 loMask = ~__mmask32(_mask >> 00);
+			GetMoments16Small(_mm512_mask_set1_epi16(row, loMask, 0), _mm512_mask_set1_epi16(col, loMask, 0), x, y, xx, xy, yy);
+			col = _mm512_add_epi16(col, K16_0020);
+
+			__mmask32 hiMask = ~__mmask32(_mask >> 32);
+			GetMoments16Small(_mm512_mask_set1_epi16(row, hiMask, 0), _mm512_mask_set1_epi16(col, hiMask, 0), x, y, xx, xy, yy);
+			col = _mm512_add_epi16(col, K16_0020);
+		}
+
+		template<bool align, bool masked> SIMD_INLINE void GetMoments8Large(const uint8_t * mask, const __m512i & index, __m512i & row, __m512i & col,
+			uint64_t & area, __m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy, __mmask64 tail = -1)
+		{
+			__mmask64 _mask = _mm512_cmpeq_epi8_mask((Load<align, masked>(mask, tail)), index);
+			area += Popcnt64(_mask);
+
+			__mmask32 loMask = ~__mmask32(_mask >> 00);
+			__m512i xxLo, xyLo, yyLo;
+			GetMoments16Large(_mm512_mask_set1_epi16(row, loMask, 0), _mm512_mask_set1_epi16(col, loMask, 0), x, y, xxLo, xyLo, yyLo);
+			col = _mm512_add_epi16(col, K16_0020);
+
+			__mmask32 hiMask = ~__mmask32(_mask >> 32);
+			__m512i xxHi, xyHi, yyHi;
+			GetMoments16Large(_mm512_mask_set1_epi16(row, hiMask, 0), _mm512_mask_set1_epi16(col, hiMask, 0), x, y, xxHi, xyHi, yyHi);
+			col = _mm512_add_epi16(col, K16_0020);
+
+			xx = _mm512_add_epi64(xx, _mm512_add_epi64(HorizontalSum32(xxLo), HorizontalSum32(xxHi)));
+			xy = _mm512_add_epi64(xy, _mm512_add_epi64(HorizontalSum32(xyLo), HorizontalSum32(xyHi)));
+			yy = _mm512_add_epi64(yy, _mm512_add_epi64(HorizontalSum32(yyLo), HorizontalSum32(yyHi)));
+		}
+
+		const __m512i K16_I = SIMD_MM512_SETR_EPI16(
+			0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+			0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F);
+
+
+		template <bool align> void GetMomentsSmall(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			uint64_t & area, __m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy)
+		{
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			const __m512i _index = _mm512_set1_epi8(index);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				__m512i _col = K16_I;
+				__m512i _row = _mm512_set1_epi16((short)row);
+
+				__m512i _rowX = _mm512_setzero_si512();
+				__m512i _rowY = _mm512_setzero_si512();
+				__m512i _rowXX = _mm512_setzero_si512();
+				__m512i _rowXY = _mm512_setzero_si512();
+				__m512i _rowYY = _mm512_setzero_si512();
+
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					GetMoments8Small<align, false>(mask + col, _index, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY);
+				if (col < width)
+					GetMoments8Small<align, true>(mask + col, _index, _row, _col, area, _rowX, _rowY, _rowXX, _rowXY, _rowYY, tailMask);
+
+				x = _mm512_add_epi64(x, HorizontalSum32(_rowX));
+				y = _mm512_add_epi64(y, HorizontalSum32(_rowY));
+				xx = _mm512_add_epi64(xx, HorizontalSum32(_rowXX));
+				xy = _mm512_add_epi64(xy, HorizontalSum32(_rowXY));
+				yy = _mm512_add_epi64(yy, HorizontalSum32(_rowYY));
+
+				mask += stride;
+			}
+		}
+
+		template <bool align> void GetMomentsLarge(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			uint64_t & area, __m512i & x, __m512i & y, __m512i & xx, __m512i & xy, __m512i & yy)
+		{
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+
+			const __m512i _index = _mm512_set1_epi8(index);
+
+			for (size_t row = 0; row < height; ++row)
+			{
+				__m512i _col = K16_I;
+				__m512i _row = _mm512_set1_epi16((short)row);
+
+				__m512i _rowX = _mm512_setzero_si512();
+				__m512i _rowY = _mm512_setzero_si512();
+
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					GetMoments8Large<align, false>(mask + col, _index, _row, _col, area, _rowX, _rowY, xx, xy, yy);
+				if (col < width)
+					GetMoments8Large<align, true>(mask + col, _index, _row, _col, area, _rowX, _rowY, xx, xy, yy, tailMask);
+
+				x = _mm512_add_epi64(x, HorizontalSum32(_rowX));
+				y = _mm512_add_epi64(y, HorizontalSum32(_rowY));
+
+				mask += stride;
+			}
+		}
+
+		SIMD_INLINE bool IsSmall(uint64_t width, uint64_t height)
+		{
+			return
+				width*width*width < 0x300000000ULL &&
+				width*width*height < 0x200000000ULL &&
+				width*height*height < 0x100000000ULL;
+		}
+
+		template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+		{
+			assert(width < SHRT_MAX && height < SHRT_MAX);
+			if (align)
+				assert(Aligned(mask) && Aligned(stride));
+
+			uint64_t _area = 0;
+			__m512i _x = _mm512_setzero_si512();
+			__m512i _y = _mm512_setzero_si512();
+			__m512i _xx = _mm512_setzero_si512();
+			__m512i _xy = _mm512_setzero_si512();
+			__m512i _yy = _mm512_setzero_si512();
+
+			if (IsSmall(width, height))
+				GetMomentsSmall<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
+			else
+				GetMomentsLarge<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
+
+			*area = _area;
+			*x = ExtractSum<int64_t>(_x);
+			*y = ExtractSum<int64_t>(_y);
+			*xx = ExtractSum<int64_t>(_xx);
+			*xy = ExtractSum<int64_t>(_xy);
+			*yy = ExtractSum<int64_t>(_yy);
+		}
+
+		void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+			uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
+		{
+			if (Aligned(mask) && Aligned(stride))
+				GetMoments<true>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+			else
+				GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
