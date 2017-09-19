@@ -4274,6 +4274,11 @@ SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, s
 
 SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::GetColSums(src, stride, width, height, sums);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetColSums(src, stride, width, height, sums);

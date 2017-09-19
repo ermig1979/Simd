@@ -304,6 +304,8 @@ namespace Simd
 			uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
 		void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+
+		void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
