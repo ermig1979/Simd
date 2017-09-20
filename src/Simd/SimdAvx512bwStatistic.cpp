@@ -459,6 +459,42 @@ namespace Simd
 			else
 				GetAbsDxColSums<false>(src, stride, width, height, sums);
 		}
+
+		template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (align)
+				assert(Aligned(src) && Aligned(stride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t fullAlignedWidth = AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			__m512i sums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < fullAlignedWidth; col += QA)
+				{
+					sums[0] = _mm512_add_epi64(sums[0], _mm512_sad_epu8(Load<align>(src + col + 0 * A), K_ZERO));
+					sums[1] = _mm512_add_epi64(sums[1], _mm512_sad_epu8(Load<align>(src + col + 1 * A), K_ZERO));
+					sums[2] = _mm512_add_epi64(sums[2], _mm512_sad_epu8(Load<align>(src + col + 2 * A), K_ZERO));
+					sums[3] = _mm512_add_epi64(sums[3], _mm512_sad_epu8(Load<align>(src + col + 3 * A), K_ZERO));
+				}
+				for (; col < alignedWidth; col += A)
+					sums[0] = _mm512_add_epi64(sums[0], _mm512_sad_epu8(Load<align>(src + col), K_ZERO));
+				if (col < width)
+					sums[0] = _mm512_add_epi64(sums[0], _mm512_sad_epu8(Load<align, true>(src + col, tailMask), K_ZERO));
+				src += stride;
+			}
+			*sum = ExtractSum<uint64_t>(_mm512_add_epi64(_mm512_add_epi64(sums[0], sums[1]), _mm512_add_epi64(sums[2], sums[3])));
+		}
+
+		void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(stride))
+				ValueSum<true>(src, stride, width, height, sum);
+			else
+				ValueSum<false>(src, stride, width, height, sum);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
