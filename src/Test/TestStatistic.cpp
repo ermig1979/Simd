@@ -713,6 +713,11 @@ namespace Test
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx2::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx512bw::CorrelationSum), FUNC5(SimdCorrelationSum));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Vmx::CorrelationSum), FUNC5(SimdCorrelationSum));

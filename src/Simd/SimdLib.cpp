@@ -4424,6 +4424,11 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
 
 SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
