@@ -101,6 +101,51 @@ namespace Simd
             else
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
+
+		template<bool align, bool mask> SIMD_INLINE void TextureBoostedUv(const uint8_t * src, uint8_t * dst, 
+			const __m512i & min8, const __m512i & max8, const __m512i & boost16, __mmask64 tail = -1)
+		{
+			const __m512i _src = Load<align, mask>(src, tail);
+			const __m512i saturated = _mm512_sub_epi8(_mm512_max_epu8(min8, _mm512_min_epu8(max8, _src)), min8);
+			const __m512i lo = _mm512_mullo_epi16(_mm512_unpacklo_epi8(saturated, K_ZERO), boost16);
+			const __m512i hi = _mm512_mullo_epi16(_mm512_unpackhi_epi8(saturated, K_ZERO), boost16);
+			Store<align, mask>(dst, _mm512_packus_epi16(lo, hi), tail);
+		}
+
+		template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t boost, uint8_t * dst, size_t dstStride)
+		{
+			assert(boost < 0x80);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			int min = 128 - (128 / boost);
+			int max = 255 - min;
+			__m512i min8 = _mm512_set1_epi8(min);
+			__m512i max8 = _mm512_set1_epi8(max);
+			__m512i boost16 = _mm512_set1_epi16(boost);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					TextureBoostedUv<align, false>(src + col, dst + col, min8, max8, boost16);
+				if (col < width)
+					TextureBoostedUv<false, true>(src + col, dst + col, min8, max8, boost16, tailMask);
+				src += srcStride;
+				dst += dstStride;
+			}
+		}
+
+		void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			uint8_t boost, uint8_t * dst, size_t dstStride)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+			else
+				TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
