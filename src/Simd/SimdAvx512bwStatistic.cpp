@@ -495,6 +495,65 @@ namespace Simd
 			else
 				ValueSum<false>(src, stride, width, height, sum);
 		}
+
+		SIMD_INLINE __m512i SquareSum(__m512i value)
+		{
+			const __m512i lo = _mm512_unpacklo_epi8(value, K_ZERO);
+			const __m512i hi = _mm512_unpackhi_epi8(value, K_ZERO);
+			return _mm512_add_epi32(_mm512_madd_epi16(lo, lo), _mm512_madd_epi16(hi, hi));
+		}
+
+		template <bool align, bool mask> void SquareSum(const uint8_t * src, __m512i * sums, __mmask64 tail = -1)
+		{
+			sums[0] = _mm512_add_epi32(sums[0], SquareSum(Load<align, mask>(src, tail)));
+		}
+
+		template <bool align> void SquareSum4(const uint8_t * src, __m512i * sums)
+		{
+			sums[0] = _mm512_add_epi32(sums[0], SquareSum(Load<align>(src + 0 * A)));
+			sums[1] = _mm512_add_epi32(sums[1], SquareSum(Load<align>(src + 1 * A)));
+			sums[2] = _mm512_add_epi32(sums[2], SquareSum(Load<align>(src + 2 * A)));
+			sums[3] = _mm512_add_epi32(sums[3], SquareSum(Load<align>(src + 3 * A)));
+		}
+
+		template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			assert(width < 256 * 256 * F);
+			if (align)
+				assert(Aligned(src) && Aligned(stride));
+
+			size_t alignedWidth = Simd::AlignLo(width, A);
+			size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			size_t blockSize = (256 * 256 * F) / width;
+			size_t blockCount = height / blockSize + 1;
+			__m512i _sum = _mm512_setzero_si512();
+			for (size_t block = 0; block < blockCount; ++block)
+			{
+				__m512i sums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+				for (size_t row = block*blockSize, endRow = Simd::Min(row + blockSize, height); row < endRow; ++row)
+				{
+					size_t col = 0;
+					for (; col < fullAlignedWidth; col += QA)
+						SquareSum4<align>(src + col, sums);
+					for (; col < alignedWidth; col += A)
+						SquareSum<align, false>(src + col, sums);
+					if (col < width)
+						SquareSum<align, true>(src + col, sums, tailMask);
+					src += stride;
+				}
+				_sum = _mm512_add_epi64(_sum, HorizontalSum32(_mm512_add_epi32(_mm512_add_epi32(sums[0], sums[1]), _mm512_add_epi32(sums[2], sums[3]))));
+			}
+			*sum = ExtractSum<uint64_t>(_sum);
+		}
+
+		void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
+		{
+			if (Aligned(src) && Aligned(stride))
+				SquareSum<true>(src, stride, width, height, sum);
+			else
+				SquareSum<false>(src, stride, width, height, sum);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -312,6 +312,8 @@ namespace Simd
 		void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
 		void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+
+		void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
