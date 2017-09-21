@@ -147,6 +147,51 @@ namespace Simd
 			else
 				Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void Yuv444pToBgr(const uint8_t * y, const uint8_t * u, const uint8_t * v, uint8_t * bgr, const __mmask64 * tails)
+		{
+			YuvToBgr<align, mask>(Load<align, mask>(y, tails[0]), Load<align, mask>(u, tails[0]), Load<align, mask>(v, tails[0]), bgr, tails + 1);
+		}
+
+		template <bool align> void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+			}
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t tail = width - alignedWidth;
+			__mmask64 tailMasks[4];
+			tailMasks[0] = TailMask64(tail);
+			for (size_t i = 0; i < 3; ++i)
+				tailMasks[1 + i] = TailMask64(tail * 3 - A * i);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					Yuv444pToBgr<align, false>(y + col, u + col, v + col, bgr + col * 3, tailMasks);
+				if (col < width)
+					Yuv444pToBgr<align, true>(y + col, u + col, v + col, bgr + col * 3, tailMasks);
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgr += bgrStride;
+			}
+		}
+
+		void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+				Yuv444pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+			else
+				Yuv444pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+		}
+
     }
 #endif// SIMD_AVX2_ENABLE
 }
