@@ -146,6 +146,67 @@ namespace Simd
 			else
 				TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
 		}
+
+		SIMD_INLINE void TextureGetDifferenceSum(const __m512i & current, const __m512i & average, __m512i & positive, __m512i & negative)
+		{
+			positive = _mm512_add_epi64(positive, _mm512_sad_epu8(_mm512_subs_epu8(current, average), K_ZERO));
+			negative = _mm512_add_epi64(negative, _mm512_sad_epu8(_mm512_subs_epu8(average, current), K_ZERO));
+		}
+
+		template <bool align, bool mask> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi,
+			__m512i & positive, __m512i & negative, __mmask64 tail = -1)
+		{
+			const __m512i current = Load<align, mask>(src, tail);
+			const __m512i _lo = Load<align, mask>(lo, tail);
+			const __m512i _hi = Load<align, mask>(hi, tail);
+			const __m512i average = _mm512_avg_epu8(_lo, _hi);
+			TextureGetDifferenceSum(current, average, positive, negative);
+		}
+
+		template <bool align> SIMD_INLINE void TextureGetDifferenceSum4(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, __m512i & positive, __m512i & negative)
+		{
+			TextureGetDifferenceSum(Load<align>(src + 0 * A), _mm512_avg_epu8(Load<align>(hi + 0 * A), Load<align>(lo + 0 * A)), positive, negative);
+			TextureGetDifferenceSum(Load<align>(src + 1 * A), _mm512_avg_epu8(Load<align>(hi + 1 * A), Load<align>(lo + 1 * A)), positive, negative);
+			TextureGetDifferenceSum(Load<align>(src + 2 * A), _mm512_avg_epu8(Load<align>(hi + 2 * A), Load<align>(lo + 2 * A)), positive, negative);
+			TextureGetDifferenceSum(Load<align>(src + 3 * A), _mm512_avg_epu8(Load<align>(hi + 3 * A), Load<align>(lo + 3 * A)), positive, negative);
+		}
+
+		template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
+		{
+			assert(sum != NULL);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t fullAlignedWidth = AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			__m512i positive = _mm512_setzero_si512();
+			__m512i negative = _mm512_setzero_si512();
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < fullAlignedWidth; col += QA)
+					TextureGetDifferenceSum4<align>(src + col, lo + col, hi + col, positive, negative);
+				for (; col < alignedWidth; col += A)
+					TextureGetDifferenceSum<align, false>(src + col, lo + col, hi + col, positive, negative);
+				if (col < width)
+					TextureGetDifferenceSum<align, true>(src + col, lo + col, hi + col, positive, negative, tailMask);
+				src += srcStride;
+				lo += loStride;
+				hi += hiStride;
+			}
+			*sum = ExtractSum<int64_t>(positive) - ExtractSum<int64_t>(negative);
+		}
+
+		void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
+		{
+			if (Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+				TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+			else
+				TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
