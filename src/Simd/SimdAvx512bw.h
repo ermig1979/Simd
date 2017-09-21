@@ -328,6 +328,9 @@ namespace Simd
 
 		void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
 			const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
+
+		void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			int shift, uint8_t * dst, size_t dstStride);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

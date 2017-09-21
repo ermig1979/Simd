@@ -207,6 +207,74 @@ namespace Simd
 			else
 				TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
 		}
+
+		template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, int shift, uint8_t * dst, size_t dstStride)
+		{
+			assert(shift > -0xFF && shift < 0xFF && shift != 0);
+			if (align)
+				assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t fullAlignedWidth = AlignLo(width, QA);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
+			if (shift > 0)
+			{
+				__m512i _shift = _mm512_set1_epi8((char)shift);
+				for (size_t row = 0; row < height; ++row)
+				{
+					size_t col = 0;
+					for (; col < fullAlignedWidth; col += QA)
+					{
+						Store<align>(dst + col + 0 * A, _mm512_adds_epu8(Load<align>(src + col + 0 * A), _shift));
+						Store<align>(dst + col + 1 * A, _mm512_adds_epu8(Load<align>(src + col + 1 * A), _shift));
+						Store<align>(dst + col + 2 * A, _mm512_adds_epu8(Load<align>(src + col + 2 * A), _shift));
+						Store<align>(dst + col + 3 * A, _mm512_adds_epu8(Load<align>(src + col + 3 * A), _shift));
+					}
+					for (; col < alignedWidth; col += A)
+						Store<align>(dst + col, _mm512_adds_epu8(Load<align>(src + col), _shift));
+					if (col < width)
+						Store<align, true>(dst + col, _mm512_adds_epu8((Load<align, true>(src + col, tailMask)), _shift), tailMask);
+					src += srcStride;
+					dst += dstStride;
+				}
+			}
+			if (shift < 0)
+			{
+				__m512i _shift = _mm512_set1_epi8((char)-shift);
+				for (size_t row = 0; row < height; ++row)
+				{
+					size_t col = 0;
+					for (; col < fullAlignedWidth; col += QA)
+					{
+						Store<align>(dst + col + 0 * A, _mm512_subs_epu8(Load<align>(src + col + 0 * A), _shift));
+						Store<align>(dst + col + 1 * A, _mm512_subs_epu8(Load<align>(src + col + 1 * A), _shift));
+						Store<align>(dst + col + 2 * A, _mm512_subs_epu8(Load<align>(src + col + 2 * A), _shift));
+						Store<align>(dst + col + 3 * A, _mm512_subs_epu8(Load<align>(src + col + 3 * A), _shift));
+					}
+					for (; col < alignedWidth; col += A)
+						Store<align>(dst + col, _mm512_subs_epu8(Load<align>(src + col), _shift));
+					if (col < width)
+						Store<align, true>(dst + col, _mm512_subs_epu8((Load<align, true>(src + col, tailMask)), _shift), tailMask);
+					src += srcStride;
+					dst += dstStride;
+				}
+			}
+		}
+
+		void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+			int shift, uint8_t * dst, size_t dstStride)
+		{
+			if (shift == 0)
+			{
+				if (src != dst)
+					Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
+				return;
+			}
+			if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+				TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+			else
+				TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

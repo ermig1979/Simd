@@ -403,6 +403,11 @@ namespace Test
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx512bw::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Vmx::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
