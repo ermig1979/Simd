@@ -343,6 +343,9 @@ namespace Simd
 
 		void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
 			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
+
+		void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }

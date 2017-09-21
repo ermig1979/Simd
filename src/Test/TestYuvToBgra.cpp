@@ -133,6 +133,11 @@ namespace Test
             result = result && YuvToBgraAutoTest(FUNC(Simd::Avx2::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && YuvToBgraAutoTest(FUNC(Simd::Avx512bw::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
+#endif 
+
 #ifdef SIMD_VMX_ENABLE
         if(Simd::Vmx::Enable)
             result = result && YuvToBgraAutoTest(FUNC(Simd::Vmx::Yuv422pToBgra), FUNC(SimdYuv422pToBgra), 2, 1);
