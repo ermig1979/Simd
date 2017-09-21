@@ -818,6 +818,90 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
 	namespace Avx512bw
 	{
+		SIMD_INLINE __m512i AdjustY16(__m512i y16)
+		{
+			return _mm512_subs_epi16(y16, K16_Y_ADJUST);
+		}
+
+		SIMD_INLINE __m512i AdjustUV16(__m512i uv16)
+		{
+			return _mm512_subs_epi16(uv16, K16_UV_ADJUST);
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToRed32(__m512i y16_1, __m512i v16_0)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, K16_YRGB_RT),
+				_mm512_madd_epi16(v16_0, K16_VR_0)), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToRed16(__m512i y16, __m512i v16)
+		{
+			return SaturateI16ToU8(_mm512_packs_epi32(
+				AdjustedYuvToRed32(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(v16, K_ZERO)),
+				AdjustedYuvToRed32(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(v16, K_ZERO))));
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToGreen32(__m512i y16_1, __m512i u16_v16)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, K16_YRGB_RT),
+				_mm512_madd_epi16(u16_v16, K16_UG_VG)), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToGreen16(__m512i y16, __m512i u16, __m512i v16)
+		{
+			return SaturateI16ToU8(_mm512_packs_epi32(
+				AdjustedYuvToGreen32(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(u16, v16)),
+				AdjustedYuvToGreen32(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(u16, v16))));
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToBlue32(__m512i y16_1, __m512i u16_0)
+		{
+			return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, K16_YRGB_RT),
+				_mm512_madd_epi16(u16_0, K16_UB_0)), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+		}
+
+		SIMD_INLINE __m512i AdjustedYuvToBlue16(__m512i y16, __m512i u16)
+		{
+			return SaturateI16ToU8(_mm512_packs_epi32(
+				AdjustedYuvToBlue32(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(u16, K_ZERO)),
+				AdjustedYuvToBlue32(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(u16, K_ZERO))));
+		}
+
+		SIMD_INLINE __m512i YuvToRed(__m512i y, __m512i v)
+		{
+			__m512i lo = AdjustedYuvToRed16(
+				AdjustY16(_mm512_unpacklo_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpacklo_epi8(v, K_ZERO)));
+			__m512i hi = AdjustedYuvToRed16(
+				AdjustY16(_mm512_unpackhi_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpackhi_epi8(v, K_ZERO)));
+			return _mm512_packus_epi16(lo, hi);
+		}
+
+		SIMD_INLINE __m512i YuvToGreen(__m512i y, __m512i u, __m512i v)
+		{
+			__m512i lo = AdjustedYuvToGreen16(
+				AdjustY16(_mm512_unpacklo_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpacklo_epi8(u, K_ZERO)),
+				AdjustUV16(_mm512_unpacklo_epi8(v, K_ZERO)));
+			__m512i hi = AdjustedYuvToGreen16(
+				AdjustY16(_mm512_unpackhi_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpackhi_epi8(u, K_ZERO)),
+				AdjustUV16(_mm512_unpackhi_epi8(v, K_ZERO)));
+			return _mm512_packus_epi16(lo, hi);
+		}
+
+		SIMD_INLINE __m512i YuvToBlue(__m512i y, __m512i u)
+		{
+			__m512i lo = AdjustedYuvToBlue16(
+				AdjustY16(_mm512_unpacklo_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpacklo_epi8(u, K_ZERO)));
+			__m512i hi = AdjustedYuvToBlue16(
+				AdjustY16(_mm512_unpackhi_epi8(y, K_ZERO)),
+				AdjustUV16(_mm512_unpackhi_epi8(u, K_ZERO)));
+			return _mm512_packus_epi16(lo, hi);
+		}
+
 		template <int index> __m512i GrayToBgr(__m512i gray);
 
 		template<> SIMD_INLINE __m512i GrayToBgr<0>(__m512i gray)

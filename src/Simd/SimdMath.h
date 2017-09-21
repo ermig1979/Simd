@@ -912,6 +912,11 @@ namespace Simd
 		{
 			return _mm512_add_epi64(_mm512_unpacklo_epi32(a, K_ZERO), _mm512_unpackhi_epi32(a, K_ZERO));
 		}
+
+		SIMD_INLINE __m512i SaturateI16ToU8(__m512i value)
+		{
+			return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
+		}
 	}
 #endif //SIMD_AVX512BW_ENABLE
 
