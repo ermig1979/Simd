@@ -155,6 +155,51 @@ namespace Simd
 			else
 				Yuv422pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void Yuv444pToBgra(const uint8_t * y, const uint8_t * u, const uint8_t * v, const __m512i & a, uint8_t * bgra, const __mmask64 * tails)
+		{
+			YuvToBgra<align, mask>(Load<align, mask>(y, tails[0]), Load<align, mask>(u, tails[0]), Load<align, mask>(v, tails[0]), a, bgra, tails + 1);
+		}
+
+		template <bool align> void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+			}
+
+			__m512i a = _mm512_set1_epi8(alpha);
+			size_t alignedWidth = AlignLo(width, A);
+			size_t tail = width - alignedWidth;
+			__mmask64 tailMasks[5];
+			tailMasks[0] = TailMask64(tail);
+			for (size_t i = 0; i < 4; ++i)
+				tailMasks[1 + i] = TailMask64(tail * 4 - A * i);			
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					Yuv444pToBgra<align, false>(y + col, u + col, v + col, a, bgra + col * 4, tailMasks);
+				if (col < width)
+					Yuv444pToBgra<align, true>(y + col, u + col, v + col, a, bgra + col * 4, tailMasks);
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				bgra += bgraStride;
+			}
+		}
+
+		void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+				&& Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+				Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+			else
+				Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+		}
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
