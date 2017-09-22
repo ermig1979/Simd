@@ -200,7 +200,7 @@ namespace Simd
             InterpolateX2(alpha + A, buffer + A);
         }
 
-        const __m512i K16_FRACTION_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
+        const __m512i K16_FRACTION_ROUND_TERM = SIMD_MM512_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
 
         template<bool align> SIMD_INLINE __m512i InterpolateY(const uint8_t * pbx0, const uint8_t * pbx1, __m512i alpha[2])
         {
@@ -359,15 +359,15 @@ namespace Simd
         {
             switch(channelCount)
             {
-            //case 1: 
-            //    if(srcWidth >= A && srcWidth < 4*dstWidth && false)
-            //        ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
-            //    else
-            //        ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
-            //    break;
-            //case 2: 
-            //    ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
-            //    break;
+            case 1: 
+                if(srcWidth >= A && srcWidth < 4*dstWidth)
+                    ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                else
+                    ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
+			case 2: 
+			    ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+			    break;
             //case 3: 
             //    ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
             //    break;
