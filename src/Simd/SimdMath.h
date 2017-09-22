@@ -917,6 +917,16 @@ namespace Simd
 		{
 			return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
 		}
+
+		SIMD_INLINE __m512i MaxI16(const __m512i a, __m512i b, __m512i c)
+		{
+			return _mm512_max_epi16(a, _mm512_max_epi16(b, c));
+		}
+
+		SIMD_INLINE __m512i MinI16(__m512i a, __m512i b, __m512i c)
+		{
+			return _mm512_min_epi16(a, _mm512_min_epi16(b, c));
+		}
 	}
 #endif //SIMD_AVX512BW_ENABLE
 
