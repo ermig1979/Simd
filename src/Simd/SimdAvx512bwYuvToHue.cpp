@@ -123,6 +123,49 @@ namespace Simd
 			else
 				Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
 		}
+
+		template <bool align, bool mask> SIMD_INLINE void Yuv444pToHue(const uint8_t * y, const uint8_t * u, const uint8_t * v, const __m512 & KF_255_DIV_6, uint8_t * hue, __mmask64 tail = -1)
+		{
+			YuvToHue<align, mask>(Load<align, mask>(y, tail), Load<align, mask>(u, tail), Load<align, mask>(v, tail), KF_255_DIV_6, hue, tail);
+		}
+
+		template <bool align> void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
+		{
+			assert(width >= A);
+			if (align)
+			{
+				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+				assert(Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride));
+			}
+
+			const __m512 KF_255_DIV_6 = _mm512_set1_ps(Base::KF_255_DIV_6);
+
+			size_t alignedWidth = AlignLo(width, A);
+			size_t tail = width - alignedWidth;
+			__mmask64 tailMask = TailMask64(tail);
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t col = 0;
+				for (; col < alignedWidth; col += A)
+					Yuv444pToHue<align, false>(y + col, u + col, v + col, KF_255_DIV_6, hue + col);
+				if (col < width)
+					Yuv444pToHue<align, true>(y + col, u + col, v + col, KF_255_DIV_6, hue + col, tailMask);
+				y += yStride;
+				u += uStride;
+				v += vStride;
+				hue += hueStride;
+			}
+		}
+
+		void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+			size_t width, size_t height, uint8_t * hue, size_t hueStride)
+		{
+			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride) && Aligned(hue) && Aligned(hueStride))
+				Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+			else
+				Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+		}
 	}
 #endif// SIMD_AVX512BW_ENABLE
 }
