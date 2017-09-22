@@ -94,6 +94,11 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
 	namespace Avx512bw
 	{
+		SIMD_INLINE __m512i SetInt8(char a0, char a1)
+		{
+			return _mm512_unpacklo_epi8(_mm512_set1_epi8(a0), _mm512_set1_epi8(a1));
+		}
+
 		SIMD_INLINE __m512i SetInt16(short a0, short a1)
 		{
 			return _mm512_unpacklo_epi16(_mm512_set1_epi16(a0), _mm512_set1_epi16(a1));

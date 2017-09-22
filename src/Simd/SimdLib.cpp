@@ -3783,6 +3783,12 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
     const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
     size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable)
+		Avx512bw::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+		shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable)
         Avx2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,

@@ -86,7 +86,7 @@ namespace Test
 	{
 		bool result = true;
 
-		const double x0 = 7.1, dx = -5.3, y0 = -5.2, dy = 3.7;
+		const double x0 = 6.9, dx = -5.3, y0 = -5.2, dy = 3.7;
 		for(int i = 0; i < 4; ++i)
 			result = result && ShiftAutoTest(format, width, height, x0 + i*dx, y0 + i*dy, i*3, f1, f2);
 
@@ -101,7 +101,6 @@ namespace Test
         {
             result = result && ShiftAutoTest(ARGS(format, W, H, f1, f2));
             result = result && ShiftAutoTest(ARGS(format, W + O, H - O, f1, f2));
-            result = result && ShiftAutoTest(ARGS(format, W - O, H + O, f1, f2));
         }
 
         return result;
@@ -121,6 +120,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if(Simd::Avx2::Enable)
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx2::ShiftBilinear), FUNC(SimdShiftBilinear));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx512bw::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
