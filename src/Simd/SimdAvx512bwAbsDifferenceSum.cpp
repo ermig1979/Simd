@@ -43,20 +43,18 @@ namespace Simd
 			sum = _mm512_add_epi64(sum, value);
 		}
 
-		template <bool align, int bits> void AbsDifferenceSum2(const uint8_t * a, const uint8_t * b, __m512i * sums)
+		template <bool align, int bits> void AbsDifferenceSum4(const uint8_t * a, const uint8_t * b, __m512i * sums)
 		{
-			const __m512i a0 = Load<align>(a + 0);
-			const __m512i b0 = Load<align>(b + 0);
-			Sum<bits>(sums[0], _mm512_sad_epu8(a0, b0));
-			const __m512i a1 = Load<align>(a + A);
-			const __m512i b1 = Load<align>(b + A);
-			Sum<bits>(sums[1], _mm512_sad_epu8(a1, b1));
+			Sum<bits>(sums[0], _mm512_sad_epu8(Load<align>(a + 0 * A), Load<align>(b + 0 * A)));
+			Sum<bits>(sums[1], _mm512_sad_epu8(Load<align>(a + 1 * A), Load<align>(b + 1 * A)));
+			Sum<bits>(sums[0], _mm512_sad_epu8(Load<align>(a + 2 * A), Load<align>(b + 2 * A)));
+			Sum<bits>(sums[1], _mm512_sad_epu8(Load<align>(a + 3 * A), Load<align>(b + 3 * A)));
 		}
 
-		template <bool align, int bits, bool mask> void AbsDifferenceSum1(const uint8_t * a, const uint8_t * b, __m512i * sums, __mmask64 m = -1)
+		template <bool align, int bits, bool mask> void AbsDifferenceSum1(const uint8_t * a, const uint8_t * b, __m512i * sums, __mmask64 tail = -1)
 		{
-			const __m512i a0 = Load<align, mask>(a, m);
-			const __m512i b0 = Load<align, mask>(b, m);
+			const __m512i a0 = Load<align, mask>(a, tail);
+			const __m512i b0 = Load<align, mask>(b, tail);
 			Sum<bits>(sums[0], _mm512_sad_epu8(a0, b0));
 		}
 
@@ -65,15 +63,15 @@ namespace Simd
 			if(align)
 				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
-			size_t fullAlignedWidth = AlignLo(width, DA);
+			size_t fullAlignedWidth = AlignLo(width, QA);
 			size_t alignedWidth = AlignLo(width, A);
-			__mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
 			__m512i sums[2] = { _mm512_setzero_si512(), _mm512_setzero_si512() };
 			for(size_t row = 0; row < height; ++row)
 			{
 				size_t col = 0;
-				for (; col < fullAlignedWidth; col += DA)
-					AbsDifferenceSum2<align, bits>(a + col, b + col, sums);
+				for (; col < fullAlignedWidth; col += QA)
+					AbsDifferenceSum4<align, bits>(a + col, b + col, sums);
 				for (; col < alignedWidth; col += A)
 					AbsDifferenceSum1<align, bits, false>(a + col, b + col, sums);
 				if (col < width)
@@ -81,8 +79,7 @@ namespace Simd
 				a += aStride;
 				b += bStride;
 			}
-			sums[0] = _mm512_add_epi64(sums[0], sums[1]);
-            *sum = ExtractSum<uint64_t>(sums[0]);
+            *sum = ExtractSum<uint64_t>(_mm512_add_epi64(sums[0], sums[1]));
 		}
 
 		template <bool align> void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t * sum)
@@ -102,16 +99,18 @@ namespace Simd
 				AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
 		}
 
-		template <bool align, int bits> void AbsDifferenceSumMasked2(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
+		template <bool align, int bits> void AbsDifferenceSumMasked(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
 		{
-			__mmask64 m0 = _mm512_cmpeq_epu8_mask(Load<align>(m + 0), index);
-			const __m512i a0 = Load<align, true>(a + 0, m0);
-			const __m512i b0 = Load<align, true>(b + 0, m0);
-			Sum<bits>(sums[0], _mm512_sad_epu8(a0, b0));
-			__mmask64 m1 = _mm512_cmpeq_epu8_mask(Load<align>(m + A), index);
-			const __m512i a1 = Load<align, true>(a + A, m1);
-			const __m512i b1 = Load<align, true>(b + A, m1);
-			Sum<bits>(sums[1], _mm512_sad_epu8(a1, b1));
+			__mmask64 mask = _mm512_cmpeq_epu8_mask(Load<align>(m), index);
+			Sum<bits>(sums[0], _mm512_sad_epu8(Load<align, true>(a, mask), Load<align, true>(b, mask)));
+		}
+
+		template <bool align, int bits> void AbsDifferenceSumMasked4(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
+		{
+			AbsDifferenceSumMasked<align, bits>(a + 0 * A, b + 0 * A, m + 0 * A, index, sums + 0);
+			AbsDifferenceSumMasked<align, bits>(a + 1 * A, b + 1 * A, m + 1 * A, index, sums + 1);
+			AbsDifferenceSumMasked<align, bits>(a + 2 * A, b + 2 * A, m + 2 * A, index, sums + 0);
+			AbsDifferenceSumMasked<align, bits>(a + 3 * A, b + 3 * A, m + 3 * A, index, sums + 1);
 		}
 
 		template <bool align, int bits, bool mask> void AbsDifferenceSumMasked1(const uint8_t * a, const uint8_t * b, const uint8_t * m, __m512i & index, __m512i * sums, __mmask64 mm = -1)
@@ -132,15 +131,15 @@ namespace Simd
 			}
 
 			__m512i _index = _mm512_set1_epi8(index);
-			size_t fullAlignedWidth = AlignLo(width, DA);
+			size_t fullAlignedWidth = AlignLo(width, QA);
 			size_t alignedWidth = AlignLo(width, A);
-			__mmask64 tailMask = __mmask64(-1) >> (A + alignedWidth - width);
+			__mmask64 tailMask = TailMask64(width - alignedWidth);
 			__m512i sums[2] = { _mm512_setzero_si512(), _mm512_setzero_si512() };
 			for (size_t row = 0; row < height; ++row)
 			{
 				size_t col = 0;
-				for (; col < fullAlignedWidth; col += DA)
-					AbsDifferenceSumMasked2<align, bits>(a + col, b + col, mask + col, _index, sums);
+				for (; col < fullAlignedWidth; col += QA)
+					AbsDifferenceSumMasked4<align, bits>(a + col, b + col, mask + col, _index, sums);
 				for (; col < alignedWidth; col += A)
 					AbsDifferenceSumMasked1<align, bits, false>(a + col, b + col, mask + col, _index, sums);
 				if (col < width)
