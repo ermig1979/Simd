@@ -200,6 +200,26 @@ namespace Simd
             InterpolateX2(alpha + A, buffer + A);
         }
 
+		const __m512i K8_SHUFFLE_X4 = SIMD_MM512_SETR_EPI8(
+			0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+			0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+			0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+			0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+		SIMD_INLINE void InterpolateX4(const uint8_t * alpha, uint8_t * buffer)
+		{
+			__m512i _buffer = _mm512_shuffle_epi8(Load<true>(buffer), K8_SHUFFLE_X4);
+			Store<false>(buffer, _mm512_maddubs_epi16(_buffer, Load<true>(alpha)));
+		}
+
+		template <> SIMD_INLINE void InterpolateX<4>(const uint8_t * alpha, uint8_t * buffer)
+		{
+			InterpolateX4(alpha + 0 * A, buffer + 0 * A);
+			InterpolateX4(alpha + 1 * A, buffer + 1 * A);
+			InterpolateX4(alpha + 2 * A, buffer + 2 * A);
+			InterpolateX4(alpha + 3 * A, buffer + 3 * A);
+		}
+
         const __m512i K16_FRACTION_ROUND_TERM = SIMD_MM512_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
 
         template<bool align> SIMD_INLINE __m512i InterpolateY(const uint8_t * pbx0, const uint8_t * pbx1, __m512i alpha[2])
@@ -375,9 +395,9 @@ namespace Simd
             //case 3: 
             //    ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
             //    break;
-            //case 4: 
-            //    ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
-            //    break;
+            case 4: 
+                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                break;
             default: 
                 Avx2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount); 
             }
