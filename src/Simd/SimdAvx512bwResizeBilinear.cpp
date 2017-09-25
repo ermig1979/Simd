@@ -297,6 +297,14 @@ namespace Simd
             _mm256_storeu_si256((__m256i*)(dst + index.dst), Shuffle(_src, _shuffle));
         }
 
+		SIMD_INLINE void LoadGrayIntrepolated(const uint8_t * src, const Index & index, const uint8_t * alpha, uint8_t * dst)
+		{
+			__m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
+			__m256i _shuffle = _mm256_loadu_si256((__m256i*)&index.shuffle);
+			__m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
+			_mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Shuffle(_src, _shuffle), _alpha));
+		}
+
         void ResizeBilinearGray(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert(dstWidth >= A);
@@ -336,14 +344,10 @@ namespace Simd
 
                 for(; k < 2; k++)
                 {
-                    const uint8_t * psrc = src + (sy + k)*srcStride;
-                    uint8_t * pdst = buffer.bx[k];
-                    for(size_t i = 0; i < blockCount; ++i)
-                        LoadGray(psrc, buffer.ix[i], pdst);
-
-                    uint8_t * pbx = buffer.bx[k];
-                    for(size_t i = 0; i < bufferWidth; i += A)
-                        InterpolateX<1>(buffer.ax + i, pbx + i);
+					const uint8_t * psrc = src + (sy + k)*srcStride;
+					uint8_t * pdst = buffer.bx[k];
+					for (size_t i = 0; i < blockCount; ++i)
+						LoadGrayIntrepolated(psrc, buffer.ix[i], buffer.ax, pdst);
                 }
 
                 for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
