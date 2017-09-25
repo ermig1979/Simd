@@ -86,6 +86,8 @@ namespace Simd
 		void NeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
 		void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
+
+		void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 	}
 #endif// SIMD_AVX512F_ENABLE
 }

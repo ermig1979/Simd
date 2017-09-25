@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
+#ifdef SIMD_AVX512F_ENABLE    
+    namespace Avx512f
     {
         namespace
         {
@@ -57,35 +57,28 @@ namespace Simd
         {
             Buffer buffer(count);
             size_t alignedCount = AlignLo(count, F);
+			__mmask16 tailMask = TailMask16(count - alignedCount);
 
             for(size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
-                __m256 _v = _mm256_set1_ps(v);
+                __m512 _v = _mm512_set1_ps(v);
                 for(; i < alignedCount; i += F)
-                {
-                    __m256 sums = Load<true>(buffer.sums + i);
-                    __m256 _svs = Load<false>(svs + i);
-                    Store<true>(buffer.sums + i, _mm256_add_ps(sums, _mm256_mul_ps(_v, _svs)));
-                }
-                for(; i < count; ++i)
-                    buffer.sums[i] += v*svs[i];
+                    Store<true>(buffer.sums + i, _mm512_fmadd_ps(_v, Load<false>(svs + i), Load<true>(buffer.sums + i)));
+				if(i < count)
+					Store<true, true>(buffer.sums + i, _mm512_fmadd_ps(_v, (Load<false, true>(svs + i, tailMask)), (Load<true, true>(buffer.sums + i, tailMask))), tailMask);
                 svs += count;
             }
 
             size_t i = 0;
-            __m256 _sum = _mm256_setzero_ps();
+            __m512 _sum = _mm512_setzero_ps();
             for(; i < alignedCount; i += F)
-            {
-                __m256 sums = Load<true>(buffer.sums + i);
-                __m256 _weights = Load<false>(weights + i);
-                _sum = _mm256_add_ps(_sum, _mm256_mul_ps(sums, _weights));
-            }
+				_sum = _mm512_fmadd_ps(Load<true>(buffer.sums + i), Load<false>(weights + i), _sum);
+			if (i < count)
+				_sum = _mm512_fmadd_ps((Load<true, true>(buffer.sums + i, tailMask)), (Load<false, true>(weights + i, tailMask)), _sum);
             *sum = ExtractSum(_sum);
-            for(; i < count; ++i)
-                *sum += buffer.sums[i]*weights[i];
         }
     }
-#endif// SIMD_AVX_ENABLE
+#endif// SIMD_AVX512F_ENABLE
 }

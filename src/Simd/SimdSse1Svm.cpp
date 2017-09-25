@@ -56,14 +56,14 @@ namespace Simd
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
         {
             Buffer buffer(count);
-            size_t alignedCount = AlignLo(count, 4);
+            size_t alignedCount = AlignLo(count, F);
 
             for(size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
                 __m128 _v = _mm_set1_ps(v);
-                for(; i < alignedCount; i += 4)
+                for(; i < alignedCount; i += F)
                 {
                     __m128 sums = Load<true>(buffer.sums + i);
                     __m128 _svs = Load<false>(svs + i);
@@ -76,7 +76,7 @@ namespace Simd
 
             size_t i = 0;
             __m128 _sum = _mm_setzero_ps();
-            for(; i < alignedCount; i += 4)
+            for(; i < alignedCount; i += F)
             {
                 __m128 sums = Load<true>(buffer.sums + i);
                 __m128 _weights = Load<false>(weights + i);

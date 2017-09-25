@@ -4496,6 +4496,11 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
 
 SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
 {
+#ifdef SIMD_AVX512F_ENABLE
+	if (Avx512f::Enable)
+		Avx512f::SvmSumLinear(x, svs, weights, length, count, sum);
+	else
+#endif
 #ifdef SIMD_AVX_ENABLE
     if(Avx::Enable)
         Avx::SvmSumLinear(x, svs, weights, length, count, sum);
