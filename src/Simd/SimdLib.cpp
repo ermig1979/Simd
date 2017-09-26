@@ -2267,6 +2267,11 @@ SIMD_API void SimdIntegral(const uint8_t * src, size_t srcStride, size_t width, 
 		Avx512bw::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
 	else
 #endif
+#ifdef SIMD_AVX2_ENABLE
+	if (Avx2::Enable)
+		Avx2::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
+	else
+#endif
 		Base::Integral(src, srcStride, width, height, sum, sumStride, sqsum, sqsumStride, tilted, tiltedStride, sumFormat, sqsumFormat);
 }
 
