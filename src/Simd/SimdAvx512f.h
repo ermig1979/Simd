@@ -89,6 +89,8 @@ namespace Simd
 
 		void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
 
+		void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
+
 		void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 	}
 #endif// SIMD_AVX512F_ENABLE
