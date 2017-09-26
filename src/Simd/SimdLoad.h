@@ -557,6 +557,16 @@ namespace Simd
 			a[0] = Load<false>(p - 1);
 			a[2] = LoadAfterLast<1>(p);
 		}
+
+		template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1)
+		{
+			return _mm512_insertf32x8(_mm512_castps256_ps512(Avx::Load<align>(p0)), Avx::Load<align>(p1), 1);
+		}
+
+		template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
+		{
+			return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1), Sse::Load<align>(p2), 2), Sse::Load<align>(p3), 3);
+		}
 	}
 #endif//SIMD_AVX512BW_ENABLE
 

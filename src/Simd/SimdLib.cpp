@@ -2194,6 +2194,11 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
 
 SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512bw::F && count >= Avx::HF)
+		Avx512bw::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::F && count >= Avx2::HF)
         Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);

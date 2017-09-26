@@ -274,6 +274,11 @@ namespace Test
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx2::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx512bw::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Neon::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
