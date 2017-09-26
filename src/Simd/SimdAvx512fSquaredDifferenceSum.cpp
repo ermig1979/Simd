@@ -38,7 +38,7 @@ namespace Simd
             sum = _mm512_fmadd_ps(_d, _d, sum);
         }
 
-        template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
+        template <bool align> void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
         {
             if(align)
                 assert(Aligned(a) && Aligned(b));
@@ -62,9 +62,15 @@ namespace Simd
             }
             for(; i < alignedSize; i += F)
                 SquaredDifferenceSum32f<align, false>(a, b, i, sums[0]);  
+#if defined (NDEBUG) && defined(_MSC_VER)
+			*sum = ExtractSum(sums[0]);
+			for (; i < size; ++i)
+				*sum += Simd::Square(a[i] - b[i]);
+#else
 			if(i < size)
 				SquaredDifferenceSum32f<align, true>(a, b, i, sums[0], tailMask);
 			*sum = ExtractSum(sums[0]);
+#endif
         }
 
         void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
@@ -86,7 +92,7 @@ namespace Simd
 			sum = temp;
 		}
 
-		template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
+		template <bool align> void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
 		{
 			if (align)
 				assert(Aligned(a) && Aligned(b));
@@ -110,9 +116,15 @@ namespace Simd
 			}
 			for (; i < alignedSize; i += F)
 				SquaredDifferenceKahanSum32f<align, false>(a, b, i, sums[0], corrections[0]);
+#if defined (NDEBUG) && defined(_MSC_VER)
+			*sum = ExtractSum(sums[0]);
+			for (; i < size; ++i)
+				*sum += Simd::Square(a[i] - b[i]);
+#else
 			if (i < size)
 				SquaredDifferenceKahanSum32f<align, true>(a, b, i, sums[0], corrections[0], tailMask);
 			*sum = ExtractSum(sums[0]);
+#endif
 		}
 
 		void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
