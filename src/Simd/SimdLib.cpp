@@ -2144,6 +2144,11 @@ SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size
 SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
                                          size_t cellX, size_t cellY, size_t quantization, float * histograms)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512bw::HA + 2)
+		Avx512bw::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A + 2)
         Avx2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
@@ -2195,12 +2200,12 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
 SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-	if (Avx512bw::Enable && width >= Avx512bw::F && count >= Avx::HF)
+	if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse::F)
 		Avx512bw::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
 	else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F && count >= Avx2::HF)
+    if (Avx2::Enable && width >= Avx2::F && count >= Sse::F)
         Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
