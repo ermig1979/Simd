@@ -2230,6 +2230,11 @@ SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t wi
 SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height,
     const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512bw::F + colSize - 1)
+		Avx512bw::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::F + colSize - 1)
         Avx2::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
