@@ -513,8 +513,8 @@ namespace Simd
                     {
                         int index = _index[col];
                         __m128 value = _mm_set1_ps(_value[col]);
-                        buffer[index] = _mm_add_ps(buffer[index], _mm_mul_ps(value, _mm_mul_ps(ky, _kx[i])));
-                    }
+						buffer[index] = _mm_fmadd_ps(_mm_mul_ps(ky, _kx[i]), value, buffer[index]);
+					}
                     buffer += Q2;
                 }
             }
@@ -529,19 +529,23 @@ namespace Simd
 
                 for (size_t cell = 0; cell <= width; ++cell)
                 {
-                    __m128 * ps = (__m128*)src;
-                    for (size_t i = 0; i < 16; i += 4)
+                    for (size_t i = 0; i < 16; i += F)
                     {
-                        __m128 s00 = _mm_unpacklo_ps(ps[i + 0], ps[i + 2]);
-                        __m128 s01 = _mm_unpacklo_ps(ps[i + 1], ps[i + 3]);
-                        __m128 s10 = _mm_unpackhi_ps(ps[i + 0], ps[i + 2]);
-                        __m128 s11 = _mm_unpackhi_ps(ps[i + 1], ps[i + 3]);
-
-                        _mm_storeu_ps(h0[0] + i, _mm_add_ps(_mm_loadu_ps(h0[0] + i), _mm_unpacklo_ps(s00, s01)));
-                        _mm_storeu_ps(h0[1] + i, _mm_add_ps(_mm_loadu_ps(h0[1] + i), _mm_unpackhi_ps(s00, s01)));
-                        _mm_storeu_ps(h1[0] + i, _mm_add_ps(_mm_loadu_ps(h1[0] + i), _mm_unpacklo_ps(s10, s11)));
-                        _mm_storeu_ps(h1[1] + i, _mm_add_ps(_mm_loadu_ps(h1[1] + i), _mm_unpackhi_ps(s10, s11)));
+						const float * s = src + i * 4;
+						__m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
+						__m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
+						__m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
+						__m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
+						__m256 b0 = _mm256_unpacklo_ps(a0, a2);
+						__m256 b1 = _mm256_unpackhi_ps(a0, a2);
+						__m256 b2 = _mm256_unpacklo_ps(a1, a3);
+						__m256 b3 = _mm256_unpackhi_ps(a1, a3);
+						Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
+						Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
+						Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
+						Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                     }
+                    __m128 * ps = (__m128*)src;
                     __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h0[0] + 16)), (__m64*)(h0[1] + 16)));
                     __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h1[0] + 16)), (__m64*)(h1[1] + 16)));
                     _mm_storel_pi((__m64*)(h0[0] + 16), s0);
