@@ -2179,6 +2179,11 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
 
 SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+	if (Avx512bw::Enable && width >= Avx512bw::HA + 2)
+		Avx512bw::HogExtractFeatures(src, stride, width, height, features);
+	else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::HA + 2)
         Avx2::HogExtractFeatures(src, stride, width, height, features);

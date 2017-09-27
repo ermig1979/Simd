@@ -382,6 +382,289 @@ namespace Simd
 			}
 		}
 
+		class HogFeatureExtractor
+		{
+			static const size_t C = 8;
+			static const size_t Q = 9;
+			static const size_t Q2 = 18;
+
+			typedef std::vector<int, Simd::Allocator<int> > Vector32i;
+			typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+
+			size_t _sx, _sy, _hs;
+
+			__m512i _pos[5];
+			__m512 _cos[5], _sin[5];
+			__m128 _kx[8], _ky[8];
+			__m512i _Q, _Q2;
+
+			Vector32i _index;
+			Vector32f _value;
+			Vector32f _buffer;
+			Vector32f _histogram;
+			Vector32f _norm;
+
+			void Init(size_t w, size_t h)
+			{
+				_sx = w / C;
+				_hs = _sx + 2;
+				_sy = h / C;
+				for (int i = 0; i < 5; ++i)
+				{
+					_cos[i] = _mm512_set1_ps((float)::cos(i*M_PI / Q));
+					_sin[i] = _mm512_set1_ps((float)::sin(i*M_PI / Q));
+					_pos[i] = _mm512_set1_epi32(i);
+				}
+				for (int i = 0; i < C; ++i)
+				{
+					float k0 = float((15 - i * 2) / 16.0f);
+					float k1 = 1.0f - k0;
+					_kx[i] = _mm_setr_ps(k0, k1, k0, k1);
+					_ky[i] = _mm_setr_ps(k0, k0, k1, k1);
+				}
+				_Q = _mm512_set1_epi32(Q);
+				_Q2 = _mm512_set1_epi32(Q2);
+
+				_index.resize(w);
+				_value.resize(w);
+				_buffer.resize((_sx + 1) * 4 * Q2);
+				_histogram.resize((_sx + 2)*(_sy + 2)*Q2);
+				_norm.resize((_sx + 2)*(_sy + 2));
+			}
+
+			template <bool align> SIMD_INLINE void GetHistogram(const __m512 & dx, const __m512 & dy, size_t col)
+			{
+				__m512 bestDot = _mm512_setzero_ps();
+				__m512i bestIndex = _mm512_setzero_si512();
+				__m512 _0 = _mm512_set1_ps(-0.0f);
+				__m512 adx = _mm512_andnot_ps(_0, dx);
+				__m512 ady = _mm512_andnot_ps(_0, dy);
+				for (int i = 0; i < 5; ++i)
+				{
+					__m512 dot = _mm512_fmadd_ps(adx, _cos[i], _mm512_mul_ps(ady, _sin[i]));
+					bestIndex = _mm512_mask_blend_epi32(_mm512_cmp_ps_mask(dot, bestDot, _CMP_GT_OS), bestIndex, _pos[i]);
+					bestDot = _mm512_max_ps(dot, bestDot);
+				}
+				bestIndex = _mm512_mask_sub_epi32(bestIndex, _mm512_cmp_ps_mask(dx, _0, _CMP_LT_OS), _Q, bestIndex);
+
+				__m512i corr = _mm512_maskz_set1_epi32(_mm512_cmp_ps_mask(adx, _mm512_setzero_ps(), _CMP_EQ_OS), 1);
+				bestIndex = _mm512_mask_sub_epi32(bestIndex, _mm512_cmp_ps_mask(dy, _0, _CMP_LT_OS), _Q2, _mm512_add_epi32(bestIndex, corr));
+
+				bestIndex = _mm512_mask_set1_epi32(bestIndex, _mm512_cmpeq_epi32_mask(bestIndex, _Q2), 0);
+
+				Store<align>(_index.data() + col, bestIndex);
+				Avx512f::Store<align>(_value.data() + col, _mm512_sqrt_ps(_mm512_fmadd_ps(adx, adx, _mm512_mul_ps(ady, ady))));
+			}
+
+			template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
+			{
+				const uint8_t * s = src + col;
+				__m256i t = Avx2::LoadPermuted<false>((__m256i*)(s - stride));
+				__m256i l = Avx2::LoadPermuted<false>((__m256i*)(s - 1));
+				__m256i r = Avx2::LoadPermuted<false>((__m256i*)(s + 1));
+				__m256i b = Avx2::LoadPermuted<false>((__m256i*)(s + stride));
+				GetHistogram<align>(CovertDifference<0>(r, l), CovertDifference<0>(b, t), col + 0);
+				GetHistogram<align>(CovertDifference<1>(r, l), CovertDifference<1>(b, t), col + F);
+			}
+
+			void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
+			{
+				const uint8_t * s = src + stride*row;
+				GetHistogram<false>(s, stride, 1);
+				for (size_t col = HA; col < aligned; col += HA)
+					GetHistogram<false>(s, stride, col);
+				GetHistogram<false>(s, stride, width - 1 - HA);
+
+				__m128 ky = _ky[(row + 4) & 7];
+				__m128 * buffer = (__m128*)_buffer.data();
+				for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
+				{
+					for (; i < n; ++i, ++col)
+					{
+						int index = _index[col];
+						__m128 value = _mm_set1_ps(_value[col]);
+						buffer[index] = _mm_fmadd_ps(_mm_mul_ps(ky, _kx[i]), value, buffer[index]);
+					}
+					buffer += Q2;
+				}
+			}
+
+			void AddToHistogram(size_t row, size_t width, size_t height)
+			{
+				typedef float f18_t[18];
+
+				float * src = _buffer.data();
+				f18_t * h0 = (f18_t*)_histogram.data() + row*_hs;
+				f18_t * h1 = h0 + _hs;
+
+				for (size_t cell = 0; cell <= width; ++cell)
+				{
+					__m512 a0 = Load<true>(src + 0x00, src + 0x10, src + 0x20, src + 0x30);
+					__m512 a1 = Load<true>(src + 0x04, src + 0x14, src + 0x24, src + 0x34);
+					__m512 a2 = Load<true>(src + 0x08, src + 0x18, src + 0x28, src + 0x38);
+					__m512 a3 = Load<true>(src + 0x0C, src + 0x1C, src + 0x2C, src + 0x3C);
+					__m512 b0 = _mm512_unpacklo_ps(a0, a2);
+					__m512 b1 = _mm512_unpackhi_ps(a0, a2);
+					__m512 b2 = _mm512_unpacklo_ps(a1, a3);
+					__m512 b3 = _mm512_unpackhi_ps(a1, a3);
+					Avx512f::Store<false>(h0[0], _mm512_add_ps(Avx512f::Load<false>(h0[0]), _mm512_unpacklo_ps(b0, b2)));
+					Avx512f::Store<false>(h0[1], _mm512_add_ps(Avx512f::Load<false>(h0[1]), _mm512_unpackhi_ps(b0, b2)));
+					Avx512f::Store<false>(h1[0], _mm512_add_ps(Avx512f::Load<false>(h1[0]), _mm512_unpacklo_ps(b1, b3)));
+					Avx512f::Store<false>(h1[1], _mm512_add_ps(Avx512f::Load<false>(h1[1]), _mm512_unpackhi_ps(b1, b3)));
+					__m128 * ps = (__m128*)src;
+					__m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h0[0] + 16)), (__m64*)(h0[1] + 16)));
+					__m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h1[0] + 16)), (__m64*)(h1[1] + 16)));
+					_mm_storel_pi((__m64*)(h0[0] + 16), s0);
+					_mm_storeh_pi((__m64*)(h0[1] + 16), s0);
+					_mm_storel_pi((__m64*)(h1[0] + 16), s1);
+					_mm_storeh_pi((__m64*)(h1[1] + 16), s1);
+					h0++;
+					h1++;
+					src += 72;
+				}
+				SetZero(_buffer);
+			}
+
+			void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
+			{
+				SetZero(_histogram);
+
+				size_t aligned = AlignHi(width - 1, HA) - HA;
+
+				SetZero(_buffer);
+				for (size_t row = 1; row < 4; ++row)
+					AddRowToBuffer(src, stride, row, width, aligned);
+				AddToHistogram(0, _sx, _sy);
+				for (size_t row = 4, cell = 1; row < height - 4; ++row)
+				{
+					AddRowToBuffer(src, stride, row, width, aligned);
+					if ((row & 7) == 3)
+						AddToHistogram(cell++, _sx, _sy);
+				}
+				for (size_t row = height - 4; row < height - 1; ++row)
+					AddRowToBuffer(src, stride, row, width, aligned);
+				AddToHistogram(_sy, _sx, _sy);
+			}
+
+			SIMD_INLINE float GetNorm(const float * src)
+			{
+				__m256 norm = _mm256_add_ps(_mm256_loadu_ps(src), _mm256_loadu_ps(src + Q));
+				norm = _mm256_mul_ps(norm, norm);
+				norm = _mm256_hadd_ps(norm, norm);
+				norm = _mm256_hadd_ps(norm, norm);
+				float buf[8];
+				_mm256_storeu_ps(buf, norm);
+				return buf[0] + buf[4] + Simd::Square(src[Q - 1] + src[Q2 - 1]);
+			}
+
+			void EstimateNorm()
+			{
+				SetZero(_norm);
+				for (size_t y = 0, i = 0; y < _sy; y++)
+				{
+					const float * h = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+					float * n = _norm.data() + (y + 1)*_hs + 1;
+					for (size_t x = 0; x < _sx; x++, i++)
+						n[x] = GetNorm(h + x*Q2);
+				}
+			}
+
+			void ExtractFeatures(float * features)
+			{
+				__m128 _02 = _mm_set1_ps(0.2f);
+				__m128 _05 = _mm_set1_ps(0.5f);
+				__m128 _02357 = _mm_set1_ps(0.2357f);
+				__m128 eps = _mm_set1_ps(0.0001f);
+				for (size_t y = 0; y < _sy; y++)
+				{
+					float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+					for (size_t x = 0; x < _sx; x++)
+					{
+						float * dst = features + (y*_sx + x) * 31;
+
+						float * p0 = _norm.data() + y*_hs + x;
+						float * p1 = p0 + _hs;
+						float * p2 = p1 + _hs;
+
+						__m128 n = _mm_setr_ps(
+							p1[1] + p1[2] + p2[1] + p2[2],
+							p0[1] + p0[2] + p1[1] + p1[2],
+							p1[0] + p1[1] + p2[0] + p2[1],
+							p0[0] + p0[1] + p1[0] + p1[1]);
+
+						n = _mm_rsqrt_ps(_mm_add_ps(n, eps));
+
+						__m128 t = _mm_setzero_ps();
+
+						float * src = ph + x*Q2;
+						for (int o = 0; o < 16; o += 4)
+						{
+							__m128 s = _mm_loadu_ps(src);
+							__m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
+							__m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
+							__m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
+							__m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
+							t = _mm_add_ps(t, _mm_add_ps(_mm_add_ps(h0, h1), _mm_add_ps(h2, h3)));
+							_mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+							dst += 4;
+							src += 4;
+						}
+						{
+							__m128 h0 = _mm_min_ps(_mm_mul_ps(_mm_set1_ps(*src++), n), _02);
+							__m128 h1 = _mm_min_ps(_mm_mul_ps(_mm_set1_ps(*src++), n), _02);
+							t = _mm_add_ps(t, _mm_add_ps(h0, h1));
+							__m128 h = _mm_hadd_ps(h0, h1);
+							_mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(h, h)));
+							dst += 2;
+						}
+
+						src = ph + x*Q2;
+						for (int o = 0; o < 8; o += 4)
+						{
+							__m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + Q));
+							__m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
+							__m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
+							__m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
+							__m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
+							_mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+							dst += 4;
+							src += 4;
+						}
+						{
+							__m128 s = _mm_set1_ps(src[0] + src[Q]);
+							__m128 h = _mm_min_ps(_mm_mul_ps(s, n), _02);
+							h = _mm_mul_ps(_05, h);
+							h = _mm_hadd_ps(h, h);
+							h = _mm_hadd_ps(h, h);
+							_mm_store_ss(dst++, h);
+						}
+						_mm_storeu_ps(dst, _mm_mul_ps(t, _02357));
+					}
+				}
+			}
+
+		public:
+
+			void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+			{
+				Init(width, height);
+
+				EstimateHistogram(src, stride, width, height);
+
+				EstimateNorm();
+
+				ExtractFeatures(features);
+			}
+		};
+
+		void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
+		{
+			assert(width % 8 == 0 && height % 8 == 0 && width >= 16 && height >= 16);
+
+			HogFeatureExtractor extractor;
+			extractor.Run(src, stride, width, height, features);
+		}
+
 		SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
 		{
 			src += i;
@@ -399,38 +682,38 @@ namespace Simd
 			Avx512f::Store<false>(dst[i + 3] + offset, _mm512_unpackhi_ps(b1, b3));
 		}
 
-        void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
-        {
-            assert(width >= F && count >= Sse::F);
+		void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
+		{
+			assert(width >= F && count >= Sse::F);
 
-            size_t alignedCount = AlignLo(count, Sse::F);
-            size_t alignedWidth = AlignLo(width, F);
+			size_t alignedCount = AlignLo(count, Sse::F);
+			size_t alignedWidth = AlignLo(width, F);
 
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t rowOffset = row*dstStride;
-                for (size_t col = 0; col < alignedWidth; col += F)
-                {
-                    const float * s = src + count*col;
-                    size_t offset = rowOffset + col;
-                    for (size_t i = 0; i < alignedCount; i += Sse::F)
-                        HogDeinterleave(s, count, dst, offset, i);
-                    if (alignedCount != count)
-                        HogDeinterleave(s, count, dst, offset, count - Sse::F);
-                }
-                if (alignedWidth != width)
-                {
-                    size_t col = width - F;
-                    const float * s = src + count*col;
-                    size_t offset = rowOffset + col;
-                    for (size_t i = 0; i < alignedCount; i += Sse::F)
-                        HogDeinterleave(s, count, dst, offset, i);
-                    if (alignedCount != count)
-                        HogDeinterleave(s, count, dst, offset, count - Sse::F);
-                }
-                src += srcStride;
-            }
-        }
+			for (size_t row = 0; row < height; ++row)
+			{
+				size_t rowOffset = row*dstStride;
+				for (size_t col = 0; col < alignedWidth; col += F)
+				{
+					const float * s = src + count*col;
+					size_t offset = rowOffset + col;
+					for (size_t i = 0; i < alignedCount; i += Sse::F)
+						HogDeinterleave(s, count, dst, offset, i);
+					if (alignedCount != count)
+						HogDeinterleave(s, count, dst, offset, count - Sse::F);
+				}
+				if (alignedWidth != width)
+				{
+					size_t col = width - F;
+					const float * s = src + count*col;
+					size_t offset = rowOffset + col;
+					for (size_t i = 0; i < alignedCount; i += Sse::F)
+						HogDeinterleave(s, count, dst, offset, i);
+					if (alignedCount != count)
+						HogDeinterleave(s, count, dst, offset, count - Sse::F);
+				}
+				src += srcStride;
+			}
+		}
 	}
 #endif
 }
