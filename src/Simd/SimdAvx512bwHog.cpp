@@ -25,6 +25,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdEnable.h"
+#include "Simd/SimdArray.h"
 #include "Simd/SimdAllocator.hpp"
 
 #include <vector>
@@ -745,19 +746,19 @@ namespace Simd
 
 		class HogSeparableFilter
 		{
-			typedef std::vector<float, Simd::Allocator<float> > Vector32f;
-			typedef std::vector<__m512, Simd::Allocator<__m512> > Vector512f;
+			typedef Array<float> Array32f;
+			typedef Array<__m512> Array512f;
 
 			size_t _w, _h, _s;
-			Vector32f _buffer;
-			Vector512f _filter;
+			Array32f _buffer;
+			Array512f _filter;
 
 			void Init(size_t w, size_t h, size_t rs, size_t cs)
 			{
 				_w = w - rs + 1;
 				_s = AlignHi(_w, F);
 				_h = h - cs + 1;
-				_buffer.resize(_s*h);
+				_buffer.Resize(_s*h);
 			}
 
 			template <bool align> void FilterRows(const float * src, const __m512 * filter, size_t size, float * dst)
@@ -770,7 +771,7 @@ namespace Simd
 
 			void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
 			{
-				_filter.resize(size);
+				_filter.Resize(size);
 				for (size_t i = 0; i < size; ++i)
 					_filter[i] = _mm512_set1_ps(filter[i]);
 
@@ -779,9 +780,9 @@ namespace Simd
 				for (size_t row = 0; row < height; ++row)
 				{
 					for (size_t col = 0; col < alignedWidth; col += F)
-						FilterRows<true>(src + col, _filter.data(), size, dst + col);
+						FilterRows<true>(src + col, _filter.data, size, dst + col);
 					if (alignedWidth != width)
-						FilterRows<false>(src + width - F, _filter.data(), size, dst + width - F);
+						FilterRows<false>(src + width - F, _filter.data, size, dst + width - F);
 					src += srcStride;
 					dst += dstStride;
 				}
@@ -850,7 +851,7 @@ namespace Simd
 
 			template <int add> void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
 			{
-				_filter.resize(size);
+				_filter.Resize(size);
 				for (size_t i = 0; i < size; ++i)
 					_filter[i] = _mm512_set1_ps(filter[i]);
 
@@ -862,11 +863,11 @@ namespace Simd
 				{
 					size_t col = 0;
 					for (; col < fullAlignedWidth; col += QF)
-						FilterCols4x<add>(src + col, srcStride, _filter.data(), size, dst + col);
+						FilterCols4x<add>(src + col, srcStride, _filter.data, size, dst + col);
 					for (; col < alignedWidth; col += F)
-						FilterCols<add, false>(src + col, srcStride, _filter.data(), size, dst + col);
+						FilterCols<add, false>(src + col, srcStride, _filter.data, size, dst + col);
 					if (col < width)
-						FilterCols<add, true>(src + col, srcStride, _filter.data(), size, dst + col, tailMask);
+						FilterCols<add, true>(src + col, srcStride, _filter.data, size, dst + col, tailMask);
 					src += srcStride;
 					dst += dstStride;
 				}
@@ -880,14 +881,14 @@ namespace Simd
 				Init(width, height, rowSize, colSize);
 
 				if (colSize == 10)
-					FilterRows_10(src, srcStride, _w, height, rowFilter, _buffer.data(), _s);
+					FilterRows_10(src, srcStride, _w, height, rowFilter, _buffer.data, _s);
 				else
-					FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data(), _s);
+					FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data, _s);
 
 				if (add)
-					FilterCols<1>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+					FilterCols<1>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
 				else
-					FilterCols<0>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+					FilterCols<0>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
 			}
 		};
 
