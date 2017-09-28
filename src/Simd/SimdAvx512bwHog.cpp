@@ -161,12 +161,12 @@ namespace Simd
 
 			template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m512 & dx, const __m512 & dy, Buffer & buffer, size_t col)
 			{
-				__m512 bestDot = _mm512_setzero_ps();
-				__m512i bestIndex = _mm512_setzero_si512();
 				__m512 _0 = _mm512_set1_ps(-0.0f);
 				__m512 adx = _mm512_andnot_ps(_0, dx);
 				__m512 ady = _mm512_andnot_ps(_0, dy);
-				for (int i = 0; i < 5; ++i)
+				__m512 bestDot = _mm512_fmadd_ps(adx, buffer.cos[0], _mm512_mul_ps(ady, buffer.sin[0]));
+				__m512i bestIndex = buffer.pos[0];
+				for (int i = 1; i < 5; ++i)
 				{
 					__m512 dot = _mm512_fmadd_ps(adx, buffer.cos[i], _mm512_mul_ps(ady, buffer.sin[i]));
 					bestIndex = _mm512_mask_blend_epi32(_mm512_cmp_ps_mask(dot, bestDot, _CMP_GT_OS), bestIndex, buffer.pos[i]);
@@ -430,12 +430,12 @@ namespace Simd
 
 			template <bool align> SIMD_INLINE void GetHistogram(const __m512 & dx, const __m512 & dy, size_t col)
 			{
-				__m512 bestDot = _mm512_setzero_ps();
-				__m512i bestIndex = _mm512_setzero_si512();
 				__m512 _0 = _mm512_set1_ps(-0.0f);
 				__m512 adx = _mm512_andnot_ps(_0, dx);
 				__m512 ady = _mm512_andnot_ps(_0, dy);
-				for (int i = 0; i < 5; ++i)
+				__m512 bestDot = _mm512_fmadd_ps(adx, _cos[0], _mm512_mul_ps(ady, _sin[0]));
+				__m512i bestIndex = _pos[0];
+				for (int i = 1; i < 5; ++i)
 				{
 					__m512 dot = _mm512_fmadd_ps(adx, _cos[i], _mm512_mul_ps(ady, _sin[i]));
 					bestIndex = _mm512_mask_blend_epi32(_mm512_cmp_ps_mask(dot, bestDot, _CMP_GT_OS), bestIndex, _pos[i]);
@@ -748,7 +748,7 @@ namespace Simd
 			Array32f _buffer;
 			Array512f _filter;
 
-			void Init(size_t w, size_t h, size_t rs, size_t cs)
+			SIMD_INLINE void Init(size_t w, size_t h, size_t rs, size_t cs)
 			{
 				_w = w - rs + 1;
 				_s = AlignHi(_w, F);
@@ -756,7 +756,7 @@ namespace Simd
 				_buffer.Resize(_s*h);
 			}
 
-			template <bool align> void FilterRows(const float * src, const __m512 * filter, size_t size, float * dst)
+			template <bool align> SIMD_INLINE void FilterRows(const float * src, const __m512 * filter, size_t size, float * dst)
 			{
 				__m512 sum = _mm512_setzero_ps();
 				for (size_t i = 0; i < size; ++i)
@@ -783,7 +783,7 @@ namespace Simd
 				}
 			}
 
-			template <bool align> void FilterRows_10(const float * src, const __m512 * filter, float * dst)
+			template <bool align> SIMD_INLINE void FilterRows_10(const float * src, const __m512 * filter, float * dst)
 			{
 				__m512  src0 = Avx512f::Load<false>(src + 0);
 				__m512  srcf = Avx512f::Load<false>(src + F);
@@ -819,7 +819,7 @@ namespace Simd
 				}
 			}
 
-			template <int add, bool mask> void FilterCols(const float * src, size_t stride, const __m512 * filter, size_t size, float * dst, __mmask16 tail = -1)
+			template <int add, bool mask> SIMD_INLINE void FilterCols(const float * src, size_t stride, const __m512 * filter, size_t size, float * dst, __mmask16 tail = -1)
 			{
 				__m512 sum = _mm512_setzero_ps();
 				for (size_t i = 0; i < size; ++i, src += stride)
@@ -827,7 +827,7 @@ namespace Simd
 				HogSeparableFilter_Detail::Set<add, mask>(dst, sum, tail);
 			}
 
-			template <int add> void FilterCols4x(const float * src, size_t stride, const __m512 * filter, size_t size, float * dst)
+			template <int add> void SIMD_INLINE FilterCols4x(const float * src, size_t stride, const __m512 * filter, size_t size, float * dst)
 			{
 				__m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
 				for (size_t i = 0; i < size; ++i, src += stride)

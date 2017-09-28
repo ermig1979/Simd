@@ -114,7 +114,7 @@ namespace Simd
                 _buffer.Resize(_s*h);
             }
 
-            template <bool align> void FilterRows(const float * src, const __m128 * filter, size_t size, float * dst)
+            template <bool align> SIMD_INLINE void FilterRows(const float * src, const __m128 * filter, size_t size, float * dst)
             {
                 __m128 sum = _mm_setzero_ps();
                 for (size_t i = 0; i < size; ++i)
@@ -141,7 +141,7 @@ namespace Simd
                 }
             }
 
-            template <int add, bool end> void FilterCols(const float * src, size_t stride, const __m128 * filter, size_t size, float * dst, const __m128 & mask)
+            template <int add, bool end> SIMD_INLINE void FilterCols(const float * src, size_t stride, const __m128 * filter, size_t size, float * dst, const __m128 & mask)
             {
                 __m128 sum = _mm_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)

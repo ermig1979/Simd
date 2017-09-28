@@ -73,7 +73,7 @@ namespace Simd
                     Free(_p);
                 }
 
-                void ClearHist()
+				SIMD_INLINE void ClearHist()
                 {
                     memset(hist, 0, hs);
                 }
@@ -88,12 +88,12 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m128 & dx, const __m128 & dy, Buffer & buffer, size_t col)
             {
-                __m128 bestDot = _mm_setzero_ps();
-                __m128i bestIndex = _mm_setzero_si128();
                 __m128 _0 = _mm_set1_ps(-0.0f);
                 __m128 adx = _mm_andnot_ps(_0, dx);
                 __m128 ady = _mm_andnot_ps(_0, dy);
-                for (int i = 0; i < 5; ++i)
+				__m128 bestDot = _mm_add_ps(_mm_mul_ps(adx, buffer.cos[0]), _mm_mul_ps(ady, buffer.sin[0]));
+				__m128i bestIndex = buffer.pos[0];
+                for (int i = 1; i < 5; ++i)
                 {
                     __m128 dot = _mm_add_ps(_mm_mul_ps(adx, buffer.cos[i]), _mm_mul_ps(ady, buffer.sin[i]));
                     __m128 mask = _mm_cmpgt_ps(dot, bestDot);
@@ -352,12 +352,12 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m128 & dx, const __m128 & dy, size_t col)
             {
-                __m128 bestDot = _mm_setzero_ps();
-                __m128i bestIndex = _mm_setzero_si128();
                 __m128 _0 = _mm_set1_ps(-0.0f);
                 __m128 adx = _mm_andnot_ps(_0, dx);
                 __m128 ady = _mm_andnot_ps(_0, dy);
-                for (int i = 0; i < 5; ++i)
+                __m128 bestDot = _mm_add_ps(_mm_mul_ps(adx, _cos[0]), _mm_mul_ps(ady, _sin[0]));
+                __m128i bestIndex = _pos[0];
+                for (int i = 1; i < 5; ++i)
                 {
                     __m128 dot = _mm_add_ps(_mm_mul_ps(adx, _cos[i]), _mm_mul_ps(ady, _sin[i]));
                     __m128 mask = _mm_cmpgt_ps(dot, bestDot);
@@ -394,7 +394,7 @@ namespace Simd
                 GetHistogram<align>(SubUnpackedU8<1>(r, l), SubUnpackedU8<1>(b, t), col + 8);
             }
 
-            void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
+			void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
             {
                 const uint8_t * s = src + stride*row;
                 GetHistogram<false>(s, stride, 1);

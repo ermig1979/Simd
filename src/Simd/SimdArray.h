@@ -33,20 +33,20 @@ namespace Simd
 		T * const data;
 		size_t const size;
 
-		Array(size_t s = 0)
+		SIMD_INLINE Array(size_t s = 0)
 			: data(0)
 			, size(0)
 		{
 			Resize(s);
 		}
 
-		~Array()
+		SIMD_INLINE ~Array()
 		{
 			if (data)
 				Simd::Free(data);
 		}
 
-		void Resize(size_t s)
+		SIMD_INLINE void Resize(size_t s)
 		{
 			if (s != size)
 			{
@@ -58,17 +58,17 @@ namespace Simd
 			}
 		}
 
-		void Clear()
+		SIMD_INLINE void Clear()
 		{
 			::memset(data, 0, size * sizeof(T));
 		}
 
-		T & operator[] (size_t i)
+		SIMD_INLINE T & operator[] (size_t i)
 		{
 			return data[i];
 		}
 
-		const T & operator[] (size_t i) const
+		SIMD_INLINE const T & operator[] (size_t i) const
 		{
 			return data[i];
 		}

@@ -171,12 +171,12 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256 & dx, const __m256 & dy, Buffer & buffer, size_t col)
             {
-                __m256 bestDot = _mm256_setzero_ps();
-                __m256i bestIndex = _mm256_setzero_si256();
                 __m256 _0 = _mm256_set1_ps(-0.0f);
                 __m256 adx = _mm256_andnot_ps(_0, dx);
                 __m256 ady = _mm256_andnot_ps(_0, dy);
-                for (int i = 0; i < 5; ++i)
+				__m256 bestDot = _mm256_fmadd_ps(adx, buffer.cos[0], _mm256_mul_ps(ady, buffer.sin[0]));
+				__m256i bestIndex = buffer.pos[0];
+				for (int i = 1; i < 5; ++i)
                 {
                     __m256 dot = _mm256_fmadd_ps(adx, buffer.cos[i], _mm256_mul_ps(ady, buffer.sin[i]));
                     __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
@@ -452,12 +452,12 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m256 & dx, const __m256 & dy, size_t col)
             {
-                __m256 bestDot = _mm256_setzero_ps();
-                __m256i bestIndex = _mm256_setzero_si256();
                 __m256 _0 = _mm256_set1_ps(-0.0f);
                 __m256 adx = _mm256_andnot_ps(_0, dx);
                 __m256 ady = _mm256_andnot_ps(_0, dy);
-                for (int i = 0; i < 5; ++i)
+				__m256 bestDot = _mm256_fmadd_ps(adx, _cos[0], _mm256_mul_ps(ady, _sin[0]));
+				__m256i bestIndex = _pos[0];
+				for (int i = 1; i < 5; ++i)
                 {
                     __m256 dot = _mm256_fmadd_ps(adx, _cos[i], _mm256_mul_ps(ady, _sin[i]));
                     __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
@@ -780,7 +780,7 @@ namespace Simd
                 _buffer.Resize(_s*h);
             }
 
-            template <bool align> void FilterRows(const float * src, const __m256 * filter, size_t size, float * dst)
+            template <bool align> SIMD_INLINE void FilterRows(const float * src, const __m256 * filter, size_t size, float * dst)
             {
                 __m256 sum = _mm256_setzero_ps();
                 for (size_t i = 0; i < size; ++i)
@@ -807,7 +807,7 @@ namespace Simd
                 }
             }
 
-            template <bool align> void FilterRows_10(const float * src, const __m256 * filter, float * dst)
+            template <bool align> SIMD_INLINE void FilterRows_10(const float * src, const __m256 * filter, float * dst)
             {
                 __m256  src0 = Avx::Load<false>(src + 0);
                 __m256  src4 = Avx::Load<false>(src + 4);
@@ -844,7 +844,7 @@ namespace Simd
                 }
             }
 
-            template <int add, bool end> void FilterCols(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
+            template <int add, bool end> SIMD_INLINE void FilterCols(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
             {
                 __m256 sum = _mm256_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
@@ -852,7 +852,7 @@ namespace Simd
                 HogSeparableFilter_Detail::Set<add, end>(dst, sum, mask);
             }
 
-            template <int add, bool end> void FilterCols4x(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
+            template <int add, bool end> SIMD_INLINE void FilterCols4x(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst, const __m256 & mask)
             {
                 __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
                 for (size_t i = 0; i < size; ++i, src += stride)
