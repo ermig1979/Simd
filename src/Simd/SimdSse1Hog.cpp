@@ -21,12 +21,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdEnable.h"
-#include "Simd/SimdAllocator.hpp"
-
-#include <vector>
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -103,19 +100,19 @@ namespace Simd
 
         class HogSeparableFilter
         {
-            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
-            typedef std::vector<__m128, Simd::Allocator<__m128> > Vector128f;
+			typedef Array<float> Array32f;
+			typedef Array<__m128> Array128f;
 
             size_t _w, _h, _s;
-            Vector32f _buffer;
-            Vector128f _filter;
+			Array32f _buffer;
+			Array128f _filter;
 
             void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
                 _w = w - rs + 1;
                 _s = AlignHi(_w, F);
                 _h = h - cs + 1;
-                _buffer.resize(_s*h);
+                _buffer.Resize(_s*h);
             }
 
             template <bool align> void FilterRows(const float * src, const __m128 * filter, size_t size, float * dst)
@@ -128,7 +125,7 @@ namespace Simd
 
             void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
-                _filter.resize(size);
+                _filter.Resize(size);
                 for (size_t i = 0; i < size; ++i)
                     _filter[i] = _mm_set1_ps(filter[i]);
 
@@ -137,9 +134,9 @@ namespace Simd
                 for (size_t row = 0; row < height; ++row)
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
-                        FilterRows<true>(src + col, _filter.data(), size, dst + col);
+                        FilterRows<true>(src + col, _filter.data, size, dst + col);
                     if(alignedWidth != width)
-                        FilterRows<false>(src + width - F, _filter.data(), size, dst + width - F);
+                        FilterRows<false>(src + width - F, _filter.data, size, dst + width - F);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -155,7 +152,7 @@ namespace Simd
 
             template <int add> void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
-                _filter.resize(size);
+                _filter.Resize(size);
                 for (size_t i = 0; i < size; ++i)
                     _filter[i] = _mm_set1_ps(filter[i]);
 
@@ -165,9 +162,9 @@ namespace Simd
                 for (size_t row = 0; row < height; ++row)
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
-                        FilterCols<add, false>(src + col, srcStride, _filter.data(), size, dst + col, tailMask);
+                        FilterCols<add, false>(src + col, srcStride, _filter.data, size, dst + col, tailMask);
                     if (alignedWidth != width)
-                        FilterCols<add, true>(src + width - F, srcStride, _filter.data(), size, dst + width - F, tailMask);
+                        FilterCols<add, true>(src + width - F, srcStride, _filter.data, size, dst + width - F, tailMask);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -180,12 +177,12 @@ namespace Simd
             {
                 Init(width, height, rowSize, colSize);
 
-                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data(), _s);
+                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data, _s);
 
                 if (add)
-                    FilterCols<1>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<1>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
                 else
-                    FilterCols<0>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<0>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
             }
         };
 
