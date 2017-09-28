@@ -21,11 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdAllocator.hpp"
-
-#include <vector>
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -250,8 +246,8 @@ namespace Simd
             static const size_t Q = 9;
             static const size_t Q2 = 18;
 
-            typedef std::vector<int, Simd::Allocator<int> > Vector32i;
-            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+            typedef Array<int> Array32i;
+            typedef Array<float> Array32f;
 
             size_t _sx, _sy, _hs;
 
@@ -259,10 +255,10 @@ namespace Simd
             float _sin[5];
             float _k[C];
 
-            Vector32i _index;
-            Vector32f _value;
-            Vector32f _histogram;
-            Vector32f _norm;
+			Array32i _index;
+			Array32f _value;
+			Array32f _histogram;
+			Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
@@ -276,15 +272,10 @@ namespace Simd
                 }
                 for (int i = 0; i < C; ++i)
                     _k[i] = float((1 + i * 2) / 16.0f);
-                _index.resize(w);
-                _value.resize(w);
-                _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
-                _norm.resize((_sx + 2)*(_sy + 2));
-            }
-
-            template<class Vector> SIMD_INLINE void SetZero(Vector & dst)
-            {
-                memset(dst.data(), 0, dst.size()*sizeof(typename Vector::value_type));
+                _index.Resize(w);
+                _value.Resize(w);
+                _histogram.Resize((_sx + 2)*(_sy + 2)*Q2);
+                _norm.Resize((_sx + 2)*(_sy + 2));
             }
 
             void AddRowToHistogram(size_t row, size_t width, size_t height)
@@ -292,8 +283,8 @@ namespace Simd
                 size_t iyp = (row - 4) / C;
                 float vy0 = _k[(row + 4) & 7];
                 float vy1 = 1.0f - vy0;
-                float * h0 = _histogram.data() + ((iyp + 1)*_hs + 0)*Q2;
-                float * h1 = _histogram.data() + ((iyp + 2)*_hs + 0)*Q2;
+                float * h0 = _histogram.data + ((iyp + 1)*_hs + 0)*Q2;
+                float * h1 = _histogram.data + ((iyp + 2)*_hs + 0)*Q2;
                 for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
                 {
                     for (; i < n; ++i, ++col)
@@ -314,7 +305,7 @@ namespace Simd
 
             void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
-                SetZero(_histogram);
+                _histogram.Clear();
                 for (size_t row = 1; row < height - 1; ++row)
                 {
                     const uint8_t * src1 = src + stride*row;
@@ -355,11 +346,11 @@ namespace Simd
 
             void EstimateNorm()
             {
-                SetZero(_norm);
+                _norm.Clear();
                 for (size_t y = 0; y < _sy; ++y)
                 {
-                    const float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
-                    float * pn = _norm.data() + (y + 1)*_hs + 1;
+                    const float * ph = _histogram.data + ((y + 1)*_hs + 1)*Q2;
+                    float * pn = _norm.data + (y + 1)*_hs + 1;
                     for (size_t x = 0; x < _sx; ++x)
                     {
                         const float * h = ph + x*Q2;
@@ -380,7 +371,7 @@ namespace Simd
 
                         float *psrc, n1, n2, n3, n4;
 
-                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p0 = _norm.data + y*_hs + x;
                         float * p1 = p0 + _hs;
                         float * p2 = p1 + _hs;
 
@@ -394,7 +385,7 @@ namespace Simd
                         float t3 = 0;
                         float t4 = 0;
 
-                        psrc = _histogram.data() + ((y + 1)*_hs + x + 1)*Q2;
+                        psrc = _histogram.data + ((y + 1)*_hs + x + 1)*Q2;
                         for (int o = 0; o < Q2; o++)
                         {
                             float h1 = Simd::Min(*psrc * n1, 0.2f);
@@ -410,7 +401,7 @@ namespace Simd
                             psrc++;
                         }
 
-                        psrc = _histogram.data() + ((y + 1)*_hs + x + 1)*Q2;
+                        psrc = _histogram.data + ((y + 1)*_hs + x + 1)*Q2;
                         for (int o = 0; o < Q; o++)
                         {
                             float sum = *psrc + *(psrc + Q);
@@ -486,16 +477,16 @@ namespace Simd
 
         class HogSeparableFilter
         {
-            typedef std::vector<float, Simd::Allocator<float> > Vector;
+            typedef Array<float> Array32f;
 
             size_t _w, _h;
-            Vector _buffer;
+            Array32f _buffer;
 
             void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
                 _w = w - rs + 1;
                 _h = h - cs + 1;
-                _buffer.resize(_w*h);
+                _buffer.Resize(_w*h);
             }
 
             void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -540,12 +531,12 @@ namespace Simd
             {
                 Init(width, height, rowSize, colSize);
 
-                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data(), _w);
+                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data, _w);
 
                 if(add)
-                    FilterCols<1>(_buffer.data(), _w, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<1>(_buffer.data, _w, _w, _h, colFilter, colSize, dst, dstStride);
                 else
-                    FilterCols<0>(_buffer.data(), _w, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<0>(_buffer.data, _w, _w, _h, colFilter, colSize, dst, dstStride);
             }
         };
 

@@ -48,8 +48,14 @@ namespace Simd
 
 		void Resize(size_t s)
 		{
-			*(size_t*)&size = s;
-			*(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
+			if (s != size)
+			{
+				if(data)
+					Simd::Free(data);
+				*(size_t*)&size = s;
+				if (s)
+					*(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
+			}
 		}
 
 		void Clear()
