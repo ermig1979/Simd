@@ -74,11 +74,6 @@ namespace Simd
     }
 #endif
 
-    template<class Vector> SIMD_INLINE void SetZero(Vector & dst)
-    {
-        memset(dst.data(), 0, dst.size()*sizeof(typename Vector::value_type));
-    }
-
     namespace Base
     {
         SIMD_INLINE int Min(int a, int b)

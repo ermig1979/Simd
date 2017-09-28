@@ -24,11 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdMemory.h"
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdAllocator.hpp"
-
-#include <vector>
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -310,8 +306,8 @@ namespace Simd
             static const size_t Q = 9;
             static const size_t Q2 = 18;
 
-            typedef std::vector<int, Simd::Allocator<int> > Vector32i;
-            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+			typedef Array<int> Array32i;
+			typedef Array<float> Array32f;
 
             size_t _sx, _sy, _hs;
 
@@ -320,11 +316,11 @@ namespace Simd
             __m128 _kx[8], _ky[8];
             __m128i _Q, _Q2;
 
-            Vector32i _index;
-            Vector32f _value;
-            Vector32f _buffer;
-            Vector32f _histogram;
-            Vector32f _norm;
+			Array32i _index;
+			Array32f _value;
+			Array32f _buffer;
+			Array32f _histogram;
+			Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
@@ -347,11 +343,11 @@ namespace Simd
                 _Q = _mm_set1_epi32(Q);
                 _Q2 = _mm_set1_epi32(Q2);
 
-                _index.resize(w);
-                _value.resize(w);
-                _buffer.resize((_sx + 1)*4*Q2);
-                _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
-                _norm.resize((_sx + 2)*(_sy + 2));
+                _index.Resize(w);
+                _value.Resize(w);
+                _buffer.Resize((_sx + 1)*4*Q2);
+                _histogram.Resize((_sx + 2)*(_sy + 2)*Q2);
+                _norm.Resize((_sx + 2)*(_sy + 2));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m128 & dx, const __m128 & dy, size_t col)
@@ -377,8 +373,8 @@ namespace Simd
 
                 bestIndex = _mm_andnot_si128(_mm_cmpeq_epi32(bestIndex, _Q2), bestIndex);
 
-                Store<align>((__m128i*)(_index.data() + col), bestIndex);
-                Sse::Store<align>(_value.data() + col, Sse::Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
+                Store<align>((__m128i*)(_index.data + col), bestIndex);
+                Sse::Store<align>(_value.data + col, Sse::Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m128i & dx, const __m128i & dy, size_t col)
@@ -406,7 +402,7 @@ namespace Simd
                     GetHistogram<true>(s, stride, col);
                 GetHistogram<false>(s, stride, width - 1 - A);
 
-                __m128 * buffer = (__m128*)_buffer.data();
+                __m128 * buffer = (__m128*)_buffer.data;
                 __m128 ky = _ky[(row + 4) & 7];
                 for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
                 {
@@ -423,8 +419,8 @@ namespace Simd
             void AddToHistogram(size_t row, size_t width, size_t height)
             {
                 typedef float f18_t[18];
-                float * src = _buffer.data();
-                f18_t * h0 = (f18_t*)_histogram.data() + row*_hs;
+                float * src = _buffer.data;
+                f18_t * h0 = (f18_t*)_histogram.data + row*_hs;
                 f18_t * h1 = h0 + _hs;
                 for (size_t cell = 0; cell <= width; ++cell)
                 {
@@ -451,16 +447,16 @@ namespace Simd
                     h1++;
                     src += 4 * Q2;
                 }
-                SetZero(_buffer);
+                _buffer.Clear();
            }
 
             void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
-                SetZero(_histogram);
+                _histogram.Clear();
 
                 size_t aligned = AlignHi(width - 1, A) - A;
 
-                SetZero(_buffer);
+                _buffer.Clear();
                 for (size_t row = 1; row < 4; ++row)
                     AddRowToBuffer(src, stride, row, width, aligned);
                 AddToHistogram(0, _sx, _sy);
@@ -492,11 +488,11 @@ namespace Simd
 
             void EstimateNorm()
             {
-                SetZero(_norm);
+                _norm.Clear();
                 for (size_t y = 0, i = 0; y < _sy; y++)
                 {
-                    const float * h = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
-                    float * n = _norm.data() + (y + 1)*_hs + 1;
+                    const float * h = _histogram.data + ((y + 1)*_hs + 1)*Q2;
+                    float * n = _norm.data + (y + 1)*_hs + 1;
                     for (size_t x = 0; x < _sx; x++, i++)
                         n[x] = GetNorm(h + x*Q2);
                 }
@@ -510,12 +506,12 @@ namespace Simd
                 __m128 eps = _mm_set1_ps(0.0001f);
                 for (size_t y = 0; y < _sy; y++)
                 {
-                    float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    float * ph = _histogram.data + ((y + 1)*_hs + 1)*Q2;
                     for (size_t x = 0; x < _sx; x++)
                     {
                         float * dst = features + (y*_sx + x) * 31;
 
-                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p0 = _norm.data + y*_hs + x;
                         float * p1 = p0 + _hs;
                         float * p2 = p1 + _hs;
 
