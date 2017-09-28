@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdArray.h"
 
 namespace Simd

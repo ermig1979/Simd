@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdStore.h"
-#include "Simd/SimdEnable.h"
 #include "Simd/SimdArray.h"
 
 namespace Simd
