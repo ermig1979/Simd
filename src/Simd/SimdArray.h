@@ -33,11 +33,11 @@ namespace Simd
 		T * const data;
 		size_t const size;
 
-		SIMD_INLINE Array(size_t s = 0)
+		SIMD_INLINE Array(size_t size_ = 0, bool clear = false)
 			: data(0)
 			, size(0)
 		{
-			Resize(s);
+			Resize(size_, clear);
 		}
 
 		SIMD_INLINE ~Array()
@@ -46,16 +46,18 @@ namespace Simd
 				Simd::Free(data);
 		}
 
-		SIMD_INLINE void Resize(size_t s)
+		SIMD_INLINE void Resize(size_t size_, bool clear = false)
 		{
-			if (s != size)
+			if (size_ != size)
 			{
 				if(data)
 					Simd::Free(data);
-				*(size_t*)&size = s;
-				if (s)
+				*(size_t*)&size = size_;
+				if (size_)
 					*(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
 			}
+			if (clear)
+				Clear();
 		}
 
 		SIMD_INLINE void Clear()

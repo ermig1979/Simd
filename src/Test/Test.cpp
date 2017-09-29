@@ -255,6 +255,8 @@ namespace Test
     TEST_ADD_GROUP(OperationBinary16i);
     TEST_ADD_GROUP(VectorProduct);
 
+	TEST_ADD_GROUP(PseudoHogExtractHistogram8x8x8);
+
     TEST_ADD_GROUP(ReduceGray2x2);
     TEST_ADD_GROUP(ReduceGray3x3);
     TEST_ADD_GROUP(ReduceGray4x4);

@@ -3410,6 +3410,11 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
 }
 
+SIMD_API void SimdPseudoHogExtractHistogram8x8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride)
+{
+	Base::PseudoHogExtractHistogram8x8x8(src, srcStride, width, height, histogram, histogramStride);
+}
+
 SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
                    uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
 {
