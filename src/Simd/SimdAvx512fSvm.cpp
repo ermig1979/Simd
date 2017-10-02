@@ -57,26 +57,26 @@ namespace Simd
         {
             Buffer buffer(count);
             size_t alignedCount = AlignLo(count, F);
-			__mmask16 tailMask = TailMask16(count - alignedCount);
+            __mmask16 tailMask = TailMask16(count - alignedCount);
 
-            for(size_t j = 0; j < length; ++j)
+            for (size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
                 __m512 _v = _mm512_set1_ps(v);
-                for(; i < alignedCount; i += F)
+                for (; i < alignedCount; i += F)
                     Store<true>(buffer.sums + i, _mm512_fmadd_ps(_v, Load<false>(svs + i), Load<true>(buffer.sums + i)));
-				if(i < count)
-					Store<true, true>(buffer.sums + i, _mm512_fmadd_ps(_v, (Load<false, true>(svs + i, tailMask)), (Load<true, true>(buffer.sums + i, tailMask))), tailMask);
+                if (i < count)
+                    Store<true, true>(buffer.sums + i, _mm512_fmadd_ps(_v, (Load<false, true>(svs + i, tailMask)), (Load<true, true>(buffer.sums + i, tailMask))), tailMask);
                 svs += count;
             }
 
             size_t i = 0;
             __m512 _sum = _mm512_setzero_ps();
-            for(; i < alignedCount; i += F)
-				_sum = _mm512_fmadd_ps(Load<true>(buffer.sums + i), Load<false>(weights + i), _sum);
-			if (i < count)
-				_sum = _mm512_fmadd_ps((Load<true, true>(buffer.sums + i, tailMask)), (Load<false, true>(weights + i, tailMask)), _sum);
+            for (; i < alignedCount; i += F)
+                _sum = _mm512_fmadd_ps(Load<true>(buffer.sums + i), Load<false>(weights + i), _sum);
+            if (i < count)
+                _sum = _mm512_fmadd_ps((Load<true, true>(buffer.sums + i, tailMask)), (Load<false, true>(weights + i, tailMask)), _sum);
             *sum = ExtractSum(_sum);
         }
     }
