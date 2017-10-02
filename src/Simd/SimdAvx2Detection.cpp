@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -29,8 +29,8 @@
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         using namespace Simd::Detection;
 
         const __m256i K32_PERMUTE = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
@@ -237,7 +237,7 @@ namespace Simd
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += 8)
                 {
                     __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
@@ -291,11 +291,11 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
@@ -469,7 +469,7 @@ namespace Simd
                 size_t offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += 8)
                 {
                     __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
@@ -520,10 +520,10 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
+                size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
@@ -650,7 +650,7 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m256i mask = LeafMask(feature, offset, subset);
-                    sum = _mm256_add_epi16(sum, _mm256_blendv_epi8(_mm256_set1_epi16(leaves[leafOffset + 1]),  _mm256_set1_epi16(leaves[leafOffset + 0]), mask));
+                    sum = _mm256_add_epi16(sum, _mm256_blendv_epi8(_mm256_set1_epi16(leaves[leafOffset + 1]), _mm256_set1_epi16(leaves[leafOffset + 0]), mask));
                     nodeOffset++;
                     leafOffset += 2;
                 }
@@ -687,7 +687,7 @@ namespace Simd
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint16_t));
+                memset(buffer.d, 0, width * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m256i result = _mm256_loadu_si256((__m256i*)(buffer.m + col));
@@ -737,7 +737,7 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left/2;
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left / 2;
                 const uint8_t * m = mask.data + row*mask.stride + rect.left;
                 uint8_t * d = dst.data + row*dst.stride + rect.left;
                 for (; col < alignedWidth; col += A)
@@ -778,6 +778,6 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
-	}
+    }
 #endif// SIMD_AVX2_ENABLE
 }

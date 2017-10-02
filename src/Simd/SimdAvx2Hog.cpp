@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -28,33 +28,33 @@
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         namespace
         {
             struct Buffer
             {
                 const int size;
-                __m256 * cos, * sin;
-                __m256i * pos, * neg; 
+                __m256 * cos, *sin;
+                __m256i * pos, *neg;
                 int * index;
                 float * value;
 
                 Buffer(size_t width, size_t quantization)
-                    : size((int)quantization/2)
+                    : size((int)quantization / 2)
                 {
-                    width = AlignHi(width, A/sizeof(float));
-                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + (sizeof(__m256i) + sizeof(__m256))*2*size);
+                    width = AlignHi(width, A / sizeof(float));
+                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + (sizeof(__m256i) + sizeof(__m256)) * 2 * size);
                     index = (int*)_p - 1;
                     value = (float*)index + width;
                     cos = (__m256*)(value + width + 1);
                     sin = cos + size;
                     pos = (__m256i*)(sin + size);
                     neg = pos + size;
-                    for(int i = 0; i < size; ++i)
+                    for (int i = 0; i < size; ++i)
                     {
-                        cos[i] = _mm256_set1_ps((float)::cos(i*M_PI/size));
-                        sin[i] = _mm256_set1_ps((float)::sin(i*M_PI/size));
+                        cos[i] = _mm256_set1_ps((float)::cos(i*M_PI / size));
+                        sin[i] = _mm256_set1_ps((float)::sin(i*M_PI / size));
                         pos[i] = _mm256_set1_epi32(i);
                         neg[i] = _mm256_set1_epi32(size + i);
                     }
@@ -74,7 +74,7 @@ namespace Simd
         {
             __m256 bestDot = _mm256_setzero_ps();
             __m256i bestIndex = _mm256_setzero_si256();
-            for(int i = 0; i < buffer.size; ++i)
+            for (int i = 0; i < buffer.size; ++i)
             {
                 __m256 dot = _mm256_fmadd_ps(dx, buffer.cos[i], _mm256_mul_ps(dy, buffer.sin[i]));
                 __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
@@ -93,12 +93,12 @@ namespace Simd
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m256i & t, const __m256i & l, const __m256i & r, const __m256i & b, Buffer & buffer, size_t col)
         {
             HogDirectionHistograms<align>(
-                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(r, K_ZERO), _mm256_unpacklo_epi16(l, K_ZERO))), 
-                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(b, K_ZERO), _mm256_unpacklo_epi16(t, K_ZERO))), 
+                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(r, K_ZERO), _mm256_unpacklo_epi16(l, K_ZERO))),
+                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpacklo_epi16(b, K_ZERO), _mm256_unpacklo_epi16(t, K_ZERO))),
                 buffer, col + 0);
             HogDirectionHistograms<align>(
-                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(r, K_ZERO), _mm256_unpackhi_epi16(l, K_ZERO))), 
-                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(b, K_ZERO), _mm256_unpackhi_epi16(t, K_ZERO))), 
+                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(r, K_ZERO), _mm256_unpackhi_epi16(l, K_ZERO))),
+                _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_unpackhi_epi16(b, K_ZERO), _mm256_unpackhi_epi16(t, K_ZERO))),
                 buffer, col + 8);
         }
 
@@ -174,9 +174,9 @@ namespace Simd
                 __m256 _0 = _mm256_set1_ps(-0.0f);
                 __m256 adx = _mm256_andnot_ps(_0, dx);
                 __m256 ady = _mm256_andnot_ps(_0, dy);
-				__m256 bestDot = _mm256_fmadd_ps(adx, buffer.cos[0], _mm256_mul_ps(ady, buffer.sin[0]));
-				__m256i bestIndex = buffer.pos[0];
-				for (int i = 1; i < 5; ++i)
+                __m256 bestDot = _mm256_fmadd_ps(adx, buffer.cos[0], _mm256_mul_ps(ady, buffer.sin[0]));
+                __m256i bestIndex = buffer.pos[0];
+                for (int i = 1; i < 5; ++i)
                 {
                     __m256 dot = _mm256_fmadd_ps(adx, buffer.cos[i], _mm256_mul_ps(ady, buffer.sin[i]));
                     __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
@@ -228,8 +228,8 @@ namespace Simd
                     int index = buffer.index[col];
                     __m128 value = _mm_set1_ps(buffer.value[col]);
                     __m128 kx = buffer.kx[(col + 4) & 7];
-					hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
-				}
+                    hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
+                }
                 hist += 18;
 
                 for (size_t cell = 1, col = 4; cell < cellEnd; ++cell)
@@ -239,8 +239,8 @@ namespace Simd
                         int index = buffer.index[col];
                         __m128 value = _mm_set1_ps(buffer.value[col]);
                         __m128 kx = buffer.kx[i];
-						hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
-					}
+                        hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
+                    }
                     hist += 18;
                 }
 
@@ -249,8 +249,8 @@ namespace Simd
                     int index = buffer.index[col];
                     __m128 value = _mm_set1_ps(buffer.value[col]);
                     __m128 kx = buffer.kx[(col + 4) & 7];
-					hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
-				}
+                    hist[index] = _mm_fmadd_ps(_mm_mul_ps(ky, kx), value, hist[index]);
+                }
             }
 
             void AddToHistogram(Buffer & buffer, size_t row, size_t width, size_t height, float * histograms)
@@ -311,22 +311,22 @@ namespace Simd
                     src += 72;
                     for (size_t cell = 1; cell < width; ++cell)
                     {
-						for (size_t i = 0; i < 16; i += F)
-						{
-							const float * s = src + i*4;
-							__m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
-							__m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
-							__m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
-							__m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
-							__m256 b0 = _mm256_unpacklo_ps(a0, a2);
-							__m256 b1 = _mm256_unpackhi_ps(a0, a2);
-							__m256 b2 = _mm256_unpacklo_ps(a1, a3);
-							__m256 b3 = _mm256_unpackhi_ps(a1, a3);
-							Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
-							Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
-							Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
-							Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
-						}
+                        for (size_t i = 0; i < 16; i += F)
+                        {
+                            const float * s = src + i * 4;
+                            __m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
+                            __m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
+                            __m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
+                            __m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
+                            __m256 b0 = _mm256_unpacklo_ps(a0, a2);
+                            __m256 b1 = _mm256_unpackhi_ps(a0, a2);
+                            __m256 b2 = _mm256_unpacklo_ps(a1, a3);
+                            __m256 b3 = _mm256_unpackhi_ps(a1, a3);
+                            Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
+                            Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
+                            Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
+                            Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
+                        }
                         for (size_t i = 16; i < 18; ++i)
                         {
                             h0[0][i] += src[i * 4 + 0];
@@ -353,7 +353,7 @@ namespace Simd
 
                 size_t sizeX = width / 8, sizeY = height / 8;
 
-                memset(histograms, 0, quantization*sizeX*sizeY*sizeof(float));
+                memset(histograms, 0, quantization*sizeX*sizeY * sizeof(float));
 
                 Buffer buffer(width);
 
@@ -374,16 +374,16 @@ namespace Simd
             }
         }
 
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
-            assert(width%cellX == 0 && height%cellY == 0 && quantization%2 == 0);
+            assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
 
             if (cellX == 8 && cellY == 8 && quantization == 18)
                 Custom_8x8_18::HogDirectionHistograms(src, stride, width, height, histograms);
             else
             {
-                memset(histograms, 0, quantization*(width / cellX)*(height / cellY)*sizeof(float));
+                memset(histograms, 0, quantization*(width / cellX)*(height / cellY) * sizeof(float));
 
                 Buffer buffer(width, quantization);
 
@@ -416,11 +416,11 @@ namespace Simd
             __m128 _kx[8], _ky[8];
             __m256i _Q, _Q2;
 
-			Array32i _index;
-			Array32f _value;
-			Array32f _buffer;
-			Array32f _histogram;
-			Array32f _norm;
+            Array32i _index;
+            Array32f _value;
+            Array32f _buffer;
+            Array32f _histogram;
+            Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
@@ -455,9 +455,9 @@ namespace Simd
                 __m256 _0 = _mm256_set1_ps(-0.0f);
                 __m256 adx = _mm256_andnot_ps(_0, dx);
                 __m256 ady = _mm256_andnot_ps(_0, dy);
-				__m256 bestDot = _mm256_fmadd_ps(adx, _cos[0], _mm256_mul_ps(ady, _sin[0]));
-				__m256i bestIndex = _pos[0];
-				for (int i = 1; i < 5; ++i)
+                __m256 bestDot = _mm256_fmadd_ps(adx, _cos[0], _mm256_mul_ps(ady, _sin[0]));
+                __m256i bestIndex = _pos[0];
+                for (int i = 1; i < 5; ++i)
                 {
                     __m256 dot = _mm256_fmadd_ps(adx, _cos[i], _mm256_mul_ps(ady, _sin[i]));
                     __m256 mask = _mm256_cmp_ps(dot, bestDot, _CMP_GT_OS);
@@ -509,8 +509,8 @@ namespace Simd
                     {
                         int index = _index[col];
                         __m128 value = _mm_set1_ps(_value[col]);
-						buffer[index] = _mm_fmadd_ps(_mm_mul_ps(ky, _kx[i]), value, buffer[index]);
-					}
+                        buffer[index] = _mm_fmadd_ps(_mm_mul_ps(ky, _kx[i]), value, buffer[index]);
+                    }
                     buffer += Q2;
                 }
             }
@@ -527,19 +527,19 @@ namespace Simd
                 {
                     for (size_t i = 0; i < 16; i += F)
                     {
-						const float * s = src + i * 4;
-						__m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
-						__m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
-						__m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
-						__m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
-						__m256 b0 = _mm256_unpacklo_ps(a0, a2);
-						__m256 b1 = _mm256_unpackhi_ps(a0, a2);
-						__m256 b2 = _mm256_unpacklo_ps(a1, a3);
-						__m256 b3 = _mm256_unpackhi_ps(a1, a3);
-						Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
-						Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
-						Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
-						Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
+                        const float * s = src + i * 4;
+                        __m256 a0 = Avx::Load<true>(s + 0x00, s + 0x10);
+                        __m256 a1 = Avx::Load<true>(s + 0x04, s + 0x14);
+                        __m256 a2 = Avx::Load<true>(s + 0x08, s + 0x18);
+                        __m256 a3 = Avx::Load<true>(s + 0x0C, s + 0x1C);
+                        __m256 b0 = _mm256_unpacklo_ps(a0, a2);
+                        __m256 b1 = _mm256_unpackhi_ps(a0, a2);
+                        __m256 b2 = _mm256_unpacklo_ps(a1, a3);
+                        __m256 b3 = _mm256_unpackhi_ps(a1, a3);
+                        Avx::Store<false>(h0[0] + i, _mm256_add_ps(Avx::Load<false>(h0[0] + i), _mm256_unpacklo_ps(b0, b2)));
+                        Avx::Store<false>(h0[1] + i, _mm256_add_ps(Avx::Load<false>(h0[1] + i), _mm256_unpackhi_ps(b0, b2)));
+                        Avx::Store<false>(h1[0] + i, _mm256_add_ps(Avx::Load<false>(h1[0] + i), _mm256_unpacklo_ps(b1, b3)));
+                        Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                     }
                     __m128 * ps = (__m128*)src;
                     __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h0[0] + 16)), (__m64*)(h0[1] + 16)));
@@ -765,12 +765,12 @@ namespace Simd
 
         class HogSeparableFilter
         {
-			typedef Array<float> Array32f;
-			typedef Array<__m256> Array256f;
+            typedef Array<float> Array32f;
+            typedef Array<__m256> Array256f;
 
             size_t _w, _h, _s;
-			Array32f _buffer;
-			Array256f _filter;
+            Array32f _buffer;
+            Array256f _filter;
 
             void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
@@ -858,15 +858,15 @@ namespace Simd
                 for (size_t i = 0; i < size; ++i, src += stride)
                 {
                     __m256 f = filter[i];
-                    sums[0] = _mm256_fmadd_ps(Avx::Load<!end>(src + 0*F), f, sums[0]);
-                    sums[1] = _mm256_fmadd_ps(Avx::Load<!end>(src + 1*F), f, sums[1]);
-                    sums[2] = _mm256_fmadd_ps(Avx::Load<!end>(src + 2*F), f, sums[2]);
-                    sums[3] = _mm256_fmadd_ps(Avx::Load<!end>(src + 3*F), f, sums[3]);
+                    sums[0] = _mm256_fmadd_ps(Avx::Load<!end>(src + 0 * F), f, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(Avx::Load<!end>(src + 1 * F), f, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(Avx::Load<!end>(src + 2 * F), f, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(Avx::Load<!end>(src + 3 * F), f, sums[3]);
                 }
-                HogSeparableFilter_Detail::Set<add, end>(dst + 0*F, sums[0], mask);
-                HogSeparableFilter_Detail::Set<add, end>(dst + 1*F, sums[1], mask);
-                HogSeparableFilter_Detail::Set<add, end>(dst + 2*F, sums[2], mask);
-                HogSeparableFilter_Detail::Set<add, end>(dst + 3*F, sums[3], mask);
+                HogSeparableFilter_Detail::Set<add, end>(dst + 0 * F, sums[0], mask);
+                HogSeparableFilter_Detail::Set<add, end>(dst + 1 * F, sums[1], mask);
+                HogSeparableFilter_Detail::Set<add, end>(dst + 2 * F, sums[2], mask);
+                HogSeparableFilter_Detail::Set<add, end>(dst + 3 * F, sums[3], mask);
             }
 
             template <int add> void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -920,6 +920,6 @@ namespace Simd
             HogSeparableFilter filter;
             filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
         }
-	}
+    }
 #endif
 }

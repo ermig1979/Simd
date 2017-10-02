@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -54,7 +54,7 @@ namespace Simd
             }
             for (; i < partialAlignedSize; i += F)
                 Float32ToFloat16<align>(src + i, dst + i);
-            if(partialAlignedSize != size)
+            if (partialAlignedSize != size)
                 Float32ToFloat16<false>(src + size - F, dst + size - F);
         }
 
@@ -124,10 +124,10 @@ namespace Simd
             {
                 for (; i < fullAlignedSize; i += QF)
                 {
-                    SquaredDifferenceSum16f<align>(a, b, i + F*0, sums[0]);
-                    SquaredDifferenceSum16f<align>(a, b, i + F*1, sums[1]);
-                    SquaredDifferenceSum16f<align>(a, b, i + F*2, sums[2]);
-                    SquaredDifferenceSum16f<align>(a, b, i + F*3, sums[3]);
+                    SquaredDifferenceSum16f<align>(a, b, i + F * 0, sums[0]);
+                    SquaredDifferenceSum16f<align>(a, b, i + F * 1, sums[1]);
+                    SquaredDifferenceSum16f<align>(a, b, i + F * 2, sums[2]);
+                    SquaredDifferenceSum16f<align>(a, b, i + F * 3, sums[3]);
                 }
                 sums[0] = _mm256_add_ps(_mm256_add_ps(sums[0], sums[1]), _mm256_add_ps(sums[2], sums[3]));
             }
@@ -140,9 +140,9 @@ namespace Simd
                 __m256 _b = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(b + size - F)));
                 __m256 _d = _mm256_and_ps(_mm256_sub_ps(_a, _b), mask);
                 sums[0] = _mm256_fmadd_ps(_d, _d, sums[0]);
-			}
+            }
             *sum = Avx::ExtractSum(sums[0]);
-		}
+        }
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
         {

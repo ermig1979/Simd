@@ -28,53 +28,53 @@
 
 namespace Simd
 {
-	template <class T> struct Array
-	{
-		T * const data;
-		size_t const size;
+    template <class T> struct Array
+    {
+        T * const data;
+        size_t const size;
 
-		SIMD_INLINE Array(size_t size_ = 0, bool clear = false)
-			: data(0)
-			, size(0)
-		{
-			Resize(size_, clear);
-		}
+        SIMD_INLINE Array(size_t size_ = 0, bool clear = false)
+            : data(0)
+            , size(0)
+        {
+            Resize(size_, clear);
+        }
 
-		SIMD_INLINE ~Array()
-		{
-			if (data)
-				Simd::Free(data);
-		}
+        SIMD_INLINE ~Array()
+        {
+            if (data)
+                Simd::Free(data);
+        }
 
-		SIMD_INLINE void Resize(size_t size_, bool clear = false)
-		{
-			if (size_ != size)
-			{
-				if(data)
-					Simd::Free(data);
-				*(size_t*)&size = size_;
-				if (size_)
-					*(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
-			}
-			if (clear)
-				Clear();
-		}
+        SIMD_INLINE void Resize(size_t size_, bool clear = false)
+        {
+            if (size_ != size)
+            {
+                if (data)
+                    Simd::Free(data);
+                *(size_t*)&size = size_;
+                if (size_)
+                    *(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
+            }
+            if (clear)
+                Clear();
+        }
 
-		SIMD_INLINE void Clear()
-		{
-			::memset(data, 0, size * sizeof(T));
-		}
+        SIMD_INLINE void Clear()
+        {
+            ::memset(data, 0, size * sizeof(T));
+        }
 
-		SIMD_INLINE T & operator[] (size_t i)
-		{
-			return data[i];
-		}
+        SIMD_INLINE T & operator[] (size_t i)
+        {
+            return data[i];
+        }
 
-		SIMD_INLINE const T & operator[] (size_t i) const
-		{
-			return data[i];
-		}
-	};
+        SIMD_INLINE const T & operator[] (size_t i) const
+        {
+            return data[i];
+        }
+    };
 }
 
 #endif//__SimdArray_h__

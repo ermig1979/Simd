@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -38,51 +38,51 @@ namespace Simd
         using Avx::RightNotZero;
 #endif
 
-		template <bool inversion> __m128i Invert(__m128i value);
+        template <bool inversion> __m128i Invert(__m128i value);
 
-		template <> __m128i Invert<true>(__m128i value)
-		{
-			return _mm_sub_epi8(Sse2::K_INV_ZERO, value);
-		}
+        template <> __m128i Invert<true>(__m128i value)
+        {
+            return _mm_sub_epi8(Sse2::K_INV_ZERO, value);
+        }
 
-		template <> __m128i Invert<false>(__m128i value)
-		{
-			return value;
-		}
+        template <> __m128i Invert<false>(__m128i value)
+        {
+            return value;
+        }
 
-		template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m256 & _1_255, float * dst)
-		{
-			__m128i _src = Invert<inversion>(_mm_loadl_epi64((__m128i*)src));
-			Avx::Stream<align, stream>(dst, _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_src)), _1_255));
-		}
+        template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m256 & _1_255, float * dst)
+        {
+            __m128i _src = Invert<inversion>(_mm_loadl_epi64((__m128i*)src));
+            Avx::Stream<align, stream>(dst, _mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_src)), _1_255));
+        }
 
-		template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
-		{
-			assert(width >= F);
-			if (align)
-				assert(Aligned(dst) && Aligned(dstStride));
+        template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
+        {
+            assert(width >= F);
+            if (align)
+                assert(Aligned(dst) && Aligned(dstStride));
 
-			size_t alignedWidth = AlignLo(width, F);
-			__m256 _1_255 = _mm256_set1_ps(1.0f / 255.0f);
+            size_t alignedWidth = AlignLo(width, F);
+            __m256 _1_255 = _mm256_set1_ps(1.0f / 255.0f);
 
-			for (size_t row = 0; row < height; ++row)
-			{
-				for (size_t col = 0; col < alignedWidth; col += F)
-					Convert<inversion, align, stream>(src + col, _1_255, dst + col);
-				if(width != alignedWidth)
-					Convert<inversion, false, stream>(src + width - F, _1_255, dst + width - F);
-				src += srcStride;
-				dst += dstStride;
-			}
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += F)
+                    Convert<inversion, align, stream>(src + col, _1_255, dst + col);
+                if (width != alignedWidth)
+                    Convert<inversion, false, stream>(src + width - F, _1_255, dst + width - F);
+                src += srcStride;
+                dst += dstStride;
+            }
             if (stream)
                 _mm_mfence();
-		}
+        }
 
         template <bool inversion> void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
         {
             if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
             {
-                if (width*height*sizeof(float) >= STREAM_SIZE_MIN)
+                if (width*height * sizeof(float) >= STREAM_SIZE_MIN)
                     NeuralConvert<inversion, true, true>(src, srcStride, width, height, dst, dstStride);
                 else
                     NeuralConvert<inversion, true, false>(src, srcStride, width, height, dst, dstStride);
@@ -241,9 +241,9 @@ namespace Simd
             {
                 Buffer(size_t width)
                 {
-                    _size = width*sizeof(float);
+                    _size = width * sizeof(float);
                     size_t stride = AlignHi(width + 2 * (count - 1), F);
-                    size_t full = count*stride*sizeof(float);
+                    size_t full = count*stride * sizeof(float);
                     _ptr = Allocate(full);
                     memset(_ptr, 0, full);
                     rows[0] = (float*)_ptr;
@@ -295,13 +295,13 @@ namespace Simd
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
                 return _mm256_add_ps(RowConvolution<align>(src, weights),
-					RowConvolution<align>(src + stride, weights + 2));
+                    RowConvolution<align>(src + stride, weights + 2));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<2> & buffer, size_t offset, const __m256 * weights)
             {
                 return _mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
-					RowConvolution<align>(buffer.rows[1] + offset, weights + 2));
+                    RowConvolution<align>(buffer.rows[1] + offset, weights + 2));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -323,21 +323,21 @@ namespace Simd
             {
                 return _mm256_fmadd_ps(Avx::Load<align>(src), weights[0],
                     _mm256_fmadd_ps(Avx::Load<false>(src + 1), weights[1],
-                    _mm256_mul_ps(Avx::Load<false>(src + 2), weights[2])));
+                        _mm256_mul_ps(Avx::Load<false>(src + 2), weights[2])));
             }
 
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
                 return _mm256_add_ps(RowConvolution<align>(src, weights),
                     _mm256_add_ps(RowConvolution<align>(src + stride, weights + 3),
-						RowConvolution<align>(src + 2 * stride, weights + 6)));
+                        RowConvolution<align>(src + 2 * stride, weights + 6)));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<3> & buffer, size_t offset, const __m256 * weights)
             {
                 return _mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
                     _mm256_add_ps(RowConvolution<align>(buffer.rows[1] + offset, weights + 3),
-						RowConvolution<align>(buffer.rows[2] + offset, weights + 6)));
+                        RowConvolution<align>(buffer.rows[2] + offset, weights + 6)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -369,17 +369,17 @@ namespace Simd
             template<bool align> static SIMD_INLINE __m256 Forward(const float * src, size_t stride, const __m256 * weights)
             {
                 return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(src, weights),
-					RowConvolution<align>(src + stride, weights + 4)),
+                    RowConvolution<align>(src + stride, weights + 4)),
                     _mm256_add_ps(RowConvolution<align>(src + 2 * stride, weights + 8),
-						RowConvolution<align>(src + 3 * stride, weights + 12)));
+                        RowConvolution<align>(src + 3 * stride, weights + 12)));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<4> & buffer, size_t offset, const __m256 * weights)
             {
                 return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
-					RowConvolution<align>(buffer.rows[1] + offset, weights + 4)),
+                    RowConvolution<align>(buffer.rows[1] + offset, weights + 4)),
                     _mm256_add_ps(RowConvolution<align>(buffer.rows[2] + offset, weights + 8),
-						RowConvolution<align>(buffer.rows[3] + offset, weights + 12)));
+                        RowConvolution<align>(buffer.rows[3] + offset, weights + 12)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -416,18 +416,18 @@ namespace Simd
             {
                 return _mm256_add_ps(RowConvolution<align>(src, weights),
                     _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(src + stride, weights + 5),
-						RowConvolution<align>(src + 2 * stride, weights + 10)),
-                    _mm256_add_ps(RowConvolution<align>(src + 3 * stride, weights + 15),
-						RowConvolution<align>(src + 4 * stride, weights + 20))));
+                        RowConvolution<align>(src + 2 * stride, weights + 10)),
+                        _mm256_add_ps(RowConvolution<align>(src + 3 * stride, weights + 15),
+                            RowConvolution<align>(src + 4 * stride, weights + 20))));
             }
 
             template<bool align> static SIMD_INLINE __m256 Backward(const Buffer<5> & buffer, size_t offset, const __m256 * weights)
             {
                 return _mm256_add_ps(_mm256_add_ps(RowConvolution<align>(buffer.rows[0] + offset, weights),
                     _mm256_add_ps(RowConvolution<align>(buffer.rows[1] + offset, weights + 5),
-						RowConvolution<align>(buffer.rows[2] + offset, weights + 10))),
+                        RowConvolution<align>(buffer.rows[2] + offset, weights + 10))),
                     _mm256_add_ps(RowConvolution<align>(buffer.rows[3] + offset, weights + 15),
-						RowConvolution<align>(buffer.rows[4] + offset, weights + 20)));
+                        RowConvolution<align>(buffer.rows[4] + offset, weights + 20)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m256 & dst, __m256 * sums)
@@ -886,89 +886,89 @@ namespace Simd
         {
             namespace Ver0
             {
-				void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
-					size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, float * dst)
-				{
-					const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
-					if (dilationX*dilationY*strideX*strideY != 1)
-					{
-						for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-						{
-							size_t srcRow0 = dstRow*strideY - padY;
-							for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-							{
-								size_t srcCol0 = dstCol*strideX - padX;
-								for (size_t channel = 0; channel < srcDepth; ++channel)
-								{
-									for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-									{
-										size_t srcRow = srcRow0 + kernelRow*dilationY;
-										if (srcRow < srcHeight)
-										{
-											const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-											{
-												size_t srcCol = srcCol0 + kernelCol*dilationX;
-												if (srcCol < srcWidth)
-													*(dst++) = psrc[srcCol];
-												else
-													*(dst++) = 0;
-											}
-										}
-										else
-										{
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-												*(dst++) = 0;
-										}
-									}
-								}
-							}
-						}
-					}
-					else if (kernelX*kernelY != 1)
-					{
-						for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-						{
-							size_t srcRow0 = dstRow - padY;
-							for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-							{
-								size_t srcCol0 = dstCol - padX;
-								for (size_t channel = 0; channel < srcDepth; ++channel)
-								{
-									for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-									{
-										size_t srcRow = srcRow0 + kernelRow;
-										if (srcRow < srcHeight)
-										{
-											const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-											{
-												size_t srcCol = srcCol0 + kernelCol;
-												if (srcCol < srcWidth)
-													*(dst++) = psrc[srcCol];
-												else
-													*(dst++) = 0;
-											}
-										}
-										else
-										{
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-												*(dst++) = 0;
-										}
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						for (size_t i = 0; i < N; ++i)
-						{
-							for (size_t k = 0; k < K; ++k)
-								*(dst++) = src[k*N + i];
-						}
-					}
-				}
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
+                    size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, float * dst)
+                {
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (dilationX*dilationY*strideX*strideY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow*strideY - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol*strideX - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow*dilationY;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol*dilationX;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (kernelX*kernelY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < N; ++i)
+                        {
+                            for (size_t k = 0; k < K; ++k)
+                                *(dst++) = src[k*N + i];
+                        }
+                    }
+                }
 
                 template <bool align> static SIMD_INLINE void Kernel1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
                 {
@@ -1120,199 +1120,199 @@ namespace Simd
 
             namespace Ver1
             {
-				void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
-				{
-					size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
-					for (size_t i = 0; i < M; i += cell)
-					{
-						size_t n = Simd::Min(cell, M - i), k = 0;
-						if (cell == 4 && n == 4)
-						{
-							for (; k < K8; k += 8)
-							{
-								const float * ps = src + k;
-								__m256 s0 = Avx::Load<false>(ps + 0 * K);
-								__m256 s1 = Avx::Load<false>(ps + 1 * K);
-								__m256 s2 = Avx::Load<false>(ps + 2 * K);
-								__m256 s3 = Avx::Load<false>(ps + 3 * K);
-								__m256 s00 = _mm256_unpacklo_ps(s0, s2);
-								__m256 s01 = _mm256_unpacklo_ps(s1, s3);
-								__m256 s10 = _mm256_unpackhi_ps(s0, s2);
-								__m256 s11 = _mm256_unpackhi_ps(s1, s3);
-								__m256 d0 = _mm256_unpacklo_ps(s00, s01);
-								__m256 d1 = _mm256_unpackhi_ps(s00, s01);
-								__m256 d2 = _mm256_unpacklo_ps(s10, s11);
-								__m256 d3 = _mm256_unpackhi_ps(s10, s11);
-								Avx::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
-								Avx::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
-								Avx::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
-								Avx::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
-								dst += 32;
-							}
-							for (; k < K4; k += 4)
-							{
-								const float * ps = src + k;
-								__m128 s0 = Sse::Load<false>(ps + 0 * K);
-								__m128 s1 = Sse::Load<false>(ps + 1 * K);
-								__m128 s2 = Sse::Load<false>(ps + 2 * K);
-								__m128 s3 = Sse::Load<false>(ps + 3 * K);
-								__m128 s00 = _mm_unpacklo_ps(s0, s2);
-								__m128 s01 = _mm_unpacklo_ps(s1, s3);
-								__m128 s10 = _mm_unpackhi_ps(s0, s2);
-								__m128 s11 = _mm_unpackhi_ps(s1, s3);
-								Sse::Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
-								Sse::Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
-								Sse::Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
-								Sse::Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
-								dst += 16;
-							}
-						}
-						for (; k < K; ++k)
-						{
-							for (size_t c = 0; c < n; ++c)
-								*(dst++) = src[c*K + k];
-						}
-						src += cell*K;
-					}
-				}
+                void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
+                {
+                    size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
+                    for (size_t i = 0; i < M; i += cell)
+                    {
+                        size_t n = Simd::Min(cell, M - i), k = 0;
+                        if (cell == 4 && n == 4)
+                        {
+                            for (; k < K8; k += 8)
+                            {
+                                const float * ps = src + k;
+                                __m256 s0 = Avx::Load<false>(ps + 0 * K);
+                                __m256 s1 = Avx::Load<false>(ps + 1 * K);
+                                __m256 s2 = Avx::Load<false>(ps + 2 * K);
+                                __m256 s3 = Avx::Load<false>(ps + 3 * K);
+                                __m256 s00 = _mm256_unpacklo_ps(s0, s2);
+                                __m256 s01 = _mm256_unpacklo_ps(s1, s3);
+                                __m256 s10 = _mm256_unpackhi_ps(s0, s2);
+                                __m256 s11 = _mm256_unpackhi_ps(s1, s3);
+                                __m256 d0 = _mm256_unpacklo_ps(s00, s01);
+                                __m256 d1 = _mm256_unpackhi_ps(s00, s01);
+                                __m256 d2 = _mm256_unpacklo_ps(s10, s11);
+                                __m256 d3 = _mm256_unpackhi_ps(s10, s11);
+                                Avx::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
+                                Avx::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
+                                Avx::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
+                                Avx::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
+                                dst += 32;
+                            }
+                            for (; k < K4; k += 4)
+                            {
+                                const float * ps = src + k;
+                                __m128 s0 = Sse::Load<false>(ps + 0 * K);
+                                __m128 s1 = Sse::Load<false>(ps + 1 * K);
+                                __m128 s2 = Sse::Load<false>(ps + 2 * K);
+                                __m128 s3 = Sse::Load<false>(ps + 3 * K);
+                                __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                                __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                                __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                                __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                                Sse::Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
+                                Sse::Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
+                                Sse::Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
+                                Sse::Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
+                                dst += 16;
+                            }
+                        }
+                        for (; k < K; ++k)
+                        {
+                            for (size_t c = 0; c < n; ++c)
+                                *(dst++) = src[c*K + k];
+                        }
+                        src += cell*K;
+                    }
+                }
 
-				void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY,
-					size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * tmp, float * dst)
-				{
-					const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
-					if (kernelX*kernelY != 1)
-					{
-						float * dst = tmp;
-						size_t channelSize = srcHeight * srcWidth;
-						if (dilationX*dilationY*strideX*strideY != 1)
-						{
-							for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
-							{
-								for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-								{
-									for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
-									{
-										size_t srcRow = kernelRow*dilationY - padY;
-										for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-										{
-											if (srcRow < srcHeight)
-											{
-												size_t srcCol = kernelCol*dilationX - padX;
-												for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = src[srcRow*srcWidth + srcCol];
-													else
-														*(dst++) = 0;
-													srcCol += strideX;
-												}
-											}
-											else
-											{
-												for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-													*(dst++) = 0;
-											}
-											srcRow += strideY;
-										}
-									}
-								}
-							}
-						}
-						else
-						{
-							const size_t bodySize = dstWidth - padX * 2;
-							for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
-							{
-								for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-								{
-									for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
-									{
-										size_t srcRow = kernelRow - padY;
-										for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
-										{
-											if (srcRow < srcHeight)
-											{
-												size_t srcCol = kernelCol - padX, dstCol = 0;
-												const float * psrc = src + srcRow*srcWidth;
-												for (; dstCol < padX; ++dstCol, ++srcCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = psrc[srcCol];
-													else
-														*(dst++) = 0;
-												}
-												memcpy(dst, psrc + srcCol, bodySize * 4);
-												dst += bodySize;
-												dstCol += bodySize;
-												srcCol += bodySize;
-												for (; dstCol < dstWidth; ++dstCol, ++srcCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = psrc[srcCol];
-													else
-														*(dst++) = 0;
-												}
-											}
-											else
-											{
-												memset(dst, 0, dstWidth * 4);
-												dst += dstWidth;
-											}
-										}
-									}
-								}
-							}
-						}
-						src = tmp;
-					}
-					if (cell == 16)
-					{
-						for (size_t j = 0; j < N; j += cell)
-						{
-							size_t n = Simd::Min(cell, N - j);
-							if (n == cell)
-							{
-								for (size_t k = 0; k < K; ++k)
-								{
-									const float * psrc = src + k*N;
-									Avx::Store<false>(dst + 0, Avx::Load<false>(psrc + 0));
-									Avx::Store<false>(dst + 8, Avx::Load<false>(psrc + 8));
-									dst += 16;
-								}
-							}
-							else
-							{
-								for (size_t k = 0; k < K; ++k)
-								{
-									const float * psrc = src + k*N;
-									size_t c = 0;
-									for (; c < n; ++c)
-										*(dst++) = *(psrc++);
-									for (; c < cell; ++c)
-										*(dst++) = 0;
-								}
-							}
-							src += cell;
-						}
-					}
-					else
-					{
-						for (size_t j = 0; j < N; j += cell)
-						{
-							size_t n = Simd::Min(cell, N - j);
-							for (size_t k = 0; k < K; ++k)
-							{
-								const float * psrc = src + k*N;
-								size_t c = 0;
-								for (; c < n; ++c)
-									*(dst++) = *(psrc++);
-								for (; c < cell; ++c)
-									*(dst++) = 0;
-							}
-							src += cell;
-						}
-					}
-				}
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY,
+                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * tmp, float * dst)
+                {
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (kernelX*kernelY != 1)
+                    {
+                        float * dst = tmp;
+                        size_t channelSize = srcHeight * srcWidth;
+                        if (dilationX*dilationY*strideX*strideY != 1)
+                        {
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow*dilationY - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol*dilationX - padX;
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = src[srcRow*srcWidth + srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                    srcCol += strideX;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                    *(dst++) = 0;
+                                            }
+                                            srcRow += strideY;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            const size_t bodySize = dstWidth - padX * 2;
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol - padX, dstCol = 0;
+                                                const float * psrc = src + srcRow*srcWidth;
+                                                for (; dstCol < padX; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                                memcpy(dst, psrc + srcCol, bodySize * 4);
+                                                dst += bodySize;
+                                                dstCol += bodySize;
+                                                srcCol += bodySize;
+                                                for (; dstCol < dstWidth; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                memset(dst, 0, dstWidth * 4);
+                                                dst += dstWidth;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        src = tmp;
+                    }
+                    if (cell == 16)
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    Avx::Store<false>(dst + 0, Avx::Load<false>(psrc + 0));
+                                    Avx::Store<false>(dst + 8, Avx::Load<false>(psrc + 8));
+                                    dst += 16;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            for (size_t k = 0; k < K; ++k)
+                            {
+                                const float * psrc = src + k*N;
+                                size_t c = 0;
+                                for (; c < n; ++c)
+                                    *(dst++) = *(psrc++);
+                                for (; c < cell; ++c)
+                                    *(dst++) = 0;
+                            }
+                            src += cell;
+                        }
+                    }
+                }
 
                 SIMD_INLINE void AddSum(const __m256 & sum, float * dst)
                 {
@@ -1518,67 +1518,67 @@ namespace Simd
                     }
                 }
 
-				template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
-					const float * weight, float * dst, size_t dstDepth)
-				{
-					__m256 _weight[kernelX*kernelY];
-					for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
-					{
-						__m256 _dst[8];
-						float * pdst = dst;
-						for (size_t row = 0; row < 8; ++row, pdst += 8)
-							_dst[row] = Avx::Load<align>(pdst);
-						if (kernelY < 4)
-						{
-							for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
-							{
-								const float * psrc = src + srcWidth*srcHeight*srcChannel;
-								LoadWeightsForward<kernelX*kernelY>(weight, _weight);
-								for (size_t row = 0; row < 8; ++row)
-								{
-									_dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template Forward<align>(psrc, srcWidth, _weight));
-									psrc += srcWidth;
-								}
-								weight += kernelX*kernelY;
-							}						
-						}
-						else
-						{
-							for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
-							{
-								const float * psrc = src + srcWidth*srcHeight*srcChannel;
-								for (size_t dy = 0; dy < kernelY; dy++)
-								{
-									const float * ps = psrc + dy*srcWidth;
-									LoadWeightsForward<kernelX>(weight, _weight);
-									for (size_t row = 0; row < 8; ++row)
-									{
-										_dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template RowConvolution<align>(ps, _weight));
-										ps += srcWidth;
-									}
-									weight += kernelX;
-								}
-							}						
-						}
-						for (size_t row = 0; row < 8; ++row, dst += 8)
-							Avx::Store<align>(dst, _dst[row]);
-					}
-				}
+                template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, float * dst, size_t dstDepth)
+                {
+                    __m256 _weight[kernelX*kernelY];
+                    for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        __m256 _dst[8];
+                        float * pdst = dst;
+                        for (size_t row = 0; row < 8; ++row, pdst += 8)
+                            _dst[row] = Avx::Load<align>(pdst);
+                        if (kernelY < 4)
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                LoadWeightsForward<kernelX*kernelY>(weight, _weight);
+                                for (size_t row = 0; row < 8; ++row)
+                                {
+                                    _dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template Forward<align>(psrc, srcWidth, _weight));
+                                    psrc += srcWidth;
+                                }
+                                weight += kernelX*kernelY;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                for (size_t dy = 0; dy < kernelY; dy++)
+                                {
+                                    const float * ps = psrc + dy*srcWidth;
+                                    LoadWeightsForward<kernelX>(weight, _weight);
+                                    for (size_t row = 0; row < 8; ++row)
+                                    {
+                                        _dst[row] = _mm256_add_ps(_dst[row], Convolution<kernelX, kernelY>::template RowConvolution<align>(ps, _weight));
+                                        ps += srcWidth;
+                                    }
+                                    weight += kernelX;
+                                }
+                            }
+                        }
+                        for (size_t row = 0; row < 8; ++row, dst += 8)
+                            Avx::Store<align>(dst, _dst[row]);
+                    }
+                }
 
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
-					if (dstWidth == 8 && dstHeight == 8)
-					{
-						AddConvolution8x8<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
-						return;
-					}
+                    if (dstWidth == 8 && dstHeight == 8)
+                    {
+                        AddConvolution8x8<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
+                        return;
+                    }
                     size_t alignedWidth = AlignLo(dstWidth, F);
                     __m256 tailMask = RightNotZero(dstWidth - alignedWidth);
                     __m256 _weight[kernelX*kernelY];
                     for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
                     {
-						for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                         {
                             const float * psrc = src + srcWidth*srcHeight*srcChannel;
                             const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
@@ -1627,7 +1627,7 @@ namespace Simd
                 {
                     if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (dstWidth*dstHeight*kernelX*kernelY >= 8*8*3*3)
+                        if (dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
                             return true;
                     }
                     return false;
@@ -1697,12 +1697,12 @@ namespace Simd
                             paddedH = srcHeight + 2 * padY;
                             sizeB = paddedW*paddedH*srcDepth;
                         }
-						else
-						{
-							paddedW = srcWidth;
-							paddedH = srcHeight;
-						}
-						break;
+                        else
+                        {
+                            paddedW = srcWidth;
+                            paddedH = srcHeight;
+                        }
+                        break;
                     default:
                         assert(0);
                         break;
@@ -1724,7 +1724,7 @@ namespace Simd
                     sizeA = AlignHi(sizeA, F);
                     sizeB = AlignHi(sizeB, F);
                     sizeT = AlignHi(sizeT, F);
-                    size_t size = (sizeA + sizeB + sizeT)*sizeof(float);
+                    size_t size = (sizeA + sizeB + sizeT) * sizeof(float);
                     if (size == 0)
                         return;
                     if (externalData != AlignHi(externalData, SIMD_ALIGN))
@@ -1768,7 +1768,7 @@ namespace Simd
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
             if (!add)
-                memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
+                memset(dst, 0, dstWidth*dstHeight*dstDepth * sizeof(float));
 
             Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
 

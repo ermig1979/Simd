@@ -58,33 +58,33 @@ namespace Simd
             Buffer buffer(count);
             size_t alignedCount = AlignLo(count, F);
 
-            for(size_t j = 0; j < length; ++j)
+            for (size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
                 __m256 _v = _mm256_set1_ps(v);
-                for(; i < alignedCount; i += F)
+                for (; i < alignedCount; i += F)
                 {
                     __m256 sums = Load<true>(buffer.sums + i);
                     __m256 _svs = Load<false>(svs + i);
                     Store<true>(buffer.sums + i, _mm256_add_ps(sums, _mm256_mul_ps(_v, _svs)));
                 }
-                for(; i < count; ++i)
+                for (; i < count; ++i)
                     buffer.sums[i] += v*svs[i];
                 svs += count;
             }
 
             size_t i = 0;
             __m256 _sum = _mm256_setzero_ps();
-            for(; i < alignedCount; i += F)
+            for (; i < alignedCount; i += F)
             {
                 __m256 sums = Load<true>(buffer.sums + i);
                 __m256 _weights = Load<false>(weights + i);
                 _sum = _mm256_add_ps(_sum, _mm256_mul_ps(sums, _weights));
             }
             *sum = ExtractSum(_sum);
-            for(; i < count; ++i)
-                *sum += buffer.sums[i]*weights[i];
+            for (; i < count; ++i)
+                *sum += buffer.sums[i] * weights[i];
         }
     }
 #endif// SIMD_AVX_ENABLE

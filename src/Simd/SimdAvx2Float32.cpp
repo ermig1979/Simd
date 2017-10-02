@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -36,10 +36,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Float32ToUint8(const float * src, const __m256 & lower, const __m256 & upper, const __m256 & boost, uint8_t * dst)
         {
-            __m256i d0 = Float32ToUint8<align>(src + F*0, lower, upper, boost);
-            __m256i d1 = Float32ToUint8<align>(src + F*1, lower, upper, boost);
-            __m256i d2 = Float32ToUint8<align>(src + F*2, lower, upper, boost);
-            __m256i d3 = Float32ToUint8<align>(src + F*3, lower, upper, boost);
+            __m256i d0 = Float32ToUint8<align>(src + F * 0, lower, upper, boost);
+            __m256i d1 = Float32ToUint8<align>(src + F * 1, lower, upper, boost);
+            __m256i d2 = Float32ToUint8<align>(src + F * 2, lower, upper, boost);
+            __m256i d3 = Float32ToUint8<align>(src + F * 3, lower, upper, boost);
             Store<align>((__m256i*)dst, PackU16ToU8(PackU32ToI16(d0, d1), PackU32ToI16(d2, d3)));
         }
 
@@ -51,7 +51,7 @@ namespace Simd
 
             __m256 _lower = _mm256_set1_ps(lower[0]);
             __m256 _upper = _mm256_set1_ps(upper[0]);
-            __m256 boost = _mm256_set1_ps(255.0f/(upper[0] - lower[0]));
+            __m256 boost = _mm256_set1_ps(255.0f / (upper[0] - lower[0]));
 
             size_t alignedSize = AlignLo(size, A);
             for (size_t i = 0; i < alignedSize; i += A)

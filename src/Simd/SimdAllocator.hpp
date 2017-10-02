@@ -144,7 +144,7 @@ namespace Simd
         typedef const T * const_pointer;
 
         template <typename U>
-        struct rebind 
+        struct rebind
         {
             typedef Allocator<U> other;
         };
@@ -175,9 +175,9 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE pointer allocate(size_type size, const void * ptr = NULL) 
+        SIMD_INLINE pointer allocate(size_type size, const void * ptr = NULL)
         {
-            return static_cast<pointer>(Allocate(size*sizeof(T), Alignment()));
+            return static_cast<pointer>(Allocate(size * sizeof(T), Alignment()));
         }
 
         SIMD_INLINE size_type max_size() const
