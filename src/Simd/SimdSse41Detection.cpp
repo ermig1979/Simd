@@ -235,7 +235,7 @@ namespace Simd
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += 4)
                 {
                     __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
@@ -289,11 +289,11 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
+                size_t p_offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
@@ -424,7 +424,7 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_ps(sum, _mm_blendv_ps(_mm_set1_ps(leaves[leafOffset + 1]), 
+                    sum = _mm_add_ps(sum, _mm_blendv_ps(_mm_set1_ps(leaves[leafOffset + 1]),
                         _mm_set1_ps(leaves[leafOffset + 0]), _mm_castsi128_ps(mask)));
                     nodeOffset++;
                     leafOffset += 2;
@@ -464,7 +464,7 @@ namespace Simd
                 size_t offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += 4)
                 {
                     __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
@@ -515,10 +515,10 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left/2;
+                size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
@@ -644,7 +644,7 @@ namespace Simd
                     const Hid::Feature & feature = hid.features[nodes[nodeOffset].featureIdx];
                     const int * subset = subsets + nodeOffset*subsetSize;
                     __m128i mask = LeafMask(feature, offset, subset);
-                    sum = _mm_add_epi16(sum, _mm_blendv_epi8(_mm_set1_epi16(leaves[leafOffset + 1]), 
+                    sum = _mm_add_epi16(sum, _mm_blendv_epi8(_mm_set1_epi16(leaves[leafOffset + 1]),
                         _mm_set1_epi16(leaves[leafOffset + 0]), mask));
                     nodeOffset++;
                     leafOffset += 2;
@@ -682,7 +682,7 @@ namespace Simd
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint16_t));
+                memset(buffer.d, 0, width * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     __m128i result = _mm_loadu_si128((__m128i*)(buffer.m + col));
@@ -732,7 +732,7 @@ namespace Simd
             for (ptrdiff_t row = rect.top; row < rect.bottom; row += step)
             {
                 size_t col = 0;
-                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left/2;
+                size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left / 2;
                 const uint8_t * m = mask.data + row*mask.stride + rect.left;
                 uint8_t * d = dst.data + row*dst.stride + rect.left;
                 for (; col < alignedWidth; col += A)

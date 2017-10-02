@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -27,8 +27,8 @@
 namespace Simd
 {
 #ifdef SIMD_SSE_ENABLE    
-	namespace Sse
-	{
+    namespace Sse
+    {
         SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
         {
             src += i;
@@ -63,7 +63,7 @@ namespace Simd
                     for (size_t i = 0; i < alignedCount; i += F)
                         HogDeinterleave(s, count, dst, offset, i);
                     if (alignedCount != count)
-                        HogDeinterleave(s, count, dst, offset, count - F);                
+                        HogDeinterleave(s, count, dst, offset, count - F);
                 }
                 if (alignedWidth != width)
                 {
@@ -99,12 +99,12 @@ namespace Simd
 
         class HogSeparableFilter
         {
-			typedef Array<float> Array32f;
-			typedef Array<__m128> Array128f;
+            typedef Array<float> Array32f;
+            typedef Array<__m128> Array128f;
 
             size_t _w, _h, _s;
-			Array32f _buffer;
-			Array128f _filter;
+            Array32f _buffer;
+            Array128f _filter;
 
             void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
@@ -134,7 +134,7 @@ namespace Simd
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
                         FilterRows<true>(src + col, _filter.data, size, dst + col);
-                    if(alignedWidth != width)
+                    if (alignedWidth != width)
                         FilterRows<false>(src + width - F, _filter.data, size, dst + width - F);
                     src += srcStride;
                     dst += dstStride;
@@ -193,6 +193,6 @@ namespace Simd
             HogSeparableFilter filter;
             filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
         }
-	}
+    }
 #endif// SIMD_SSE_ENABLE
 }

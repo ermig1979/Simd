@@ -55,8 +55,8 @@ namespace Simd
     namespace Neural
     {
         typedef Point<ptrdiff_t> Size; /*!< \brief 2D-size (width and height). */
-		typedef std::vector<uint8_t, Allocator<uint8_t>> Buffer; /*!< \brief Vector with 8-bit unsigned integer values. */
-		typedef std::vector<float, Allocator<float>> Vector; /*!< \brief Vector with 32-bit float point values. */
+        typedef std::vector<uint8_t, Allocator<uint8_t>> Buffer; /*!< \brief Vector with 8-bit unsigned integer values. */
+        typedef std::vector<float, Allocator<float>> Vector; /*!< \brief Vector with 32-bit float point values. */
         typedef std::vector<ptrdiff_t, Allocator<ptrdiff_t>> VectorI; /*!< \brief Vector with integer values. */
         typedef std::vector<Vector> Vectors; /*!< \brief Vector of vectors with 32-bit float point values. */
         typedef size_t Label; /*!< \brief Integer name (label) of object class. */
@@ -67,7 +67,7 @@ namespace Simd
         {
             template <class T, class A> SIMD_INLINE void SetZero(std::vector<T, A> & vector)
             {
-                memset(vector.data(), 0, vector.size()*sizeof(T));
+                memset(vector.data(), 0, vector.size() * sizeof(T));
             }
 
             SIMD_INLINE int RandomUniform(int min, int max)
@@ -108,12 +108,12 @@ namespace Simd
             /*!
                 \enum Type
 
-                Describes types of activation function. It is used in order to create a Layer in Network. 
+                Describes types of activation function. It is used in order to create a Layer in Network.
             */
             enum Type
             {
-                /*! 
-                    Identity: 
+                /*!
+                    Identity:
                     \verbatim
                     f(x) = x;
                     \endverbatim
@@ -301,7 +301,7 @@ namespace Simd
 
             Provides access to complex 3D-array inside simple 1D-array.
         */
-        struct Index 
+        struct Index
         {
             ptrdiff_t width; /*!< \brief A width of 3D-array. */
             ptrdiff_t height; /*!< \brief A height of 3D-array. */
@@ -336,7 +336,7 @@ namespace Simd
 
                 \param [in] s - initial size (width and height).
                 \param [in] d - initial value for depth (default value is equal to 1).
-            */            
+            */
             SIMD_INLINE Index(const Size & s, ptrdiff_t d = 1)
                 : width(s.x)
                 , height(s.y)
@@ -348,7 +348,7 @@ namespace Simd
                 Creates a new Index structure on the base of another Index structure.
 
                 \param [in] i - another Index structure.
-            */ 
+            */
             SIMD_INLINE Index(const Index & i)
                 : width(i.width)
                 , height(i.height)
@@ -392,8 +392,8 @@ namespace Simd
                 \return - an offset of the point in 1D-array.
             */
             SIMD_INLINE ptrdiff_t Offset(ptrdiff_t x, ptrdiff_t y, ptrdiff_t c) const
-            { 
-                return (height * c + y) * width + x; 
+            {
+                return (height * c + y) * width + x;
             }
 
             /*!
@@ -444,8 +444,8 @@ namespace Simd
                 \return - an area of the channel.
             */
             SIMD_INLINE ptrdiff_t Area() const
-            { 
-                return width * height; 
+            {
+                return width * height;
             }
 
             /*!
@@ -454,8 +454,8 @@ namespace Simd
                 \return - total size (volume) of 3D-array.
             */
             SIMD_INLINE ptrdiff_t Volume() const
-            { 
-                return width * height * depth; 
+            {
+                return width * height * depth;
             }
         };
 
@@ -471,7 +471,7 @@ namespace Simd
             /*!
                 \enum Type
 
-                Describes types of network layers. 
+                Describes types of network layers.
             */
             enum Type
             {
@@ -561,7 +561,7 @@ namespace Simd
             {
                 return _common[thread].prevDelta;
             }
-            
+
             const Type _type;
             const Function _function;
 
@@ -646,12 +646,12 @@ namespace Simd
                 \param [in] srcDepth - a number of input channels (images).
                 \param [in] dstDepth - a number of output channels (images).
                 \param [in] coreSize - a size of convolution core.
-                \param [in] valid - a boolean flag (True - only original image points are used in convolution, so output image is decreased; 
+                \param [in] valid - a boolean flag (True - only original image points are used in convolution, so output image is decreased;
                                     False - input image is padded by zeros and output image has the same size). By default its true.
                 \param [in] bias - a boolean flag (enabling of bias). By default its True.
                 \param [in] connection - a table of connections between input and output channels. By default all channels are connected.
             */
-            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, const Size & coreSize, 
+            ConvolutionalLayer(Function::Type f, const Size & srcSize, size_t srcDepth, size_t dstDepth, const Size & coreSize,
                 bool valid = true, bool bias = true, const View & connection = View())
                 : Layer(Convolutional, f)
                 , _functionForward(0)
@@ -659,7 +659,7 @@ namespace Simd
                 , _functionSum(0)
             {
                 _valid = valid;
-                _indent = coreSize/2;
+                _indent = coreSize / 2;
                 Size pad = coreSize - Size(1, 1);
                 _src.Resize(srcSize, srcDepth);
                 _dst.Resize(srcSize - (_valid ? pad : Size()), dstDepth);
@@ -671,10 +671,10 @@ namespace Simd
                 SetThreadNumber(1, false);
 
                 _connection.Recreate(dstDepth, srcDepth, View::Gray8);
-				_partial = Simd::Compatible(connection, _connection);
+                _partial = Simd::Compatible(connection, _connection);
                 if (_partial)
                     Simd::Copy(connection, _connection);
-				else
+                else
                     Simd::Fill(_connection, 1);
 
                 if (_core.width == 2 && _core.height == 2)
@@ -708,54 +708,54 @@ namespace Simd
                 const Vector & padded = PaddedSrc(src, thread);
                 Vector & sum = _common[thread].sum;
                 Vector & dst = _common[thread].dst;
-				if (_partial)
-				{
-					Detail::SetZero(sum);
-					for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
-					{
-						for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
-						{
-							if (!_connection.At<bool>(dc, sc))
-								return;
+                if (_partial)
+                {
+                    Detail::SetZero(sum);
+                    for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+                    {
+                        for (ptrdiff_t sc = 0; sc < _src.depth; ++sc)
+                        {
+                            if (!_connection.At<bool>(dc, sc))
+                                return;
 
-							const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
-							const float * psrc = _padded.Get(padded, 0, 0, sc);
-							float * psum = _dst.Get(sum, 0, 0, dc);
+                            const float * pweight = _core.Get(_weight, 0, 0, _src.depth*dc + sc);
+                            const float * psrc = _padded.Get(padded, 0, 0, sc);
+                            float * psum = _dst.Get(sum, 0, 0, dc);
 
-							if (_functionForward)
-								_functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
-							else if (_core.width == 1 && _core.height == 1)
-								::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
-							else
-							{
-								for (ptrdiff_t y = 0; y < _dst.height; y++)
-								{
-									for (ptrdiff_t x = 0; x < _dst.width; x++)
-									{
-										const float * pw = pweight;
-										const float * ps = psrc + y * _padded.width + x;
-										float s = 0;
-										for (ptrdiff_t wy = 0; wy < _core.height; wy++)
-											for (ptrdiff_t wx = 0; wx < _core.width; wx++)
-												s += *pw++ * ps[wy * _padded.width + wx];
-										psum[y * _dst.width + x] += s;
-									}
-								}
-							}
-						}
-					}
-				}
-				else
-				{
-					Buffer & buffer = _specific[thread].buffer;
-					size_t size = buffer.size();
-					::SimdNeuralConvolutionForward(padded.data(), _padded.width, _padded.height, _padded.depth, _weight.data(),
-						_core.width, _core.height, 0, 0, 1, 1, 1, 1, buffer.data(), &size, sum.data(), _dst.width, _dst.height, _dst.depth, 0);
-					if (size > buffer.size())
-						buffer.resize(size);
-				}
-				for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
-				{
+                            if (_functionForward)
+                                _functionForward(psrc, _padded.width, _dst.width, _dst.height, pweight, psum, _dst.width);
+                            else if (_core.width == 1 && _core.height == 1)
+                                ::SimdNeuralAddVectorMultipliedByValue(psrc, _dst.width*_dst.height, pweight, psum);
+                            else
+                            {
+                                for (ptrdiff_t y = 0; y < _dst.height; y++)
+                                {
+                                    for (ptrdiff_t x = 0; x < _dst.width; x++)
+                                    {
+                                        const float * pw = pweight;
+                                        const float * ps = psrc + y * _padded.width + x;
+                                        float s = 0;
+                                        for (ptrdiff_t wy = 0; wy < _core.height; wy++)
+                                            for (ptrdiff_t wx = 0; wx < _core.width; wx++)
+                                                s += *pw++ * ps[wy * _padded.width + wx];
+                                        psum[y * _dst.width + x] += s;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Buffer & buffer = _specific[thread].buffer;
+                    size_t size = buffer.size();
+                    ::SimdNeuralConvolutionForward(padded.data(), _padded.width, _padded.height, _padded.depth, _weight.data(),
+                        _core.width, _core.height, 0, 0, 1, 1, 1, 1, buffer.data(), &size, sum.data(), _dst.width, _dst.height, _dst.depth, 0);
+                    if (size > buffer.size())
+                        buffer.resize(size);
+                }
+                for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
+                {
                     if (_bias.size())
                         ::SimdNeuralAddValue(_bias.data() + dc, _dst.Get(sum, 0, 0, dc), _dst.Area());
                 }
@@ -843,7 +843,7 @@ namespace Simd
                     }
                 }
 
-                if (dBias.size()) 
+                if (dBias.size())
                 {
                     for (ptrdiff_t dc = 0; dc < _dst.depth; ++dc)
                     {
@@ -889,7 +889,7 @@ namespace Simd
                 else
                 {
                     Vector & padded = _specific[thread].paddedSrc;
-                    size_t size = _src.width*sizeof(float);
+                    size_t size = _src.width * sizeof(float);
                     for (ptrdiff_t c = 0; c < _src.depth; ++c)
                     {
                         for (ptrdiff_t y = 0; y < _src.height; ++y)
@@ -904,7 +904,7 @@ namespace Simd
                 if (!_valid)
                 {
                     Vector & dst = _common[thread].prevDelta;
-                    size_t size = _src.width*sizeof(float);
+                    size_t size = _src.width * sizeof(float);
                     for (ptrdiff_t c = 0; c < _src.depth; c++)
                     {
                         for (ptrdiff_t y = 0; y < _src.height; ++y)
@@ -915,8 +915,8 @@ namespace Simd
 
             struct Specific
             {
-				Vector paddedSrc, paddedDelta;
-				Buffer buffer;
+                Vector paddedSrc, paddedDelta;
+                Buffer buffer;
             };
             std::vector<Specific> _specific;
 
@@ -924,10 +924,10 @@ namespace Simd
             Index _padded;
             Size _indent;
             bool _valid;
-			bool _partial;
+            bool _partial;
             View _connection;
 
-            typedef void (*FunctionForwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
+            typedef void(*FunctionForwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
             FunctionForwardPtr _functionForward;
 
             typedef void(*FunctionBackwardPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride);
@@ -1023,12 +1023,12 @@ namespace Simd
                         {
                             ptrdiff_t dyStart = y*_poolingStride.y - _poolingPad.y;
                             ptrdiff_t dyEnd = std::min(dyStart + _poolingSize.y, _src.height);
-							dyStart = std::max(ptrdiff_t(0), dyStart);
+                            dyStart = std::max(ptrdiff_t(0), dyStart);
                             for (ptrdiff_t x = 0; x < _dst.width; x++)
                             {
                                 ptrdiff_t dxStart = x*_poolingStride.x - _poolingPad.x;
                                 ptrdiff_t dxEnd = std::min(dxStart + _poolingSize.x, _src.width);
-								dxStart = std::max(ptrdiff_t(0), dxStart);
+                                dxStart = std::max(ptrdiff_t(0), dxStart);
                                 ptrdiff_t maxIndex = _src.Offset(dxStart, dyStart, c);
                                 float maxValue = std::numeric_limits<float>::lowest();
                                 for (ptrdiff_t dy = dyStart; dy < dyEnd; dy++)
@@ -1047,10 +1047,10 @@ namespace Simd
                                 ptrdiff_t dstOffset = _dst.Offset(x, y, c);
                                 sum[dstOffset] = maxValue;
                                 idx[dstOffset] = maxIndex;
-								assert(idx[dstOffset] < (int)_common[thread].prevDelta.size());
+                                assert(idx[dstOffset] < (int)_common[thread].prevDelta.size());
                             }
                         }
-                    }                    
+                    }
                 }
                 _function.function(sum.data(), sum.size(), dst.data());
             }
@@ -1179,7 +1179,7 @@ namespace Simd
             \short FullyConnectedLayer class.
 
             Fully connected layer in neural network.
-        */        
+        */
         class FullyConnectedLayer : public Layer
         {
         public:
@@ -1190,7 +1190,7 @@ namespace Simd
                 \param [in] srcSize - a size of input vector.
                 \param [in] dstSize - a size of output vector.
                 \param [in] bias - a boolean flag (enabling of bias). By default it is True.
-            */            
+            */
             FullyConnectedLayer(Function::Type f, size_t srcSize, size_t dstSize, bool bias = true)
                 : Layer(FullyConnected, f)
                 , _reordered(false)
@@ -1287,7 +1287,7 @@ namespace Simd
             DropoutLayer(size_t srcSize, float rate)
                 : Layer(Dropout, Function::Identity)
                 , _rate(rate)
-                , _scale(1.0f/rate)
+                , _scale(1.0f / rate)
             {
                 _src.Resize(srcSize, 1, 1);
                 _dst.Resize(srcSize, 1, 1);
@@ -1364,7 +1364,7 @@ namespace Simd
         /*! @ingroup cpp_neural
 
             \short Contains a set of training options.
-        */ 
+        */
         struct TrainOptions
         {
             /*!
@@ -1463,7 +1463,7 @@ namespace Simd
             }
 
             template<TrainOptions::LossType type> void Gradient(const Vector & current, const Vector & control, Vector & delta);
-            
+
             template<> SIMD_INLINE void Gradient<TrainOptions::Mse>(const Vector & current, const Vector & control, Vector & delta)
             {
                 for (size_t i = 0; i < current.size(); ++i)
@@ -1473,13 +1473,13 @@ namespace Simd
             template<> SIMD_INLINE void Gradient<TrainOptions::CrossEntropy>(const Vector & current, const Vector & control, Vector & delta)
             {
                 for (size_t i = 0; i < current.size(); ++i)
-                    delta[i] = (current[i] - control[i])/(current[i] *(1.0f - current[i]));
+                    delta[i] = (current[i] - control[i]) / (current[i] * (1.0f - current[i]));
             }
 
             template<> SIMD_INLINE void Gradient<TrainOptions::CrossEntropyMulticlass>(const Vector & current, const Vector & control, Vector & delta)
             {
                 for (size_t i = 0; i < current.size(); ++i)
-                    delta[i] = -control[i]/current[i];
+                    delta[i] = -control[i] / current[i];
             }
 
             template<TrainOptions::UpdateType type> void UpdateWeight(const TrainOptions & o, const Vector & d, Vector & g, Vector & v);
@@ -1519,7 +1519,7 @@ namespace Simd
             /*!
                 \short Adds new Layer to the neural network.
 
-                \param [in] layer - a pointer to the new layer. You can add ConvolutionalLayer, MaxPoolingLayer and FullyConnectedLayer. 
+                \param [in] layer - a pointer to the new layer. You can add ConvolutionalLayer, MaxPoolingLayer and FullyConnectedLayer.
                 \return a result of addition. If added layer is not compatible with previous layer the result might be negative.
             */
             bool Add(Layer * layer)
@@ -1687,7 +1687,7 @@ namespace Simd
                     bool result = Load(ifs, train);
                     ifs.close();
                     return result;
-                }                
+                }
                 return false;
             }
 
@@ -1738,7 +1738,7 @@ namespace Simd
                     bool result = Save(ofs, train);
                     ofs.close();
                     return result;
-                }                
+                }
                 return false;
             }
 
@@ -1760,7 +1760,7 @@ namespace Simd
                     if (src[i] < size)
                         dst[i][src[i]] = max;
                 }
-            }       
+            }
 
         private:
             LayerPtrs _layers;

@@ -56,14 +56,14 @@ namespace Simd
             uint8_t red; /*!< \brief 8-bit red channel 24-bit BGR pixel. */
 
             /*!
-                Creates a new 24-bit BGR pixel structure with specified channel values. 
+                Creates a new 24-bit BGR pixel structure with specified channel values.
 
                 \param [in] gray - initial value for all channels. It is equal to 0 by default.
             */
             Bgr24(const uint8_t & gray = uint8_t(0));
 
             /*!
-                Creates a new 24-bit BGR pixel structure with specified channel values. 
+                Creates a new 24-bit BGR pixel structure with specified channel values.
 
                 \param [in] b - initial value for blue channel.
                 \param [in] g - initial value for green channel.
@@ -72,14 +72,14 @@ namespace Simd
             Bgr24(const uint8_t & b, const uint8_t & g, const uint8_t & r);
 
             /*!
-                Creates a new 24-bit BGR pixel structure on the base of 32-bit BGRA pixel. 
+                Creates a new 24-bit BGR pixel structure on the base of 32-bit BGRA pixel.
 
                 \param [in] p - 32-bit BGRA pixel.
             */
             Bgr24(const Bgra32 & p);
 
             /*!
-                Creates a copy of 24-bit BGR pixel structure. 
+                Creates a copy of 24-bit BGR pixel structure.
 
                 \param [in] p - 24-bit BGR pixel.
             */
@@ -88,7 +88,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static const Bgr24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets constant reference to the pixel with specific coordinates at the image view. 
+                Gets constant reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit BGR pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -100,7 +100,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static Bgr24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets reference to the pixel with specific coordinates at the image view. 
+                Gets reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit BGR pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -124,7 +124,7 @@ namespace Simd
             uint8_t alpha; /*!< \brief 8-bit alpha channel 32-bit BGRA pixel. */
 
             /*!
-                Creates a new 32-bit BGRA pixel structure with specified channel values. 
+                Creates a new 32-bit BGRA pixel structure with specified channel values.
 
                 \param [in] gray - initial value for blue, green and red channels. It is equal to 0 by default.
                 \param [in] a - initial value for alpha channel. It is equal to 255 by default.
@@ -132,7 +132,7 @@ namespace Simd
             Bgra32(const uint8_t & gray = uint8_t(0), const uint8_t & a = uint8_t(255));
 
             /*!
-                Creates a new 32-bit BGRA pixel structure with specified channel values. 
+                Creates a new 32-bit BGRA pixel structure with specified channel values.
 
                 \param [in] b - initial value for blue channel.
                 \param [in] g - initial value for green channel.
@@ -142,15 +142,15 @@ namespace Simd
             Bgra32(const uint8_t & b, const uint8_t & g, const uint8_t & r, const uint8_t & a = uint8_t(255));
 
             /*!
-                Creates a new 32-bit BGRA pixel structure on the base of 32-bit BGR pixel. 
+                Creates a new 32-bit BGRA pixel structure on the base of 32-bit BGR pixel.
 
                 \param [in] p - 32-bit BGR pixel.
                 \param [in] a - initial value for alpha channel. It is equal to 255 by default.
-            */            
+            */
             Bgra32(const Bgr24 & p, const uint8_t & a = uint8_t(255));
-            
+
             /*!
-                Creates a copy of 32-bit BGRA pixel structure. 
+                Creates a copy of 32-bit BGRA pixel structure.
 
                 \param [in] p - 32-bit BGRA pixel.
             */
@@ -159,7 +159,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static const Bgr32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets constant reference to the pixel with specific coordinates at the image view. 
+                Gets constant reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 32-bit BGRA pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -171,7 +171,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static Bgr32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets reference to the pixel with specific coordinates at the image view. 
+                Gets reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 32-bit BGRA pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -194,23 +194,23 @@ namespace Simd
             uint8_t value; /*!< \brief 8-bit value channel 24-bit HSV pixel. */
 
             /*!
-                Creates a new 24-bit HSV pixel structure with specified channel values. 
+                Creates a new 24-bit HSV pixel structure with specified channel values.
 
                 \param [in] gray - initial value for value channel. It is equal to 0 by default.
             */
             Hsv24(const uint8_t & gray = uint8_t(0));
 
             /*!
-                Creates a new 24-bit HSV pixel structure with specified channel values. 
+                Creates a new 24-bit HSV pixel structure with specified channel values.
 
                 \param [in] h - initial value for hue channel.
                 \param [in] s - initial value for saturation channel.
                 \param [in] v - initial value for value channel.
-            */            
+            */
             Hsv24(const uint8_t & h, const uint8_t & s, const uint8_t & v);
 
             /*!
-                Creates a copy of 24-bit HSV pixel structure. 
+                Creates a copy of 24-bit HSV pixel structure.
 
                 \param [in] p - 24-bit HSV pixel.
             */
@@ -219,7 +219,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static const Hsv24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets constant reference to the pixel with specific coordinates at the image view. 
+                Gets constant reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit HSV pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -231,7 +231,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static Hsv24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets reference to the pixel with specific coordinates at the image view. 
+                Gets reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit HSV pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -254,23 +254,23 @@ namespace Simd
             uint8_t lightness; /*!< \brief 8-bit lightness channel 24-bit HSL pixel. */
 
             /*!
-                Creates a new 24-bit HSL pixel structure with specified channel values. 
+                Creates a new 24-bit HSL pixel structure with specified channel values.
 
                 \param [in] gray - initial value for value channel. It is equal to 0 by default.
             */
             Hsl24(const uint8_t & gray = uint8_t(0));
 
             /*!
-                Creates a new 24-bit HSL pixel structure with specified channel values. 
+                Creates a new 24-bit HSL pixel structure with specified channel values.
 
                 \param [in] h - initial value for hue channel.
                 \param [in] s - initial value for saturation channel.
                 \param [in] l - initial value for lightness channel.
-            */            
+            */
             Hsl24(const uint8_t & h, const uint8_t & s, const uint8_t & l);
 
             /*!
-                Creates a copy of 24-bit HSL pixel structure. 
+                Creates a copy of 24-bit HSL pixel structure.
 
                 \param [in] p - 24-bit HSL pixel.
             */
@@ -280,7 +280,7 @@ namespace Simd
             /*!
                 \fn template <template<class> class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets constant reference to the pixel with specific coordinates at the image view. 
+                Gets constant reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit HSL pixel format.
                 \param [in] col - x-coordinate of the pixel.
@@ -288,11 +288,11 @@ namespace Simd
                 \return a constant reference to the pixel.
             */
             template <template<class> class A> static const Hsl24 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
-            
+
             /*!
                 \fn template <template<class> class A> static Hsl24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
 
-                Gets reference to the pixel with specific coordinates at the image view. 
+                Gets reference to the pixel with specific coordinates at the image view.
 
                 \param [in] view - an image view of 24-bit HSL pixel format.
                 \param [in] col - x-coordinate of the pixel.

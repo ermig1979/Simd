@@ -36,11 +36,11 @@ namespace Simd
             {
                 Buffer(size_t size, size_t width, size_t height)
                 {
-                    _p = Allocate(2*size + sizeof(int16_t)*2*width + sizeof(int)*(2*height + width));
+                    _p = Allocate(2 * size + sizeof(int16_t) * 2 * width + sizeof(int)*(2 * height + width));
                     bx[0] = (uint8_t*)_p;
                     bx[1] = bx[0] + size;
                     ax = (int16_t*)(bx[1] + size);
-                    ix = (int*)(ax + 2*width);
+                    ix = (int*)(ax + 2 * width);
                     iy = ix + width;
                     ay = iy + height;
                 }
@@ -62,21 +62,21 @@ namespace Simd
 
         void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, int * indexes, int16_t * alphas)
         {
-            float scale = (float)srcSize/dstSize;
+            float scale = (float)srcSize / dstSize;
 
-            for(size_t i = 0; i < dstSize; ++i)
+            for (size_t i = 0; i < dstSize; ++i)
             {
                 float alpha = (float)((i + 0.5)*scale - 0.5);
                 ptrdiff_t index = (ptrdiff_t)::floor(alpha);
                 alpha -= index;
 
-                if(index < 0)
+                if (index < 0)
                 {
                     index = 0;
                     alpha = 0;
                 }
 
-                if(index > (ptrdiff_t)srcSize - 2)
+                if (index > (ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;
@@ -130,8 +130,8 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void InterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m128i alpha[2], uint8_t * dst)
         {
-            __m128i lo = InterpolateY<align>((__m128i*)bx0 + 0, (__m128i*)bx1 + 0, alpha); 
-            __m128i hi = InterpolateY<align>((__m128i*)bx0 + 1, (__m128i*)bx1 + 1, alpha); 
+            __m128i lo = InterpolateY<align>((__m128i*)bx0 + 0, (__m128i*)bx1 + 0, alpha);
+            __m128i hi = InterpolateY<align>((__m128i*)bx0 + 1, (__m128i*)bx1 + 1, alpha);
             Store<false>((__m128i*)dst, _mm_packus_epi16(lo, hi));
         }
 
@@ -142,15 +142,15 @@ namespace Simd
             assert(dstWidth >= A);
 
             struct One { uint8_t channels[channelCount]; };
-            struct Two { uint8_t channels[channelCount*2]; };
+            struct Two { uint8_t channels[channelCount * 2]; };
 
-            size_t size = 2*dstWidth*channelCount;
-            size_t bufferSize = AlignHi(dstWidth, A)*channelCount*2;
+            size_t size = 2 * dstWidth*channelCount;
+            size_t bufferSize = AlignHi(dstWidth, A)*channelCount * 2;
             size_t alignedSize = AlignHi(size, DA) - DA;
             Buffer buffer(bufferSize, dstWidth, dstHeight);
 
-            const size_t stepB = A/channelCount;
-            const size_t stepA = DA/channelCount;
+            const size_t stepB = A / channelCount;
+            const size_t stepA = DA / channelCount;
             size_t bufferWidth = AlignHi(dstWidth, stepB);
 
             Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
@@ -161,7 +161,7 @@ namespace Simd
 
             __m128i a[2];
 
-            for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
                 a[0] = _mm_set1_epi16(int16_t(Base::FRACTION_RANGE - buffer.ay[yDst]));
                 a[1] = _mm_set1_epi16(int16_t(buffer.ay[yDst]));
@@ -169,9 +169,9 @@ namespace Simd
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
 
-                if(sy == previous)
+                if (sy == previous)
                     k = 2;
-                else if(sy == previous + 1)
+                else if (sy == previous + 1)
                 {
                     Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
@@ -179,21 +179,21 @@ namespace Simd
 
                 previous = sy;
 
-                for(; k < 2; k++)
+                for (; k < 2; k++)
                 {
                     Two * pb = (Two *)buffer.bx[k];
                     const One * ps = (const One *)(src + (sy + k)*srcStride);
-                    for(size_t x = 0; x < dstWidth; x++)
+                    for (size_t x = 0; x < dstWidth; x++)
                         pb[x] = *(Two *)(ps + buffer.ix[x]);
 
-                    for(size_t ib = 0, ia = 0; ib < bufferWidth; ib += stepB, ia += stepA)
+                    for (size_t ib = 0, ia = 0; ib < bufferWidth; ib += stepB, ia += stepA)
                         InterpolateX<channelCount>((__m128i*)(buffer.ax + ia), (__m128i*)(pb + ib));
                 }
 
-                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                for (size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
                     InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -201,18 +201,18 @@ namespace Simd
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            switch(channelCount)
+            switch (channelCount)
             {
-            case 1: 
-                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 1:
+                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 2: 
-                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 2:
+                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            default: 
-                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount); 
+            default:
+                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
             }
-        }	
+        }
     }
 #endif//SIMD_SSE2_ENABLE
 }

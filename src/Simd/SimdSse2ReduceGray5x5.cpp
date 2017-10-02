@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -35,7 +35,7 @@ namespace Simd
             {
                 Buffer(size_t width)
                 {
-                    _p = Allocate(sizeof(uint16_t)*(5*width + A));
+                    _p = Allocate(sizeof(uint16_t)*(5 * width + A));
                     in0 = (uint16_t*)_p;
                     in1 = in0 + width;
                     out0 = in1 + width;
@@ -55,7 +55,7 @@ namespace Simd
                 uint16_t * dst;
             private:
                 void *_p;
-            };	
+            };
         }
 
         template <bool compensation> SIMD_INLINE __m128i DivideBy256(__m128i value);
@@ -120,7 +120,7 @@ namespace Simd
         {
             __m128i t0 = MainRowX5x5<align, compensation>(buffer.dst + offset);
             __m128i t1 = MainRowX5x5<align, compensation>(buffer.dst + offset + HA);
-            t0 = _mm_packus_epi16(_mm_and_si128(_mm_packus_epi16(t0, t1), K16_00FF), K_ZERO); 
+            t0 = _mm_packus_epi16(_mm_and_si128(_mm_packus_epi16(t0, t1), K16_00FF), K_ZERO);
             _mm_storel_epi64((__m128i*)dst, t0);
         }
 
@@ -128,27 +128,27 @@ namespace Simd
             const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
-            assert((srcWidth + 1)/2 == dstWidth && (srcHeight + 1)/2 == dstHeight && srcWidth >= A);
+            assert((srcWidth + 1) / 2 == dstWidth && (srcHeight + 1) / 2 == dstHeight && srcWidth >= A);
 
             size_t alignedWidth = Simd::AlignLo(srcWidth, A);
             size_t bufferDstTail = Simd::AlignHi(srcWidth - A, 2);
 
             Buffer buffer(Simd::AlignHi(srcWidth, A));
 
-            for(size_t col = 0; col < alignedWidth; col += A)
+            for (size_t col = 0; col < alignedWidth; col += A)
                 FirstRow5x5<true>(src, buffer, col);
-            if(alignedWidth != srcWidth)
+            if (alignedWidth != srcWidth)
                 FirstRow5x5<false>(src, buffer, srcWidth - A);
             src += srcStride;
 
-            for(size_t row = 1; row <= srcHeight; row += 2, dst += dstStride, src += 2*srcStride)
+            for (size_t row = 1; row <= srcHeight; row += 2, dst += dstStride, src += 2 * srcStride)
             {
                 const uint8_t *odd = src - (row < srcHeight ? 0 : srcStride);
-                const uint8_t *even = odd + (row < srcHeight - 1 ? srcStride : 0); 
+                const uint8_t *even = odd + (row < srcHeight - 1 ? srcStride : 0);
 
-                for(size_t col = 0; col < alignedWidth; col += A)
+                for (size_t col = 0; col < alignedWidth; col += A)
                     MainRowY5x5<true>(odd, even, buffer, col);
-                if(alignedWidth != srcWidth)
+                if (alignedWidth != srcWidth)
                     MainRowY5x5<false>(odd, even, buffer, srcWidth - A);
 
                 Swap(buffer.in0, buffer.out0);
@@ -159,17 +159,17 @@ namespace Simd
                 buffer.dst[srcWidth] = buffer.dst[srcWidth - 1];
                 buffer.dst[srcWidth + 1] = buffer.dst[srcWidth - 1];
 
-                for(size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += HA)
+                for (size_t srcCol = 0, dstCol = 0; srcCol < alignedWidth; srcCol += A, dstCol += HA)
                     MainRowX5x5<true, compensation>(buffer, srcCol, dst + dstCol);
-                if(alignedWidth != srcWidth)
+                if (alignedWidth != srcWidth)
                     MainRowX5x5<false, compensation>(buffer, bufferDstTail, dst + dstWidth - HA);
             }
         }
 
-        void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, 
+        void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation)
         {
-            if(compensation)
+            if (compensation)
                 ReduceGray5x5<true>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
             else
                 ReduceGray5x5<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);

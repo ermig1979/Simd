@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -40,39 +40,39 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
-            if(align)
+            if (align)
                 assert(Aligned(a) && Aligned(b));
 
             *sum = 0;
             size_t partialAlignedSize = AlignLo(size, F);
             size_t fullAlignedSize = AlignLo(size, QF);
             size_t i = 0;
-            if(partialAlignedSize)
+            if (partialAlignedSize)
             {
-                __m128 sums[4] = {_mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps()};
-                if(fullAlignedSize)
+                __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                if (fullAlignedSize)
                 {
-                    for(; i < fullAlignedSize; i += QF)
+                    for (; i < fullAlignedSize; i += QF)
                     {
-						NeuralProductSum<align>(a, b, i + F*0, sums[0]);
-						NeuralProductSum<align>(a, b, i + F*1, sums[1]);
-						NeuralProductSum<align>(a, b, i + F*2, sums[2]);
-						NeuralProductSum<align>(a, b, i + F*3, sums[3]);
+                        NeuralProductSum<align>(a, b, i + F * 0, sums[0]);
+                        NeuralProductSum<align>(a, b, i + F * 1, sums[1]);
+                        NeuralProductSum<align>(a, b, i + F * 2, sums[2]);
+                        NeuralProductSum<align>(a, b, i + F * 3, sums[3]);
                     }
                     sums[0] = _mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3]));
                 }
-                for(; i < partialAlignedSize; i += F)
-					NeuralProductSum<align>(a, b, i, sums[0]);
+                for (; i < partialAlignedSize; i += F)
+                    NeuralProductSum<align>(a, b, i, sums[0]);
                 *sum += ExtractSum(sums[0]);
             }
-            for(; i < size; ++i)
-                *sum += a[i]*b[i];
+            for (; i < size; ++i)
+                *sum += a[i] * b[i];
         }
 
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum)
         {
-            if(Aligned(a) && Aligned(b))
-				NeuralProductSum<true>(a, b, size, sum);
+            if (Aligned(a) && Aligned(b))
+                NeuralProductSum<true>(a, b, size, sum);
             else
                 NeuralProductSum<false>(a, b, size, sum);
         }
@@ -90,10 +90,10 @@ namespace Simd
                 __m128 _value = _mm_set1_ps(value);
                 for (; i < aligned; i += QF)
                 {
-                    AddMultiplied<align>(src + i + F*0, _value, dst + i + F*0);
-                    AddMultiplied<align>(src + i + F*1, _value, dst + i + F*1);
-                    AddMultiplied<align>(src + i + F*2, _value, dst + i + F*2);
-                    AddMultiplied<align>(src + i + F*3, _value, dst + i + F*3);
+                    AddMultiplied<align>(src + i + F * 0, _value, dst + i + F * 0);
+                    AddMultiplied<align>(src + i + F * 1, _value, dst + i + F * 1);
+                    AddMultiplied<align>(src + i + F * 2, _value, dst + i + F * 2);
+                    AddMultiplied<align>(src + i + F * 3, _value, dst + i + F * 3);
                 }
                 for (; i < partial; i += F)
                     AddMultiplied<align>(src + i, _value, dst + i);
@@ -178,40 +178,40 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
-		template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-		{
+        template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
             if (align)
                 assert(Aligned(src) && Aligned(dst));
             size_t alignedSize = Simd::AlignLo(size, F);
-			__m128 _slope = _mm_set1_ps(*slope);
-			__m128 _0 = _mm_set1_ps(-0.0f);
-			__m128 _1 = _mm_set1_ps(1.0f);
-			__m128 _a = _mm_set1_ps(0.5417f);
-			__m128 _b = _mm_set1_ps(0.1460f);
-			size_t i = 0;
-			for (; i < alignedSize; i += F)
-			{
-				__m128 _src = Load<align>(src + i);
-				__m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
-				__m128 x2 = _mm_mul_ps(x, x);
-				__m128 x4 = _mm_mul_ps(x2, x2);
-				__m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _a), _mm_mul_ps(x4, _b)));
-				__m128 mask = _mm_cmpgt_ps(_src, _0);
-				__m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
-				__m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
-				Store<align>(dst + i, sigmoid);
-			}
-			for (; i < size; ++i)
-				dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
-		}
+            __m128 _slope = _mm_set1_ps(*slope);
+            __m128 _0 = _mm_set1_ps(-0.0f);
+            __m128 _1 = _mm_set1_ps(1.0f);
+            __m128 _a = _mm_set1_ps(0.5417f);
+            __m128 _b = _mm_set1_ps(0.1460f);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+            {
+                __m128 _src = Load<align>(src + i);
+                __m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
+                __m128 x2 = _mm_mul_ps(x, x);
+                __m128 x4 = _mm_mul_ps(x2, x2);
+                __m128 series = _mm_add_ps(_mm_add_ps(_1, x), _mm_add_ps(_mm_mul_ps(x2, _a), _mm_mul_ps(x4, _b)));
+                __m128 mask = _mm_cmpgt_ps(_src, _0);
+                __m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
+                __m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
+                Store<align>(dst + i, sigmoid);
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
+        }
 
-		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-		{
-			if (Aligned(src) && Aligned(dst))
-				NeuralRoughSigmoid<true>(src, size, slope, dst);
-			else
-				NeuralRoughSigmoid<false>(src, size, slope, dst);
-		}
+        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralRoughSigmoid<true>(src, size, slope, dst);
+            else
+                NeuralRoughSigmoid<false>(src, size, slope, dst);
+        }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m128 & k, const __m128 & o, const __m128 & m, float * dst)
         {
@@ -273,7 +273,7 @@ namespace Simd
                 Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_mul_ps(_mm_sub_ps(_1, _src), _src)));
             }
             for (; i < size; ++i)
-                dst[i] *= slope[0]*Base::DerivativeSigmoid(src[i]);
+                dst[i] *= slope[0] * Base::DerivativeSigmoid(src[i]);
         }
 
         void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
@@ -441,10 +441,10 @@ namespace Simd
                 {
                     for (; i < fullAlignedSize; i += QF)
                     {
-                        UpdateWeights<align>(x, i + F*0, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + F*1, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + F*2, _a, _b, d, w);
-                        UpdateWeights<align>(x, i + F*3, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 0, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 1, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 2, _a, _b, d, w);
+                        UpdateWeights<align>(x, i + F * 3, _a, _b, d, w);
                     }
                 }
                 for (; i < partialAlignedSize; i += F)
@@ -532,9 +532,9 @@ namespace Simd
             {
                 Buffer(size_t width)
                 {
-                    _size = width*sizeof(float);
+                    _size = width * sizeof(float);
                     size_t stride = AlignHi(width + 2 * (count - 1), F);
-                    size_t full = count*stride*sizeof(float);
+                    size_t full = count*stride * sizeof(float);
                     _ptr = Allocate(full);
                     memset(_ptr, 0, full);
                     rows[0] = (float*)_ptr;
@@ -614,21 +614,21 @@ namespace Simd
             {
                 return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
                     _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]),
-                    _mm_mul_ps(Load<false>(src + 2), weights[2])));
+                        _mm_mul_ps(Load<false>(src + 2), weights[2])));
             }
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
             {
                 return _mm_add_ps(Convolution3<align>(src, weights),
                     _mm_add_ps(Convolution3<align>(src + stride, weights + 3),
-                    Convolution3<align>(src + 2 * stride, weights + 6)));
+                        Convolution3<align>(src + 2 * stride, weights + 6)));
             }
 
             template<bool align> static SIMD_INLINE __m128 Backward(const Buffer<3> & buffer, size_t offset, const __m128 * weights)
             {
                 return _mm_add_ps(Convolution3<align>(buffer.rows[0] + offset, weights),
                     _mm_add_ps(Convolution3<align>(buffer.rows[1] + offset, weights + 3),
-                   Convolution3<align>(buffer.rows[2] + offset, weights + 6)));
+                        Convolution3<align>(buffer.rows[2] + offset, weights + 6)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
@@ -656,10 +656,10 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
             {
-                return _mm_add_ps(_mm_add_ps(Convolution4<align>(src, weights), 
+                return _mm_add_ps(_mm_add_ps(Convolution4<align>(src, weights),
                     Convolution4<align>(src + stride, weights + 4)),
-                    _mm_add_ps(Convolution4<align>(src + 2 * stride, weights + 8), 
-                    Convolution4<align>(src + 3 * stride, weights + 12)));
+                    _mm_add_ps(Convolution4<align>(src + 2 * stride, weights + 8),
+                        Convolution4<align>(src + 3 * stride, weights + 12)));
             }
 
             template<bool align> static SIMD_INLINE __m128 Backward(const Buffer<4> & buffer, size_t offset, const __m128 * weights)
@@ -667,7 +667,7 @@ namespace Simd
                 return _mm_add_ps(_mm_add_ps(Convolution4<align>(buffer.rows[0] + offset, weights),
                     Convolution4<align>(buffer.rows[1] + offset, weights + 4)),
                     _mm_add_ps(Convolution4<align>(buffer.rows[2] + offset, weights + 8),
-                    Convolution4<align>(buffer.rows[3] + offset, weights + 12)));
+                        Convolution4<align>(buffer.rows[3] + offset, weights + 12)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
@@ -698,20 +698,20 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float * src, size_t stride, const __m128 * weights)
             {
-                return _mm_add_ps(Convolution5<align>(src, weights), 
-                    _mm_add_ps(_mm_add_ps(Convolution5<align>(src + stride, weights + 5), 
-                    Convolution5<align>(src + 2 * stride, weights + 10)),
-                    _mm_add_ps(Convolution5<align>(src + 3 * stride, weights + 15), 
-                    Convolution5<align>(src + 4 * stride, weights + 20))));
+                return _mm_add_ps(Convolution5<align>(src, weights),
+                    _mm_add_ps(_mm_add_ps(Convolution5<align>(src + stride, weights + 5),
+                        Convolution5<align>(src + 2 * stride, weights + 10)),
+                        _mm_add_ps(Convolution5<align>(src + 3 * stride, weights + 15),
+                            Convolution5<align>(src + 4 * stride, weights + 20))));
             }
 
             template<bool align> static SIMD_INLINE __m128 Backward(const Buffer<5> & buffer, size_t offset, const __m128 * weights)
             {
                 return _mm_add_ps(_mm_add_ps(Convolution5<align>(buffer.rows[0] + offset, weights),
                     _mm_add_ps(Convolution5<align>(buffer.rows[1] + offset, weights + 5),
-                    Convolution5<align>(buffer.rows[2] + offset, weights + 10))),
+                        Convolution5<align>(buffer.rows[2] + offset, weights + 10))),
                     _mm_add_ps(Convolution5<align>(buffer.rows[3] + offset, weights + 15),
-                    Convolution5<align>(buffer.rows[4] + offset, weights + 20)));
+                        Convolution5<align>(buffer.rows[4] + offset, weights + 20)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums)
@@ -817,11 +817,11 @@ namespace Simd
                 {
                     const float * w = weights + dy * coreX;
                     float * d = dst + dy*dstStride;
-                    If<0 < coreX>::template AddMultiplied<align>(src, aligned, partial, width, w[0], d + 0);
-                    If<1 < coreX>::template AddMultiplied<false>(src, aligned, partial, width, w[1], d + 1);
-                    If<2 < coreX>::template AddMultiplied<false>(src, aligned, partial, width, w[2], d + 2);
-                    If<3 < coreX>::template AddMultiplied<false>(src, aligned, partial, width, w[3], d + 3);
-                    If<4 < coreX>::template AddMultiplied<align>(src, aligned, partial, width, w[4], d + 4);
+                    If < 0 < coreX > ::template AddMultiplied<align>(src, aligned, partial, width, w[0], d + 0);
+                    If < 1 < coreX > ::template AddMultiplied<false>(src, aligned, partial, width, w[1], d + 1);
+                    If < 2 < coreX > ::template AddMultiplied<false>(src, aligned, partial, width, w[2], d + 2);
+                    If < 3 < coreX > ::template AddMultiplied<false>(src, aligned, partial, width, w[3], d + 3);
+                    If < 4 < coreX > ::template AddMultiplied<align>(src, aligned, partial, width, w[4], d + 4);
                 }
                 src += srcStride;
                 dst += dstStride;

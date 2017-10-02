@@ -36,7 +36,7 @@ namespace Simd
             {
                 Buffer(size_t size, size_t width, size_t height)
                 {
-                    _p = Allocate(3*size + sizeof(int)*(2*height + width));
+                    _p = Allocate(3 * size + sizeof(int)*(2 * height + width));
                     bx[0] = (uint8_t*)_p;
                     bx[1] = bx[0] + size;
                     ax = bx[1] + size;
@@ -67,16 +67,16 @@ namespace Simd
 
             struct BufferG
             {
-				BufferG(size_t width, size_t blocks, size_t height)
-				{
-					_p = Allocate(3*width + sizeof(int)*2*height + blocks*sizeof(Index) + 2*A);
-					bx[0] = (uint8_t*)_p;
-					bx[1] = bx[0] + width + A;
-					ax = bx[1] + width + A;
-					ix = (Index*)(ax + width);
-					iy = (int*)(ix + blocks);
-					ay = iy + height;
-				}
+                BufferG(size_t width, size_t blocks, size_t height)
+                {
+                    _p = Allocate(3 * width + sizeof(int) * 2 * height + blocks * sizeof(Index) + 2 * A);
+                    bx[0] = (uint8_t*)_p;
+                    bx[1] = bx[0] + width + A;
+                    ax = bx[1] + width + A;
+                    ix = (Index*)(ax + width);
+                    iy = (int*)(ix + blocks);
+                    ay = iy + height;
+                }
 
                 ~BufferG()
                 {
@@ -95,21 +95,21 @@ namespace Simd
 
         template <size_t channelCount> void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, int * indexes, uint8_t * alphas)
         {
-            float scale = (float)srcSize/dstSize;
+            float scale = (float)srcSize / dstSize;
 
-            for(size_t i = 0; i < dstSize; ++i)
+            for (size_t i = 0; i < dstSize; ++i)
             {
                 float alpha = (float)((i + 0.5)*scale - 0.5);
                 ptrdiff_t index = (ptrdiff_t)::floor(alpha);
                 alpha -= index;
 
-                if(index < 0)
+                if (index < 0)
                 {
                     index = 0;
                     alpha = 0;
                 }
 
-                if(index > (ptrdiff_t)srcSize - 2)
+                if (index > (ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;
@@ -118,53 +118,53 @@ namespace Simd
                 indexes[i] = (int)index;
                 alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
                 alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
-                for(size_t channel = 1; channel < channelCount; channel++)
+                for (size_t channel = 1; channel < channelCount; channel++)
                     ((uint16_t*)alphas)[channel] = *(uint16_t*)alphas;
-                alphas += 2*channelCount;
+                alphas += 2 * channelCount;
             }
         }
 
-		size_t BlockCountMax(size_t src, size_t dst)
-		{
-			return (size_t)Simd::Max(::ceil(float(src) / (A - 1)), ::ceil(float(dst) / HA));
-		}
+        size_t BlockCountMax(size_t src, size_t dst)
+        {
+            return (size_t)Simd::Max(::ceil(float(src) / (A - 1)), ::ceil(float(dst) / HA));
+        }
 
         void EstimateAlphaIndexX(int srcSize, int dstSize, Index * indexes, uint8_t * alphas, size_t & blockCount)
         {
-            float scale = (float)srcSize/dstSize;
-			int block = 0;
+            float scale = (float)srcSize / dstSize;
+            int block = 0;
             indexes[0].src = 0;
             indexes[0].dst = 0;
-            for(int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
+            for (int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
             {
                 float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
                 int srcIndex = (int)::floor(alpha);
                 alpha -= srcIndex;
 
-                if(srcIndex < 0)
+                if (srcIndex < 0)
                 {
                     srcIndex = 0;
                     alpha = 0;
                 }
 
-                if(srcIndex > srcSize - 2)
+                if (srcIndex > srcSize - 2)
                 {
                     srcIndex = srcSize - 2;
                     alpha = 1;
                 }
 
-				int dst = 2 * dstIndex - indexes[block].dst;
-				int src = srcIndex - indexes[block].src;
-				if (src >= A - 1 || dst >= A)
-				{
-					block++;
-					indexes[block].src = Simd::Min(srcIndex, srcSize - (int)A);
-					indexes[block].dst = 2 * dstIndex;
-					dst = 0;
-					src = srcIndex - indexes[block].src;
-				}
-				indexes[block].shuffle[dst] = src;
-				indexes[block].shuffle[dst + 1] = src + 1;
+                int dst = 2 * dstIndex - indexes[block].dst;
+                int src = srcIndex - indexes[block].src;
+                if (src >= A - 1 || dst >= A)
+                {
+                    block++;
+                    indexes[block].src = Simd::Min(srcIndex, srcSize - (int)A);
+                    indexes[block].dst = 2 * dstIndex;
+                    dst = 0;
+                    src = srcIndex - indexes[block].src;
+                }
+                indexes[block].shuffle[dst] = src;
+                indexes[block].shuffle[dst + 1] = src + 1;
 
                 alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
                 alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
@@ -194,13 +194,13 @@ namespace Simd
             InterpolateX2(alpha + 1, buffer + 1);
         }
 
-        const __m128i K8_SHUFFLE_X3_00 = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD,  -1);
-        const __m128i K8_SHUFFLE_X3_01 = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x0);
-        const __m128i K8_SHUFFLE_X3_10 = SIMD_MM_SETR_EPI8(0xE,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_X3_11 = SIMD_MM_SETR_EPI8( -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE,  -1);
-        const __m128i K8_SHUFFLE_X3_12 = SIMD_MM_SETR_EPI8( -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0x1);
-        const __m128i K8_SHUFFLE_X3_21 = SIMD_MM_SETR_EPI8(0xF,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1,  -1);
-        const __m128i K8_SHUFFLE_X3_22 = SIMD_MM_SETR_EPI8( -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
+        const __m128i K8_SHUFFLE_X3_00 = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1);
+        const __m128i K8_SHUFFLE_X3_01 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0);
+        const __m128i K8_SHUFFLE_X3_10 = SIMD_MM_SETR_EPI8(0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_X3_11 = SIMD_MM_SETR_EPI8(-1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1);
+        const __m128i K8_SHUFFLE_X3_12 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1);
+        const __m128i K8_SHUFFLE_X3_21 = SIMD_MM_SETR_EPI8(0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m128i K8_SHUFFLE_X3_22 = SIMD_MM_SETR_EPI8(-1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
 
         template <> SIMD_INLINE void InterpolateX<3>(const __m128i * alpha, __m128i * buffer)
         {
@@ -218,8 +218,8 @@ namespace Simd
             shuffled[2] = _mm_shuffle_epi8(src[1], K8_SHUFFLE_X3_21);
             shuffled[2] = _mm_or_si128(shuffled[2], _mm_shuffle_epi8(src[2], K8_SHUFFLE_X3_22));
             _mm_store_si128(buffer + 2, _mm_maddubs_epi16(shuffled[2], _mm_load_si128(alpha + 2)));
-        }        
-        
+        }
+
         const __m128i K8_SHUFFLE_X4 = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
 
         SIMD_INLINE void InterpolateX4(const __m128i * alpha, __m128i * buffer)
@@ -246,8 +246,8 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void InterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m128i alpha[2], uint8_t * dst)
         {
-            __m128i lo = InterpolateY<align>((__m128i*)bx0 + 0, (__m128i*)bx1 + 0, alpha); 
-            __m128i hi = InterpolateY<align>((__m128i*)bx0 + 1, (__m128i*)bx1 + 1, alpha); 
+            __m128i lo = InterpolateY<align>((__m128i*)bx0 + 0, (__m128i*)bx1 + 0, alpha);
+            __m128i hi = InterpolateY<align>((__m128i*)bx0 + 1, (__m128i*)bx1 + 1, alpha);
             Store<false>((__m128i*)dst, _mm_packus_epi16(lo, hi));
         }
 
@@ -258,10 +258,10 @@ namespace Simd
             assert(dstWidth >= A);
 
             struct One { uint8_t channels[channelCount]; };
-            struct Two { uint8_t channels[channelCount*2]; };
+            struct Two { uint8_t channels[channelCount * 2]; };
 
-            size_t size = 2*dstWidth*channelCount;
-            size_t bufferSize = AlignHi(dstWidth, A)*channelCount*2;
+            size_t size = 2 * dstWidth*channelCount;
+            size_t bufferSize = AlignHi(dstWidth, A)*channelCount * 2;
             size_t alignedSize = AlignHi(size, DA) - DA;
             const size_t step = A*channelCount;
 
@@ -275,7 +275,7 @@ namespace Simd
 
             __m128i a[2];
 
-            for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
                 a[0] = _mm_set1_epi16(int16_t(Base::FRACTION_RANGE - buffer.ay[yDst]));
                 a[1] = _mm_set1_epi16(int16_t(buffer.ay[yDst]));
@@ -283,9 +283,9 @@ namespace Simd
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
 
-                if(sy == previous)
+                if (sy == previous)
                     k = 2;
-                else if(sy == previous + 1)
+                else if (sy == previous + 1)
                 {
                     Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
@@ -293,22 +293,22 @@ namespace Simd
 
                 previous = sy;
 
-                for(; k < 2; k++)
+                for (; k < 2; k++)
                 {
                     Two * pb = (Two *)buffer.bx[k];
                     const One * psrc = (const One *)(src + (sy + k)*srcStride);
-                    for(size_t x = 0; x < dstWidth; x++)
+                    for (size_t x = 0; x < dstWidth; x++)
                         pb[x] = *(Two *)(psrc + buffer.ix[x]);
 
                     uint8_t * pbx = buffer.bx[k];
-                    for(size_t i = 0; i < bufferSize; i += step)
+                    for (size_t i = 0; i < bufferSize; i += step)
                         InterpolateX<channelCount>((__m128i*)(buffer.ax + i), (__m128i*)(pbx + i));
                 }
 
-                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                for (size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
                     InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -323,8 +323,8 @@ namespace Simd
         {
             assert(dstWidth >= A);
 
-            size_t size = 2*dstWidth;
-            size_t bufferWidth = AlignHi(dstWidth, A)*2;
+            size_t size = 2 * dstWidth;
+            size_t bufferWidth = AlignHi(dstWidth, A) * 2;
             size_t blockCount = BlockCountMax(srcWidth, dstWidth);
             size_t alignedSize = AlignHi(size, DA) - DA;
 
@@ -338,7 +338,7 @@ namespace Simd
 
             __m128i a[2];
 
-            for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
                 a[0] = _mm_set1_epi16(int16_t(Base::FRACTION_RANGE - buffer.ay[yDst]));
                 a[1] = _mm_set1_epi16(int16_t(buffer.ay[yDst]));
@@ -346,9 +346,9 @@ namespace Simd
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
 
-                if(sy == previous)
+                if (sy == previous)
                     k = 2;
-                else if(sy == previous + 1)
+                else if (sy == previous + 1)
                 {
                     Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
@@ -356,22 +356,22 @@ namespace Simd
 
                 previous = sy;
 
-                for(; k < 2; k++)
+                for (; k < 2; k++)
                 {
                     const uint8_t * psrc = src + (sy + k)*srcStride;
                     uint8_t * pdst = buffer.bx[k];
-                    for(size_t i = 0; i < blockCount; ++i)
+                    for (size_t i = 0; i < blockCount; ++i)
                         LoadGray(psrc, buffer.ix[i], pdst);
 
                     uint8_t * pbx = buffer.bx[k];
-                    for(size_t i = 0; i < bufferWidth; i += A)
+                    for (size_t i = 0; i < bufferWidth; i += A)
                         InterpolateX<1>((__m128i*)(buffer.ax + i), (__m128i*)(pbx + i));
                 }
 
-                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                for (size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
                     InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -379,27 +379,27 @@ namespace Simd
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            switch(channelCount)
+            switch (channelCount)
             {
-            case 1: 
-                if(srcWidth >= A && srcWidth < 4*dstWidth)
-                    ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 1:
+                if (srcWidth >= A && srcWidth < 4 * dstWidth)
+                    ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 else
-                    ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+                    ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 2: 
-                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 2:
+                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 3: 
-                ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 3:
+                ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 4: 
-                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 4:
+                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            default: 
-                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount); 
+            default:
+                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
             }
-        }	
+        }
     }
 #endif
 }

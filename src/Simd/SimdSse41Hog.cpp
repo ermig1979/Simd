@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -29,15 +29,15 @@
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
-	namespace Sse41
-	{
+    namespace Sse41
+    {
         namespace Custom_8x8_18
         {
             struct Buffer
             {
                 __m128i pos[5];
                 __m128 cos[5], sin[5], kx[8], ky[8];
-                    
+
                 int * index;
                 float * value;
                 __m128 * hist;
@@ -73,7 +73,7 @@ namespace Simd
                     Free(_p);
                 }
 
-				SIMD_INLINE void ClearHist()
+                SIMD_INLINE void ClearHist()
                 {
                     memset(hist, 0, hs);
                 }
@@ -91,8 +91,8 @@ namespace Simd
                 __m128 _0 = _mm_set1_ps(-0.0f);
                 __m128 adx = _mm_andnot_ps(_0, dx);
                 __m128 ady = _mm_andnot_ps(_0, dy);
-				__m128 bestDot = _mm_add_ps(_mm_mul_ps(adx, buffer.cos[0]), _mm_mul_ps(ady, buffer.sin[0]));
-				__m128i bestIndex = buffer.pos[0];
+                __m128 bestDot = _mm_add_ps(_mm_mul_ps(adx, buffer.cos[0]), _mm_mul_ps(ady, buffer.sin[0]));
+                __m128i bestIndex = buffer.pos[0];
                 for (int i = 1; i < 5; ++i)
                 {
                     __m128 dot = _mm_add_ps(_mm_mul_ps(adx, buffer.cos[i]), _mm_mul_ps(ady, buffer.sin[i]));
@@ -139,13 +139,13 @@ namespace Simd
 
                 __m128 ky = buffer.ky[(row + 4) & 7];
                 __m128 * hist = buffer.hist;
-                size_t cellEnd = width/8;
+                size_t cellEnd = width / 8;
 
                 for (size_t col = 1; col < 4; ++col)
                 {
                     int index = buffer.index[col];
                     __m128 value = _mm_set1_ps(buffer.value[col]);
-                    __m128 kx = buffer.kx[(col + 4)&7];
+                    __m128 kx = buffer.kx[(col + 4) & 7];
                     hist[index] = _mm_add_ps(hist[index], _mm_mul_ps(value, _mm_mul_ps(ky, kx)));
                 }
                 hist += 18;
@@ -166,7 +166,7 @@ namespace Simd
                 {
                     int index = buffer.index[col];
                     __m128 value = _mm_set1_ps(buffer.value[col]);
-                    __m128 kx = buffer.kx[(col + 4)&7];
+                    __m128 kx = buffer.kx[(col + 4) & 7];
                     hist[index] = _mm_add_ps(hist[index], _mm_mul_ps(value, _mm_mul_ps(ky, kx)));
                 }
             }
@@ -266,9 +266,9 @@ namespace Simd
             {
                 const size_t quantization = 18;
 
-                size_t sizeX = width / 8, sizeY = height/8;
+                size_t sizeX = width / 8, sizeY = height / 8;
 
-                memset(histograms, 0, quantization*sizeX*sizeY*sizeof(float));
+                memset(histograms, 0, quantization*sizeX*sizeY * sizeof(float));
 
                 Buffer buffer(width);
 
@@ -306,8 +306,8 @@ namespace Simd
             static const size_t Q = 9;
             static const size_t Q2 = 18;
 
-			typedef Array<int> Array32i;
-			typedef Array<float> Array32f;
+            typedef Array<int> Array32i;
+            typedef Array<float> Array32f;
 
             size_t _sx, _sy, _hs;
 
@@ -316,11 +316,11 @@ namespace Simd
             __m128 _kx[8], _ky[8];
             __m128i _Q, _Q2;
 
-			Array32i _index;
-			Array32f _value;
-			Array32f _buffer;
-			Array32f _histogram;
-			Array32f _norm;
+            Array32i _index;
+            Array32f _value;
+            Array32f _buffer;
+            Array32f _histogram;
+            Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
@@ -345,7 +345,7 @@ namespace Simd
 
                 _index.Resize(w);
                 _value.Resize(w);
-                _buffer.Resize((_sx + 1)*4*Q2);
+                _buffer.Resize((_sx + 1) * 4 * Q2);
                 _histogram.Resize((_sx + 2)*(_sy + 2)*Q2);
                 _norm.Resize((_sx + 2)*(_sy + 2));
             }
@@ -394,7 +394,7 @@ namespace Simd
                 GetHistogram<align>(SubUnpackedU8<1>(r, l), SubUnpackedU8<1>(b, t), col + 8);
             }
 
-			void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
+            void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
             {
                 const uint8_t * s = src + stride*row;
                 GetHistogram<false>(s, stride, 1);
@@ -448,7 +448,7 @@ namespace Simd
                     src += 4 * Q2;
                 }
                 _buffer.Clear();
-           }
+            }
 
             void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
@@ -593,6 +593,6 @@ namespace Simd
             HogFeatureExtractor extractor;
             extractor.Run(src, stride, width, height, features);
         }
-	}
+    }
 #endif// SIMD_SSE41_ENABLE
 }

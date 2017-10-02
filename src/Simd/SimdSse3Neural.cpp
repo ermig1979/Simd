@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -242,85 +242,85 @@ namespace Simd
                 void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
                     size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, float * dst)
                 {
-					const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
-					if (dilationX*dilationY*strideX*strideY != 1)
-					{
-						for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-						{
-							size_t srcRow0 = dstRow*strideY - padY;
-							for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-							{
-								size_t srcCol0 = dstCol*strideX - padX;
-								for (size_t channel = 0; channel < srcDepth; ++channel)
-								{
-									for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-									{
-										size_t srcRow = srcRow0 + kernelRow*dilationY;
-										if (srcRow < srcHeight)
-										{
-											const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-											{
-												size_t srcCol = srcCol0 + kernelCol*dilationX;
-												if (srcCol < srcWidth)
-													*(dst++) = psrc[srcCol];
-												else
-													*(dst++) = 0;
-											}
-										}
-										else
-										{
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-												*(dst++) = 0;
-										}
-									}
-								}
-							}
-						}
-					}
-					else if(kernelX*kernelY != 1)
-					{
-						for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-						{
-							size_t srcRow0 = dstRow - padY;
-							for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-							{
-								size_t srcCol0 = dstCol - padX;
-								for (size_t channel = 0; channel < srcDepth; ++channel)
-								{
-									for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-									{
-										size_t srcRow = srcRow0 + kernelRow;
-										if (srcRow < srcHeight)
-										{
-											const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-											{
-												size_t srcCol = srcCol0 + kernelCol;
-												if (srcCol < srcWidth)
-													*(dst++) = psrc[srcCol];
-												else
-													*(dst++) = 0;
-											}
-										}
-										else
-										{
-											for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
-												*(dst++) = 0;
-										}
-									}
-								}
-							}
-						}
-					}
-					else 
-					{
-						for (size_t i = 0; i < N; ++i)
-						{
-							for (size_t k = 0; k < K; ++k)
-								*(dst++) = src[k*N + i];
-						}
-					}
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (dilationX*dilationY*strideX*strideY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow*strideY - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol*strideX - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow*dilationY;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol*dilationX;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (kernelX*kernelY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < N; ++i)
+                        {
+                            for (size_t k = 0; k < K; ++k)
+                                *(dst++) = src[k*N + i];
+                        }
+                    }
                 }
 
                 template <bool align> static SIMD_INLINE void Kernel1x4x4(const __m128 & a, size_t K, const float * b, __m128 * sums)
@@ -465,40 +465,40 @@ namespace Simd
             {
                 void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
                 {
-					size_t K4 = AlignLo(K, 4);
-					for (size_t i = 0; i < M; i += cell)
-					{
-						size_t n = Simd::Min(cell, M - i), k = 0;
-						if (cell == 4 && n == 4)
-						{
-							for (; k < K4; k += 4)
-							{
-								const float * ps = src + k;
-								__m128 s0 = Load<false>(ps + 0 * K);
-								__m128 s1 = Load<false>(ps + 1 * K);
-								__m128 s2 = Load<false>(ps + 2 * K);
-								__m128 s3 = Load<false>(ps + 3 * K);
-								__m128 s00 = _mm_unpacklo_ps(s0, s2);
-								__m128 s01 = _mm_unpacklo_ps(s1, s3);
-								__m128 s10 = _mm_unpackhi_ps(s0, s2);
-								__m128 s11 = _mm_unpackhi_ps(s1, s3);
-								Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
-								Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
-								Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
-								Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
-								dst += 16;
-							}
-						}
-						for (; k < K; ++k)
-						{
-							for (size_t c = 0; c < n; ++c)
-								*(dst++) = src[c*K + k];
-						}
-						src += cell*K;
-					}	
+                    size_t K4 = AlignLo(K, 4);
+                    for (size_t i = 0; i < M; i += cell)
+                    {
+                        size_t n = Simd::Min(cell, M - i), k = 0;
+                        if (cell == 4 && n == 4)
+                        {
+                            for (; k < K4; k += 4)
+                            {
+                                const float * ps = src + k;
+                                __m128 s0 = Load<false>(ps + 0 * K);
+                                __m128 s1 = Load<false>(ps + 1 * K);
+                                __m128 s2 = Load<false>(ps + 2 * K);
+                                __m128 s3 = Load<false>(ps + 3 * K);
+                                __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                                __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                                __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                                __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                                Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
+                                Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
+                                Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
+                                Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
+                                dst += 16;
+                            }
+                        }
+                        for (; k < K; ++k)
+                        {
+                            for (size_t c = 0; c < n; ++c)
+                                *(dst++) = src[c*K + k];
+                        }
+                        src += cell*K;
+                    }
                 }
 
-                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, 
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY,
                     size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * tmp, float * dst)
                 {
                     const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
@@ -506,134 +506,134 @@ namespace Simd
                     {
                         float * dst = tmp;
                         size_t channelSize = srcHeight * srcWidth;
-						if (dilationX*dilationY*strideX*strideY != 1)
-						{
-							for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
-							{
-								for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-								{
-									for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
-									{
-										size_t srcRow = kernelRow*dilationY - padY;
-										for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
-										{
-											if (srcRow < srcHeight)
-											{
-												size_t srcCol = kernelCol*dilationX - padX;
-												for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = src[srcRow*srcWidth + srcCol];
-													else
-														*(dst++) = 0;
-													srcCol += strideX;
-												}
-											} 
-											else
-											{
-												for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
-													*(dst++) = 0;
-											}
-											srcRow += strideY;
-										}
-									}
-								}
-							}
-						}
-						else
-						{
-							const size_t bodySize = dstWidth - padX * 2;
-							for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
-							{
-								for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
-								{
-									for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
-									{
-										size_t srcRow = kernelRow - padY;
-										for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
-										{
-											if (srcRow < srcHeight)
-											{
-												size_t srcCol = kernelCol - padX, dstCol = 0;
-												const float * psrc = src + srcRow*srcWidth;
-												for (; dstCol < padX; ++dstCol, ++srcCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = psrc[srcCol];
-													else
-														*(dst++) = 0;
-												}
-												memcpy(dst, psrc + srcCol, bodySize * 4);
-												dst += bodySize;
-												dstCol += bodySize;
-												srcCol += bodySize;
-												for (; dstCol < dstWidth; ++dstCol, ++srcCol)
-												{
-													if (srcCol < srcWidth)
-														*(dst++) = psrc[srcCol];
-													else
-														*(dst++) = 0;
-												}
-											}
-											else
-											{
-												memset(dst, 0, dstWidth * 4);
-												dst += dstWidth;
-											}
-										}
-									}
-								}
-							}
-						}
+                        if (dilationX*dilationY*strideX*strideY != 1)
+                        {
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow*dilationY - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol*dilationX - padX;
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = src[srcRow*srcWidth + srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                    srcCol += strideX;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                    *(dst++) = 0;
+                                            }
+                                            srcRow += strideY;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            const size_t bodySize = dstWidth - padX * 2;
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol - padX, dstCol = 0;
+                                                const float * psrc = src + srcRow*srcWidth;
+                                                for (; dstCol < padX; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                                memcpy(dst, psrc + srcCol, bodySize * 4);
+                                                dst += bodySize;
+                                                dstCol += bodySize;
+                                                srcCol += bodySize;
+                                                for (; dstCol < dstWidth; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                memset(dst, 0, dstWidth * 4);
+                                                dst += dstWidth;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         src = tmp;
                     }
-					if (cell == 8)
-					{
-						for (size_t j = 0; j < N; j += cell)
-						{
-							size_t n = Simd::Min(cell, N - j);
-							if (n == cell)
-							{
-								for (size_t k = 0; k < K; ++k)
-								{
-									const float * psrc = src + k*N;
-									Store<false>(dst + 0, Load<false>(psrc + 0));
-									Store<false>(dst + 4, Load<false>(psrc + 4));
-									dst += 8;
-								}
-							}
-							else
-							{
-								for (size_t k = 0; k < K; ++k)
-								{
-									const float * psrc = src + k*N;
-									size_t c = 0;
-									for (; c < n; ++c)
-										*(dst++) = *(psrc++);
-									for (; c < cell; ++c)
-										*(dst++) = 0;
-								}
-							}
-							src += cell;
-						}
-					}
-					else
-					{
-						for (size_t j = 0; j < N; j += cell)
-						{
-							size_t n = Simd::Min(cell, N - j);
-							for (size_t k = 0; k < K; ++k)
-							{
-								const float * psrc = src + k*N;
-								size_t c = 0;
-								for (; c < n; ++c)
-									*(dst++) = *(psrc++);
-								for (; c < cell; ++c)
-									*(dst++) = 0;
-							}
-							src += cell;
-						} 
-					}
+                    if (cell == 8)
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    Store<false>(dst + 0, Load<false>(psrc + 0));
+                                    Store<false>(dst + 4, Load<false>(psrc + 4));
+                                    dst += 8;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            for (size_t k = 0; k < K; ++k)
+                            {
+                                const float * psrc = src + k*N;
+                                size_t c = 0;
+                                for (; c < n; ++c)
+                                    *(dst++) = *(psrc++);
+                                for (; c < cell; ++c)
+                                    *(dst++) = 0;
+                            }
+                            src += cell;
+                        }
+                    }
                 }
 
                 SIMD_INLINE void AddSum(const __m128 & sum, float * dst)
@@ -698,10 +698,10 @@ namespace Simd
                         size_t j = 0;
                         for (; j < N4; j += 4)
                             Kernel4x4<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
-                        if(N4 < N)
+                        if (N4 < N)
                             Kernel4x4<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
                     }
-                    if(M4 < M)
+                    if (M4 < M)
                     {
                         size_t j = 0;
                         for (; j < N4; j += 4)
@@ -806,9 +806,9 @@ namespace Simd
                 {
                     if (cellA == 4)
                     {
-                        if(cellB == 4)
+                        if (cellB == 4)
                             Execute4x4<false>(M, N, K, a, b, c);
-                        if (cellB == 8)                           
+                        if (cellB == 8)
                             Execute4x8<false>(M, N, K, a, b, c);
                     }
                 }
@@ -822,11 +822,11 @@ namespace Simd
                     {
                         const float * s = src;
                         float * d = dst;
-                        memset(d, 0, padY*dstWidth*4);
+                        memset(d, 0, padY*dstWidth * 4);
                         d += padY*dstWidth;
                         for (size_t row = padY; row < dstHeight - padY; ++row)
                         {
-                            memset(d, 0, padX*4);
+                            memset(d, 0, padX * 4);
                             memcpy(d + padX, s, srcWidth * 4);
                             memset(d + padX + srcWidth, 0, padX * 4);
                             d += dstWidth;
@@ -850,11 +850,11 @@ namespace Simd
                     size_t alignedWidth = AlignLo(dstWidth, F);
                     __m128 tailMask = RightNotZero(dstWidth - alignedWidth);
                     __m128 _weight[kernelX*kernelY];
-					for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
-					{
-						for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
-						{
-							const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                    for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                    {
+                        for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                        {
+                            const float * psrc = src + srcWidth*srcHeight*srcChannel;
                             const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
                             float * pdst = dst + dstWidth*dstHeight*dstChannel;
                             LoadWeight<kernelX*kernelY>(pweight, _weight);
@@ -945,12 +945,12 @@ namespace Simd
 
                     if (dstWidth*dstHeight / kernelX <= 2000)
                         alg = Ver0;
-                    else 
+                    else
                         alg = Ver1;
                     if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
                         alg = Ver2;
 
-					switch (alg)
+                    switch (alg)
                     {
                     case Ver0:
                         sizeB = N*K;
@@ -971,13 +971,13 @@ namespace Simd
                             paddedH = srcHeight + 2 * padY;
                             sizeB = paddedW*paddedH*srcDepth;
                         }
-						else
-						{
-							paddedW = srcWidth;
-							paddedH = srcHeight;
-						}
-						break;
-					default:
+                        else
+                        {
+                            paddedW = srcWidth;
+                            paddedH = srcHeight;
+                        }
+                        break;
+                    default:
                         assert(0);
                         break;
                     }
@@ -998,7 +998,7 @@ namespace Simd
                     sizeA = AlignHi(sizeA, F);
                     sizeB = AlignHi(sizeB, F);
                     sizeT = AlignHi(sizeT, F);
-                    size_t size = (sizeA + sizeB + sizeT)*sizeof(float);
+                    size_t size = (sizeA + sizeB + sizeT) * sizeof(float);
                     if (size == 0)
                         return;
                     if (externalData != AlignHi(externalData, SIMD_ALIGN))
@@ -1042,7 +1042,7 @@ namespace Simd
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
             if (!add)
-                memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
+                memset(dst, 0, dstWidth*dstHeight*dstDepth * sizeof(float));
 
             Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
 

@@ -47,63 +47,63 @@ namespace Simd
             return _mm_unpacklo_epi32(_mm_set1_epi32(a0), _mm_set1_epi32(a1));
         }
 
-		SIMD_INLINE __m128 SetFloat(float a0, float a1)
-		{
-			return _mm_unpacklo_ps(_mm_set_ps1(a0), _mm_set_ps1(a1));
-		}
-	}
+        SIMD_INLINE __m128 SetFloat(float a0, float a1)
+        {
+            return _mm_unpacklo_ps(_mm_set_ps1(a0), _mm_set_ps1(a1));
+        }
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
-	{
-		SIMD_INLINE __m256i SetInt8(char a0, char a1)
-		{
-			return _mm256_unpacklo_epi8(_mm256_set1_epi8(a0), _mm256_set1_epi8(a1));
-		}
+    namespace Avx2
+    {
+        SIMD_INLINE __m256i SetInt8(char a0, char a1)
+        {
+            return _mm256_unpacklo_epi8(_mm256_set1_epi8(a0), _mm256_set1_epi8(a1));
+        }
 
-		SIMD_INLINE __m256i SetInt16(short a0, short a1)
-		{
-			return _mm256_unpacklo_epi16(_mm256_set1_epi16(a0), _mm256_set1_epi16(a1));
-		}
+        SIMD_INLINE __m256i SetInt16(short a0, short a1)
+        {
+            return _mm256_unpacklo_epi16(_mm256_set1_epi16(a0), _mm256_set1_epi16(a1));
+        }
 
-		SIMD_INLINE __m256i SetInt32(int a0, int a1)
-		{
-			return _mm256_unpacklo_epi32(_mm256_set1_epi32(a0), _mm256_set1_epi32(a1));
-		}
+        SIMD_INLINE __m256i SetInt32(int a0, int a1)
+        {
+            return _mm256_unpacklo_epi32(_mm256_set1_epi32(a0), _mm256_set1_epi32(a1));
+        }
 
-		SIMD_INLINE __m256 SetFloat(float a0, float a1)
-		{
-			return _mm256_unpacklo_ps(_mm256_set1_ps(a0), _mm256_set1_ps(a1));
-		}
+        SIMD_INLINE __m256 SetFloat(float a0, float a1)
+        {
+            return _mm256_unpacklo_ps(_mm256_set1_ps(a0), _mm256_set1_ps(a1));
+        }
 
         template <class T> SIMD_INLINE __m256i SetMask(T first, size_t position, T second)
         {
-            const size_t size = A/sizeof(T);
+            const size_t size = A / sizeof(T);
             assert(position <= size);
             T mask[size];
-            for(size_t i = 0; i < position; ++i)
+            for (size_t i = 0; i < position; ++i)
                 mask[i] = first;
-            for(size_t i = position; i < size; ++i)
+            for (size_t i = position; i < size; ++i)
                 mask[i] = second;
             return _mm256_loadu_si256((__m256i*)mask);
         }
-	}
+    }
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512BW_ENABLE
-	namespace Avx512bw
-	{
-		SIMD_INLINE __m512i SetInt8(char a0, char a1)
-		{
-			return _mm512_unpacklo_epi8(_mm512_set1_epi8(a0), _mm512_set1_epi8(a1));
-		}
+    namespace Avx512bw
+    {
+        SIMD_INLINE __m512i SetInt8(char a0, char a1)
+        {
+            return _mm512_unpacklo_epi8(_mm512_set1_epi8(a0), _mm512_set1_epi8(a1));
+        }
 
-		SIMD_INLINE __m512i SetInt16(short a0, short a1)
-		{
-			return _mm512_unpacklo_epi16(_mm512_set1_epi16(a0), _mm512_set1_epi16(a1));
-		}
-	}
+        SIMD_INLINE __m512i SetInt16(short a0, short a1)
+        {
+            return _mm512_unpacklo_epi16(_mm512_set1_epi16(a0), _mm512_set1_epi16(a1));
+        }
+    }
 #endif// SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE
@@ -166,7 +166,7 @@ namespace Simd
     {
         SIMD_INLINE float32x4_t SetF32(float a0, float a1, float a2, float a3)
         {
-            const float a[4] = {a0, a1, a2, a3};
+            const float a[4] = { a0, a1, a2, a3 };
             return vld1q_f32(a);
         }
     }

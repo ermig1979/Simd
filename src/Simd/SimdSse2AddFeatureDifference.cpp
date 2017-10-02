@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -27,8 +27,8 @@
 namespace Simd
 {
 #ifdef SIMD_SSE2_ENABLE    
-	namespace Sse2
-	{
+    namespace Sse2
+    {
         SIMD_INLINE __m128i FeatureDifference(__m128i value, __m128i lo, __m128i hi)
         {
             return _mm_max_epu8(_mm_subs_epu8(value, hi), _mm_subs_epu8(lo, value));
@@ -46,7 +46,7 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, 
+        template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi,
             uint8_t * difference, size_t offset, __m128i weight, __m128i mask)
         {
             const __m128i _value = Load<align>((__m128i*)(value + offset));
@@ -59,12 +59,12 @@ namespace Simd
             Store<align>((__m128i*)(difference + offset), _mm_adds_epu8(_difference, inc));
         }
 
-        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             assert(width >= A);
-            if(align)
+            if (align)
             {
                 assert(Aligned(value) && Aligned(valueStride));
                 assert(Aligned(lo) && Aligned(loStride));
@@ -76,11 +76,11 @@ namespace Simd
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
             __m128i _weight = _mm_set1_epi16((short)weight);
 
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += A)
+                for (size_t col = 0; col < alignedWidth; col += A)
                     AddFeatureDifference<align>(value, lo, hi, difference, col, _weight, K_INV_ZERO);
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                     AddFeatureDifference<false>(value, lo, hi, difference, width - A, _weight, tailMask);
                 value += valueStride;
                 lo += loStride;
@@ -89,16 +89,16 @@ namespace Simd
             }
         }
 
-        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
-            if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
+            if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
                 Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))
                 AddFeatureDifference<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
             else
                 AddFeatureDifference<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
         }
-	}
+    }
 #endif// SIMD_SSE2_ENABLE
 }

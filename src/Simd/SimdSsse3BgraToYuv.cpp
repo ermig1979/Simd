@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -30,8 +30,8 @@ namespace Simd
 #ifdef SIMD_SSSE3_ENABLE    
     namespace Ssse3
     {
-        const __m128i K8_SHUFFLE_BGRA_TO_B0R0 = SIMD_MM_SETR_EPI8(0x0,  -1, 0x2,  -1, 0x4,  -1, 0x6,  -1, 0x8,  -1, 0xA,  -1, 0xC,  -1, 0xE,  -1);
-        const __m128i K8_SHUFFLE_BGRA_TO_G000 = SIMD_MM_SETR_EPI8(0x1,  -1,  -1,  -1, 0x5,  -1,  -1,  -1, 0x9,  -1,  -1,  -1, 0xD,  -1,  -1,  -1);
+        const __m128i K8_SHUFFLE_BGRA_TO_B0R0 = SIMD_MM_SETR_EPI8(0x0, -1, 0x2, -1, 0x4, -1, 0x6, -1, 0x8, -1, 0xA, -1, 0xC, -1, 0xE, -1);
+        const __m128i K8_SHUFFLE_BGRA_TO_G000 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
 
         template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1)
         {
@@ -98,35 +98,35 @@ namespace Simd
         template <bool align> void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
-            if(align)
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
             {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, DA);
-            const size_t A8 = A*8;
-            for(size_t row = 0; row < height; row += 2)
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; row += 2)
             {
-                for(size_t colUV = 0, colY = 0, colBgra = 0; colY < alignedWidth; colY += DA, colUV += A, colBgra += A8)
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < alignedWidth; colY += DA, colUV += A, colBgra += A8)
                     BgraToYuv420p<align>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     size_t offset = width - DA;
-                    BgraToYuv420p<false>(bgra + offset*4, bgraStride, y + offset, yStride, u + offset/2, v + offset/2);
+                    BgraToYuv420p<false>(bgra + offset * 4, bgraStride, y + offset, yStride, u + offset / 2, v + offset / 2);
                 }
-                y += 2*yStride;
+                y += 2 * yStride;
                 u += uStride;
                 v += vStride;
-                bgra += 2*bgraStride;
+                bgra += 2 * bgraStride;
             }
         }
 
         void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 BgraToYuv420p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
@@ -157,23 +157,23 @@ namespace Simd
         template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            assert((width%2 == 0) && (width >= DA));
-            if(align)
+            assert((width % 2 == 0) && (width >= DA));
+            if (align)
             {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, DA);
-            const size_t A8 = A*8;
-            for(size_t row = 0; row < height; ++row)
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; ++row)
             {
-                for(size_t colUV = 0, colY = 0, colBgra = 0; colY < alignedWidth; colY += DA, colUV += A, colBgra += A8)
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < alignedWidth; colY += DA, colUV += A, colBgra += A8)
                     BgraToYuv422p<align>(bgra + colBgra, y + colY, u + colUV, v + colUV);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     size_t offset = width - DA;
-                    BgraToYuv422p<false>(bgra + offset*4, y + offset, u + offset/2, v + offset/2);
+                    BgraToYuv422p<false>(bgra + offset * 4, y + offset, u + offset / 2, v + offset / 2);
                 }
                 y += yStride;
                 u += uStride;
@@ -185,7 +185,7 @@ namespace Simd
         void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
