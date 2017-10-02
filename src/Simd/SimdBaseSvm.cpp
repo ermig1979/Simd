@@ -53,16 +53,16 @@ namespace Simd
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
         {
             Buffer buffer(count);
-            for(size_t j = 0; j < length; ++j)
+            for (size_t j = 0; j < length; ++j)
             {
                 float v = x[j];
-                for(size_t i = 0; i < count; ++i)
+                for (size_t i = 0; i < count; ++i)
                     buffer.sums[i] += v*svs[i];
                 svs += count;
             }
             *sum = 0;
-            for(size_t i = 0; i < count; ++i)
-                *sum += buffer.sums[i]*weights[i];
+            for (size_t i = 0; i < count; ++i)
+                *sum += buffer.sums[i] * weights[i];
         }
     }
 }

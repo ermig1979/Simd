@@ -53,9 +53,9 @@ namespace Simd
 
             template<class InputIterator> inline  InputIterator FindNotSpace(InputIterator first, InputIterator last)
             {
-                while (first != last) 
+                while (first != last)
                 {
-                    if (!isspace(*first)) 
+                    if (!isspace(*first))
                         return first;
                     ++first;
                 }
@@ -151,7 +151,7 @@ namespace Simd
         {
             static const float THRESHOLD_EPS = 1e-5f;
 
-            Data * data = NULL; 
+            Data * data = NULL;
             try
             {
                 tinyxml2::XMLDocument xml;
@@ -321,14 +321,14 @@ namespace Simd
             Data * data = (Data*)_data;
             if (data)
             {
-                if(width)
+                if (width)
                     *width = data->origWinSize.x;
-                if(height)
+                if (height)
                     *height = data->origWinSize.y;
-                if(flags)
+                if (flags)
                     *flags = SimdDetectionInfoFlags(data->featureType |
                     (data->hasTilted ? SimdDetectionInfoHasTilted : 0) |
-                    (data->canInt16 ? SimdDetectionInfoCanInt16 : 0));
+                        (data->canInt16 ? SimdDetectionInfoCanInt16 : 0));
             }
         }
 
@@ -764,7 +764,7 @@ namespace Simd
             }
         }
 
-        void DetectionHaarDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride, 
+        void DetectionHaarDetect32fp(const void * _hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride)
         {
             const HidHaarCascade & hid = *(HidHaarCascade*)_hid;

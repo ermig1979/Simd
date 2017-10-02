@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -30,51 +30,51 @@ namespace Simd
         void Fill(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value)
         {
             size_t rowSize = width*pixelSize;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 memset(dst, value, rowSize);
                 dst += stride;
             }
         }
 
-        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+        void FillFrame(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
             size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value)
         {
-            if(frameTop)
+            if (frameTop)
             {
                 size_t offset = 0;
                 size_t size = width*pixelSize;
-                for(size_t row = 0; row < frameTop; ++row)
+                for (size_t row = 0; row < frameTop; ++row)
                 {
                     memset(dst + offset, value, size);
                     offset += stride;
                 }
             }
-            if(height - frameBottom)
+            if (height - frameBottom)
             {
                 size_t offset = frameBottom*stride;
                 size_t size = width*pixelSize;
-                for(size_t row = frameBottom; row < height; ++row)
+                for (size_t row = frameBottom; row < height; ++row)
                 {
                     memset(dst + offset, value, size);
                     offset += stride;
                 }
             }
-            if(frameLeft)
+            if (frameLeft)
             {
                 size_t offset = frameTop*stride;
                 size_t size = frameLeft*pixelSize;
-                for(size_t row = frameTop; row < frameBottom; ++row)
+                for (size_t row = frameTop; row < frameBottom; ++row)
                 {
                     memset(dst + offset, value, size);
                     offset += stride;
                 }
             }
-            if(width - frameRight)
+            if (width - frameRight)
             {
                 size_t offset = frameTop*stride + frameRight*pixelSize;
                 size_t size = (width - frameRight)*pixelSize;
-                for(size_t row = frameTop; row < frameBottom; ++row)
+                for (size_t row = frameTop; row < frameBottom; ++row)
                 {
                     memset(dst + offset, value, size);
                     offset += stride;
@@ -85,10 +85,10 @@ namespace Simd
         SIMD_INLINE uint64_t Fill64(uint8_t a, uint8_t b, uint8_t c)
         {
 #ifdef SIMD_BIG_ENDIAN
-            return (uint64_t(a) << 56) | (uint64_t(b) << 48) | (uint64_t(c) << 40) | (uint64_t(a) << 32) | 
+            return (uint64_t(a) << 56) | (uint64_t(b) << 48) | (uint64_t(c) << 40) | (uint64_t(a) << 32) |
                 (uint64_t(b) << 24) | (uint64_t(c) << 16) | (uint64_t(a) << 8) | uint64_t(b);
 #else
-            return uint64_t(a) | (uint64_t(b) << 8) | (uint64_t(c) << 16) | (uint64_t(a) << 24) | 
+            return uint64_t(a) | (uint64_t(b) << 8) | (uint64_t(c) << 16) | (uint64_t(a) << 24) |
                 (uint64_t(b) << 32) | (uint64_t(c) << 40) | (uint64_t(a) << 48) | (uint64_t(b) << 56);
 #endif
         }
@@ -104,9 +104,9 @@ namespace Simd
 
         void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
-            size_t size = width*3;
-            size_t step = sizeof(size_t)*3;
-            size_t alignedSize = AlignLo(width, sizeof(size_t))*3;
+            size_t size = width * 3;
+            size_t step = sizeof(size_t) * 3;
+            size_t alignedSize = AlignLo(width, sizeof(size_t)) * 3;
             size_t bgrs[3];
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             bgrs[0] = Fill64(blue, green, red);
@@ -118,16 +118,16 @@ namespace Simd
             bgrs[1] = Fill32(green, red, blue);
             bgrs[2] = Fill32(red, blue, green);
 #endif
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t offset = 0;
-                for(; offset < alignedSize; offset += step)
+                for (; offset < alignedSize; offset += step)
                 {
                     ((size_t*)(dst + offset))[0] = bgrs[0];
                     ((size_t*)(dst + offset))[1] = bgrs[1];
                     ((size_t*)(dst + offset))[2] = bgrs[2];
                 }
-                for(; offset < size; offset += 3)
+                for (; offset < size; offset += 3)
                 {
                     (dst + offset)[0] = blue;
                     (dst + offset)[1] = green;
@@ -148,18 +148,18 @@ namespace Simd
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             uint64_t bgra64 = uint64_t(bgra32) | (uint64_t(bgra32) << 32);
             size_t alignedWidth = AlignLo(width, 2);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < alignedWidth; col += 2)
+                for (size_t col = 0; col < alignedWidth; col += 2)
                     *((uint64_t*)((uint32_t*)dst + col)) = bgra64;
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                     ((uint32_t*)dst)[width - 1] = bgra32;
                 dst += stride;
             }
 #else
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
-                for(size_t col = 0; col < width; ++col)
+                for (size_t col = 0; col < width; ++col)
                     ((uint32_t*)dst)[col] = bgra32;
                 dst += stride;
             }

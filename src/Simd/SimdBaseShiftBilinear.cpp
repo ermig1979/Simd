@@ -26,148 +26,148 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-		SIMD_INLINE int Interpolate(int s[2][2], int k[2][2])
-		{
-			return (s[0][0]*k[0][0] + s[0][1]*k[0][1] + 
-				s[1][0]*k[1][0] + s[1][1]*k[1][1] + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-		}
+    namespace Base
+    {
+        SIMD_INLINE int Interpolate(int s[2][2], int k[2][2])
+        {
+            return (s[0][0] * k[0][0] + s[0][1] * k[0][1] +
+                s[1][0] * k[1][0] + s[1][1] * k[1][1] + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+        }
 
-		SIMD_INLINE int Interpolate(const unsigned char *src, size_t dx, size_t dy, int k[2][2])
-		{
-			return (src[0]*k[0][0] + src[dx]*k[0][1] + 
-				src[dy]*k[1][0] + src[dx + dy]*k[1][1] + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-		}
+        SIMD_INLINE int Interpolate(const unsigned char *src, size_t dx, size_t dy, int k[2][2])
+        {
+            return (src[0] * k[0][0] + src[dx] * k[0][1] +
+                src[dy] * k[1][0] + src[dx + dy] * k[1][1] + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+        }
 
-		SIMD_INLINE int Interpolate(const unsigned char *src, size_t dr, int k[2])
-		{
-			return (src[0]*k[0] + src[dr]*k[1] + LINEAR_ROUND_TERM) >> LINEAR_SHIFT;
-		}
+        SIMD_INLINE int Interpolate(const unsigned char *src, size_t dr, int k[2])
+        {
+            return (src[0] * k[0] + src[dr] * k[1] + LINEAR_ROUND_TERM) >> LINEAR_SHIFT;
+        }
 
-		void MixBorder(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,            
-			const uint8_t * bkg, size_t bkgStride, ptrdiff_t iDx, ptrdiff_t iDy, int fDx, int fDy, uint8_t * dst, size_t dstStride)
-		{
-			size_t bkgWidth = Abs(iDx) - (iDx < 0 && fDx ? 1 : 0);
-			size_t bkgHeight = Abs(iDy) - (iDy < 0 && fDy ? 1 : 0);
+        void MixBorder(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            const uint8_t * bkg, size_t bkgStride, ptrdiff_t iDx, ptrdiff_t iDy, int fDx, int fDy, uint8_t * dst, size_t dstStride)
+        {
+            size_t bkgWidth = Abs(iDx) - (iDx < 0 && fDx ? 1 : 0);
+            size_t bkgHeight = Abs(iDy) - (iDy < 0 && fDy ? 1 : 0);
 
-			size_t mainWidth = width - bkgWidth - (fDx ? 1 : 0);
-			size_t mainHeight = height - bkgHeight - (fDy ? 1 : 0); 
+            size_t mainWidth = width - bkgWidth - (fDx ? 1 : 0);
+            size_t mainHeight = height - bkgHeight - (fDy ? 1 : 0);
 
-			int k[2][2];
-			k[0][0] = (FRACTION_RANGE - fDx)*(FRACTION_RANGE - fDy); 
-			k[0][1] = fDx*(FRACTION_RANGE - fDy); 
-			k[1][0] = (FRACTION_RANGE - fDx)*fDy; 
-			k[1][1] = fDx*fDy; 
+            int k[2][2];
+            k[0][0] = (FRACTION_RANGE - fDx)*(FRACTION_RANGE - fDy);
+            k[0][1] = fDx*(FRACTION_RANGE - fDy);
+            k[1][0] = (FRACTION_RANGE - fDx)*fDy;
+            k[1][1] = fDx*fDy;
 
-			if(fDx)
-			{
-				const uint8_t * ps[2][2];
-				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
-				size_t bkgOffset = (iDy > 0 ? 0 : - iDy)*bkgStride + xOffset;
-				size_t dstOffset = (iDy > 0 ? 0 : - iDy)*dstStride + xOffset;
+            if (fDx)
+            {
+                const uint8_t * ps[2][2];
+                size_t xOffset = (iDx >= 0 ? width - 1 - iDx : -iDx - 1)*channelCount;
+                size_t bkgOffset = (iDy > 0 ? 0 : -iDy)*bkgStride + xOffset;
+                size_t dstOffset = (iDy > 0 ? 0 : -iDy)*dstStride + xOffset;
 
-				if(iDx < 0)
-				{
-					ps[0][0] = bkg + bkgOffset; 
-					ps[0][1] = src + (iDy < 0 ? 0 : iDy)*srcStride; 
-					ps[1][0] = bkg + bkgOffset; 
-					ps[1][1] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride; 
-				}
-				else
-				{
-					ps[0][0] = src + (iDy < 0 ? 0 : iDy)*srcStride + (width - 1)*channelCount; 
-					ps[0][1] = bkg + bkgOffset; 
-					ps[1][0] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride + (width - 1)*channelCount; 
-					ps[1][1] = bkg + bkgOffset; 
-				}
+                if (iDx < 0)
+                {
+                    ps[0][0] = bkg + bkgOffset;
+                    ps[0][1] = src + (iDy < 0 ? 0 : iDy)*srcStride;
+                    ps[1][0] = bkg + bkgOffset;
+                    ps[1][1] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride;
+                }
+                else
+                {
+                    ps[0][0] = src + (iDy < 0 ? 0 : iDy)*srcStride + (width - 1)*channelCount;
+                    ps[0][1] = bkg + bkgOffset;
+                    ps[1][0] = src + ((iDy < 0 ? 0 : iDy) + (fDy ? 1 : 0))*srcStride + (width - 1)*channelCount;
+                    ps[1][1] = bkg + bkgOffset;
+                }
 
-				for(size_t row = 0; row < mainHeight; ++row)
-				{
-					for(size_t channel = 0; channel < channelCount; channel++)
-					{
-						int s[2][2];
-						s[0][0] = ps[0][0][channel]; 
-						s[0][1] = ps[0][1][channel]; 
-						s[1][0] = ps[1][0][channel]; 
-						s[1][1] = ps[1][1][channel]; 
-						dst[dstOffset + channel] = Interpolate(s, k);
-					}
-					ps[0][0] += srcStride; 
-					ps[0][1] += bkgStride; 
-					ps[1][0] += srcStride; 
-					ps[1][1] += bkgStride; 
-					dstOffset += dstStride;
-				}
-			}
+                for (size_t row = 0; row < mainHeight; ++row)
+                {
+                    for (size_t channel = 0; channel < channelCount; channel++)
+                    {
+                        int s[2][2];
+                        s[0][0] = ps[0][0][channel];
+                        s[0][1] = ps[0][1][channel];
+                        s[1][0] = ps[1][0][channel];
+                        s[1][1] = ps[1][1][channel];
+                        dst[dstOffset + channel] = Interpolate(s, k);
+                    }
+                    ps[0][0] += srcStride;
+                    ps[0][1] += bkgStride;
+                    ps[1][0] += srcStride;
+                    ps[1][1] += bkgStride;
+                    dstOffset += dstStride;
+                }
+            }
 
-			if(fDy)
-			{
-				const uint8_t * ps[2][2];
-				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + (iDx > 0 ? 0 : -iDx)*channelCount;
-				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + (iDx > 0 ? 0 : -iDx)*channelCount;
+            if (fDy)
+            {
+                const uint8_t * ps[2][2];
+                size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : -iDy - 1)*bkgStride + (iDx > 0 ? 0 : -iDx)*channelCount;
+                size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : -iDy - 1)*dstStride + (iDx > 0 ? 0 : -iDx)*channelCount;
 
-				if(iDy < 0)
-				{
-					ps[0][0] = bkg + bkgOffset;
-					ps[0][1] = bkg + bkgOffset; 
-					ps[1][0] = src + (iDx < 0 ? 0 : iDx)*channelCount; 
-					ps[1][1] = src + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount; 
-				}
-				else
-				{
-					ps[0][0] = src + (height - 1)*srcStride + (iDx < 0 ? 0 : iDx)*channelCount;
-					ps[0][1] = src + (height - 1)*srcStride + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount; 
-					ps[1][0] = bkg + bkgOffset; 
-					ps[1][1] = bkg + bkgOffset;
-				}
+                if (iDy < 0)
+                {
+                    ps[0][0] = bkg + bkgOffset;
+                    ps[0][1] = bkg + bkgOffset;
+                    ps[1][0] = src + (iDx < 0 ? 0 : iDx)*channelCount;
+                    ps[1][1] = src + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount;
+                }
+                else
+                {
+                    ps[0][0] = src + (height - 1)*srcStride + (iDx < 0 ? 0 : iDx)*channelCount;
+                    ps[0][1] = src + (height - 1)*srcStride + ((iDx < 0 ? 0 : iDx) + (fDx ? 1 : 0))*channelCount;
+                    ps[1][0] = bkg + bkgOffset;
+                    ps[1][1] = bkg + bkgOffset;
+                }
 
-				for(size_t col = 0; col < mainWidth; ++col)
-				{
-					for(size_t channel = 0; channel < channelCount; channel++)
-					{
-						int s[2][2];
-						s[0][0] = ps[0][0][channel]; 
-						s[0][1] = ps[0][1][channel]; 
-						s[1][0] = ps[1][0][channel]; 
-						s[1][1] = ps[1][1][channel]; 
-						dst[dstOffset + channel] = Interpolate(s, k);
-					}
-					ps[0][0] += channelCount; 
-					ps[0][1] += channelCount; 
-					ps[1][0] += channelCount; 
-					ps[1][1] += channelCount; 
-					dstOffset += channelCount;
-				}
-			}
+                for (size_t col = 0; col < mainWidth; ++col)
+                {
+                    for (size_t channel = 0; channel < channelCount; channel++)
+                    {
+                        int s[2][2];
+                        s[0][0] = ps[0][0][channel];
+                        s[0][1] = ps[0][1][channel];
+                        s[1][0] = ps[1][0][channel];
+                        s[1][1] = ps[1][1][channel];
+                        dst[dstOffset + channel] = Interpolate(s, k);
+                    }
+                    ps[0][0] += channelCount;
+                    ps[0][1] += channelCount;
+                    ps[1][0] += channelCount;
+                    ps[1][1] += channelCount;
+                    dstOffset += channelCount;
+                }
+            }
 
-			if(fDx && fDy)
-			{
-				const uint8_t * ps[2][2];
-				size_t xOffset = (iDx >= 0 ? width - 1 - iDx : - iDx - 1)*channelCount;
-				size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*bkgStride + xOffset;
-				size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : - iDy - 1)*dstStride + xOffset;
+            if (fDx && fDy)
+            {
+                const uint8_t * ps[2][2];
+                size_t xOffset = (iDx >= 0 ? width - 1 - iDx : -iDx - 1)*channelCount;
+                size_t bkgOffset = (iDy >= 0 ? height - 1 - iDy : -iDy - 1)*bkgStride + xOffset;
+                size_t dstOffset = (iDy >= 0 ? height - 1 - iDy : -iDy - 1)*dstStride + xOffset;
 
-				ps[0][0] = (iDx >= 0 && iDy >= 0) ? (src + (height - 1)*srcStride + (width - 1)*channelCount): bkg + bkgOffset; 
-				ps[0][1] = (iDx < 0 && iDy >= 0) ? (src + (height - 1)*srcStride): bkg + bkgOffset; 
-				ps[1][0] = (iDx >= 0 && iDy < 0) ? (src + (width - 1)*channelCount): bkg + bkgOffset; 
-				ps[1][1] = (iDx < 0 && iDy < 0) ? (src): bkg + bkgOffset; 
+                ps[0][0] = (iDx >= 0 && iDy >= 0) ? (src + (height - 1)*srcStride + (width - 1)*channelCount) : bkg + bkgOffset;
+                ps[0][1] = (iDx < 0 && iDy >= 0) ? (src + (height - 1)*srcStride) : bkg + bkgOffset;
+                ps[1][0] = (iDx >= 0 && iDy < 0) ? (src + (width - 1)*channelCount) : bkg + bkgOffset;
+                ps[1][1] = (iDx < 0 && iDy < 0) ? (src) : bkg + bkgOffset;
 
-				for(size_t channel = 0; channel < channelCount; channel++)
-				{
-					int s[2][2];
-					s[0][0] = ps[0][0][channel]; 
-					s[0][1] = ps[0][1][channel]; 
-					s[1][0] = ps[1][0][channel]; 
-					s[1][1] = ps[1][1][channel]; 
-					dst[dstOffset + channel] = Interpolate(s, k);
-				}
-			}
-		}
+                for (size_t channel = 0; channel < channelCount; channel++)
+                {
+                    int s[2][2];
+                    s[0][0] = ps[0][0][channel];
+                    s[0][1] = ps[0][1][channel];
+                    s[1][0] = ps[1][0][channel];
+                    s[1][1] = ps[1][1][channel];
+                    dst[dstOffset + channel] = Interpolate(s, k);
+                }
+            }
+        }
 
         void CommonShiftAction(
-            const uint8_t * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount, 
-            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
+            const uint8_t * & src, size_t srcStride, size_t & width, size_t & height, size_t channelCount,
+            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * & dst, size_t dstStride,
             int & fDx, int & fDy)
         {
@@ -197,91 +197,91 @@ namespace Simd
             MixBorder(src, srcStride, width, height, channelCount, bkg, bkgStride, iDx, iDy, fDx, fDy, dst, dstStride);
 
             src += Simd::Max((ptrdiff_t)0, iDy)*srcStride + Simd::Max((ptrdiff_t)0, iDx)*channelCount;
-            dst += Simd::Max((ptrdiff_t)0,-iDy)*dstStride + Simd::Max((ptrdiff_t)0,-iDx)*channelCount;
+            dst += Simd::Max((ptrdiff_t)0, -iDy)*dstStride + Simd::Max((ptrdiff_t)0, -iDx)*channelCount;
 
             width = width - Abs(iDx) + (iDx < 0 && fDx ? 1 : 0) - (fDx ? 1 : 0);
-            height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0); 
+            height = height - Abs(iDy) + (iDy < 0 && fDy ? 1 : 0) - (fDy ? 1 : 0);
         }
 
-		void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			int fDx, int fDy, uint8_t * dst, size_t dstStride)
-		{
-			size_t size = width*channelCount;
-			if(fDy)
-			{
-				if(fDx)
-				{
-					int k[2][2];
-					k[0][0] = (FRACTION_RANGE - fDx)*(FRACTION_RANGE - fDy); 
-					k[0][1] = fDx*(FRACTION_RANGE - fDy); 
-					k[1][0] = (FRACTION_RANGE - fDx)*fDy; 
-					k[1][1] = fDx*fDy; 
-					for(size_t row = 0; row < height; ++row)
-					{
-						for(size_t col = 0; col < size; col++)
-						{
-							dst[col] = Interpolate(src + col, channelCount, srcStride, k);
-						}
-						src += srcStride;
-						dst += dstStride;
-					}
-				}
-				else
-				{
-					int k[2];
-					k[0] = FRACTION_RANGE - fDy; 
-					k[1] = fDy; 
-					for(size_t row = 0; row < height; ++row)
-					{
-						for(size_t col = 0; col < size; col++)
-						{
-							dst[col] = Interpolate(src + col, srcStride, k);
-						}
-						src += srcStride;
-						dst += dstStride;
-					}
-				}
-			}
-			else
-			{
-				if(fDx)
-				{
-					int k[2];
-					k[0] = FRACTION_RANGE - fDx; 
-					k[1] = fDx; 
-					for(size_t row = 0; row < height; ++row)
-					{
-						for(size_t col = 0; col < size; col++)
-						{
-							dst[col] = Interpolate(src + col, channelCount, k);
-						}
-						src += srcStride;
-						dst += dstStride;
-					}
-				}
-				else
-				{
-					for(size_t row = 0; row < height; ++row)
-					{
-						memcpy(dst, src, size);
-						src += srcStride;
-						dst += dstStride;
-					}
-				}
-			}
-		}
+        void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            int fDx, int fDy, uint8_t * dst, size_t dstStride)
+        {
+            size_t size = width*channelCount;
+            if (fDy)
+            {
+                if (fDx)
+                {
+                    int k[2][2];
+                    k[0][0] = (FRACTION_RANGE - fDx)*(FRACTION_RANGE - fDy);
+                    k[0][1] = fDx*(FRACTION_RANGE - fDy);
+                    k[1][0] = (FRACTION_RANGE - fDx)*fDy;
+                    k[1][1] = fDx*fDy;
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        for (size_t col = 0; col < size; col++)
+                        {
+                            dst[col] = Interpolate(src + col, channelCount, srcStride, k);
+                        }
+                        src += srcStride;
+                        dst += dstStride;
+                    }
+                }
+                else
+                {
+                    int k[2];
+                    k[0] = FRACTION_RANGE - fDy;
+                    k[1] = fDy;
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        for (size_t col = 0; col < size; col++)
+                        {
+                            dst[col] = Interpolate(src + col, srcStride, k);
+                        }
+                        src += srcStride;
+                        dst += dstStride;
+                    }
+                }
+            }
+            else
+            {
+                if (fDx)
+                {
+                    int k[2];
+                    k[0] = FRACTION_RANGE - fDx;
+                    k[1] = fDx;
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        for (size_t col = 0; col < size; col++)
+                        {
+                            dst[col] = Interpolate(src + col, channelCount, k);
+                        }
+                        src += srcStride;
+                        dst += dstStride;
+                    }
+                }
+                else
+                {
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        memcpy(dst, src, size);
+                        src += srcStride;
+                        dst += dstStride;
+                    }
+                }
+            }
+        }
 
-		void ShiftBilinear(
-			const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-			const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
-			size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
-		{
-			int fDx, fDy;
-			CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 
-				cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
+        void ShiftBilinear(
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
+        {
+            int fDx, fDy;
+            CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY,
+                cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
-			ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
-		}
-	}
+            ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
+        }
+    }
 }
 

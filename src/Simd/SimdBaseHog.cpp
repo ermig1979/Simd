@@ -27,27 +27,27 @@ namespace Simd
 {
     namespace Base
     {
-        namespace 
+        namespace
         {
             struct Buffer
             {
                 const int size;
-                float * cos, * sin;
+                float * cos, *sin;
                 int * index;
                 float * value;
 
                 Buffer(size_t width, size_t quantization)
-                    : size((int)quantization/2)
+                    : size((int)quantization / 2)
                 {
-                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + sizeof(float)*2*size);
+                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + sizeof(float) * 2 * size);
                     index = (int*)_p;
                     value = (float*)index + width;
                     cos = value + width;
                     sin = cos + size;
-                    for(int i = 0; i < size; ++i)
+                    for (int i = 0; i < size; ++i)
                     {
-                        cos[i] = (float)::cos(i*M_PI/size);
-                        sin[i] = (float)::sin(i*M_PI/size);
+                        cos[i] = (float)::cos(i*M_PI / size);
+                        sin[i] = (float)::sin(i*M_PI / size);
                     }
                 }
 
@@ -58,58 +58,58 @@ namespace Simd
 
             private:
                 void *_p;
-            }; 
+            };
         }
 
         void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
-            int blockX = int(width/cellX);
-            int blockY = int(height/cellY);
+            int blockX = int(width / cellX);
+            int blockY = int(height / cellY);
             int blockStride = int(quantization*blockX);
 
-            float yp = ((float)row + 0.5f)/(float)cellY - 0.5f;
+            float yp = ((float)row + 0.5f) / (float)cellY - 0.5f;
             int iyp = (int)floor(yp);
             float vy0 = yp - iyp;
             float vy1 = 1.0f - vy0;
 
-            size_t noseEnd = cellX/2;
-            size_t bodyEnd = width - cellX/2;
+            size_t noseEnd = cellX / 2;
+            size_t bodyEnd = width - cellX / 2;
 
-            if(iyp < 0)
+            if (iyp < 0)
             {
                 float * h = histograms + (iyp + 1)*blockStride;
-                for (size_t col = 1; col < width - 1; ++col) 
+                for (size_t col = 1; col < width - 1; ++col)
                 {
                     float value = values[col];
                     int index = indexes[col];
 
-                    float xp = ((float)col + 0.5f)/(float)cellX - 0.5f;
+                    float xp = ((float)col + 0.5f) / (float)cellX - 0.5f;
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
 
-                    if (ixp >= 0) 
+                    if (ixp >= 0)
                         h[ixp*quantization + index] += vx1*vy0*value;
-                    if (ixp + 1 < blockX) 
+                    if (ixp + 1 < blockX)
                         h[(ixp + 1)*quantization + index] += vx0*vy0*value;
                 }
             }
-            else if(iyp + 1 == blockY)
+            else if (iyp + 1 == blockY)
             {
                 float * h = histograms + iyp*blockStride;
-                for (size_t col = 1; col < width - 1; ++col) 
+                for (size_t col = 1; col < width - 1; ++col)
                 {
                     float value = values[col];
                     int index = indexes[col];
 
-                    float xp = ((float)col + 0.5f)/(float)cellX - 0.5f;
+                    float xp = ((float)col + 0.5f) / (float)cellX - 0.5f;
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
 
-                    if (ixp >= 0) 
+                    if (ixp >= 0)
                         h[ixp*quantization + index] += vx1*vy1*value;
-                    if (ixp + 1 < blockX) 
+                    if (ixp + 1 < blockX)
                         h[(ixp + 1)*quantization + index] += vx0*vy1*value;
                 }
             }
@@ -118,12 +118,12 @@ namespace Simd
                 float * h0 = histograms + iyp*blockStride;
                 float * h1 = histograms + (iyp + 1)*blockStride;
                 size_t col = 1;
-                for (; col < noseEnd; ++col) 
+                for (; col < noseEnd; ++col)
                 {
                     float value = values[col];
                     int index = indexes[col];
 
-                    float xp = ((float)col + 0.5f)/(float)cellX - 0.5f;
+                    float xp = ((float)col + 0.5f) / (float)cellX - 0.5f;
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
 
@@ -131,12 +131,12 @@ namespace Simd
                     h1[(ixp + 1)*quantization + index] += vx0*vy0*value;
                 }
 
-                for (; col < bodyEnd; ++col) 
+                for (; col < bodyEnd; ++col)
                 {
                     float value = values[col];
                     int index = indexes[col];
 
-                    float xp = ((float)col + 0.5f)/(float)cellX - 0.5f;
+                    float xp = ((float)col + 0.5f) / (float)cellX - 0.5f;
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
@@ -147,12 +147,12 @@ namespace Simd
                     h1[(ixp + 1)*quantization + index] += vx0*vy0*value;
                 }
 
-                for (; col < width - 1; ++col) 
+                for (; col < width - 1; ++col)
                 {
                     float value = values[col];
                     int index = indexes[col];
 
-                    float xp = ((float)col + 0.5f)/(float)cellX - 0.5f;
+                    float xp = ((float)col + 0.5f) / (float)cellX - 0.5f;
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
@@ -163,16 +163,16 @@ namespace Simd
             }
         }
 
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
-            assert(width%cellX == 0 && height%cellY == 0 && quantization%2 == 0);
+            assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
 
             Buffer buffer(width, quantization);
 
-            memset(histograms, 0, quantization*(width/cellX)*(height/cellY)*sizeof(float));
+            memset(histograms, 0, quantization*(width / cellX)*(height / cellY) * sizeof(float));
 
-            for (size_t row = 1; row < height - 1; ++row) 
+            for (size_t row = 1; row < height - 1; ++row)
             {
                 const uint8_t * src1 = src + stride*row;
                 const uint8_t * src0 = src1 - stride;
@@ -229,7 +229,7 @@ namespace Simd
                     if (dx < 0)
                         index = buffer.size - index;
                     if (dy < 0 && index != 0)
-                        index = buffer.size*2 - index - (dx == 0);
+                        index = buffer.size * 2 - index - (dx == 0);
 
                     buffer.value[col] = value;
                     buffer.index[col] = index;
@@ -255,20 +255,20 @@ namespace Simd
             float _sin[5];
             float _k[C];
 
-			Array32i _index;
-			Array32f _value;
-			Array32f _histogram;
-			Array32f _norm;
+            Array32i _index;
+            Array32f _value;
+            Array32f _histogram;
+            Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
-                _sx = w/C;
+                _sx = w / C;
                 _hs = _sx + 2;
-                _sy = h/C;
+                _sy = h / C;
                 for (int i = 0; i < 5; ++i)
                 {
-                    _cos[i] = (float)::cos(i*M_PI/Q);
-                    _sin[i] = (float)::sin(i*M_PI/Q);
+                    _cos[i] = (float)::cos(i*M_PI / Q);
+                    _sin[i] = (float)::sin(i*M_PI / Q);
                 }
                 for (int i = 0; i < C; ++i)
                     _k[i] = float((1 + i * 2) / 16.0f);
@@ -458,7 +458,7 @@ namespace Simd
             template <> SIMD_INLINE void Set<1>(float & dst, float value)
             {
                 dst += value;
-            }        
+            }
         }
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
@@ -533,7 +533,7 @@ namespace Simd
 
                 FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data, _w);
 
-                if(add)
+                if (add)
                     FilterCols<1>(_buffer.data, _w, _w, _h, colFilter, colSize, dst, dstStride);
                 else
                     FilterCols<0>(_buffer.data, _w, _w, _h, colFilter, colSize, dst, dstStride);

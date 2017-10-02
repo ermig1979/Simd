@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-	namespace Base
-	{
+    namespace Base
+    {
         static void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
@@ -39,9 +39,9 @@ namespace Simd
             }
         }
 
-		void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
-		{
+        void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
             Int16ToGray((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
-		}
-	}
+        }
+    }
 }

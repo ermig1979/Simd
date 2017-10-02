@@ -26,86 +26,86 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-		SIMD_INLINE int AbsSecondDerivative(const uint8_t * src, ptrdiff_t step)
-		{
-			return AbsDifferenceU8(Average(src[step], src[-step]), src[0]);
-		}
+    namespace Base
+    {
+        SIMD_INLINE int AbsSecondDerivative(const uint8_t * src, ptrdiff_t step)
+        {
+            return AbsDifferenceU8(Average(src[step], src[-step]), src[0]);
+        }
 
-		void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
-			size_t step, size_t indent, uint32_t * histogram)
-		{
-			assert(width > 2*indent && height > 2*indent && indent >= step);
+        void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint32_t * histogram)
+        {
+            assert(width > 2 * indent && height > 2 * indent && indent >= step);
 
-			memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
+            memset(histogram, 0, sizeof(uint32_t)*HISTOGRAM_SIZE);
 
-			src += indent*(stride + 1);
-			height -= 2*indent;
-			width -= 2*indent;
+            src += indent*(stride + 1);
+            height -= 2 * indent;
+            width -= 2 * indent;
 
-			size_t rowStep = step*stride;
-			for(size_t row = 0; row < height; ++row)
-			{
-				for(size_t col = 0; col < width; ++col)
-				{
-					const int sdX = AbsSecondDerivative(src + col, step);
-					const int sdY = AbsSecondDerivative(src + col, rowStep);
-					const int sd = MaxU8(sdY, sdX);
-					++histogram[sd];
-				}
-				src += stride;
-			}
-		}
+            size_t rowStep = step*stride;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                {
+                    const int sdX = AbsSecondDerivative(src + col, step);
+                    const int sdY = AbsSecondDerivative(src + col, rowStep);
+                    const int sd = MaxU8(sdY, sdX);
+                    ++histogram[sd];
+                }
+                src += stride;
+            }
+        }
 
         void Histogram(const uint8_t * src, size_t width, size_t height, size_t stride, uint32_t * histogram)
         {
             uint32_t histograms[4][HISTOGRAM_SIZE];
-            memset(histograms, 0, sizeof(uint32_t)*HISTOGRAM_SIZE*4);
+            memset(histograms, 0, sizeof(uint32_t)*HISTOGRAM_SIZE * 4);
             size_t alignedWidth = Simd::AlignLo(width, 4);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for(; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += 4)
                 {
                     ++histograms[0][src[col + 0]];
                     ++histograms[1][src[col + 1]];
                     ++histograms[2][src[col + 2]];
                     ++histograms[3][src[col + 3]];
                 }
-                for(; col < width; ++col)
+                for (; col < width; ++col)
                     ++histograms[0][src[col + 0]];
 
                 src += stride;
             }
 
-            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
                 histogram[i] = histograms[0][i] + histograms[1][i] + histograms[2][i] + histograms[3][i];
         }
 
-        void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void HistogramMasked(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram)
         {
             uint32_t histograms[4][HISTOGRAM_SIZE + 4];
-            memset(histograms, 0, sizeof(uint32_t)*(HISTOGRAM_SIZE + 4)*4);
+            memset(histograms, 0, sizeof(uint32_t)*(HISTOGRAM_SIZE + 4) * 4);
             size_t alignedWidth = Simd::AlignLo(width, 4);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for(; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += 4)
                 {
                     ++histograms[0][(4 + src[col + 0])*(mask[col + 0] == index)];
                     ++histograms[1][(4 + src[col + 1])*(mask[col + 1] == index)];
                     ++histograms[2][(4 + src[col + 2])*(mask[col + 2] == index)];
                     ++histograms[3][(4 + src[col + 3])*(mask[col + 3] == index)];
                 }
-                for(; col < width; ++col)
+                for (; col < width; ++col)
                     ++histograms[0][(4 + src[col + 0])*(mask[col + 0] == index)];
 
                 src += srcStride;
                 mask += maskStride;
             }
-            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
                 histogram[i] = histograms[0][4 + i] + histograms[1][4 + i] + histograms[2][4 + i] + histograms[3][4 + i];
         }
 
@@ -160,43 +160,43 @@ namespace Simd
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            uint32_t histogram[HISTOGRAM_SIZE]; 
+            uint32_t histogram[HISTOGRAM_SIZE];
             Histogram(src, width, height, srcStride, histogram);
 
-            uint32_t integral[HISTOGRAM_SIZE], sum = 0, minCount = 0, minColor = 0; 
-            for(size_t i = 0; i < HISTOGRAM_SIZE; ++i)
+            uint32_t integral[HISTOGRAM_SIZE], sum = 0, minCount = 0, minColor = 0;
+            for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
             {
                 if (sum == 0 && histogram[i] != 0)
                 {
-                    minCount = histogram[i]; 
+                    minCount = histogram[i];
                     minColor = (uint32_t)i;
                 }
                 sum += histogram[i];
                 integral[i] = sum;
             }
 
-            uint32_t norm = sum - minCount, term = (sum - minCount)/2;
+            uint32_t norm = sum - minCount, term = (sum - minCount) / 2;
             uint8_t colors[HISTOGRAM_SIZE];
             for (size_t i = 0; i < HISTOGRAM_SIZE; ++i)
-                colors[i] = i < minColor ? 0 : (norm ? (255*(integral[i] - minCount) + term)/norm : minColor); 
+                colors[i] = i < minColor ? 0 : (norm ? (255 * (integral[i] - minCount) + term) / norm : minColor);
 
             size_t alignedWidth = Simd::AlignLo(width, 4);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for(; col < alignedWidth; col += 4)
+                for (; col < alignedWidth; col += 4)
                 {
                     dst[col + 0] = colors[src[col + 0]];
                     dst[col + 1] = colors[src[col + 1]];
                     dst[col + 2] = colors[src[col + 2]];
                     dst[col + 3] = colors[src[col + 3]];
                 }
-                for(; col < width; ++col)
+                for (; col < width; ++col)
                     dst[col] = colors[src[col]];
 
                 src += srcStride;
                 dst += dstStride;
             }
         }
-	}
+    }
 }

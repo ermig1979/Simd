@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -28,25 +28,25 @@ namespace Simd
 {
     namespace Base
     {
-		void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
-		{
+        void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
+        {
             const float k = 1.0f / 255.0f;
-			for (size_t row = 0; row < height; ++row)
-			{
-				if (inversion)
-				{
-					for (size_t col = 0; col < width; ++col)
-						dst[col] = (255 - src[col])* k;
-				}
-				else
-				{
-					for (size_t col = 0; col < width; ++col)
-						dst[col] = src[col] * k;
-				}
-				src += srcStride;
-				dst += dstStride;
-			}
-		}
+            for (size_t row = 0; row < height; ++row)
+            {
+                if (inversion)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                        dst[col] = (255 - src[col])* k;
+                }
+                else
+                {
+                    for (size_t col = 0; col < width; ++col)
+                        dst[col] = src[col] * k;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
 
         SIMD_INLINE float ProductSum(const float * a, const float * b, size_t aligned, size_t full)
         {
@@ -119,19 +119,19 @@ namespace Simd
                 dst[i] += val;
         }
 
-		void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-		{
-			float s = slope[0];
-			for (size_t i = 0; i < size; ++i)
-				dst[i] = Sigmoid(src[i] * s);
-		}
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = slope[0];
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = Sigmoid(src[i] * s);
+        }
 
-		void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
-		{
-			float s = slope[0];
-			for (size_t i = 0; i < size; ++i)
-				dst[i] = RoughSigmoid(src[i] * s);
-		}
+        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            float s = slope[0];
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = RoughSigmoid(src[i] * s);
+        }
 
         void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
         {
@@ -180,7 +180,7 @@ namespace Simd
             else
             {
                 for (size_t i = 0; i < size; ++i)
-                    dst[i] = Simd::Max(src[i]*s, src[i]);
+                    dst[i] = Simd::Max(src[i] * s, src[i]);
             }
         }
 
@@ -209,7 +209,7 @@ namespace Simd
 
         void NeuralAdaptiveGradientUpdate(const float * delta, size_t size, size_t batch, const float * alpha, const float * epsilon, float * gradient, float * weight)
         {
-            float norm = (float)(1.0/batch), _alpha = alpha[0], _epsilon = epsilon[0];
+            float norm = (float)(1.0 / batch), _alpha = alpha[0], _epsilon = epsilon[0];
             size_t alignedSize = Simd::AlignLo(size, 4);
             size_t i = 0;
             for (; i < alignedSize; i += 4)
@@ -230,8 +230,8 @@ namespace Simd
 
         SIMD_INLINE float Convolution2x2Forward(const float * src, size_t stride, const float * weights)
         {
-            return 
-                Convolution2(src, weights) + 
+            return
+                Convolution2(src, weights) +
                 Convolution2(src + stride, weights + 2);
         }
 
@@ -460,10 +460,10 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < widthEven; col += 2)
-                    dst[col>>1] = Max2x2(src + col, srcStride);
-                if(width - widthEven)
+                    dst[col >> 1] = Max2x2(src + col, srcStride);
+                if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
-                src += 2*srcStride;
+                src += 2 * srcStride;
                 dst += dstStride;
             }
             if (height - heightEven)
@@ -524,7 +524,7 @@ namespace Simd
                                 for (ptrdiff_t dstCol = 0; dstCol < dstWidth; ++dstCol)
                                     *(dst++) = 0;
                             }
-                            else 
+                            else
                             {
                                 ptrdiff_t srcCol = kernelCol*dilationX - padX;
                                 for (ptrdiff_t dstCol = 0; dstCol < dstWidth; ++dstCol)
@@ -600,21 +600,21 @@ namespace Simd
                     const float * pa = a + i*K;
                     const float * pb = b + j*K;
                     for (size_t k = 0; k < K; ++k)
-                        s += pa[k]*pb[k];
+                        s += pa[k] * pb[k];
                     c[i*N + j] += s;
                 }
             }
         }
 
-        void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
-            const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
+        void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+            const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
             void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
         {
             assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
             if (!add)
-                memset(dst, 0, dstWidth*dstHeight*dstDepth*sizeof(float));
+                memset(dst, 0, dstWidth*dstHeight*dstDepth * sizeof(float));
 
             float * temporal = NULL;
             void * internal = NULL;
@@ -625,7 +625,7 @@ namespace Simd
                 temporal = (float*)src;
             else
             {
-                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY*sizeof(float);
+                size_t required = dstWidth*dstHeight*srcDepth*kernelX*kernelY * sizeof(float);
                 if (buffer != AlignHi(buffer, SIMD_ALIGN))
                     required += SIMD_ALIGN;
                 if (buffer == NULL || size == NULL || *size < required)
@@ -638,7 +638,7 @@ namespace Simd
                 else
                     temporal = (float*)AlignHi(buffer, SIMD_ALIGN);
 
-                if(transpose)
+                if (transpose)
                     NeuralConvolutionForwardConvertT(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
                 else
                     NeuralConvolutionForwardConvertN(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, temporal);
@@ -650,7 +650,7 @@ namespace Simd
             else
                 NeuralConvolutionForwardGemmNN(M, N, K, weight, temporal, dst);
 
-            if(internal)
+            if (internal)
                 Free(internal);
         }
     }

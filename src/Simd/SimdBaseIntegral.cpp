@@ -25,29 +25,29 @@
 
 namespace Simd
 {
-	namespace Base
-	{
-        void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
-            uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, 
+    namespace Base
+    {
+        void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride,
             SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat)
         {
-            assert(sumFormat == SimdPixelFormatInt32 && sumStride%sizeof(uint32_t) == 0);
-            if(tilted)
-                assert(tiltedStride%sizeof(uint32_t) == 0);
+            assert(sumFormat == SimdPixelFormatInt32 && sumStride % sizeof(uint32_t) == 0);
+            if (tilted)
+                assert(tiltedStride % sizeof(uint32_t) == 0);
 
-            if(sqsum)
+            if (sqsum)
             {
-                if(tilted)
+                if (tilted)
                 {
-                    switch(sqsumFormat)
+                    switch (sqsumFormat)
                     {
                     case SimdPixelFormatInt32:
-                        IntegralSumSqsumTilted<uint32_t, uint32_t>(src, srcStride, width, height, 
-                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride/sizeof(uint32_t), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                        IntegralSumSqsumTilted<uint32_t, uint32_t>(src, srcStride, width, height,
+                            (uint32_t*)sum, sumStride / sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride / sizeof(uint32_t), (uint32_t*)tilted, tiltedStride / sizeof(uint32_t));
                         break;
                     case SimdPixelFormatDouble:
-                        IntegralSumSqsumTilted<uint32_t, double>(src, srcStride, width, height, 
-                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (double*)sqsum, sqsumStride/sizeof(double), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                        IntegralSumSqsumTilted<uint32_t, double>(src, srcStride, width, height,
+                            (uint32_t*)sum, sumStride / sizeof(uint32_t), (double*)sqsum, sqsumStride / sizeof(double), (uint32_t*)tilted, tiltedStride / sizeof(uint32_t));
                         break;
                     default:
                         assert(0);
@@ -55,15 +55,15 @@ namespace Simd
                 }
                 else
                 {
-                    switch(sqsumFormat)
+                    switch (sqsumFormat)
                     {
                     case SimdPixelFormatInt32:
-                        IntegralSumSqsum<uint32_t, uint32_t>(src, srcStride, width, height, 
-                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride/sizeof(uint32_t));
+                        IntegralSumSqsum<uint32_t, uint32_t>(src, srcStride, width, height,
+                            (uint32_t*)sum, sumStride / sizeof(uint32_t), (uint32_t*)sqsum, sqsumStride / sizeof(uint32_t));
                         break;
                     case SimdPixelFormatDouble:
-                        IntegralSumSqsum<uint32_t, double>(src, srcStride, width, height, 
-                            (uint32_t*)sum, sumStride/sizeof(uint32_t), (double*)sqsum, sqsumStride/sizeof(double));
+                        IntegralSumSqsum<uint32_t, double>(src, srcStride, width, height,
+                            (uint32_t*)sum, sumStride / sizeof(uint32_t), (double*)sqsum, sqsumStride / sizeof(double));
                         break;
                     default:
                         assert(0);
@@ -72,16 +72,16 @@ namespace Simd
             }
             else
             {
-                if(tilted)
+                if (tilted)
                 {
-                    IntegralSumTilted<uint32_t>(src, srcStride, width, height, 
-                        (uint32_t*)sum, sumStride/sizeof(uint32_t), (uint32_t*)tilted, tiltedStride/sizeof(uint32_t));
+                    IntegralSumTilted<uint32_t>(src, srcStride, width, height,
+                        (uint32_t*)sum, sumStride / sizeof(uint32_t), (uint32_t*)tilted, tiltedStride / sizeof(uint32_t));
                 }
                 else
                 {
-                    IntegralSum<uint32_t>(src, srcStride, width, height, (uint32_t*)sum, sumStride/sizeof(uint32_t));
+                    IntegralSum<uint32_t>(src, srcStride, width, height, (uint32_t*)sum, sumStride / sizeof(uint32_t));
                 }
             }
         }
-	}
+    }
 }

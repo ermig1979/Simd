@@ -33,7 +33,7 @@ namespace Simd
             {
                 Buffer(size_t width, size_t height)
                 {
-                    _p = Allocate(2*sizeof(int)*(2*width + height));
+                    _p = Allocate(2 * sizeof(int)*(2 * width + height));
                     ix = (int*)_p;
                     ax = ix + width;
                     iy = ax + width;
@@ -59,27 +59,27 @@ namespace Simd
 
         void EstimateAlphaIndex(size_t srcSize, size_t dstSize, int * indexes, int * alphas, size_t channelCount)
         {
-            float scale = (float)srcSize/dstSize;
+            float scale = (float)srcSize / dstSize;
 
-            for(size_t i = 0; i < dstSize; ++i)
+            for (size_t i = 0; i < dstSize; ++i)
             {
                 float alpha = (float)((i + 0.5)*scale - 0.5);
                 ptrdiff_t index = (ptrdiff_t)::floor(alpha);
                 alpha -= index;
 
-                if(index < 0)
+                if (index < 0)
                 {
                     index = 0;
                     alpha = 0;
                 }
 
-                if(index > (ptrdiff_t)srcSize - 2)
+                if (index > (ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;
                 }
 
-                for(size_t c = 0; c < channelCount; c++)
+                for (size_t c = 0; c < channelCount; c++)
                 {
                     size_t offset = i*channelCount + c;
                     indexes[offset] = (int)(channelCount*index + c);
@@ -104,15 +104,15 @@ namespace Simd
 
             ptrdiff_t previous = -2;
 
-            for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
                 int fy = buffer.ay[yDst];
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
 
-                if(sy == previous)
+                if (sy == previous)
                     k = 2;
-                else if(sy == previous + 1)
+                else if (sy == previous + 1)
                 {
                     Swap(buffer.pbx[0], buffer.pbx[1]);
                     k = 1;
@@ -120,11 +120,11 @@ namespace Simd
 
                 previous = sy;
 
-                for(; k < 2; k++)
+                for (; k < 2; k++)
                 {
                     int* pb = buffer.pbx[k];
                     const uint8_t* ps = src + (sy + k)*srcStride;
-                    for(size_t x = 0; x < dstRowSize; x++)
+                    for (size_t x = 0; x < dstRowSize; x++)
                     {
                         size_t sx = buffer.ix[x];
                         int fx = buffer.ax[x];
@@ -133,15 +133,15 @@ namespace Simd
                     }
                 }
 
-                if(fy == 0)
-                    for(size_t xDst = 0; xDst < dstRowSize; xDst++)
+                if (fy == 0)
+                    for (size_t xDst = 0; xDst < dstRowSize; xDst++)
                         dst[xDst] = ((buffer.pbx[0][xDst] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-                else if(fy == FRACTION_RANGE)
-                    for(size_t xDst = 0; xDst < dstRowSize; xDst++)
+                else if (fy == FRACTION_RANGE)
+                    for (size_t xDst = 0; xDst < dstRowSize; xDst++)
                         dst[xDst] = ((buffer.pbx[1][xDst] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
                 else
                 {
-                    for(size_t xDst = 0; xDst < dstRowSize; xDst++)
+                    for (size_t xDst = 0; xDst < dstRowSize; xDst++)
                     {
                         int t = buffer.pbx[0][xDst];
                         dst[xDst] = ((t << LINEAR_SHIFT) + (buffer.pbx[1][xDst] - t)*fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
