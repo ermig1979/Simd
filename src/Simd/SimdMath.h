@@ -29,37 +29,37 @@
 
 namespace Simd
 {
-	template <class T> SIMD_INLINE void Swap(T & a, T & b)
-	{
-		T t = a;
-		a = b;
-		b = t;
-	}
+    template <class T> SIMD_INLINE void Swap(T & a, T & b)
+    {
+        T t = a;
+        a = b;
+        b = t;
+    }
 
-	template <class T> SIMD_INLINE T Min(T a, T b)
-	{
-		return a < b ? a : b;
-	}
+    template <class T> SIMD_INLINE T Min(T a, T b)
+    {
+        return a < b ? a : b;
+    }
 
-	template <class T> SIMD_INLINE T Max(T a, T b)
-	{
-		return a > b ? a : b;
-	}
+    template <class T> SIMD_INLINE T Max(T a, T b)
+    {
+        return a > b ? a : b;
+    }
 
-	template <class T> SIMD_INLINE T Abs(T a)
-	{
-		return a < 0 ? -a : a;
-	}
+    template <class T> SIMD_INLINE T Abs(T a)
+    {
+        return a < 0 ? -a : a;
+    }
 
-	template <class T> SIMD_INLINE T RestrictRange(T value, T min, T max)
-	{
-		return Max(min, Min(max, value));
-	}
+    template <class T> SIMD_INLINE T RestrictRange(T value, T min, T max)
+    {
+        return Max(min, Min(max, value));
+    }
 
-	template <class T> SIMD_INLINE T Square(T a)
-	{
-		return a*a;
-	}
+    template <class T> SIMD_INLINE T Square(T a)
+    {
+        return a*a;
+    }
 
 #ifndef SIMD_ROUND
 #define SIMD_ROUND
@@ -86,10 +86,10 @@ namespace Simd
             return a > b ? a : b;
         }
 
-		SIMD_INLINE int RestrictRange(int value, int min = 0, int max = 255)
-		{
-			return Max(min, Min(max, value));
-		}
+        SIMD_INLINE int RestrictRange(int value, int min = 0, int max = 255)
+        {
+            return Max(min, Min(max, value));
+        }
 
         SIMD_INLINE int Square(int a)
         {
@@ -101,49 +101,49 @@ namespace Simd
             return Square(a - b);
         }
 
-		SIMD_INLINE int AbsDifference(int a, int b)
-		{
-			return a > b ? a - b : b - a;
-		}
+        SIMD_INLINE int AbsDifference(int a, int b)
+        {
+            return a > b ? a - b : b - a;
+        }
 
-		SIMD_INLINE int Average(int a, int b)
-		{
-			return (a + b + 1) >> 1;
-		}
+        SIMD_INLINE int Average(int a, int b)
+        {
+            return (a + b + 1) >> 1;
+        }
 
-		SIMD_INLINE int Average(int a, int b, int c, int d)
-		{
-			return (a + b + c + d + 2) >> 2;
-		}
+        SIMD_INLINE int Average(int a, int b, int c, int d)
+        {
+            return (a + b + c + d + 2) >> 2;
+        }
 
-		SIMD_INLINE void SortU8(int & a, int & b)
-		{
-			int d = a - b;
-			int m = ~(d >> 8);
-			b += d & m;
-			a -= d & m;
-		}
+        SIMD_INLINE void SortU8(int & a, int & b)
+        {
+            int d = a - b;
+            int m = ~(d >> 8);
+            b += d & m;
+            a -= d & m;
+        }
 
-		SIMD_INLINE int AbsDifferenceU8(int a, int b)
-		{
-			int d = a - b;
-			int m = d >> 8;
-			return (d & ~m)|(-d & m);
-		}
+        SIMD_INLINE int AbsDifferenceU8(int a, int b)
+        {
+            int d = a - b;
+            int m = d >> 8;
+            return (d & ~m) | (-d & m);
+        }
 
-		SIMD_INLINE int MaxU8(int a, int b)
-		{
-			int d = a - b;
-			int m = ~(d >> 8);
-			return b + (d & m);
-		}
+        SIMD_INLINE int MaxU8(int a, int b)
+        {
+            int d = a - b;
+            int m = ~(d >> 8);
+            return b + (d & m);
+        }
 
-		SIMD_INLINE int MinU8(int a, int b)
-		{
-			int d = a - b;
-			int m = ~(d >> 8);
-			return a - (d & m);
-		}
+        SIMD_INLINE int MinU8(int a, int b)
+        {
+            int d = a - b;
+            int m = ~(d >> 8);
+            return a - (d & m);
+        }
 
         SIMD_INLINE int SaturatedSubtractionU8(int a, int b)
         {
@@ -154,7 +154,7 @@ namespace Simd
 
         SIMD_INLINE int DivideBy255(int value)
         {
-			return (value + 1 + (value >> 8)) >> 8;
+            return (value + 1 + (value >> 8)) >> 8;
         }
 
         template <bool compensation> SIMD_INLINE int DivideBy16(int value);
@@ -171,7 +171,7 @@ namespace Simd
 
         template <bool compensation> SIMD_INLINE int GaussianBlur3x3(const uint8_t *s0, const uint8_t *s1, const uint8_t *s2, size_t x0, size_t x1, size_t x2)
         {
-            return DivideBy16<compensation>(s0[x0] + 2*s0[x1] + s0[x2] + (s1[x0] + 2*s1[x1] + s1[x2])*2 + s2[x0] + 2*s2[x1] + s2[x2]);
+            return DivideBy16<compensation>(s0[x0] + 2 * s0[x1] + s0[x2] + (s1[x0] + 2 * s1[x1] + s1[x2]) * 2 + s2[x0] + 2 * s2[x1] + s2[x2]);
         }
 
         SIMD_INLINE void Reorder16bit(const uint8_t * src, uint8_t * dst)
@@ -183,33 +183,33 @@ namespace Simd
         SIMD_INLINE void Reorder32bit(const uint8_t * src, uint8_t * dst)
         {
             uint32_t value = *(uint32_t*)src;
-            *(uint32_t*)dst = 
-                (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 | 
+            *(uint32_t*)dst =
+                (value & 0x000000FF) << 24 | (value & 0x0000FF00) << 8 |
                 (value & 0x00FF0000) >> 8 | (value & 0xFF000000) >> 24;
         }
 
         SIMD_INLINE void Reorder64bit(const uint8_t * src, uint8_t * dst)
         {
             uint64_t value = *(uint64_t*)src;
-            *(uint64_t*)dst = 
-                (value & 0x00000000000000FF) << 56 | (value & 0x000000000000FF00) << 40 | 
-                (value & 0x0000000000FF0000) << 24 | (value & 0x00000000FF000000) << 8 | 
-                (value & 0x000000FF00000000) >> 8  | (value & 0x0000FF0000000000) >> 24 | 
+            *(uint64_t*)dst =
+                (value & 0x00000000000000FF) << 56 | (value & 0x000000000000FF00) << 40 |
+                (value & 0x0000000000FF0000) << 24 | (value & 0x00000000FF000000) << 8 |
+                (value & 0x000000FF00000000) >> 8 | (value & 0x0000FF0000000000) >> 24 |
                 (value & 0x00FF000000000000) >> 40 | (value & 0xFF00000000000000) >> 56;
         }
 
-		SIMD_INLINE float Sigmoid(float value)
-		{
-			return 1.0f / (1.0f + ::exp(-value));
-		}
+        SIMD_INLINE float Sigmoid(float value)
+        {
+            return 1.0f / (1.0f + ::exp(-value));
+        }
 
-		SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
-		{
-			float x = ::fabs(value);
-			float x2 = x*x;
-			float e = 1.0f + x + x2*0.5417f + x2*x2*0.1460f;
-			return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
-		}
+        SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
+        {
+            float x = ::fabs(value);
+            float x2 = x*x;
+            float e = 1.0f + x + x2*0.5417f + x2*x2*0.1460f;
+            return 1.0f / (1.0f + (value > 0 ? 1.0f / e : e));
+        }
 
         SIMD_INLINE float RoughSigmoid2(float value) // maximal absolute error 0.001721
         {
@@ -238,8 +238,8 @@ namespace Simd
             float x = ::fabs(value);
             float x2 = x*x;
             float pe = 1.0f + x + x2*0.5658f + x2*x2*0.1430f;
-            float ne = 1.0f/pe;
-            return (value > 0 ? 1.0f : -1.0f)*(pe - ne)/(pe + ne);
+            float ne = 1.0f / pe;
+            return (value > 0 ? 1.0f : -1.0f)*(pe - ne) / (pe + ne);
         }
 
         SIMD_INLINE float DerivativeTanh(float function)
@@ -256,11 +256,11 @@ namespace Simd
 
         SIMD_INLINE void AdaptiveGradientUpdate(const float * delta, size_t offset, float norm, float alpha, float epsilon, float * gradient, float * weight)
         {
-            float d = delta[offset]*norm;
+            float d = delta[offset] * norm;
             gradient[offset] += d*d;
             weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
         }
-	}
+    }
 
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
@@ -311,89 +311,89 @@ namespace Simd
             return _mm_and_ps(value, mask);
         }
 
-		SIMD_INLINE void Max2x3s(const float * src, size_t stride, float * dst)
-		{
-			__m128 z = _mm_setzero_ps();
-			__m128 s0 = _mm_loadl_pi(z, (__m64*)src);
-			__m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
-			__m128 s2 = _mm_loadl_pi(z, (__m64*)(src + 2 * stride));
-			__m128 m = _mm_max_ps(_mm_max_ps(s0, s1), s2);
-			return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
-		}
+        SIMD_INLINE void Max2x3s(const float * src, size_t stride, float * dst)
+        {
+            __m128 z = _mm_setzero_ps();
+            __m128 s0 = _mm_loadl_pi(z, (__m64*)src);
+            __m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
+            __m128 s2 = _mm_loadl_pi(z, (__m64*)(src + 2 * stride));
+            __m128 m = _mm_max_ps(_mm_max_ps(s0, s1), s2);
+            return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
+        }
 
-		SIMD_INLINE void Max2x2s(const float * src, size_t stride, float * dst)
-		{
-			__m128 z = _mm_setzero_ps();
-			__m128 s0 = _mm_loadl_pi(z, (__m64*)src);
-			__m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
-			__m128 m = _mm_max_ps(s0, s1);
-			return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
-		}
+        SIMD_INLINE void Max2x2s(const float * src, size_t stride, float * dst)
+        {
+            __m128 z = _mm_setzero_ps();
+            __m128 s0 = _mm_loadl_pi(z, (__m64*)src);
+            __m128 s1 = _mm_loadl_pi(z, (__m64*)(src + stride));
+            __m128 m = _mm_max_ps(s0, s1);
+            return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
 #ifdef SIMD_SSE2_ENABLE
-	namespace Sse2
-	{
-		SIMD_INLINE __m128i SaturateI16ToU8(__m128i value)
-		{
-			return _mm_min_epi16(K16_00FF, _mm_max_epi16(value, K_ZERO));
-		}
+    namespace Sse2
+    {
+        SIMD_INLINE __m128i SaturateI16ToU8(__m128i value)
+        {
+            return _mm_min_epi16(K16_00FF, _mm_max_epi16(value, K_ZERO));
+        }
 
-		SIMD_INLINE __m128i MaxI16(__m128i a, __m128i b, __m128i c)
-		{
-			return _mm_max_epi16(a, _mm_max_epi16(b, c));
-		}
+        SIMD_INLINE __m128i MaxI16(__m128i a, __m128i b, __m128i c)
+        {
+            return _mm_max_epi16(a, _mm_max_epi16(b, c));
+        }
 
-		SIMD_INLINE __m128i MinI16(__m128i a, __m128i b, __m128i c)
-		{
-			return _mm_min_epi16(a, _mm_min_epi16(b, c));
-		}
+        SIMD_INLINE __m128i MinI16(__m128i a, __m128i b, __m128i c)
+        {
+            return _mm_min_epi16(a, _mm_min_epi16(b, c));
+        }
 
-		SIMD_INLINE void SortU8(__m128i & a, __m128i & b)
-		{
-			__m128i t = a;
-			a = _mm_min_epu8(t, b);
-			b = _mm_max_epu8(t, b);
-		}
+        SIMD_INLINE void SortU8(__m128i & a, __m128i & b)
+        {
+            __m128i t = a;
+            a = _mm_min_epu8(t, b);
+            b = _mm_max_epu8(t, b);
+        }
 
-		SIMD_INLINE __m128i ShiftLeft(__m128i a, size_t shift)
-		{
-			__m128i t = a;
-			if(shift & 8)
-				t = _mm_slli_si128(t, 8);
-			if(shift & 4)
-				t = _mm_slli_si128(t, 4);
-			if(shift & 2)
-				t = _mm_slli_si128(t, 2);
-			if(shift & 1)
-				t = _mm_slli_si128(t, 1);
-			return t;
-		}
+        SIMD_INLINE __m128i ShiftLeft(__m128i a, size_t shift)
+        {
+            __m128i t = a;
+            if (shift & 8)
+                t = _mm_slli_si128(t, 8);
+            if (shift & 4)
+                t = _mm_slli_si128(t, 4);
+            if (shift & 2)
+                t = _mm_slli_si128(t, 2);
+            if (shift & 1)
+                t = _mm_slli_si128(t, 1);
+            return t;
+        }
 
-		SIMD_INLINE __m128i ShiftRight(__m128i a, size_t shift)
-		{
-			__m128i t = a;
-			if(shift & 8)
-				t = _mm_srli_si128(t, 8);
-			if(shift & 4)
-				t = _mm_srli_si128(t, 4);
-			if(shift & 2)
-				t = _mm_srli_si128(t, 2);
-			if(shift & 1)
-				t = _mm_srli_si128(t, 1);
-			return t;
-		}
+        SIMD_INLINE __m128i ShiftRight(__m128i a, size_t shift)
+        {
+            __m128i t = a;
+            if (shift & 8)
+                t = _mm_srli_si128(t, 8);
+            if (shift & 4)
+                t = _mm_srli_si128(t, 4);
+            if (shift & 2)
+                t = _mm_srli_si128(t, 2);
+            if (shift & 1)
+                t = _mm_srli_si128(t, 1);
+            return t;
+        }
 
-		SIMD_INLINE __m128i HorizontalSum32(__m128i a)
-		{
+        SIMD_INLINE __m128i HorizontalSum32(__m128i a)
+        {
             return _mm_add_epi64(_mm_unpacklo_epi32(a, K_ZERO), _mm_unpackhi_epi32(a, K_ZERO));
-		}
+        }
 
-		SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
-		{
-			return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
-		}
+        SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
+        {
+            return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
+        }
 
         SIMD_INLINE __m128i MulU8(__m128i a, __m128i b)
         {
@@ -431,25 +431,25 @@ namespace Simd
 
         template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
         {
-            return _mm_unpacklo_epi8(a, b); 
+            return _mm_unpacklo_epi8(a, b);
         }
 
         template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
         {
-            return _mm_unpackhi_epi8(a, b); 
+            return _mm_unpackhi_epi8(a, b);
         }
 
-		template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
+        template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
 
-		template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
-		{
-			return _mm_unpacklo_epi16(a, b);
-		}
+        template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi16(a, b);
+        }
 
-		template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
-		{
-			return _mm_unpackhi_epi16(a, b);
-		}
+        template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi16(a, b);
+        }
 
         template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
 
@@ -473,7 +473,7 @@ namespace Simd
             return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
             //return _mm_shuffle_ps(a, a, index*0x55);
         }
-	}
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSSE3_ENABLE
@@ -625,12 +625,12 @@ namespace Simd
 
         template <> SIMD_INLINE __m256i UnpackU8<0>(__m256i a, __m256i b)
         {
-            return _mm256_unpacklo_epi8(a, b); 
+            return _mm256_unpacklo_epi8(a, b);
         }
 
         template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
         {
-            return _mm256_unpackhi_epi8(a, b); 
+            return _mm256_unpackhi_epi8(a, b);
         }
 
         template<int part> SIMD_INLINE __m256i SubUnpackedU8(__m256i a, __m256i b)
@@ -658,271 +658,271 @@ namespace Simd
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512F_ENABLE
-	namespace Avx512f
-	{
-		__mmask16 SIMD_INLINE TailMask16(ptrdiff_t tail)
-		{
-			return tail <= 0 ? __mmask16(0) : (tail >= 16 ? __mmask16(-1) : __mmask16(-1) >> (16 - tail));
-		}
+    namespace Avx512f
+    {
+        __mmask16 SIMD_INLINE TailMask16(ptrdiff_t tail)
+        {
+            return tail <= 0 ? __mmask16(0) : (tail >= 16 ? __mmask16(-1) : __mmask16(-1) >> (16 - tail));
+        }
 
-		SIMD_INLINE __m512 Cast(const __m512i & value)
-		{
+        SIMD_INLINE __m512 Cast(const __m512i & value)
+        {
 #if defined(__clang__)
-			return (__m512)value;
+            return (__m512)value;
 #else
-			return _mm512_castsi512_ps(value);
+            return _mm512_castsi512_ps(value);
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512i Cast(const __m512 & value)
-		{
+        SIMD_INLINE __m512i Cast(const __m512 & value)
+        {
 #if defined(__clang__)
-			return (__m512i)value;
+            return (__m512i)value;
 #else
-			return _mm512_castps_si512(value);
+            return _mm512_castps_si512(value);
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
-		{
+        SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
+        {
 #if defined(__clang__)
-			return (__m512)_mm512_and_epi32((__m512i)a, (__m512i)b);
+            return (__m512)_mm512_and_epi32((__m512i)a, (__m512i)b);
 #else
-			return _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+            return _mm512_castsi512_ps(_mm512_and_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 AndMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
-		{
+        SIMD_INLINE __m512 AndMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+        {
 #if defined(__clang__)
-			return (__m512)_mm512_maskz_and_epi32(m, (__m512i)a, (__m512i)b);
+            return (__m512)_mm512_maskz_and_epi32(m, (__m512i)a, (__m512i)b);
 #else
-			return _mm512_castsi512_ps(_mm512_maskz_and_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
+            return _mm512_castsi512_ps(_mm512_maskz_and_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
-		{
+        SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
+        {
 #if defined(__clang__)
-			return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
+            return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
 #else
-			return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+            return _mm512_castsi512_ps(_mm512_andnot_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 AndNotMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
-		{
+        SIMD_INLINE __m512 AndNotMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+        {
 #if defined(__clang__)
-			return (__m512)_mm512_maskz_andnot_epi32(m, (__m512i)a, (__m512i)b);
+            return (__m512)_mm512_maskz_andnot_epi32(m, (__m512i)a, (__m512i)b);
 #else
-			return _mm512_castsi512_ps(_mm512_maskz_andnot_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
+            return _mm512_castsi512_ps(_mm512_maskz_andnot_epi32(m, _mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 Xor(const __m512 & a, const __m512 & b)
-		{
+        SIMD_INLINE __m512 Xor(const __m512 & a, const __m512 & b)
+        {
 #if defined(__clang__)
-			return (__m512)_mm512_xor_epi32((__m512i)a, (__m512i)b);
+            return (__m512)_mm512_xor_epi32((__m512i)a, (__m512i)b);
 #else
-			return _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+            return _mm512_castsi512_ps(_mm512_xor_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 Rcp14(const __m512 & a)
-		{
+        SIMD_INLINE __m512 Rcp14(const __m512 & a)
+        {
 #if defined(_MSC_VER)
-			return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
+            return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
 #else
-			return _mm512_rcp14_ps(a);
+            return _mm512_rcp14_ps(a);
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512 Rsqrt14(const __m512 & a)
-		{
+        SIMD_INLINE __m512 Rsqrt14(const __m512 & a)
+        {
 #if defined(_MSC_VER)
-			return _mm512_maskz_rsqrt14_ps(_MM_K0_REG, a);
+            return _mm512_maskz_rsqrt14_ps(_MM_K0_REG, a);
 #else
-			return _mm512_rsqrt14_ps(a);
+            return _mm512_rsqrt14_ps(a);
 #endif
-		}
+        }
 
-		template<int shift> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi)
-		{
-			return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
-		}
+        template<int shift> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi)
+        {
+            return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
+        }
 
-		template<> SIMD_INLINE __m512 Alignr<0>(const __m512 & lo, const __m512 & hi)
-		{
-			return lo;
-		}
+        template<> SIMD_INLINE __m512 Alignr<0>(const __m512 & lo, const __m512 & hi)
+        {
+            return lo;
+        }
 
-		template<> SIMD_INLINE __m512 Alignr<F>(const __m512 & lo, const __m512 & hi)
-		{
-			return hi;
-		}
-	}
+        template<> SIMD_INLINE __m512 Alignr<F>(const __m512 & lo, const __m512 & hi)
+        {
+            return hi;
+        }
+    }
 #endif //SIMD_AVX512F_ENABLE
 
 #ifdef SIMD_AVX512BW_ENABLE
-	namespace Avx512bw
-	{
-		SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)
-		{
-			return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));
-		}
+    namespace Avx512bw
+    {
+        SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)
+        {
+            return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));
+        }
 
-		SIMD_INLINE __mmask64 TailMask64(ptrdiff_t tail)
-		{
-			return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));
-		}
+        SIMD_INLINE __mmask64 TailMask64(ptrdiff_t tail)
+        {
+            return tail <= 0 ? __mmask64(0) : (tail >= 64 ? __mmask64(-1) : __mmask64(-1) >> (64 - tail));
+        }
 
-		SIMD_INLINE __mmask64 NoseMask64(ptrdiff_t nose)
-		{
-			return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
-		}
+        SIMD_INLINE __mmask64 NoseMask64(ptrdiff_t nose)
+        {
+            return nose <= 0 ? __mmask64(0) : (nose >= 64 ? __mmask64(-1) : __mmask64(-1) << (64 - nose));
+        }
 
 #if defined(_MSC_VER) || (defined(__GNUC__) && defined(__LZCNT__))
-		SIMD_INLINE size_t FirstNotZero64(__mmask64 mask)
-		{
+        SIMD_INLINE size_t FirstNotZero64(__mmask64 mask)
+        {
 #ifdef SIMD_X64_ENABLE
-			return _tzcnt_u64(mask);
+            return _tzcnt_u64(mask);
 #else
-			return (__mmask32(col) ? _tzcnt_u32(__mmask32(cols)) : _tzcnt_u32(__mmask32(cols >> 32)) + 32);
+            return (__mmask32(col) ? _tzcnt_u32(__mmask32(cols)) : _tzcnt_u32(__mmask32(cols >> 32)) + 32);
 #endif
-		}
+        }
 
-		SIMD_INLINE size_t LastNotZero64(__mmask64 mask)
-		{
+        SIMD_INLINE size_t LastNotZero64(__mmask64 mask)
+        {
 #ifdef SIMD_X64_ENABLE
-			return 64 - _lzcnt_u64(mask);
+            return 64 - _lzcnt_u64(mask);
 #else
-			return 64 - (__mmask32(col >> 32) ? _lzcnt_u32(__mmask32(cols >> 32)) : _lzcnt_u32(__mmask32(cols)) + 32);
+            return 64 - (__mmask32(col >> 32) ? _lzcnt_u32(__mmask32(cols >> 32)) : _lzcnt_u32(__mmask32(cols)) + 32);
 #endif
-		}
+        }
 #endif
 
 #if defined(_MSC_VER) || (defined(__GNUC__) && defined(__POPCNT__))
-		SIMD_INLINE size_t Popcnt64(__mmask64 mask)
-		{
+        SIMD_INLINE size_t Popcnt64(__mmask64 mask)
+        {
 #ifdef SIMD_X64_ENABLE
-			return _mm_popcnt_u64(mask);
+            return _mm_popcnt_u64(mask);
 #else
-			return _mm_popcnt_u32(__mmask32(mask)) + _mm_popcnt_u32(__mmask32(mask >> 32));
+            return _mm_popcnt_u32(__mmask32(mask)) + _mm_popcnt_u32(__mmask32(mask >> 32));
 #endif
-		}
+        }
 #endif
 
-		SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
-		{
+        SIMD_INLINE void SortU8(__m512i & a, __m512i & b)
+        {
 #if 0
-			__m512i t = a;
-			a = _mm512_min_epu8(t, b);
-			b = _mm512_max_epu8(t, b);
+            __m512i t = a;
+            a = _mm512_min_epu8(t, b);
+            b = _mm512_max_epu8(t, b);
 #else
-			__m512i d = _mm512_subs_epu8(a, b);
-			a = _mm512_sub_epi8(a, d);
-			b = _mm512_add_epi8(b, d);
+            __m512i d = _mm512_subs_epu8(a, b);
+            a = _mm512_sub_epi8(a, d);
+            b = _mm512_add_epi8(b, d);
 #endif
-		}
+        }
 
-		SIMD_INLINE __m512i BinomialSum16(const __m512i & a, const __m512i & b, const __m512i & c)
-		{
-			return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));
-		}
+        SIMD_INLINE __m512i BinomialSum16(const __m512i & a, const __m512i & b, const __m512i & c)
+        {
+            return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));
+        }
 
-		SIMD_INLINE __m512i DivideI16By255(__m512i value)
-		{
-			return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
-		}
+        SIMD_INLINE __m512i DivideI16By255(__m512i value)
+        {
+            return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
+        }
 
-		template <int part> SIMD_INLINE __m512i UnpackU8(__m512i a, __m512i b = K_ZERO);
+        template <int part> SIMD_INLINE __m512i UnpackU8(__m512i a, __m512i b = K_ZERO);
 
-		template <> SIMD_INLINE __m512i UnpackU8<0>(__m512i a, __m512i b)
-		{
-			return _mm512_unpacklo_epi8(a, b);
-		}
+        template <> SIMD_INLINE __m512i UnpackU8<0>(__m512i a, __m512i b)
+        {
+            return _mm512_unpacklo_epi8(a, b);
+        }
 
-		template <> SIMD_INLINE __m512i UnpackU8<1>(__m512i a, __m512i b)
-		{
-			return _mm512_unpackhi_epi8(a, b);
-		}
+        template <> SIMD_INLINE __m512i UnpackU8<1>(__m512i a, __m512i b)
+        {
+            return _mm512_unpackhi_epi8(a, b);
+        }
 
-		template <int part> SIMD_INLINE __m512i UnpackU16(__m512i a, __m512i b = K_ZERO);
+        template <int part> SIMD_INLINE __m512i UnpackU16(__m512i a, __m512i b = K_ZERO);
 
-		template <> SIMD_INLINE __m512i UnpackU16<0>(__m512i a, __m512i b)
-		{
-			return _mm512_unpacklo_epi16(a, b);
-		}
+        template <> SIMD_INLINE __m512i UnpackU16<0>(__m512i a, __m512i b)
+        {
+            return _mm512_unpacklo_epi16(a, b);
+        }
 
-		template <> SIMD_INLINE __m512i UnpackU16<1>(__m512i a, __m512i b)
-		{
-			return _mm512_unpackhi_epi16(a, b);
-		}
+        template <> SIMD_INLINE __m512i UnpackU16<1>(__m512i a, __m512i b)
+        {
+            return _mm512_unpackhi_epi16(a, b);
+        }
 
-		SIMD_INLINE __m512i UnpackHalfU8(__m256i a, __m256i b = Avx2::K_ZERO)
-		{
-			return _mm512_unpacklo_epi8(_mm512_castsi256_si512(a), _mm512_castsi256_si512(b));
-		}
+        SIMD_INLINE __m512i UnpackHalfU8(__m256i a, __m256i b = Avx2::K_ZERO)
+        {
+            return _mm512_unpacklo_epi8(_mm512_castsi256_si512(a), _mm512_castsi256_si512(b));
+        }
 
-		SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
-		{
-			return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
-		}
+        SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
+        {
+            return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
+        }
 
-		SIMD_INLINE __m512i Saturate16iTo8u(__m512i value)
-		{
-			return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
-		}
+        SIMD_INLINE __m512i Saturate16iTo8u(__m512i value)
+        {
+            return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
+        }
 
-		SIMD_INLINE __m512i Hadd32(__m512i a, __m512i b)
-		{
-			__m512i ab0 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_0, b);
-			__m512i ab1 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_1, b);
-			return _mm512_add_epi32(ab0, ab1);
-		}
+        SIMD_INLINE __m512i Hadd32(__m512i a, __m512i b)
+        {
+            __m512i ab0 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_0, b);
+            __m512i ab1 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_1, b);
+            return _mm512_add_epi32(ab0, ab1);
+        }
 
-		SIMD_INLINE __m512i Permuted2Pack16iTo8u(__m512i lo, __m512i hi)
-		{
-			return _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(lo, hi));
-		}
+        SIMD_INLINE __m512i Permuted2Pack16iTo8u(__m512i lo, __m512i hi)
+        {
+            return _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(lo, hi));
+        }
 
-		template<int part> SIMD_INLINE __m512i SubUnpackedU8(__m512i a, __m512i b)
-		{
-			return _mm512_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
-		}
+        template<int part> SIMD_INLINE __m512i SubUnpackedU8(__m512i a, __m512i b)
+        {
+            return _mm512_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
+        }
 
-		template <bool abs> __m512i ConditionalAbs(__m512i a);
+        template <bool abs> __m512i ConditionalAbs(__m512i a);
 
-		template <> SIMD_INLINE __m512i ConditionalAbs<true>(__m512i a)
-		{
-			return _mm512_abs_epi16(a);
-		}
+        template <> SIMD_INLINE __m512i ConditionalAbs<true>(__m512i a)
+        {
+            return _mm512_abs_epi16(a);
+        }
 
-		template <> SIMD_INLINE __m512i ConditionalAbs<false>(__m512i a)
-		{
-			return a;
-		}
+        template <> SIMD_INLINE __m512i ConditionalAbs<false>(__m512i a)
+        {
+            return a;
+        }
 
-		SIMD_INLINE __m512i HorizontalSum32(__m512i a)
-		{
-			return _mm512_add_epi64(_mm512_unpacklo_epi32(a, K_ZERO), _mm512_unpackhi_epi32(a, K_ZERO));
-		}
+        SIMD_INLINE __m512i HorizontalSum32(__m512i a)
+        {
+            return _mm512_add_epi64(_mm512_unpacklo_epi32(a, K_ZERO), _mm512_unpackhi_epi32(a, K_ZERO));
+        }
 
-		SIMD_INLINE __m512i SaturateI16ToU8(__m512i value)
-		{
-			return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
-		}
+        SIMD_INLINE __m512i SaturateI16ToU8(__m512i value)
+        {
+            return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
+        }
 
-		SIMD_INLINE __m512i MaxI16(const __m512i a, __m512i b, __m512i c)
-		{
-			return _mm512_max_epi16(a, _mm512_max_epi16(b, c));
-		}
+        SIMD_INLINE __m512i MaxI16(const __m512i a, __m512i b, __m512i c)
+        {
+            return _mm512_max_epi16(a, _mm512_max_epi16(b, c));
+        }
 
-		SIMD_INLINE __m512i MinI16(__m512i a, __m512i b, __m512i c)
-		{
-			return _mm512_min_epi16(a, _mm512_min_epi16(b, c));
-		}
-	}
+        SIMD_INLINE __m512i MinI16(__m512i a, __m512i b, __m512i c)
+        {
+            return _mm512_min_epi16(a, _mm512_min_epi16(b, c));
+        }
+    }
 #endif //SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE
@@ -930,22 +930,22 @@ namespace Simd
     {
         SIMD_INLINE v128_u8 ShiftLeft(v128_u8 value, size_t shift)
         {
-            return vec_perm(K8_00, value, vec_lvsr(shift, (uint8_t*)0));        
+            return vec_perm(K8_00, value, vec_lvsr(shift, (uint8_t*)0));
         }
 
         SIMD_INLINE v128_u16 ShiftLeft(v128_u16 value, size_t shift)
         {
-            return (v128_u16)ShiftLeft((v128_u8)value, 2*shift);      
+            return (v128_u16)ShiftLeft((v128_u8)value, 2 * shift);
         }
 
         SIMD_INLINE v128_u8 ShiftRight(v128_u8 value, size_t shift)
         {
-            return vec_perm(value, K8_00, vec_lvsl(shift, (uint8_t*)0));        
+            return vec_perm(value, K8_00, vec_lvsl(shift, (uint8_t*)0));
         }
 
         SIMD_INLINE v128_u16 MulHiU16(v128_u16 a, v128_u16 b)
         {
-            return (v128_u16)vec_perm(vec_mule(a, b), vec_mulo(a, b), K8_PERM_MUL_HI_U16);        
+            return (v128_u16)vec_perm(vec_mule(a, b), vec_mulo(a, b), K8_PERM_MUL_HI_U16);
         }
 
         SIMD_INLINE v128_u8 AbsDifferenceU8(v128_u8 a, v128_u8 b)
@@ -1000,101 +1000,101 @@ namespace Simd
 #endif//SIMD_VMX_ENABLE
 
 #ifdef SIMD_NEON_ENABLE
-	namespace Neon
-	{
-		SIMD_INLINE uint8x16_t ShiftLeft(uint8x16_t value, size_t shift)
-		{
-			if (shift & 8)
-				value = vextq_u8(K8_00, value, 8);
-			if (shift & 4)
-				value = vextq_u8(K8_00, value, 12);
-			if (shift & 2)
-				value = vextq_u8(K8_00, value, 14);
-			if (shift & 1)
-				value = vextq_u8(K8_00, value, 15);
-			return value;
-		}
+    namespace Neon
+    {
+        SIMD_INLINE uint8x16_t ShiftLeft(uint8x16_t value, size_t shift)
+        {
+            if (shift & 8)
+                value = vextq_u8(K8_00, value, 8);
+            if (shift & 4)
+                value = vextq_u8(K8_00, value, 12);
+            if (shift & 2)
+                value = vextq_u8(K8_00, value, 14);
+            if (shift & 1)
+                value = vextq_u8(K8_00, value, 15);
+            return value;
+        }
 
-		SIMD_INLINE uint8x16_t ShiftRight(uint8x16_t value, size_t shift)
-		{
-			if (shift & 8)
-				value = vextq_u8(value, K8_00, 8);
-			if (shift & 4)
-				value = vextq_u8(value, K8_00, 4);
-			if (shift & 2)
-				value = vextq_u8(value, K8_00, 2);
-			if (shift & 1)
-				value = vextq_u8(value, K8_00, 1);
-			return value;
-		}
+        SIMD_INLINE uint8x16_t ShiftRight(uint8x16_t value, size_t shift)
+        {
+            if (shift & 8)
+                value = vextq_u8(value, K8_00, 8);
+            if (shift & 4)
+                value = vextq_u8(value, K8_00, 4);
+            if (shift & 2)
+                value = vextq_u8(value, K8_00, 2);
+            if (shift & 1)
+                value = vextq_u8(value, K8_00, 1);
+            return value;
+        }
 
-		SIMD_INLINE void SortU8(uint8x16_t & a, uint8x16_t & b)
-		{
-			uint8x16_t t = a;
-			a = vminq_u8(t, b);
-			b = vmaxq_u8(t, b);
-		}
+        SIMD_INLINE void SortU8(uint8x16_t & a, uint8x16_t & b)
+        {
+            uint8x16_t t = a;
+            a = vminq_u8(t, b);
+            b = vmaxq_u8(t, b);
+        }
 
-		SIMD_INLINE uint16x8_t DivideI16By255(uint16x8_t value)
-		{
-			return vshrq_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
-		}
+        SIMD_INLINE uint16x8_t DivideI16By255(uint16x8_t value)
+        {
+            return vshrq_n_u16(vaddq_u16(vaddq_u16(value, K16_0001), vshrq_n_u16(value, 8)), 8);
+        }
 
-		SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c)
-		{
-			return vaddq_u16(vaddq_u16(a, c), vaddq_u16(b, b));
-		}
+        SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c)
+        {
+            return vaddq_u16(vaddq_u16(a, c), vaddq_u16(b, b));
+        }
 
         SIMD_INLINE int16x8_t BinomialSum(const int16x8_t & a, const int16x8_t & b, const int16x8_t & c)
         {
             return vaddq_s16(vaddq_s16(a, c), vaddq_s16(b, b));
         }
 
-		SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c, const uint16x8_t & d)
-		{
-			return vaddq_u16(vaddq_u16(a, d), vmulq_u16(vaddq_u16(b, c), K16_0003));
-		}
+        SIMD_INLINE uint16x8_t BinomialSum16(const uint16x8_t & a, const uint16x8_t & b, const uint16x8_t & c, const uint16x8_t & d)
+        {
+            return vaddq_u16(vaddq_u16(a, d), vmulq_u16(vaddq_u16(b, c), K16_0003));
+        }
 
-		SIMD_INLINE uint16x8_t DivideBy16(uint16x8_t value)
-		{
-			return vshrq_n_u16(vaddq_u16(value, K16_0008), 4);
-		}
+        SIMD_INLINE uint16x8_t DivideBy16(uint16x8_t value)
+        {
+            return vshrq_n_u16(vaddq_u16(value, K16_0008), 4);
+        }
 
-		template <int part> SIMD_INLINE uint8x8_t Half(uint8x16_t a);
+        template <int part> SIMD_INLINE uint8x8_t Half(uint8x16_t a);
 
-		template <> SIMD_INLINE uint8x8_t Half<0>(uint8x16_t a)
-		{
-			return vget_low_u8(a);
-		}
+        template <> SIMD_INLINE uint8x8_t Half<0>(uint8x16_t a)
+        {
+            return vget_low_u8(a);
+        }
 
-		template <> SIMD_INLINE uint8x8_t Half<1>(uint8x16_t a)
-		{
-			return vget_high_u8(a);
-		}
+        template <> SIMD_INLINE uint8x8_t Half<1>(uint8x16_t a)
+        {
+            return vget_high_u8(a);
+        }
 
-		template <int part> SIMD_INLINE uint16x4_t Half(uint16x8_t a);
+        template <int part> SIMD_INLINE uint16x4_t Half(uint16x8_t a);
 
-		template <> SIMD_INLINE uint16x4_t Half<0>(uint16x8_t a)
-		{
-			return vget_low_u16(a);
-		}
+        template <> SIMD_INLINE uint16x4_t Half<0>(uint16x8_t a)
+        {
+            return vget_low_u16(a);
+        }
 
-		template <> SIMD_INLINE uint16x4_t Half<1>(uint16x8_t a)
-		{
-			return vget_high_u16(a);
-		}
+        template <> SIMD_INLINE uint16x4_t Half<1>(uint16x8_t a)
+        {
+            return vget_high_u16(a);
+        }
 
-		template <int part> SIMD_INLINE int16x4_t Half(int16x8_t a);
+        template <int part> SIMD_INLINE int16x4_t Half(int16x8_t a);
 
-		template <> SIMD_INLINE int16x4_t Half<0>(int16x8_t a)
-		{
-			return vget_low_s16(a);
-		}
+        template <> SIMD_INLINE int16x4_t Half<0>(int16x8_t a)
+        {
+            return vget_low_s16(a);
+        }
 
-		template <> SIMD_INLINE int16x4_t Half<1>(int16x8_t a)
-		{
-			return vget_high_s16(a);
-		}
+        template <> SIMD_INLINE int16x4_t Half<1>(int16x8_t a)
+        {
+            return vget_high_s16(a);
+        }
 
         template <int part> SIMD_INLINE float32x2_t Half(float32x4_t a);
 
@@ -1108,116 +1108,116 @@ namespace Simd
             return vget_high_f32(a);
         }
 
-		template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a)
-		{
-			return vmovl_u8(Half<part>(a));
-		}
+        template <int part> SIMD_INLINE uint16x8_t UnpackU8(uint8x16_t a)
+        {
+            return vmovl_u8(Half<part>(a));
+        }
 
-		template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a)
-		{
-			return vmovl_u16(Half<part>(a));
-		}
+        template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a)
+        {
+            return vmovl_u16(Half<part>(a));
+        }
 
-		template <int part> SIMD_INLINE int32x4_t UnpackI16(int16x8_t a)
-		{
-			return vmovl_s16(Half<part>(a));
-		}
+        template <int part> SIMD_INLINE int32x4_t UnpackI16(int16x8_t a)
+        {
+            return vmovl_s16(Half<part>(a));
+        }
 
-		SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
-		{
-			return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
-		}
+        SIMD_INLINE uint8x16_t PackU16(uint16x8_t lo, uint16x8_t hi)
+        {
+            return vcombine_u8(vmovn_u16(lo), vmovn_u16(hi));
+        }
 
-		SIMD_INLINE uint8x16_t PackSaturatedI16(int16x8_t lo, int16x8_t hi)
-		{
-			return vcombine_u8(vqmovun_s16(lo), vqmovun_s16(hi));
-		}
+        SIMD_INLINE uint8x16_t PackSaturatedI16(int16x8_t lo, int16x8_t hi)
+        {
+            return vcombine_u8(vqmovun_s16(lo), vqmovun_s16(hi));
+        }
 
-		SIMD_INLINE uint8x16_t PackSaturatedU16(uint16x8_t lo, uint16x8_t hi)
-		{
-			return vcombine_u8(vqmovn_u16(lo), vqmovn_u16(hi));
-		}
+        SIMD_INLINE uint8x16_t PackSaturatedU16(uint16x8_t lo, uint16x8_t hi)
+        {
+            return vcombine_u8(vqmovn_u16(lo), vqmovn_u16(hi));
+        }
 
-		SIMD_INLINE uint16x8_t PackU32(uint32x4_t lo, uint32x4_t hi)
-		{
-			return vcombine_u16(vmovn_u32(lo), vmovn_u32(hi));
-		}
+        SIMD_INLINE uint16x8_t PackU32(uint32x4_t lo, uint32x4_t hi)
+        {
+            return vcombine_u16(vmovn_u32(lo), vmovn_u32(hi));
+        }
 
-		SIMD_INLINE int16x8_t PackI32(int32x4_t lo, int32x4_t hi)
-		{
-			return vcombine_s16(vmovn_s32(lo), vmovn_s32(hi));
-		}
+        SIMD_INLINE int16x8_t PackI32(int32x4_t lo, int32x4_t hi)
+        {
+            return vcombine_s16(vmovn_s32(lo), vmovn_s32(hi));
+        }
 
-		SIMD_INLINE uint8x8x2_t Deinterleave(uint8x16_t value)
-		{
-			uint8_t buffer[A];
-			vst1q_u8(buffer, value);
-			return vld2_u8(buffer);
-		}
+        SIMD_INLINE uint8x8x2_t Deinterleave(uint8x16_t value)
+        {
+            uint8_t buffer[A];
+            vst1q_u8(buffer, value);
+            return vld2_u8(buffer);
+        }
 
-		template <int part> SIMD_INLINE uint8x16_t Stretch2(uint8x16_t a)
-		{
-			return (uint8x16_t)vmulq_u16(UnpackU8<part>(a), K16_0101);
-		}
+        template <int part> SIMD_INLINE uint8x16_t Stretch2(uint8x16_t a)
+        {
+            return (uint8x16_t)vmulq_u16(UnpackU8<part>(a), K16_0101);
+        }
 
-		template <bool abs> int16x8_t ConditionalAbs(int16x8_t a);
+        template <bool abs> int16x8_t ConditionalAbs(int16x8_t a);
 
-		template <> SIMD_INLINE int16x8_t ConditionalAbs<true>(int16x8_t a)
-		{
-			return vabdq_s16(a, (int16x8_t)K16_0000);
-		}
+        template <> SIMD_INLINE int16x8_t ConditionalAbs<true>(int16x8_t a)
+        {
+            return vabdq_s16(a, (int16x8_t)K16_0000);
+        }
 
-		template <> SIMD_INLINE int16x8_t ConditionalAbs<false>(int16x8_t a)
-		{
-			return a;
-		}
+        template <> SIMD_INLINE int16x8_t ConditionalAbs<false>(int16x8_t a)
+        {
+            return a;
+        }
 
-		SIMD_INLINE int16x8_t SaturateByU8(int16x8_t a)
-		{
-			return (int16x8_t)vmovl_u8(vqmovun_s16(a));
-		}
+        SIMD_INLINE int16x8_t SaturateByU8(int16x8_t a)
+        {
+            return (int16x8_t)vmovl_u8(vqmovun_s16(a));
+        }
 
-		template <int iter> SIMD_INLINE float32x4_t Reciprocal(const float32x4_t & a);
+        template <int iter> SIMD_INLINE float32x4_t Reciprocal(const float32x4_t & a);
 
-		template <> SIMD_INLINE float32x4_t Reciprocal<-1>(const float32x4_t & a)
-		{
-			float _a[4];
-			vst1q_f32(_a, a);
-			float r[4] = {1.0f/_a[0], 1.0f/_a[1], 1.0f/_a[2], 1.0f/_a[3]};
-			return vld1q_f32(r);
-		};
+        template <> SIMD_INLINE float32x4_t Reciprocal<-1>(const float32x4_t & a)
+        {
+            float _a[4];
+            vst1q_f32(_a, a);
+            float r[4] = { 1.0f / _a[0], 1.0f / _a[1], 1.0f / _a[2], 1.0f / _a[3] };
+            return vld1q_f32(r);
+        };
 
-		template<> SIMD_INLINE float32x4_t Reciprocal<0>(const float32x4_t & a)
-		{
-			return vrecpeq_f32(a);
-		}
+        template<> SIMD_INLINE float32x4_t Reciprocal<0>(const float32x4_t & a)
+        {
+            return vrecpeq_f32(a);
+        }
 
-		template<> SIMD_INLINE float32x4_t Reciprocal<1>(const float32x4_t & a)
-		{
-			float32x4_t r = vrecpeq_f32(a);
-			return vmulq_f32(vrecpsq_f32(a, r), r);
-		}
+        template<> SIMD_INLINE float32x4_t Reciprocal<1>(const float32x4_t & a)
+        {
+            float32x4_t r = vrecpeq_f32(a);
+            return vmulq_f32(vrecpsq_f32(a, r), r);
+        }
 
-		template<> SIMD_INLINE float32x4_t Reciprocal<2>(const float32x4_t & a)
-		{
-			float32x4_t r = vrecpeq_f32(a);
-			r = vmulq_f32(vrecpsq_f32(a, r), r);
-			return vmulq_f32(vrecpsq_f32(a, r), r);
-		}
+        template<> SIMD_INLINE float32x4_t Reciprocal<2>(const float32x4_t & a)
+        {
+            float32x4_t r = vrecpeq_f32(a);
+            r = vmulq_f32(vrecpsq_f32(a, r), r);
+            return vmulq_f32(vrecpsq_f32(a, r), r);
+        }
 
-		template <int iter> SIMD_INLINE float32x4_t Div(const float32x4_t & a, const float32x4_t & b)
-		{
-			return vmulq_f32(a, Reciprocal<iter>(b));
-		}
+        template <int iter> SIMD_INLINE float32x4_t Div(const float32x4_t & a, const float32x4_t & b)
+        {
+            return vmulq_f32(a, Reciprocal<iter>(b));
+        }
 
-		template <> SIMD_INLINE float32x4_t Div<-1>(const float32x4_t & a, const float32x4_t & b)
-		{
-			float _a[4], _b[4];
-			vst1q_f32(_a, a);
-			vst1q_f32(_b, b);
-			float c[4] = {_a[0]/_b[0], _a[1]/_b[1], _a[2]/_b[2], _a[3]/_b[3]};
-			return vld1q_f32(c);
-		};
+        template <> SIMD_INLINE float32x4_t Div<-1>(const float32x4_t & a, const float32x4_t & b)
+        {
+            float _a[4], _b[4];
+            vst1q_f32(_a, a);
+            vst1q_f32(_b, b);
+            float c[4] = { _a[0] / _b[0], _a[1] / _b[1], _a[2] / _b[2], _a[3] / _b[3] };
+            return vld1q_f32(c);
+        };
 
         template <int iter> SIMD_INLINE float32x4_t ReciprocalSqrt(const float32x4_t & a);
 
@@ -1225,7 +1225,7 @@ namespace Simd
         {
             float _a[4];
             vst1q_f32(_a, a);
-            float r[4] = { 1.0f/::sqrtf(_a[0]), 1.0f/::sqrtf(_a[1]), 1.0f/::sqrtf(_a[2]), 1.0f/::sqrtf(_a[3]) };
+            float r[4] = { 1.0f / ::sqrtf(_a[0]), 1.0f / ::sqrtf(_a[1]), 1.0f / ::sqrtf(_a[2]), 1.0f / ::sqrtf(_a[3]) };
             return vld1q_f32(r);
         }
 
@@ -1260,10 +1260,10 @@ namespace Simd
             return vld1q_f32(r);
         }
 
-		template <int part> SIMD_INLINE int16x8_t Sub(uint8x16_t a, uint8x16_t b)
-		{
-			return (int16x8_t)vsubl_u8(Half<part>(a), Half<part>(b));
-		}
+        template <int part> SIMD_INLINE int16x8_t Sub(uint8x16_t a, uint8x16_t b)
+        {
+            return (int16x8_t)vsubl_u8(Half<part>(a), Half<part>(b));
+        }
 
         template <int part> SIMD_INLINE float32x4_t ToFloat(int16x8_t a)
         {
@@ -1288,14 +1288,14 @@ namespace Simd
 
         template <int index> SIMD_INLINE float32x4_t Broadcast(float32x4_t a)
         {
-            return vdupq_lane_f32(Half<index/2>(a), index&1);
+            return vdupq_lane_f32(Half<index / 2>(a), index & 1);
         }
 
         SIMD_INLINE float32x4_t Hadd(float32x4_t a, float32x4_t b)
         {
             return vcombine_f32(vpadd_f32(Half<0>(a), Half<1>(a)), vpadd_f32(Half<0>(b), Half<1>(b)));
         }
-	}
+    }
 #endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdMath_h__

@@ -174,7 +174,7 @@ Functions</h2></td></tr>
 
 <p>Performs background update (initial grow, slow mode). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0; 
+<p>For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0;
 hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__background.html#gad5d1fdc00d4f9d647ee6ac5068086931" title="Performs background update (initial grow, slow mode). ">Simd::BackgroundGrowRangeSlow(const View&lt;A&gt;&amp; value, View&lt;A&gt;&amp; lo, View&lt;A&gt;&amp; hi)</a>.</dd></dl>
@@ -258,7 +258,7 @@ hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 
 <p>Performs background update (initial grow, fast mode). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i]; 
+<p>For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i];
 hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__background.html#ga955c46a38373cd611facc6a0e23a8df8" title="Performs background update (initial grow, fast mode). ">Simd::BackgroundGrowRangeFast(const View&lt;A&gt;&amp; value, View&lt;A&gt;&amp; lo, View&lt;A&gt;&amp; hi)</a>.</dd></dl>
@@ -366,7 +366,7 @@ hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 
 <p>Performs collection of background statistic. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0; 
+<p>Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0;
 hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__background.html#ga4386d650f9bbbf155aa6638e8d5e82e8" title="Performs collection of background statistic. ">Simd::BackgroundIncrementCount(const View&lt;A&gt;&amp; value, const View&lt;A&gt;&amp; loValue, const View&lt;A&gt;&amp; hiValue, View&lt;A&gt;&amp; loCount, View&lt;A&gt;&amp; hiCount)</a>.</dd></dl>
@@ -473,10 +473,10 @@ hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 <p>Performs adjustment of background range. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>Adjusts background range for every point: </p><pre class="fragment">loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
-loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0; 
+loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
 loCount[i] = 0;
 hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0;
-hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0; 
+hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0;
 hiCount[i] = 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__background.html#ga7799e1b4f52c157cf2ccc8f270eb339a" title="Performs adjustment of background range. ">Simd::BackgroundAdjustRange(View&lt;A&gt;&amp; loCount, View&lt;A&gt;&amp; loValue, View&lt;A&gt;&amp; hiCount, View&lt;A&gt;&amp; hiValue, uint8_t threshold)</a>.</dd></dl>
@@ -594,12 +594,12 @@ hiCount[i] = 0;
 <p>Performs adjustment of background range with using adjust range mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>Adjusts background range for every point: </p><pre class="fragment">if(mask[i])
-{ 
+{
     loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
-    loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0; 
+    loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
     loCount[i] = 0;
     hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0;
-    hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0; 
+    hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0;
     hiCount[i] = 0;
 }
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
@@ -890,8 +890,8 @@ if (lo[i] &gt; value[i])
 
 <p>Creates background update mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">if(mask[i] == index) 
-    dst[i] = value; 
+<p>For every point: </p><pre class="fragment">if(mask[i] == index)
+    dst[i] = value;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__background.html#gac2ee3f42ec61b02282b4ab2a9287db09" title="Creates background update mask. ">Simd::BackgroundInitMask(const View&lt;A&gt;&amp; src, uint8_t index, uint8_t value, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -944,7 +944,7 @@ if (lo[i] &gt; value[i])
 
 <p>Performs background update (initial grow, slow mode). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0; 
+<p>For every point: </p><pre class="fragment">lo[i] -= value[i] &lt; lo[i] ? 1 : 0;
 hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga92518b3197a907a3b34c1adb08065697" title="Performs background update (initial grow, slow mode). ">SimdBackgroundGrowRangeSlow</a>.</dd></dl>
@@ -993,7 +993,7 @@ hi[i] += value[i] &gt; hi[i] ? 1 : 0;
 
 <p>Performs background update (initial grow, fast mode). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i]; 
+<p>For every point: </p><pre class="fragment">lo[i] = value[i] &lt; lo[i] ? value[i] : lo[i];
 hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga38559b41f752154fad2ec4c8b8f2421b" title="Performs background update (initial grow, fast mode). ">SimdBackgroundGrowRangeFast</a>.</dd></dl>
@@ -1054,7 +1054,7 @@ hi[i] = value[i] &gt; hi[i] ? value[i] : hi[i];
 
 <p>Performs collection of background statistic. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0; 
+<p>Updates background statistic counters for every point: </p><pre class="fragment">loCount[i] += (value[i] &lt; loValue[i] &amp;&amp; loCount[i] &lt; 255) ? 1 : 0;
 hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga9d7c378294c144324e85028cf5321222" title="Performs collection of background statistic. ">SimdBackgroundIncrementCount</a>.</dd></dl>
@@ -1118,10 +1118,10 @@ hiCount[i] += (value[i] &gt; hiValue[i] &amp;&amp; hiCount[i] &lt; 255) ? 1 : 0;
 <p>Performs adjustment of background range. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>Adjusts background range for every point: </p><pre class="fragment">loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
-loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0; 
+loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
 loCount[i] = 0;
 hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0;
-hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0; 
+hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0;
 hiCount[i] = 0;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#ga5eb435c051cd7957de7ad38850ec6d35" title="Performs adjustment of background range. ">SimdBackgroundAdjustRange</a>.</dd></dl>
@@ -1191,12 +1191,12 @@ hiCount[i] = 0;
 <p>Performs adjustment of background range with using adjust range mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>Adjusts background range for every point: </p><pre class="fragment">if(mask[i])
-{ 
+{
     loValue[i] -= (loCount[i] &gt; threshold &amp;&amp; loValue[i] &gt; 0) ? 1 : 0;
-    loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0; 
+    loValue[i] += (loCount[i] &lt; threshold &amp;&amp; loValue[i] &lt; 255) ? 1 : 0;
     loCount[i] = 0;
     hiValue[i] += (hiCount[i] &gt; threshold &amp;&amp; hiValue[i] &lt; 255) ? 1 : 0;
-    hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0; 
+    hiValue[i] -= (hiCount[i] &lt; threshold &amp;&amp; hiValue[i] &gt; 0) ? 1 : 0;
     hiCount[i] = 0;
 }
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
@@ -1379,8 +1379,8 @@ if (lo[i] &gt; value[i])
 
 <p>Creates background update mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">if(mask[i] == index) 
-    dst[i] = value; 
+<p>For every point: </p><pre class="fragment">if(mask[i] == index)
+    dst[i] = value;
 </pre><p>This function is used for background updating in motion detection algorithm.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__background.html#gaf1e16149f47dcaa840531707ef49c52b" title="Creates background update mask. ">SimdBackgroundInitMask</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

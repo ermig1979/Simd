@@ -114,7 +114,7 @@ namespace Simd
         };
         typedef std::vector<Result> Results; /*!< A vector with results. */
 
-        /*! 
+        /*!
             \enum HashType
 
             Describes size of reduced image used in image Hash.
@@ -160,9 +160,9 @@ namespace Simd
             static const size_t sizes[] = { 16, 32, 64 };
             size_t size = sizes[type];
 
-            if(number >= 10000 && threshold < 0.10)
+            if (number >= 10000 && threshold < 0.10)
                 _matcher.reset(new Matcher_3D(threshold, size, number, normalized));
-            else if(number > 1000 && !normalized)
+            else if (number > 1000 && !normalized)
                 _matcher.reset(new Matcher_1D(threshold, size, number));
             else
                 _matcher.reset(new Matcher_0D(threshold, size, number));
@@ -197,9 +197,9 @@ namespace Simd
             size_t step = main / fast;
             size_t area = Simd::Square(step);
 
-            for (size_t  fast_y = 0; fast_y < fast; ++fast_y)
+            for (size_t fast_y = 0; fast_y < fast; ++fast_y)
             {
-                for (size_t  fast_x = 0; fast_x < fast; ++fast_x)
+                for (size_t fast_x = 0; fast_x < fast; ++fast_x)
                 {
                     size_t sum = area / 2;
                     for (size_t y = fast_y*step, y_end = y + step; y < y_end; ++y)
@@ -270,7 +270,7 @@ namespace Simd
             size_t Size() const { return _size; }
 
             virtual ~Matcher() {}
-            virtual void Add(const HashPtr & hash) = 0; 
+            virtual void Add(const HashPtr & hash) = 0;
             virtual void Find(const HashPtr & hash, Results & results) = 0;
 
         protected:
@@ -313,7 +313,7 @@ namespace Simd
                 if (mainSum > _mainMax)
                     return false;
 
-                difference = ::sqrt(double(mainSum)/_mainSize/ UINT8_MAX/ UINT8_MAX);
+                difference = ::sqrt(double(mainSum) / _mainSize / UINT8_MAX / UINT8_MAX);
 
                 return difference <= _threshold;
             }
@@ -351,7 +351,7 @@ namespace Simd
                 _half = (int)ceil(double(_range)*threshold);
             }
 
-            virtual void Add(const HashPtr & hash)            
+            virtual void Add(const HashPtr & hash)
             {
                 this->AddIn(Get(hash), hash);
             }
@@ -432,7 +432,7 @@ namespace Simd
 
             struct Index
             {
-                int x; 
+                int x;
                 int y;
                 int z;
             };

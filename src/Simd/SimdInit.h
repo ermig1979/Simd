@@ -30,7 +30,7 @@ namespace Simd
 {
 #if defined(_MSC_VER) && (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE))
 
-	template <class T> SIMD_INLINE char GetChar(T value, size_t index)
+    template <class T> SIMD_INLINE char GetChar(T value, size_t index)
     {
         return ((char*)&value)[index];
     }
@@ -429,7 +429,7 @@ namespace Simd
 
 #define SIMD_MM512_SET1_EPI64(a) \
     {a, a, a, a, a, a, a, a}
- 
+
 #define SIMD_MM512_SET2_EPI64(a0, a1) \
     {a0, a1, a0, a1, a0, a1, a0, a1}
 

@@ -80,7 +80,7 @@ namespace Simd
 
             // Ecx:
             SSE3 = 1 << 0,
-            SSSE3 =	1 << 9,
+            SSSE3 = 1 << 9,
             FMA = 1 << 12,
             SSE41 = 1 << 19,
             SSE42 = 1 << 20,
@@ -100,7 +100,7 @@ namespace Simd
 
         SIMD_INLINE bool CheckBit(Level level, Register index, Bit bit)
         {
-            unsigned int registers[4] = {0, 0, 0, 0};
+            unsigned int registers[4] = { 0, 0, 0, 0 };
 #if defined(_MSC_VER)
             __cpuid((int*)registers, level);
 #elif (defined __GNUC__)
@@ -122,20 +122,20 @@ namespace Simd
         {
             bool result = false;
             int file = ::open("/proc/self/auxv", O_RDONLY);
-            if (file < 0) 
+            if (file < 0)
                 return false;
             const ssize_t size = 64;
             unsigned long buffer[size];
-            for(ssize_t count = size; count == size;)
+            for (ssize_t count = size; count == size;)
             {
-                count = ::read(file, buffer, sizeof(buffer))/sizeof(unsigned long);
-                for (int i = 0; i < count; i += 2) 
-                {                                                                                                           
-                    if (buffer[i] == (unsigned)at) 
-                    {                                                                                                                                      
-                        result = !!(buffer[i + 1] & bit);                                                                                                           
+                count = ::read(file, buffer, sizeof(buffer)) / sizeof(unsigned long);
+                for (int i = 0; i < count; i += 2)
+                {
+                    if (buffer[i] == (unsigned)at)
+                    {
+                        result = !!(buffer[i + 1] & bit);
                         count = 0;
-                    } 
+                    }
                     if (buffer[i] == AT_NULL)
                         count = 0;
                 }
@@ -162,7 +162,7 @@ namespace Simd
                 __m128 value = _mm_set1_ps(1.0f);// try to execute of SSE instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -191,7 +191,7 @@ namespace Simd
                 __m128d value = _mm_set1_pd(1.0);// try to execute of SSE2 instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -249,7 +249,7 @@ namespace Simd
                 __m128i value = _mm_abs_epi8(_mm_set1_epi8(-1)); //try to execute of SSSE3 instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -278,7 +278,7 @@ namespace Simd
                 int value = _mm_testz_si128(_mm_set1_epi8(0), _mm_set1_epi8(-1)); // try to execute of SSE41 instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -307,7 +307,7 @@ namespace Simd
                 uint32_t value = _mm_crc32_u8(0, 1); // try to execute of SSE42 instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -321,8 +321,8 @@ namespace Simd
 #endif
 
 #ifdef SIMD_AVX_ENABLE
-	namespace Avx
-	{
+    namespace Avx
+    {
         SIMD_INLINE bool SupportedByCPU()
         {
             return
@@ -338,7 +338,7 @@ namespace Simd
                 __m256d value = _mm256_set1_pd(1.0);// try to execute of AVX instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -347,13 +347,13 @@ namespace Simd
 #endif
         }
 
-		const bool Enable = SupportedByCPU() && SupportedByOS();
-	}
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         SIMD_INLINE bool SupportedByCPU()
         {
             return
@@ -371,7 +371,7 @@ namespace Simd
                 __m256i value = _mm256_abs_epi8(_mm256_set1_epi8(1));// try to execute of AVX2 instructions;
                 return true;
             }
-            __except(EXCEPTION_EXECUTE_HANDLER)
+            __except (EXCEPTION_EXECUTE_HANDLER)
             {
                 return false;
             }
@@ -380,69 +380,69 @@ namespace Simd
 #endif
         }
 
-		const bool Enable = SupportedByCPU() && SupportedByOS();
-	}
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-	namespace Avx512f
-	{
-		SIMD_INLINE bool SupportedByCPU()
-		{
-			return
-				Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F);
-		}
+    namespace Avx512f
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F);
+        }
 
-		SIMD_INLINE bool SupportedByOS()
-		{
+        SIMD_INLINE bool SupportedByOS()
+        {
 #if defined(_MSC_VER)
-			__try
-			{
-				__m512d value = _mm512_set1_pd(1.0);// try to execute of AVX-512-F instructions;
-				return true;
-			}
-			__except (EXCEPTION_EXECUTE_HANDLER)
-			{
-				return false;
-			}
+            __try
+            {
+                __m512d value = _mm512_set1_pd(1.0);// try to execute of AVX-512-F instructions;
+                return true;
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
 #else
-			return true;
+            return true;
 #endif
-		}
+        }
 
-		const bool Enable = SupportedByCPU() && SupportedByOS();
-	}
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-	namespace Avx512bw
-	{
-		SIMD_INLINE bool SupportedByCPU()
-		{
-			return
-				Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-				Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW);
-		}
+    namespace Avx512bw
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
+            return
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW);
+        }
 
-		SIMD_INLINE bool SupportedByOS()
-		{
+        SIMD_INLINE bool SupportedByOS()
+        {
 #if defined(_MSC_VER)
-			__try
-			{
-				__m512i value = _mm512_abs_epi8(_mm512_set1_epi8(1));// try to execute of AVX-512-BW instructions;
-				return true;
-			}
-			__except (EXCEPTION_EXECUTE_HANDLER)
-			{
-				return false;
-			}
+            __try
+            {
+                __m512i value = _mm512_abs_epi8(_mm512_set1_epi8(1));// try to execute of AVX-512-BW instructions;
+                return true;
+            }
+            __except (EXCEPTION_EXECUTE_HANDLER)
+            {
+                return false;
+            }
 #else
-			return true;
+            return true;
 #endif
-		}
+        }
 
-		const bool Enable = SupportedByCPU() && SupportedByOS();
-	}
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
 #endif
 
 #ifdef SIMD_VMX_ENABLE
@@ -480,12 +480,12 @@ namespace Simd
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-	namespace Neon
-	{
-		SIMD_INLINE bool SupportedByCPU()
-		{
+    namespace Neon
+    {
+        SIMD_INLINE bool SupportedByCPU()
+        {
 #if defined(_MSC_VER)
-			return true;
+            return true;
 #elif defined(__GNUC__)
 #if defined(SIMD_ARM64_ENABLE)
             return true;
@@ -495,15 +495,15 @@ namespace Simd
 #else
 #error Do not know how to detect NEON support!
 #endif
-		}
+        }
 
-		SIMD_INLINE bool SupportedByOS()
-		{
-			return true;
-		}
+        SIMD_INLINE bool SupportedByOS()
+        {
+            return true;
+        }
 
-		const bool Enable = SupportedByCPU() && SupportedByOS();
-	}
+        const bool Enable = SupportedByCPU() && SupportedByOS();
+    }
 #endif
 
 #ifdef SIMD_MSA_ENABLE
@@ -526,14 +526,14 @@ namespace Simd
     SIMD_INLINE size_t Alignment()
     {
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Avx512bw::Enable)
-			return sizeof(__m512i);
-		else
+        if (Avx512bw::Enable)
+            return sizeof(__m512i);
+        else
 #endif
 #ifdef SIMD_AVX512F_ENABLE
-		if (Avx512f::Enable)
-			return sizeof(__m512);
-		else
+        if (Avx512f::Enable)
+            return sizeof(__m512);
+        else
 #endif
 #ifdef SIMD_AVX2_ENABLE
         if (Avx2::Enable)

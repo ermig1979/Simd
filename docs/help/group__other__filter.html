@@ -134,8 +134,8 @@ Functions</h2></td></tr>
 
 <p>Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. </p>
 <p>Both images must have the same width and height.</p>
-<p>For border pixels: </p><pre class="fragment">dst[x, y] = 0; 
-</pre><p>For other pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]); 
+<p>For border pixels: </p><pre class="fragment">dst[x, y] = 0;
+</pre><p>For other pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]);
 dy = abs(src[x, y + 1] - src[x, y - 1]);
 dst[x, y] = min(dx + dy, 255);
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__other__filter.html#ga9cc37f1a90fb1a8eb17f6fc2b8127f70" title="Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-b...">Simd::AbsGradientSaturatedSum(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
@@ -210,9 +210,9 @@ dst[x, y] = min(dx + dy, 255);
 </div><div class="memdoc">
 
 <p>Performs Gaussian blur filtration with window 3x3. </p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] + 
+<p>For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
             2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
+            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
 </pre><p>All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7" title="Performs Gaussian blur filtration with window 3x3. ">Simd::GaussianBlur3x3(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -402,8 +402,8 @@ dst[x, y] = min(dx + dy, 255);
 
 <p>Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image. </p>
 <p>Both images must have the same width and height.</p>
-<p>For border pixels: </p><pre class="fragment">dst[x, y] = 0; 
-</pre><p>For other pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]); 
+<p>For border pixels: </p><pre class="fragment">dst[x, y] = 0;
+</pre><p>For other pixels: </p><pre class="fragment">dx = abs(src[x + 1, y] - src[x - 1, y]);
 dy = abs(src[x, y + 1] - src[x, y - 1]);
 dst[x, y] = min(dx + dy, 255);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__filter.html#ga173589ebbd59bf2d214c8a82cefe1487" title="Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-b...">SimdAbsGradientSaturatedSum</a>.</dd></dl>
@@ -444,9 +444,9 @@ dst[x, y] = min(dx + dy, 255);
 </div><div class="memdoc">
 
 <p>Performs Gaussian blur filtration with window 3x3. </p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] + 
+<p>For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
             2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16; 
+            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
 </pre><p> All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__filter.html#gaf37e85de82125071158ae2db59fb5643" title="Performs Gaussian blur filtration with window 3x3. ">SimdGaussianBlur3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

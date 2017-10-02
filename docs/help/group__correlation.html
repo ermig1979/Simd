@@ -591,7 +591,7 @@ Functions</h2></td></tr>
 
 <p>Calculates sum of squared differences for two images with using mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">if(mask[i] == index) 
+<p>For every point: </p><pre class="fragment">if(mask[i] == index)
     sum += (a[i] - b[i])*(a[i] - b[i]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__correlation.html#ga48c4dc2867632711f01ce0ead4cbdaba" title="Calculates sum of squared differences for two images with using mask. ">Simd::SquaredDifferenceSum(const View&lt;A&gt;&amp; a, const View&lt;A&gt;&amp; b, const View&lt;A&gt;&amp; mask, uint8_t index, uint64_t &amp; sum)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -711,7 +711,7 @@ for(i = 0; i &lt; size; ++i)
     diff = (a[i] - b[i])*(a[i] - b[i]) - corr;
     temp = sum + diff;
     corr = (temp - sum) - diff;
-    sum = temp; 
+    sum = temp;
 }
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1030,7 +1030,7 @@ for(i = 0; i &lt; size; ++i)
 
 <p>Calculates sum of squared differences for two images with using mask. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
-<p>For every point: </p><pre class="fragment">if(mask[i] == index) 
+<p>For every point: </p><pre class="fragment">if(mask[i] == index)
     sum += (a[i] - b[i])*(a[i] - b[i]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gac577779d2246e3bdba79f6eb14aa61bb" title="Calculates sum of squared differences for two images with using mask. ">SimdSquaredDifferenceSumMasked</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

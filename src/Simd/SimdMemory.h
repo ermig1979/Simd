@@ -107,10 +107,10 @@ namespace Simd
 #endif// SIMD_SSE_ENABLE
 
 #ifdef SIMD_SSE2_ENABLE
-	namespace Sse2
-	{
+    namespace Sse2
+    {
         using Sse::Aligned;
-	}
+    }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE3_ENABLE
@@ -128,9 +128,9 @@ namespace Simd
 #endif// SIMD_SSSE3_ENABLE
 
 #ifdef SIMD_SSE42_ENABLE
-	namespace Sse42
-	{
-	}
+    namespace Sse42
+    {
+    }
 #endif// SIMD_SSE42_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
@@ -149,32 +149,32 @@ namespace Simd
 #endif// SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
-	namespace Avx2
-	{
+    namespace Avx2
+    {
         using Avx::Aligned;
     }
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512F_ENABLE
-	namespace Avx512f
-	{
-		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m512))
-		{
-			return Simd::Aligned(size, align);
-		}
+    namespace Avx512f
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m512))
+        {
+            return Simd::Aligned(size, align);
+        }
 
-		SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m512))
-		{
-			return Simd::Aligned(ptr, align);
-		}
-	}
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m512))
+        {
+            return Simd::Aligned(ptr, align);
+        }
+    }
 #endif// SIMD_AVX512F_ENABLE
 
 #ifdef SIMD_AVX512BW_ENABLE
-	namespace Avx512bw
-	{
-		using Avx512f::Aligned;
-	}
+    namespace Avx512bw
+    {
+        using Avx512f::Aligned;
+    }
 #endif// SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE
@@ -200,18 +200,18 @@ namespace Simd
 #endif// SIMD_VSX_ENABLE
 
 #ifdef SIMD_NEON_ENABLE
-	namespace Neon
-	{
-		SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(uint8x16_t))
-		{
-			return Simd::Aligned(size, align);
-		}
+    namespace Neon
+    {
+        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(uint8x16_t))
+        {
+            return Simd::Aligned(size, align);
+        }
 
-		SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(uint8x16_t))
-		{
-			return Simd::Aligned(ptr, align);
-		}
-	}
+        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(uint8x16_t))
+        {
+            return Simd::Aligned(ptr, align);
+        }
+    }
 #endif// SIMD_NEON_ENABLE
 
 #ifdef SIMD_MSA_ENABLE

@@ -46,7 +46,7 @@ namespace Simd
         typedef std::vector<Point> Points;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
         typedef std::vector<Rect> Rects;
-        typedef Simd::View<Simd::Allocator> View; 
+        typedef Simd::View<Simd::Allocator> View;
         typedef Simd::Frame<Simd::Allocator> Frame;
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
 
@@ -244,10 +244,10 @@ namespace Simd
 
             struct Texture
             {
-                struct Bound 
+                struct Bound
                 {
-                    Pyramid value; 
-                    Pyramid count; 
+                    Pyramid value;
+                    Pyramid count;
 
                     void Create(const Size & size, size_t levelCount)
                     {
@@ -256,10 +256,10 @@ namespace Simd
                     }
                 };
 
-                struct Feature 
+                struct Feature
                 {
-                    Pyramid value; 
-                    Bound lo; 
+                    Pyramid value;
+                    Bound lo;
                     Bound hi;
                     uint16_t weight;
 
@@ -279,9 +279,9 @@ namespace Simd
                     FeatureDy,
                 };
 
-                Feature gray; 
-                Feature dx; 
-                Feature dy; 
+                Feature gray;
+                Feature dx;
+                Feature dy;
 
                 typedef std::vector<Feature *> Features;
                 Features features;
@@ -356,9 +356,9 @@ namespace Simd
                 enum MaskIndices
                 {
                     MaskNotVisited = 0,
-                    MaskSeed = 1,       
-                    MaskInvalid = 2,    
-                    MaskIndexSize, 
+                    MaskSeed = 1,
+                    MaskInvalid = 2,
+                    MaskIndexSize,
                 };
 
                 Pyramid mask;
@@ -501,7 +501,7 @@ namespace Simd
                 for (size_t i = 0; i < texture.gray.value.Size(); ++i)
                 {
                     Simd::TextureBoostedSaturatedGradient(texture.gray.value[i],
-                        _options.TextureGradientSaturation, _options.TextureGradientBoost, 
+                        _options.TextureGradientSaturation, _options.TextureGradientBoost,
                         texture.dx.value[i], texture.dy.value[i]);
                 }
 
@@ -558,7 +558,7 @@ namespace Simd
                 segmentation.differenceCreationMin = 128;
                 segmentation.differenceExpansionMin = 96;
                 segmentation.movingRegionAreaMin = 16;
-                    
+
                 segmentation.movingRegions.clear();
 
                 Simd::Fill(segmentation.mask, Segmentation::MaskNotVisited);
@@ -618,7 +618,7 @@ namespace Simd
                                     Simd::SegmentationChangeIndex(segmentation.mask[region->level].Region(region->rect).Ref(), region->index, Segmentation::MaskInvalid);
                                 else
                                 {
-                                    ComputeIndex(segmentation,*region);
+                                    ComputeIndex(segmentation, *region);
                                     if (!region->rect.Empty())
                                     {
                                         region->level = searchRegion.scale;

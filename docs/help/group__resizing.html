@@ -252,9 +252,9 @@ Functions</h2></td></tr>
 
 <p>Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3. </p>
 <p>For input and output image must be performed: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.</p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] + 
+<p>For every point: </p><pre class="fragment">dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] +
           2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
-             src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16; 
+             src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__resizing.html#gad1fd1f3529a3138ca3b06178a27a65dc" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3...">Simd::ReduceGray3x3(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst, bool compensation)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -340,7 +340,7 @@ Functions</h2></td></tr>
 <p>For every point: </p><pre class="fragment">dst[x, y] = (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
           3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
           3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-             src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64; 
+             src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__resizing.html#gaca167e2e6bd4955434ca980ece10cfe3" title="Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 4x4...">Simd::ReduceGray4x4(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -433,8 +433,8 @@ Functions</h2></td></tr>
     4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
     6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
     4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-       src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 
-    compensation ? 128 : 0) / 256; 
+       src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
+    compensation ? 128 : 0) / 256;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::ReduceGray5x5(const Viewc&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst, bool compensation).</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -695,9 +695,9 @@ Functions</h2></td></tr>
 
 <p>Performs reducing (in 2 times) and Gaussian blurring a 8-bit gray image with using window 3x3. </p>
 <p>For input and output image must be performed: dst.width = (src.width + 1)/2, dst.height = (src.height + 1)/2.</p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] + 
+<p>For every point: </p><pre class="fragment">dst[x, y] = (src[2*x-1, 2*y-1] + 2*src[2*x, 2*y-1] + src[2*x+1, 2*y-1] +
           2*(src[2*x-1, 2*y]   + 2*src[2*x, 2*y]   + src[2*x+1, 2*y]) +
-             src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16; 
+             src[2*x-1, 2*y+1] + 2*src[2*x, 2*y+1] + src[2*x+1, 2*y+1] + compensation ? 8 : 0) / 16;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#ga658e9b5cf60a4c204b0baa6e5b3db812" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 3x3...">SimdReduceGray3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -741,7 +741,7 @@ Functions</h2></td></tr>
 <p>For every point: </p><pre class="fragment">dst[x, y] =   (src[2*x-1, 2*y-1] + 3*src[2*x, 2*y-1] + 3*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]
             3*(src[2*x-1, 2*y]   + 3*src[2*x, 2*y]   + 3*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
             3*(src[2*x-1, 2*y+1] + 3*src[2*x, 2*y+1] + 3*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-               src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64; 
+               src[2*x-1, 2*y+2] + 3*src[2*x, 2*y+2] + 3*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 32) / 64;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#gaff71b6a09158e9297a3fb3fb3fa5ff70" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 4x4...">SimdReduceGray4x4</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -792,8 +792,8 @@ Functions</h2></td></tr>
     4*(src[2*x-2, 2*y-1] + 4*src[2*x-1, 2*y-1] + 6*src[2*x, 2*y-1] + 4*src[2*x+1, 2*y-1] + src[2*x+2, 2*y-1]) +
     6*(src[2*x-2, 2*y]   + 4*src[2*x-1, 2*y]   + 6*src[2*x, 2*y]   + 4*src[2*x+1, 2*y]   + src[2*x+2, 2*y]) +
     4*(src[2*x-2, 2*y+1] + 4*src[2*x-1, 2*y+1] + 6*src[2*x, 2*y+1] + 4*src[2*x+1, 2*y+1] + src[2*x+2, 2*y+1]) +
-       src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] + 
-    compensation ? 128 : 0) / 256; 
+       src[2*x-2, 2*y+2] + 4*src[2*x-1, 2*y+2] + 6*src[2*x, 2*y+2] + 4*src[2*x+1, 2*y+2] + src[2*x+2, 2*y+2] +
+    compensation ? 128 : 0) / 256;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__resizing.html#ga0a89812c8da5bfbbebabd9717855f7ce" title="Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 5x5...">SimdReduceGray5x5</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

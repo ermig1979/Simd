@@ -76,7 +76,7 @@ namespace Simd
                     alpha = 0;
                 }
 
-                if (index >(ptrdiff_t)srcSize - 2)
+                if (index > (ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;
@@ -128,7 +128,7 @@ namespace Simd
             InterpolateX3(alpha + 0 * A, b + 0 * A, buffer + 0 * A);
             InterpolateX3(alpha + 1 * A, b + 1 * A, buffer + 1 * A);
             InterpolateX3(alpha + 2 * A, b + 2 * A, buffer + 2 * A);
-        }        
+        }
 
         SIMD_INLINE void InterpolateX4(const uint8_t * alpha, uint8_t * buffer)
         {
@@ -139,10 +139,10 @@ namespace Simd
 
         template <> SIMD_INLINE void InterpolateX<4>(const uint8_t * alpha, uint8_t * buffer)
         {
-            InterpolateX4(alpha + 0*A, buffer + 0*A);
-            InterpolateX4(alpha + 1*A, buffer + 1*A);
-            InterpolateX4(alpha + 2*A, buffer + 2*A);
-            InterpolateX4(alpha + 3*A, buffer + 3*A);
+            InterpolateX4(alpha + 0 * A, buffer + 0 * A);
+            InterpolateX4(alpha + 1 * A, buffer + 1 * A);
+            InterpolateX4(alpha + 2 * A, buffer + 2 * A);
+            InterpolateX4(alpha + 3 * A, buffer + 3 * A);
         }
 
         const uint16x8_t K16_FRACTION_ROUND_TERM = SIMD_VEC_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
@@ -155,8 +155,8 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void InterpolateY(const uint8_t * bx0, const uint8_t * bx1, uint16x8_t alpha[2], uint8_t * dst)
         {
-            uint16x8_t lo = InterpolateY<align>((uint16_t*)(bx0 + 0), (uint16_t*)(bx1 + 0), alpha); 
-            uint16x8_t hi = InterpolateY<align>((uint16_t*)(bx0 + A), (uint16_t*)(bx1 + A), alpha); 
+            uint16x8_t lo = InterpolateY<align>((uint16_t*)(bx0 + 0), (uint16_t*)(bx1 + 0), alpha);
+            uint16x8_t hi = InterpolateY<align>((uint16_t*)(bx0 + A), (uint16_t*)(bx1 + A), alpha);
             Store<false>(dst, PackU16(lo, hi));
         }
 
@@ -167,10 +167,10 @@ namespace Simd
             assert(dstWidth >= A);
 
             struct One { uint8_t channels[channelCount]; };
-            struct Two { uint8_t channels[channelCount*2]; };
+            struct Two { uint8_t channels[channelCount * 2]; };
 
-            size_t size = 2*dstWidth*channelCount;
-            size_t bufferSize = AlignHi(dstWidth, A)*channelCount*2;
+            size_t size = 2 * dstWidth*channelCount;
+            size_t bufferSize = AlignHi(dstWidth, A)*channelCount * 2;
             size_t alignedSize = AlignHi(size, DA) - DA;
             const size_t step = A*channelCount;
 
@@ -184,7 +184,7 @@ namespace Simd
 
             uint16x8_t a[2];
 
-            for(size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
             {
                 a[0] = vdupq_n_u16(Base::FRACTION_RANGE - buffer.ay[yDst]);
                 a[1] = vdupq_n_u16(buffer.ay[yDst]);
@@ -192,9 +192,9 @@ namespace Simd
                 ptrdiff_t sy = buffer.iy[yDst];
                 int k = 0;
 
-                if(sy == previous)
+                if (sy == previous)
                     k = 2;
-                else if(sy == previous + 1)
+                else if (sy == previous + 1)
                 {
                     Swap(buffer.bx[0], buffer.bx[1]);
                     k = 1;
@@ -202,22 +202,22 @@ namespace Simd
 
                 previous = sy;
 
-                for(; k < 2; k++)
+                for (; k < 2; k++)
                 {
                     Two * pb = (Two *)buffer.bx[k];
                     const One * psrc = (const One *)(src + (sy + k)*srcStride);
-                    for(size_t x = 0; x < dstWidth; x++)
+                    for (size_t x = 0; x < dstWidth; x++)
                         pb[x] = *(Two *)(psrc + buffer.ix[x]);
 
                     uint8_t * pbx = buffer.bx[k];
-                    for(size_t i = 0; i < bufferSize; i += step)
+                    for (size_t i = 0; i < bufferSize; i += step)
                         InterpolateX<channelCount>(buffer.ax + i, pbx + i);
                 }
 
-                for(size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                for (size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
                     InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
                 size_t i = size - DA;
-                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i/2);
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i / 2);
             }
         }
 
@@ -225,24 +225,24 @@ namespace Simd
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
         {
-            switch(channelCount)
+            switch (channelCount)
             {
-            case 1: 
-                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 1:
+                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 2: 
-                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 2:
+                ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 3: 
-                ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 3:
+                ResizeBilinear<3>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            case 4: 
-                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride); 
+            case 4:
+                ResizeBilinear<4>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
-            default: 
-                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount); 
+            default:
+                Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
             }
-        }	
+        }
     }
 #endif
 }

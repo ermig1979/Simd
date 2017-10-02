@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -29,7 +29,7 @@ namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
-	{
+    {
         using namespace Simd::Detection;
 
         SIMD_INLINE void UnpackMask16i(const uint8_t * src, uint16_t * dst, const uint8x16_t & mask, uint8x16x2_t & buffer)
@@ -239,7 +239,7 @@ namespace Simd
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += F)
                 {
                     uint32x4_t result = vld1q_u32(buffer.m + col);
@@ -297,7 +297,7 @@ namespace Simd
                 size_t pq_offset = row * hid.sqsum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, (uint8x16_t)K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
@@ -470,7 +470,7 @@ namespace Simd
                 size_t offset = row * hid.sum.stride / sizeof(uint32_t) + rect.left;
 
                 UnpackMask32i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint32_t));
+                memset(buffer.d, 0, width * sizeof(uint32_t));
                 for (; col < alignedWidth; col += 4)
                 {
                     uint32x4_t result = vld1q_u32(buffer.m + col);
@@ -524,7 +524,7 @@ namespace Simd
                 size_t offset = row * hid.isum.stride / sizeof(uint32_t) + rect.left / 2;
 
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, evenWidth, buffer.m, (uint8x16_t)K16_0001);
-                memset(buffer.d, 0, evenWidth*sizeof(uint16_t));
+                memset(buffer.d, 0, evenWidth * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     uint32x4_t result = (uint32x4_t)vld1q_u16(buffer.m + col);
@@ -680,7 +680,7 @@ namespace Simd
                 size_t col = 0;
                 size_t offset = row * hid.isum.stride / sizeof(uint16_t) + rect.left;
                 UnpackMask16i(mask.data + row*mask.stride + rect.left, width, buffer.m, K8_01);
-                memset(buffer.d, 0, width*sizeof(uint16_t));
+                memset(buffer.d, 0, width * sizeof(uint16_t));
                 for (; col < alignedWidth; col += HA)
                 {
                     uint16x8_t result = vld1q_u16(buffer.m + col);

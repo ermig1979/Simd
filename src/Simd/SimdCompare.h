@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -153,7 +153,7 @@ namespace Simd
         template<> SIMD_INLINE __m128i Compare8u<SimdCompareLesserOrEqual>(__m128i a, __m128i b)
         {
             return LesserOrEqual8u(a, b);
-        } 
+        }
 
         SIMD_INLINE __m128i NotEqual16i(__m128i a, __m128i b)
         {
@@ -200,7 +200,7 @@ namespace Simd
         template<> SIMD_INLINE __m128i Compare16i<SimdCompareLesserOrEqual>(__m128i a, __m128i b)
         {
             return LesserOrEqual16i(a, b);
-        } 
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 
@@ -314,72 +314,72 @@ namespace Simd
 #endif// SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512BW_ENABLE    
-	namespace Avx512bw
-	{
-		template<SimdCompareType compareType> SIMD_INLINE __mmask64 Compare8u(__m512i a, __m512i b);
+    namespace Avx512bw
+    {
+        template<SimdCompareType compareType> SIMD_INLINE __mmask64 Compare8u(__m512i a, __m512i b);
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpeq_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpeq_epu8_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareNotEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpneq_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareNotEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpneq_epu8_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreater>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpgt_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreater>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpgt_epu8_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpge_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpge_epu8_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesser>(__m512i a, __m512i b)
-		{
-			return _mm512_cmplt_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesser>(__m512i a, __m512i b)
+        {
+            return _mm512_cmplt_epu8_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmple_epu8_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask64 Compare8u<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmple_epu8_mask(a, b);
+        }
 
-		template<SimdCompareType compareType> SIMD_INLINE __mmask32 Compare16i(__m512i a, __m512i b);
+        template<SimdCompareType compareType> SIMD_INLINE __mmask32 Compare16i(__m512i a, __m512i b);
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpeq_epi16_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpeq_epi16_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareNotEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpneq_epi16_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareNotEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpneq_epi16_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreater>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpgt_epi16_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreater>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpgt_epi16_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmpge_epi16_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareGreaterOrEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmpge_epi16_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesser>(__m512i a, __m512i b)
-		{
-			return _mm512_cmplt_epi16_mask(a, b);
-		}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesser>(__m512i a, __m512i b)
+        {
+            return _mm512_cmplt_epi16_mask(a, b);
+        }
 
-		template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
-		{
-			return _mm512_cmple_epi16_mask(a, b);
-		}
-	}
+        template<> SIMD_INLINE __mmask32 Compare16i<SimdCompareLesserOrEqual>(__m512i a, __m512i b)
+        {
+            return _mm512_cmple_epi16_mask(a, b);
+        }
+    }
 #endif// SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE    
@@ -457,72 +457,72 @@ namespace Simd
 #endif// SIMD_VMX_ENABLE
 
 #ifdef SIMD_NEON_ENABLE    
-	namespace Neon
-	{
-		template<SimdCompareType compareType> SIMD_INLINE uint8x16_t Compare8u(const uint8x16_t & a, const uint8x16_t & b);
+    namespace Neon
+    {
+        template<SimdCompareType compareType> SIMD_INLINE uint8x16_t Compare8u(const uint8x16_t & a, const uint8x16_t & b);
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareEqual>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vceqq_u8(a, b);
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareEqual>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vceqq_u8(a, b);
+        }
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareNotEqual>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vmvnq_u8(vceqq_u8(a, b));
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareNotEqual>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vmvnq_u8(vceqq_u8(a, b));
+        }
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreater>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vcgtq_u8(a, b);
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreater>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vcgtq_u8(a, b);
+        }
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreaterOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vcgeq_u8(a, b);
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareGreaterOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vcgeq_u8(a, b);
+        }
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesser>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vcltq_u8(a, b);
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesser>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vcltq_u8(a, b);
+        }
 
-		template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesserOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
-		{
-			return vcleq_u8(a, b);
-		}
+        template<> SIMD_INLINE uint8x16_t Compare8u<SimdCompareLesserOrEqual>(const uint8x16_t & a, const uint8x16_t & b)
+        {
+            return vcleq_u8(a, b);
+        }
 
-		template<SimdCompareType compareType> SIMD_INLINE uint16x8_t Compare16i(const int16x8_t & a, const int16x8_t & b);
+        template<SimdCompareType compareType> SIMD_INLINE uint16x8_t Compare16i(const int16x8_t & a, const int16x8_t & b);
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareEqual>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vceqq_s16(a, b);
-		}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareEqual>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vceqq_s16(a, b);
+        }
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareNotEqual>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vmvnq_u16(vceqq_s16(a, b));
-		}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareNotEqual>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vmvnq_u16(vceqq_s16(a, b));
+        }
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareGreater>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vcgtq_s16(a, b);
-		}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareGreater>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vcgtq_s16(a, b);
+        }
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareGreaterOrEqual>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vcgeq_s16(a, b);
-		}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareGreaterOrEqual>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vcgeq_s16(a, b);
+        }
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareLesser>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vcltq_s16(a, b);
-		}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareLesser>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vcltq_s16(a, b);
+        }
 
-		template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareLesserOrEqual>(const int16x8_t & a, const int16x8_t & b)
-		{
-			return vcleq_s16(a, b);
-		}
-	}
+        template<> SIMD_INLINE uint16x8_t Compare16i<SimdCompareLesserOrEqual>(const int16x8_t & a, const int16x8_t & b)
+        {
+            return vcleq_s16(a, b);
+        }
+    }
 #endif// SIMD_NEON_ENABLE
 }
 #endif//__SimdCompare_h__

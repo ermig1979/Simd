@@ -144,7 +144,7 @@ Functions</h2></td></tr>
 <p>Adds feature difference to common difference sum. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For every point: </p><pre class="fragment">excess = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0);
-difference[i] += (weight * excess*excess) &gt;&gt; 16; 
+difference[i] += (weight * excess*excess) &gt;&gt; 16;
 </pre><p>This function is used for difference estimation in algorithm of motion detection.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__difference__estimation.html#gadf18540d615e3a16a6c8b2d12632af2a" title="Adds feature difference to common difference sum. ">Simd::AddFeatureDifference(const View&lt;A&gt;&amp; value, const View&lt;A&gt;&amp; lo, const View&lt;A&gt;&amp; hi, uint16_t weight, View&lt;A&gt;&amp; difference)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -213,7 +213,7 @@ difference[i] += (weight * excess*excess) &gt;&gt; 16;
 <p>Adds feature difference to common difference sum. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For every point: </p><pre class="fragment">excess = max(lo[i] - value[i], 0) + max(value[i] - hi[i], 0);
-difference[i] += (weight * excess*excess) &gt;&gt; 16; 
+difference[i] += (weight * excess*excess) &gt;&gt; 16;
 </pre><p>This function is used for difference estimation in algorithm of motion detection.</p>
 <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__difference__estimation.html#ga1cbf6f1a311067e08b83ab4c29c35395" title="Adds feature difference to common difference sum. ">SimdAddFeatureDifference</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

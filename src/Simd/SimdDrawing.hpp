@@ -138,7 +138,7 @@ namespace Simd
 
         double error = dx / 2.0f;
         const ptrdiff_t ystep = (y1 < y2) ? 1 : -1;
-        ptrdiff_t y0 = y1 - width/2;
+        ptrdiff_t y0 = y1 - width / 2;
 
         for (ptrdiff_t x = x1; x <= x2; x++)
         {
@@ -224,7 +224,7 @@ namespace Simd
 
         for (ptrdiff_t row = rect.top; row < rect.bottom; ++row)
         {
-            Color * dst = & At<A, Color>(canvas, 0, row);
+            Color * dst = &At<A, Color>(canvas, 0, row);
             for (ptrdiff_t col = rect.left; col < rect.right; ++col)
                 dst[col] = color;
         }
@@ -295,7 +295,7 @@ namespace Simd
             {
                 ptrdiff_t left = std::max<ptrdiff_t>(0, intersections[i + 0]);
                 ptrdiff_t right = std::min<ptrdiff_t>(canvas.width, intersections[i + 1]);
-                Color * dst = & At<A, Color>(canvas, 0, y);
+                Color * dst = &At<A, Color>(canvas, 0, y);
                 for (ptrdiff_t x = left; x < right; ++x)
                     dst[x] = color;
             }
@@ -319,10 +319,10 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(color));
 
-        const size_t n = 8*std::max((size_t)1, (size_t)::pow(axes.x*axes.x + axes.y*axes.y, 0.25));
+        const size_t n = 8 * std::max((size_t)1, (size_t)::pow(axes.x*axes.x + axes.y*axes.y, 0.25));
         double ss = ::sin(slope);
         double sc = ::cos(slope);
-        double px, py, da = 2*M_PI / n;
+        double px, py, da = 2 * M_PI / n;
         for (size_t i = 0; i <= n; ++i)
         {
             double a = i*da;

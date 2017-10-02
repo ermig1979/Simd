@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -30,167 +30,167 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-		const size_t A3 = A*3;
-		const size_t A6 = A*6;
+        const size_t A3 = A * 3;
+        const size_t A6 = A * 6;
 
-		template <bool align> SIMD_INLINE void YuvToBgr(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, uint8_t * bgr)
-		{
-			uint8x16x3_t _bgr;
-			YuvToBgr(y, u, v, _bgr);
-			Store3<align>(bgr, _bgr);
-		}
+        template <bool align> SIMD_INLINE void YuvToBgr(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, uint8_t * bgr)
+        {
+            uint8x16x3_t _bgr;
+            YuvToBgr(y, u, v, _bgr);
+            Store3<align>(bgr, _bgr);
+        }
 
-		template <bool align> SIMD_INLINE void Yuv422pToBgr(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v, uint8_t * bgr)
-		{
-			YuvToBgr<align>(Load<align>(y + 0), u.val[0], v.val[0], bgr + 0);
-			YuvToBgr<align>(Load<align>(y + A), u.val[1], v.val[1], bgr + A3);
-		}
+        template <bool align> SIMD_INLINE void Yuv422pToBgr(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v, uint8_t * bgr)
+        {
+            YuvToBgr<align>(Load<align>(y + 0), u.val[0], v.val[0], bgr + 0);
+            YuvToBgr<align>(Load<align>(y + A), u.val[1], v.val[1], bgr + A3);
+        }
 
-		template <bool align> void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
-			if(align)
-			{
-				assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
-				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-			}
+        template <bool align> void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
 
-			size_t bodyWidth = AlignLo(width, DA);
-			size_t tail = width - bodyWidth;
-			uint8x16x2_t _u, _v;
-			for(size_t row = 0; row < height; row += 2)
-			{
-				for(size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A6)
-				{
-					_u.val[1] = _u.val[0] = Load<align>(u + colUV);
-					_u = vzipq_u8(_u.val[0], _u.val[1]);
-					_v.val[1] = _v.val[0] = Load<align>(v + colUV);
-					_v = vzipq_u8(_v.val[0], _v.val[1]);
-					Yuv422pToBgr<align>(y + colY, _u, _v, bgr + colBgr);
-					Yuv422pToBgr<align>(y + colY + yStride, _u, _v, bgr + colBgr + bgrStride);
-				}
-				if(tail)
-				{
-					size_t offset = width - DA;
-					_u.val[1] = _u.val[0] = Load<false>(u + offset/2);
-					_u = vzipq_u8(_u.val[0], _u.val[1]);
-					_v.val[1] = _v.val[0] = Load<false>(v + offset/2);
-					_v = vzipq_u8(_v.val[0], _v.val[1]);
-					Yuv422pToBgr<false>(y + offset, _u, _v, bgr + 3*offset);
-					Yuv422pToBgr<false>(y + offset + yStride, _u, _v, bgr + 3*offset + bgrStride);
-				}
-				y += 2*yStride;
-				u += uStride;
-				v += vStride;
-				bgr += 2*bgrStride;
-			}
-		}
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            uint8x16x2_t _u, _v;
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A6)
+                {
+                    _u.val[1] = _u.val[0] = Load<align>(u + colUV);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<align>(v + colUV);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuv422pToBgr<align>(y + colY, _u, _v, bgr + colBgr);
+                    Yuv422pToBgr<align>(y + colY + yStride, _u, _v, bgr + colBgr + bgrStride);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    _u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuv422pToBgr<false>(y + offset, _u, _v, bgr + 3 * offset);
+                    Yuv422pToBgr<false>(y + offset + yStride, _u, _v, bgr + 3 * offset + bgrStride);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                bgr += 2 * bgrStride;
+            }
+        }
 
-		void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-				Yuv420pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-			else
-				Yuv420pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-		}
+        void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+                Yuv420pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+            else
+                Yuv420pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+        }
 
-		template <bool align> void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			assert((width % 2 == 0) && (width >= DA));
-			if (align)
-			{
-				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-			}
+        template <bool align> void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            assert((width % 2 == 0) && (width >= DA));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
 
-			size_t bodyWidth = AlignLo(width, DA);
-			size_t tail = width - bodyWidth;
-			uint8x16x2_t _u, _v;
-			for (size_t row = 0; row < height; ++row)
-			{
-				for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A6)
-				{
-					_u.val[1] = _u.val[0] = Load<align>(u + colUV);
-					_u = vzipq_u8(_u.val[0], _u.val[1]);
-					_v.val[1] = _v.val[0] = Load<align>(v + colUV);
-					_v = vzipq_u8(_v.val[0], _v.val[1]);
-					Yuv422pToBgr<align>(y + colY, _u, _v, bgr + colBgr);
-				}
-				if (tail)
-				{
-					size_t offset = width - DA;
-					_u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
-					_u = vzipq_u8(_u.val[0], _u.val[1]);
-					_v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
-					_v = vzipq_u8(_v.val[0], _v.val[1]);
-					Yuv422pToBgr<false>(y + offset, _u, _v, bgr + 3 * offset);
-				}
-				y += yStride;
-				u += uStride;
-				v += vStride;
-				bgr += bgrStride;
-			}
-		}
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            uint8x16x2_t _u, _v;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t colUV = 0, colY = 0, colBgr = 0; colY < bodyWidth; colY += DA, colUV += A, colBgr += A6)
+                {
+                    _u.val[1] = _u.val[0] = Load<align>(u + colUV);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<align>(v + colUV);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuv422pToBgr<align>(y + colY, _u, _v, bgr + colBgr);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    _u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuv422pToBgr<false>(y + offset, _u, _v, bgr + 3 * offset);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
 
-		void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-				Yuv422pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-			else
-				Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-		}
+        void Yuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+                Yuv422pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+            else
+                Yuv422pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+        }
 
-		template <bool align> void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			assert(width >= A);
-			if (align)
-			{
-				assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-				assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
-			}
+        template <bool align> void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride));
+            }
 
-			size_t bodyWidth = AlignLo(width, A);
-			size_t tail = width - bodyWidth;
-			for (size_t row = 0; row < height; ++row)
-			{
-				for (size_t col = 0, colBgr = 0; col < bodyWidth; col += A, colBgr += A3)
-				{
-					uint8x16_t _y = Load<align>(y + col);
-					uint8x16_t _u = Load<align>(u + col);
-					uint8x16_t _v = Load<align>(v + col);
-					YuvToBgr<align>(_y, _u, _v, bgr + colBgr);
-				}
-				if (tail)
-				{
-					size_t col = width - A;
-					uint8x16_t _y = Load<false>(y + col);
-					uint8x16_t _u = Load<false>(u + col);
-					uint8x16_t _v = Load<false>(v + col);
-					YuvToBgr<false>(_y, _u, _v, bgr + 3 * col);
-				}
-				y += yStride;
-				u += uStride;
-				v += vStride;
-				bgr += bgrStride;
-			}
-		}
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, colBgr = 0; col < bodyWidth; col += A, colBgr += A3)
+                {
+                    uint8x16_t _y = Load<align>(y + col);
+                    uint8x16_t _u = Load<align>(u + col);
+                    uint8x16_t _v = Load<align>(v + col);
+                    YuvToBgr<align>(_y, _u, _v, bgr + colBgr);
+                }
+                if (tail)
+                {
+                    size_t col = width - A;
+                    uint8x16_t _y = Load<false>(y + col);
+                    uint8x16_t _u = Load<false>(u + col);
+                    uint8x16_t _v = Load<false>(v + col);
+                    YuvToBgr<false>(_y, _u, _v, bgr + 3 * col);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgr += bgrStride;
+            }
+        }
 
-		void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-			size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
-		{
-			if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
-				&& Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
-				Yuv444pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-			else
-				Yuv444pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
-		}
+        void Yuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            size_t width, size_t height, uint8_t * bgr, size_t bgrStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgr) && Aligned(bgrStride))
+                Yuv444pToBgr<true>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+            else
+                Yuv444pToBgr<false>(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

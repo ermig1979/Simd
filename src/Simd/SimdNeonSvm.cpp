@@ -58,33 +58,33 @@ namespace Simd
             Buffer buffer(count);
             size_t alignedCount = AlignLo(count, 4);
 
-            for(size_t j = 0; j < length; ++j)
+            for (size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
                 float32x4_t _v = vdupq_n_f32(v);
-                for(; i < alignedCount; i += 4)
+                for (; i < alignedCount; i += 4)
                 {
                     float32x4_t sums = Load<true>(buffer.sums + i);
                     float32x4_t _svs = Load<false>(svs + i);
                     Store<true>(buffer.sums + i, vaddq_f32(sums, vmulq_f32(_v, _svs)));
                 }
-                for(; i < count; ++i)
+                for (; i < count; ++i)
                     buffer.sums[i] += v*svs[i];
                 svs += count;
             }
 
             size_t i = 0;
             float32x4_t _sum = vdupq_n_f32(0);
-            for(; i < alignedCount; i += 4)
+            for (; i < alignedCount; i += 4)
             {
                 float32x4_t sums = Load<true>(buffer.sums + i);
                 float32x4_t _weights = Load<false>(weights + i);
                 _sum = vaddq_f32(_sum, vmulq_f32(sums, _weights));
             }
             *sum = ExtractSum32f(_sum);
-            for(; i < count; ++i)
-                *sum += buffer.sums[i]*weights[i];
+            for (; i < count; ++i)
+                *sum += buffer.sums[i] * weights[i];
         }
     }
 #endif// SIMD_NEON_ENABLE

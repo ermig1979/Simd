@@ -114,7 +114,7 @@ Functions</h2></td></tr>
 
 <p>Calculate sums of rows for given 8-bit gray image. </p>
 <p>For all rows: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += src[x, y]; 
+    sums[y] += src[x, y];
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__row__statistic.html#ga83dfa99b903c623a7c1660f935d0bfa7" title="Calculate sums of rows for given 8-bit gray image. ">Simd::GetRowSums(const View&lt;A&gt;&amp; src, uint32_t * sums)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -175,8 +175,8 @@ Functions</h2></td></tr>
 
 <p>Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. </p>
 <p>For all rows except the last: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += abs(src[x, y+1] - src[x, y]); 
-</pre><p> For the last row: </p><pre class="fragment">sums[height-1] = 0; 
+    sums[y] += abs(src[x, y+1] - src[x, y]);
+</pre><p> For the last row: </p><pre class="fragment">sums[height-1] = 0;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__row__statistic.html#ga792d61e6457a6bd54b328d1e0f7855f2" title="Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. ">Simd::GetAbsDyRowSums(const View&lt;A&gt;&amp; src, uint32_t * sums)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -219,7 +219,7 @@ Functions</h2></td></tr>
 
 <p>Calculate sums of rows for given 8-bit gray image. </p>
 <p>For all rows: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += src[x, y]; 
+    sums[y] += src[x, y];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__row__statistic.html#gadf7d736f34e7868b13998deda7b7ca68" title="Calculate sums of rows for given 8-bit gray image. ">SimdGetRowSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -259,8 +259,8 @@ Functions</h2></td></tr>
 
 <p>Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. </p>
 <p>For all rows except the last: </p><pre class="fragment">for(x = 0; x &lt; width; ++x)
-    sums[y] += abs(src[x, y+1] - src[x, y]); 
-</pre><p> For the last row: </p><pre class="fragment">sums[height-1] = 0; 
+    sums[y] += abs(src[x, y+1] - src[x, y]);
+</pre><p> For the last row: </p><pre class="fragment">sums[height-1] = 0;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__row__statistic.html#ga8027704bddeeaae84ec2e37278cabc43" title="Calculate sums of absolute derivate along y axis for rows for given 8-bit gray image. ">SimdGetAbsDyRowSums</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

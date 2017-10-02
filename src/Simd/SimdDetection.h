@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -191,7 +191,7 @@ namespace Simd
             Image sum, sqsum, tilted;
             Image isum, itilted;
 
-            virtual ~HidHaarCascade() 
+            virtual ~HidHaarCascade()
             {
             }
         };
@@ -254,7 +254,7 @@ namespace Simd
         {
             Buffer(size_t size)
             {
-                _p = Allocate(2 * size*sizeof(T));
+                _p = Allocate(2 * size * sizeof(T));
                 m = (T*)_p;
                 d = m + size;
             }
@@ -307,7 +307,7 @@ namespace Simd
 
         template< class T> SIMD_INLINE int Calculate(const HidLbpFeature<T> & feature, ptrdiff_t offset)
         {
-			T central = IntegralSum(feature.p[5], feature.p[6], feature.p[9], feature.p[10], offset);
+            T central = IntegralSum(feature.p[5], feature.p[6], feature.p[9], feature.p[10], offset);
 
             return
                 (IntegralSum(feature.p[0], feature.p[1], feature.p[4], feature.p[5], offset) >= central ? 128 : 0) |

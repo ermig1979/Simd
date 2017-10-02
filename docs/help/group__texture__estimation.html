@@ -159,8 +159,8 @@ Functions</h2></td></tr>
 <p>Calculates boosted saturated gradients for given input image. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For border pixels: </p><pre class="fragment">dx[x, y] = 0;
-dy[x, y] = 0;  
-</pre><p> For other pixels: </p><pre class="fragment">dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost; 
+dy[x, y] = 0;
+</pre><p> For other pixels: </p><pre class="fragment">dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost;
 dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__texture__estimation.html#ga9eb65e1d5618b683fbe26ad9e304b1d2" title="Calculates boosted saturated gradients for given input image. ">Simd::TextureBoostedSaturatedGradient(const View&lt;A&gt;&amp; src, uint8_t saturation, uint8_t boost, View&lt;A&gt;&amp; dx, View&lt;A&gt;&amp; dy)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -240,8 +240,8 @@ dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x
 <p>Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For every pixel: </p><pre class="fragment">lo = 128 - (128/boost);
-hi = 255 - lo; 
-dst[x, y] = max(lo, min(hi, src[i]))*boost; 
+hi = 255 - lo;
+dst[x, y] = max(lo, min(hi, src[i]))*boost;
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__texture__estimation.html#ga49d7c6be8f5bdfc39bf7bbf1235afce9" title="Calculates boosted colorized texture feature of input image (actual for U and V components of YUV for...">Simd::TextureBoostedUv(const View&lt;A&gt;&amp; src, uint8_t boost, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -469,8 +469,8 @@ dst[x, y] = max(lo, min(hi, src[i]))*boost;
 <p>Calculates boosted saturated gradients for given input image. </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For border pixels: </p><pre class="fragment">dx[x, y] = 0;
-dy[x, y] = 0;  
-</pre><p> For other pixels: </p><pre class="fragment">dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost; 
+dy[x, y] = 0;
+</pre><p> For other pixels: </p><pre class="fragment">dx[x, y] = (saturation + max(-saturation, min(saturation, (src[x + 1, y] - src[x - 1, y]))))*boost;
 dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x, y - 1]))))*boost;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__texture__estimation.html#ga508429e734d19ae13675a83950333be2" title="Calculates boosted saturated gradients for given input image. ">SimdTextureBoostedSaturatedGradient</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -521,8 +521,8 @@ dy[x, y] = (saturation + max(-saturation, min(saturation, (src[x, y + 1] - src[x
 <p>Calculates boosted colorized texture feature of input image (actual for U and V components of YUV format). </p>
 <p>All images must have the same width, height and format (8-bit gray).</p>
 <p>For every pixel: </p><pre class="fragment">lo = 128 - (128/boost);
-hi = 255 - lo; 
-dst[x, y] = max(lo, min(hi, src[i]))*boost; 
+hi = 255 - lo;
+dst[x, y] = max(lo, min(hi, src[i]))*boost;
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__texture__estimation.html#ga72e34e8082a24ab3f0010444bd020b04" title="Calculates boosted colorized texture feature of input image (actual for U and V components of YUV for...">SimdTextureBoostedUv</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

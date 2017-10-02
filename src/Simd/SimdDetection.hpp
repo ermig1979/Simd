@@ -35,9 +35,9 @@
 
 namespace Simd
 {
-	/*! @ingroup cpp_detection
+    /*! @ingroup cpp_detection
 
-		\short The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.
+        \short The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.
 
         Using example (face detection in the image):
         \code
@@ -65,7 +65,7 @@ namespace Simd
 
             image.Save("result.pgm");
 
-            return 0;   
+            return 0;
         }
         \endcode
 
@@ -136,11 +136,11 @@ namespace Simd
         \endcode
 
         \note This is wrapper around low-level \ref object_detection API.
-	*/
-	template <template<class> class A>
-	struct Detection
-	{
-		typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
+    */
+    template <template<class> class A>
+    struct Detection
+    {
+        typedef A<uint8_t> Allocator; /*!< Allocator type definition. */
         typedef Simd::View<A> View; /*!< An image type definition. */
         typedef Simd::Point<ptrdiff_t> Size; /*!< An image size type definition. */
         typedef std::vector<Size> Sizes; /*!< A vector of image sizes type definition. */
@@ -150,7 +150,7 @@ namespace Simd
 
         static const Tag UNDEFINED_OBJECT_TAG = -1; /*!< The undefined object tag. */
 
-        /*! 
+        /*!
             \short The Object structure describes detected object.
 
         */
@@ -192,14 +192,14 @@ namespace Simd
         /*!
             Creates a new empty Detection structure.
         */
-        Detection() 
+        Detection()
         {
         }
 
         /*!
             A Detection destructor.
         */
-        ~Detection() 
+        ~Detection()
         {
             for (size_t i = 0; i < _data.size(); ++i)
                 ::SimdDetectionFree(_data[i].handle);
@@ -230,16 +230,16 @@ namespace Simd
         }
 
         /*!
-            Prepares Detection structure to work with image of given size. 
+            Prepares Detection structure to work with image of given size.
 
             \param [in] imageSize - a size of input image.
-            \param [in] scaleFactor - a scale factor. To detect objects of different sizes the algorithm uses many scaled image. 
+            \param [in] scaleFactor - a scale factor. To detect objects of different sizes the algorithm uses many scaled image.
                                       This parameter defines size difference between neighboring images. This parameter strongly affects to performance.
-            \param [in] sizeMin - a minimal size of detected objects. This parameter strongly affects to performance. 
+            \param [in] sizeMin - a minimal size of detected objects. This parameter strongly affects to performance.
             \param [in] sizeMax - a maximal size of detected objects.
             \param [in] roi - a 8-bit image mask which defines Region Of Interest. User can restricts detection region with using this mask.
                               The mask affects to the center of detected object.
-            \param [in] threadNumber - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number. 
+            \param [in] threadNumber - a number of work threads. It useful for multi core CPU. Use value -1 to auto choose of thread number.
             \return a result of this operation.
         */
         bool Init(const Size & imageSize, double scaleFactor = 1.1, const Size & sizeMin = Size(0, 0),
@@ -258,7 +258,7 @@ namespace Simd
 
             \param [in] src - a input image.
             \param [out] objects - detected objects.
-            \param [in] groupSizeMin - a minimal weight (number of elementary detections) of detected image. 
+            \param [in] groupSizeMin - a minimal weight (number of elementary detections) of detected image.
             \param [in] sizeDifferenceMax - a parameter to group elementary detections.
             \param [in] motionMask - an using of motion detection flag. Useful for dynamical restriction of detection region to addition to ROI.
             \param [in] motionRegions - a set of rectangles (motion regions) to restrict detection region to addition to ROI.
@@ -319,7 +319,7 @@ namespace Simd
 
             bool Haar() const { return (flags&::SimdDetectionInfoFeatureMask) == ::SimdDetectionInfoFeatureHaar; }
             bool Tilted() const { return (flags&::SimdDetectionInfoHasTilted) != 0; }
-            bool Int16() const {return (flags&::SimdDetectionInfoCanInt16) != 0; }
+            bool Int16() const { return (flags&::SimdDetectionInfoCanInt16) != 0; }
         };
 
         typedef void(*DetectPtr)(const void * hid, const uint8_t * mask, size_t maskStride,
@@ -378,7 +378,7 @@ namespace Simd
                     ::SimdDetectionFree(hids[i].handle);
             }
         };
-		typedef std::unique_ptr<Level> LevelPtr;
+        typedef std::unique_ptr<Level> LevelPtr;
         typedef std::vector<LevelPtr> LevelPtrs;
 
         std::vector<Data> _data;
@@ -446,7 +446,7 @@ namespace Simd
                                 hid.detect = level.throughColumn ? ::SimdDetectionHaarDetect32fi : ::SimdDetectionHaarDetect32fp;
                             else
                             {
-                                if(_data[i].Int16())
+                                if (_data[i].Int16())
                                     hid.detect = level.throughColumn ? ::SimdDetectionLbpDetect16ii : ::SimdDetectionLbpDetect16ip;
                                 else
                                     hid.detect = level.throughColumn ? ::SimdDetectionLbpDetect32fi : ::SimdDetectionLbpDetect32fp;
@@ -496,7 +496,7 @@ namespace Simd
             }
         }
 
-        void EstimateIntegral(Level & level)        
+        void EstimateIntegral(Level & level)
         {
             if (level.needSqsum)
             {
@@ -686,7 +686,7 @@ namespace Simd
                     dst.push_back(buffer[i]);
             }
         }
-	};
+    };
 }
 
 #endif//__SimdDetection_hpp__

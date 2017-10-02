@@ -3,38 +3,35 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdAllocator.hpp"
-
-#include <vector>
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
-	namespace Neon
-	{
+    namespace Neon
+    {
         SIMD_INLINE void HogDeinterleave(const float * src, size_t count, float ** dst, size_t offset, size_t i)
         {
             src += i;
@@ -86,26 +83,26 @@ namespace Simd
             struct Buffer
             {
                 const int size;
-                float32x4_t * cos, * sin;
-                int32x4_t * pos, * neg; 
+                float32x4_t * cos, *sin;
+                int32x4_t * pos, *neg;
                 int * index;
                 float * value;
 
                 Buffer(size_t width, size_t quantization)
-                    : size((int)quantization/2)
+                    : size((int)quantization / 2)
                 {
-                    width = AlignHi(width, A/sizeof(float));
-                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + (sizeof(int32x4_t) + sizeof(float32x4_t))*2*size);
+                    width = AlignHi(width, A / sizeof(float));
+                    _p = Allocate(width*(sizeof(int) + sizeof(float)) + (sizeof(int32x4_t) + sizeof(float32x4_t)) * 2 * size);
                     index = (int*)_p - 1;
                     value = (float*)index + width;
                     cos = (float32x4_t*)(value + width + 1);
                     sin = cos + size;
                     pos = (int32x4_t*)(sin + size);
                     neg = pos + size;
-                    for(int i = 0; i < size; ++i)
+                    for (int i = 0; i < size; ++i)
                     {
-                        cos[i] = vdupq_n_f32((float)::cos(i*M_PI/size));
-                        sin[i] = vdupq_n_f32((float)::sin(i*M_PI/size));
+                        cos[i] = vdupq_n_f32((float)::cos(i*M_PI / size));
+                        sin[i] = vdupq_n_f32((float)::sin(i*M_PI / size));
                         pos[i] = vdupq_n_s32(i);
                         neg[i] = vdupq_n_s32(size + i);
                     }
@@ -125,7 +122,7 @@ namespace Simd
         {
             float32x4_t bestDot = vdupq_n_f32(0);
             int32x4_t bestIndex = vdupq_n_s32(0);
-            for(int i = 0; i < buffer.size; ++i)
+            for (int i = 0; i < buffer.size; ++i)
             {
                 float32x4_t dot = vaddq_f32(vmulq_f32(dx, buffer.cos[i]), vmulq_f32(dy, buffer.sin[i]));
                 uint32x4_t mask = vcgtq_f32(dot, bestDot);
@@ -158,18 +155,18 @@ namespace Simd
             HogDirectionHistograms<align>(Sub<1>(r, l), Sub<1>(b, t), buffer, col + 8);
         }
 
-        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
-            assert(width%cellX == 0 && height%cellY == 0 && quantization%2 == 0);
+            assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
 
             Buffer buffer(width, quantization);
 
-            memset(histograms, 0, quantization*(width/cellX)*(height/cellY)*sizeof(float));
+            memset(histograms, 0, quantization*(width / cellX)*(height / cellY) * sizeof(float));
 
             size_t alignedWidth = AlignLo(width - 2, A) + 1;
 
-            for (size_t row = 1; row < height - 1; ++row) 
+            for (size_t row = 1; row < height - 1; ++row)
             {
                 const uint8_t * s = src + stride*row;
                 for (size_t col = 1; col < alignedWidth; col += A)
@@ -185,8 +182,8 @@ namespace Simd
             static const size_t Q = 9;
             static const size_t Q2 = 18;
 
-            typedef std::vector<int, Simd::Allocator<int> > Vector32i;
-            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
+            typedef Array<int> Array32i;
+            typedef Array<float> Array32f;
 
             size_t _sx, _sy, _hs;
 
@@ -195,11 +192,11 @@ namespace Simd
             float32x4_t _kx[8], _ky[8];
             int32x4_t _Q, _Q2;
 
-            Vector32i _index;
-            Vector32f _value;
-            Vector32f _buffer;
-            Vector32f _histogram;
-            Vector32f _norm;
+            Array32i _index;
+            Array32f _value;
+            Array32f _buffer;
+            Array32f _histogram;
+            Array32f _norm;
 
             void Init(size_t w, size_t h)
             {
@@ -222,11 +219,11 @@ namespace Simd
                 _Q = vdupq_n_s32(Q);
                 _Q2 = vdupq_n_s32(Q2);
 
-                _index.resize(w);
-                _value.resize(w);
-                _buffer.resize((_sx + 1) * 4 * Q2);
-                _histogram.resize((_sx + 2)*(_sy + 2)*Q2);
-                _norm.resize((_sx + 2)*(_sy + 2));
+                _index.Resize(w);
+                _value.Resize(w);
+                _buffer.Resize((_sx + 1) * 4 * Q2);
+                _histogram.Resize((_sx + 2)*(_sy + 2)*Q2);
+                _norm.Resize((_sx + 2)*(_sy + 2));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const float32x4_t & dx, const float32x4_t & dy, size_t col)
@@ -252,8 +249,8 @@ namespace Simd
 
                 bestIndex = vbslq_s32(vceqq_s32(bestIndex, _Q2), (int32x4_t)K32_00000000, bestIndex);
 
-                Store<false>(_index.data() + col, bestIndex); // fixed program crash.
-                Store<align>(_value.data() + col, Sqrt<SIMD_NEON_RCP_ITER>(vmlaq_f32(vmulq_f32(adx, adx), ady, ady)));
+                Store<false>(_index.data + col, bestIndex); // fixed program crash.
+                Store<align>(_value.data + col, Sqrt<SIMD_NEON_RCP_ITER>(vmlaq_f32(vmulq_f32(adx, adx), ady, ady)));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const int16x8_t & dx, const int16x8_t & dy, size_t col)
@@ -280,8 +277,8 @@ namespace Simd
                 for (size_t col = A; col < aligned; col += A)
                     GetHistogram<true>(s, stride, col);
                 GetHistogram<false>(s, stride, width - 1 - A);
-                
-                float32x4_t * buffer = (float32x4_t*)_buffer.data();
+
+                float32x4_t * buffer = (float32x4_t*)_buffer.data;
                 float32x4_t ky = _ky[(row + 4) & 7];
                 for (size_t col = 1, n = C, i = 5; col < width - 1; i = 0, n = Simd::Min<size_t>(C, width - col - 1))
                 {
@@ -298,8 +295,8 @@ namespace Simd
             void AddToHistogram(size_t row, size_t width, size_t height)
             {
                 typedef float f18_t[18];
-                const float * src = _buffer.data();
-                f18_t * h0 = (f18_t*)_histogram.data() + row*_hs;
+                const float * src = _buffer.data;
+                f18_t * h0 = (f18_t*)_histogram.data + row*_hs;
                 f18_t * h1 = h0 + _hs;
                 for (size_t cell = 0; cell <= width; ++cell)
                 {
@@ -320,16 +317,16 @@ namespace Simd
                     h1++;
                     src += 4 * Q2;
                 }
-                SetZero(_buffer);
+                _buffer.Clear();
             }
 
             void EstimateHistogram(const uint8_t * src, size_t stride, size_t width, size_t height)
             {
-                SetZero(_histogram);
+                _histogram.Clear();
 
                 size_t aligned = AlignHi(width - 1, A) - A;
 
-                SetZero(_buffer);
+                _buffer.Clear();
                 for (size_t row = 1; row < 4; ++row)
                     AddRowToBuffer(src, stride, row, width, aligned);
                 AddToHistogram(0, _sx, _sy);
@@ -350,18 +347,18 @@ namespace Simd
                 for (size_t i = 0; i < 8; i += 4)
                 {
                     float32x4_t sum = vaddq_f32(Load<false>(src + i + 0), Load<false>(src + i + Q));
-                   norm = vmlaq_f32(norm, sum, sum);
+                    norm = vmlaq_f32(norm, sum, sum);
                 }
                 return ExtractSum32f(norm) + Simd::Square(src[Q - 1] + src[Q2 - 1]);
             }
 
             void EstimateNorm()
             {
-                SetZero(_norm);
+                _norm.Clear();
                 for (size_t y = 0, i = 0; y < _sy; y++)
                 {
-                    const float * h = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
-                    float * n = _norm.data() + (y + 1)*_hs + 1;
+                    const float * h = _histogram.data + ((y + 1)*_hs + 1)*Q2;
+                    float * n = _norm.data + (y + 1)*_hs + 1;
                     for (size_t x = 0; x < _sx; x++, i++)
                         n[x] = GetNorm(h + x*Q2);
                 }
@@ -375,12 +372,12 @@ namespace Simd
                 float32x4_t eps = vdupq_n_f32(0.0001f);
                 for (size_t y = 0; y < _sy; y++)
                 {
-                    float * ph = _histogram.data() + ((y + 1)*_hs + 1)*Q2;
+                    float * ph = _histogram.data + ((y + 1)*_hs + 1)*Q2;
                     for (size_t x = 0; x < _sx; x++)
                     {
                         float * dst = features + (y*_sx + x) * 31;
 
-                        float * p0 = _norm.data() + y*_hs + x;
+                        float * p0 = _norm.data + y*_hs + x;
                         float * p1 = p0 + _hs;
                         float * p2 = p1 + _hs;
 
@@ -443,13 +440,13 @@ namespace Simd
 
             void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
             {
-                Init(width, height); 
+                Init(width, height);
 
-                EstimateHistogram(src, stride, width, height); 
+                EstimateHistogram(src, stride, width, height);
 
-                EstimateNorm(); 
+                EstimateNorm();
 
-                ExtractFeatures(features); 
+                ExtractFeatures(features);
             }
         };
 
@@ -481,19 +478,19 @@ namespace Simd
 
         class HogSeparableFilter
         {
-            typedef std::vector<float, Simd::Allocator<float> > Vector32f;
-            typedef std::vector<float32x4_t, Simd::Allocator<float32x4_t> > Vector128f;
+            typedef Array<float> Array32f;
+            typedef Array<float32x4_t> Array128f;
 
             size_t _w, _h, _s;
-            Vector32f _buffer;
-            Vector128f _filter;
+            Array32f _buffer;
+            Array128f _filter;
 
             void Init(size_t w, size_t h, size_t rs, size_t cs)
             {
                 _w = w - rs + 1;
                 _s = AlignHi(_w, F);
                 _h = h - cs + 1;
-                _buffer.resize(_s*h);
+                _buffer.Resize(_s*h);
             }
 
             template <bool align> void FilterRows(const float * src, const float32x4_t * filter, size_t size, float * dst)
@@ -506,7 +503,7 @@ namespace Simd
 
             void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
-                _filter.resize(size);
+                _filter.Resize(size);
                 for (size_t i = 0; i < size; ++i)
                     _filter[i] = vdupq_n_f32(filter[i]);
 
@@ -515,9 +512,9 @@ namespace Simd
                 for (size_t row = 0; row < height; ++row)
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
-                        FilterRows<true>(src + col, _filter.data(), size, dst + col);
+                        FilterRows<true>(src + col, _filter.data, size, dst + col);
                     if (alignedWidth != width)
-                        FilterRows<false>(src + width - F, _filter.data(), size, dst + width - F);
+                        FilterRows<false>(src + width - F, _filter.data, size, dst + width - F);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -533,7 +530,7 @@ namespace Simd
 
             template <int add> void FilterCols(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
-                _filter.resize(size);
+                _filter.Resize(size);
                 for (size_t i = 0; i < size; ++i)
                     _filter[i] = vdupq_n_f32(filter[i]);
 
@@ -543,9 +540,9 @@ namespace Simd
                 for (size_t row = 0; row < height; ++row)
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
-                        FilterCols<add, false>(src + col, srcStride, _filter.data(), size, dst + col, tailMask);
+                        FilterCols<add, false>(src + col, srcStride, _filter.data, size, dst + col, tailMask);
                     if (alignedWidth != width)
-                        FilterCols<add, true>(src + width - F, srcStride, _filter.data(), size, dst + width - F, tailMask);
+                        FilterCols<add, true>(src + width - F, srcStride, _filter.data, size, dst + width - F, tailMask);
                     src += srcStride;
                     dst += dstStride;
                 }
@@ -558,12 +555,12 @@ namespace Simd
             {
                 Init(width, height, rowSize, colSize);
 
-                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data(), _s);
+                FilterRows(src, srcStride, _w, height, rowFilter, rowSize, _buffer.data, _s);
 
                 if (add)
-                    FilterCols<1>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<1>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
                 else
-                    FilterCols<0>(_buffer.data(), _s, _w, _h, colFilter, colSize, dst, dstStride);
+                    FilterCols<0>(_buffer.data, _s, _w, _h, colFilter, colSize, dst, dstStride);
             }
         };
 
@@ -575,6 +572,6 @@ namespace Simd
             HogSeparableFilter filter;
             filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
         }
-	}
+    }
 #endif// SIMD_NEON_ENABLE
 }

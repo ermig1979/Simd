@@ -254,11 +254,11 @@ Functions</h2></td></tr>
 <p>Performs averaging binarization of 8-bit gray image. </p>
 <p>All images must have 8-bit gray format and must have the same width and height.</p>
 <p>For every point: </p><pre class="fragment">sum = 0; area = 0;
-for(dy = -neighborhood; dy &lt;= neighborhood; ++dy) 
+for(dy = -neighborhood; dy &lt;= neighborhood; ++dy)
 {
-    for(dx = -neighborhood; dx &lt;= neighborhood; ++dx) 
+    for(dx = -neighborhood; dx &lt;= neighborhood; ++dx)
     {
-        if(x + dx &gt;= 0 &amp;&amp; x + dx &lt; width &amp;&amp; y + dy &gt;= 0 &amp;&amp; y + dy &lt; height) 
+        if(x + dx &gt;= 0 &amp;&amp; x + dx &lt; width &amp;&amp; y + dy &gt;= 0 &amp;&amp; y + dy &lt; height)
         {
             area++;
             if(compare(src[x + dx, x + dy], value))
@@ -423,11 +423,11 @@ dst[x, y] = sum*255 &gt; area*threshold ? positive : negative;
 <p>Performs averaging binarization of 8-bit gray image. </p>
 <p>All images must have 8-bit gray format and must have the same width and height.</p>
 <p>For every point: </p><pre class="fragment">sum = 0; area = 0;
-for(dy = -neighborhood; dy &lt;= neighborhood; ++dy) 
+for(dy = -neighborhood; dy &lt;= neighborhood; ++dy)
 {
-    for(dx = -neighborhood; dx &lt;= neighborhood; ++dx) 
+    for(dx = -neighborhood; dx &lt;= neighborhood; ++dx)
     {
-        if(x + dx &gt;= 0 &amp;&amp; x + dx &lt; width &amp;&amp; y + dy &gt;= 0 &amp;&amp; y + dy &lt; height) 
+        if(x + dx &gt;= 0 &amp;&amp; x + dx &lt; width &amp;&amp; y + dy &gt;= 0 &amp;&amp; y + dy &lt; height)
         {
             area++;
             if(compare(src[x + dx, x + dy], value))

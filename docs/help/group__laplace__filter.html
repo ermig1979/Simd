@@ -120,7 +120,7 @@ Functions</h2></td></tr>
 
 <p>Calculates Laplace's filter. </p>
 <p>All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.</p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = 
+<p>For every point: </p><pre class="fragment">dst[x, y] =
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
     - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
@@ -238,7 +238,7 @@ Functions</h2></td></tr>
 
 <p>Calculates Laplace's filter. </p>
 <p>All images must have the same width and height. Input image must has 8-bit gray format, output image must has 16-bit integer format.</p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = 
+<p>For every point: </p><pre class="fragment">dst[x, y] =
     - src[x-1, y-1] -   src[x, y-1] - src[x+1, y-1]
     - src[x-1, y]   + 8*src[x, y]   - src[x+1, y]
     - src[x-1, y+1] -   src[x, y+1] - src[x+1, y+1].
