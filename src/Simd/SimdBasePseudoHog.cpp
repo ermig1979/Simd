@@ -50,19 +50,19 @@ namespace Simd
 
 		public:
 
-			void Run(const uint8_t * src, size_t stride, size_t width, size_t height, float * histogram, size_t histogramStride)
+			void Run(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride)
 			{
 				assert(cell == 8 || cell == 4);
 				assert(width >= cell*2 && height >= cell*2);
 
 				Init(width);
 
-				src += (stride + 1)*cell/2;
+				src += (srcStride + 1)*cell/2;
 				height = (height / cell - 1)*cell;
 				width = (width / cell - 1)*cell;
 
-				ArrayInt * hist0 = &_histogram[0];
-				ArrayInt * hist1 = &_histogram[1];
+				ArrayInt * hist0 = _histogram + 0;
+				ArrayInt * hist1 = _histogram + 1;
 
 				float k = 1.0f / 256.0f;
 				for (size_t row = 0; row < height; ++row)
@@ -77,16 +77,15 @@ namespace Simd
 					{
 						for (size_t ix = 0; ix < cell; ++ix, ++col)
 						{
-							int dy = src[col + stride] - src[col - stride];
+							int dy = src[col + srcStride] - src[col - srcStride];
 							int dx = src[col + 1] - src[col - 1];
 							int adx = Abs(dx);
 							int ady = Abs(dy);
 							int value = RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
 
 							size_t index = (ady > adx ? 0 : 1);
-							index = (dy > 0 ? index : Q / 2 - index);
-							index = (dx > 0 ? index : Q - index);
-							index = index & (Q - 1);
+							index = (dy > 0 ? index : (Q / 2 - 1) - index);
+							index = (dx > 0 ? index : (Q - 1) - index);
 
 							h0[0 + index] += value*_k0[ix] * ky0;
 							h1[0 + index] += value*_k0[ix] * ky1;
@@ -105,6 +104,7 @@ namespace Simd
 						Swap(hist0, hist1);
 						histogram += histogramStride;
 					}
+					src += srcStride;
 				}
 			}
 		};
