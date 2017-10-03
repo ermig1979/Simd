@@ -27,50 +27,50 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func1
-		{
-			typedef void (*FuncPtr)(const uint8_t *src, size_t stride, size_t width, size_t height, 
-				 uint8_t * min, uint8_t * max, uint8_t * average);
+    namespace
+    {
+        struct Func1
+        {
+            typedef void(*FuncPtr)(const uint8_t *src, size_t stride, size_t width, size_t height,
+                uint8_t * min, uint8_t * max, uint8_t * average);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, uint8_t * min, uint8_t * max, uint8_t * average) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, min, max, average);
-			}
-		};
-	}
+            void Call(const View & src, uint8_t * min, uint8_t * max, uint8_t * average) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, min, max, average);
+            }
+        };
+    }
 
 #define FUNC1(function) Func1(function, #function)
 
-	bool GetStatisticAutoTest(int width, int height, const Func1 & f1, const Func1 & f2)
-	{
-		bool result = true;
+    bool GetStatisticAutoTest(int width, int height, const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(src);
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
 
-		 uint8_t min1, max1, average1;
-		 uint8_t min2, max2, average2;
+        uint8_t min1, max1, average1;
+        uint8_t min2, max2, average2;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, &min1, &max1, &average1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, &min1, &max1, &average1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, &min2, &max2, &average2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, &min2, &max2, &average2));
 
         TEST_CHECK_VALUE(min);
         TEST_CHECK_VALUE(max);
         TEST_CHECK_VALUE(average);
 
-		return result;
-	}
+        return result;
+    }
 
     bool GetStatisticAutoTest(const Func1 & f1, const Func1 & f2)
     {
@@ -83,45 +83,45 @@ namespace Test
         return result;
     }
 
-	bool GetStatisticAutoTest()
-	{
-		bool result = true;
+    bool GetStatisticAutoTest()
+    {
+        bool result = true;
 
-		result = result && GetStatisticAutoTest(FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
+        result = result && GetStatisticAutoTest(FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetStatisticAutoTest(FUNC1(Simd::Sse2::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetStatisticAutoTest(FUNC1(Simd::Avx2::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetStatisticAutoTest(FUNC1(Simd::Avx512bw::GetStatistic), FUNC1(SimdGetStatistic));
+        if (Simd::Avx512bw::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Avx512bw::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetStatisticAutoTest(FUNC1(Simd::Vmx::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
+        if (Simd::Neon::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Neon::GetStatistic), FUNC1(SimdGetStatistic));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     namespace
     {
         struct FuncM
         {
-            typedef void (*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+            typedef void(*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
             FuncPtr func;
@@ -202,28 +202,28 @@ namespace Test
         result = result && GetMomentsAutoTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx2::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx512bw::GetMoments), FUNC_M(SimdGetMoments));
+        if (Simd::Avx512bw::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx512bw::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetMomentsAutoTest(FUNC_M(Simd::Vmx::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetMomentsAutoTest(FUNC_M(Simd::Neon::GetMoments), FUNC_M(SimdGetMoments));
+        if (Simd::Neon::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Neon::GetMoments), FUNC_M(SimdGetMoments));
 #endif
 
         return result;
@@ -233,7 +233,7 @@ namespace Test
     {
         struct Func3
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
             FuncPtr func;
             String description;
@@ -290,28 +290,28 @@ namespace Test
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetRowSums), FUNC3(SimdGetRowSums), true);
+        if (Simd::Avx512bw::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetRowSums), FUNC3(SimdGetRowSums), true);
+        if (Simd::Neon::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif
 
         return result;
@@ -324,28 +324,28 @@ namespace Test
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
+        if (Simd::Avx512bw::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
+        if (Simd::Neon::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
         return result;
@@ -358,28 +358,28 @@ namespace Test
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        if (Simd::Avx512bw::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+        if (Simd::Neon::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif
 
         return result;
@@ -392,28 +392,28 @@ namespace Test
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Avx2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        if (Simd::Avx512bw::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Avx512bw::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GetSumsAutoTest(FUNC3(Simd::Vmx::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+        if (Simd::Neon::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Neon::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif
 
         return result;
@@ -423,7 +423,7 @@ namespace Test
     {
         struct Func4
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 
             FuncPtr func;
             String description;
@@ -479,28 +479,28 @@ namespace Test
         result = result && SumAutoTest(FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Sse2::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx2::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Avx512bw::ValueSum), FUNC4(SimdValueSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx512bw::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Vmx::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Neon::ValueSum), FUNC4(SimdValueSum));
+        if (Simd::Neon::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Neon::ValueSum), FUNC4(SimdValueSum));
 #endif
 
         return result;
@@ -513,28 +513,28 @@ namespace Test
         result = result && SumAutoTest(FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Sse2::SquareSum), FUNC4(SimdSquareSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx2::SquareSum), FUNC4(SimdSquareSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SquareSum), FUNC4(SimdSquareSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SquareSum), FUNC4(SimdSquareSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Vmx::SquareSum), FUNC4(SimdSquareSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Neon::SquareSum), FUNC4(SimdSquareSum));
+        if (Simd::Neon::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Neon::SquareSum), FUNC4(SimdSquareSum));
 #endif
 
         return result;
@@ -547,28 +547,28 @@ namespace Test
         result = result && SumAutoTest(FUNC4(Simd::Base::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx2::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Vmx::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+        if (Simd::Neon::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif
 
         return result;
@@ -581,28 +581,28 @@ namespace Test
         result = result && SumAutoTest(FUNC4(Simd::Base::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx2::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx512bw::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Vmx::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+        if (Simd::Neon::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Neon::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif
 
         return result;
@@ -615,28 +615,28 @@ namespace Test
         result = result && SumAutoTest(FUNC4(Simd::Base::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Ssse3::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Avx2::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Avx512bw::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Avx512bw::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SumAutoTest(FUNC4(Simd::Vmx::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SumAutoTest(FUNC4(Simd::Neon::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+        if (Simd::Neon::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Neon::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif
 
         return result;
@@ -646,7 +646,7 @@ namespace Test
     {
         struct Func5
         {
-            typedef void (*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
+            typedef void(*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
             FuncPtr func;
             String description;
@@ -704,28 +704,28 @@ namespace Test
         result = result && CorrelationSumAutoTest(FUNC5(Simd::Base::CorrelationSum), FUNC5(SimdCorrelationSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Sse2::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx2::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx512bw::CorrelationSum), FUNC5(SimdCorrelationSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Avx512bw::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && CorrelationSumAutoTest(FUNC5(Simd::Vmx::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && CorrelationSumAutoTest(FUNC5(Simd::Neon::CorrelationSum), FUNC5(SimdCorrelationSum));
+        if (Simd::Neon::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Neon::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif
 
         return result;
@@ -746,7 +746,7 @@ namespace Test
         uint8_t min1, max1, average1;
         uint8_t min2, max2, average2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -803,7 +803,7 @@ namespace Test
         uint64_t area1, x1, y1, xx1, xy1, yy1;
         uint64_t area2, x2, y2, xx2, xy2, yy2;
 
-        if(create)
+        if (create)
         {
             FillRandomMask(mask, index);
 
@@ -872,7 +872,7 @@ namespace Test
         Sums sums1(size, 0);
         Sums sums2(size, 0);
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -946,7 +946,7 @@ namespace Test
 
         uint64_t sum1, sum2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -1030,7 +1030,7 @@ namespace Test
 
         uint64_t sum1, sum2;
 
-        if(create)
+        if (create)
         {
             FillRandom(a);
             FillRandom(b);

@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -49,28 +49,28 @@ namespace Simd
         template <bool align> void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride));
 
             size_t alignedWidth = AlignLo(width, A);
-            if(width == alignedWidth)
+            if (width == alignedWidth)
                 alignedWidth -= A;
 
             const v128_u8 _alpha = SetU8(alpha);
 
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 Loader<align> _bgr(bgr);
                 Storer<align> _bgra(bgra);
                 BgrToBgra<align, true>(_bgr, _alpha, _bgra);
-                for(size_t col = A; col < alignedWidth; col += A)
+                for (size_t col = A; col < alignedWidth; col += A)
                     BgrToBgra<align, false>(_bgr, _alpha, _bgra);
                 Flush(_bgra);
 
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
-                    Loader<false> _bgr(bgr + 3*(width - A));
-                    Storer<false> _bgra(bgra + 4*(width - A));
+                    Loader<false> _bgr(bgr + 3 * (width - A));
+                    Storer<false> _bgra(bgra + 4 * (width - A));
                     BgrToBgra<false, true>(_bgr, _alpha, _bgra);
                     Flush(_bgra);
                 }
@@ -82,7 +82,7 @@ namespace Simd
 
         void BgrToBgra(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
-            if(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride))
+            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride))
                 BgrToBgra<true>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
             else
                 BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
@@ -90,8 +90,8 @@ namespace Simd
 
         const v128_u8 K8_PERM_48 = SIMD_VEC_SETR_EPI8(0x01, 0x11, 0x03, 0x13, 0x05, 0x15, 0x07, 0x17, 0x09, 0x19, 0x0B, 0x1B, 0x0D, 0x1D, 0x0F, 0x1F);
 
-        template <bool align, bool first> 
-        SIMD_INLINE void Bgr48pToBgra32(const uint8_t * blue, const uint8_t * green, const uint8_t * red, size_t offset, 
+        template <bool align, bool first>
+        SIMD_INLINE void Bgr48pToBgra32(const uint8_t * blue, const uint8_t * green, const uint8_t * red, size_t offset,
             const v128_u8 & alpha, Storer<align> & bgra)
         {
             const v128_u8 _blue = Load<align>(blue + offset);
@@ -109,7 +109,7 @@ namespace Simd
             const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= HA);
-            if(align)
+            if (align)
             {
                 assert(Aligned(blue) && Aligned(blueStride));
                 assert(Aligned(green) && Aligned(greenStride));
@@ -119,18 +119,18 @@ namespace Simd
 
             v128_u8 _alpha = SetU8(alpha);
             size_t alignedWidth = AlignLo(width, HA);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 Storer<align> _bgra(bgra);
                 Bgr48pToBgra32<align, true>(blue, green, red, 0, _alpha, _bgra);
-                for(size_t col = HA; col < alignedWidth; col += HA)
-                    Bgr48pToBgra32<align, false>(blue, green, red, col*2, _alpha, _bgra);
+                for (size_t col = HA; col < alignedWidth; col += HA)
+                    Bgr48pToBgra32<align, false>(blue, green, red, col * 2, _alpha, _bgra);
                 Flush(_bgra);
 
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
-                    Storer<false> _bgra(bgra + (width - HA)*4);
-                    Bgr48pToBgra32<false, true>(blue, green, red, (width - HA)*2, _alpha, _bgra);
+                    Storer<false> _bgra(bgra + (width - HA) * 4);
+                    Bgr48pToBgra32<false, true>(blue, green, red, (width - HA) * 2, _alpha, _bgra);
                     Flush(_bgra);
                 }
 
@@ -144,7 +144,7 @@ namespace Simd
         void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
             const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
         {
-            if(Aligned(blue) && Aligned(blueStride) && Aligned(green) && Aligned(greenStride) && 
+            if (Aligned(blue) && Aligned(blueStride) && Aligned(green) && Aligned(greenStride) &&
                 Aligned(red) && Aligned(redStride) && Aligned(bgra) && Aligned(bgraStride))
                 Bgr48pToBgra32<true>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
             else

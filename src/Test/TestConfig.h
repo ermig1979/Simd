@@ -72,12 +72,12 @@ namespace Test
 {
     typedef std::string String;
     typedef std::vector<String> Strings;
-	typedef Simd::View<Simd::Allocator> View;
+    typedef Simd::View<Simd::Allocator> View;
     typedef Simd::Point<ptrdiff_t> Point;
     typedef std::vector<Point> Points;
-	typedef Point Size;
+    typedef Point Size;
     typedef Simd::Rectangle<ptrdiff_t> Rect;
-	typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
+    typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
@@ -92,8 +92,8 @@ namespace Test
 
     const float EPS = 0.001f;
 
-	extern int W;
-	extern int H;
+    extern int W;
+    extern int H;
 
     extern String ROOT_PATH;
     extern String SOURCE;

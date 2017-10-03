@@ -33,96 +33,96 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct FuncC1
-		{
-			typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
+    namespace
+    {
+        struct FuncC1
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
-			FuncPtr func;
-			String description;
-			bool inversion;
+            FuncPtr func;
+            String description;
+            bool inversion;
 
-			FuncC1(const FuncPtr & f, const String & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
+            FuncC1(const FuncPtr & f, const String & d, bool i) : func(f), description(d + (i ? "[1]" : "[0]")), inversion(i) {}
 
-			void Call(const View & src, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, (float*)dst.data, src.width, inversion ? 1 : 0);
-			}
-		};
-	}
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, (float*)dst.data, src.width, inversion ? 1 : 0);
+            }
+        };
+    }
 #define FUNC_C1(function, inversion) FuncC1(function, #function, inversion)
 
-	bool NeuralConvertAutoTest(int width, int height, float eps, const FuncC1 & f1, const FuncC1 & f2)
-	{
-		bool result = true;
+    bool NeuralConvertAutoTest(int width, int height, float eps, const FuncC1 & f1, const FuncC1 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(src);
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
 
-		View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
-		View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+        View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
 
-		result = Compare(dst1, dst2, eps, true, 32);
+        result = Compare(dst1, dst2, eps, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralConvertAutoTest(float eps, const FuncC1 & f1, const FuncC1 & f2)
-	{
-		bool result = true;
+    bool NeuralConvertAutoTest(float eps, const FuncC1 & f1, const FuncC1 & f2)
+    {
+        bool result = true;
 
-		result = result && NeuralConvertAutoTest(W, H, eps, f1, f2);
-		result = result && NeuralConvertAutoTest(W - O, H + O, eps, f1, f2);
-		result = result && NeuralConvertAutoTest(W + O, H - O, eps, f1, f2);
+        result = result && NeuralConvertAutoTest(W, H, eps, f1, f2);
+        result = result && NeuralConvertAutoTest(W - O, H + O, eps, f1, f2);
+        result = result && NeuralConvertAutoTest(W + O, H - O, eps, f1, f2);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralConvertAutoTest()
-	{
-		bool result = true;
+    bool NeuralConvertAutoTest()
+    {
+        bool result = true;
 
-		result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-		result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+        result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Base::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
 
 #ifdef SIMD_SSE2_ENABLE
-		if (Simd::Sse2::Enable)
-		{
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
-		}
+        if (Simd::Sse2::Enable)
+        {
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Sse2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        }
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable)
-		{
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
-		}
+        if (Simd::Avx2::Enable)
+        {
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx2::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        }
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-		{
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
-	}
+        if (Simd::Avx512bw::Enable)
+        {
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Avx512bw::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        }
 #endif
 
 #ifdef SIMD_VSX_ENABLE
-		if (Simd::Vsx::Enable)
-		{
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
-			result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
-		}
+        if (Simd::Vsx::Enable)
+        {
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, true), FUNC_C1(SimdNeuralConvert, true));
+            result = result && NeuralConvertAutoTest(EPS, FUNC_C1(Simd::Vsx::NeuralConvert, false), FUNC_C1(SimdNeuralConvert, false));
+        }
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -133,14 +133,14 @@ namespace Test
         }
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
-	namespace
-	{
+    namespace
+    {
         struct FuncPS
         {
-            typedef void (*FuncPtr)(const float * a, const float * b, size_t size, float * sum);
+            typedef void(*FuncPtr)(const float * a, const float * b, size_t size, float * sum);
 
             FuncPtr func;
             String description;
@@ -153,7 +153,7 @@ namespace Test
                 func((float*)a.data, (float*)b.data, a.width, sum);
             }
         };
-	}
+    }
 #define FUNC_PS(function) FuncPS(function, #function)
 
     bool NeuralProductSumAutoTest(int size, float eps, const FuncPS & f1, const FuncPS & f2)
@@ -197,13 +197,13 @@ namespace Test
         result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Base::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 
 #ifdef SIMD_SSE_ENABLE
-		if (Simd::Sse::Enable)
-			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Sse::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
+        if (Simd::Sse::Enable)
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Sse::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
-		if (Simd::Avx::Enable)
-			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
+        if (Simd::Avx::Enable)
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
@@ -212,13 +212,13 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx512f::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx512f::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
-		if (Simd::Vsx::Enable)
-			result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
+        if (Simd::Vsx::Enable)
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Vsx::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -309,8 +309,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx512f::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx512f::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -394,8 +394,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx512f::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx512f::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -478,8 +478,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx512f::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx512f::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -490,91 +490,91 @@ namespace Test
         return result;
     }
 
-	namespace
-	{
-		struct FuncAF
-		{
-			typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
+    namespace
+    {
+        struct FuncAF
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * slope, float * dst);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncAF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncAF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, float slope, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func((float*)src.data, src.width, &slope, (float*)dst.data);
-			}
-		};
-	}
+            void Call(const View & src, float slope, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dst.data);
+            }
+        };
+    }
 #define FUNC_AF(function) FuncAF(function, #function)
 
-	bool NeuralActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
-	{
-		bool result = true;
+    bool NeuralActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
 
-		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
-		FillRandom32f(src, -10.0f, 10.0f);
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        FillRandom32f(src, -10.0f, 10.0f);
 
-		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
-		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
 
-		result = Compare(dst1, dst2, error, true, 32, relative);
+        result = Compare(dst1, dst2, error, true, 32, relative);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralActivateFunctionAutoTest(float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
-	{
-		bool result = true;
+    bool NeuralActivateFunctionAutoTest(float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
 
-		result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
-		result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
-		result = result && NeuralActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
+        result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
+        result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
+        result = result && NeuralActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralSigmoidAutoTest()
-	{
-		bool result = true;
+    bool NeuralSigmoidAutoTest()
+    {
+        bool result = true;
 
-		result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralRoughSigmoidAutoTest()
-	{
-		bool result = true;
+    bool NeuralRoughSigmoidAutoTest()
+    {
+        bool result = true;
 
-		result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Base::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Base::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 
 #ifdef SIMD_SSE_ENABLE
-		if (Simd::Sse::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Sse::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+        if (Simd::Sse::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Sse::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
-		if (Simd::Avx::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+        if (Simd::Avx::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
-		if (Simd::Vsx::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Vsx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+        if (Simd::Vsx::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Vsx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -582,8 +582,8 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Neon::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     bool NeuralRoughSigmoid2AutoTest()
     {
@@ -607,8 +607,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -645,8 +645,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -674,8 +674,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Avx512f::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Avx512f::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -759,8 +759,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -788,8 +788,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -817,8 +817,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx512f::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx512f::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -909,8 +909,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Avx512f::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Avx512f::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1002,8 +1002,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAdaptiveGradientUpdateAutoTest(EPS, false, FUNC_AGU(Simd::Avx512f::NeuralAdaptiveGradientUpdate), FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAdaptiveGradientUpdateAutoTest(EPS, false, FUNC_AGU(Simd::Avx512f::NeuralAdaptiveGradientUpdate), FUNC_AGU(SimdNeuralAdaptiveGradientUpdate));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1029,7 +1029,7 @@ namespace Test
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/sizeof(float), size.x, size.y, weights, (float*)dstDst.data, dstDst.stride/sizeof(float));
+                func((float*)src.data, src.stride / sizeof(float), size.x, size.y, weights, (float*)dstDst.data, dstDst.stride / sizeof(float));
             }
         };
     }
@@ -1102,8 +1102,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution2x2Forward), FUNC_C2(SimdNeuralAddConvolution2x2Forward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution2x2Forward), FUNC_C2(SimdNeuralAddConvolution2x2Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1137,8 +1137,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution3x3Forward), FUNC_C2(SimdNeuralAddConvolution3x3Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1172,8 +1172,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution4x4Forward), FUNC_C2(SimdNeuralAddConvolution4x4Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1207,8 +1207,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, true, FUNC_C2(Simd::Avx512f::NeuralAddConvolution5x5Forward), FUNC_C2(SimdNeuralAddConvolution5x5Forward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1242,8 +1242,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution2x2Backward), FUNC_C2(SimdNeuralAddConvolution2x2Backward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution2x2Backward), FUNC_C2(SimdNeuralAddConvolution2x2Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1277,8 +1277,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution3x3Backward), FUNC_C2(SimdNeuralAddConvolution3x3Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1312,8 +1312,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution4x4Backward), FUNC_C2(SimdNeuralAddConvolution4x4Backward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution4x4Backward), FUNC_C2(SimdNeuralAddConvolution4x4Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1347,8 +1347,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionAutoTest(EPS, core, false, FUNC_C2(Simd::Avx512f::NeuralAddConvolution5x5Backward), FUNC_C2(SimdNeuralAddConvolution5x5Backward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1446,8 +1446,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1486,8 +1486,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1526,8 +1526,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1566,8 +1566,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Avx512f::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1592,7 +1592,7 @@ namespace Test
             void Call(const View & src, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/sizeof(float), src.width, src.height, (float*)dst.data, dst.stride/sizeof(float));
+                func((float*)src.data, src.stride / sizeof(float), src.width, src.height, (float*)dst.data, dst.stride / sizeof(float));
             }
         };
     }
@@ -1648,8 +1648,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1678,8 +1678,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1708,8 +1708,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -1727,8 +1727,8 @@ namespace Test
     {
         struct FuncCF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
-                const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
+            typedef void(*FuncPtr)(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
                 void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
 
             FuncPtr func;
@@ -1758,12 +1758,12 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(const Vector & src, const Index & srcIndex, const Vector & weight, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation, 
+            void Call(const Vector & src, const Index & srcIndex, const Vector & weight, const Size & kernel, const Size & pad, const Size & stride, const Size & dilation,
                 Vector & buffer, const Vector & dstSrc, Vector & dstDst, const Index & dstIndex, int add) const
             {
                 if (add)
-                    memcpy(dstDst.data(), dstSrc.data(), dstDst.size() *sizeof(float));
-                size_t size = buffer.size()*sizeof(float);
+                    memcpy(dstDst.data(), dstSrc.data(), dstDst.size() * sizeof(float));
+                size_t size = buffer.size() * sizeof(float);
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data(), srcIndex.width, srcIndex.height, srcIndex.depth,
                     weight.data(), kernel.x, kernel.y, pad.x, pad.y, stride.x, stride.y, dilation.x, dilation.y,
@@ -1791,7 +1791,7 @@ namespace Test
         Vector dstSrc(dstIndex.Volume());
         Vector dstDst1(dstIndex.Volume());
         Vector dstDst2(dstIndex.Volume());
-        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y*2 + dstIndex.Area()*2);
+        Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y * 2 + dstIndex.Area() * 2);
 
         FillRandom32f(src, 0, 1);
         FillRandom32f(weight, -1, 1);
@@ -1873,54 +1873,54 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-	bool NeuralConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
-	{
-		bool result = true;
+    bool NeuralConvertDataTest(bool create, int width, int height, float eps, const FuncC1 & f)
+    {
+        bool result = true;
 
-		Data data(f.description);
+        Data data(f.description);
 
-		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(src);
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
 
-		View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
-		View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+        View dst1(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(width*height, 1, View::Float, NULL, TEST_ALIGN(width));
 
-		if (create)
-		{
-			FillRandom(src);
+        if (create)
+        {
+            FillRandom(src);
 
-			TEST_SAVE(src);
+            TEST_SAVE(src);
 
-			f.Call(src, dst1);
+            f.Call(src, dst1);
 
-			TEST_SAVE(dst1);
-		}
-		else
-		{
-			TEST_LOAD(src);
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
 
-			TEST_LOAD(dst1);
+            TEST_LOAD(dst1);
 
-			f.Call(src, dst2);
+            f.Call(src, dst2);
 
-			TEST_SAVE(dst2);
+            TEST_SAVE(dst2);
 
-			result = Compare(dst1, dst2, eps, true);
-		}
+            result = Compare(dst1, dst2, eps, true);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralConvertDataTest(bool create)
-	{
-		bool result = true;
+    bool NeuralConvertDataTest(bool create)
+    {
+        bool result = true;
 
-		result = result && NeuralConvertDataTest(create, DW, DH, EPS, FUNC_C1(SimdNeuralConvert, true));
+        result = result && NeuralConvertDataTest(create, DW, DH, EPS, FUNC_C1(SimdNeuralConvert, true));
 
-		return result;
-	}
+        return result;
+    }
 
     bool NeuralProductSumDataTest(bool create, int size, float eps, const FuncPS & f)
     {
@@ -1935,7 +1935,7 @@ namespace Test
 
         float s1, s2;
 
-        if(create)
+        if (create)
         {
             FillRandom32f(a);
             FillRandom32f(b);
@@ -2126,61 +2126,61 @@ namespace Test
         return result;
     }
 
-	bool NeuralActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncAF & f)
-	{
-		bool result = true;
+    bool NeuralActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncAF & f)
+    {
+        bool result = true;
 
-		Data data(f.description);
+        Data data(f.description);
 
-		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << size << "].");
 
-		View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
-		View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
-		View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
 
-		if (create)
-		{
-			FillRandom32f(src, -10.0f, 10.0f);
+        if (create)
+        {
+            FillRandom32f(src, -10.0f, 10.0f);
 
-			TEST_SAVE(src);
+            TEST_SAVE(src);
 
-			f.Call(src, slope, dst1);
+            f.Call(src, slope, dst1);
 
-			TEST_SAVE(dst1);
-		}
-		else
-		{
-			TEST_LOAD(src);
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
 
-			TEST_LOAD(dst1);
+            TEST_LOAD(dst1);
 
-			f.Call(src, slope, dst2);
+            f.Call(src, slope, dst2);
 
-			TEST_SAVE(dst2);
+            TEST_SAVE(dst2);
 
-			result = Compare(dst1, dst2, error, true, 0, relative);
-		}
+            result = Compare(dst1, dst2, error, true, 0, relative);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralSigmoidDataTest(bool create)
-	{
-		bool result = true;
+    bool NeuralSigmoidDataTest(bool create)
+    {
+        bool result = true;
 
-		result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralSigmoid));
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralSigmoid));
 
-		return result;
-	}
+        return result;
+    }
 
-	bool NeuralRoughSigmoidDataTest(bool create)
-	{
-		bool result = true;
+    bool NeuralRoughSigmoidDataTest(bool create)
+    {
+        bool result = true;
 
-		result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid));
+        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid));
 
-		return result;
-	}
+        return result;
+    }
 
     bool NeuralRoughSigmoid2DataTest(bool create)
     {
@@ -2886,7 +2886,7 @@ namespace Test
             TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Relu, 4 * 4 * 24, 96)));
             if (dropout)
                 TEST_ADD_LAYER(net, (new DropoutLayer(96, 0.9f)));
-            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10))); 
+            TEST_ADD_LAYER(net, (new FullyConnectedLayer(Function::Sigmoid, 96, 10)));
 #elif SIMD_NEURAL_EXPERIMENT_VERSION == 3 // using of convolutional layer with core 2x2 and 4x4.
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(16, 16), 1, 8, Size(4, 4))));
             TEST_ADD_LAYER(net, (new ConvolutionalLayer(Function::Relu, Size(13, 13), 8, 12, Size(2, 2))));
@@ -2935,8 +2935,8 @@ namespace Test
         {
             TEST_LOG_SS(Error, "Can't load Simd::Neural::Network from file '" << path << "'!");
             return false;
-        }        
-        
+        }
+
         TrainSample sample;
         if (!LoadDigits(net, true, sample))
             return false;

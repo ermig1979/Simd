@@ -27,52 +27,52 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func2
-		{
-			typedef void (*FuncPtr)(
-				const uint8_t * uv, size_t uvStride, size_t width, size_t height,
-				 uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
+    namespace
+    {
+        struct Func2
+        {
+            typedef void(*FuncPtr)(
+                const uint8_t * uv, size_t uvStride, size_t width, size_t height,
+                uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & uv, View & u, View & v) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
-			}
-		};
-	}
+            void Call(const View & uv, View & u, View & v) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(uv.data, uv.stride, uv.width, uv.height, u.data, u.stride, v.data, v.stride);
+            }
+        };
+    }
 
 #define FUNC2(function) Func2(function, #function)
 
-	bool DeinterleaveUvAutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
-	{
-		bool result = true;
+    bool DeinterleaveUvAutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
-		FillRandom(uv);
+        View uv(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+        FillRandom(uv);
 
-		View u1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View v1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View u1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View v1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(uv, u1, v1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(uv, u1, v1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(uv, u2, v2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(uv, u2, v2));
 
-		result = result && Compare(u1, u2, 0, true, 32, 0, "u");
-		result = result && Compare(v1, v2, 0, true, 32, 0, "v");
+        result = result && Compare(u1, u2, 0, true, 32, 0, "u");
+        result = result && Compare(v1, v2, 0, true, 32, 0, "v");
 
-		return result;
-	}
+        return result;
+    }
 
     bool DeinterleaveUvAutoTest(const Func2 & f1, const Func2 & f2)
     {
@@ -85,39 +85,39 @@ namespace Test
         return result;
     }
 
-	bool DeinterleaveUvAutoTest()
-	{
-		bool result = true;
+    bool DeinterleaveUvAutoTest()
+    {
+        bool result = true;
 
-		result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+        result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx512bw::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+        if (Simd::Avx512bw::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx512bw::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Vmx::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Neon::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+        if (Simd::Neon::Enable)
+            result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Neon::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
-		return result;
-	}
+        return result;
+    }
 
     namespace
     {
@@ -197,8 +197,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
+        if (Simd::Avx512bw::Enable)
+            result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -290,8 +290,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Avx512bw::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
+        if (Simd::Avx512bw::Enable)
+            result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Avx512bw::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -319,7 +319,7 @@ namespace Test
         View u2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View v2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(uv);
 

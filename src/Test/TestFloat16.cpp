@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncSH
         {
-            typedef void (*FuncPtr)(const float * src, size_t size, uint16_t * dst);
+            typedef void(*FuncPtr)(const float * src, size_t size, uint16_t * dst);
 
             FuncPtr func;
             String description;
@@ -43,7 +43,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func((const float*)src.data, src.width, (uint16_t*)dst.data);
             }
-        };       
+        };
     }
 
 #define FUNC_SH(function) FuncSH(function, #function)
@@ -86,13 +86,13 @@ namespace Test
         result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Base::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Avx2::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Avx512bw::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
+        if (Simd::Avx512bw::Enable)
+            result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Avx512bw::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 #endif 
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
@@ -169,8 +169,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Avx512bw::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
+        if (Simd::Avx512bw::Enable)
+            result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Avx512bw::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
 #endif 
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
@@ -210,7 +210,7 @@ namespace Test
         View a(size, 1, View::Int16, NULL, TEST_ALIGN(size));
         ::SimdFloat32ToFloat16((float*)aOrigin.data, a.width, (uint16_t*)a.data);
 
-		View bOrigin(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View bOrigin(size, 1, View::Float, NULL, TEST_ALIGN(size));
         FillRandom32f(bOrigin, -10.0, 10.0);
         View b(size, 1, View::Int16, NULL, TEST_ALIGN(size));
         ::SimdFloat32ToFloat16((float*)bOrigin.data, b.width, (uint16_t*)b.data);
@@ -250,8 +250,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+        if (Simd::Avx512bw::Enable)
+            result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
 #endif
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
@@ -276,7 +276,7 @@ namespace Test
         View dst1(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        if(create)
+        if (create)
         {
             FillRandom32f(src, -10.0, 10.0);
 

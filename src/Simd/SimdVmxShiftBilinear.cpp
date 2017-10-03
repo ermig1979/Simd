@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -82,29 +82,29 @@ namespace Simd
             LoadBlock(src + dr, s[0][1], s[1][1]);
         }
 
-        void ShiftBilinear(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
+        void ShiftBilinear(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             int fDx, int fDy, uint8_t *dst, size_t dstStride)
         {
-            size_t size = width*channelCount; 
+            size_t size = width*channelCount;
             size_t alignedSize = AlignLo(size, A);
 
-            if(fDy)
+            if (fDy)
             {
-                if(fDx)
+                if (fDx)
                 {
                     v128_u16 k[2][2], s[2][2][2];
-                    k[0][0] = SetU16((Base::FRACTION_RANGE - fDx)*(Base::FRACTION_RANGE - fDy)); 
-                    k[0][1] = SetU16(fDx*(Base::FRACTION_RANGE - fDy)); 
-                    k[1][0] = SetU16((Base::FRACTION_RANGE - fDx)*fDy); 
+                    k[0][0] = SetU16((Base::FRACTION_RANGE - fDx)*(Base::FRACTION_RANGE - fDy));
+                    k[0][1] = SetU16(fDx*(Base::FRACTION_RANGE - fDy));
+                    k[1][0] = SetU16((Base::FRACTION_RANGE - fDx)*fDy);
                     k[1][1] = SetU16(fDx*fDy);
-                    for(size_t row = 0; row < height; ++row)
+                    for (size_t row = 0; row < height; ++row)
                     {
-                        for(size_t col = 0; col < alignedSize; col += A)
+                        for (size_t col = 0; col < alignedSize; col += A)
                         {
                             LoadBlock(src + col, channelCount, srcStride, s);
                             Store<false>(dst + col, Interpolate(s, k));
                         }
-                        if(size != alignedSize)
+                        if (size != alignedSize)
                         {
                             LoadBlock(src + size - A, channelCount, srcStride, s);
                             Store<false>(dst + size - A, Interpolate(s, k));
@@ -116,16 +116,16 @@ namespace Simd
                 else
                 {
                     v128_u16 k[2], s[2][2];
-                    k[0] = SetU16(Base::FRACTION_RANGE - fDy); 
-                    k[1] = SetU16(fDy); 
-                    for(size_t row = 0; row < height; ++row)
+                    k[0] = SetU16(Base::FRACTION_RANGE - fDy);
+                    k[1] = SetU16(fDy);
+                    for (size_t row = 0; row < height; ++row)
                     {
-                        for(size_t col = 0; col < alignedSize; col += A)
+                        for (size_t col = 0; col < alignedSize; col += A)
                         {
                             LoadBlock(src + col, srcStride, s);
                             Store<false>(dst + col, Interpolate(s, k));
                         }
-                        if(size != alignedSize)
+                        if (size != alignedSize)
                         {
                             LoadBlock(src + size - A, srcStride, s);
                             Store<false>(dst + size - A, Interpolate(s, k));
@@ -137,19 +137,19 @@ namespace Simd
             }
             else
             {
-                if(fDx)
+                if (fDx)
                 {
                     v128_u16 k[2], s[2][2];
-                    k[0] = SetU16(Base::FRACTION_RANGE - fDx); 
-                    k[1] = SetU16(fDx); 
-                    for(size_t row = 0; row < height; ++row)
+                    k[0] = SetU16(Base::FRACTION_RANGE - fDx);
+                    k[1] = SetU16(fDx);
+                    for (size_t row = 0; row < height; ++row)
                     {
-                        for(size_t col = 0; col < alignedSize; col += A)
+                        for (size_t col = 0; col < alignedSize; col += A)
                         {
                             LoadBlock(src + col, channelCount, s);
                             Store<false>(dst + col, Interpolate(s, k));
                         }
-                        if(size != alignedSize)
+                        if (size != alignedSize)
                         {
                             LoadBlock(src + size - A, channelCount, s);
                             Store<false>(dst + size - A, Interpolate(s, k));
@@ -160,7 +160,7 @@ namespace Simd
                 }
                 else
                 {
-                    for(size_t row = 0; row < height; ++row)
+                    for (size_t row = 0; row < height; ++row)
                     {
                         memcpy(dst, src, size);
                         src += srcStride;
@@ -171,15 +171,15 @@ namespace Simd
         }
 
         void ShiftBilinear(
-            const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
+            const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
             size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride)
         {
             int fDx, fDy;
-            Base::CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY, 
+            Base::CommonShiftAction(src, srcStride, width, height, channelCount, bkg, bkgStride, shiftX, shiftY,
                 cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
-            if(*shiftX + A < cropRight - cropLeft)
+            if (*shiftX + A < cropRight - cropLeft)
                 Vmx::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
             else
                 Base::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);

@@ -22,9 +22,9 @@
 * SOFTWARE.
 */
 
-/*                                                                                       
-* File name   : SimdCheckCpp.cpp                                                       
-* Description : This file is needed to verify the C++ API of Simd Library.               
+/*
+* File name   : SimdCheckCpp.cpp
+* Description : This file is needed to verify the C++ API of Simd Library.
 */
 
 //#define SIMD_OPENCV_ENABLE
@@ -131,7 +131,7 @@ namespace Test
         TestPyramid();
 
         TestStdVector();
-	}
+    }
 }
 
 

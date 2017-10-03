@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -74,39 +74,39 @@ namespace Simd
             size_t partialAlignedCount = AlignLo(count, 4);
             size_t fullAlignedCount = AlignLo(count, 16);
 
-            for(size_t j = 0; j < length; ++j)
+            for (size_t j = 0; j < length; ++j)
             {
                 size_t i = 0;
                 float v = x[j];
                 v128_f32 _v = SetF32(v);
-                for(; i < fullAlignedCount; i += 16)
+                for (; i < fullAlignedCount; i += 16)
                 {
                     AddMul(svs, _v, i, buffer.sums);
                     AddMul(svs, _v, i + 4, buffer.sums);
                     AddMul(svs, _v, i + 8, buffer.sums);
                     AddMul(svs, _v, i + 12, buffer.sums);
                 }
-                for(; i < partialAlignedCount; i += 4)
+                for (; i < partialAlignedCount; i += 4)
                     AddMul(svs, _v, i, buffer.sums);
-                for(; i < count; ++i)
+                for (; i < count; ++i)
                     buffer.sums[i] += v*svs[i];
                 svs += count;
             }
 
             size_t i = 0;
             v128_f32 _sum = K_0_0f;
-            for(; i < fullAlignedCount; i += 16)
+            for (; i < fullAlignedCount; i += 16)
             {
                 AddMul(buffer.sums, weights, i, _sum);
                 AddMul(buffer.sums, weights, i + 4, _sum);
                 AddMul(buffer.sums, weights, i + 8, _sum);
                 AddMul(buffer.sums, weights, i + 12, _sum);
             }
-            for(; i < partialAlignedCount; i += 4)
+            for (; i < partialAlignedCount; i += 4)
                 AddMul(buffer.sums, weights, i, _sum);
             *sum = ExtractSum(_sum);
-            for(; i < count; ++i)
-                *sum += buffer.sums[i]*weights[i];
+            for (; i < count; ++i)
+                *sum += buffer.sums[i] * weights[i];
         }
     }
 #endif// SIMD_VSX_ENABLE

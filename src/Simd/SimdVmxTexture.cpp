@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -37,14 +37,14 @@ namespace Simd
             return vec_mladd(vec_max((v128_s16)K16_0000, vec_add(saturation, vec_min(vec_sub(b, a), saturation))), boost, (v128_s16)K16_0000);
         }
 
-        SIMD_INLINE v128_u8 TextureBoostedSaturatedGradient8(v128_u8 a, v128_u8 b, const v128_s16 & saturation, const v128_s16 & boost) 
+        SIMD_INLINE v128_u8 TextureBoostedSaturatedGradient8(v128_u8 a, v128_u8 b, const v128_s16 & saturation, const v128_s16 & boost)
         {
             v128_s16 lo = TextureBoostedSaturatedGradient16((v128_s16)UnpackLoU8(a), (v128_s16)UnpackLoU8(b), saturation, boost);
             v128_s16 hi = TextureBoostedSaturatedGradient16((v128_s16)UnpackHiU8(a), (v128_s16)UnpackHiU8(b), saturation, boost);
             return vec_packsu(lo, hi);
         }
 
-        template<bool align, bool first> 
+        template<bool align, bool first>
         SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, size_t stride, const v128_s16 & saturation, const v128_s16 & boost,
             Storer<align> & dx, Storer<align> & dy)
         {
@@ -52,7 +52,7 @@ namespace Simd
             Store<align, first>(dy, TextureBoostedSaturatedGradient8(Load<align>(src - stride), Load<align>(src + stride), saturation, boost));
         }
 
-        template<bool align> 
+        template<bool align>
         SIMD_INLINE void TextureBoostedSaturatedGradient(const uint8_t * src, size_t stride, const v128_s16 & saturation, const v128_s16 & boost,
             uint8_t * dx, uint8_t * dy, size_t offset)
         {
@@ -61,11 +61,11 @@ namespace Simd
             Store<align>(dy + offset, TextureBoostedSaturatedGradient8(Load<align>(s - stride), Load<align>(s + stride), saturation, boost));
         }
 
-        template<bool align> void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        template<bool align> void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
         {
             assert(width >= A && int(2)*saturation*boost <= 0xFF);
-            if(align)
+            if (align)
             {
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride));
             }
@@ -82,7 +82,7 @@ namespace Simd
             dy += dyStride;
             for (size_t row = 2; row < height; ++row)
             {
-                if(align)
+                if (align)
                 {
                     size_t col = 0;
                     for (; col < fullAlignedWidth; col += DA)
@@ -101,7 +101,7 @@ namespace Simd
                         TextureBoostedSaturatedGradient<align, false>(src + col, srcStride, _saturation, _boost, _dx, _dy);
                     Flush(_dx, _dy);
                 }
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                     TextureBoostedSaturatedGradient<false>(src, srcStride, _saturation, _boost, dx, dy, width - A);
 
                 dx[0] = 0;
@@ -117,16 +117,16 @@ namespace Simd
             memset(dy, 0, width);
         }
 
-        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
         {
-            if(Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dx) && Aligned(dxStride) && Aligned(dy) && Aligned(dyStride))
                 TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
             else
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
 
-        template<bool align, bool first> 
+        template<bool align, bool first>
         SIMD_INLINE void TextureBoostedUv(const uint8_t * src, const v128_u8 & min, const v128_u8 & max, const v128_u16 & boost, Storer<align> & dst)
         {
             const v128_u8 _src = Load<align>(src);
@@ -136,15 +136,15 @@ namespace Simd
             Store<align, first>(dst, vec_packsu(lo, hi));
         }
 
-        template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        template<bool align> void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t boost, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A && boost < 0x80);
-            if(align)
+            if (align)
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width, A);
-            int min = 128 - (128/boost);
+            int min = 128 - (128 / boost);
             int max = 255 - min;
 
             v128_u8 _min = SetU8(min);
@@ -159,7 +159,7 @@ namespace Simd
                     TextureBoostedUv<align, false>(src + col, _min, _max, _boost, _dst);
                 Flush(_dst);
 
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     Storer<false> _dst(dst + width - A);
                     TextureBoostedUv<false, true>(src + width - A, _min, _max, _boost, _dst);
@@ -171,16 +171,16 @@ namespace Simd
             }
         }
 
-        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t boost, uint8_t * dst, size_t dstStride)
         {
-            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
             else
                 TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
         }
 
-        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi, 
+        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t * src, const uint8_t * lo, const uint8_t * hi,
             v128_u32 & positive, v128_u32 & negative, const v128_u8 & mask)
         {
             const v128_u8 _src = Load<align>(src);
@@ -192,11 +192,11 @@ namespace Simd
             negative = vec_msum(vec_subs(average, current), K8_01, negative);
         }
 
-        template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        template <bool align> void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
             assert(width >= A && sum != NULL);
-            if(align)
+            if (align)
             {
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
             }
@@ -211,7 +211,7 @@ namespace Simd
 
                 for (size_t col = 0; col < alignedWidth; col += A)
                     TextureGetDifferenceSum<align>(src + col, lo + col, hi + col, positive, negative, K8_FF);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                     TextureGetDifferenceSum<false>(src + width - A, lo + width - A, hi + width - A, positive, negative, tailMask);
 
                 *sum += ExtractSum(positive);
@@ -223,27 +223,27 @@ namespace Simd
             }
         }
 
-        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum)
         {
-            if(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+            if (Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
                 TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
             else
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
         }
 
-        template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        template <bool align> void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             int shift, uint8_t * dst, size_t dstStride)
         {
             assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
-            if(align)
+            if (align)
             {
                 assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
             }
 
             size_t alignedWidth = AlignLo(width, A);
             v128_u8 tailMask = src == dst ? ShiftLeft(K8_FF, A - width + alignedWidth) : K8_FF;
-            if(shift > 0)
+            if (shift > 0)
             {
                 v128_u8 _shift = SetU8(shift);
                 for (size_t row = 0; row < height; ++row)
@@ -253,7 +253,7 @@ namespace Simd
                     for (size_t col = A; col < alignedWidth; col += A)
                         _dst.Next(vec_adds(Load<align>(src + col), _shift));
                     Flush(_dst);
-                    if(width != alignedWidth)
+                    if (width != alignedWidth)
                     {
                         const v128_u8 _src = Load<false>(src + width - A);
                         Store<false>(dst + width - A, vec_adds(_src, vec_and(_shift, tailMask)));
@@ -262,7 +262,7 @@ namespace Simd
                     dst += dstStride;
                 }
             }
-            if(shift < 0)
+            if (shift < 0)
             {
                 v128_u8 _shift = SetU8(-shift);
                 for (size_t row = 0; row < height; ++row)
@@ -272,7 +272,7 @@ namespace Simd
                     for (size_t col = A; col < alignedWidth; col += A)
                         _dst.Next(vec_subs(Load<align>(src + col), _shift));
                     Flush(_dst);
-                    if(width != alignedWidth)
+                    if (width != alignedWidth)
                     {
                         const v128_u8 _src = Load<false>(src + width - A);
                         Store<false>(dst + width - A, vec_subs(_src, vec_and(_shift, tailMask)));
@@ -283,16 +283,16 @@ namespace Simd
             }
         }
 
-        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             int shift, uint8_t * dst, size_t dstStride)
         {
-            if(shift == 0)
+            if (shift == 0)
             {
-                if(src != dst)
+                if (src != dst)
                     Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
                 return;
             }
-            if(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
                 TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
             else
                 TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);

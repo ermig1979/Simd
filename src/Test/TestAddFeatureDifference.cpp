@@ -27,64 +27,64 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-            typedef void (*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+    namespace
+    {
+        struct Func
+        {
+            typedef void(*FuncPtr)(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                 const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
                 uint16_t weight, uint8_t * difference, size_t differenceStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & value, const View & lo, const View & hi, uint16_t weight, const View & differenceSrc, View & differenceDst) const
-			{
-				Simd::Copy(differenceSrc, differenceDst);
-				TEST_PERFORMANCE_TEST(description);
-				func(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride,
+            void Call(const View & value, const View & lo, const View & hi, uint16_t weight, const View & differenceSrc, View & differenceDst) const
+            {
+                Simd::Copy(differenceSrc, differenceDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(value.data, value.stride, value.width, value.height, lo.data, lo.stride, hi.data, hi.stride,
                     weight, differenceDst.data, differenceDst.stride);
-			}
-		};
-	}
+            }
+        };
+    }
 
 #define FUNC(function) Func(function, std::string(#function))
 
-	bool AddFeatureDifferenceAutoTest(int width, int height, uint16_t weight, const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool AddFeatureDifferenceAutoTest(int width, int height, uint16_t weight, const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << weight/256 << "*256).");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << weight / 256 << "*256).");
 
-		View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(value);
-		View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(lo);
-		View hi(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(hi);
+        View value(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(value);
+        View lo(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(lo);
+        View hi(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(hi);
         View differenceSrc(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(differenceSrc);
 
-		View differenceDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View differenceDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View differenceDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View differenceDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(value, lo, hi, weight, differenceSrc, differenceDst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(value, lo, hi, weight, differenceSrc, differenceDst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, lo, hi, weight, differenceSrc, differenceDst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(value, lo, hi, weight, differenceSrc, differenceDst2));
 
-		result = result && Compare(differenceDst1, differenceDst2, 0, true, 32, 0);
+        result = result && Compare(differenceDst1, differenceDst2, 0, true, 32, 0);
 
-		return result;
-	}
+        return result;
+    }
 
     bool AddFeatureDifferenceAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
-        const uint16_t delta = 256*7;
-        for(uint16_t weight = 0; weight < 4 && result; ++weight)
+        const uint16_t delta = 256 * 7;
+        for (uint16_t weight = 0; weight < 4 && result; ++weight)
         {
             result = result &&  AddFeatureDifferenceAutoTest(W, H, weight*delta, f1, f2);
             result = result &&  AddFeatureDifferenceAutoTest(W + O, H - O, weight*delta, f1, f2);
@@ -101,28 +101,28 @@ namespace Test
         result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Sse2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx512bw::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        if (Simd::Avx512bw::Enable)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx512bw::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Vmx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Neon::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+        if (Simd::Neon::Enable)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Neon::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
         return result;
@@ -146,9 +146,9 @@ namespace Test
         View differenceDst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View differenceDst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const uint16_t weight = 256*7;
+        const uint16_t weight = 256 * 7;
 
-        if(create)
+        if (create)
         {
             FillRandom(value);
             FillRandom(lo);

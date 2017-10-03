@@ -27,11 +27,11 @@
 
 namespace Test
 {
-	namespace
-	{
+    namespace
+    {
         struct FuncH
         {
-            typedef void (*FuncPtr)(
+            typedef void(*FuncPtr)(
                 const uint8_t *src, size_t width, size_t height, size_t stride, uint32_t * histogram);
 
             FuncPtr func;
@@ -44,11 +44,11 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.width, src.height, src.stride, histogram);
             }
-        };       
-        
+        };
+
         struct FuncHM
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 const uint8_t * mask, size_t maskStride, uint8_t index, uint32_t * histogram);
 
             FuncPtr func;
@@ -64,25 +64,25 @@ namespace Test
         };
 
 
-		struct FuncASDH
-		{
-			typedef void (*FuncPtr)(
-				const uint8_t *src, size_t width, size_t height, size_t stride,
-				size_t step, size_t indent, uint32_t * histogram);
+        struct FuncASDH
+        {
+            typedef void(*FuncPtr)(
+                const uint8_t *src, size_t width, size_t height, size_t stride,
+                size_t step, size_t indent, uint32_t * histogram);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncASDH(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncASDH(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, size_t step, size_t indent, uint32_t * histogram) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.width, src.height, src.stride,
-					step, indent, histogram);
-			}
-		};
-	}
+            void Call(const View & src, size_t step, size_t indent, uint32_t * histogram) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.width, src.height, src.stride,
+                    step, indent, histogram);
+            }
+        };
+    }
 
 #define FUNC_H(function) FuncH(function, #function)
 
@@ -99,7 +99,7 @@ namespace Test
         View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        Histogram h1 = {0}, h2 = {0};
+        Histogram h1 = { 0 }, h2 = { 0 };
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1));
 
@@ -143,7 +143,7 @@ namespace Test
         FillRandom(s);
         FillRandomMask(m, index);
 
-        Histogram h1 = {0}, h2 = {0};
+        Histogram h1 = { 0 }, h2 = { 0 };
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, m, index, h1));
 
@@ -172,22 +172,22 @@ namespace Test
         result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Base::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Sse2::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Avx2::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Avx512bw::HistogramMasked), FUNC_HM(SimdHistogramMasked));
+        if (Simd::Avx512bw::Enable)
+            result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Avx512bw::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Vmx::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
@@ -199,25 +199,25 @@ namespace Test
         return result;
     }
 
-	bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, const FuncASDH & f1, const FuncASDH & f2)
-	{
-		bool result = true;
+    bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, const FuncASDH & f1, const FuncASDH & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << step << ", " << indent << ").");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << step << ", " << indent << ").");
 
-		View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(s);
+        View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(s);
 
-		Histogram h1 = {0}, h2 = {0};
+        Histogram h1 = { 0 }, h2 = { 0 };
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, step, indent, h1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, step, indent, h1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, step, indent, h2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, step, indent, h2));
 
-		result = result && Compare(h1, h2, 0, true, 32);
+        result = result && Compare(h1, h2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
     bool AbsSecondDerivativeHistogramAutoTest(const FuncASDH & f1, const FuncASDH & f2)
     {
@@ -231,29 +231,29 @@ namespace Test
         return result;
     }
 
-	bool AbsSecondDerivativeHistogramAutoTest()
-	{
-		bool result = true;
+    bool AbsSecondDerivativeHistogramAutoTest()
+    {
+        bool result = true;
 
-		result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Base::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+        result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Base::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx512bw::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+        if (Simd::Avx512bw::Enable)
+            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx512bw::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Vmx::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
@@ -262,8 +262,8 @@ namespace Test
             result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Neon::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
-		return result;
-	}
+        return result;
+    }
 
     namespace
     {
@@ -348,8 +348,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Avx512bw::HistogramConditional), FUNC_HC(SimdHistogramConditional));
+        if (Simd::Avx512bw::Enable)
+            result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Avx512bw::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -374,7 +374,7 @@ namespace Test
 
         Histogram h1, h2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -423,7 +423,7 @@ namespace Test
         const uint8_t index = 77;
         Histogram h1, h2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
             FillRandomMask(mask, index);
@@ -474,7 +474,7 @@ namespace Test
         size_t step = 1, indent = 16;
         Histogram h1, h2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

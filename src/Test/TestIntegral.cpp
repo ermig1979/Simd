@@ -27,11 +27,11 @@
 
 namespace Test
 {
-	namespace
-	{
+    namespace
+    {
         struct Func
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 uint8_t * sum, size_t sumStride, uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride,
                 SimdPixelFormatType sumFormat, SimdPixelFormatType sqsumFormat);
 
@@ -43,11 +43,11 @@ namespace Test
             void Call(const View & src, View & sum, View & sqsum, View & tilted) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, sum.data, sum.stride, sqsum.data, sqsum.stride, tilted.data, tilted.stride, 
+                func(src.data, src.stride, src.width, src.height, sum.data, sum.stride, sqsum.data, sqsum.stride, tilted.data, tilted.stride,
                     (SimdPixelFormatType)sum.format, (SimdPixelFormatType)sqsum.format);
             }
         };
-	}
+    }
 
 #define FUNC(function) Func(function, #function)
 
@@ -64,12 +64,12 @@ namespace Test
         View sum1(width + 1, height + 1, sumFormat, NULL, TEST_ALIGN(width));
         View sum2(width + 1, height + 1, sumFormat, NULL, TEST_ALIGN(width));
         View sqsum1, sqsum2, tilted1, tilted2;
-        if(sqsumEnable)
+        if (sqsumEnable)
         {
             sqsum1.Recreate(width + 1, height + 1, sqsumFormat, NULL, TEST_ALIGN(width));
             sqsum2.Recreate(width + 1, height + 1, sqsumFormat, NULL, TEST_ALIGN(width));
         }
-        if(tiltedEnable)
+        if (tiltedEnable)
         {
             tilted1.Recreate(width + 1, height + 1, sumFormat, NULL, TEST_ALIGN(width));
             tilted2.Recreate(width + 1, height + 1, sumFormat, NULL, TEST_ALIGN(width));
@@ -80,9 +80,9 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, sum2, sqsum2, tilted2));
 
         result = result && Compare(sum1, sum2, 0, true, 32, 0, "sum");
-        if(sqsumEnable)
+        if (sqsumEnable)
             result = result && Compare(sqsum1, sqsum2, 0, true, 32, 0, "sqsum");
-        if(tiltedEnable)
+        if (tiltedEnable)
             result = result && Compare(tilted1, tilted2, 0, true, 32, 0, "tilted");
 
         return result;
@@ -92,9 +92,9 @@ namespace Test
     {
         bool result = true;
 
-        for(int sqsumEnable = 0; sqsumEnable <= 1; ++sqsumEnable)
+        for (int sqsumEnable = 0; sqsumEnable <= 1; ++sqsumEnable)
         {
-            for(int tiltedEnable = 0; tiltedEnable <= 1; ++tiltedEnable)
+            for (int tiltedEnable = 0; tiltedEnable <= 1; ++tiltedEnable)
             {
                 std::stringstream ss;
                 ss << ColorDescription(sumFormat) + ColorDescription(sqsumFormat);
@@ -128,13 +128,13 @@ namespace Test
         result = result && IntegralAutoTest(FUNC(Simd::Base::Integral), FUNC(SimdIntegral));
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable)
-			result = result && IntegralAutoTest(FUNC(Simd::Avx2::Integral), FUNC(SimdIntegral));
+        if (Simd::Avx2::Enable)
+            result = result && IntegralAutoTest(FUNC(Simd::Avx2::Integral), FUNC(SimdIntegral));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && IntegralAutoTest(FUNC(Simd::Avx512bw::Integral), FUNC(SimdIntegral));
+        if (Simd::Avx512bw::Enable)
+            result = result && IntegralAutoTest(FUNC(Simd::Avx512bw::Integral), FUNC(SimdIntegral));
 #endif
 
         return result;
@@ -159,7 +159,7 @@ namespace Test
         View tilted1(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
         View tilted2(width + 1, height + 1, View::Int32, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

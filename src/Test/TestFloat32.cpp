@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncFB
         {
-            typedef void (*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
             FuncPtr func;
             String description;
@@ -43,7 +43,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func((const float*)src.data, src.width, &lower, &upper, dst.data);
             }
-        };       
+        };
     }
 
 #define FUNC_FB(function) FuncFB(function, #function)
@@ -97,8 +97,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Avx512bw::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
+        if (Simd::Avx512bw::Enable)
+            result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Avx512bw::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -179,8 +179,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Avx512bw::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
+        if (Simd::Avx512bw::Enable)
+            result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Avx512bw::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -207,7 +207,7 @@ namespace Test
 
         const float lower = -0.10, upper = 0.10;
 
-        if(create)
+        if (create)
         {
             FillRandom32f(src, -0.11, 0.11);
 

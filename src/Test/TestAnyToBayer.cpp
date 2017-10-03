@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -27,23 +27,23 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-			typedef void(*FuncPtr)(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
-			FuncPtr func;
-			String description;
+    namespace
+    {
+        struct Func
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
+            FuncPtr func;
+            String description;
 
-			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride, (SimdPixelFormatType)dst.format);
-			}
-		};	
-	}
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.width, src.height, src.stride, dst.data, dst.stride, (SimdPixelFormatType)dst.format);
+            }
+        };
+    }
 
 #define FUNC(func) Func(func, #func)
 
@@ -72,7 +72,7 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
+        for (View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
         {
             result = result && AnyToBayerAutoTest(W, H, srcType, dstType, f1, f2);
             result = result && AnyToBayerAutoTest(W + E, H - E, srcType, dstType, f1, f2);
@@ -89,17 +89,17 @@ namespace Test
         result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBayer), FUNC(SimdBgrToBayer));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBayer), FUNC(SimdBgrToBayer));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
@@ -108,7 +108,7 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif
 
-        return result;    
+        return result;
     }
 
     bool BgraToBayerAutoTest()
@@ -118,17 +118,17 @@ namespace Test
         result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
 
 #ifdef SIMD_SSSE3_ENABLE
-		if (Simd::Ssse3::Enable)
-			result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
+        if (Simd::Ssse3::Enable)
+            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if(Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Avx512bw::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Vmx::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
 
@@ -137,7 +137,7 @@ namespace Test
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Neon::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
 
-        return result;    
+        return result;
     }
 
     //-----------------------------------------------------------------------
@@ -155,7 +155,7 @@ namespace Test
         View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
         View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -186,7 +186,7 @@ namespace Test
         bool result = true;
 
         Func f = FUNC(SimdBgrToBayer);
-        for(View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
+        for (View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
         {
             Func fc = Func(f.func, f.description + Data::Description(dstType));
             result = result && AnyToBayerDataTest(create, DW, DH, View::Bgr24, dstType, fc);
@@ -200,7 +200,7 @@ namespace Test
         bool result = true;
 
         Func f = FUNC(SimdBgraToBayer);
-        for(View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
+        for (View::Format dstType = View::BayerGrbg; dstType <= View::BayerBggr; dstType = View::Format(dstType + 1))
         {
             Func fc = Func(f.func, f.description + Data::Description(dstType));
             result = result && AnyToBayerDataTest(create, DW, DH, View::Bgra32, dstType, fc);

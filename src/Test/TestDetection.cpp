@@ -108,11 +108,11 @@ namespace Test
             }
         }
         String path = desc;
-		for (size_t i = 0; i < path.size(); ++i)
-		{
-			if (path[i] == ':')
-				path[i] = '_';
-		}
+        for (size_t i = 0; i < path.size(); ++i)
+        {
+            if (path[i] == ':')
+                path[i] = '_';
+        }
         size_t s = path.length();
         if (path[s - 1] == '>')
         {
@@ -173,7 +173,7 @@ namespace Test
         size_t w, h;
         SimdDetectionInfoFlags flags;
         SimdDetectionInfo(data, &w, &h, &flags);
-        Rect rect(width/9, height/11, width - w, height - h);
+        Rect rect(width / 9, height / 11, width - w, height - h);
 
         View mask(width, height, View::Gray8);
         Simd::Fill(mask, 0);
@@ -203,7 +203,7 @@ namespace Test
         SimdDetectionFree(hid);
 
         //Annotate(src, dst1, w, h, f1.description);
-		//Annotate(src, dst2, w, h, f2.description);
+        //Annotate(src, dst2, w, h, f2.description);
 
         return result;
     }
@@ -259,8 +259,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(0, 0, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fp), FUNC_D(SimdDetectionHaarDetect32fp));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -288,8 +288,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(0, 1, 0, FUNC_D(Simd::Avx512bw::DetectionHaarDetect32fi), FUNC_D(SimdDetectionHaarDetect32fi));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -317,8 +317,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fp), FUNC_D(SimdDetectionLbpDetect32fp));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -346,8 +346,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 0, FUNC_D(Simd::Avx512bw::DetectionLbpDetect32fi), FUNC_D(SimdDetectionLbpDetect32fi));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -375,8 +375,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(1, 0, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ip), FUNC_D(SimdDetectionLbpDetect16ip));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -404,8 +404,8 @@ namespace Test
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
+        if (Simd::Avx512bw::Enable)
+            result = result && DetectionDetectAutoTest(1, 1, 1, FUNC_D(Simd::Avx512bw::DetectionLbpDetect16ii), FUNC_D(SimdDetectionLbpDetect16ii));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -558,7 +558,7 @@ namespace Test
 
         View roi(src.Size(), View::Gray8);
         Simd::Fill(roi, 255);
-        Simd::Fill(roi.Region(Size(W, H)/2, View::MiddleCenter).Ref(), 0);
+        Simd::Fill(roi.Region(Size(W, H) / 2, View::MiddleCenter).Ref(), 0);
 
         double time = GetTime();
         detection.Init(src.Size(), 1.1, Size(), Size(INT_MAX, INT_MAX), roi, threadNumber);
@@ -591,7 +591,7 @@ namespace Test
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_0.xml", 0);
         detection.Load(ROOT_PATH + "/data/cascade/haar_face_1.xml", 1);
         detection.Load(ROOT_PATH + "/data/cascade/lbp_face.xml", 2);
-        TEST_LOG_SS(Info, "Load: " << (GetTime() - time)*1000 << " ms " << std::endl);
+        TEST_LOG_SS(Info, "Load: " << (GetTime() - time) * 1000 << " ms " << std::endl);
 
         Objects os, om;
 
@@ -619,7 +619,7 @@ namespace Test
             TEST_LOG_SS(Error, "Detection single thread: ");
             for (size_t i = 0; i < os.size(); ++i)
             {
-                TEST_LOG_SS(Error, "(" << os[i].rect.left << ", " << os[i].rect.top << ", " 
+                TEST_LOG_SS(Error, "(" << os[i].rect.left << ", " << os[i].rect.top << ", "
                     << os[i].rect.right << ", " << os[i].rect.bottom << ") - " << os[i].weight);
             }
 

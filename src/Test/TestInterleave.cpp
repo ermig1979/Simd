@@ -27,49 +27,49 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func2
-		{
-			typedef void (*FuncPtr)(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
-				size_t width, size_t height, uint8_t * uv, size_t uvStride);
+    namespace
+    {
+        struct Func2
+        {
+            typedef void(*FuncPtr)(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+                size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & u, const View & v, View & uv) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(u.data, u.stride, v.data, v.stride, u.width, u.height, uv.data, uv.stride);
-			}
-		};
-	}
+            void Call(const View & u, const View & v, View & uv) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(u.data, u.stride, v.data, v.stride, u.width, u.height, uv.data, uv.stride);
+            }
+        };
+    }
 #define FUNC2(function) Func2(function, #function)
 
-	bool InterleaveUvAutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
-	{
-		bool result = true;
+    bool InterleaveUvAutoTest(int width, int height, const Func2 & f1, const Func2 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View u(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(u);
-		View v(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(v);
+        View u(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(u);
+        View v(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(v);
 
-		View uv1(width, height, View::Uv16, NULL, TEST_ALIGN(width));
-		View uv2(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+        View uv1(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+        View uv2(width, height, View::Uv16, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(u, v, uv1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(u, v, uv1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(u, v, uv2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(u, v, uv2));
 
-		result = result && Compare(uv1, uv2, 0, true, 32);
+        result = result && Compare(uv1, uv2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
     bool InterleaveUvAutoTest(const Func2 & f1, const Func2 & f2)
     {
@@ -82,45 +82,45 @@ namespace Test
         return result;
     }
 
-	bool InterleaveUvAutoTest()
-	{
-		bool result = true;
+    bool InterleaveUvAutoTest()
+    {
+        bool result = true;
 
-		result = result && InterleaveUvAutoTest(FUNC2(Simd::Base::InterleaveUv), FUNC2(SimdInterleaveUv));
+        result = result && InterleaveUvAutoTest(FUNC2(Simd::Base::InterleaveUv), FUNC2(SimdInterleaveUv));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Sse2::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Avx2::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterleaveUvAutoTest(FUNC2(Simd::Avx512bw::InterleaveUv), FUNC2(SimdInterleaveUv));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterleaveUvAutoTest(FUNC2(Simd::Avx512bw::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && InterleaveUvAutoTest(FUNC2(Simd::Vmx::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && InterleaveUvAutoTest(FUNC2(Simd::Neon::InterleaveUv), FUNC2(SimdInterleaveUv));
+        if (Simd::Neon::Enable)
+            result = result && InterleaveUvAutoTest(FUNC2(Simd::Neon::InterleaveUv), FUNC2(SimdInterleaveUv));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     namespace
     {
         struct Func3
         {
-            typedef void(*FuncPtr)(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, 
+            typedef void(*FuncPtr)(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride,
                 size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
             FuncPtr func;
@@ -190,8 +190,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::InterleaveBgr), FUNC3(SimdInterleaveBgr));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Avx512bw::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -278,8 +278,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterleaveBgraAutoTest(FUNC4(Simd::Avx512bw::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Avx512bw::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -300,19 +300,19 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
-		View u(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View v(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View u(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View v(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		View uv1(width, height, View::Uv16, NULL, TEST_ALIGN(width));
-		View uv2(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+        View uv1(width, height, View::Uv16, NULL, TEST_ALIGN(width));
+        View uv2(width, height, View::Uv16, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(u);
-			FillRandom(v);
+            FillRandom(v);
 
             TEST_SAVE(u);
-			TEST_SAVE(v);
+            TEST_SAVE(v);
 
             f.Call(u, v, uv1);
 
@@ -323,7 +323,7 @@ namespace Test
             TEST_LOAD(u);
             TEST_LOAD(v);
 
-			TEST_LOAD(uv1);
+            TEST_LOAD(uv1);
 
             f.Call(u, v, uv2);
 

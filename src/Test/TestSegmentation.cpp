@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -27,25 +27,25 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct FuncSR
-		{
-			typedef void(*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+    namespace
+    {
+        struct FuncSR
+        {
+            typedef void(*FuncPtr)(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncSR(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncSR(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, uint8_t index, const Rect & srcRect, Rect & dstRect) const
-			{
+            void Call(const View & src, uint8_t index, const Rect & srcRect, Rect & dstRect) const
+            {
                 dstRect = srcRect;
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, index, &dstRect.left, &dstRect.top, &dstRect.right, &dstRect.bottom);
-			}
-		};	
-	}
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, index, &dstRect.left, &dstRect.top, &dstRect.right, &dstRect.bottom);
+            }
+        };
+    }
 
 #define FUNC_SR(func) FuncSR(func, #func)
 
@@ -58,7 +58,7 @@ namespace Test
         const uint8_t index = 3;
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         Rect rs1(s.Size()), rs2(s.Size()), rd1, rd2;
-        FillRhombMask(s, Rect(width*1/15, height*2/15, width*11/15, height*12/15), index);
+        FillRhombMask(s, Rect(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15), index);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, index, rs1, rd1));
 
@@ -77,7 +77,7 @@ namespace Test
         result = result && SegmentationShrinkRegionAutoTest(W + O, H - O, f1, f2);
         result = result && SegmentationShrinkRegionAutoTest(W - O, H + O, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool SegmentationShrinkRegionAutoTest()
@@ -87,22 +87,22 @@ namespace Test
         result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Base::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 
 #ifdef SIMD_SSE41_ENABLE
-        if(Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable)
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Sse41::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx2::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx512bw::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
+        if (Simd::Avx512bw::Enable)
+            result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Avx512bw::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Vmx::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
@@ -111,7 +111,7 @@ namespace Test
             result = result && SegmentationShrinkRegionAutoTest(FUNC_SR(Simd::Neon::SegmentationShrinkRegion), FUNC_SR(SimdSegmentationShrinkRegion));
 #endif
 
-        return result;    
+        return result;
     }
 
     namespace
@@ -130,7 +130,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(dst.data, dst.stride, dst.width, dst.height, index);
             }
-        };	
+        };
     }
 
 #define FUNC_FSH(func) FuncFSH(func, #func)
@@ -164,7 +164,7 @@ namespace Test
         result = result && SegmentationFillSingleHolesAutoTest(W + O, H - O, f1, f2);
         result = result && SegmentationFillSingleHolesAutoTest(W - O, H + O, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool SegmentationFillSingleHolesAutoTest()
@@ -174,31 +174,31 @@ namespace Test
         result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Base::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sse2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx512bw::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+        if (Simd::Avx512bw::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Avx512bw::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Vmx::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Neon::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+        if (Simd::Neon::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Neon::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
-        return result;    
+        return result;
     }
 
     namespace
@@ -217,7 +217,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(dst.data, dst.stride, dst.width, dst.height, oldIndex, newIndex);
             }
-        };	
+        };
     }
 
 #define FUNC_CI(func) FuncCI(func, #func)
@@ -251,7 +251,7 @@ namespace Test
         result = result && SegmentationChangeIndexAutoTest(W + O, H - O, f1, f2);
         result = result && SegmentationChangeIndexAutoTest(W - O, H + O, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool SegmentationChangeIndexAutoTest()
@@ -261,54 +261,54 @@ namespace Test
         result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sse2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx512bw::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+        if (Simd::Avx512bw::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Avx512bw::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Vmx::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Neon::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+        if (Simd::Neon::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Neon::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
-        return result;    
+        return result;
     }
 
     namespace
     {
         struct FuncP
         {
-            typedef void(*FuncPtr)(const uint8_t * parent, size_t parentStride, size_t width, size_t height, 
-                uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride, 
+            typedef void(*FuncPtr)(const uint8_t * parent, size_t parentStride, size_t width, size_t height,
+                uint8_t * child, size_t childStride, const uint8_t * difference, size_t differenceStride,
                 uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold);
             FuncPtr func;
             String description;
 
             FuncP(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & parrent, const View & childSrc, View & childDst, const View & difference, 
+            void Call(const View & parrent, const View & childSrc, View & childDst, const View & difference,
                 uint8_t currentIndex, uint8_t invalidIndex, uint8_t emptyIndex, uint8_t differenceThreshold) const
             {
                 Simd::Copy(childSrc, childDst);
                 TEST_PERFORMANCE_TEST(description);
-                func(parrent.data, parrent.stride, parrent.width, parrent.height, childDst.data, childDst.stride, 
+                func(parrent.data, parrent.stride, parrent.width, parrent.height, childDst.data, childDst.stride,
                     difference.data, difference.stride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
             }
-        };	
+        };
     }
 
 #define FUNC_P(func) FuncP(func, #func)
@@ -321,10 +321,10 @@ namespace Test
 
         const uint8_t currentIndex = 3, invalidIndex = 2, emptyIndex = 0, differenceThreshold = 128;
         View parent(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childSrc(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View difference(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childDst1(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childDst2(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childSrc(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View difference(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst1(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst2(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandomMask(parent, currentIndex);
         FillRandom(childSrc, 0, currentIndex - 1);
         FillRandom(difference);
@@ -346,7 +346,7 @@ namespace Test
         result = result && SegmentationPropagate2x2AutoTest(W + O, H - O, f1, f2);
         result = result && SegmentationPropagate2x2AutoTest(W - O, H + O, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool SegmentationPropagate2x2AutoTest()
@@ -356,31 +356,31 @@ namespace Test
         result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Base::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sse2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx512bw::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+        if (Simd::Avx512bw::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Avx512bw::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Vmx::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Neon::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+        if (Simd::Neon::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Neon::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
-        return result;    
+        return result;
     }
 
     //-----------------------------------------------------------------------
@@ -398,9 +398,9 @@ namespace Test
 
         const uint8_t index = 3;
 
-        if(create)
+        if (create)
         {
-            FillRhombMask(s, Rect(width*1/15, height*2/15, width*11/15, height*12/15), index);
+            FillRhombMask(s, Rect(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15), index);
 
             TEST_SAVE(s);
 
@@ -448,7 +448,7 @@ namespace Test
 
         const uint8_t index = 3;
 
-        if(create)
+        if (create)
         {
             FillRandomMask(s, index);
 
@@ -498,7 +498,7 @@ namespace Test
 
         const uint8_t oldIndex = 3, newIndex = 2;
 
-        if(create)
+        if (create)
         {
             FillRandomMask(s, oldIndex);
 
@@ -543,12 +543,12 @@ namespace Test
 
         const uint8_t currentIndex = 3, invalidIndex = 2, emptyIndex = 0, differenceThreshold = 128;
         View parent(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childSrc(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View difference(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childDst1(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
-        View childDst2(2*width, 2*height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childSrc(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View difference(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst1(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
+        View childDst2(2 * width, 2 * height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandomMask(parent, currentIndex);
             FillRandom(childSrc, 0, currentIndex - 1);

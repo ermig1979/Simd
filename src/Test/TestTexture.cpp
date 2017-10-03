@@ -31,7 +31,7 @@ namespace Test
     {
         struct Func1
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
             FuncPtr func;
@@ -101,33 +101,33 @@ namespace Test
         result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Ssse3::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx512bw::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+        if (Simd::Avx512bw::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Avx512bw::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Vmx::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Neon::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+        if (Simd::Neon::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Neon::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif
 
         return result;
@@ -137,7 +137,7 @@ namespace Test
     {
         struct Func2
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 uint8_t boost, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
@@ -204,28 +204,28 @@ namespace Test
         result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx512bw::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+        if (Simd::Avx512bw::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Avx512bw::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Vmx::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Neon::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+        if (Simd::Neon::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Neon::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif
 
         return result;
@@ -235,7 +235,7 @@ namespace Test
     {
         struct Func3
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
 
             FuncPtr func;
@@ -294,28 +294,28 @@ namespace Test
         result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx512bw::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx512bw::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Vmx::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Neon::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+        if (Simd::Neon::Enable)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Neon::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif
 
         return result;
@@ -325,7 +325,7 @@ namespace Test
     {
         struct Func4
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 int shift, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
@@ -394,28 +394,28 @@ namespace Test
         result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx512bw::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+        if (Simd::Avx512bw::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Avx512bw::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Vmx::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Neon::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+        if (Simd::Neon::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Neon::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif
 
         return result;
@@ -437,9 +437,9 @@ namespace Test
         View dx2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View dy2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const int saturation = 16, boost = 4; 
+        const int saturation = 16, boost = 4;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -490,9 +490,9 @@ namespace Test
         View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const int boost = 4; 
+        const int boost = 4;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -541,7 +541,7 @@ namespace Test
 
         int64_t s1, s2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
             FillRandom(lo);
@@ -598,7 +598,7 @@ namespace Test
 
         const int shift = -7;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

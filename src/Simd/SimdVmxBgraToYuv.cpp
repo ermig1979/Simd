@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -65,7 +65,7 @@ namespace Simd
 
         SIMD_INLINE void Average(v128_s16 & a, v128_s16 & b)
         {
-            a = (v128_s16)vec_sr(vec_add(vec_add(a, b), (v128_s16)K16_0002), K16_0002); 
+            a = (v128_s16)vec_sr(vec_add(vec_add(a, b), (v128_s16)K16_0002), K16_0002);
         }
 
         SIMD_INLINE v128_u16 ConvertU(v128_s16 b_r[2], v128_s16 g_1[2])
@@ -76,9 +76,9 @@ namespace Simd
         SIMD_INLINE v128_u16 ConvertV(v128_s16 b_r[2], v128_s16 g_1[2])
         {
             return SaturateI16ToU8(vec_add((v128_s16)K16_UV_ADJUST, vec_pack(BgrToV(b_r[0], g_1[0]), BgrToV(b_r[1], g_1[1]))));
-        }        
-        
-        template <bool align, bool first> SIMD_INLINE void BgraToYuv420p(const uint8_t * bgra0, size_t bgraStride, 
+        }
+
+        template <bool align, bool first> SIMD_INLINE void BgraToYuv420p(const uint8_t * bgra0, size_t bgraStride,
             Storer<align> & y0, Storer<align> & y1, Storer<align> & u, Storer<align> & v)
         {
             const uint8_t * bgra1 = bgra0 + bgraStride;
@@ -106,40 +106,40 @@ namespace Simd
         template <bool align> void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            assert((width%2 == 0) && (height%2 == 0) && (width >= DA) && (height >= 2));
-            if(align)
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
             {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, DA);
-            const size_t A8 = A*8;
-            for(size_t row = 0; row < height; row += 2)
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; row += 2)
             {
                 Storer<align> _y0(y), _y1(y + yStride), _u(u), _v(v);
                 BgraToYuv420p<align, true>(bgra, bgraStride, _y0, _y1, _u, _v);
-                for(size_t col = DA, colBgra = A8; col < alignedWidth; col += DA, colBgra += A8)
+                for (size_t col = DA, colBgra = A8; col < alignedWidth; col += DA, colBgra += A8)
                     BgraToYuv420p<align, false>(bgra + colBgra, bgraStride, _y0, _y1, _u, _v);
                 Flush(_y0, _y1, _u, _v);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     size_t offset = width - DA;
-                    Storer<false> _y0(y + offset), _y1(y + offset + yStride), _u(u + offset/2), _v(v + offset/2);
-                    BgraToYuv420p<false, true>(bgra + offset*4, bgraStride, _y0, _y1, _u, _v);
+                    Storer<false> _y0(y + offset), _y1(y + offset + yStride), _u(u + offset / 2), _v(v + offset / 2);
+                    BgraToYuv420p<false, true>(bgra + offset * 4, bgraStride, _y0, _y1, _u, _v);
                     Flush(_y0, _y1, _u, _v);
                 }
-                y += 2*yStride;
+                y += 2 * yStride;
                 u += uStride;
                 v += vStride;
-                bgra += 2*bgraStride;
+                bgra += 2 * bgraStride;
             }
         }
 
         void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 BgraToYuv420p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
@@ -148,10 +148,10 @@ namespace Simd
 
         SIMD_INLINE void Average(v128_s16 a[2][2])
         {
-            a[0][0] = (v128_s16)vec_sr(vec_add(a[0][0], (v128_s16)K16_0001), K16_0001); 
-            a[0][1] = (v128_s16)vec_sr(vec_add(a[0][1], (v128_s16)K16_0001), K16_0001); 
-            a[1][0] = (v128_s16)vec_sr(vec_add(a[1][0], (v128_s16)K16_0001), K16_0001); 
-            a[1][1] = (v128_s16)vec_sr(vec_add(a[1][1], (v128_s16)K16_0001), K16_0001); 
+            a[0][0] = (v128_s16)vec_sr(vec_add(a[0][0], (v128_s16)K16_0001), K16_0001);
+            a[0][1] = (v128_s16)vec_sr(vec_add(a[0][1], (v128_s16)K16_0001), K16_0001);
+            a[1][0] = (v128_s16)vec_sr(vec_add(a[1][0], (v128_s16)K16_0001), K16_0001);
+            a[1][1] = (v128_s16)vec_sr(vec_add(a[1][1], (v128_s16)K16_0001), K16_0001);
         }
 
         template <bool align, bool first> SIMD_INLINE void BgraToYuv422p(const uint8_t * bgra, Storer<align> & y, Storer<align> & u, Storer<align> & v)
@@ -170,27 +170,27 @@ namespace Simd
         template <bool align> void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            assert((width%2 == 0) && (width >= DA));
-            if(align)
+            assert((width % 2 == 0) && (width >= DA));
+            if (align)
             {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, DA);
-            const size_t A8 = A*8;
-            for(size_t row = 0; row < height; ++row)
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; ++row)
             {
                 Storer<align> _y(y), _u(u), _v(v);
                 BgraToYuv422p<align, true>(bgra, _y, _u, _v);
-                for(size_t col = DA, colBgra = A8; col < alignedWidth; col += DA, colBgra += A8)
+                for (size_t col = DA, colBgra = A8; col < alignedWidth; col += DA, colBgra += A8)
                     BgraToYuv422p<align, false>(bgra + colBgra, _y, _u, _v);
                 Flush(_y, _u, _v);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     size_t offset = width - DA;
-                    Storer<false> _y(y + offset), _u(u + offset/2), _v(v + offset/2);
-                    BgraToYuv422p<false, true>(bgra + offset*4, _y, _u, _v);
+                    Storer<false> _y(y + offset), _u(u + offset / 2), _v(v + offset / 2);
+                    BgraToYuv422p<false, true>(bgra + offset * 4, _y, _u, _v);
                     Flush(_y, _u, _v);
                 }
                 y += yStride;
@@ -203,7 +203,7 @@ namespace Simd
         void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
@@ -215,14 +215,14 @@ namespace Simd
             return SaturateI16ToU8(vec_add((v128_s16)K16_Y_ADJUST, vec_pack(BgrToY(b_r[0], g_1[0]), BgrToY(b_r[1], g_1[1]))));
         }
 
-        template <bool align, bool first> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra, 
+        template <bool align, bool first> SIMD_INLINE void BgraToYuv444p(const uint8_t * bgra,
             Storer<align> & y, Storer<align> & u, Storer<align> & v)
         {
             v128_s16 _b_r[2][2], _g_1[2][2];
             LoadPreparedBgra<align>(bgra + 0, _b_r[0][0], _g_1[0][0]);
             LoadPreparedBgra<align>(bgra + A, _b_r[0][1], _g_1[0][1]);
-            LoadPreparedBgra<align>(bgra + 2*A, _b_r[1][0], _g_1[1][0]);
-            LoadPreparedBgra<align>(bgra + 3*A, _b_r[1][1], _g_1[1][1]);
+            LoadPreparedBgra<align>(bgra + 2 * A, _b_r[1][0], _g_1[1][0]);
+            LoadPreparedBgra<align>(bgra + 3 * A, _b_r[1][1], _g_1[1][1]);
 
             Store<align, first>(y, vec_pack(ConvertY(_b_r[0], _g_1[0]), ConvertY(_b_r[1], _g_1[1])));
             Store<align, first>(u, vec_pack(ConvertU(_b_r[0], _g_1[0]), ConvertU(_b_r[1], _g_1[1])));
@@ -233,25 +233,25 @@ namespace Simd
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
             assert(width >= A);
-            if(align)
+            if (align)
             {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) &&  Aligned(uStride));
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
                 assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, A);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 Storer<align> _y(y), _u(u), _v(v);
                 BgraToYuv444p<align, true>(bgra, _y, _u, _v);
-                for(size_t col = A, colBgra = QA; col < alignedWidth; col += A, colBgra += QA)
+                for (size_t col = A, colBgra = QA; col < alignedWidth; col += A, colBgra += QA)
                     BgraToYuv444p<align, false>(bgra + colBgra, _y, _u, _v);
                 Flush(_y, _u, _v);
-                if(width != alignedWidth)
+                if (width != alignedWidth)
                 {
                     size_t offset = width - A;
                     Storer<false> _y(y + offset), _u(u + offset), _v(v + offset);
-                    BgraToYuv444p<false, true>(bgra + offset*4, _y, _u, _v);
+                    BgraToYuv444p<false, true>(bgra + offset * 4, _y, _u, _v);
                     Flush(_y, _u, _v);
                 }
                 y += yStride;
@@ -264,7 +264,7 @@ namespace Simd
         void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
-            if(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) 
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
                 && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
                 BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else

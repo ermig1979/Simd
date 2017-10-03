@@ -50,7 +50,7 @@ namespace Simd
 
             View view1(40, 30, View::Bgr24);
             cv::Mat mat1(80, 60, CV_8UC3)
-            
+
             View view2 = mat1; // view2 will be refer to mat1, it is not a copy!
             cv::Mat mat2 = view1; // mat2 will be refer to view1, it is not a copy!
 
@@ -658,7 +658,7 @@ namespace Simd
     {
         View<A> * view = new View<A>(width, height, format);
         size_t size = width*PixelSize();
-        for(size_t row = 0; row < height; ++row)
+        for (size_t row = 0; row < height; ++row)
             memcpy(view->data + view->stride*row, data + stride*row, size);
         return view;
     }
@@ -666,9 +666,9 @@ namespace Simd
     /*! \cond */
     template <template<class> class A> SIMD_INLINE View<A> & View<A>::operator = (const View<A> & view)
     {
-        if(this != &view)
+        if (this != &view)
         {
-            if(_owner && data)
+            if (_owner && data)
             {
                 Allocator::Free(data);
                 assert(0);
@@ -699,7 +699,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE void View<A>::Recreate(size_t w, size_t h, Format f, void * d, size_t align)
     {
-        if(_owner && data)
+        if (_owner && data)
         {
             Allocator::Free(data);
             *(void**)&data = NULL;
@@ -709,7 +709,7 @@ namespace Simd
         *(size_t*)&height = h;
         *(Format*)&format = f;
         *(ptrdiff_t*)&stride = Allocator::Align(width*PixelSize(format), align);
-        if(d)
+        if (d)
         {
             *(void**)&data = Allocator::Align(d, align);
             _owner = false;
@@ -728,7 +728,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom) const
     {
-        if(data != NULL && right >= left && bottom >= top)
+        if (data != NULL && right >= left && bottom >= top)
         {
             left = std::min<ptrdiff_t>(std::max<ptrdiff_t>(left, 0), width);
             top = std::min<ptrdiff_t>(std::max<ptrdiff_t>(top, 0), height);
@@ -752,24 +752,24 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & size, Position position) const
     {
-        switch(position)
+        switch (position)
         {
         case TopLeft:
             return Region(0, 0, size.x, size.y);
         case TopCenter:
-            return Region((width - size.x)/2, 0, (width + size.x)/2, size.y);
+            return Region((width - size.x) / 2, 0, (width + size.x) / 2, size.y);
         case TopRight:
             return Region(width - size.x, 0, width, size.y);
         case MiddleLeft:
-            return Region(0, (height - size.y)/2, size.x, (height + size.y)/2);
+            return Region(0, (height - size.y) / 2, size.x, (height + size.y) / 2);
         case MiddleCenter:
-            return Region((width - size.x)/2, (height - size.y)/2, (width + size.x)/2, (height + size.y)/2);
+            return Region((width - size.x) / 2, (height - size.y) / 2, (width + size.x) / 2, (height + size.y) / 2);
         case MiddleRight:
-            return Region(width - size.x, (height - size.y)/2, width, (height + size.y)/2);
+            return Region(width - size.x, (height - size.y) / 2, width, (height + size.y) / 2);
         case BottomLeft:
             return Region(0, height - size.y, size.x, height);
         case BottomCenter:
-            return Region((width - size.x)/2, height - size.y, (width + size.x)/2, height);
+            return Region((width - size.x) / 2, height - size.y, (width + size.x) / 2, height);
         case BottomRight:
             return Region(width - size.x, height - size.y, width, height);
         default:
@@ -822,7 +822,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE size_t View<A>::PixelSize(Format format)
     {
-        switch(format)
+        switch (format)
         {
         case None:      return 0;
         case Gray8:     return 1;
@@ -851,7 +851,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelSize(Format format)
     {
-        switch(format)
+        switch (format)
         {
         case None:      return 0;
         case Gray8:     return 1;
@@ -880,7 +880,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE size_t View<A>::ChannelCount(Format format)
     {
-        switch(format)
+        switch (format)
         {
         case None:      return 0;
         case Gray8:     return 1;

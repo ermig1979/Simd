@@ -238,7 +238,7 @@ int main()
 
     View view1(40, 30, View::Bgr24);
     cv::Mat mat1(80, 60, CV_8UC3)
-    
+
     View view2 = mat1; // view2 will be refer to mat1, it is not a copy!
     cv::Mat mat2 = view1; // mat2 will be refer to view1, it is not a copy!
 

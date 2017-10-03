@@ -27,30 +27,30 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-			typedef uint32_t (*FunkPtr)(const void *src, size_t size);
+    namespace
+    {
+        struct Func
+        {
+            typedef uint32_t(*FunkPtr)(const void *src, size_t size);
 
-			FunkPtr func;
-			String description;
+            FunkPtr func;
+            String description;
 
-			Func(const FunkPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FunkPtr & f, const String & d) : func(f), description(d) {}
 
-			uint32_t Call(const std::vector<uint8_t> & src) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				return func(src.data(), src.size());
-			}
-		};
-	}
+            uint32_t Call(const std::vector<uint8_t> & src) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                return func(src.data(), src.size());
+            }
+        };
+    }
 
 #define FUNC(func) Func(func, #func)
 
     void SetRandom(unsigned char * data, size_t size)
     {
-        for(size_t i = 0; i < size; ++i)
+        for (size_t i = 0; i < size; ++i)
             data[i] = Random(256);
     }
 
@@ -67,9 +67,9 @@ namespace Test
 
         uint32_t crc1, crc2;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc1 = f1.Call(src));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(crc1 = f1.Call(src));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(crc2 = f2.Call(src));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(crc2 = f2.Call(src));
 
         TEST_CHECK_VALUE(crc);
 
@@ -93,7 +93,7 @@ namespace Test
         result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
 #ifdef SIMD_SSE42_ENABLE
-        if(Simd::Sse42::Enable)
+        if (Simd::Sse42::Enable)
             result = result && Crc32AutoTest(FUNC(Simd::Sse42::Crc32c), FUNC(SimdCrc32c));
 #endif 
 
@@ -114,7 +114,7 @@ namespace Test
 
         uint32_t crc1, crc2;
 
-        if(create)
+        if (create)
         {
             SetRandom(src.data(), src.size());
 

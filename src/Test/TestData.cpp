@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -40,9 +40,9 @@ namespace Test
     bool Data::CreatePath(const String & path) const
     {
 #if defined(_MSC_VER)
-        if(!std::tr2::sys::exists(std::tr2::sys::path(path)))
+        if (!std::tr2::sys::exists(std::tr2::sys::path(path)))
         {
-            if(!std::tr2::sys::create_directories(std::tr2::sys::path(path)))
+            if (!std::tr2::sys::create_directories(std::tr2::sys::path(path)))
             {
                 TEST_LOG_SS(Error, "Can't create path '" << path << "'!");
                 return false;
@@ -62,35 +62,35 @@ namespace Test
 
     template <class T> bool Data::SaveArray(const T * data, size_t size, const String & name) const
     {
-        if(!CreatePath(_path))
+        if (!CreatePath(_path))
             return false;
 
         String path = Path(name);
         std::ofstream ofs(path);
-        if(ofs.bad())
+        if (ofs.bad())
         {
-            TEST_LOG_SS(Error, "Can't create file '" << path << "'!"); 
+            TEST_LOG_SS(Error, "Can't create file '" << path << "'!");
             return false;
         }
 
         try
         {
             ofs << size << std::endl;
-            if(sizeof(T) < sizeof(int))
+            if (sizeof(T) < sizeof(int))
             {
-                for(size_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                     ofs << (int)data[i] << " ";
             }
             else
             {
-                for(size_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                     ofs << data[i] << " ";
             }
             ofs << std::endl;
         }
         catch (std::exception e)
         {
-            TEST_LOG_SS(Error, "Can't save array to file '" << path << "', because there is an exception: " << e.what()); 
+            TEST_LOG_SS(Error, "Can't save array to file '" << path << "', because there is an exception: " << e.what());
             ofs.close();
             return false;
         }
@@ -104,9 +104,9 @@ namespace Test
     {
         String path = Path(name);
         std::ifstream ifs(path);
-        if(ifs.bad())
+        if (ifs.bad())
         {
-            TEST_LOG_SS(Error, "Can't open file '" << path << "'!"); 
+            TEST_LOG_SS(Error, "Can't open file '" << path << "'!");
             return false;
         }
 
@@ -114,13 +114,13 @@ namespace Test
         {
             uint64_t value;
             ifs >> value;
-            if(value != (uint64_t)size)
+            if (value != (uint64_t)size)
                 throw std::runtime_error("Invalid sums size!");
 
-            if(sizeof(T) < sizeof(int))
+            if (sizeof(T) < sizeof(int))
             {
                 int tmp;
-                for(size_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                 {
                     ifs >> tmp;
                     data[i] = (T)tmp;
@@ -128,13 +128,13 @@ namespace Test
             }
             else
             {
-                for(size_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < size; ++i)
                     ifs >> data[i];
             }
         }
         catch (std::exception e)
         {
-            TEST_LOG_SS(Error, "Can't load array from file '" << path << "', because there is an exception: " << e.what()); 
+            TEST_LOG_SS(Error, "Can't load array from file '" << path << "', because there is an exception: " << e.what());
             ifs.close();
             return false;
         }
@@ -148,11 +148,11 @@ namespace Test
     {
         std::stringstream path;
         path << ROOT_PATH << "/test/";
-        for(size_t i = 0; i < test.size(); ++i)
+        for (size_t i = 0; i < test.size(); ++i)
         {
-            if(test[i] == '<')
+            if (test[i] == '<')
                 path << '_';
-            else if(test[i] == '>')
+            else if (test[i] == '>')
                 path << "";
             else
                 path << test[i];
@@ -162,14 +162,14 @@ namespace Test
 
     bool Data::Save(const View & image, const String & name) const
     {
-        if(!CreatePath(_path))
+        if (!CreatePath(_path))
             return false;
 
         String path = Path(name);
         std::ofstream ofs(path);
-        if(ofs.bad())
+        if (ofs.bad())
         {
-            TEST_LOG_SS(Error, "Can't create file '" << path << "'!"); 
+            TEST_LOG_SS(Error, "Can't create file '" << path << "'!");
             return false;
         }
 
@@ -180,17 +180,17 @@ namespace Test
             size_t pixelSize = image.PixelSize();
 
             ofs << (int)image.format << " " << image.width << " " << image.height << std::endl;
-            if(image.format != View::Float && image.format != View::Double)
+            if (image.format != View::Float && image.format != View::Double)
             {
                 ofs << std::hex;
-                for(size_t row = 0; row < image.height; ++row)
+                for (size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t col = 0; col < image.width; ++col)
+                    for (size_t col = 0; col < image.width; ++col)
                     {
-                        for(size_t channel = 0; channel < channelCount; ++channel)
+                        for (size_t channel = 0; channel < channelCount; ++channel)
                         {
                             const uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
-                            for(size_t i = 0; i < channelSize; ++i)
+                            for (size_t i = 0; i < channelSize; ++i)
                             {
 #ifdef SIMD_BIG_ENDIAN
                                 ofs << (int)(data[i] >> 4);
@@ -205,27 +205,27 @@ namespace Test
                         ofs << " ";
                     }
                     ofs << std::endl;
-                } 
+                }
             }
             else
             {
-                for(size_t row = 0; row < image.height; ++row)
+                for (size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t col = 0; col < image.width; ++col)
+                    for (size_t col = 0; col < image.width; ++col)
                     {
-                        if(image.format == View::Float)
+                        if (image.format == View::Float)
                             ofs << image.At<float>(col, row);
                         else
                             ofs << image.At<double>(col, row);
                         ofs << " ";
                     }
                     ofs << std::endl;
-                } 
+                }
             }
         }
         catch (std::exception e)
         {
-            TEST_LOG_SS(Error, "Can't save image to file '" << path << "', because there is an exception: " << e.what()); 
+            TEST_LOG_SS(Error, "Can't save image to file '" << path << "', because there is an exception: " << e.what());
             ofs.close();
             return false;
         }
@@ -239,9 +239,9 @@ namespace Test
     {
         String path = Path(name);
         std::ifstream ifs(path);
-        if(ifs.bad())
+        if (ifs.bad())
         {
-            TEST_LOG_SS(Error, "Can't open file '" << path << "'!"); 
+            TEST_LOG_SS(Error, "Can't open file '" << path << "'!");
             return false;
         }
 
@@ -253,32 +253,32 @@ namespace Test
 
             uint64_t value;
             ifs >> value;
-            if(value != (uint64_t)image.format)
+            if (value != (uint64_t)image.format)
                 throw std::runtime_error("Invalid image format!");
             ifs >> value;
-            if(value != (uint64_t)image.width)
+            if (value != (uint64_t)image.width)
                 throw std::runtime_error("Invalid image width!");
             ifs >> value;
-            if(value != (uint64_t)image.height)
+            if (value != (uint64_t)image.height)
                 throw std::runtime_error("Invalid image height!");
 
-            if(image.format != View::Float && image.format != View::Double)
+            if (image.format != View::Float && image.format != View::Double)
             {
                 ifs >> std::hex;
-                for(size_t row = 0; row < image.height; ++row)
+                for (size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t col = 0; col < image.width; ++col)
+                    for (size_t col = 0; col < image.width; ++col)
                     {
-                        for(size_t channel = 0; channel < channelCount; ++channel)
+                        for (size_t channel = 0; channel < channelCount; ++channel)
                         {
                             uint8_t * data = image.data + row*image.stride + col*pixelSize + channel*channelSize;
                             ifs >> value;
-                            for(size_t i = 0; i < channelSize; ++i)
+                            for (size_t i = 0; i < channelSize; ++i)
                             {
 #ifdef SIMD_BIG_ENDIAN
-                                data[i] = (value >> 8*(channelSize - i - 1))&0xFF;
+                                data[i] = (value >> 8 * (channelSize - i - 1)) & 0xFF;
 #else
-                                data[i] = (value >> 8*i)&0xFF;
+                                data[i] = (value >> 8 * i) & 0xFF;
 #endif                    
                             }
                         }
@@ -287,11 +287,11 @@ namespace Test
             }
             else
             {
-                for(size_t row = 0; row < image.height; ++row)
+                for (size_t row = 0; row < image.height; ++row)
                 {
-                    for(size_t col = 0; col < image.width; ++col)
+                    for (size_t col = 0; col < image.width; ++col)
                     {
-                        if(image.format == View::Float)
+                        if (image.format == View::Float)
                             ifs >> image.At<float>(col, row);
                         else
                             ifs >> image.At<double>(col, row);
@@ -301,7 +301,7 @@ namespace Test
         }
         catch (std::exception e)
         {
-            TEST_LOG_SS(Error, "Can't load image from file '" << path << "', because there is an exception: " << e.what()); 
+            TEST_LOG_SS(Error, "Can't load image from file '" << path << "', because there is an exception: " << e.what());
             ifs.close();
             return false;
         }
@@ -440,7 +440,7 @@ namespace Test
 
     String Data::Description(SimdCompareType type)
     {
-        switch(type)
+        switch (type)
         {
         case SimdCompareEqual:
             return "_Equal";
@@ -461,7 +461,7 @@ namespace Test
 
     String Data::Description(SimdOperationBinary8uType type)
     {
-        switch(type)
+        switch (type)
         {
         case SimdOperationBinary8uAverage:
             return "_Average";
@@ -484,55 +484,55 @@ namespace Test
 
     String Data::Description(SimdOperationBinary16iType type)
     {
-        switch(type)
+        switch (type)
         {
         case SimdOperationBinary16iAddition:
             return "_Addition";
-		case SimdOperationBinary16iSubtraction:
-			return "_Subtraction";
-		}
+        case SimdOperationBinary16iSubtraction:
+            return "_Subtraction";
+        }
         assert(0);
         return "_Unknown";
     }
 
     String Data::Description(View::Format format)
     {
-        switch(format)
+        switch (format)
         {
-        case View::None:      
+        case View::None:
             return "_None";
-        case View::Gray8:     
+        case View::Gray8:
             return "_Gray8";
-        case View::Uv16:      
+        case View::Uv16:
             return "_Uv16";
-        case View::Bgr24:     
+        case View::Bgr24:
             return "_Bgr24";
-        case View::Bgra32:    
+        case View::Bgra32:
             return "_Bgra32";
-        case View::Int16:     
+        case View::Int16:
             return "_Int16";
-        case View::Int32:     
+        case View::Int32:
             return "_Int32";
-        case View::Int64:     
+        case View::Int64:
             return "_Int64";
-        case View::Float:     
+        case View::Float:
             return "_Float";
-        case View::Double:    
+        case View::Double:
             return "_Double";
-        case View::BayerGrbg: 
+        case View::BayerGrbg:
             return "_BayerGrgb";
-        case View::BayerGbrg: 
+        case View::BayerGbrg:
             return "_BayerGbgr";
-        case View::BayerRggb: 
+        case View::BayerRggb:
             return "_BayerRggb";
-        case View::BayerBggr: 
+        case View::BayerBggr:
             return "_BayerBggr";
         case View::Hsv24:
             return "_Hsv24";
         case View::Hsl24:
             return "_Hsl24";
         }
-        assert(0); 
+        assert(0);
         return "_Unknown";
     }
 }

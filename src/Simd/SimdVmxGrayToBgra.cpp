@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -34,7 +34,7 @@ namespace Simd
         const v128_u8 K8_PERM_GRAY_TO_BGRA_2 = SIMD_VEC_SETR_EPI8(0x08, 0x08, 0x08, 0x18, 0x09, 0x09, 0x09, 0x19, 0x0A, 0x0A, 0x0A, 0x1A, 0x0B, 0x0B, 0x0B, 0x1B);
         const v128_u8 K8_PERM_GRAY_TO_BGRA_3 = SIMD_VEC_SETR_EPI8(0x0C, 0x0C, 0x0C, 0x1C, 0x0D, 0x0D, 0x0D, 0x1D, 0x0E, 0x0E, 0x0E, 0x1E, 0x0F, 0x0F, 0x0F, 0x1F);
 
-        template <bool align, bool first> 
+        template <bool align, bool first>
         SIMD_INLINE void GrayToBgra(const Loader<align> & gray, v128_u8 alpha, Storer<align> & bgra)
         {
             v128_u8 _gray = Load<align, first>(gray);
@@ -48,24 +48,24 @@ namespace Simd
         template <bool align> void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(gray) && Aligned(grayStride));
 
             const v128_u8 _alpha = SIMD_VEC_SET1_EPI8(alpha);
             size_t alignedWidth = AlignLo(width, A);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 Loader<align> _gray(gray);
                 Storer<align> _bgra(bgra);
                 GrayToBgra<align, true>(_gray, _alpha, _bgra);
-                for(size_t col = A; col < alignedWidth; col += A)
+                for (size_t col = A; col < alignedWidth; col += A)
                     GrayToBgra<align, false>(_gray, _alpha, _bgra);
                 Flush(_bgra);
 
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                 {
                     Loader<false> _gray(gray + width - A);
-                    Storer<false> _bgra(bgra + 4*(width - A));
+                    Storer<false> _bgra(bgra + 4 * (width - A));
                     GrayToBgra<false, true>(_gray, _alpha, _bgra);
                     Flush(_bgra);
                 }
@@ -77,7 +77,7 @@ namespace Simd
 
         void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)
         {
-            if(Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
+            if (Aligned(bgra) && Aligned(gray) && Aligned(bgraStride) && Aligned(grayStride))
                 GrayToBgra<true>(gray, width, height, grayStride, bgra, bgraStride, alpha);
             else
                 GrayToBgra<false>(gray, width, height, grayStride, bgra, bgraStride, alpha);

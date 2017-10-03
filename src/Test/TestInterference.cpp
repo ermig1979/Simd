@@ -27,32 +27,32 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func1
-		{
-			typedef void (*FuncPtr)(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t value, int16_t saturation);
+    namespace
+    {
+        struct Func1
+        {
+            typedef void(*FuncPtr)(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t value, int16_t saturation);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & statisticSrc, View & statisticDst, uint8_t value, int16_t saturation) const
-			{
-				Simd::Copy(statisticSrc, statisticDst);
-				TEST_PERFORMANCE_TEST(description);
-				func(statisticDst.data, statisticDst.stride, statisticDst.width, statisticDst.height, value, saturation);
-			}
-		};
+            void Call(const View & statisticSrc, View & statisticDst, uint8_t value, int16_t saturation) const
+            {
+                Simd::Copy(statisticSrc, statisticDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(statisticDst.data, statisticDst.stride, statisticDst.width, statisticDst.height, value, saturation);
+            }
+        };
 
         struct Func2
         {
-            typedef void (*FuncPtr)(uint8_t * statistic, size_t statisticStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
                 uint8_t value, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
             FuncPtr func;
-            String description; 
+            String description;
 
             Func2(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
@@ -60,39 +60,39 @@ namespace Test
             {
                 Simd::Copy(statisticSrc, statisticDst);
                 TEST_PERFORMANCE_TEST(description);
-                func(statisticDst.data, statisticDst.stride, statisticDst.width, statisticDst.height, 
+                func(statisticDst.data, statisticDst.stride, statisticDst.width, statisticDst.height,
                     value, saturation, mask.data, mask.stride, index);
             }
         };
-	}
+    }
 
 #define FUNC1(function) Func1(function, std::string(#function))
 
 #define FUNC2(function) Func2(function, std::string(#function))
 
-	bool InterferenceChangeAutoTest(int width, int height, const Func1 & f1, const Func1 & f2)
-	{
-		bool result = true;
+    bool InterferenceChangeAutoTest(int width, int height, const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View statisticSrc(width, height, View::Int16, NULL, TEST_ALIGN(width));
-		FillRandom(statisticSrc, 0, 64);
+        View statisticSrc(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        FillRandom(statisticSrc, 0, 64);
 
         uint8_t value = 3;
         int16_t saturation = 8888;
 
-		View statisticDst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
-		View statisticDst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View statisticDst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
+        View statisticDst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(statisticSrc, statisticDst1, value, saturation));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(statisticSrc, statisticDst1, value, saturation));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(statisticSrc, statisticDst2, value, saturation));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(statisticSrc, statisticDst2, value, saturation));
 
-		result = result && Compare(statisticDst1, statisticDst2, 0, true, 32, 0);
+        result = result && Compare(statisticDst1, statisticDst2, 0, true, 32, 0);
 
-		return result;
-	}
+        return result;
+    }
 
     bool InterferenceChangeAutoTest(const Func1 & f1, const Func1 & f2)
     {
@@ -112,22 +112,22 @@ namespace Test
         result = result && InterferenceChangeAutoTest(FUNC1(Simd::Base::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse2::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx2::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx512bw::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx512bw::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
@@ -146,22 +146,22 @@ namespace Test
         result = result && InterferenceChangeAutoTest(FUNC1(Simd::Base::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse2::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx2::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx512bw::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Avx512bw::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && InterferenceChangeAutoTest(FUNC1(Simd::Vmx::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
@@ -218,22 +218,22 @@ namespace Test
         result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Base::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse2::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx2::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx512bw::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx512bw::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif
 
@@ -252,22 +252,22 @@ namespace Test
         result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Base::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse2::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx2::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx512bw::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
+        if (Simd::Avx512bw::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Avx512bw::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Vmx::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
@@ -296,7 +296,7 @@ namespace Test
         uint8_t value = 3;
         int16_t saturation = 8888;
 
-        if(create)
+        if (create)
         {
             FillRandom(statisticSrc, 0, 64);
 
@@ -357,7 +357,7 @@ namespace Test
 
         View mask(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(statisticSrc, 0, 64);
             FillRandomMask(mask, index);

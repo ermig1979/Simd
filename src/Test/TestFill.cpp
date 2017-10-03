@@ -31,7 +31,7 @@ namespace Test
     {
         struct Func
         {
-            typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
+            typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, uint8_t value);
 
             FuncPtr func;
             String description;
@@ -73,9 +73,9 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             Func f1c = Func(f1.func, f1.description + ColorDescription(format));
@@ -102,7 +102,7 @@ namespace Test
     {
         struct FuncF
         {
-            typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize, 
+            typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, size_t pixelSize,
                 size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t value);
 
             FuncPtr func;
@@ -113,7 +113,7 @@ namespace Test
             void Call(View & dst, const Rect & frame, uint8_t value) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(), 
+                func(dst.data, dst.stride, dst.width, dst.height, dst.PixelSize(),
                     frame.left, frame.top, frame.right, frame.bottom, value);
             }
         };
@@ -129,7 +129,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         uint8_t value = Random(256);
-        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+        Rect frame(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15);
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
@@ -149,9 +149,9 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             FuncF f1c = FuncF(f1.func, f1.description + ColorDescription(format));
@@ -174,31 +174,31 @@ namespace Test
         return result;
     }
 
-	namespace
-	{
-		struct FuncBgra
-		{
-			typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
+    namespace
+    {
+        struct FuncBgra
+        {
+            typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncBgra(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncBgra(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
-			}
-		};
-	}
+            void Call(View & dst, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
+            }
+        };
+    }
 
 #define FUNC_BGRA(function) \
 	FuncBgra(function, std::string(#function))
 
-	bool FillBgraAutoTest(int width, int height, const FuncBgra & f1, const FuncBgra & f2)
-	{
-		bool result = true;
+    bool FillBgraAutoTest(int width, int height, const FuncBgra & f1, const FuncBgra & f2)
+    {
+        bool result = true;
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
@@ -207,17 +207,17 @@ namespace Test
         uint8_t red = Random(256);
         uint8_t alpha = Random(256);
 
-		View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
-		View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, blue, green, red, alpha));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, blue, green, red, alpha));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, blue, green, red, alpha));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, blue, green, red, alpha));
 
-		result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
     bool FillBgraAutoTest(const FuncBgra & f1, const FuncBgra & f2)
     {
@@ -237,22 +237,22 @@ namespace Test
         result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sse2::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx2::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx512bw::FillBgra), FUNC_BGRA(SimdFillBgra));
+        if (Simd::Avx512bw::Enable)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Avx512bw::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Vmx::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
@@ -268,7 +268,7 @@ namespace Test
     {
         struct FuncBgr
         {
-            typedef void (*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
+            typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
             FuncPtr func;
             String description;
@@ -327,22 +327,22 @@ namespace Test
         result = result && FillBgrAutoTest(FUNC_BGR(Simd::Base::FillBgr), FUNC_BGR(SimdFillBgr));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Sse2::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx2::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx512bw::FillBgr), FUNC_BGR(SimdFillBgr));
+        if (Simd::Avx512bw::Enable)
+            result = result && FillBgrAutoTest(FUNC_BGR(Simd::Avx512bw::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && FillBgrAutoTest(FUNC_BGR(Simd::Vmx::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
@@ -355,7 +355,7 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
-    
+
     bool FillDataTest(bool create, View::Format format, int width, int height, const Func & f)
     {
         bool result = true;
@@ -369,7 +369,7 @@ namespace Test
 
         const uint8_t value = 0x77;
 
-        if(create)
+        if (create)
         {
             f.Call(d1, value);
 
@@ -395,9 +395,9 @@ namespace Test
 
         Func f = FUNC(SimdFill);
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             result = result && FillDataTest(create, format, DW, DH, Func(f.func, f.description + Data::Description(format)));
@@ -414,14 +414,14 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
-        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+        Rect frame(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15);
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
 
         const uint8_t value = 0x77;
 
-        if(create)
+        if (create)
         {
             Simd::Fill(d1, 0);
 
@@ -451,9 +451,9 @@ namespace Test
 
         FuncF f = FUNC_F(SimdFillFrame);
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             result = result && FillFrameDataTest(create, format, DW, DH, FuncF(f.func, f.description + Data::Description(format)));
@@ -477,7 +477,7 @@ namespace Test
         const uint8_t green = 0xAA;
         const uint8_t red = 0x77;
 
-        if(create)
+        if (create)
         {
             f.Call(bgr1, blue, green, red);
 
@@ -522,7 +522,7 @@ namespace Test
         const uint8_t red = 0x77;
         const uint8_t alpha = 0xFF;
 
-        if(create)
+        if (create)
         {
             f.Call(bgra1, blue, green, red, alpha);
 

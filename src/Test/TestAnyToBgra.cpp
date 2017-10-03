@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -27,8 +27,8 @@
 
 namespace Test
 {
-	namespace
-	{
+    namespace
+    {
         struct Func
         {
             typedef void(*FuncPtr)(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
@@ -42,8 +42,8 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.width, src.height, src.stride, bgra.data, bgra.stride, alpha);
             }
-        };	
-	}
+        };
+    }
 
 #define FUNC(func) Func(func, #func)
 
@@ -78,7 +78,7 @@ namespace Test
         result = result && AnyToBgraAutoTest(W + O, H - O, srcType, f1, f2);
         result = result && AnyToBgraAutoTest(W - O, H + O, srcType, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool BgrToBgraAutoTest()
@@ -88,31 +88,31 @@ namespace Test
         result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBgra), FUNC(SimdBgrToBgra));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBgra), FUNC(SimdBgrToBgra));
+        if (Simd::Neon::Enable)
+            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
-        return result;    
+        return result;
     }
 
     bool GrayToBgraAutoTest()
@@ -122,31 +122,31 @@ namespace Test
         result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Sse2::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Avx2::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Avx512bw::GrayToBgra), FUNC(SimdGrayToBgra));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Avx512bw::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Vmx::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Neon::GrayToBgra), FUNC(SimdGrayToBgra));
+        if (Simd::Neon::Enable)
+            result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Neon::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif
 
-        return result;    
+        return result;
     }
 
     //-----------------------------------------------------------------------
@@ -164,7 +164,7 @@ namespace Test
         View dst1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         View dst2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

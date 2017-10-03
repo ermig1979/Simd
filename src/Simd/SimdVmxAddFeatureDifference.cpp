@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -52,14 +52,14 @@ namespace Simd
             const v128_u8 _lo = Load<align>(lo + offset);
             const v128_u8 _hi = Load<align>(hi + offset);
             return ShiftedWeightedSquare8(FeatureDifference(_value, _lo, _hi), weight);
-        } 
+        }
 
         template <bool align> SIMD_INLINE void AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, size_t offset, v128_u16 weight, uint8_t * difference)
         {
             const v128_u8 _increase = FeatureDifferenceInc<align>(value, lo, hi, offset, weight);
             const v128_u8 _difference = Load<align>(difference + offset);
             Store<align>(difference + offset, vec_adds(_difference, _increase));
-        } 
+        }
 
         SIMD_INLINE void AddFeatureDifferenceMasked(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, size_t offset, v128_u16 weight, v128_u8 mask, uint8_t * difference)
         {
@@ -67,7 +67,7 @@ namespace Simd
             const v128_u8 _difference = Load<false>(difference + offset);
             Store<false>(difference + offset, vec_adds(_difference, vec_and(_increase, mask)));
         }
-        
+
         template <bool align> SIMD_INLINE v128_u8 AddFeatureDifference(const uint8_t * value, const uint8_t * lo, const uint8_t * hi, const uint8_t * difference, size_t offset, v128_u16 weight)
         {
             const v128_u8 _increase = FeatureDifferenceInc<align>(value, lo, hi, offset, weight);
@@ -75,12 +75,12 @@ namespace Simd
             return vec_adds(_difference, _increase);
         }
 
-        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+        template <bool align> void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
             assert(width >= A);
-            if(align)
+            if (align)
             {
                 assert(Aligned(value) && Aligned(valueStride));
                 assert(Aligned(lo) && Aligned(loStride));
@@ -93,30 +93,30 @@ namespace Simd
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             const v128_u16 _weight = SIMD_VEC_SET1_EPI16(weight);
 
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
-                if(align)
+                if (align)
                 {
                     size_t col = 0;
-                    for(; col < fullAlignedWidth; col += QA)
+                    for (; col < fullAlignedWidth; col += QA)
                     {
                         AddFeatureDifference<align>(value, lo, hi, col, _weight, difference);
                         AddFeatureDifference<align>(value, lo, hi, col + A, _weight, difference);
-                        AddFeatureDifference<align>(value, lo, hi, col + 2*A, _weight, difference);
-                        AddFeatureDifference<align>(value, lo, hi, col + 3*A, _weight, difference);
+                        AddFeatureDifference<align>(value, lo, hi, col + 2 * A, _weight, difference);
+                        AddFeatureDifference<align>(value, lo, hi, col + 3 * A, _weight, difference);
                     }
-                    for(; col < alignedWidth; col += A)
+                    for (; col < alignedWidth; col += A)
                         AddFeatureDifference<align>(value, lo, hi, col, _weight, difference);
                 }
                 else
                 {
                     Storer<align> _difference(difference);
                     _difference.First(AddFeatureDifference<align>(value, lo, hi, difference, 0, _weight));
-                    for(size_t col = A; col < alignedWidth; col += A)
+                    for (size_t col = A; col < alignedWidth; col += A)
                         _difference.Next(AddFeatureDifference<align>(value, lo, hi, difference, col, _weight));
                     Flush(_difference);
                 }
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                     AddFeatureDifferenceMasked(value, lo, hi, width - A, _weight, tailMask, difference);
                 value += valueStride;
                 lo += loStride;
@@ -125,11 +125,11 @@ namespace Simd
             }
         }
 
-        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height, 
+        void AddFeatureDifference(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride,
             uint16_t weight, uint8_t * difference, size_t differenceStride)
         {
-            if(Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) && 
+            if (Aligned(value) && Aligned(valueStride) && Aligned(lo) && Aligned(loStride) &&
                 Aligned(hi) && Aligned(hiStride) && Aligned(difference) && Aligned(differenceStride))
                 AddFeatureDifference<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
             else

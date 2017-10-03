@@ -22,9 +22,9 @@
 * SOFTWARE.
 */
 
-/*                                                                                       
-* File name   : SimdCheckC.c                                                       
-* Description : This file is needed to verify the C API of Simd Library.               
+/*
+* File name   : SimdCheckC.c
+* Description : This file is needed to verify the C API of Simd Library.
 */
 
 #include "Simd/SimdLib.h"

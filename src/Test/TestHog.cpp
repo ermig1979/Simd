@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncHDH
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height,
                 size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
             FuncPtr func;
@@ -44,7 +44,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, cell.x, cell.y, quantization, histograms);
             }
-        };       
+        };
     }
 
 #define FUNC_HDH(function) FuncHDH(function, #function)
@@ -92,7 +92,7 @@ namespace Test
         result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Base::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
@@ -102,17 +102,17 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx512bw::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
+        if (Simd::Avx512bw::Enable)
+            result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx512bw::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
+        if (Simd::Vsx::Enable)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Vsx::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
@@ -154,7 +154,7 @@ namespace Test
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
 
-        const size_t size = (width/8)*(height/8)*31;
+        const size_t size = (width / 8)*(height / 8) * 31;
         Buffer32f features1(size, 0), features2(size, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, features1.data()));
@@ -193,8 +193,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx512bw::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
+        if (Simd::Avx512bw::Enable)
+            result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx512bw::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -219,7 +219,7 @@ namespace Test
             void Call(const View & src, const size_t width, size_t count, float ** dst, size_t dstStride) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/4, width, src.height, count, dst, dstStride);
+                func((float*)src.data, src.stride / 4, width, src.height, count, dst, dstStride);
             }
         };
     }
@@ -236,7 +236,7 @@ namespace Test
         for (size_t row = 0; row < height; ++row)
             for (size_t col = 0; col < width; ++col)
                 for (size_t i = 0; i < count; ++i)
-                    src.At<float>(count*col + i, row) = float(row*100000 + col*100 + i);
+                    src.At<float>(count*col + i, row) = float(row * 100000 + col * 100 + i);
 
         View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
         View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
@@ -260,7 +260,7 @@ namespace Test
     {
         bool result = true;
 
-        size_t w = Simd::AlignHi(W/8, SIMD_ALIGN), h = H/8, c = 31;
+        size_t w = Simd::AlignHi(W / 8, SIMD_ALIGN), h = H / 8, c = 31;
 
         result = result && HogDeinterleaveAutoTest(w, h, c, f1, f2);
         result = result && HogDeinterleaveAutoTest(w - 1, h + 1, c, f1, f2);
@@ -285,8 +285,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx512bw::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+        if (Simd::Avx512bw::Enable)
+            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Avx512bw::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -314,7 +314,7 @@ namespace Test
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride/4, src.width, src.height, row.data(), row.size(), col.data(), col.size(), (float*)dstDst.data, dstDst.stride/4, add);
+                func((float*)src.data, src.stride / 4, src.width, src.height, row.data(), row.size(), col.data(), col.size(), (float*)dstDst.data, dstDst.stride / 4, add);
             }
         };
     }
@@ -380,8 +380,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Avx512bw::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
+        if (Simd::Avx512bw::Enable)
+            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Avx512bw::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -406,10 +406,10 @@ namespace Test
 
         const Point cell(8, 8);
         const size_t quantization = 18;
-        const size_t size = quantization*width*height/cell.x/cell.y;
+        const size_t size = quantization*width*height / cell.x / cell.y;
         Buffer32f h1(size, 0), h2(size, 0);
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -454,7 +454,7 @@ namespace Test
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const size_t size = 31*(width/8)*(height/8);
+        const size_t size = 31 * (width / 8)*(height / 8);
         Buffer32f f1(size, 0), f2(size, 0);
 
         if (create)

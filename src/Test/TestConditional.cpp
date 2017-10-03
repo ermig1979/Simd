@@ -32,7 +32,7 @@ namespace Test
     {
         struct FuncC8U
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height,
                 uint8_t value, SimdCompareType compareType, uint32_t * count);
 
             FuncPtr func;
@@ -81,7 +81,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCount8uAutoTest(ARGS_C8U(W, H, type, f1, f2));
             result = result && ConditionalCount8uAutoTest(ARGS_C8U(W + O, H - O, type, f1, f2));
@@ -98,28 +98,28 @@ namespace Test
         result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Base::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sse2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Avx2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Avx512bw::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Avx512bw::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Vmx::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Neon::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Neon::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
         return result;
@@ -129,7 +129,7 @@ namespace Test
     {
         struct FuncC16I
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height,
                 int16_t value, SimdCompareType compareType, uint32_t * count);
 
             FuncPtr func;
@@ -178,7 +178,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCount16iAutoTest(ARGS_C16I(W, H, type, f1, f2));
             result = result && ConditionalCount16iAutoTest(ARGS_C16I(W + O, H - O, type, f1, f2));
@@ -195,38 +195,38 @@ namespace Test
         result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Base::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sse2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx512bw::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Avx512bw::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Vmx::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Neon::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Neon::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif
 
         return result;
     }
 
-    namespace 
+    namespace
     {
         struct FuncS
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
 
             FuncPtr func;
@@ -277,7 +277,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalSumAutoTest(ARGS_S(W, H, type, f1, f2));
             result = result && ConditionalSumAutoTest(ARGS_S(W + O, H - O, type, f1, f2));
@@ -294,28 +294,28 @@ namespace Test
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSum), FUNC_S(SimdConditionalSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSum), FUNC_S(SimdConditionalSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vmx::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSum), FUNC_S(SimdConditionalSum));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
         return result;
@@ -328,28 +328,28 @@ namespace Test
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vmx::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif
 
         return result;
@@ -362,53 +362,53 @@ namespace Test
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Avx512bw::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ConditionalSumAutoTest(FUNC_S(Simd::Vmx::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Neon::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
         return result;
     }
 
-	namespace
-	{
-		struct FuncF
-		{
-			typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-				uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
+    namespace
+    {
+        struct FuncF
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, const View & dstSrc, View & dstDst) const
-			{
-				Simd::Copy(dstSrc, dstDst);
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, threshold, compareType, value, dstDst.data, dstDst.stride);
-			}
-		};
-	}
+            void Call(const View & src, uint8_t threshold, SimdCompareType compareType, uint8_t value, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, threshold, compareType, value, dstDst.data, dstDst.stride);
+            }
+        };
+    }
 
 #define ARGS_F(width, height, type, function1, function2) \
     width, height, type, \
@@ -418,77 +418,77 @@ namespace Test
 #define FUNC_F(function) \
     FuncF(function, std::string(#function))
 
-	bool ConditionalFillAutoTest(int width, int height, SimdCompareType type, const FuncF & f1, const FuncF & f2)
-	{
-		bool result = true;
+    bool ConditionalFillAutoTest(int width, int height, SimdCompareType type, const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(src);
-		View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(dst);
-		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+        View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(dst);
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		uint8_t threshold = 127, value = 63;
+        uint8_t threshold = 127, value = 63;
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, type, value, dst, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, type, value, dst, dst1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, type, value, dst, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, type, value, dst, dst2));
 
-		result = result && Compare(dst1, dst2, 0, true, 32);
+        result = result && Compare(dst1, dst2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ConditionalFillAutoTest(const FuncF & f1, const FuncF & f2)
-	{
-		bool result = true;
+    bool ConditionalFillAutoTest(const FuncF & f1, const FuncF & f2)
+    {
+        bool result = true;
 
-		for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
-		{
-			result = result && ConditionalFillAutoTest(ARGS_F(W, H, type, f1, f2));
-			result = result && ConditionalFillAutoTest(ARGS_F(W + O, H - O, type, f1, f2));
-			result = result && ConditionalFillAutoTest(ARGS_F(W - O, H + O, type, f1, f2));
-		}
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalFillAutoTest(ARGS_F(W, H, type, f1, f2));
+            result = result && ConditionalFillAutoTest(ARGS_F(W + O, H - O, type, f1, f2));
+            result = result && ConditionalFillAutoTest(ARGS_F(W - O, H + O, type, f1, f2));
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ConditionalFillAutoTest()
-	{
-		bool result = true;
+    bool ConditionalFillAutoTest()
+    {
+        bool result = true;
 
-		result = result && ConditionalFillAutoTest(FUNC_F(Simd::Base::ConditionalFill), FUNC_F(SimdConditionalFill));
+        result = result && ConditionalFillAutoTest(FUNC_F(Simd::Base::ConditionalFill), FUNC_F(SimdConditionalFill));
 
 #ifdef SIMD_SSE2_ENABLE
-		if (Simd::Sse2::Enable)
-			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sse2::ConditionalFill), FUNC_F(SimdConditionalFill));
+        if (Simd::Sse2::Enable)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sse2::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable)
-			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx2::ConditionalFill), FUNC_F(SimdConditionalFill));
+        if (Simd::Avx2::Enable)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx2::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx512bw::ConditionalFill), FUNC_F(SimdConditionalFill));
+        if (Simd::Avx512bw::Enable)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Avx512bw::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-		if (Simd::Vmx::Enable)
-			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Vmx::ConditionalFill), FUNC_F(SimdConditionalFill));
+        if (Simd::Vmx::Enable)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Vmx::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ConditionalFillAutoTest(FUNC_F(Simd::Neon::ConditionalFill), FUNC_F(SimdConditionalFill));
+        if (Simd::Neon::Enable)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Neon::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     //-----------------------------------------------------------------------
 
@@ -504,7 +504,7 @@ namespace Test
         uint8_t value = 127;
         uint32_t c1, c2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -535,7 +535,7 @@ namespace Test
         bool result = true;
 
         FuncC8U f = FUNC_C8U(SimdConditionalCount8u);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCount8uDataTest(create, DW, DH, type, FuncC8U(f.func, f.description + Data::Description(type)));
         }
@@ -555,7 +555,7 @@ namespace Test
         int16_t value = 1111;
         uint32_t c1, c2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -586,7 +586,7 @@ namespace Test
         bool result = true;
 
         FuncC16I f = FUNC_C16I(SimdConditionalCount16i);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalCount16iDataTest(create, DW, DH, type, FuncC16I(f.func, f.description + Data::Description(type)));
         }
@@ -607,7 +607,7 @@ namespace Test
         uint8_t value = 127;
         uint64_t s1, s2;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
             FillRandom(mask);
@@ -641,7 +641,7 @@ namespace Test
         bool result = true;
 
         FuncS f = FUNC_S(SimdConditionalSum);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
         }
@@ -654,7 +654,7 @@ namespace Test
         bool result = true;
 
         FuncS f = FUNC_S(SimdConditionalSquareSum);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
         }
@@ -667,7 +667,7 @@ namespace Test
         bool result = true;
 
         FuncS f = FUNC_S(SimdConditionalSquareGradientSum);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && ConditionalSumDataTest(create, DW, DH, type, FuncS(f.func, f.description + Data::Description(type)));
         }
@@ -675,59 +675,59 @@ namespace Test
         return result;
     }
 
-	bool ConditionalFillDataTest(bool create, int width, int height, SimdCompareType type, const FuncF & f)
-	{
-		bool result = true;
+    bool ConditionalFillDataTest(bool create, int width, int height, SimdCompareType type, const FuncF & f)
+    {
+        bool result = true;
 
-		Data data(f.description);
+        Data data(f.description);
 
-		TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		uint8_t threshold = 127, value = 63;
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        uint8_t threshold = 127, value = 63;
 
-		if (create)
-		{
-			FillRandom(src);
-			FillRandom(dst);
+        if (create)
+        {
+            FillRandom(src);
+            FillRandom(dst);
 
-			TEST_SAVE(src);
-			TEST_SAVE(dst);
+            TEST_SAVE(src);
+            TEST_SAVE(dst);
 
-			f.Call(src, threshold, type, value, dst, dst1);
+            f.Call(src, threshold, type, value, dst, dst1);
 
-			TEST_SAVE(dst1);
-		}
-		else
-		{
-			TEST_LOAD(src);
-			TEST_LOAD(dst);
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(dst);
 
-			TEST_LOAD(dst1);
+            TEST_LOAD(dst1);
 
-			f.Call(src, threshold, type, value, dst, dst2);
+            f.Call(src, threshold, type, value, dst, dst2);
 
-			TEST_SAVE(dst2);
+            TEST_SAVE(dst2);
 
-			result = result && Compare(dst1, dst2, 0, true, 32);
-		}
+            result = result && Compare(dst1, dst2, 0, true, 32);
+        }
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ConditionalFillDataTest(bool create)
-	{
-		bool result = true;
+    bool ConditionalFillDataTest(bool create)
+    {
+        bool result = true;
 
-		FuncF f = FUNC_F(SimdConditionalFill);
-		for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
-		{
-			result = result && ConditionalFillDataTest(create, DW, DH, type, FuncF(f.func, f.description + Data::Description(type)));
-		}
+        FuncF f = FUNC_F(SimdConditionalFill);
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        {
+            result = result && ConditionalFillDataTest(create, DW, DH, type, FuncF(f.func, f.description + Data::Description(type)));
+        }
 
-		return result;
-	}
+        return result;
+    }
 }

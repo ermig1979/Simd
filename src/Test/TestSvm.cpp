@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncSL
         {
-            typedef void (*FuncPtr)(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
+            typedef void(*FuncPtr)(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
             FuncPtr func;
             String description;
@@ -43,7 +43,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func((float*)x.data, (float*)svs.data, (float*)weights.data, length, count, sum);
             }
-        };       
+        };
     }
 
 #define FUNC_SL(function) FuncSL(function, #function)
@@ -77,9 +77,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SvmSumLinearAutoTest(W/9, H*9, f1, f2);
-        result = result && SvmSumLinearAutoTest(W/10, H*10, f1, f2);
-        result = result && SvmSumLinearAutoTest(W/11, H*11, f1, f2);
+        result = result && SvmSumLinearAutoTest(W / 9, H * 9, f1, f2);
+        result = result && SvmSumLinearAutoTest(W / 10, H * 10, f1, f2);
+        result = result && SvmSumLinearAutoTest(W / 11, H * 11, f1, f2);
 
         return result;
     }
@@ -91,22 +91,22 @@ namespace Test
         result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Base::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 
 #ifdef SIMD_SSE_ENABLE
-        if(Simd::Sse::Enable)
+        if (Simd::Sse::Enable)
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Sse::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
-        if(Simd::Avx::Enable)
+        if (Simd::Avx::Enable)
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
-		if (Simd::Avx512f::Enable)
-			result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx512f::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
+        if (Simd::Avx512f::Enable)
+            result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx512f::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
-        if(Simd::Vsx::Enable)
+        if (Simd::Vsx::Enable)
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Vsx::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
 
@@ -126,7 +126,7 @@ namespace Test
 
         Data data(f.description);
 
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << length<< ", " << count << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << length << ", " << count << "].");
 
         View svs(length*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View weights(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -134,7 +134,7 @@ namespace Test
 
         float s1, s2;
 
-        if(create)
+        if (create)
         {
             FillRandom32f(svs, -10.0, 10.0);
             FillRandom32f(weights, -10.0, 10.0);

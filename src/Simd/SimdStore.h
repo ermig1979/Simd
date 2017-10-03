@@ -158,102 +158,102 @@ namespace Simd
 #endif//SIMD_SAVX2_ENABLE
 
 #ifdef SIMD_AVX512F_ENABLE
-	namespace Avx512f
-	{
-		template <bool align> SIMD_INLINE void Store(float * p, __m512 a);
+    namespace Avx512f
+    {
+        template <bool align> SIMD_INLINE void Store(float * p, __m512 a);
 
-		template <> SIMD_INLINE void Store<false>(float * p, __m512 a)
-		{
-			_mm512_storeu_ps(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(float * p, __m512 a)
+        {
+            _mm512_storeu_ps(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(float * p, __m512 a)
-		{
-			_mm512_store_ps(p, a);
-		}
+        template <> SIMD_INLINE void Store<true>(float * p, __m512 a)
+        {
+            _mm512_store_ps(p, a);
+        }
 
-		template <bool align, bool mask> SIMD_INLINE void Store(float * p, __m512 a, __mmask16 m)
-		{
-			return Store<align>(p, a);
-		}
+        template <bool align, bool mask> SIMD_INLINE void Store(float * p, __m512 a, __mmask16 m)
+        {
+            return Store<align>(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<false, true>(float * p, __m512 a, __mmask16 m)
-		{
-			return _mm512_mask_storeu_ps(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<false, true>(float * p, __m512 a, __mmask16 m)
+        {
+            return _mm512_mask_storeu_ps(p, m, a);
+        }
 
-		template <> SIMD_INLINE void Store<true, true>(float * p, __m512 a, __mmask16 m)
-		{
-			return _mm512_mask_store_ps(p, m, a);
-		}
-	}
+        template <> SIMD_INLINE void Store<true, true>(float * p, __m512 a, __mmask16 m)
+        {
+            return _mm512_mask_store_ps(p, m, a);
+        }
+    }
 #endif//SIMD_AVX512F_ENABLE
 
 #ifdef SIMD_AVX512BW_ENABLE
-	namespace Avx512bw
-	{
-		template <bool align> SIMD_INLINE void Store(void * p, __m512i a);
+    namespace Avx512bw
+    {
+        template <bool align> SIMD_INLINE void Store(void * p, __m512i a);
 
-		template <> SIMD_INLINE void Store<false>(void * p, __m512i a)
-		{
-			_mm512_storeu_si512(p, a);
-		}
+        template <> SIMD_INLINE void Store<false>(void * p, __m512i a)
+        {
+            _mm512_storeu_si512(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<true>(void * p, __m512i a)
-		{
-			_mm512_store_si512(p, a);
-		}
+        template <> SIMD_INLINE void Store<true>(void * p, __m512i a)
+        {
+            _mm512_store_si512(p, a);
+        }
 
-		template <bool align, bool mask> SIMD_INLINE void Store(uint8_t * p, __m512i a, __mmask64 m)
-		{
-			return Store<align>(p, a);
-		}
+        template <bool align, bool mask> SIMD_INLINE void Store(uint8_t * p, __m512i a, __mmask64 m)
+        {
+            return Store<align>(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<false, true>(uint8_t * p, __m512i a, __mmask64 m)
-		{
-			return _mm512_mask_storeu_epi8(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<false, true>(uint8_t * p, __m512i a, __mmask64 m)
+        {
+            return _mm512_mask_storeu_epi8(p, m, a);
+        }
 
-		template <> SIMD_INLINE void Store<true, true>(uint8_t * p, __m512i a, __mmask64 m)
-		{
-			return _mm512_mask_storeu_epi8(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<true, true>(uint8_t * p, __m512i a, __mmask64 m)
+        {
+            return _mm512_mask_storeu_epi8(p, m, a);
+        }
 
-		template <bool align, bool mask> SIMD_INLINE void Store(int16_t * p, __m512i a, __mmask32 m)
-		{
-			return Store<align>(p, a);
-		}
+        template <bool align, bool mask> SIMD_INLINE void Store(int16_t * p, __m512i a, __mmask32 m)
+        {
+            return Store<align>(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<false, true>(int16_t * p, __m512i a, __mmask32 m)
-		{
-			return _mm512_mask_storeu_epi16(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<false, true>(int16_t * p, __m512i a, __mmask32 m)
+        {
+            return _mm512_mask_storeu_epi16(p, m, a);
+        }
 
-		template <> SIMD_INLINE void Store<true, true>(int16_t * p, __m512i a, __mmask32 m)
-		{
-			return _mm512_mask_storeu_epi16(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<true, true>(int16_t * p, __m512i a, __mmask32 m)
+        {
+            return _mm512_mask_storeu_epi16(p, m, a);
+        }
 
-		template <bool align, bool mask> SIMD_INLINE void Store(uint16_t * p, __m512i a, __mmask32 m)
-		{
-			return Store<align, mask>((int16_t*)p, a, m);
-		}
+        template <bool align, bool mask> SIMD_INLINE void Store(uint16_t * p, __m512i a, __mmask32 m)
+        {
+            return Store<align, mask>((int16_t*)p, a, m);
+        }
 
-		template <bool align, bool mask> SIMD_INLINE void Store(uint32_t * p, __m512i a, __mmask16 m)
-		{
-			return Store<align>(p, a);
-		}
+        template <bool align, bool mask> SIMD_INLINE void Store(uint32_t * p, __m512i a, __mmask16 m)
+        {
+            return Store<align>(p, a);
+        }
 
-		template <> SIMD_INLINE void Store<false, true>(uint32_t * p, __m512i a, __mmask16 m)
-		{
-			return _mm512_mask_storeu_epi32(p, m, a);
-		}
+        template <> SIMD_INLINE void Store<false, true>(uint32_t * p, __m512i a, __mmask16 m)
+        {
+            return _mm512_mask_storeu_epi32(p, m, a);
+        }
 
-		template <> SIMD_INLINE void Store<true, true>(uint32_t * p, __m512i a, __mmask16 m)
-		{
-			return _mm512_mask_storeu_epi32(p, m, a);
-		}
-	}
+        template <> SIMD_INLINE void Store<true, true>(uint32_t * p, __m512i a, __mmask16 m)
+        {
+            return _mm512_mask_storeu_epi32(p, m, a);
+        }
+    }
 #endif//SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_VMX_ENABLE

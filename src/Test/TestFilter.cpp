@@ -27,24 +27,24 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct FuncC
-		{
-			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
+    namespace
+    {
+        struct FuncC
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			FuncC(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncC(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst) const
-			{
+            void Call(const View & src, View & dst) const
+            {
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), dst.data, dst.stride);
-			}
-		};
-	}
+            }
+        };
+    }
 
 #define ARGS_C(format, width, height, function1, function2) \
     format, width, height, \
@@ -54,32 +54,32 @@ namespace Test
 #define FUNC_C(function) \
     FuncC(function, std::string(#function))
 
-	bool ColorFilterAutoTest(View::Format format, int width, int height, const FuncC & f1, const FuncC & f2)
-	{
-		bool result = true;
+    bool ColorFilterAutoTest(View::Format format, int width, int height, const FuncC & f1, const FuncC & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View s(width, height, format, NULL, TEST_ALIGN(width));
-		FillRandom(s);
+        View s(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(s);
 
-		View d1(width, height, format, NULL, TEST_ALIGN(width));
-		View d2(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 64);
+        result = result && Compare(d1, d2, 0, true, 64);
 
-		return result;
-	}
+        return result;
+    }
 
     bool ColorFilterAutoTest(const FuncC & f1, const FuncC & f2)
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ColorFilterAutoTest(ARGS_C(format, W, H, f1, f2));
             result = result && ColorFilterAutoTest(ARGS_C(format, W + O, H - O, f1, f2));
@@ -89,35 +89,35 @@ namespace Test
         return result;
     }
 
-	bool MeanFilter3x3AutoTest()
-	{
-		bool result = true;
+    bool MeanFilter3x3AutoTest()
+    {
+        bool result = true;
 
-		result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 
 #ifdef SIMD_SSE2_ENABLE
-		if (Simd::Sse2::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (Simd::Sse2::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-		if (Simd::Ssse3::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (Simd::Ssse3::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (Simd::Avx2::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-		if (Simd::Vmx::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+        if (Simd::Vmx::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -125,8 +125,8 @@ namespace Test
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     bool MedianFilterRhomb3x3AutoTest()
     {
@@ -135,28 +135,28 @@ namespace Test
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
         return result;
@@ -169,28 +169,28 @@ namespace Test
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif
 
         return result;
@@ -203,28 +203,28 @@ namespace Test
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif
 
         return result;
@@ -237,31 +237,31 @@ namespace Test
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif
 
-		return result;
+        return result;
     }
 
     bool GaussianBlur3x3AutoTest()
@@ -271,43 +271,43 @@ namespace Test
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+        if (Simd::Avx512bw::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Avx512bw::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Vmx::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+        if (Simd::Neon::Enable)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Neon::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif
 
-		return result;
+        return result;
     }
 
     namespace
     {
         struct FuncG
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
             String description;
@@ -325,26 +325,26 @@ namespace Test
 #define FUNC_G(function) \
     FuncG(function, std::string(#function))
 
-	bool GrayFilterAutoTest(int width, int height, View::Format format, const FuncG & f1, const FuncG & f2)
-	{
-		bool result = true;
+    bool GrayFilterAutoTest(int width, int height, View::Format format, const FuncG & f1, const FuncG & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(s);
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(s);
 
-		View d1(width, height, format, NULL, TEST_ALIGN(width));
-		View d2(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 64);
+        result = result && Compare(d1, d2, 0, true, 64);
 
-		return result;
-	}
+        return result;
+    }
 
     bool GrayFilterAutoTest(View::Format format, const FuncG & f1, const FuncG & f2)
     {
@@ -357,39 +357,39 @@ namespace Test
         return result;
     }
 
-	bool AbsGradientSaturatedSumAutoTest()
-	{
-		bool result = true;
+    bool AbsGradientSaturatedSumAutoTest()
+    {
+        bool result = true;
 
-		result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+        result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Vmx::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 
     bool LbpEstimateAutoTest()
     {
@@ -398,28 +398,28 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::LbpEstimate), FUNC_G(SimdLbpEstimate));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse2::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx2::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::LbpEstimate), FUNC_G(SimdLbpEstimate));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Vmx::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::LbpEstimate), FUNC_G(SimdLbpEstimate));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Neon::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
         return result;
@@ -441,33 +441,33 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDx), FUNC_G(SimdSobelDx));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDx), FUNC_G(SimdSobelDx));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDx), FUNC_G(SimdSobelDx));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDx), FUNC_G(SimdSobelDx));
 #endif
 
         return result;
@@ -480,28 +480,28 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif
 
         return result;
@@ -514,33 +514,33 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDy), FUNC_G(SimdSobelDy));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDy), FUNC_G(SimdSobelDy));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDy), FUNC_G(SimdSobelDy));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDy), FUNC_G(SimdSobelDy));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDy), FUNC_G(SimdSobelDy));
 #endif
 
         return result;
@@ -553,28 +553,28 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif
 
         return result;
@@ -587,28 +587,28 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::ContourMetrics), FUNC_G(SimdContourMetrics));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::ContourMetrics), FUNC_G(SimdContourMetrics));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::ContourMetrics), FUNC_G(SimdContourMetrics));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif
 
         return result;
@@ -621,33 +621,33 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::Laplace), FUNC_G(SimdLaplace));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::Laplace), FUNC_G(SimdLaplace));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::Laplace), FUNC_G(SimdLaplace));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::Laplace), FUNC_G(SimdLaplace));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
         return result;
@@ -660,28 +660,28 @@ namespace Test
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx2::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Avx512bw::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Vmx::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+        if (Simd::Neon::Enable)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Neon::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif
 
         return result;
@@ -702,7 +702,7 @@ namespace Test
         View dst1(width, height, format, NULL, TEST_ALIGN(width));
         View dst2(width, height, format, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -732,7 +732,7 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ColorFilterDataTest(create, width, height, format, FuncC(f.func, f.description + Data::Description(format)));
         }
@@ -740,14 +740,14 @@ namespace Test
         return result;
     }
 
-	bool MeanFilter3x3DataTest(bool create)
-	{
-		bool result = true;
+    bool MeanFilter3x3DataTest(bool create)
+    {
+        bool result = true;
 
-		result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMeanFilter3x3));
+        result = result && ColorFilterDataTest(create, DW, DH, FUNC_C(SimdMeanFilter3x3));
 
-		return result;
-	}
+        return result;
+    }
 
     bool MedianFilterRhomb3x3DataTest(bool create)
     {
@@ -807,7 +807,7 @@ namespace Test
         View dst1(width, height, format, NULL, TEST_ALIGN(width));
         View dst2(width, height, format, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

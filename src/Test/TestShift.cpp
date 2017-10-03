@@ -27,28 +27,28 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, 
-				const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY, 
-				size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
+    namespace
+    {
+        struct Func
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+                const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
+                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, const View & bkg, double shiftX, double shiftY, 
-				size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), bkg.data, bkg.stride,
-					&shiftX, &shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.data, dst.stride);
-			}
-		};
-	}
+            void Call(const View & src, const View & bkg, double shiftX, double shiftY,
+                size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, View::PixelSize(src.format), bkg.data, bkg.stride,
+                    &shiftX, &shiftY, cropLeft, cropTop, cropRight, cropBottom, dst.data, dst.stride);
+            }
+        };
+    }
 
 #define ARGS(format, width, height, function1, function2) \
 	format, width, height, \
@@ -58,46 +58,46 @@ namespace Test
 #define FUNC(function) \
     Func(function, std::string(#function))
 
-	bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool ShiftAutoTest(View::Format format, int width, int height, double dx, double dy, int crop, const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, std::setprecision(1) << std::fixed << "Test " << f1.description << " & " << f2.description 
+        TEST_LOG_SS(Info, std::setprecision(1) << std::fixed << "Test " << f1.description << " & " << f2.description
             << " [" << width << ", " << height << "]," << " (" << dx << ", " << dy << ", " << crop << ").");
 
-		View s(width, height, format, NULL, TEST_ALIGN(width));
-		FillRandom(s);
-		View b(width, height, format, NULL, TEST_ALIGN(width));
-		FillRandom(b);
+        View s(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(s);
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(b);
 
-		View d1(width, height, format, NULL, TEST_ALIGN(width));
-		View d2(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, b, dx, dy, crop, crop, width - crop, height - crop, d2));
 
-		result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ShiftAutoTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool ShiftAutoTest(View::Format format, int width, int height, const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		const double x0 = 6.9, dx = -5.3, y0 = -5.2, dy = 3.7;
-		for(int i = 0; i < 4; ++i)
-			result = result && ShiftAutoTest(format, width, height, x0 + i*dx, y0 + i*dy, i*3, f1, f2);
+        const double x0 = 6.9, dx = -5.3, y0 = -5.2, dy = 3.7;
+        for (int i = 0; i < 4; ++i)
+            result = result && ShiftAutoTest(format, width, height, x0 + i*dx, y0 + i*dy, i * 3, f1, f2);
 
-		return result;
-	}
+        return result;
+    }
 
     bool ShiftBilinearAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ShiftAutoTest(ARGS(format, W, H, f1, f2));
             result = result && ShiftAutoTest(ARGS(format, W + O, H - O, f1, f2));
@@ -106,39 +106,39 @@ namespace Test
         return result;
     }
 
-	bool ShiftBilinearAutoTest()
-	{
-		bool result = true;
+    bool ShiftBilinearAutoTest()
+    {
+        bool result = true;
 
-		result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
+        result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Sse2::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx2::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx512bw::ShiftBilinear), FUNC(SimdShiftBilinear));
+        if (Simd::Avx512bw::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Avx512bw::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ShiftBilinearAutoTest(FUNC(Simd::Vmx::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ShiftBilinearAutoTest(FUNC(Simd::Neon::ShiftBilinear), FUNC(SimdShiftBilinear));
+        if (Simd::Neon::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Neon::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
-		return result;
-	}
+        return result;
+    }
 
     //-----------------------------------------------------------------------
 
@@ -158,7 +158,7 @@ namespace Test
         const double dx = -5.3, dy = 3.7;
         const int crop = 3;
 
-        if(create)
+        if (create)
         {
             FillRandom(s);
             FillRandom(b);
@@ -190,7 +190,7 @@ namespace Test
         bool result = true;
 
         Func f = FUNC(SimdShiftBilinear);
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ShiftBilinearDataTest(create, DW, DH, format, Func(f.func, f.description + Data::Description(format)));
         }
@@ -222,7 +222,7 @@ namespace Test
                 size_t dx2 = Simd::Square(co - x);
                 size_t r2 = dy2 + dx2;
                 obj.At<uint8_t>(x, y) = (r2 >= rl2 && r2 <= rh2 ? hi : lo);
-          
+
             }
         }
         FillRandom(bkg, 0, lo * 2);
@@ -269,9 +269,9 @@ namespace Test
         for (int i = 0; i < n; ++i)
         {
             const int ms = (int)region.Width() / 4;
-            Point ss(Random(2*ms) - ms, Random(2*ms) - ms);
+            Point ss(Random(2 * ms) - ms, Random(2 * ms) - ms);
 
-            shiftDetector.Estimate(background.Region(region), region.Shifted(ss), ms*2);
+            shiftDetector.Estimate(background.Region(region), region.Shifted(ss), ms * 2);
 
             ShiftDetector::FPoint ds = shiftDetector.ProximateShift();
 

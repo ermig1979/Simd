@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncPHEH
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride);
 
             FuncPtr func;
             String description;
@@ -43,7 +43,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 func(src.data, src.stride, src.width, src.height, histogram, stride);
             }
-        };       
+        };
     }
 
 #define FUNC_PHEH(function) FuncPHEH(function, #function)
@@ -57,8 +57,8 @@ namespace Test
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-		const size_t stride = quantization*(width / cell);
-        const size_t size = stride*(height/cell);
+        const size_t stride = quantization*(width / cell);
+        const size_t size = stride*(height / cell);
         Buffer32f h1(size, 0), h2(size, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1.data(), stride));
@@ -101,11 +101,11 @@ namespace Test
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		const size_t stride = quantization*(width / cell);
-		const size_t size = stride*(height / cell);
-		Buffer32f h1(size, 0), h2(size, 0);
+        const size_t stride = quantization*(width / cell);
+        const size_t size = stride*(height / cell);
+        Buffer32f h1(size, 0), h2(size, 0);
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 

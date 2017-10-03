@@ -31,7 +31,7 @@ namespace Test
     {
         struct FuncM
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 const uint8_t * mask, size_t maskStride, uint8_t indexMin, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
@@ -92,28 +92,28 @@ namespace Test
         result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Ssse3::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx2::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx512bw::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+        if (Simd::Avx512bw::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx512bw::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vmx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+        if (Simd::Neon::Enable)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
         return result;
@@ -123,7 +123,7 @@ namespace Test
     {
         struct FuncA
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                 size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
@@ -183,28 +183,28 @@ namespace Test
         result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx512bw::ContourAnchors), FUNC_A(SimdContourAnchors));
+        if (Simd::Avx512bw::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx512bw::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vmx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
+        if (Simd::Neon::Enable)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif
 
         return result;
@@ -226,7 +226,7 @@ namespace Test
         View dst1(width, height, View::Int16, NULL, TEST_ALIGN(width));
         View dst2(width, height, View::Int16, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
             FillRandom(mask);
@@ -277,7 +277,7 @@ namespace Test
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(s);
 

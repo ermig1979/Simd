@@ -4,20 +4,20 @@
 * Copyright (c) 2011-2017 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -28,23 +28,23 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-			typedef void(*FuncPtr)(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
-			FuncPtr func;
-			String description;
+    namespace
+    {
+        struct Func
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
+            FuncPtr func;
+            String description;
 
-			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
-			}
-		};	
-	}
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
+            }
+        };
+    }
 
 #define FUNC(func) Func(func, #func)
 
@@ -77,7 +77,7 @@ namespace Test
         result = result && AnyToAnyAutoTest(W + O, H - O, srcType, dstType, f1, f2);
         result = result && AnyToAnyAutoTest(W - O, H + O, srcType, dstType, f1, f2);
 
-        return result;    
+        return result;
     }
 
     bool BgraToBgrAutoTest()
@@ -87,26 +87,26 @@ namespace Test
         result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Base::BgraToBgr), FUNC(SimdBgraToBgr));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Ssse3::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Avx512bw::BgraToBgr), FUNC(SimdBgraToBgr));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Avx512bw::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Vmx::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Neon::BgraToBgr), FUNC(SimdBgraToBgr));
+        if (Simd::Neon::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Bgr24, FUNC(Simd::Neon::BgraToBgr), FUNC(SimdBgraToBgr));
 #endif 
 
-        return result;    
+        return result;
     }
 
     bool BgraToGrayAutoTest()
@@ -116,31 +116,31 @@ namespace Test
         result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Base::BgraToGray), FUNC(SimdBgraToGray));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Sse2::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Avx2::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Avx512bw::BgraToGray), FUNC(SimdBgraToGray));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Avx512bw::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Vmx::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Neon::BgraToGray), FUNC(SimdBgraToGray));
+        if (Simd::Neon::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC(Simd::Neon::BgraToGray), FUNC(SimdBgraToGray));
 #endif 
 
-        return result;    
+        return result;
     }
 
     bool BgrToGrayAutoTest()
@@ -150,36 +150,36 @@ namespace Test
         result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Base::BgrToGray), FUNC(SimdBgrToGray));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Sse2::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Ssse3::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Avx2::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Avx512bw::BgrToGray), FUNC(SimdBgrToGray));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Avx512bw::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Vmx::BgrToGray), FUNC(SimdBgrToGray));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Neon::BgrToGray), FUNC(SimdBgrToGray));
+        if (Simd::Neon::Enable)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC(Simd::Neon::BgrToGray), FUNC(SimdBgrToGray));
 #endif
 
-        return result;    
+        return result;
     }
 
     bool BgrToHslAutoTest()
@@ -188,7 +188,7 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsl24, FUNC(Simd::Base::BgrToHsl), FUNC(SimdBgrToHsl));
 
-        return result;    
+        return result;
     }
 
     bool BgrToHsvAutoTest()
@@ -197,7 +197,7 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Bgr24, View::Hsv24, FUNC(Simd::Base::BgrToHsv), FUNC(SimdBgrToHsv));
 
-        return result;    
+        return result;
     }
 
     bool GrayToBgrAutoTest()
@@ -207,38 +207,38 @@ namespace Test
         result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Base::GrayToBgr), FUNC(SimdGrayToBgr));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Ssse3::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Avx2::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Avx512bw::GrayToBgr), FUNC(SimdGrayToBgr));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Avx512bw::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Vmx::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Neon::GrayToBgr), FUNC(SimdGrayToBgr));
+        if (Simd::Neon::Enable)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC(Simd::Neon::GrayToBgr), FUNC(SimdGrayToBgr));
 #endif 
 
-        return result;    
+        return result;
     }
 
-	bool Int16ToGrayAutoTest()
-	{
-		bool result = true;
+    bool Int16ToGrayAutoTest()
+    {
+        bool result = true;
 
-		result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Base::Int16ToGray), FUNC(SimdInt16ToGray));
+        result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Base::Int16ToGray), FUNC(SimdInt16ToGray));
 
 #ifdef SIMD_SSE2_ENABLE
         if (Simd::Sse2::Enable)
@@ -251,8 +251,8 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Avx512bw::Int16ToGray), FUNC(SimdInt16ToGray));
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Avx512bw::Int16ToGray), FUNC(SimdInt16ToGray));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -260,9 +260,9 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC(Simd::Neon::Int16ToGray), FUNC(SimdInt16ToGray));
 #endif 
 
-		return result;
-	}    
-    
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool AnyToAnyDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
@@ -278,7 +278,7 @@ namespace Test
         View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
         View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -358,12 +358,12 @@ namespace Test
         return result;
     }
 
-	bool Int16ToGrayDataTest(bool create)
-	{
-		bool result = true;
+    bool Int16ToGrayDataTest(bool create)
+    {
+        bool result = true;
 
-		result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC(SimdInt16ToGray));
+        result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC(SimdInt16ToGray));
 
-		return result;
-	}
+        return result;
+    }
 }

@@ -31,7 +31,7 @@ namespace Test
     {
         struct Func
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
             String description;
@@ -74,9 +74,9 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             Func f1c = Func(f1.func, f1.description + ColorDescription(format));
@@ -103,7 +103,7 @@ namespace Test
     {
         struct FuncF
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
                 size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
             FuncPtr func;
@@ -114,7 +114,7 @@ namespace Test
             void Call(const View & src, const Rect & frame, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, src.PixelSize(), 
+                func(src.data, src.stride, src.width, src.height, src.PixelSize(),
                     frame.left, frame.top, frame.right, frame.bottom, dst.data, dst.stride);
             }
         };
@@ -132,7 +132,7 @@ namespace Test
         View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+        Rect frame(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15);
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
@@ -152,9 +152,9 @@ namespace Test
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             FuncF f1c = FuncF(f1.func, f1.description + ColorDescription(format));
@@ -178,7 +178,7 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
-    
+
     bool CopyDataTest(bool create, View::Format format, int width, int height, const Func & f)
     {
         bool result = true;
@@ -192,7 +192,7 @@ namespace Test
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(s);
 
@@ -224,9 +224,9 @@ namespace Test
 
         Func f = FUNC(SimdCopy);
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             result = result && CopyDataTest(create, format, DW, DH, Func(f.func, f.description + Data::Description(format)));
@@ -245,12 +245,12 @@ namespace Test
 
         View s(width, height, format, NULL, TEST_ALIGN(width));
 
-        Rect frame(width*1/15, height*2/15, width*11/15, height*12/15);
+        Rect frame(width * 1 / 15, height * 2 / 15, width * 11 / 15, height * 12 / 15);
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(s);
 
@@ -286,9 +286,9 @@ namespace Test
 
         FuncF f = FUNC_F(SimdCopyFrame);
 
-        for(View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::BayerBggr; format = View::Format(format + 1))
         {
-            if(format == View::Float || format == View::Double)
+            if (format == View::Float || format == View::Double)
                 continue;
 
             result = result && CopyFrameDataTest(create, format, DW, DH, FuncF(f.func, f.description + Data::Description(format)));

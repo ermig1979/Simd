@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -30,7 +30,7 @@ namespace Simd
 #ifdef SIMD_VMX_ENABLE  
     namespace Vmx
     {
-        const v128_u16 K16_BLUE_RED = SIMD_VEC_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);        
+        const v128_u16 K16_BLUE_RED = SIMD_VEC_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);
         const v128_u16 K16_GREEN_0000 = SIMD_VEC_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0x0000);
         const v128_u32 K32_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::BGR_TO_GRAY_ROUND_TERM);
         const v128_u32 K32_SHIFT = SIMD_VEC_SET1_EPI32(Base::BGR_TO_GRAY_AVERAGING_SHIFT);
@@ -58,10 +58,10 @@ namespace Simd
             _bgr[2] = Load<align, false>(bgr);
 
             const v128_u16 lo = vec_packsu(
-                BgraToGray32(vec_perm(_bgr[0], _bgr[1], K8_PERM_0)), 
+                BgraToGray32(vec_perm(_bgr[0], _bgr[1], K8_PERM_0)),
                 BgraToGray32(vec_perm(_bgr[0], _bgr[1], K8_PERM_1)));
             const v128_u16 hi = vec_packsu(
-                BgraToGray32(vec_perm(_bgr[1], _bgr[2], K8_PERM_2)), 
+                BgraToGray32(vec_perm(_bgr[1], _bgr[2], K8_PERM_2)),
                 BgraToGray32(vec_perm(_bgr[1], _bgr[2], K8_PERM_3)));
             Store<align, first>(gray, vec_packsu(lo, hi));
         }
@@ -69,22 +69,22 @@ namespace Simd
         template <bool align> void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(bgr) && Aligned(bgrStride) && Aligned(gray) && Aligned(grayStride));
 
             size_t alignedWidth = AlignLo(width, A);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 Loader<align> _bgr(bgr);
                 Storer<align> _gray(gray);
                 BgrToGray<align, true>(_bgr, _gray);
-                for(size_t col = A; col < alignedWidth; col += A)
+                for (size_t col = A; col < alignedWidth; col += A)
                     BgrToGray<align, false>(_bgr, _gray);
                 Flush(_gray);
 
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                 {
-                    Loader<false> _bgr(bgr + 3*(width - A));
+                    Loader<false> _bgr(bgr + 3 * (width - A));
                     Storer<false> _gray(gray + width - A);
                     BgrToGray<false, true>(_bgr, _gray);
                     Flush(_gray);
@@ -97,7 +97,7 @@ namespace Simd
 
         void BgrToGray(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * gray, size_t grayStride)
         {
-            if(Aligned(bgr) && Aligned(gray) && Aligned(bgrStride) && Aligned(grayStride))
+            if (Aligned(bgr) && Aligned(gray) && Aligned(bgrStride) && Aligned(grayStride))
                 BgrToGray<true>(bgr, width, height, bgrStride, gray, grayStride);
             else
                 BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);

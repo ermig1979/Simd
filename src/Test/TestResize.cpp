@@ -27,27 +27,27 @@
 
 namespace Test
 {
-	namespace
-	{
-		struct Func
-		{
-			typedef void (*FuncPtr)(
-				const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-				 uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+    namespace
+    {
+        struct Func
+        {
+            typedef void(*FuncPtr)(
+                const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+                uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, View & dst) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.width, src.height, src.stride,
-					dst.data, dst.width, dst.height, dst.stride, View::PixelSize(src.format));
-			}
-		};
-	}
+            void Call(const View & src, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.width, src.height, src.stride,
+                    dst.data, dst.width, dst.height, dst.stride, View::PixelSize(src.format));
+            }
+        };
+    }
 
 #define ARGS1(format, width, height, k, function1, function2) \
     format, width, height, k, \
@@ -62,33 +62,33 @@ namespace Test
 #define FUNC(function) \
     Func(function, std::string(#function))
 
-	bool ResizeAutoTest(View::Format format, int width, int height, double k, const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool ResizeAutoTest(View::Format format, int width, int height, double k, const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description
-			<< " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description
+            << " [" << size_t(width*k) << ", " << size_t(height*k) << "] -> [" << width << ", " << height << "].");
 
-		View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
-		FillRandom(s);
+        View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
+        FillRandom(s);
 
-		View d1(width, height, format, NULL, TEST_ALIGN(width));
-		View d2(width, height, format, NULL, TEST_ALIGN(width));
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
 
-		result = result && Compare(d1, d2, 0, true, 64);
+        result = result && Compare(d1, d2, 0, true, 64);
 
-		return result;
-	}
+        return result;
+    }
 
     bool ResizeAutoTest(const Func & f1, const Func & f2)
     {
         bool result = true;
 
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ResizeAutoTest(ARGS1(format, W, H, 0.9, f1, f2));
             result = result && ResizeAutoTest(ARGS1(format, W + O, H - O, 1.3, f1, f2));
@@ -105,33 +105,33 @@ namespace Test
         result = result && ResizeAutoTest(FUNC(Simd::Base::ResizeBilinear), FUNC(SimdResizeBilinear));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && ResizeAutoTest(FUNC(Simd::Sse2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if(Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable)
             result = result && ResizeAutoTest(FUNC(Simd::Ssse3::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && ResizeAutoTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && ResizeAutoTest(FUNC(Simd::Avx512bw::ResizeBilinear), FUNC(SimdResizeBilinear));
+        if (Simd::Avx512bw::Enable)
+            result = result && ResizeAutoTest(FUNC(Simd::Avx512bw::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && ResizeAutoTest(FUNC(Simd::Vmx::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && ResizeAutoTest(FUNC(Simd::Neon::ResizeBilinear), FUNC(SimdResizeBilinear));
+        if (Simd::Neon::Enable)
+            result = result && ResizeAutoTest(FUNC(Simd::Neon::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif
 
         return result;
@@ -154,7 +154,7 @@ namespace Test
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
 
-        if(create)
+        if (create)
         {
             FillRandom(s);
             TEST_SAVE(s);
@@ -184,7 +184,7 @@ namespace Test
         bool result = true;
 
         Func f = FUNC(SimdResizeBilinear);
-        for(View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && ResizeDataTest(create, DW, DH, format, Func(f.func, f.description + Data::Description(format)));
         }
@@ -192,45 +192,45 @@ namespace Test
         return result;
     }
 
-	//-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
 
-	bool ResizeSpecialTest(View::Format format, const Size & src, const Size & dst, const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool ResizeSpecialTest(View::Format format, const Size & src, const Size & dst, const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << src.x << ", " << src.y << "] -> [" << dst.x << ", " << dst.y << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << src.x << ", " << src.y << "] -> [" << dst.x << ", " << dst.y << "].");
 
-		View s(src.x, src.y, format, NULL, TEST_ALIGN(src.x));
-		FillRandom(s);
+        View s(src.x, src.y, format, NULL, TEST_ALIGN(src.x));
+        FillRandom(s);
 
-		View d1(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
-		View d2(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
+        View d1(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
+        View d2(dst.x, dst.y, format, NULL, TEST_ALIGN(dst.x));
 
-		f1.Call(s, d1);
+        f1.Call(s, d1);
 
-		f2.Call(s, d2);
+        f2.Call(s, d2);
 
-		result = result && Compare(d1, d2, 0, true, 64);
+        result = result && Compare(d1, d2, 0, true, 64);
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ResizeSpecialTest(const Func & f1, const Func & f2)
-	{
-		bool result = true;
+    bool ResizeSpecialTest(const Func & f1, const Func & f2)
+    {
+        bool result = true;
 
-		result = result && ResizeSpecialTest(ARGS2(View::Gray8, Size(352, 240), Size(174, 94), f1, f2));
+        result = result && ResizeSpecialTest(ARGS2(View::Gray8, Size(352, 240), Size(174, 94), f1, f2));
 
-		for (Size dst(128, 8); dst.x < 144; ++dst.x)
-			for (Size src(32, 12); src.x < 512; ++src.x)
-				result = result && ResizeSpecialTest(ARGS2(View::Gray8, src, dst, f1, f2));
+        for (Size dst(128, 8); dst.x < 144; ++dst.x)
+            for (Size src(32, 12); src.x < 512; ++src.x)
+                result = result && ResizeSpecialTest(ARGS2(View::Gray8, src, dst, f1, f2));
 
-		return result;
-	}
+        return result;
+    }
 
-	bool ResizeBilinearSpecialTest()
-	{
-		bool result = true;
+    bool ResizeBilinearSpecialTest()
+    {
+        bool result = true;
 
         result = result && ResizeSpecialTest(FUNC(Simd::Base::ResizeBilinear), FUNC(SimdResizeBilinear));
 
@@ -240,13 +240,13 @@ namespace Test
 #endif
 
 #ifdef SIMD_SSSE3_ENABLE
-		if (Simd::Ssse3::Enable)
-			result = result && ResizeSpecialTest(FUNC(Simd::Ssse3::ResizeBilinear), FUNC(SimdResizeBilinear));
+        if (Simd::Ssse3::Enable)
+            result = result && ResizeSpecialTest(FUNC(Simd::Ssse3::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-		if (Simd::Avx2::Enable)
-			result = result && ResizeSpecialTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
+        if (Simd::Avx2::Enable)
+            result = result && ResizeSpecialTest(FUNC(Simd::Avx2::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
@@ -259,6 +259,6 @@ namespace Test
             result = result && ResizeSpecialTest(FUNC(Simd::Neon::ResizeBilinear), FUNC(SimdResizeBilinear));
 #endif
 
-		return result;
-	}
+        return result;
+    }
 }

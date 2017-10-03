@@ -3,20 +3,20 @@
 *
 * Copyright (c) 2011-2017 Yermalayeu Ihar.
 *
-* Permission is hereby granted, free of charge, to any person obtaining a copy 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-* copies of the Software, and to permit persons to whom the Software is 
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
 *
-* The above copyright notice and this permission notice shall be included in 
+* The above copyright notice and this permission notice shall be included in
 * all copies or substantial portions of the Software.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
@@ -39,34 +39,34 @@ namespace Simd
             sum = vec_msum(_src, K8_01, sum);
         }
 
-        template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        template <bool align> void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average)
         {
             assert(width*height && width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(src) && Aligned(stride));
 
             size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             uint64_t sum = 0;
-            v128_u8 mins[4] = {K8_FF, K8_FF, K8_FF, K8_FF};
-            v128_u8 maxs[4] = {K8_00, K8_00, K8_00, K8_00};
-            for(size_t row = 0; row < height; ++row)
+            v128_u8 mins[4] = { K8_FF, K8_FF, K8_FF, K8_FF };
+            v128_u8 maxs[4] = { K8_00, K8_00, K8_00, K8_00 };
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     GetStatistic<align>(src, col, mins[0], maxs[0], sums[0]);
                     GetStatistic<align>(src, col + A, mins[1], maxs[1], sums[1]);
-                    GetStatistic<align>(src, col + 2*A, mins[2], maxs[2], sums[2]);
-                    GetStatistic<align>(src, col + 3*A, mins[3], maxs[3], sums[3]);
+                    GetStatistic<align>(src, col + 2 * A, mins[2], maxs[2], sums[2]);
+                    GetStatistic<align>(src, col + 3 * A, mins[3], maxs[3], sums[3]);
                 }
                 sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     GetStatistic<align>(src, col, mins[0], maxs[0], sums[0]);
-                if(width - bodyWidth)
+                if (width - bodyWidth)
                 {
                     const v128_u8 _src = Load<false>(src + width - A);
                     mins[0] = vec_min(mins[0], _src);
@@ -85,19 +85,19 @@ namespace Simd
                 *min = Base::MinU8(vec_extract(mins[0], i), *min);
                 *max = Base::MaxU8(vec_extract(maxs[0], i), *max);
             }
-            *average = (uint8_t)((sum + width*height/2)/(width*height));
+            *average = (uint8_t)((sum + width*height / 2) / (width*height));
         }
 
-        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height, 
+        void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 GetStatistic<true>(src, stride, width, height, min, max, average);
             else
                 GetStatistic<false>(src, stride, width, height, min, max, average);
         }
 
-        SIMD_INLINE void GetMoments(const v128_u16 & row, const v128_u16 & col, 
+        SIMD_INLINE void GetMoments(const v128_u16 & row, const v128_u16 & col,
             v128_u32 & x, v128_u32 & y, v128_u32 & xx, v128_u32 & xy, v128_u32 & yy)
         {
             x = vec_msum(col, K16_0001, x);
@@ -115,7 +115,7 @@ namespace Simd
             *sum += vec_extract(value, 3);
         }
 
-        SIMD_INLINE void GetMoments(const v128_u8 & mask, v128_u16 & row, v128_u16 & col, 
+        SIMD_INLINE void GetMoments(const v128_u8 & mask, v128_u16 & row, v128_u16 & col,
             v128_u32 & area, v128_u32 & x, v128_u32 & y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
             area = vec_msum(vec_and(K8_01, mask), K8_01, area);
@@ -137,11 +137,11 @@ namespace Simd
             SumTo(_yy, yy);
         }
 
-        template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+        template <bool align> void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
             assert(width >= A && width < SHRT_MAX && height < SHRT_MAX);
-            if(align)
+            if (align)
                 assert(Aligned(mask) && Aligned(stride));
 
             size_t alignedWidth = AlignLo(width, A);
@@ -158,7 +158,7 @@ namespace Simd
             *yy = 0;
 
             v128_u32 _area = K32_00000000;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 v128_u16 _col = K16_I;
                 v128_u16 _row = SetU16(row);
@@ -166,12 +166,12 @@ namespace Simd
                 v128_u32 _x = K32_00000000;
                 v128_u32 _y = K32_00000000;
 
-                for(size_t col = 0; col < alignedWidth; col += A)
+                for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    v128_u8 _mask = (v128_u8 )vec_cmpeq(Load<align>(mask + col), _index);
+                    v128_u8 _mask = (v128_u8)vec_cmpeq(Load<align>(mask + col), _index);
                     GetMoments(_mask, _row, _col, _area, _x, _y, xx, xy, yy);
                 }
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                 {
                     v128_u8 _mask = vec_and(vec_cmpeq(Load<false>(mask + width - A), _index), tailMask);
                     _col = tailCol;
@@ -186,10 +186,10 @@ namespace Simd
             *area = ExtractSum(_area);
         }
 
-        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index, 
+        void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
         {
-            if(Aligned(mask) && Aligned(stride))
+            if (Aligned(mask) && Aligned(stride))
                 GetMoments<true>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
             else
                 GetMoments<false>(mask, stride, width, height, index, area, x, y, xx, xy, yy);
@@ -210,28 +210,28 @@ namespace Simd
         template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(src) && Aligned(stride));
 
             size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             *sum = 0;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     ValueSum<align>(src, col, sums[0]);
                     ValueSum<align>(src, col + A, sums[1]);
-                    ValueSum<align>(src, col + 2*A, sums[2]);
-                    ValueSum<align>(src, col + 3*A, sums[3]);
+                    ValueSum<align>(src, col + 2 * A, sums[2]);
+                    ValueSum<align>(src, col + 3 * A, sums[3]);
                 }
                 sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     ValueSum<align>(src, col, sums[0]);
-                if(width - bodyWidth)
+                if (width - bodyWidth)
                     ValueSumMasked<false>(src, width - A, tailMask, sums[0]);
                 *sum += ExtractSum(sums[0]);
                 src += stride;
@@ -240,7 +240,7 @@ namespace Simd
 
         void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 ValueSum<true>(src, stride, width, height, sum);
             else
                 ValueSum<false>(src, stride, width, height, sum);
@@ -261,28 +261,28 @@ namespace Simd
         template <bool align> void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(src) && Aligned(stride));
 
             size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             *sum = 0;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     SquareSum<align>(src, col, sums[0]);
                     SquareSum<align>(src, col + A, sums[1]);
-                    SquareSum<align>(src, col + 2*A, sums[2]);
-                    SquareSum<align>(src, col + 3*A, sums[3]);
+                    SquareSum<align>(src, col + 2 * A, sums[2]);
+                    SquareSum<align>(src, col + 3 * A, sums[3]);
                 }
                 sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     SquareSum<align>(src, col, sums[0]);
-                if(width - bodyWidth)
+                if (width - bodyWidth)
                     SquareSumMasked<false>(src, width - A, tailMask, sums[0]);
                 *sum += ExtractSum(sums[0]);
                 src += stride;
@@ -291,7 +291,7 @@ namespace Simd
 
         void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 SquareSum<true>(src, stride, width, height, sum);
             else
                 SquareSum<false>(src, stride, width, height, sum);
@@ -314,28 +314,28 @@ namespace Simd
         template <bool align> void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
-            if(align)
+            if (align)
                 assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride));
 
             size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
             *sum = 0;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     CorrelationSum<align>(a, b, col, sums[0]);
                     CorrelationSum<align>(a, b, col + A, sums[1]);
-                    CorrelationSum<align>(a, b, col + 2*A, sums[2]);
-                    CorrelationSum<align>(a, b, col + 3*A, sums[3]);
+                    CorrelationSum<align>(a, b, col + 2 * A, sums[2]);
+                    CorrelationSum<align>(a, b, col + 3 * A, sums[3]);
                 }
                 sums[0] = vec_add(vec_add(sums[0], sums[1]), vec_add(sums[2], sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     CorrelationSum<align>(a, b, col, sums[0]);
-                if(width - bodyWidth)
+                if (width - bodyWidth)
                     CorrelationSumMasked<false>(a, b, width - A, tailMask, sums[0]);
                 *sum += ExtractSum(sums[0]);
                 a += aStride;
@@ -345,7 +345,7 @@ namespace Simd
 
         void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
-            if(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
                 CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
             else
                 CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
@@ -356,21 +356,21 @@ namespace Simd
             size_t alignedWidth = AlignLo(width, QA);
             size_t bodyWidth = AlignLo(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 _sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 _sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     ValueSum<align>(src, col, _sums[0]);
                     ValueSum<align>(src, col + A, _sums[1]);
-                    ValueSum<align>(src, col + 2*A, _sums[2]);
-                    ValueSum<align>(src, col + 3*A, _sums[3]);
+                    ValueSum<align>(src, col + 2 * A, _sums[2]);
+                    ValueSum<align>(src, col + 3 * A, _sums[3]);
                 }
                 _sums[0] = vec_add(vec_add(_sums[0], _sums[1]), vec_add(_sums[2], _sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     ValueSum<align>(src, col, _sums[0]);
-                if(width - bodyWidth)
+                if (width - bodyWidth)
                     ValueSumMasked<false>(src, width - A, tailMask, _sums[0]);
                 sums[row] = ExtractSum(_sums[0]);
                 src += stride;
@@ -379,7 +379,7 @@ namespace Simd
 
         void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 GetRowSums<true>(src, stride, width, height, sums);
             else
                 GetRowSums<false>(src, stride, width, height, sums);
@@ -400,21 +400,21 @@ namespace Simd
             const uint8_t * src0 = src;
             const uint8_t * src1 = src + stride;
             height--;
-            for(size_t row = 0; row < height; ++row)
+            for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                v128_u32 _sums[4] = {K32_00000000, K32_00000000, K32_00000000, K32_00000000};
-                for(; col < alignedWidth; col += QA)
+                v128_u32 _sums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (; col < alignedWidth; col += QA)
                 {
                     GetAbsDyRowSums<align>(src0, src1, col, _sums[0]);
                     GetAbsDyRowSums<align>(src0, src1, col + A, _sums[1]);
-                    GetAbsDyRowSums<align>(src0, src1, col + 2*A, _sums[2]);
-                    GetAbsDyRowSums<align>(src0, src1, col + 3*A, _sums[3]);
+                    GetAbsDyRowSums<align>(src0, src1, col + 2 * A, _sums[2]);
+                    GetAbsDyRowSums<align>(src0, src1, col + 3 * A, _sums[3]);
                 }
                 _sums[0] = vec_add(vec_add(_sums[0], _sums[1]), vec_add(_sums[2], _sums[3]));
-                for(; col < bodyWidth; col += A)
+                for (; col < bodyWidth; col += A)
                     GetAbsDyRowSums<align>(src0, src1, col, _sums[0]);
-                if(alignedWidth != width)
+                if (alignedWidth != width)
                 {
                     v128_u8 _src0 = Load<false>(src0 + width - A);
                     v128_u8 _src1 = Load<false>(src1 + width - A);
@@ -429,7 +429,7 @@ namespace Simd
 
         void GetAbsDyRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 GetAbsDyRowSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
@@ -476,25 +476,25 @@ namespace Simd
             size_t alignedHiWidth = AlignHi(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedLoWidth);
             size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+            size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
             Buffer buffer(alignedHiWidth);
             memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
 
-            for(size_t step = 0; step < stepCount; ++step)
+            for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Simd::Min(rowStart + stepSize, height);
 
                 memset(buffer.sums16, 0, sizeof(uint16_t)*width);
-                for(size_t row = rowStart; row < rowEnd; ++row)
+                for (size_t row = rowStart; row < rowEnd; ++row)
                 {
-                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
                     {
                         v128_u8 _src = Load<align>(src + col);
                         Sum16<true>(_src, buffer.sums16 + col);
                     }
-                    if(alignedLoWidth != width)
+                    if (alignedLoWidth != width)
                     {
                         v128_u8 _src = Load<false>(src + width - A);
                         Sum16<false>(vec_and(_src, tailMask), buffer.sums16 + width - A);
@@ -502,7 +502,7 @@ namespace Simd
                     src += stride;
                 }
 
-                for(size_t col = 0; col < alignedHiWidth; col += HA)
+                for (size_t col = 0; col < alignedHiWidth; col += HA)
                 {
                     v128_u16 src16 = Load<true>(buffer.sums16 + col);
                     Sum32<true>(src16, buffer.sums32 + col);
@@ -513,7 +513,7 @@ namespace Simd
 
         void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 GetColSums<true>(src, stride, width, height, sums);
             else
                 GetColSums<false>(src, stride, width, height, sums);
@@ -526,26 +526,26 @@ namespace Simd
             size_t alignedHiWidth = AlignHi(width, A);
             v128_u8 tailMask = ShiftLeft(K8_FF, A - width + alignedLoWidth);
             size_t stepSize = SCHAR_MAX + 1;
-            size_t stepCount = (height + SCHAR_MAX)/stepSize;
+            size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
             Buffer buffer(alignedHiWidth);
             memset(buffer.sums32, 0, sizeof(uint32_t)*alignedHiWidth);
 
-            for(size_t step = 0; step < stepCount; ++step)
+            for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step*stepSize;
                 size_t rowEnd = Simd::Min(rowStart + stepSize, height);
 
                 memset(buffer.sums16, 0, sizeof(uint16_t)*width);
-                for(size_t row = rowStart; row < rowEnd; ++row)
+                for (size_t row = rowStart; row < rowEnd; ++row)
                 {
-                    for(size_t col = 0; col < alignedLoWidth; col += A)
+                    for (size_t col = 0; col < alignedLoWidth; col += A)
                     {
                         v128_u8 _src0 = Load<align>(src + col + 0);
                         v128_u8 _src1 = Load<false>(src + col + 1);
                         Sum16<true>(AbsDifferenceU8(_src0, _src1), buffer.sums16 + col);
                     }
-                    if(alignedLoWidth != width)
+                    if (alignedLoWidth != width)
                     {
                         v128_u8 _src0 = Load<false>(src + width - A + 0);
                         v128_u8 _src1 = Load<false>(src + width - A + 1);
@@ -554,7 +554,7 @@ namespace Simd
                     src += stride;
                 }
 
-                for(size_t col = 0; col < alignedHiWidth; col += HA)
+                for (size_t col = 0; col < alignedHiWidth; col += HA)
                 {
                     v128_u16 src16 = Load<true>(buffer.sums16 + col);
                     Sum32<true>(src16, buffer.sums32 + col);
@@ -566,7 +566,7 @@ namespace Simd
 
         void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
-            if(Aligned(src) && Aligned(stride))
+            if (Aligned(src) && Aligned(stride))
                 GetAbsDxColSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDxColSums<false>(src, stride, width, height, sums);

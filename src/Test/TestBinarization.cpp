@@ -28,24 +28,24 @@
 namespace Test
 {
     namespace
-	{
-		struct Func1
-		{
-			typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
-				 uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType type);
+    {
+        struct Func1
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType type);
 
-			FuncPtr func;
-			String description;
+            FuncPtr func;
+            String description;
 
-			Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func1(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-			void Call(const View & src, uint8_t value, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
-			{
-				TEST_PERFORMANCE_TEST(description);
-				func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, type);
-			}
-		};
-	}
+            void Call(const View & src, uint8_t value, uint8_t positive, uint8_t negative, View & dst, SimdCompareType type) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, value, positive, negative, dst.data, dst.stride, type);
+            }
+        };
+    }
 
 #define ARGS1(width, height, type, function1, function2) \
     width, height, type, \
@@ -55,36 +55,36 @@ namespace Test
 #define FUNC1(function) \
     Func1(function, std::string(#function))
 
-	bool BinarizationAutoTest(int width, int height, SimdCompareType type, const Func1 & f1, const Func1 & f2)
-	{
-		bool result = true;
+    bool BinarizationAutoTest(int width, int height, SimdCompareType type, const Func1 & f1, const Func1 & f2)
+    {
+        bool result = true;
 
-		TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-		View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		FillRandom(src);
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
 
-		uint8_t value = Random(256);
-		uint8_t positive = Random(256);
-		uint8_t negative = Random(256);
+        uint8_t value = Random(256);
+        uint8_t positive = Random(256);
+        uint8_t negative = Random(256);
 
-		View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-		View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, positive, negative, d1, type));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, value, positive, negative, d1, type));
 
-		TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, positive, negative, d2, type));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, value, positive, negative, d2, type));
 
-		result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 32);
 
-		return result;
-	}
+        return result;
+    }
 
     bool BinarizationAutoTest(const Func1 & f1, const Func1 & f2)
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && BinarizationAutoTest(ARGS1(W, H, type, f1, f2));
             result = result && BinarizationAutoTest(ARGS1(W + O, H - O, type, f1, f2));
@@ -94,46 +94,46 @@ namespace Test
         return result;
     }
 
-	bool BinarizationAutoTest()
-	{
-		bool result = true;
+    bool BinarizationAutoTest()
+    {
+        bool result = true;
 
-		result = result && BinarizationAutoTest(FUNC1(Simd::Base::Binarization), FUNC1(SimdBinarization));
+        result = result && BinarizationAutoTest(FUNC1(Simd::Base::Binarization), FUNC1(SimdBinarization));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && BinarizationAutoTest(FUNC1(Simd::Sse2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && BinarizationAutoTest(FUNC1(Simd::Avx2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && BinarizationAutoTest(FUNC1(Simd::Avx512bw::Binarization), FUNC1(SimdBinarization));
+        if (Simd::Avx512bw::Enable)
+            result = result && BinarizationAutoTest(FUNC1(Simd::Avx512bw::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && BinarizationAutoTest(FUNC1(Simd::Vmx::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && BinarizationAutoTest(FUNC1(Simd::Neon::Binarization), FUNC1(SimdBinarization));
+        if (Simd::Neon::Enable)
+            result = result && BinarizationAutoTest(FUNC1(Simd::Neon::Binarization), FUNC1(SimdBinarization));
 #endif
 
         return result;
-	}
+    }
 
     namespace
     {
         struct Func2
         {
-            typedef void (*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
-                uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative, 
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
                 uint8_t * dst, size_t dstStride, SimdCompareType type);
 
             FuncPtr func;
@@ -188,7 +188,7 @@ namespace Test
     {
         bool result = true;
 
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && AveragingBinarizationAutoTest(ARGS2(W, H, type, f1, f2));
             result = result && AveragingBinarizationAutoTest(ARGS2(W + O, H - O, type, f1, f2));
@@ -205,31 +205,31 @@ namespace Test
         result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Base::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 
 #ifdef SIMD_SSE2_ENABLE
-        if(Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Sse2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if(Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-		if (Simd::Avx512bw::Enable)
-			result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx512bw::AveragingBinarization), FUNC2(SimdAveragingBinarization));
+        if (Simd::Avx512bw::Enable)
+            result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx512bw::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if(Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Vmx::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-		if (Simd::Neon::Enable)
-			result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Neon::AveragingBinarization), FUNC2(SimdAveragingBinarization));
+        if (Simd::Neon::Enable)
+            result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Neon::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
-		return result;
+        return result;
     }
 
     //-----------------------------------------------------------------------
@@ -251,7 +251,7 @@ namespace Test
         const uint8_t positive = 0xAA;
         const uint8_t negative = 0x11;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -282,7 +282,7 @@ namespace Test
         bool result = true;
 
         Func1 f = FUNC1(SimdBinarization);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && BinarizationDataTest(create, DW, DH, type, Func1(f.func, f.description + Data::Description(type)));
         }
@@ -309,7 +309,7 @@ namespace Test
         const uint8_t positive = 7;
         const uint8_t negative = 3;
 
-        if(create)
+        if (create)
         {
             FillRandom(src);
 
@@ -340,7 +340,7 @@ namespace Test
         bool result = true;
 
         Func2 f = FUNC2(SimdAveragingBinarization);
-        for(SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
+        for (SimdCompareType type = SimdCompareEqual; type <= SimdCompareLesserOrEqual && result; type = SimdCompareType(type + 1))
         {
             result = result && AveragingBinarizationDataTest(create, DW, DH, type, Func2(f.func, f.description + Data::Description(type)));
         }
