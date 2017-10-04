@@ -81,17 +81,23 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#aba72d1b38e0a7570bb3cf3bec776b97c">Predict</a> (const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;x, <a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0f">Layer::Method</a> method=<a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0fa44e0add47cd0ec96505d444d425b70af">Layer::Fast</a>)</td></tr>
 <tr class="memdesc:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies given sample.  <a href="#aba72d1b38e0a7570bb3cf3bec776b97c">More...</a><br /></td></tr>
 <tr class="separator:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abab7d7ec110a04877974ed615a2bdc0c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#abab7d7ec110a04877974ed615a2bdc0c">Load</a> (const void *data, size_t size, bool train=false)</td></tr>
+<tr class="memdesc:abab7d7ec110a04877974ed615a2bdc0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the weights of neural network from an external buffer.  <a href="#abab7d7ec110a04877974ed615a2bdc0c">More...</a><br /></td></tr>
+<tr class="separator:abab7d7ec110a04877974ed615a2bdc0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3077f07c43bcd8a26efb19b87b70737d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a3077f07c43bcd8a26efb19b87b70737d">Load</a> (std::istream &amp;is, bool train=false)</td></tr>
-<tr class="memdesc:a3077f07c43bcd8a26efb19b87b70737d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the neural network from file stream.  <a href="#a3077f07c43bcd8a26efb19b87b70737d">More...</a><br /></td></tr>
+<tr class="memdesc:a3077f07c43bcd8a26efb19b87b70737d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the weights of neural network from file stream.  <a href="#a3077f07c43bcd8a26efb19b87b70737d">More...</a><br /></td></tr>
 <tr class="separator:a3077f07c43bcd8a26efb19b87b70737d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad1440317e523a8e23fe6523c0ccd54ed"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#ad1440317e523a8e23fe6523c0ccd54ed">Load</a> (const std::string &amp;path, bool train=false)</td></tr>
-<tr class="memdesc:ad1440317e523a8e23fe6523c0ccd54ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the neural network from file.  <a href="#ad1440317e523a8e23fe6523c0ccd54ed">More...</a><br /></td></tr>
+<tr class="memdesc:ad1440317e523a8e23fe6523c0ccd54ed"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the weights of neural network from file.  <a href="#ad1440317e523a8e23fe6523c0ccd54ed">More...</a><br /></td></tr>
 <tr class="separator:ad1440317e523a8e23fe6523c0ccd54ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91912c957caceb22e6627795ddb77415"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a91912c957caceb22e6627795ddb77415">Save</a> (void *data, size_t *size, bool train=false) const</td></tr>
+<tr class="memdesc:a91912c957caceb22e6627795ddb77415"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the weights of neural network into external buffer.  <a href="#a91912c957caceb22e6627795ddb77415">More...</a><br /></td></tr>
+<tr class="separator:a91912c957caceb22e6627795ddb77415"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1ed5999f88a945d4c21656de275d8ebb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a1ed5999f88a945d4c21656de275d8ebb">Save</a> (std::ostream &amp;os, bool train=false) const</td></tr>
-<tr class="memdesc:a1ed5999f88a945d4c21656de275d8ebb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the neural network to file stream.  <a href="#a1ed5999f88a945d4c21656de275d8ebb">More...</a><br /></td></tr>
+<tr class="memdesc:a1ed5999f88a945d4c21656de275d8ebb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the weights of neural network to file stream.  <a href="#a1ed5999f88a945d4c21656de275d8ebb">More...</a><br /></td></tr>
 <tr class="separator:a1ed5999f88a945d4c21656de275d8ebb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2e2ba08c17a2b397393491563f78f1fa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a2e2ba08c17a2b397393491563f78f1fa">Save</a> (const std::string &amp;path, bool train=false) const</td></tr>
-<tr class="memdesc:a2e2ba08c17a2b397393491563f78f1fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the neural network to file.  <a href="#a2e2ba08c17a2b397393491563f78f1fa">More...</a><br /></td></tr>
+<tr class="memdesc:a2e2ba08c17a2b397393491563f78f1fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Saves the weights of neural network to file.  <a href="#a2e2ba08c17a2b397393491563f78f1fa">More...</a><br /></td></tr>
 <tr class="separator:a2e2ba08c17a2b397393491563f78f1fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5e72de9b473a7f84b163facdfee7eaa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#aa5e72de9b473a7f84b163facdfee7eaa">Convert</a> (const <a class="el" href="namespace_simd_1_1_neural.html#ab69a86809cb32838d3d0d214718e0cef">Labels</a> &amp;src, <a class="el" href="namespace_simd_1_1_neural.html#aad5a51ea811517b5771641657cc80b4f">Vectors</a> &amp;dst) const</td></tr>
 <tr class="memdesc:aa5e72de9b473a7f84b163facdfee7eaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts format of classification results.  <a href="#aa5e72de9b473a7f84b163facdfee7eaa">More...</a><br /></td></tr>
@@ -331,8 +337,54 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
+<a id="abab7d7ec110a04877974ed615a2bdc0c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abab7d7ec110a04877974ed615a2bdc0c">&#9670;&nbsp;</a></span>Load() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Load </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>train</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads the weights of neural network from an external buffer. </p>
+<dl class="section note"><dt>Note</dt><dd>The network has to be created previously with using of methods Clear/Add.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">data</td><td>- a pointer to the external buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the external buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">train</td><td>- a boolean flag (True - if we need to load temporary training data, False - otherwise). By default it is equal to False. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of loading. </dd></dl>
+
+</div>
+</div>
 <a id="a3077f07c43bcd8a26efb19b87b70737d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3077f07c43bcd8a26efb19b87b70737d">&#9670;&nbsp;</a></span>Load() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a3077f07c43bcd8a26efb19b87b70737d">&#9670;&nbsp;</a></span>Load() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -357,7 +409,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
 </div><div class="memdoc">
 
-<p>Loads the neural network from file stream. </p>
+<p>Loads the weights of neural network from file stream. </p>
 <dl class="section note"><dt>Note</dt><dd>The network has to be created previously with using of methods Clear/Add.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -371,7 +423,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <a id="ad1440317e523a8e23fe6523c0ccd54ed"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad1440317e523a8e23fe6523c0ccd54ed">&#9670;&nbsp;</a></span>Load() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1440317e523a8e23fe6523c0ccd54ed">&#9670;&nbsp;</a></span>Load() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -396,7 +448,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
 </div><div class="memdoc">
 
-<p>Loads the neural network from file. </p>
+<p>Loads the weights of neural network from file. </p>
 <dl class="section note"><dt>Note</dt><dd>The network has to be created previously with using of methods Clear/Add.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -409,8 +461,53 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
+<a id="a91912c957caceb22e6627795ddb77415"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a91912c957caceb22e6627795ddb77415">&#9670;&nbsp;</a></span>Save() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Save </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>data</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>train</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Saves the weights of neural network into external buffer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">data</td><td>- a pointer to the external buffer. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">size</td><td>- a pointer to the size of external buffer. Returns requred buffer size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">train</td><td>- a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of saving. </dd></dl>
+
+</div>
+</div>
 <a id="a1ed5999f88a945d4c21656de275d8ebb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1ed5999f88a945d4c21656de275d8ebb">&#9670;&nbsp;</a></span>Save() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1ed5999f88a945d4c21656de275d8ebb">&#9670;&nbsp;</a></span>Save() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -435,7 +532,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
 </div><div class="memdoc">
 
-<p>Saves the neural network to file stream. </p>
+<p>Saves the weights of neural network to file stream. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">os</td><td>- a output stream. </td></tr>
@@ -448,7 +545,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 </div>
 </div>
 <a id="a2e2ba08c17a2b397393491563f78f1fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2e2ba08c17a2b397393491563f78f1fa">&#9670;&nbsp;</a></span>Save() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2e2ba08c17a2b397393491563f78f1fa">&#9670;&nbsp;</a></span>Save() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -473,7 +570,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
       </table>
 </div><div class="memdoc">
 
-<p>Saves the neural network to file. </p>
+<p>Saves the weights of neural network to file. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to output file. </td></tr>

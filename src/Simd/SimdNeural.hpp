@@ -31,6 +31,7 @@
 
 #include <numeric>
 #include <random>
+#include <iterator>
 
 #ifndef SIMD_CHECK_PERFORMANCE
 #define SIMD_CHECK_PERFORMANCE()
@@ -1631,7 +1632,50 @@ namespace Simd
             }
 
             /*!
-                \short Loads the neural network from file stream.
+                \short Loads the weights of neural network from an external buffer.
+
+                \note The network has to be created previously with using of methods Clear/Add.
+
+                \param [in] data - a pointer to the external buffer.
+                \param [in] size - a size of the external buffer.
+                \param [in] train - a boolean flag (True - if we need to load temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of loading.
+            */
+            bool Load(const void * data, size_t size, bool train = false)
+            {
+                if (Requred(train) > size)
+                    return false;
+                typedef  Vector::value_type Type;
+                Type * ptr = (Type*)data;
+                if (train)
+                {
+                    for (size_t i = 0; i < _layers.size(); ++i)
+                        _layers[i]->SetThreadNumber(1, true);
+                }
+                for (size_t i = 0; i < _layers.size(); ++i)
+                {
+                    Layer & layer = *_layers[i];
+                    memcpy(layer._weight.data(), ptr, layer._weight.size() * sizeof(Type));
+                    ptr += layer._weight.size();
+                    memcpy(layer._bias.data(), ptr, layer._bias.size() * sizeof(Type));
+                    ptr += layer._bias.size();
+                }
+                if (train)
+                {
+                    for (size_t i = 0; i < _layers.size(); ++i)
+                    {
+                        Layer & layer = *_layers[i];
+                        memcpy(layer._gWeight.data(), ptr, layer._gWeight.size() * sizeof(Type));
+                        ptr += layer._gWeight.size();
+                        memcpy(layer._gBias.data(), ptr, layer._gBias.size() * sizeof(Type));
+                        ptr += layer._gBias.size();
+                    }
+                }
+                return true;
+            }
+
+            /*!
+                \short Loads the weights of neural network from file stream.
 
                 \note The network has to be created previously with using of methods Clear/Add.
 
@@ -1660,18 +1704,18 @@ namespace Simd
                 {
                     for (size_t i = 0; i < _layers.size(); ++i)
                     {
-                        Layer & level = *_layers[i];
-                        for (size_t j = 0; j < level._gWeight.size(); ++j)
-                            Load(is, level._gWeight[j]);
-                        for (size_t j = 0; j < level._gBias.size(); ++j)
-                            Load(is, level._gBias[j]);
+                        Layer & layer = *_layers[i];
+                        for (size_t j = 0; j < layer._gWeight.size(); ++j)
+                            Load(is, layer._gWeight[j]);
+                        for (size_t j = 0; j < layer._gBias.size(); ++j)
+                            Load(is, layer._gBias[j]);
                     }
                 }
                 return true;
             }
 
             /*!
-                \short Loads the neural network from file.
+                \short Loads the weights of neural network from file.
 
                 \note The network has to be created previously with using of methods Clear/Add.
 
@@ -1692,7 +1736,50 @@ namespace Simd
             }
 
             /*!
-                \short Saves the neural network to file stream.
+                \short Saves the weights of neural network into external buffer.
+
+                \param [out] data - a pointer to the external buffer.
+                \param [in, out] size - a pointer to the size of external buffer. Returns requred buffer size. 
+                \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
+                \return a result of saving.
+            */
+            bool Save(void * data, size_t * size, bool train = false) const
+            {
+                typedef  Vector::value_type Type;
+                Type * ptr = (Type*)data;
+                size_t requred = Requred(train);
+                if (requred >= *size)
+                {
+                    *size = requred;
+                    return false;
+                }
+                else
+                    *size = requred;
+
+                for (size_t i = 0; i < _layers.size(); ++i)
+                {
+                    const Layer & layer = *_layers[i];
+                    memcpy(ptr, layer._weight.data(), layer._weight.size() * sizeof(Type));
+                    ptr += layer._weight.size();
+                    memcpy(ptr, layer._weight.data(), layer._bias.size() * sizeof(Type));
+                    ptr += layer._bias.size();
+                }
+                if (train)
+                {
+                    for (size_t i = 0; i < _layers.size(); ++i)
+                    {
+                        const Layer & layer = *_layers[i];
+                        memcpy(ptr, layer._weight.data(), layer._gWeight.size() * sizeof(Type));
+                        ptr += layer._gWeight.size();
+                        memcpy(ptr, layer._weight.data(), layer._gBias.size() * sizeof(Type));
+                        ptr += layer._gBias.size();
+                    }
+                }
+                return true;
+            }
+
+            /*!
+                \short Saves the weights of neural network to file stream.
 
                 \param [out] os - a output stream.
                 \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
@@ -1713,18 +1800,18 @@ namespace Simd
                     os << std::endl;
                     for (size_t i = 0; i < _layers.size(); ++i)
                     {
-                        const Layer & level = *_layers[i];
-                        for (size_t j = 0; j < level._gWeight.size(); ++j)
-                            os << level._gWeight[j] << " ";
-                        for (size_t j = 0; j < level._gBias.size(); ++j)
-                            os << level._gBias[j] << " ";
+                        const Layer & layer = *_layers[i];
+                        for (size_t j = 0; j < layer._gWeight.size(); ++j)
+                            os << layer._gWeight[j] << " ";
+                        for (size_t j = 0; j < layer._gBias.size(); ++j)
+                            os << layer._gBias[j] << " ";
                     }
                 }
                 return true;
             }
 
             /*!
-                \short Saves the neural network to file.
+                \short Saves the weights of neural network to file.
 
                 \param [in] path - a path to output file.
                 \param [in] train - a boolean flag (True - if we need to save temporary training data, False - otherwise). By default it is equal to False.
@@ -1764,6 +1851,20 @@ namespace Simd
 
         private:
             LayerPtrs _layers;
+
+            size_t Requred(bool train) const
+            {
+                typedef Vector::value_type Type;
+                size_t requred = 0;
+                for (size_t i = 0; i < _layers.size(); ++i)
+                {
+                    const Layer & layer = *_layers[i];
+                    requred += (layer._weight.size() + layer._bias.size()) * sizeof(Type);
+                    if (train)
+                        requred += (layer._gWeight.size() + layer._gBias.size()) * sizeof(Type);
+                }
+                return requred;
+            }
 
             static SIMD_INLINE void Load(std::istream & is, float & value)
             {
