@@ -1518,6 +1518,14 @@ namespace Simd
             }
 
             /*!
+                \short Returns true if the neural network is empty.
+            */
+            bool Empty() const
+            {
+                return _layers.empty();
+            }
+
+            /*!
                 \short Adds new Layer to the neural network.
 
                 \param [in] layer - a pointer to the new layer. You can add ConvolutionalLayer, MaxPoolingLayer and FullyConnectedLayer.
@@ -1748,7 +1756,7 @@ namespace Simd
                 typedef  Vector::value_type Type;
                 Type * ptr = (Type*)data;
                 size_t requred = Requred(train);
-                if (requred >= *size)
+                if (requred > *size)
                 {
                     *size = requred;
                     return false;
