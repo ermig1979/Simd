@@ -83,9 +83,9 @@ namespace Simd
                             int ady = Abs(dy);
                             int value = RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
 
-                            size_t index = (ady > adx ? 0 : 1);
-                            index = (dy > 0 ? index : (Q / 2 - 1) - index);
-                            index = (dx > 0 ? index : (Q - 1) - index);
+                            size_t index = (adx > ady ? 0 : 1);
+                            index = (dx > 0 ? index : (Q / 2 - 1) - index);
+                            index = (dy > 0 ? index : (Q - 1) - index);
 
                             h0[0 + index] += value*_k0[ix] * ky0;
                             h1[0 + index] += value*_k0[ix] * ky1;
