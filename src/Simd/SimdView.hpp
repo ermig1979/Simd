@@ -437,19 +437,27 @@ namespace Simd
         void Swap(View & other);
 
         /*!
-            Loads 8-bit gray image from PGM(Portable Graymap Format) binary(P5) file.
+            Loads image from file.
+            
+            Supported formats:
+             - PGM(Portable Gray Map) binary(P5) (the file is loaded as 8-bit gray image).
+             - PPM(Portable Pixel Map) binary(P6) (the file is loaded as 32-bit BGRA image).
 
-            \note PGM files with comments are not supported.
+            \note PGM and PPM files with comments are not supported.
 
-            \param [in] path - a path to file with PGM image.
+            \param [in] path - a path to file with PGM or PPM image.
             \return - a result of loading.
         */
         bool Load(const std::string & path);
 
         /*!
-            Saves 8-bit gray image to PGM(Portable Graymap Format) binary(P5) file.
+            Saves image to file.
+ 
+            Supported formats:
+             - PGM(Portable Gray Map) binary(P5) (this format is used in order to save 8-bit gray images).
+             - PPM(Portable Pixel Map) binary(P6) (this format is used in order to save 24-bit BGR and 32-bit BGRA images).
 
-            \param [in] path - a path to file with PGM image.
+            \param [in] path - a path to file.
             \return - a result of saving.
         */
         bool Save(const std::string & path) const;
@@ -958,33 +966,94 @@ namespace Simd
         {
             std::string type;
             ifs >> type;
-            if (type != "P5")
-                return false;
-            size_t w, h, d;
-            ifs >> w >> h >> d;
-            if (d != 255)
-                return false;
-            ifs.get();
-            Recreate(w, h, View<A>::Gray8);
-            for (size_t row = 0; row < height; ++row)
-                ifs.read((char*)(data + row*stride), width);
-            return true;
+            if (type == "P5")
+            {
+                size_t w, h, d;
+                ifs >> w >> h >> d;
+                if (d != 255)
+                    return false;
+                ifs.get();
+                Recreate(w, h, View<A>::Gray8);
+                for (size_t row = 0; row < height; ++row)
+                    ifs.read((char*)(data + row*stride), width);
+                return true;
+            }
+            if (type == "P6")
+            {
+                size_t w, h, d;
+                ifs >> w >> h >> d;
+                if (d != 255)
+                    return false;
+                ifs.get();
+                Recreate(w, h, View<A>::Bgra32);
+                View buffer(width, 1, Bgr24);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    ifs.read((char*)buffer.data, width*3);
+                    const uint8_t * rgb = buffer.data;
+                    uint8_t * bgra = data + row*stride;
+                    for (size_t col = 0; col < width; ++col, rgb += 3, bgra += 4)
+                    {
+                        bgra[0] = rgb[2];
+                        bgra[1] = rgb[1];
+                        bgra[2] = rgb[0];
+                        bgra[3] = 0xFF;
+                    }
+                }
+                return true;
+            }
         }
-        else
-            return false;
+        return false;
     }
 
     template <template<class> class A> SIMD_INLINE bool View<A>::Save(const std::string & path) const
     {
-        if (format != View<A>::Gray8)
+        if (!(format == View<A>::Gray8 || format == View<A>::Bgr24 || format == View<A>::Bgra32))
             return false;
 
         std::ofstream ofs(path.c_str(), std::ifstream::binary);
         if (ofs.is_open())
         {
-            ofs << "P5\n" << width << " " << height << "\n255\n";
-            for (size_t row = 0; row < height; ++row)
-                ofs.write((const char*)(data + row*stride), width);
+            if (format == View<A>::Gray8)
+            {
+                ofs << "P5\n" << width << " " << height << "\n255\n";
+                for (size_t row = 0; row < height; ++row)
+                    ofs.write((const char*)(data + row*stride), width);
+            }
+            else if (format == View<A>::Bgr24)
+            {
+                ofs << "P6\n" << width << " " << height << "\n255\n";
+                View buffer(width, 1, Bgr24);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    const uint8_t * bgr = data + row*stride;
+                    uint8_t * rgb = buffer.data;
+                    for (size_t col = 0; col < width; ++col, bgr += 3, rgb += 3)
+                    {
+                        rgb[0] = bgr[2];
+                        rgb[1] = bgr[1];
+                        rgb[2] = bgr[0];
+                    }
+                    ofs.write((const char*)(buffer.data), width*3);
+                }
+            }
+            else if (format == View<A>::Bgra32)
+            {
+                ofs << "P6\n" << width << " " << height << "\n255\n";
+                View buffer(width, 1, Bgr24);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    const uint8_t * bgra = data + row*stride;
+                    uint8_t * rgb = buffer.data;
+                    for (size_t col = 0; col < width; ++col, bgra += 4, rgb += 3)
+                    {
+                        rgb[0] = bgra[2];
+                        rgb[1] = bgra[1];
+                        rgb[2] = bgra[0];
+                    }
+                    ofs.write((const char*)buffer.data, width * 3);
+                }
+            }
             return true;
         }
         else

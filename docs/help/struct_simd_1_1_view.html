@@ -1413,11 +1413,15 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Loads 8-bit gray image from PGM(Portable Graymap Format) binary(P5) file.</p>
-<dl class="section note"><dt>Note</dt><dd>PGM files with comments are not supported.</dd></dl>
+<p>Loads image from file.</p>
+<p>Supported formats:</p><ul>
+<li>PGM(Portable Gray Map) binary(P5) (the file is loaded as 8-bit gray image).</li>
+<li>PPM(Portable Pixel Map) binary(P6) (the file is loaded as 32-bit BGRA image).</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>PGM and PPM files with comments are not supported.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file with PGM image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file with PGM or PPM image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1440,10 +1444,14 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Saves 8-bit gray image to PGM(Portable Graymap Format) binary(P5) file.</p>
+<p>Saves image to file.</p>
+<p>Supported formats:</p><ul>
+<li>PGM(Portable Gray Map) binary(P5) (this format is used in order to save 8-bit gray images).</li>
+<li>PPM(Portable Pixel Map) binary(P6) (this format is used in order to save 24-bit BGR and 32-bit BGRA images).</li>
+</ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file with PGM image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file. </td></tr>
   </table>
   </dd>
 </dl>
