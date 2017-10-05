@@ -885,8 +885,8 @@ namespace Simd
         {
             template <bool align, bool mask> static SIMD_INLINE __m512 RowConvolution(const float * src, const __m512 * weights, __mmask16 m = -1)
             {
-                __m512 src0 = Load<align, mask>(src, m);
-                __m512 srcf = Load<align, mask>(src + F, m);
+                __m512 src0 = Load<align>(src);
+                __m512 srcf = Load<align>(src + F);
                 __m512 sum0 = _mm512_fmadd_ps(Alignr<0>(src0, srcf), weights[0], _mm512_mul_ps(Alignr<1>(src0, srcf), weights[1]));
                 __m512 sum1 = _mm512_fmadd_ps(Alignr<2>(src0, srcf), weights[2], _mm512_mul_ps(Alignr<3>(src0, srcf), weights[3]));
                 return _mm512_add_ps(sum0, sum1);
@@ -1009,8 +1009,8 @@ namespace Simd
         {
             template <bool align, bool mask> static SIMD_INLINE __m512 RowConvolution(const float * src, const __m512 * weights, __mmask16 m = -1)
             {
-                __m512 src0 = Load<align, mask>(src, m);
-                __m512 srcf = Load<align, mask>(src + F, m);
+                __m512 src0 = Load<align>(src);
+                __m512 srcf = Load<align>(src + F);
                 __m512 sum0 = _mm512_fmadd_ps(Alignr<0>(src0, srcf), weights[0], _mm512_mul_ps(Alignr<1>(src0, srcf), weights[1]));
                 __m512 sum1 = _mm512_fmadd_ps(Alignr<2>(src0, srcf), weights[2], _mm512_mul_ps(Alignr<3>(src0, srcf), weights[3]));
                 return _mm512_fmadd_ps(Alignr<4>(src0, srcf), weights[4], _mm512_add_ps(sum0, sum1));
@@ -1681,6 +1681,932 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
+        }
+
+        namespace Ncf
+        {
+            namespace Ver0
+            {
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY,
+                    size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, float * dst)
+                {
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (dilationX*dilationY*strideX*strideY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow*strideY - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol*strideX - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow*dilationY;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol*dilationX;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (kernelX*kernelY != 1)
+                    {
+                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                        {
+                            size_t srcRow0 = dstRow - padY;
+                            for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                            {
+                                size_t srcCol0 = dstCol - padX;
+                                for (size_t channel = 0; channel < srcDepth; ++channel)
+                                {
+                                    for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                    {
+                                        size_t srcRow = srcRow0 + kernelRow;
+                                        if (srcRow < srcHeight)
+                                        {
+                                            const float * psrc = src + (channel*srcHeight + srcRow)*srcWidth;
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                            {
+                                                size_t srcCol = srcCol0 + kernelCol;
+                                                if (srcCol < srcWidth)
+                                                    *(dst++) = psrc[srcCol];
+                                                else
+                                                    *(dst++) = 0;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol)
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < N; ++i)
+                        {
+                            for (size_t k = 0; k < K; ++k)
+                                *(dst++) = src[k*N + i];
+                        }
+                    }
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
+                {
+                    sums[0] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 0 * K), sums[0]);
+                    sums[1] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 1 * K), sums[1]);
+                    sums[2] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 2 * K), sums[2]);
+                    sums[3] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 3 * K), sums[3]);
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel1x1x8(const __m256 & a, const float * b, __m256 & sum)
+                {
+                    sum = _mm256_fmadd_ps(a, Avx::Load<align>(b), sum);
+                }
+
+                SIMD_INLINE void Add4ExtractedSums(const __m256 * src, float * dst)
+                {
+                    __m256 sum256 = _mm256_hadd_ps(_mm256_hadd_ps(src[0], src[1]), _mm256_hadd_ps(src[2], src[3]));
+                    __m128 sum128 = _mm_add_ps(_mm256_extractf128_ps(sum256, 0), _mm256_extractf128_ps(sum256, 1));
+                    _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), sum128));
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel2x4x8(const __m256 & a0, const __m256 & a1, size_t K, const float * b, __m256 * sums)
+                {
+                    __m256 b0 = Avx::Load<align>(b + 0 * K);
+                    sums[0] = _mm256_fmadd_ps(a0, b0, sums[0]);
+                    sums[4] = _mm256_fmadd_ps(a1, b0, sums[4]);
+                    __m256 b1 = Avx::Load<align>(b + 1 * K);
+                    sums[1] = _mm256_fmadd_ps(a0, b1, sums[1]);
+                    sums[5] = _mm256_fmadd_ps(a1, b1, sums[5]);
+                    __m256 b2 = Avx::Load<align>(b + 2 * K);
+                    sums[2] = _mm256_fmadd_ps(a0, b2, sums[2]);
+                    sums[6] = _mm256_fmadd_ps(a1, b2, sums[6]);
+                    __m256 b3 = Avx::Load<align>(b + 3 * K);
+                    sums[3] = _mm256_fmadd_ps(a0, b3, sums[3]);
+                    sums[7] = _mm256_fmadd_ps(a1, b3, sums[7]);
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel2x1x8(const __m256 & a0, const __m256 & a1, const float * b, __m256 * sums)
+                {
+                    sums[0] = _mm256_fmadd_ps(a0, Avx::Load<align>(b), sums[0]);
+                    sums[1] = _mm256_fmadd_ps(a1, Avx::Load<align>(b), sums[1]);
+                }
+
+                template <bool align> void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M2 = Simd::AlignLo(M, 2);
+                    size_t N4 = Simd::AlignLo(N, 4);
+                    size_t K8 = Simd::AlignLo(K, 8);
+                    __m256 tailMask = Avx::RightNotZero(K - K8);
+                    size_t i = 0;
+                    for (; i < M2; i += 2)
+                    {
+                        const float * pa0 = a + i*K;
+                        const float * pa1 = a + i*K + K;
+                        float * pc0 = c + i*N;
+                        float * pc1 = c + i*N + N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float * pb = b + j*K;
+                            __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            for (size_t k = 0; k < K8; k += 8)
+                            {
+                                __m256 _a0 = Avx::Load<false>(pa0 + k);
+                                __m256 _a1 = Avx::Load<false>(pa1 + k);
+                                Kernel2x4x8<align>(_a0, _a1, K, pb + k, sums);
+                            }
+                            if (K8 < K)
+                            {
+                                size_t k = K - 8;
+                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
+                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
+                                Kernel2x4x8<false>(_a0, _a1, K, pb + k, sums);
+                            }
+                            Add4ExtractedSums(sums + 0, pc0 + j);
+                            Add4ExtractedSums(sums + 4, pc1 + j);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float * pb = b + j*K;
+                            __m256 sums[2] = { _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            for (size_t k = 0; k < K8; k += 8)
+                            {
+                                __m256 _a0 = Avx::Load<false>(pa0 + k);
+                                __m256 _a1 = Avx::Load<false>(pa1 + k);
+                                Kernel2x1x8<align>(_a0, _a1, pb + k, sums);
+                            }
+                            if (K8 < K)
+                            {
+                                size_t k = K - 8;
+                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
+                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
+                                Kernel2x1x8<false>(_a0, _a1, pb + k, sums);
+                            }
+                            pc0[j] += Avx::ExtractSum(sums[0]);
+                            pc1[j] += Avx::ExtractSum(sums[1]);
+                        }
+                    }
+                    for (; i < M; ++i)
+                    {
+                        const float * pa = a + i*K;
+                        float * pc = c + i*N;
+                        size_t j = 0;
+                        for (; j < N4; j += 4)
+                        {
+                            const float * pb = b + j*K;
+                            __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            for (size_t k = 0; k < K8; k += 8)
+                            {
+                                __m256 _a = Avx::Load<false>(pa + k);
+                                Kernel1x4x8<align>(_a, K, pb + k, sums);
+                            }
+                            if (K8 < K)
+                            {
+                                size_t k = K - 8;
+                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
+                                Kernel1x4x8<false>(_a, K, pb + k, sums);
+                            }
+                            Add4ExtractedSums(sums + 0, pc + j);
+                        }
+                        for (; j < N; ++j)
+                        {
+                            const float * pb = b + j*K;
+                            __m256 sum = _mm256_setzero_ps();
+                            for (size_t k = 0; k < K8; k += 8)
+                            {
+                                __m256 _a = Avx::Load<false>(pa + k);
+                                Kernel1x1x8<align>(_a, pb + k, sum);
+                            }
+                            if (K8 < K)
+                            {
+                                size_t k = K - 8;
+                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
+                                Kernel1x1x8<false>(_a, pb + k, sum);
+                            }
+                            pc[j] += Avx::ExtractSum(sum);
+                        }
+                    }
+                }
+
+                void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    if (Aligned(K, F))
+                        Execute<true>(M, N, K, a, b, c);
+                    else
+                        Execute<false>(M, N, K, a, b, c);
+                }
+            }
+
+            namespace Ver1
+            {
+                void PrepareA(const float * src, size_t M, size_t K, size_t cell, float * dst)
+                {
+                    size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
+                    for (size_t i = 0; i < M; i += cell)
+                    {
+                        size_t n = Simd::Min(cell, M - i), k = 0;
+                        if (cell == 4 && n == 4)
+                        {
+                            for (; k < K8; k += 8)
+                            {
+                                const float * ps = src + k;
+                                __m256 s0 = Avx::Load<false>(ps + 0 * K);
+                                __m256 s1 = Avx::Load<false>(ps + 1 * K);
+                                __m256 s2 = Avx::Load<false>(ps + 2 * K);
+                                __m256 s3 = Avx::Load<false>(ps + 3 * K);
+                                __m256 s00 = _mm256_unpacklo_ps(s0, s2);
+                                __m256 s01 = _mm256_unpacklo_ps(s1, s3);
+                                __m256 s10 = _mm256_unpackhi_ps(s0, s2);
+                                __m256 s11 = _mm256_unpackhi_ps(s1, s3);
+                                __m256 d0 = _mm256_unpacklo_ps(s00, s01);
+                                __m256 d1 = _mm256_unpackhi_ps(s00, s01);
+                                __m256 d2 = _mm256_unpacklo_ps(s10, s11);
+                                __m256 d3 = _mm256_unpackhi_ps(s10, s11);
+                                Avx::Store<false>(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
+                                Avx::Store<false>(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
+                                Avx::Store<false>(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
+                                Avx::Store<false>(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
+                                dst += 32;
+                            }
+                            for (; k < K4; k += 4)
+                            {
+                                const float * ps = src + k;
+                                __m128 s0 = Sse::Load<false>(ps + 0 * K);
+                                __m128 s1 = Sse::Load<false>(ps + 1 * K);
+                                __m128 s2 = Sse::Load<false>(ps + 2 * K);
+                                __m128 s3 = Sse::Load<false>(ps + 3 * K);
+                                __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                                __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                                __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                                __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                                Sse::Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
+                                Sse::Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
+                                Sse::Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
+                                Sse::Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
+                                dst += 16;
+                            }
+                        }
+                        for (; k < K; ++k)
+                        {
+                            for (size_t c = 0; c < n; ++c)
+                                *(dst++) = src[c*K + k];
+                        }
+                        src += cell*K;
+                    }
+                }
+
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY,
+                    size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t cell, float * tmp, float * dst)
+                {
+                    const size_t K = kernelX*kernelY*srcDepth, N = dstHeight*dstWidth;
+                    if (kernelX*kernelY != 1)
+                    {
+                        float * dst = tmp;
+                        size_t channelSize = srcHeight * srcWidth;
+                        if (dilationX*dilationY*strideX*strideY != 1)
+                        {
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow*dilationY - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol*dilationX - padX;
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = src[srcRow*srcWidth + srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                    srcCol += strideX;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                                                    *(dst++) = 0;
+                                            }
+                                            srcRow += strideY;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            const size_t bodySize = dstWidth - padX * 2;
+                            for (size_t channel = 0, k = 0; channel < srcDepth; ++channel, src += channelSize)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < kernelY; ++kernelRow)
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < kernelX; ++kernelCol, ++k)
+                                    {
+                                        size_t srcRow = kernelRow - padY;
+                                        for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow, ++srcRow)
+                                        {
+                                            if (srcRow < srcHeight)
+                                            {
+                                                size_t srcCol = kernelCol - padX, dstCol = 0;
+                                                const float * psrc = src + srcRow*srcWidth;
+                                                for (; dstCol < padX; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                                memcpy(dst, psrc + srcCol, bodySize * 4);
+                                                dst += bodySize;
+                                                dstCol += bodySize;
+                                                srcCol += bodySize;
+                                                for (; dstCol < dstWidth; ++dstCol, ++srcCol)
+                                                {
+                                                    if (srcCol < srcWidth)
+                                                        *(dst++) = psrc[srcCol];
+                                                    else
+                                                        *(dst++) = 0;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                memset(dst, 0, dstWidth * 4);
+                                                dst += dstWidth;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        src = tmp;
+                    }
+                    if (cell == 16)
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    Avx::Store<false>(dst + 0, Avx::Load<false>(psrc + 0));
+                                    Avx::Store<false>(dst + 8, Avx::Load<false>(psrc + 8));
+                                    dst += 16;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            for (size_t k = 0; k < K; ++k)
+                            {
+                                const float * psrc = src + k*N;
+                                size_t c = 0;
+                                for (; c < n; ++c)
+                                    *(dst++) = *(psrc++);
+                                for (; c < cell; ++c)
+                                    *(dst++) = 0;
+                            }
+                            src += cell;
+                        }
+                    }
+                }
+
+                SIMD_INLINE void AddSum(const __m256 & sum, float * dst)
+                {
+                    Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), sum));
+                }
+
+                SIMD_INLINE void AddSums8(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                {
+                    if (mask)
+                    {
+                        __m256 _mask = _mm256_loadu_ps(mask);
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                            AddSum(_mm256_and_ps(_mask, sums[i]), dst);
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                            AddSum(sums[i], dst);
+                    }
+                }
+
+                template <bool align> SIMD_INLINE void KernelMx8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                {
+                    __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m256 b0 = Avx::Load<align>(b);
+                        for (size_t s = 0; s < m; ++s)
+                            sums[s] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + s), b0, sums[s]);
+                        b += 8;
+                        a += m;
+                    }
+                    AddSums8(sums, m, mask, c, N);
+                }
+
+                template <bool align> SIMD_INLINE void Kernel4x8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                {
+                    __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m256 b0 = Avx::Load<align>(b);
+                        sums[0] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 0), b0, sums[0]);
+                        sums[1] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 1), b0, sums[1]);
+                        sums[2] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 2), b0, sums[2]);
+                        sums[3] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 3), b0, sums[3]);
+                        b += 8;
+                        a += 4;
+                    }
+                    AddSums8(sums, 4, mask, c, N);
+                }
+
+                template <bool align> void Execute4x8(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N8 = Simd::AlignLo(N, 8);
+                    const int32_t mask[16] = { -1, -1, -1, -1,  -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    const float * tail = (float*)mask + 8 - N + N8;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N8; j += 8)
+                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
+                        if (N8 < N)
+                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
+                    }
+                    if (M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N8; j += 8)
+                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
+                        if (N8 < N)
+                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
+                    }
+                }
+
+                SIMD_INLINE void AddSums16(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                {
+                    if (mask)
+                    {
+                        __m256 mask0 = _mm256_loadu_ps(mask + 0);
+                        __m256 mask1 = _mm256_loadu_ps(mask + 8);
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(_mm256_and_ps(mask0, sums[i + 0]), dst + 0);
+                            AddSum(_mm256_and_ps(mask1, sums[i + 4]), dst + 8);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(sums[i + 0], dst + 0);
+                            AddSum(sums[i + 4], dst + 8);
+                        }
+                    }
+                }
+
+                template <bool align> SIMD_INLINE void KernelMx16(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                {
+                    __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m256 b0 = Avx::Load<align>(b + 0);
+                        __m256 b1 = Avx::Load<align>(b + 8);
+                        for (size_t s = 0; s < m; ++s)
+                        {
+                            __m256 a0 = _mm256_broadcast_ss(a + s);
+                            sums[s + 0] = _mm256_fmadd_ps(b0, a0, sums[s + 0]);
+                            sums[s + 4] = _mm256_fmadd_ps(b1, a0, sums[s + 4]);
+                        }
+                        b += 16;
+                        a += m;
+                    }
+                    AddSums16(sums, m, mask, c, N);
+                }
+
+                template <bool align> SIMD_INLINE void Kernel4x16(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                {
+                    __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m256 b0 = Avx::Load<align>(b + 0);
+                        __m256 b1 = Avx::Load<align>(b + 8);
+                        __m256 a0 = _mm256_broadcast_ss(a + 0);
+                        sums[0] = _mm256_fmadd_ps(b0, a0, sums[0]);
+                        sums[4] = _mm256_fmadd_ps(b1, a0, sums[4]);
+                        __m256 a1 = _mm256_broadcast_ss(a + 1);
+                        sums[1] = _mm256_fmadd_ps(b0, a1, sums[1]);
+                        sums[5] = _mm256_fmadd_ps(b1, a1, sums[5]);
+                        __m256 a2 = _mm256_broadcast_ss(a + 2);
+                        sums[2] = _mm256_fmadd_ps(b0, a2, sums[2]);
+                        sums[6] = _mm256_fmadd_ps(b1, a2, sums[6]);
+                        __m256 a3 = _mm256_broadcast_ss(a + 3);
+                        sums[3] = _mm256_fmadd_ps(b0, a3, sums[3]);
+                        sums[7] = _mm256_fmadd_ps(b1, a3, sums[7]);
+                        b += 16;
+                        a += 4;
+                    }
+                    AddSums16(sums, 4, mask, c, N);
+                }
+
+                template <bool align> void Execute4x16(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N16 = Simd::AlignLo(N, 16);
+                    const int32_t mask[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    const float * tail = (float*)mask + 16 - N + N16;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N16; j += 16)
+                            Kernel4x16<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
+                        if (N16 < N)
+                            Kernel4x16<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
+                    }
+                    if (M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N16; j += 16)
+                            KernelMx16<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
+                        if (N16 < N)
+                            KernelMx16<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
+                    }
+                }
+
+                void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c, size_t cellA, size_t cellB)
+                {
+                    if (cellA == 4)
+                    {
+                        if (cellB == 8)
+                            Execute4x8<false>(M, N, K, a, b, c);
+                        if (cellB == 16)
+                            Execute4x16<false>(M, N, K, a, b, c);
+                    }
+                }
+            }
+
+            namespace Ver2
+            {
+                void PrepareB(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t padX, size_t padY, float * dst, size_t dstWidth, size_t dstHeight)
+                {
+                    for (size_t channel = 0; channel < srcDepth; ++channel)
+                    {
+                        const float * s = src;
+                        float * d = dst;
+                        memset(d, 0, padY*dstWidth * 4);
+                        d += padY*dstWidth;
+                        for (size_t row = padY; row < dstHeight - padY; ++row)
+                        {
+                            memset(d, 0, padX * 4);
+                            memcpy(d + padX, s, srcWidth * 4);
+                            memset(d + padX + srcWidth, 0, padX * 4);
+                            d += dstWidth;
+                            s += srcWidth;
+                        }
+                        memset(d, 0, padY*dstWidth * 4);
+                        src += srcWidth*srcHeight;
+                        dst += dstWidth*dstHeight;
+                    }
+                }
+
+                template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, float * dst, size_t dstDepth)
+                {
+                    __m512 _weight[kernelX*kernelY];
+                    __mmask16 tailMask = TailMask16(F - 8);
+                    for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        __m512 _dst[8];
+                        float * pdst = dst;
+                        for (size_t row = 0; row < 8; ++row, pdst += 8)
+                            _dst[row] = Load<align, true>(pdst, tailMask);
+                        if (kernelY < 4)
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                LoadWeightsForward<kernelX*kernelY>(weight, _weight);
+                                for (size_t row = 0; row < 8; ++row)
+                                {
+                                    _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template Forward<align, true>(psrc, srcWidth, _weight, tailMask)));
+                                    psrc += srcWidth;
+                                }
+                                weight += kernelX*kernelY;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                for (size_t dy = 0; dy < kernelY; dy++)
+                                {
+                                    const float * ps = psrc + dy*srcWidth;
+                                    LoadWeightsForward<kernelX>(weight, _weight);
+                                    for (size_t row = 0; row < 8; ++row)
+                                    {
+                                        _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template RowConvolution<align, true>(ps, _weight, tailMask)));
+                                        ps += srcWidth;
+                                    }
+                                    weight += kernelX;
+                                }
+                            }
+                        }
+                        for (size_t row = 0; row < 8; ++row, dst += 8)
+                            Store<align, true>(dst, _dst[row], tailMask);
+                    }
+                }
+
+                template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    if (dstWidth == 8 && dstHeight == 8)
+                    {
+                        AddConvolution8x8<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
+                        return;
+                    }
+                    size_t alignedWidth = AlignLo(dstWidth, F);
+                    __mmask16 tailMask = TailMask16(dstWidth - alignedWidth);
+                    __m512 _weight[kernelX*kernelY];
+                    for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        {
+                            const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                            const float * pweight = weight + (dstChannel*srcDepth + srcChannel)*kernelX*kernelY;
+                            float * pdst = dst + dstWidth*dstHeight*dstChannel;
+                            LoadWeightsForward<kernelX*kernelY>(pweight, _weight);
+                            for (size_t row = 0; row < dstHeight; ++row)
+                            {
+                                size_t col = 0;
+                                for (; col < alignedWidth; col += F)
+                                {
+                                    __m512 _dst = Load<align>(pdst + col);
+                                    _dst = _mm512_add_ps(_dst, (Convolution<kernelX, kernelY>::template Forward<align, false>(psrc + col, srcWidth, _weight)));
+                                    Store<align>(pdst + col, _dst);
+                                }
+                                if (col < dstWidth)
+                                {
+                                    __m512 _dst = Load<align, true>(pdst + col, tailMask);
+                                    _dst = _mm512_add_ps(_dst, (Convolution<kernelX, kernelY>::template Forward<align, true>(psrc + col, srcWidth, _weight, tailMask)));
+                                    Store<align, true>(pdst + col, _dst, tailMask);
+                                }
+                                psrc += srcWidth;
+                                pdst += dstWidth;
+                            }
+                        }
+                    }
+                }
+
+                void Execute(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, size_t kernelX, size_t kernelY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    assert(kernelX == kernelY);
+                    if (kernelX == 2)
+                        AddConvolution<false, 2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 3)
+                        AddConvolution<false, 3, 3>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 4)
+                        AddConvolution<false, 4, 4>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else if (kernelX == 5)
+                        AddConvolution<false, 5, 5>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
+                    else
+                        assert(0);
+                }
+
+                bool Preferable(size_t srcDepth, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
+                    {
+                        if (dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                            return true;
+                    }
+                    return false;
+                }
+            }
+
+            struct Opt
+            {
+                enum Alg
+                {
+                    None,
+                    Ver0,
+                    Ver1,
+                    Ver2,
+                } alg;
+
+                size_t sizeA;
+                size_t sizeB;
+                size_t sizeT;
+
+                size_t cellA;
+                size_t cellB;
+
+                size_t M, N, K;
+                size_t strideB;
+                size_t paddedW;
+                size_t paddedH;
+
+                Opt(size_t srcWidth, size_t srcHeight, size_t srcDepth, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
+                {
+                    alg = None;
+                    sizeA = 0;
+                    sizeB = 0;
+                    sizeT = 0;
+                    cellA = 1;
+                    cellB = 1;
+
+                    M = dstDepth;
+                    N = dstHeight*dstWidth;
+                    K = kernelX*kernelY*srcDepth;
+
+                    if (dstWidth*dstHeight / kernelX <= 2000)
+                        alg = Ver0;
+                    else
+                        alg = Ver1;
+                    if (Ver2::Preferable(srcDepth, kernelX, kernelY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth))
+                        alg = Ver2;
+
+                    switch (alg)
+                    {
+                    case Ver0:
+                        sizeB = N*K;
+                        break;
+                    case Ver1:
+                        cellA = 4;
+                        cellB = 16;
+                        sizeA = M*K;
+                        strideB = Simd::AlignHi(N, cellB);
+                        sizeB = strideB*K;
+                        if (kernelX*kernelY > 1)
+                            sizeT = sizeB;
+                        break;
+                    case Ver2:
+                        if (padX > 0 || padY > 0)
+                        {
+                            paddedW = Simd::AlignHi(srcWidth + 2 * padX, F);
+                            paddedH = srcHeight + 2 * padY;
+                            sizeB = paddedW*paddedH*srcDepth;
+                        }
+                        else
+                        {
+                            paddedW = srcWidth;
+                            paddedH = srcHeight;
+                        }
+                        break;
+                    default:
+                        assert(0);
+                        break;
+                    }
+                }
+            };
+
+            struct Data
+            {
+                float * a;
+                float * b;
+                float * t;
+
+                Data(size_t sizeA, size_t sizeB, size_t sizeT, void * externalData, size_t * externalSize)
+                    : a(0)
+                    , b(0)
+                    , _data(0)
+                {
+                    sizeA = AlignHi(sizeA, F);
+                    sizeB = AlignHi(sizeB, F);
+                    sizeT = AlignHi(sizeT, F);
+                    size_t size = (sizeA + sizeB + sizeT) * sizeof(float);
+                    if (size == 0)
+                        return;
+                    if (externalData != AlignHi(externalData, SIMD_ALIGN))
+                        size += SIMD_ALIGN;
+                    float * data = NULL;
+                    if (externalData == NULL || externalSize == NULL || *externalSize < size)
+                    {
+                        _data = Simd::Allocate(size);
+                        if (externalSize)
+                            *externalSize = size;
+                        data = (float*)_data;
+                    }
+                    else
+                        data = (float*)AlignHi(externalData, SIMD_ALIGN);
+                    if (sizeA)
+                        a = data;
+                    if (sizeB)
+                        b = data + sizeA;
+                    if (sizeT)
+                        t = data + sizeA + sizeB;
+                }
+
+                ~Data()
+                {
+                    if (_data)
+                        Simd::Free(_data);
+                }
+
+            private:
+                void * _data;
+            };
+        }
+
+        void NeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+            const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
+            void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add)
+        {
+            using namespace Ncf;
+
+            assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
+            assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
+
+            if (!add)
+                memset(dst, 0, dstWidth*dstHeight*dstDepth * sizeof(float));
+
+            Opt opt(srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, dstDepth);
+
+            Data data(opt.sizeA, opt.sizeB, opt.sizeT, buffer, size);
+
+            if (opt.sizeA)
+            {
+                switch (opt.alg)
+                {
+                case Opt::Ver1: Ver1::PrepareA(weight, opt.M, opt.K, opt.cellA, data.a);
+                default:
+                    break;
+                }
+            }
+            else
+                data.a = (float*)weight;
+
+            if (opt.sizeB)
+            {
+                switch (opt.alg)
+                {
+                case Opt::Ver0: Ver0::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, data.b); break;
+                case Opt::Ver1: Ver1::PrepareB(src, srcWidth, srcHeight, srcDepth, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, dstWidth, dstHeight, opt.cellB, data.t, data.b); break;
+                case Opt::Ver2: Ver2::PrepareB(src, srcWidth, srcHeight, srcDepth, padX, padY, data.b, opt.paddedW, opt.paddedH); break;
+                default: break;
+                }
+            }
+            else
+                data.b = (float*)src;
+
+            switch (opt.alg)
+            {
+            case Opt::Ver0: Ver0::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst); break;
+            case Opt::Ver1: Ver1::Execute(opt.M, opt.N, opt.K, data.a, data.b, dst, opt.cellA, opt.cellB); break;
+            case Opt::Ver2: Ver2::Execute(data.b, opt.paddedW, opt.paddedH, srcDepth, weight, kernelX, kernelY, dst, dstWidth, dstHeight, dstDepth); break;
+            default: break;
+            }
         }
     }
 #endif// SIMD_AVX512F_ENABLE

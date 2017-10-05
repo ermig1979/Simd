@@ -1838,10 +1838,10 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
 #else
-        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 7), _3, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 4), _3, _1, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        
 
         return result;
@@ -1866,6 +1866,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Avx2::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Avx512f::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
         return result;
