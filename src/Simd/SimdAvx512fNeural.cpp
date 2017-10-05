@@ -1772,54 +1772,57 @@ namespace Simd
                     }
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel1x4x8(const __m256 & a, size_t K, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel1x4x16(const __m512 & a, size_t K, const float * b, __m512 * sums)
                 {
-                    sums[0] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 0 * K), sums[0]);
-                    sums[1] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 1 * K), sums[1]);
-                    sums[2] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 2 * K), sums[2]);
-                    sums[3] = _mm256_fmadd_ps(a, Avx::Load<align>(b + 3 * K), sums[3]);
+                    sums[0] = _mm512_fmadd_ps(a, Load<align>(b + 0 * K), sums[0]);
+                    sums[1] = _mm512_fmadd_ps(a, Load<align>(b + 1 * K), sums[1]);
+                    sums[2] = _mm512_fmadd_ps(a, Load<align>(b + 2 * K), sums[2]);
+                    sums[3] = _mm512_fmadd_ps(a, Load<align>(b + 3 * K), sums[3]);
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel1x1x8(const __m256 & a, const float * b, __m256 & sum)
+                template <bool align> static SIMD_INLINE void Kernel1x1x16(const __m512 & a, const float * b, __m512 & sum)
                 {
-                    sum = _mm256_fmadd_ps(a, Avx::Load<align>(b), sum);
+                    sum = _mm512_fmadd_ps(a, Load<align>(b), sum);
                 }
 
-                SIMD_INLINE void Add4ExtractedSums(const __m256 * src, float * dst)
+                SIMD_INLINE void Add4ExtractedSums(const __m512 * src, float * dst)
                 {
-                    __m256 sum256 = _mm256_hadd_ps(_mm256_hadd_ps(src[0], src[1]), _mm256_hadd_ps(src[2], src[3]));
-                    __m128 sum128 = _mm_add_ps(_mm256_extractf128_ps(sum256, 0), _mm256_extractf128_ps(sum256, 1));
+                    __m512 sum02 = _mm512_add_ps(_mm512_unpacklo_ps(src[0], src[2]), _mm512_unpackhi_ps(src[0], src[2]));
+                    __m512 sum13 = _mm512_add_ps(_mm512_unpacklo_ps(src[1], src[3]), _mm512_unpackhi_ps(src[1], src[3]));
+                    __m512 sum512 = _mm512_add_ps(_mm512_unpacklo_ps(sum02, sum13), _mm512_unpackhi_ps(sum02, sum13));
+                    __m128 sum128 = _mm_add_ps(_mm_add_ps(_mm512_extractf32x4_ps(sum512, 0), _mm512_extractf32x4_ps(sum512, 1)),
+                        _mm_add_ps(_mm512_extractf32x4_ps(sum512, 2), _mm512_extractf32x4_ps(sum512, 3)));
                     _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), sum128));
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x4x8(const __m256 & a0, const __m256 & a1, size_t K, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel2x4x16(const __m512 & a0, const __m512 & a1, size_t K, const float * b, __m512 * sums)
                 {
-                    __m256 b0 = Avx::Load<align>(b + 0 * K);
-                    sums[0] = _mm256_fmadd_ps(a0, b0, sums[0]);
-                    sums[4] = _mm256_fmadd_ps(a1, b0, sums[4]);
-                    __m256 b1 = Avx::Load<align>(b + 1 * K);
-                    sums[1] = _mm256_fmadd_ps(a0, b1, sums[1]);
-                    sums[5] = _mm256_fmadd_ps(a1, b1, sums[5]);
-                    __m256 b2 = Avx::Load<align>(b + 2 * K);
-                    sums[2] = _mm256_fmadd_ps(a0, b2, sums[2]);
-                    sums[6] = _mm256_fmadd_ps(a1, b2, sums[6]);
-                    __m256 b3 = Avx::Load<align>(b + 3 * K);
-                    sums[3] = _mm256_fmadd_ps(a0, b3, sums[3]);
-                    sums[7] = _mm256_fmadd_ps(a1, b3, sums[7]);
+                    __m512 b0 = Load<align>(b + 0 * K);
+                    sums[0] = _mm512_fmadd_ps(a0, b0, sums[0]);
+                    sums[4] = _mm512_fmadd_ps(a1, b0, sums[4]);
+                    __m512 b1 = Load<align>(b + 1 * K);
+                    sums[1] = _mm512_fmadd_ps(a0, b1, sums[1]);
+                    sums[5] = _mm512_fmadd_ps(a1, b1, sums[5]);
+                    __m512 b2 = Load<align>(b + 2 * K);
+                    sums[2] = _mm512_fmadd_ps(a0, b2, sums[2]);
+                    sums[6] = _mm512_fmadd_ps(a1, b2, sums[6]);
+                    __m512 b3 = Load<align>(b + 3 * K);
+                    sums[3] = _mm512_fmadd_ps(a0, b3, sums[3]);
+                    sums[7] = _mm512_fmadd_ps(a1, b3, sums[7]);
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x1x8(const __m256 & a0, const __m256 & a1, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel2x1x16(const __m512 & a0, const __m512 & a1, const float * b, __m512 * sums)
                 {
-                    sums[0] = _mm256_fmadd_ps(a0, Avx::Load<align>(b), sums[0]);
-                    sums[1] = _mm256_fmadd_ps(a1, Avx::Load<align>(b), sums[1]);
+                    sums[0] = _mm512_fmadd_ps(a0, Load<align>(b), sums[0]);
+                    sums[1] = _mm512_fmadd_ps(a1, Load<align>(b), sums[1]);
                 }
 
                 template <bool align> void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
                     size_t M2 = Simd::AlignLo(M, 2);
                     size_t N4 = Simd::AlignLo(N, 4);
-                    size_t K8 = Simd::AlignLo(K, 8);
-                    __m256 tailMask = Avx::RightNotZero(K - K8);
+                    size_t K16 = Simd::AlignLo(K, 16);
+                    __mmask16 tailMask = TailMask16(K - K16);
                     size_t i = 0;
                     for (; i < M2; i += 2)
                     {
@@ -1831,19 +1834,20 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                            for (size_t k = 0; k < K8; k += 8)
+                            __m512 sums[8] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
+                                _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            size_t k = 0;
+                            for (; k < K16; k += 16)
                             {
-                                __m256 _a0 = Avx::Load<false>(pa0 + k);
-                                __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                Kernel2x4x8<align>(_a0, _a1, K, pb + k, sums);
+                                __m512 _a0 = Load<false>(pa0 + k);
+                                __m512 _a1 = Load<false>(pa1 + k);
+                                Kernel2x4x16<align>(_a0, _a1, K, pb + k, sums);
                             }
-                            if (K8 < K)
+                            if (k < K)
                             {
-                                size_t k = K - 8;
-                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
-                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                Kernel2x4x8<false>(_a0, _a1, K, pb + k, sums);
+                                __m512 _a0 = Load<false, true>(pa0 + k, tailMask);
+                                __m512 _a1 = Load<false, true>(pa1 + k, tailMask);
+                                Kernel2x4x16<false>(_a0, _a1, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc0 + j);
                             Add4ExtractedSums(sums + 4, pc1 + j);
@@ -1851,22 +1855,22 @@ namespace Simd
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            __m256 sums[2] = { _mm256_setzero_ps(), _mm256_setzero_ps() };
-                            for (size_t k = 0; k < K8; k += 8)
+                            __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            size_t k = 0;
+                            for (; k < K16; k += 16)
                             {
-                                __m256 _a0 = Avx::Load<false>(pa0 + k);
-                                __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                Kernel2x1x8<align>(_a0, _a1, pb + k, sums);
+                                __m512 _a0 = Load<false>(pa0 + k);
+                                __m512 _a1 = Load<false>(pa1 + k);
+                                Kernel2x1x16<align>(_a0, _a1, pb + k, sums);
                             }
-                            if (K8 < K)
+                            if (k < K)
                             {
-                                size_t k = K - 8;
-                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
-                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                Kernel2x1x8<false>(_a0, _a1, pb + k, sums);
+                                __m512 _a0 = Load<false, true>(pa0 + k, tailMask);
+                                __m512 _a1 = Load<false, true>(pa1 + k, tailMask);
+                                Kernel2x1x16<false>(_a0, _a1, pb + k, sums);
                             }
-                            pc0[j] += Avx::ExtractSum(sums[0]);
-                            pc1[j] += Avx::ExtractSum(sums[1]);
+                            pc0[j] += ExtractSum(sums[0]);
+                            pc1[j] += ExtractSum(sums[1]);
                         }
                     }
                     for (; i < M; ++i)
@@ -1877,36 +1881,36 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                            for (size_t k = 0; k < K8; k += 8)
+                            __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            size_t k = 0;
+                            for (; k < K16; k += 16)
                             {
-                                __m256 _a = Avx::Load<false>(pa + k);
-                                Kernel1x4x8<align>(_a, K, pb + k, sums);
+                                __m512 _a = Load<false>(pa + k);
+                                Kernel1x4x16<align>(_a, K, pb + k, sums);
                             }
-                            if (K8 < K)
+                            if (k < K)
                             {
-                                size_t k = K - 8;
-                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
-                                Kernel1x4x8<false>(_a, K, pb + k, sums);
+                                __m512 _a =  Load<false, true>(pa + k, tailMask);
+                                Kernel1x4x16<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j);
                         }
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            __m256 sum = _mm256_setzero_ps();
-                            for (size_t k = 0; k < K8; k += 8)
+                            __m512 sum = _mm512_setzero_ps();
+                            size_t k = 0;
+                            for (; k < K16; k += 16)
                             {
-                                __m256 _a = Avx::Load<false>(pa + k);
-                                Kernel1x1x8<align>(_a, pb + k, sum);
+                                __m512 _a = Load<false>(pa + k);
+                                Kernel1x1x16<align>(_a, pb + k, sum);
                             }
-                            if (K8 < K)
+                            if (k < K)
                             {
-                                size_t k = K - 8;
-                                __m256 _a = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k));
-                                Kernel1x1x8<false>(_a, pb + k, sum);
+                                __m512 _a = Load<false, true>(pa + k, tailMask);
+                                Kernel1x1x16<false>(_a, pb + k, sum);
                             }
-                            pc[j] += Avx::ExtractSum(sum);
+                            pc[j] += ExtractSum(sum);
                         }
                     }
                 }
@@ -2077,8 +2081,7 @@ namespace Simd
                                 for (size_t k = 0; k < K; ++k)
                                 {
                                     const float * psrc = src + k*N;
-                                    Avx::Store<false>(dst + 0, Avx::Load<false>(psrc + 0));
-                                    Avx::Store<false>(dst + 8, Avx::Load<false>(psrc + 8));
+                                    Store<false>(dst, Load<false>(psrc));
                                     dst += 16;
                                 }
                             }
