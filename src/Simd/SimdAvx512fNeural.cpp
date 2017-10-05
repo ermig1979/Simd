@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStream.h"
+#include "Simd/SimdNeural.h"
 
 namespace Simd
 {
@@ -2322,23 +2323,22 @@ namespace Simd
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, float * dst, size_t dstDepth)
                 {
-                    __m512 _weight[kernelX*kernelY];
-                    __mmask16 tailMask = TailMask16(F - 8);
+                    __m256 _weight[kernelX*kernelY];
                     for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
                     {
-                        __m512 _dst[8];
+                        __m256 _dst[8];
                         float * pdst = dst;
                         for (size_t row = 0; row < 8; ++row, pdst += 8)
-                            _dst[row] = Load<align, true>(pdst, tailMask);
+                            _dst[row] = Avx::Load<align>(pdst);
                         if (kernelY < 4)
                         {
                             for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                             {
                                 const float * psrc = src + srcWidth*srcHeight*srcChannel;
-                                LoadWeightsForward<kernelX*kernelY>(weight, _weight);
+                                Avx2::LoadWeightsForward<kernelX*kernelY>(weight, _weight);
                                 for (size_t row = 0; row < 8; ++row)
                                 {
-                                    _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template Forward<align, true>(psrc, srcWidth, _weight, tailMask)));
+                                    _dst[row] = _mm256_add_ps(_dst[row], Avx2::Convolution<kernelX, kernelY>::template Forward<align>(psrc, srcWidth, _weight));
                                     psrc += srcWidth;
                                 }
                                 weight += kernelX*kernelY;
@@ -2352,10 +2352,10 @@ namespace Simd
                                 for (size_t dy = 0; dy < kernelY; dy++)
                                 {
                                     const float * ps = psrc + dy*srcWidth;
-                                    LoadWeightsForward<kernelX>(weight, _weight);
+                                    Avx2::LoadWeightsForward<kernelX>(weight, _weight);
                                     for (size_t row = 0; row < 8; ++row)
                                     {
-                                        _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template RowConvolution<align, true>(ps, _weight, tailMask)));
+                                        _dst[row] = _mm256_add_ps(_dst[row], Avx2::Convolution<kernelX, kernelY>::template RowConvolution<align>(ps, _weight));
                                         ps += srcWidth;
                                     }
                                     weight += kernelX;
@@ -2363,7 +2363,7 @@ namespace Simd
                             }
                         }
                         for (size_t row = 0; row < 8; ++row, dst += 8)
-                            Store<align, true>(dst, _dst[row], tailMask);
+                            Avx::Store<align>(dst, _dst[row]);
                     }
                 }
 
