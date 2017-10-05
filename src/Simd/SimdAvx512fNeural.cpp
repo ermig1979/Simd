@@ -2367,12 +2367,64 @@ namespace Simd
                     }
                 }
 
+                template <bool align, size_t kernelX, size_t kernelY> void AddConvolution16x16(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
+                    const float * weight, float * dst, size_t dstDepth)
+                {
+                    __m512 _weight[kernelX*kernelY];
+                    for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        __m512 _dst[16];
+                        float * pdst = dst;
+                        for (size_t row = 0; row < 16; ++row, pdst += 16)
+                            _dst[row] = Load<align>(pdst);
+                        if (kernelY < 4)
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                LoadWeightsForward<kernelX*kernelY>(weight, _weight);
+                                for (size_t row = 0; row < 16; ++row)
+                                {
+                                    _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template Forward<align, false>(psrc, srcWidth, _weight)));
+                                    psrc += srcWidth;
+                                }
+                                weight += kernelX*kernelY;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                            {
+                                const float * psrc = src + srcWidth*srcHeight*srcChannel;
+                                for (size_t dy = 0; dy < kernelY; dy++)
+                                {
+                                    const float * ps = psrc + dy*srcWidth;
+                                    LoadWeightsForward<kernelX>(weight, _weight);
+                                    for (size_t row = 0; row < 16; ++row)
+                                    {
+                                        _dst[row] = _mm512_add_ps(_dst[row], (Convolution<kernelX, kernelY>::template RowConvolution<align, false>(ps, _weight)));
+                                        ps += srcWidth;
+                                    }
+                                    weight += kernelX;
+                                }
+                            }
+                        }
+                        for (size_t row = 0; row < 16; ++row, dst += 16)
+                            Store<align>(dst, _dst[row]);
+                    }
+                }
+
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     if (dstWidth == 8 && dstHeight == 8)
                     {
                         AddConvolution8x8<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
+                        return;
+                    }
+                    if (dstWidth == 16 && dstHeight == 16)
+                    {
+                        AddConvolution16x16<align, kernelX, kernelY>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstDepth);
                         return;
                     }
                     size_t alignedWidth = AlignLo(dstWidth, F);
