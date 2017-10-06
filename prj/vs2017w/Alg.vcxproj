@@ -52,10 +52,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx2*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx512f*.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdAvx512f*.cpp">
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bw*.cpp">
