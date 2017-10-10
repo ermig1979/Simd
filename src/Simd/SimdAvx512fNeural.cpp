@@ -1883,7 +1883,7 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[16] = { 
+                            register __m512 sums[16] = {
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
@@ -1937,7 +1937,7 @@ namespace Simd
                             const float * pb = b + j*K;
                             register __m512 sums[8] = {
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
-                                _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps()};
+                                _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
@@ -1955,7 +1955,7 @@ namespace Simd
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps()};
+                            register __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
@@ -1988,7 +1988,7 @@ namespace Simd
                             }
                             if (k < K)
                             {
-                                register __m512 _a =  Load<false, true>(pa + k, tailMask);
+                                register __m512 _a = Load<false, true>(pa + k, tailMask);
                                 Kernel1x4x16<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j);
@@ -2169,7 +2169,37 @@ namespace Simd
                         }
                         src = tmp;
                     }
-                    if (cell == 16)
+                    if (cell == 32)
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    Store<false>(dst + 0, Load<false>(psrc + 0));
+                                    Store<false>(dst + F, Load<false>(psrc + F));
+                                    dst += 32;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k*N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else if (cell == 16)
                     {
                         for (size_t j = 0; j < N; j += cell)
                         {
@@ -2217,171 +2247,156 @@ namespace Simd
                     }
                 }
 
-                SIMD_INLINE void AddSum(const __m256 & sum, float * dst)
+                template<bool mask> SIMD_INLINE void AddSum(__m512 sum, float * dst, __mmask16 tail = -1)
                 {
-                    Avx::Store<false>(dst, _mm256_add_ps(Avx::Load<false>(dst), sum));
+                    Store<false, mask>(dst, _mm512_add_ps((Load<false, mask>(dst, tail)), sum), tail);
                 }
 
-                SIMD_INLINE void AddSums8(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                template<bool mask> SIMD_INLINE void AddSums16(const __m512 * sums, size_t size, float * dst, size_t stride, __mmask16 tail = -1)
                 {
-                    if (mask)
-                    {
-                        __m256 _mask = _mm256_loadu_ps(mask);
-                        for (size_t i = 0; i < size; ++i, dst += stride)
-                            AddSum(_mm256_and_ps(_mask, sums[i]), dst);
-                    }
-                    else
-                    {
-                        for (size_t i = 0; i < size; ++i, dst += stride)
-                            AddSum(sums[i], dst);
-                    }
+                    for (size_t i = 0; i < size; ++i, dst += stride)
+                        AddSum<mask>(sums[i], dst, tail);
                 }
 
-                template <bool align> SIMD_INLINE void KernelMx8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                template <bool align, bool mask> SIMD_INLINE void KernelMx16(size_t N, size_t K, const float * a, const float * b, float * c, size_t m, __mmask16 tail = -1)
                 {
-                    __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                     for (size_t k = 0; k < K; ++k)
                     {
-                        __m256 b0 = Avx::Load<align>(b);
-                        for (size_t s = 0; s < m; ++s)
-                            sums[s] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + s), b0, sums[s]);
-                        b += 8;
-                        a += m;
-                    }
-                    AddSums8(sums, m, mask, c, N);
-                }
-
-                template <bool align> SIMD_INLINE void Kernel4x8(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
-                {
-                    __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        __m256 b0 = Avx::Load<align>(b);
-                        sums[0] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 0), b0, sums[0]);
-                        sums[1] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 1), b0, sums[1]);
-                        sums[2] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 2), b0, sums[2]);
-                        sums[3] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 3), b0, sums[3]);
-                        b += 8;
-                        a += 4;
-                    }
-                    AddSums8(sums, 4, mask, c, N);
-                }
-
-                template <bool align> void Execute4x8(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
-                {
-                    size_t M4 = Simd::AlignLo(M, 4);
-                    size_t N8 = Simd::AlignLo(N, 8);
-                    const int32_t mask[16] = { -1, -1, -1, -1,  -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
-                    const float * tail = (float*)mask + 8 - N + N8;
-                    size_t i = 0;
-                    for (; i < M4; i += 4)
-                    {
-                        size_t j = 0;
-                        for (; j < N8; j += 8)
-                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
-                        if (N8 < N)
-                            Kernel4x8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
-                    }
-                    if (M4 < M)
-                    {
-                        size_t j = 0;
-                        for (; j < N8; j += 8)
-                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
-                        if (N8 < N)
-                            KernelMx8<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
-                    }
-                }
-
-                SIMD_INLINE void AddSums16(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
-                {
-                    if (mask)
-                    {
-                        __m256 mask0 = _mm256_loadu_ps(mask + 0);
-                        __m256 mask1 = _mm256_loadu_ps(mask + 8);
-                        for (size_t i = 0; i < size; ++i, dst += stride)
-                        {
-                            AddSum(_mm256_and_ps(mask0, sums[i + 0]), dst + 0);
-                            AddSum(_mm256_and_ps(mask1, sums[i + 4]), dst + 8);
-                        }
-                    }
-                    else
-                    {
-                        for (size_t i = 0; i < size; ++i, dst += stride)
-                        {
-                            AddSum(sums[i + 0], dst + 0);
-                            AddSum(sums[i + 4], dst + 8);
-                        }
-                    }
-                }
-
-                template <bool align> SIMD_INLINE void KernelMx16(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
-                {
-                    __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
-                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        __m256 b0 = Avx::Load<align>(b + 0);
-                        __m256 b1 = Avx::Load<align>(b + 8);
+                        __m512 b0 = Load<align>(b);
                         for (size_t s = 0; s < m; ++s)
                         {
-                            __m256 a0 = _mm256_broadcast_ss(a + s);
-                            sums[s + 0] = _mm256_fmadd_ps(b0, a0, sums[s + 0]);
-                            sums[s + 4] = _mm256_fmadd_ps(b1, a0, sums[s + 4]);
+                            __m512 a0 = _mm512_set1_ps(a[s]);
+                            sums[s] = _mm512_fmadd_ps(b0, a0, sums[s]);
                         }
                         b += 16;
                         a += m;
                     }
-                    AddSums16(sums, m, mask, c, N);
+                    AddSums16<mask>(sums, m, c, N, tail);
                 }
 
-                template <bool align> SIMD_INLINE void Kernel4x16(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                template <bool align, bool mask> SIMD_INLINE void Kernel4x16(size_t N, size_t K, const float * a, const float * b, float * c, __mmask16 tail = -1)
                 {
-                    __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
-                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                     for (size_t k = 0; k < K; ++k)
                     {
-                        __m256 b0 = Avx::Load<align>(b + 0);
-                        __m256 b1 = Avx::Load<align>(b + 8);
-                        __m256 a0 = _mm256_broadcast_ss(a + 0);
-                        sums[0] = _mm256_fmadd_ps(b0, a0, sums[0]);
-                        sums[4] = _mm256_fmadd_ps(b1, a0, sums[4]);
-                        __m256 a1 = _mm256_broadcast_ss(a + 1);
-                        sums[1] = _mm256_fmadd_ps(b0, a1, sums[1]);
-                        sums[5] = _mm256_fmadd_ps(b1, a1, sums[5]);
-                        __m256 a2 = _mm256_broadcast_ss(a + 2);
-                        sums[2] = _mm256_fmadd_ps(b0, a2, sums[2]);
-                        sums[6] = _mm256_fmadd_ps(b1, a2, sums[6]);
-                        __m256 a3 = _mm256_broadcast_ss(a + 3);
-                        sums[3] = _mm256_fmadd_ps(b0, a3, sums[3]);
-                        sums[7] = _mm256_fmadd_ps(b1, a3, sums[7]);
+                        __m512 b0 = Load<align>(b);
+                        __m512 a0 = _mm512_set1_ps(a[0]);
+                        sums[0] = _mm512_fmadd_ps(b0, a0, sums[0]);
+                        __m512 a1 = _mm512_set1_ps(a[1]);
+                        sums[1] = _mm512_fmadd_ps(b0, a1, sums[1]);
+                        __m512 a2 = _mm512_set1_ps(a[2]);
+                        sums[2] = _mm512_fmadd_ps(b0, a2, sums[2]);
+                        __m512 a3 = _mm512_set1_ps(a[3]);
+                        sums[3] = _mm512_fmadd_ps(b0, a3, sums[3]);
                         b += 16;
                         a += 4;
                     }
-                    AddSums16(sums, 4, mask, c, N);
+                    AddSums16<mask>(sums, 4, c, N, tail);
                 }
 
                 template <bool align> void Execute4x16(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
                     size_t M4 = Simd::AlignLo(M, 4);
                     size_t N16 = Simd::AlignLo(N, 16);
-                    const int32_t mask[32] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                    const float * tail = (float*)mask + 16 - N + N16;
+                    __mmask16 tailMask = TailMask16(N - N16);
                     size_t i = 0;
                     for (; i < M4; i += 4)
                     {
                         size_t j = 0;
                         for (; j < N16; j += 16)
-                            Kernel4x16<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL);
-                        if (N16 < N)
-                            Kernel4x16<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail);
+                            Kernel4x16<align, false>(N, K, a + i*K, b + j*K, c + i*N + j);
+                        if (j < N)
+                            Kernel4x16<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, tailMask);
                     }
-                    if (M4 < M)
+                    if (i < M)
                     {
                         size_t j = 0;
                         for (; j < N16; j += 16)
-                            KernelMx16<align>(N, K, a + i*K, b + j*K, c + i*N + j, NULL, M - M4);
-                        if (N16 < N)
-                            KernelMx16<align>(N, K, a + i*K, b + j*K, c + i*N + j, tail, M - M4);
+                            KernelMx16<align, false>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4);
+                        if (j < N)
+                            KernelMx16<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4, tailMask);
+                    }
+                }
+
+                template<bool mask> SIMD_INLINE void AddSums32(const __m512 * sums, size_t size, float * dst, size_t stride, const __mmask16 * tails)
+                {
+                    for (size_t i = 0; i < size; ++i, dst += stride)
+                    {
+                        AddSum<mask>(sums[i + 0], dst + 00, tails[0]);
+                        AddSum<mask>(sums[i + 4], dst + 16, tails[1]);
+                    }
+                }
+
+                template <bool align, bool mask> SIMD_INLINE void KernelMx32(size_t N, size_t K, const float * a, const float * b, float * c, size_t m, const __mmask16 * tails)
+                {
+                    __m512 sums[8] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
+                        _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m512 b0 = Load<align>(b + 00);
+                        __m512 b1 = Load<align>(b + 16);
+                        for (size_t s = 0; s < m; ++s)
+                        {
+                            __m512 a0 = _mm512_set1_ps(a[s]);
+                            sums[s + 0] = _mm512_fmadd_ps(b0, a0, sums[s + 0]);
+                            sums[s + 4] = _mm512_fmadd_ps(b1, a0, sums[s + 4]);
+                        }
+                        b += 32;
+                        a += m;
+                    }
+                    AddSums32<mask>(sums, m, c, N, tails);
+                }
+
+                template <bool align, bool mask> SIMD_INLINE void Kernel4x32(size_t N, size_t K, const float * a, const float * b, float * c, const __mmask16 * tails)
+                {
+                    __m512 sums[8] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
+                        _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        __m512 b0 = Load<align>(b + 00);
+                        __m512 b1 = Load<align>(b + 16);
+                        __m512 a0 = _mm512_set1_ps(a[0]);
+                        sums[0] = _mm512_fmadd_ps(b0, a0, sums[0]);
+                        sums[4] = _mm512_fmadd_ps(b1, a0, sums[4]);
+                        __m512 a1 = _mm512_set1_ps(a[1]);
+                        sums[1] = _mm512_fmadd_ps(b0, a1, sums[1]);
+                        sums[5] = _mm512_fmadd_ps(b1, a1, sums[5]);
+                        __m512 a2 = _mm512_set1_ps(a[2]);
+                        sums[2] = _mm512_fmadd_ps(b0, a2, sums[2]);
+                        sums[6] = _mm512_fmadd_ps(b1, a2, sums[6]);
+                        __m512 a3 = _mm512_set1_ps(a[3]);
+                        sums[3] = _mm512_fmadd_ps(b0, a3, sums[3]);
+                        sums[7] = _mm512_fmadd_ps(b1, a3, sums[7]);
+                        b += 32;
+                        a += 4;
+                    }
+                    AddSums32<mask>(sums, 4, c, N, tails);
+                }
+
+                template <bool align> void Execute4x32(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N32 = Simd::AlignLo(N, 32);
+                    __mmask16 tailMasks[2];
+                    for (size_t i = 0; i < 2; ++i)
+                        tailMasks[i] = TailMask16(N - N32 - F*i);
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N32; j += 32)
+                            Kernel4x32<align, false>(N, K, a + i*K, b + j*K, c + i*N + j, tailMasks);
+                        if (j < N)
+                            Kernel4x32<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, tailMasks);
+                    }
+                    if (i < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N32; j += 32)
+                            KernelMx32<align, false>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4, tailMasks);
+                        if (j < N)
+                            KernelMx32<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4, tailMasks);
                     }
                 }
 
@@ -2389,10 +2404,10 @@ namespace Simd
                 {
                     if (cellA == 4)
                     {
-                        if (cellB == 8)
-                            Execute4x8<false>(M, N, K, a, b, c);
                         if (cellB == 16)
                             Execute4x16<false>(M, N, K, a, b, c);
+                        if (cellB == 32)
+                            Execute4x32<false>(M, N, K, a, b, c);
                     }
                 }
             }
@@ -2637,7 +2652,7 @@ namespace Simd
                         break;
                     case Ver1:
                         cellA = 4;
-                        cellB = 16;
+                        cellB = 32;
                         sizeA = M*K;
                         strideB = Simd::AlignHi(N, cellB);
                         sizeB = strideB*K;
