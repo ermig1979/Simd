@@ -639,10 +639,8 @@ namespace Simd
                         {
                             __m128 s = _mm_set1_ps(src[0] + src[Q]);
                             __m128 h = _mm_min_ps(_mm_mul_ps(s, n), _02);
-                            h = _mm_mul_ps(_05, h);
-                            h = _mm_hadd_ps(h, h);
-                            h = _mm_hadd_ps(h, h);
-                            _mm_store_ss(dst++, h);
+							h = _mm_dp_ps(_05, h, 0xF1);
+							_mm_store_ss(dst++, h);
                         }
                         _mm_storeu_ps(dst, _mm_mul_ps(t, _02357));
                     }
