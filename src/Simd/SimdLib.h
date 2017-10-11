@@ -2327,6 +2327,26 @@ extern "C"
 
     /*! @ingroup histogram
 
+        \fn void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
+
+        \short Changes colors for 8-bit gray image with using of color map.
+
+        The input and output 8-bit gray images must have the same size. 
+
+        \note This function has a C++ wrapper Simd::ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] srcStride - a row size of the image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] colors - a pointer to the color map (array of 256 unsigned 8-bit values).
+        \param [out] dst - a pointer to pixels data of output 8-bit gray image.
+        \param [in] dstStride - a row size of the output gray image.
+    */
+    SIMD_API void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup histogram
+
         \fn void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         \short Normalizes histogram for 8-bit gray image.

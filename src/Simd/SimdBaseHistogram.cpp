@@ -177,14 +177,8 @@ namespace Simd
                 colors[i] = i < minColor ? 0 : (norm ? (255 * (integral[i] - minCount) + term) / norm : minColor);
         }
 
-        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride)
         {
-            uint32_t histogram[HISTOGRAM_SIZE];
-            Histogram(src, width, height, srcStride, histogram);
-
-            uint8_t colors[HISTOGRAM_SIZE];
-            NormalizedColors(histogram, colors);
-
             size_t alignedWidth = Simd::AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
             {
@@ -202,6 +196,17 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
+        }
+
+        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            uint32_t histogram[HISTOGRAM_SIZE];
+            Histogram(src, width, height, srcStride, histogram);
+
+            uint8_t colors[HISTOGRAM_SIZE];
+            NormalizedColors(histogram, colors);
+
+            ChangeColors(src, srcStride, width, height, colors, dst, dstStride);
         }
     }
 }

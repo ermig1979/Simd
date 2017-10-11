@@ -267,6 +267,77 @@ namespace Test
 
     namespace
     {
+        struct FuncCC
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
+                const uint8_t * colors, uint8_t * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncCC(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & colors, const View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, colors.data, dst.data, dst.stride);
+            }
+        };
+    }
+
+#define FUNC_CC(function) \
+    FuncCC(function, std::string(#function))
+
+    bool ChangeColorsAutoTest(int width, int height, const FuncCC & f1, const FuncCC & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(s);
+
+        View c(Simd::HISTOGRAM_SIZE, 1, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(c);
+
+        View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, c, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, c, d2));
+
+        result = result && Compare(d1, d2, 0, true, 32);
+
+        return result;
+    }
+
+    bool ChangeColorsAutoTest(const FuncCC & f1, const FuncCC & f2)
+    {
+        bool result = true;
+
+        result = result && ChangeColorsAutoTest(W, H, f1, f2);
+        result = result && ChangeColorsAutoTest(W + O, H - O, f1, f2);
+
+        return result;
+    }
+
+    bool ChangeColorsAutoTest()
+    {
+        bool result = true;
+
+        result = result && ChangeColorsAutoTest(FUNC_CC(Simd::Base::ChangeColors), FUNC_CC(SimdChangeColors));
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && ChangeColorsAutoTest(FUNC_CC(Simd::Avx512bw::ChangeColors), FUNC_CC(SimdChangeColors));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncHC
         {
             typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -507,6 +578,57 @@ namespace Test
         result = result && AbsSecondDerivativeHistogramDataTest(create, DW, DH, FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 
         return result;
+    }
+
+    bool ChangeColorsDataTest(bool create, int width, int height, const FuncCC & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View colors(Simd::HISTOGRAM_SIZE, 1, View::Gray8, NULL, TEST_ALIGN(width));
+
+        View dst1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View dst2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom(src);
+
+            FillRandom(colors);
+
+            TEST_SAVE(src);
+
+            TEST_SAVE(colors);
+
+            f.Call(src, colors, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(colors);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, colors, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 32);
+        }
+
+        return result;
+    }
+
+    bool ChangeColorsDataTest(bool create)
+    {
+        return ChangeColorsDataTest(create, DW, DH, FUNC_CC(SimdChangeColors));
     }
 
     bool HistogramConditionalDataTest(bool create, int width, int height, SimdCompareType type, const FuncHC & f)

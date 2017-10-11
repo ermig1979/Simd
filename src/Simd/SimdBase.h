@@ -247,6 +247,8 @@ namespace Simd
 
         void NormalizedColors(const uint32_t * histogram, uint8_t * colors);
 
+        void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
+
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height,

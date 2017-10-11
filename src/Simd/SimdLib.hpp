@@ -1700,6 +1700,27 @@ namespace Simd
 
     /*! @ingroup histogram
 
+        \fn void ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst)
+
+        \short Changes colors for 8-bit gray image with using of color map.
+
+        The input and output 8-bit gray images must have the same size.
+
+        \note This function is a C++ wrapper for function ::SimdChangeColors.
+
+        \param [in] src - an input 8-bit gray image.
+        \param [in] colors - a pointer to the color map (array of 256 unsigned 8-bit values).
+        \param [out] dst - an output 8-bit gray image.
+    */
+    template<template<class> class A> SIMD_INLINE void ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst)
+    {
+        assert(Compatible(src, dst) && src.format == View<A>::Gray8);
+
+        SimdChangeColors(src.data, src.stride, src.width, src.height, colors, dst.data, dst.stride);
+    }
+
+    /*! @ingroup histogram
+
         \fn void NormalizeHistogram(const View<A> & src, View<A> & dst)
 
         \short Normalizes histogram for 8-bit gray image.

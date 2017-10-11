@@ -293,6 +293,52 @@ namespace Simd
                 assert(0);
             }
         }
+
+        template< bool align> void ChangeColors(const uint8_t * src, const __m512i * colors, uint8_t * dst)
+        {
+            __m512i _src = _mm512_cvtepu8_epi16(Avx2::Load<align>((__m256i*)src));
+            __mmask32 blend = _mm512_cmpge_epi16_mask(_src, K16_0080);
+            __m512i permute = _mm512_srli_epi16(_src, 1);
+            __m512i shift = _mm512_slli_epi16(_mm512_and_si512(_src, K16_0001), 3);
+            __m512i permute0 = _mm512_permutex2var_epi16(colors[0], permute, colors[1]);
+            __m512i permute1 = _mm512_permutex2var_epi16(colors[2], permute, colors[3]);
+            __m512i blended = _mm512_mask_blend_epi16(blend, permute0, permute1);
+            __m512i shifted = _mm512_and_si512(_mm512_srlv_epi16(blended, shift), K16_00FF);
+            Avx2::Store<align>((__m256i*)dst, _mm512_cvtepi16_epi8(shifted));
+        }
+
+        template< bool align> void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride)
+        {
+            assert(width >= Avx512bw::HA);
+            if (align)
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+
+            __m512i _colors[4];
+            _colors[0] = Load<false>(colors + 0 * A);
+            _colors[1] = Load<false>(colors + 1 * A);
+            _colors[2] = Load<false>(colors + 2 * A);
+            _colors[3] = Load<false>(colors + 3 * A);
+
+            size_t alignedWidth = Simd::AlignLo(width, HA);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += HA)
+                    ChangeColors<align>(src + col, _colors, dst + col);
+                if(alignedWidth < width)
+                    ChangeColors<false>(src + width - HA, _colors, dst + width - HA);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                ChangeColors<true>(src, srcStride, width, height, colors, dst, dstStride);
+            else
+                ChangeColors<false>(src, srcStride, width, height, colors, dst, dstStride);
+        }    
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -194,7 +194,8 @@ namespace Test
     TEST_ADD_GROUP(Histogram);
     TEST_ADD_GROUP(HistogramMasked);
     TEST_ADD_GROUP(HistogramConditional);
-    TEST_ADD_GROUP(AbsSecondDerivativeHistogram);
+    TEST_ADD_GROUP(AbsSecondDerivativeHistogram); 
+    TEST_ADD_GROUP(ChangeColors);
 
     TEST_ADD_GROUP(HogDirectionHistograms);
     TEST_ADD_GROUP(HogExtractFeatures);
