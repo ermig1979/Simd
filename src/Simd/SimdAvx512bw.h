@@ -194,6 +194,8 @@ namespace Simd
 
         void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride);
 
+        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 

@@ -2153,7 +2153,12 @@ SIMD_API void SimdChangeColors(const uint8_t * src, size_t srcStride, size_t wid
 
 SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
-    Base::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::HA)
+        Avx512bw::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::NormalizeHistogram(src, srcStride, width, height, dst, dstStride);
 }
 
 SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, 

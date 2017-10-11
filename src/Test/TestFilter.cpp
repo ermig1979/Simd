@@ -431,6 +431,11 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::NormalizeHistogram), FUNC_G(SimdNormalizeHistogram));
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Avx512bw::NormalizeHistogram), FUNC_G(SimdNormalizeHistogram));
+#endif 
+
         return result;
     }
 

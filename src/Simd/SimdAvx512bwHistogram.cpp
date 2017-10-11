@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdLog.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -338,7 +338,19 @@ namespace Simd
                 ChangeColors<true>(src, srcStride, width, height, colors, dst, dstStride);
             else
                 ChangeColors<false>(src, srcStride, width, height, colors, dst, dstStride);
-        }    
+        }  
+
+
+        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            uint32_t histogram[HISTOGRAM_SIZE];
+            Base::Histogram(src, width, height, srcStride, histogram);
+
+            uint8_t colors[HISTOGRAM_SIZE];
+            Base::NormalizedColors(histogram, colors);
+
+            ChangeColors(src, srcStride, width, height, colors, dst, dstStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
