@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gafaecd81aa0fdcb27bcbac490d483f420"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#gafaecd81aa0fdcb27bcbac490d483f420">SimdHistogramConditional</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, const uint8_t *mask, size_t maskStride, uint8_t value, <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a> compareType, uint32_t *histogram)</td></tr>
 <tr class="memdesc:gafaecd81aa0fdcb27bcbac490d483f420"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates histogram of 8-bit gray image for those points when mask points satisfying certain condition.  <a href="#gafaecd81aa0fdcb27bcbac490d483f420">More...</a><br /></td></tr>
 <tr class="separator:gafaecd81aa0fdcb27bcbac490d483f420"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8b1c849a1480235d6eb69f90d5627d95"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga8b1c849a1480235d6eb69f90d5627d95">SimdNormalizedColors</a> (const uint32_t *histogram, uint8_t *colors)</td></tr>
+<tr class="memdesc:ga8b1c849a1480235d6eb69f90d5627d95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets normalized color map for given histogram.  <a href="#ga8b1c849a1480235d6eb69f90d5627d95">More...</a><br /></td></tr>
+<tr class="separator:ga8b1c849a1480235d6eb69f90d5627d95"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__histogram.html#ga1b98bb6c69e965a56919bc5f10201d1d">SimdNormalizeHistogram</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normalizes histogram for 8-bit gray image.  <a href="#ga1b98bb6c69e965a56919bc5f10201d1d">More...</a><br /></td></tr>
 <tr class="separator:ga1b98bb6c69e965a56919bc5f10201d1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -390,6 +393,43 @@ histogram[max(dx, dy)]++;
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a second value for compare operation. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">compareType</td><td>- a compare operation type (see <a class="el" href="group__c__types.html#gacc0482a1811a1028062f6e4ed877804a">SimdCompareType</a>). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga8b1c849a1480235d6eb69f90d5627d95"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8b1c849a1480235d6eb69f90d5627d95">&#9670;&nbsp;</a></span>SimdNormalizedColors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNormalizedColors </td>
+          <td>(</td>
+          <td class="paramtype">const uint32_t *&#160;</td>
+          <td class="paramname"><em>histogram</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>colors</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets normalized color map for given histogram. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">histogram</td><td>- a pointer to histogram (array of 256 unsigned 32-bit values). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">colors</td><td>- a pointer to the color map (array of 256 unsigned 8-bit values). </td></tr>
   </table>
   </dd>
 </dl>

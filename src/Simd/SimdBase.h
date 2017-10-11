@@ -245,6 +245,10 @@ namespace Simd
         void HistogramConditional(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t * histogram);
 
+        void NormalizedColors(const uint32_t * histogram, uint8_t * colors);
+
+        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
+
         void AddRowToHistograms(int * indexes, float * values, size_t row, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
@@ -252,8 +256,6 @@ namespace Simd
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
-
-        void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 

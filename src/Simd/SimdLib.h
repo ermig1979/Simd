@@ -2316,6 +2316,17 @@ extern "C"
 
     /*! @ingroup histogram
 
+        \fn void SimdNormalizedColors(const uint32_t * histogram, uint8_t * colors);
+
+        \short Gets normalized color map for given histogram.
+
+        \param [in] histogram - a pointer to histogram (array of 256 unsigned 32-bit values).
+        \param [out] colors - a pointer to the color map (array of 256 unsigned 8-bit values).
+    */
+    SIMD_API void SimdNormalizedColors(const uint32_t * histogram, uint8_t * colors);
+
+    /*! @ingroup histogram
+
         \fn void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         \short Normalizes histogram for 8-bit gray image.
