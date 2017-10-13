@@ -29,26 +29,26 @@ namespace Test
 {
     namespace
     {
-        struct FuncPHEH
+        struct FuncHLEF
         {
-            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride);
 
             FuncPtr func;
             String description;
 
-            FuncPHEH(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncHLEF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, float * histogram, size_t stride) const
+            void Call(const View & src, float * features, size_t stride) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, histogram, stride);
+                func(src.data, src.stride, src.width, src.height, features, stride);
             }
         };
     }
 
-#define FUNC_PHEH(function) FuncPHEH(function, #function)
+#define FUNC_HLEF(function) FuncHLEF(function, #function)
 
-    bool PseudoHogExtractHistogramAutoTest(size_t cell, size_t quantization, size_t width, size_t height, const FuncPHEH & f1, const FuncPHEH & f2)
+    bool HogLiteExtractFeaturesAutoTest(size_t cell, size_t size, size_t width, size_t height, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
 
@@ -57,9 +57,9 @@ namespace Test
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        const size_t stride = quantization*(width / cell);
-        const size_t size = stride*(height / cell);
-        Buffer32f h1(size, 0), h2(size, 0);
+        const size_t stride = size*(width / cell);
+        const size_t full = stride*(height / cell);
+        Buffer32f h1(full, 0), h2(full, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1.data(), stride));
 
@@ -70,28 +70,28 @@ namespace Test
         return result;
     }
 
-    bool PseudoHogExtractHistogramAutoTest(size_t cell, size_t quantization, const FuncPHEH & f1, const FuncPHEH & f2)
+    bool HogLiteExtractFeaturesAutoTest(size_t cell, size_t size, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
 
-        result = result && PseudoHogExtractHistogramAutoTest(cell, quantization, W, H, f1, f2);
-        result = result && PseudoHogExtractHistogramAutoTest(cell, quantization, W + O, H - O, f1, f2);
+        result = result && HogLiteExtractFeaturesAutoTest(cell, size, W, H, f1, f2);
+        result = result && HogLiteExtractFeaturesAutoTest(cell, size, W + O, H - O, f1, f2);
 
         return result;
     }
 
-    bool PseudoHogExtractHistogram8x8x8AutoTest()
+    bool HogLiteExtractFeatures8x8AutoTest()
     {
         bool result = true;
 
-        result = result && PseudoHogExtractHistogramAutoTest(8, 8, FUNC_PHEH(Simd::Base::PseudoHogExtractHistogram8x8x8), FUNC_PHEH(SimdPseudoHogExtractHistogram8x8x8));
+        result = result && HogLiteExtractFeaturesAutoTest(8, 16, FUNC_HLEF(Simd::Base::HogLiteExtractFeatures8x8), FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
 
         return result;
     }
 
     //-----------------------------------------------------------------------
 
-    bool PseudoHogExtractHistogramDataTest(bool create, size_t cell, size_t quantization, int width, int height, const FuncPHEH & f)
+    bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
     {
         bool result = true;
 
@@ -101,9 +101,9 @@ namespace Test
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const size_t stride = quantization*(width / cell);
-        const size_t size = stride*(height / cell);
-        Buffer32f h1(size, 0), h2(size, 0);
+        const size_t stride = size*(width / cell);
+        const size_t full = stride*(height / cell);
+        Buffer32f h1(full, 0), h2(full, 0);
 
         if (create)
         {
@@ -131,12 +131,8 @@ namespace Test
         return result;
     }
 
-    bool PseudoHogExtractHistogram8x8x8DataTest(bool create)
+    bool HogLiteExtractFeatures8x8DataTest(bool create)
     {
-        bool result = true;
-
-        result = result && PseudoHogExtractHistogramDataTest(create, 8, 8, DW, DH, FUNC_PHEH(SimdPseudoHogExtractHistogram8x8x8));
-
-        return result;
+        return HogLiteExtractFeaturesDataTest(create, 8, 16, DW, DH, FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
     }
 }

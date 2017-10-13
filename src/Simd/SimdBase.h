@@ -263,6 +263,8 @@ namespace Simd
 
         void HogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
+        void HogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride);
+
         void Int16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
 
         void Integral(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -382,8 +384,6 @@ namespace Simd
             size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
 
         void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
-
-        void PseudoHogExtractHistogram8x8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride);
 
         void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);

@@ -27,7 +27,7 @@ namespace Simd
 {
     namespace Base
     {
-        template <size_t cell> class PseudoHogHistogramExtractor
+        template <size_t cell> class HogLiteFeatureExtractor
         {
             static const size_t Q = 8;
 
@@ -50,7 +50,7 @@ namespace Simd
 
         public:
 
-            void Run(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride)
+            void Run(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
             {
                 assert(cell == 8 || cell == 4);
                 assert(width >= cell * 2 && height >= cell * 2);
@@ -98,21 +98,29 @@ namespace Simd
 
                     if (iy == cell - 1)
                     {
-                        for (size_t i = 0; i < hist0->size; ++i)
-                            histogram[i] = float(hist0->data[i])*k;
+                        const int * h = hist0->data;
+                        float * f = features;
+                        for (size_t i = 0; i < hist0->size; i += Q)
+                        {
+                            for(size_t j = 0; j < Q; ++j)
+                                f[i] = float(h[i])*k;
+                            memset(f + Q, 0, sizeof(float)*Q);
+                            h += Q;
+                            f += 2*Q;
+                        }
                         hist0->Clear();
                         Swap(hist0, hist1);
-                        histogram += histogramStride;
+                        features += featuresStride;
                     }
                     src += srcStride;
                 }
             }
         };
 
-        void PseudoHogExtractHistogram8x8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride)
+        void HogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
         {
-            PseudoHogHistogramExtractor<8> extractor;
-            extractor.Run(src, srcStride, width, height, histogram, histogramStride);
+            HogLiteFeatureExtractor<8> extractor;
+            extractor.Run(src, srcStride, width, height, features, featuresStride);
         }
     }
 }

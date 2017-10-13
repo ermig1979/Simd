@@ -2273,6 +2273,11 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
         Base::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
 }
 
+SIMD_API void SimdHogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
+{
+    Base::HogLiteExtractFeatures8x8(src, srcStride, width, height, features, featuresStride);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
@@ -3428,11 +3433,6 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
     else
 #endif
         Base::VectorProduct(vertical, horizontal, dst, stride, width, height);
-}
-
-SIMD_API void SimdPseudoHogExtractHistogram8x8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride)
-{
-    Base::PseudoHogExtractHistogram8x8x8(src, srcStride, width, height, histogram, histogramStride);
 }
 
 SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,

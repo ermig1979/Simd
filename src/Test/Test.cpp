@@ -202,6 +202,8 @@ namespace Test
     TEST_ADD_GROUP(HogDeinterleave);
     TEST_ADD_GROUP(HogFilterSeparable);
 
+    TEST_ADD_GROUP(HogLiteExtractFeatures8x8);
+
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 
     TEST_ADD_GROUP(Integral);
@@ -255,8 +257,6 @@ namespace Test
     TEST_ADD_GROUP(OperationBinary8u);
     TEST_ADD_GROUP(OperationBinary16i);
     TEST_ADD_GROUP(VectorProduct);
-
-    TEST_ADD_GROUP(PseudoHogExtractHistogram8x8x8);
 
     TEST_ADD_GROUP(ReduceGray2x2);
     TEST_ADD_GROUP(ReduceGray3x3);

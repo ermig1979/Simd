@@ -2454,6 +2454,8 @@ extern "C"
     */
     SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
+    SIMD_API void SimdHogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride);
+
     /*! @ingroup other_conversion
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);
@@ -3654,8 +3656,6 @@ extern "C"
     */
     SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizontal,
         uint8_t * dst, size_t stride, size_t width, size_t height);
-
-    SIMD_API void SimdPseudoHogExtractHistogram8x8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * histogram, size_t histogramStride);
 
     /*! @ingroup resizing
 
