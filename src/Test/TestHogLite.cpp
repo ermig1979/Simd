@@ -48,6 +48,23 @@ namespace Test
 
 #define FUNC_HLEF(function) FuncHLEF(function, #function)
 
+    void FillCircle(View & view)
+    {
+        assert(view.format == View::Gray8);
+        Point c = view.Size() / 2;
+        ptrdiff_t r2 = Simd::Square(Simd::Min(view.width, view.height)/4);
+        for (size_t y = 0; y < view.height; ++y)
+        {
+            ptrdiff_t y2 = Simd::Square(y - c.y);
+            uint8_t * data = view.data + view.stride*y;
+            for (size_t x = 0; x < view.width; ++x)
+            {
+                ptrdiff_t x2 = Simd::Square(x - c.x);
+                data[x] = x2 + y2 < r2 ? 255 : 0;
+            }
+        }
+    }
+
     bool HogLiteExtractFeaturesAutoTest(size_t cell, size_t size, size_t width, size_t height, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
@@ -57,8 +74,8 @@ namespace Test
         View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(s);
 
-        const size_t stride = size*(width / cell);
-        const size_t full = stride*(height / cell);
+        const size_t stride = size*(width / cell - 2);
+        const size_t full = stride*(height / cell - 2);
         Buffer32f h1(full, 0), h2(full, 0);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1.data(), stride));
@@ -101,8 +118,8 @@ namespace Test
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const size_t stride = size*(width / cell);
-        const size_t full = stride*(height / cell);
+        const size_t stride = size*(width / cell - 2);
+        const size_t full = stride*(height / cell - 2);
         Buffer32f h1(full, 0), h2(full, 0);
 
         if (create)

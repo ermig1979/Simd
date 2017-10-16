@@ -29,23 +29,32 @@ namespace Simd
     {
         template <size_t cell> class HogLiteFeatureExtractor
         {
-            static const size_t Q = 8;
+            static const size_t FQ = 8;
+            static const size_t HQ = FQ/2;
 
-            typedef Array<int> ArrayInt;
+            typedef Array<int> Ints;
+            typedef Array<float> Floats;
 
-            ArrayInt _histogram[2];
-            int _k0[cell];
-            int _k1[cell];
+            size_t _hx, _hy;
+            Ints _hi[2];
+            Floats _hf[2], _nf[4];
+            int _k0[cell], _k1[cell];
 
             void Init(size_t width)
             {
+                _hx = width / cell;
                 for (size_t i = 0; i < cell; ++i)
                 {
                     _k0[i] = int(cell - i - 1) * 2 + 1;
                     _k1[i] = int(i) * 2 + 1;
                 }
-                _histogram[0].Resize(width / cell * Q, true);
-                _histogram[1].Resize(width / cell * Q, true);
+                for (size_t i = 0; i < 2; ++i)
+                {
+                    _hi[i].Resize(_hx*FQ, true);
+                    _hf[i].Resize(_hx*FQ);
+                }
+                for (size_t i = 0; i < 4; ++i)
+                    _nf[i].Resize(_hx);
             }
 
         public:
@@ -58,17 +67,18 @@ namespace Simd
                 Init(width);
 
                 src += (srcStride + 1)*cell / 2;
-                height = (height / cell - 1)*cell;
-                width = (width / cell - 1)*cell;
+                height = (height/cell - 1)*cell;
+                width = (width/cell - 1)*cell;
 
-                ArrayInt * hist0 = _histogram + 0;
-                ArrayInt * hist1 = _histogram + 1;
-
-                float k = 1.0f / 256.0f;
+                float k = 1.0f / 256.0f, eps = 0.0001f;
                 for (size_t row = 0; row < height; ++row)
                 {
-                    int * h0 = hist0->data;
-                    int * h1 = hist1->data;
+                    size_t hrow = row / cell;
+                    Ints & hi0 = _hi[(hrow + 0) & 1];
+                    Ints & hi1 = _hi[(hrow + 1) & 1];
+
+                    int * h0 = hi0.data;
+                    int * h1 = hi1.data;
                     size_t iy = row&(cell - 1);
                     int ky0 = _k0[iy];
                     int ky1 = _k1[iy];
@@ -84,35 +94,91 @@ namespace Simd
                             int value = RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
 
                             size_t index = (adx > ady ? 0 : 1);
-                            index = (dx > 0 ? index : (Q / 2 - 1) - index);
-                            index = (dy > 0 ? index : (Q - 1) - index);
+                            index = (dx > 0 ? index : (HQ - 1) - index);
+                            index = (dy > 0 ? index : (FQ - 1) - index);
 
-                            h0[0 + index] += value*_k0[ix] * ky0;
-                            h1[0 + index] += value*_k0[ix] * ky1;
-                            h0[Q + index] += value*_k1[ix] * ky0;
-                            h1[Q + index] += value*_k1[ix] * ky1;
+                            h0[00 + index] += value*_k0[ix] * ky0;
+                            h1[00 + index] += value*_k0[ix] * ky1;
+                            h0[FQ + index] += value*_k1[ix] * ky0;
+                            h1[FQ + index] += value*_k1[ix] * ky1;
                         }
-                        h0 += Q;
-                        h1 += Q;
+                        h0 += FQ;
+                        h1 += FQ;
                     }
+                    src += srcStride;
 
                     if (iy == cell - 1)
                     {
-                        const int * h = hist0->data;
-                        float * f = features;
-                        for (size_t i = 0; i < hist0->size; i += Q)
+                        Floats & hf = _hf[hrow & 1];
+                        Floats & nf = _nf[hrow & 3];
+
+                        for (size_t i = 0; i < hi0.size; ++i)
+                            hf.data[i] = float(hi0.data[i])*k;
+                        hi0.Clear();
+
+                        const float * h = hf.data;
+                        for (size_t x = 0; x < _hx; ++x, h += FQ)
                         {
-                            for(size_t j = 0; j < Q; ++j)
-                                f[i] = float(h[i])*k;
-                            memset(f + Q, 0, sizeof(float)*Q);
-                            h += Q;
-                            f += 2*Q;
+                            float sum = 0;
+                            for (int i = 0; i < HQ; ++i)
+                                sum += Simd::Square(h[i] + h[i + HQ]);
+                            nf.data[x] = sum;
                         }
-                        hist0->Clear();
-                        Swap(hist0, hist1);
-                        features += featuresStride;
+
+                        if (hrow >= 2)
+                        {
+                            float * hf = _hf[(hrow - 1) & 1].data + FQ;
+                            float * p0 = _nf[(hrow - 2) & 3].data;
+                            float * p1 = _nf[(hrow - 1) & 3].data;
+                            float * p2 = _nf[(hrow - 0) & 3].data;
+                            float * dst = features;
+                            for (size_t x = 2; x < _hx; ++x, ++p0, ++p1, ++p2)
+                            {
+                                float n1 = 1.0f / sqrt(p1[1] + p1[2] + p2[1] + p2[2] + eps);
+                                float n2 = 1.0f / sqrt(p0[1] + p0[2] + p1[1] + p1[2] + eps);
+                                float n3 = 1.0f / sqrt(p1[0] + p1[1] + p2[0] + p2[1] + eps);
+                                float n4 = 1.0f / sqrt(p0[0] + p0[1] + p1[0] + p1[1] + eps);
+
+                                float t1 = 0;
+                                float t2 = 0;
+                                float t3 = 0;
+                                float t4 = 0;
+
+                                float * psrc = hf + FQ*x;
+                                for (size_t o = 0; o < FQ; o++)
+                                {
+                                    float h1 = Simd::Min(*psrc * n1, 0.2f);
+                                    float h2 = Simd::Min(*psrc * n2, 0.2f);
+                                    float h3 = Simd::Min(*psrc * n3, 0.2f);
+                                    float h4 = Simd::Min(*psrc * n4, 0.2f);
+                                    *dst++ = 0.5f * (h1 + h2 + h3 + h4);
+                                    t1 += h1;
+                                    t2 += h2;
+                                    t3 += h3;
+                                    t4 += h4;
+                                    psrc++;
+                                }
+
+                                psrc = hf + FQ*x;
+                                for (size_t o = 0; o < HQ; o++)
+                                {
+                                    float sum = *psrc + *(psrc + HQ);
+                                    float h1 = Simd::Min(sum * n1, 0.2f);
+                                    float h2 = Simd::Min(sum * n2, 0.2f);
+                                    float h3 = Simd::Min(sum * n3, 0.2f);
+                                    float h4 = Simd::Min(sum * n4, 0.2f);
+                                    *dst++ = 0.5f * (h1 + h2 + h3 + h4);
+                                    psrc++;
+                                }
+
+                                *dst++ = 0.2357f * t1;
+                                *dst++ = 0.2357f * t2;
+                                *dst++ = 0.2357f * t3;
+                                *dst++ = 0.2357f * t4;
+                            }
+                            features += featuresStride;
+                        }
                     }
-                    src += srcStride;
                 }
             }
         };
