@@ -38,10 +38,10 @@ namespace Test
 
             FuncHLEF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, float * features, size_t stride) const
+            void Call(const View & src, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, features, stride);
+                func(src.data, src.stride, src.width, src.height, (float*)dst.data, dst.stride/sizeof(float));
             }
         };
     }
@@ -71,18 +71,19 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
-        View s(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        FillRandom(s);
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
 
-        const size_t stride = size*(width / cell - 2);
-        const size_t full = stride*(height / cell - 2);
-        Buffer32f h1(full, 0), h2(full, 0);
+        size_t dstX = width / cell - 2;
+        size_t dstY = height / cell - 2;
+        View dst1(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, h1.data(), stride));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, h2.data(), stride));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
 
-        result = result && Compare(h1, h2, EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -103,6 +104,11 @@ namespace Test
 
         result = result && HogLiteExtractFeaturesAutoTest(8, 16, FUNC_HLEF(Simd::Base::HogLiteExtractFeatures8x8), FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteExtractFeaturesAutoTest(8, 16, FUNC_HLEF(Simd::Sse41::HogLiteExtractFeatures8x8), FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
+#endif 
+
         return result;
     }
 
@@ -118,9 +124,10 @@ namespace Test
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
 
-        const size_t stride = size*(width / cell - 2);
-        const size_t full = stride*(height / cell - 2);
-        Buffer32f h1(full, 0), h2(full, 0);
+        size_t dstX = width / cell - 2;
+        size_t dstY = height / cell - 2;
+        View dst1(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
+        View dst2(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
 
         if (create)
         {
@@ -128,21 +135,21 @@ namespace Test
 
             TEST_SAVE(src);
 
-            f.Call(src, h1.data(), stride);
+            f.Call(src, dst1);
 
-            TEST_SAVE(h1);
+            TEST_SAVE(dst1);
         }
         else
         {
             TEST_LOAD(src);
 
-            TEST_LOAD(h1);
+            TEST_LOAD(dst1);
 
-            f.Call(src, h2.data(), stride);
+            f.Call(src, dst2);
 
-            TEST_SAVE(h2);
+            TEST_SAVE(dst2);
 
-            result = result && Compare(h1, h2, EPS, true, 64);
+            result = result && Compare(dst1, dst2, EPS, true, 64);
         }
 
         return result;

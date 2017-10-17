@@ -2275,7 +2275,12 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
 
 SIMD_API void SimdHogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
 {
-    Base::HogLiteExtractFeatures8x8(src, srcStride, width, height, features, featuresStride);
+#ifdef SIMD_SSE_ENABLE
+    if (Sse41::Enable)
+        Sse41::HogLiteExtractFeatures8x8(src, srcStride, width, height, features, featuresStride);
+    else
+#endif
+        Base::HogLiteExtractFeatures8x8(src, srcStride, width, height, features, featuresStride);
 }
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)

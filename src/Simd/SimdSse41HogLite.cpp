@@ -21,16 +21,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
 #include "Simd/SimdArray.h"
 
 namespace Simd
 {
-    namespace Base
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <size_t cell> class HogLiteFeatureExtractor
         {
             static const size_t FQ = 8;
-            static const size_t HQ = FQ/2;
+            static const size_t HQ = FQ / 2;
 
             typedef Array<int> Ints;
             typedef Array<float> Floats;
@@ -72,7 +76,7 @@ namespace Simd
                         int dx = src[col + 1] - src[col - 1];
                         int adx = Abs(dx);
                         int ady = Abs(dy);
-                        int value = RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
+                        int value = Base::RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
 
                         size_t index = (adx > ady ? 0 : 1);
                         index = (dx > 0 ? index : (HQ - 1) - index);
@@ -172,8 +176,8 @@ namespace Simd
                 Init(width);
 
                 src += (srcStride + 1)*cell / 2;
-                height = (height/cell - 1)*cell;
-                width = (width/cell - 1)*cell;
+                height = (height / cell - 1)*cell;
+                width = (width / cell - 1)*cell;
 
                 float k = 1.0f / 256.0f, eps = 0.0001f;
                 for (size_t row = 0; row < height; ++row)
@@ -192,7 +196,7 @@ namespace Simd
                     }
                     src += srcStride;
                 }
-                size_t rowI = height/cell;
+                size_t rowI = height / cell;
                 UpdateFloatHistogram(rowI);
                 SetFeatures(rowI, features);
             }
@@ -204,4 +208,5 @@ namespace Simd
             extractor.Run(src, srcStride, width, height, features, featuresStride);
         }
     }
+#endif// SIMD_SSE41_ENABLE
 }
