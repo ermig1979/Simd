@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdCompare.h"
 #include "Simd/SimdArray.h"
 
 namespace Simd
@@ -36,16 +36,21 @@ namespace Simd
             static const size_t FQ = 8;
             static const size_t HQ = FQ / 2;
 
+            typedef Array<uint8_t> Bytes;
             typedef Array<int> Ints;
             typedef Array<float> Floats;
 
             size_t _hx, _fx;
+            Bytes _value, _index;
             Ints _hi[2];
             Floats _hf[2], _nf[4];
             int _k0[cell], _k1[cell];
 
-            void Init(size_t width)
+            SIMD_INLINE void Init(size_t width)
             {
+                size_t aligned = AlignHi(width, A);
+                _value.Resize(aligned);
+                _index.Resize(aligned);
                 _hx = width / cell;
                 _fx = _hx - 2;
                 for (size_t i = 0; i < cell; ++i)
@@ -62,26 +67,43 @@ namespace Simd
                     _nf[i].Resize(_hx);
             }
 
-            void UpdateIntegerHistogram(const uint8_t * src, size_t stride, size_t width, size_t rowI, size_t rowF)
+            SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, size_t width)
+            {
+                for (size_t col = 0; col < _value.size; col += A, src += A)
+                {
+                    __m128i y0 = Load<false>((__m128i*)(src - stride));
+                    __m128i y1 = Load<false>((__m128i*)(src + stride));
+                    __m128i x0 = Load<false>((__m128i*)(src - 1));
+                    __m128i x1 = Load<false>((__m128i*)(src + 1));
+
+                    __m128i ady = AbsDifferenceU8(y0, y1);
+                    __m128i adx = AbsDifferenceU8(x0, x1);
+
+                    __m128i max = _mm_max_epu8(ady, adx);
+                    __m128i min = _mm_min_epu8(ady, adx);
+                    __m128i value = _mm_adds_epu8(max, _mm_avg_epu8(min, K_ZERO));
+                    Store<false>((__m128i*)(_value.data + col), value);
+
+                    __m128i index = _mm_blendv_epi8(K8_01, K_ZERO, Compare8u<SimdCompareGreater>(adx, ady));
+                    index = _mm_blendv_epi8(_mm_sub_epi8(K8_03, index), index, Compare8u<SimdCompareGreater>(x1, x0));
+                    index = _mm_blendv_epi8(_mm_sub_epi8(K8_07, index), index, Compare8u<SimdCompareGreater>(y1, y0));
+                    Store<false>((__m128i*)(_index.data + col), index);
+                }
+            }
+
+            SIMD_INLINE void UpdateIntegerHistogram(const uint8_t * src, size_t stride, size_t width, size_t rowI, size_t rowF)
             {
                 int * h0 = _hi[(rowI + 0) & 1].data;
                 int * h1 = _hi[(rowI + 1) & 1].data;
                 int ky0 = _k0[rowF];
                 int ky1 = _k1[rowF];
+                SetIndexAndValue(src, stride, width);
                 for (size_t col = 0; col < width;)
                 {
                     for (size_t colF = 0; colF < cell; ++colF, ++col)
                     {
-                        int dy = src[col + stride] - src[col - stride];
-                        int dx = src[col + 1] - src[col - 1];
-                        int adx = Abs(dx);
-                        int ady = Abs(dy);
-                        int value = Base::RestrictRange(Max(adx, ady) + (Min(adx, ady) + 1) / 2);
-
-                        size_t index = (adx > ady ? 0 : 1);
-                        index = (dx > 0 ? index : (HQ - 1) - index);
-                        index = (dy > 0 ? index : (FQ - 1) - index);
-
+                        int value = _value[col];
+                        int index = _index[col];
                         h0[00 + index] += value*_k0[colF] * ky0;
                         h1[00 + index] += value*_k0[colF] * ky1;
                         h0[FQ + index] += value*_k1[colF] * ky0;
@@ -92,7 +114,7 @@ namespace Simd
                 }
             }
 
-            void UpdateFloatHistogram(size_t rowI)
+            SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
             {
                 const float k = 1.0f / 256.0f;
                 Ints & hi = _hi[rowI & 1];
@@ -113,7 +135,7 @@ namespace Simd
                 }
             }
 
-            void SetFeatures(size_t rowI, float * dst)
+            SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
             {
                 const float eps = 0.0001f;
                 float * hf = _hf[(rowI - 1) & 1].data + FQ;
@@ -210,3 +232,5 @@ namespace Simd
     }
 #endif// SIMD_SSE41_ENABLE
 }
+
+

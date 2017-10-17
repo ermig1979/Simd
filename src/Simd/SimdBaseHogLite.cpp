@@ -40,7 +40,7 @@ namespace Simd
             Floats _hf[2], _nf[4];
             int _k0[cell], _k1[cell];
 
-            void Init(size_t width)
+            SIMD_INLINE void Init(size_t width)
             {
                 _hx = width / cell;
                 _fx = _hx - 2;
@@ -58,7 +58,7 @@ namespace Simd
                     _nf[i].Resize(_hx);
             }
 
-            void UpdateIntegerHistogram(const uint8_t * src, size_t stride, size_t width, size_t rowI, size_t rowF)
+            SIMD_INLINE void UpdateIntegerHistogram(const uint8_t * src, size_t stride, size_t width, size_t rowI, size_t rowF)
             {
                 int * h0 = _hi[(rowI + 0) & 1].data;
                 int * h1 = _hi[(rowI + 1) & 1].data;
@@ -88,7 +88,7 @@ namespace Simd
                 }
             }
 
-            void UpdateFloatHistogram(size_t rowI)
+            SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
             {
                 const float k = 1.0f / 256.0f;
                 Ints & hi = _hi[rowI & 1];
@@ -109,7 +109,7 @@ namespace Simd
                 }
             }
 
-            void SetFeatures(size_t rowI, float * dst)
+            SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
             {
                 const float eps = 0.0001f;
                 float * hf = _hf[(rowI - 1) & 1].data + FQ;
