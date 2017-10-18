@@ -90,7 +90,7 @@ namespace Simd
 
             SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
             {
-                const float k = 1.0f / 256.0f;
+                const float k = 1.0f / Simd::Square(cell * 2);
                 Ints & hi = _hi[rowI & 1];
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
@@ -175,7 +175,6 @@ namespace Simd
                 height = (height/cell - 1)*cell;
                 width = (width/cell - 1)*cell;
 
-                float k = 1.0f / 256.0f, eps = 0.0001f;
                 for (size_t row = 0; row < height; ++row)
                 {
                     size_t rowI = row / cell;

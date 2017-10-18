@@ -45,7 +45,7 @@ namespace Simd
             Ints _hi[2];
             Floats _hf[2], _nf[4];
             int _k0[cell], _k1[cell];
-            __m128i _kx8;
+            __m128i _kx4, _kx8;
 
             SIMD_INLINE void Init(size_t width)
             {
@@ -67,6 +67,7 @@ namespace Simd
                 }
                 for (size_t i = 0; i < 4; ++i)
                     _nf[i].Resize(_hx);
+                _kx4 = _mm_setr_epi8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
                 _kx8 = _mm_setr_epi8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
             }
 
@@ -104,27 +105,53 @@ namespace Simd
                 }
             }
 
+            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const __m128i & kx, const __m128i & ky0, const __m128i & ky1, int * h0, int * h1)
+            {
+                __m128i val = Load<false>((__m128i*)value);
+                __m128i idx = Load<false>((__m128i*)index);
+                __m128i cur0 = K_ZERO;
+                __m128i cur1 = K8_01;
+                __m128i dirs[4];
+                for (size_t i = 0; i < 4; ++i)
+                {
+                    __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), kx);
+                    __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), kx);
+                    dirs[i] = _mm_hadd_epi16(dir0, dir1);
+                    cur0 = _mm_add_epi8(cur0, K8_02);
+                    cur1 = _mm_add_epi8(cur1, K8_02);
+                }
+                __m128i hx0 = Shuffle32i<0x88>(dirs[0], dirs[1]);
+                __m128i hx1 = Shuffle32i<0x88>(dirs[2], dirs[3]);
+                __m128i hx2 = Shuffle32i<0xDD>(dirs[0], dirs[1]);
+                __m128i hx3 = Shuffle32i<0xDD>(dirs[2], dirs[3]);
+                Store<true>((__m128i*)h0 + 0, _mm_add_epi32(Load<true>((__m128i*)h0 + 0), _mm_madd_epi16(hx0, ky0)));
+                Store<true>((__m128i*)h0 + 1, _mm_add_epi32(Load<true>((__m128i*)h0 + 1), _mm_madd_epi16(hx1, ky0)));
+                Store<true>((__m128i*)h0 + 4, _mm_add_epi32(Load<true>((__m128i*)h0 + 4), _mm_madd_epi16(hx2, ky0)));
+                Store<true>((__m128i*)h0 + 5, _mm_add_epi32(Load<true>((__m128i*)h0 + 5), _mm_madd_epi16(hx3, ky0)));
+                Store<true>((__m128i*)h1 + 0, _mm_add_epi32(Load<true>((__m128i*)h1 + 0), _mm_madd_epi16(hx0, ky1)));
+                Store<true>((__m128i*)h1 + 1, _mm_add_epi32(Load<true>((__m128i*)h1 + 1), _mm_madd_epi16(hx1, ky1)));
+                Store<true>((__m128i*)h1 + 4, _mm_add_epi32(Load<true>((__m128i*)h1 + 4), _mm_madd_epi16(hx2, ky1)));
+                Store<true>((__m128i*)h1 + 5, _mm_add_epi32(Load<true>((__m128i*)h1 + 5), _mm_madd_epi16(hx3, ky1)));
+            }
+
             SIMD_INLINE void UpdateIntegerHistogram4x4(size_t rowI, size_t rowF)
             {
                 int * h0 = _hi[(rowI + 0) & 1].data;
                 int * h1 = _hi[(rowI + 1) & 1].data;
-                uint8_t * value = _value.data + A;
-                uint8_t * index = _index.data + A;
-                int ky0 = _k0[rowF];
-                int ky1 = _k1[rowF];
-                for (size_t col = 0; col < _w;)
+                uint8_t * value = _value.data + A - cell;
+                uint8_t * index = _index.data + A - cell;
+                __m128i ky0 = _mm_set1_epi16((short)_k0[rowF]);
+                __m128i ky1 = _mm_set1_epi16((short)_k1[rowF]);
+                for (size_t col = 0; col <= _w;)
                 {
-                    for (size_t colF = 0; colF < cell; ++colF, ++col)
-                    {
-                        int val = value[col];
-                        int idx = index[col];
-                        h0[00 + idx] += val*_k0[colF] * ky0;
-                        h1[00 + idx] += val*_k0[colF] * ky1;
-                        h0[FQ + idx] += val*_k1[colF] * ky0;
-                        h1[FQ + idx] += val*_k1[colF] * ky1;
-                    }
+                    UpdateIntegerHistogram4x4(value + col, index + col, _kx4, ky0, ky1, h0, h1);
+                    col += cell;
                     h0 += FQ;
                     h1 += FQ;
+                    UpdateIntegerHistogram4x4(value + col, index + col, _kx4, ky0, ky1, h0, h1);
+                    col += 3 * cell;
+                    h0 += 3*FQ;
+                    h1 += 3*FQ;
                 }
             }
 
@@ -164,7 +191,7 @@ namespace Simd
 
             SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
             {
-                const float k = 1.0f / 256.0f;
+                const float k = 1.0f / Simd::Square(cell * 2);
                 Ints & hi = _hi[rowI & 1];
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
@@ -248,7 +275,6 @@ namespace Simd
                 src += (srcStride + 1)*cell / 2;
                 height = (height / cell - 1)*cell;
 
-                float k = 1.0f / 256.0f, eps = 0.0001f;
                 for (size_t row = 0; row < height; ++row)
                 {
                     SetIndexAndValue(src, srcStride);

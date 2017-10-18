@@ -468,10 +468,15 @@ namespace Simd
             return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
         }
 
-        template <int index> static SIMD_INLINE __m128 Broadcast(__m128 a)
+        template <int index> SIMD_INLINE __m128 Broadcast(__m128 a)
         {
             return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
             //return _mm_shuffle_ps(a, a, index*0x55);
+        }
+
+        template<int imm> SIMD_INLINE __m128i Shuffle32i(__m128i lo, __m128i hi)
+        {
+            return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(lo), _mm_castsi128_ps(hi), imm));
         }
     }
 #endif// SIMD_SSE2_ENABLE
