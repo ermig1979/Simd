@@ -40,19 +40,21 @@ namespace Simd
             typedef Array<int> Ints;
             typedef Array<float> Floats;
 
-            size_t _hx, _fx;
+            size_t _hx, _fx, _w, _aw;
             Bytes _value, _index;
             Ints _hi[2];
             Floats _hf[2], _nf[4];
             int _k0[cell], _k1[cell];
+            __m128i _kx8;
 
             SIMD_INLINE void Init(size_t width)
             {
-                size_t aligned = AlignHi(width, A);
-                _value.Resize(aligned);
-                _index.Resize(aligned);
+                _w = (width / cell - 1)*cell;
+                _aw = AlignLo(_w, A);
                 _hx = width / cell;
                 _fx = _hx - 2;
+                _value.Resize(_aw + 3 * A, true);
+                _index.Resize(_aw + 3 * A, true);
                 for (size_t i = 0; i < cell; ++i)
                 {
                     _k0[i] = int(cell - i - 1) * 2 + 1;
@@ -65,50 +67,96 @@ namespace Simd
                 }
                 for (size_t i = 0; i < 4; ++i)
                     _nf[i].Resize(_hx);
+                _kx8 = _mm_setr_epi8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
             }
 
-            SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, size_t width)
+            template<bool align> static SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, uint8_t * value, uint8_t * index)
             {
-                for (size_t col = 0; col < _value.size; col += A, src += A)
+                __m128i y0 = Load<false>((__m128i*)(src - stride));
+                __m128i y1 = Load<false>((__m128i*)(src + stride));
+                __m128i x0 = Load<false>((__m128i*)(src - 1));
+                __m128i x1 = Load<false>((__m128i*)(src + 1));
+
+                __m128i ady = AbsDifferenceU8(y0, y1);
+                __m128i adx = AbsDifferenceU8(x0, x1);
+
+                __m128i max = _mm_max_epu8(ady, adx);
+                __m128i min = _mm_min_epu8(ady, adx);
+                __m128i val = _mm_adds_epu8(max, _mm_avg_epu8(min, K_ZERO));
+                Store<align>((__m128i*)value, val);
+
+                __m128i idx = _mm_blendv_epi8(K8_01, K_ZERO, Compare8u<SimdCompareGreater>(adx, ady));
+                idx = _mm_blendv_epi8(_mm_sub_epi8(K8_03, idx), idx, Compare8u<SimdCompareGreater>(x1, x0));
+                idx = _mm_blendv_epi8(_mm_sub_epi8(K8_07, idx), idx, Compare8u<SimdCompareGreater>(y1, y0));
+                Store<align>((__m128i*)index, idx);
+            }
+
+            SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride)
+            {
+                uint8_t * value = _value.data + A;
+                uint8_t * index = _index.data + A;
+                for (size_t col = 0; col < _aw; col += A)
+                    SetIndexAndValue<true>(src + col, stride, value + col, index + col);
+                if (_aw < _w)
                 {
-                    __m128i y0 = Load<false>((__m128i*)(src - stride));
-                    __m128i y1 = Load<false>((__m128i*)(src + stride));
-                    __m128i x0 = Load<false>((__m128i*)(src - 1));
-                    __m128i x1 = Load<false>((__m128i*)(src + 1));
-
-                    __m128i ady = AbsDifferenceU8(y0, y1);
-                    __m128i adx = AbsDifferenceU8(x0, x1);
-
-                    __m128i max = _mm_max_epu8(ady, adx);
-                    __m128i min = _mm_min_epu8(ady, adx);
-                    __m128i value = _mm_adds_epu8(max, _mm_avg_epu8(min, K_ZERO));
-                    Store<false>((__m128i*)(_value.data + col), value);
-
-                    __m128i index = _mm_blendv_epi8(K8_01, K_ZERO, Compare8u<SimdCompareGreater>(adx, ady));
-                    index = _mm_blendv_epi8(_mm_sub_epi8(K8_03, index), index, Compare8u<SimdCompareGreater>(x1, x0));
-                    index = _mm_blendv_epi8(_mm_sub_epi8(K8_07, index), index, Compare8u<SimdCompareGreater>(y1, y0));
-                    Store<false>((__m128i*)(_index.data + col), index);
+                    size_t col = _w - A;
+                    SetIndexAndValue<false>(src + col, stride, value + col, index + col);
                 }
             }
 
-            SIMD_INLINE void UpdateIntegerHistogram(const uint8_t * src, size_t stride, size_t width, size_t rowI, size_t rowF)
+            SIMD_INLINE void UpdateIntegerHistogram4x4(size_t rowI, size_t rowF)
             {
                 int * h0 = _hi[(rowI + 0) & 1].data;
                 int * h1 = _hi[(rowI + 1) & 1].data;
+                uint8_t * value = _value.data + A;
+                uint8_t * index = _index.data + A;
                 int ky0 = _k0[rowF];
                 int ky1 = _k1[rowF];
-                SetIndexAndValue(src, stride, width);
-                for (size_t col = 0; col < width;)
+                for (size_t col = 0; col < _w;)
                 {
                     for (size_t colF = 0; colF < cell; ++colF, ++col)
                     {
-                        int value = _value[col];
-                        int index = _index[col];
-                        h0[00 + index] += value*_k0[colF] * ky0;
-                        h1[00 + index] += value*_k0[colF] * ky1;
-                        h0[FQ + index] += value*_k1[colF] * ky0;
-                        h1[FQ + index] += value*_k1[colF] * ky1;
+                        int val = value[col];
+                        int idx = index[col];
+                        h0[00 + idx] += val*_k0[colF] * ky0;
+                        h1[00 + idx] += val*_k0[colF] * ky1;
+                        h0[FQ + idx] += val*_k1[colF] * ky0;
+                        h1[FQ + idx] += val*_k1[colF] * ky1;
                     }
+                    h0 += FQ;
+                    h1 += FQ;
+                }
+            }
+
+            SIMD_INLINE void UpdateIntegerHistogram8x8(size_t rowI, size_t rowF)
+            {
+                int * h0 = _hi[(rowI + 0) & 1].data;
+                int * h1 = _hi[(rowI + 1) & 1].data;
+                uint8_t * value = _value.data + A - cell;
+                uint8_t * index = _index.data + A - cell;
+                __m128i ky0 = _mm_set1_epi16((short)_k0[rowF]);
+                __m128i ky1 = _mm_set1_epi16((short)_k1[rowF]);
+                for (size_t col = 0; col <= _w; col += cell)
+                {
+                    __m128i val = Load<false>((__m128i*)(value + col));
+                    __m128i idx = Load<false>((__m128i*)(index + col));
+                    __m128i cur0 = K_ZERO;
+                    __m128i cur1 = K8_01;
+                    __m128i dirs[4];
+                    for (size_t i = 0; i < 4; ++i)
+                    {
+                        __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), _kx8);
+                        __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), _kx8);
+                        dirs[i] = _mm_hadd_epi16(dir0, dir1);
+                        cur0 = _mm_add_epi8(cur0, K8_02);
+                        cur1 = _mm_add_epi8(cur1, K8_02);
+                    }
+                    dirs[0] = _mm_hadd_epi16(dirs[0], dirs[1]);
+                    dirs[1] = _mm_hadd_epi16(dirs[2], dirs[3]);
+                    Store<true>((__m128i*)h0 + 0, _mm_add_epi32(Load<true>((__m128i*)h0 + 0), _mm_madd_epi16(dirs[0], ky0)));
+                    Store<true>((__m128i*)h0 + 1, _mm_add_epi32(Load<true>((__m128i*)h0 + 1), _mm_madd_epi16(dirs[1], ky0)));
+                    Store<true>((__m128i*)h1 + 0, _mm_add_epi32(Load<true>((__m128i*)h1 + 0), _mm_madd_epi16(dirs[0], ky1)));
+                    Store<true>((__m128i*)h1 + 1, _mm_add_epi32(Load<true>((__m128i*)h1 + 1), _mm_madd_epi16(dirs[1], ky1)));
                     h0 += FQ;
                     h1 += FQ;
                 }
@@ -199,14 +247,17 @@ namespace Simd
 
                 src += (srcStride + 1)*cell / 2;
                 height = (height / cell - 1)*cell;
-                width = (width / cell - 1)*cell;
 
                 float k = 1.0f / 256.0f, eps = 0.0001f;
                 for (size_t row = 0; row < height; ++row)
                 {
+                    SetIndexAndValue(src, srcStride);
                     size_t rowI = row / cell;
                     size_t rowF = row & (cell - 1);
-                    UpdateIntegerHistogram(src, srcStride, width, rowI, rowF);
+                    if(cell == 8)
+                        UpdateIntegerHistogram8x8(rowI, rowF);
+                    else
+                        UpdateIntegerHistogram4x4(rowI, rowF);
                     if (rowF == cell - 1)
                     {
                         UpdateFloatHistogram(rowI);
