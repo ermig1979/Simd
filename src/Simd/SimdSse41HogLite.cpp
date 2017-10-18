@@ -254,10 +254,10 @@ namespace Simd
                     SetIndexAndValue(src, srcStride);
                     size_t rowI = row / cell;
                     size_t rowF = row & (cell - 1);
-                    if(cell == 8)
-                        UpdateIntegerHistogram8x8(rowI, rowF);
-                    else
+                    if(cell == 4)
                         UpdateIntegerHistogram4x4(rowI, rowF);
+                    else
+                        UpdateIntegerHistogram8x8(rowI, rowF);
                     if (rowF == cell - 1)
                     {
                         UpdateFloatHistogram(rowI);
@@ -275,10 +275,18 @@ namespace Simd
             }
         };
 
-        void HogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
+        void HogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride)
         {
-            HogLiteFeatureExtractor<8> extractor;
-            extractor.Run(src, srcStride, width, height, features, featuresStride);
+            if (cell == 4)
+            {
+                HogLiteFeatureExtractor<4> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
+            else
+            {
+                HogLiteFeatureExtractor<8> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
         }
     }
 #endif// SIMD_SSE41_ENABLE

@@ -2364,7 +2364,7 @@ extern "C"
     */
     SIMD_API void SimdNormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
-    /*! @ingroup face_recognition
+    /*! @ingroup hog
 
         \fn void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
@@ -2386,7 +2386,7 @@ extern "C"
     SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
         size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
-    /*! @ingroup face_recognition
+    /*! @ingroup hog
 
         \fn void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
@@ -2404,7 +2404,7 @@ extern "C"
     */
     SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
 
-    /*! @ingroup face_recognition
+    /*! @ingroup hog
 
         \fn void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
@@ -2420,7 +2420,7 @@ extern "C"
     */
     SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride);
 
-    /*! @ingroup face_recognition
+    /*! @ingroup hog
 
         \fn void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
@@ -2454,7 +2454,25 @@ extern "C"
     */
     SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t width, size_t height, const float * rowFilter, size_t rowSize, const float * colFilter, size_t colSize, float * dst, size_t dstStride, int add);
 
-    SIMD_API void SimdHogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride);
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride);
+
+        \short Extracts lite HOG features for 8-bit gray image.
+
+        Extracts lite (for 8 directions) HOG features 8-bit gray image. 16 features are extracted for 8x8 or 4x4 cell size and 2x2 block size. 
+
+        \note This function has a C++ wrapper Simd::HogLiteExtractFeatures(const View<A> & src, size_t cell, float * features, size_t featuresStride).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] srcStride - a row size of the image.
+        \param [in] width - an image width. Its minimal value is cell*3.
+        \param [in] height - an image height. Its minimal value is cell*3.
+        \param [in] cell - a size of cell. It must be 4 or 8. 
+        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (height/cell - 2)*featuresStride.
+        \param [in] featuresStride - a row size of the buffer with features. It must be grater or equal to (width/cell - 2)*16.
+    */
+    SIMD_API void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride);
 
     /*! @ingroup other_conversion
 

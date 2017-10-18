@@ -41,34 +41,41 @@ $(function() {
   <div class="summary">
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle">
-<div class="title">Face Recognition<div class="ingroups"><a class="el" href="group__functions.html">Functions</a></div></div>  </div>
+<div class="title">HOG (Histogram of Oriented Gradients)<div class="ingroups"><a class="el" href="group__functions.html">Functions</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>Functions for face recognition.  
+<p>Functions for extraction and processing of HOG features.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaf79e620d24e34dab623c577fbb86437e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#gaf79e620d24e34dab623c577fbb86437e">SimdHogDirectionHistograms</a> (const uint8_t *src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float *histograms)</td></tr>
+<tr class="memitem:gaf79e620d24e34dab623c577fbb86437e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gaf79e620d24e34dab623c577fbb86437e">SimdHogDirectionHistograms</a> (const uint8_t *src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float *histograms)</td></tr>
 <tr class="memdesc:gaf79e620d24e34dab623c577fbb86437e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HOG direction histograms for 8-bit gray image.  <a href="#gaf79e620d24e34dab623c577fbb86437e">More...</a><br /></td></tr>
 <tr class="separator:gaf79e620d24e34dab623c577fbb86437e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga12aa4948ab141ccce6c285daf6276ca9">SimdHogExtractFeatures</a> (const uint8_t *src, size_t stride, size_t width, size_t height, float *features)</td></tr>
+<tr class="memitem:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9">SimdHogExtractFeatures</a> (const uint8_t *src, size_t stride, size_t width, size_t height, float *features)</td></tr>
 <tr class="memdesc:ga12aa4948ab141ccce6c285daf6276ca9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="#ga12aa4948ab141ccce6c285daf6276ca9">More...</a><br /></td></tr>
 <tr class="separator:ga12aa4948ab141ccce6c285daf6276ca9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga36551f924cff995432f14cfcd085baa3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga36551f924cff995432f14cfcd085baa3">SimdHogDeinterleave</a> (const float *src, size_t srcStride, size_t width, size_t height, size_t count, float **dst, size_t dstStride)</td></tr>
+<tr class="memitem:ga36551f924cff995432f14cfcd085baa3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga36551f924cff995432f14cfcd085baa3">SimdHogDeinterleave</a> (const float *src, size_t srcStride, size_t width, size_t height, size_t count, float **dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga36551f924cff995432f14cfcd085baa3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Separates one interleaved 32-bit float point image to separate planes.  <a href="#ga36551f924cff995432f14cfcd085baa3">More...</a><br /></td></tr>
 <tr class="separator:ga36551f924cff995432f14cfcd085baa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga59f186f7578a091b31dd568a0a92ad23"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga59f186f7578a091b31dd568a0a92ad23">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *rowFilter, size_t rowSize, const float *colFilter, size_t colSize, float *dst, size_t dstStride, int add)</td></tr>
+<tr class="memitem:ga59f186f7578a091b31dd568a0a92ad23"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga59f186f7578a091b31dd568a0a92ad23">SimdHogFilterSeparable</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *rowFilter, size_t rowSize, const float *colFilter, size_t colSize, float *dst, size_t dstStride, int add)</td></tr>
 <tr class="memdesc:ga59f186f7578a091b31dd568a0a92ad23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to given image of 32-bit float point format.  <a href="#ga59f186f7578a091b31dd568a0a92ad23">More...</a><br /></td></tr>
 <tr class="separator:ga59f186f7578a091b31dd568a0a92ad23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gaa887f3dfaefd0102f0772e4d41f4eb4e">SimdHogLiteExtractFeatures</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t cell, float *features, size_t featuresStride)</td></tr>
+<tr class="memdesc:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts lite HOG features for 8-bit gray image.  <a href="#gaa887f3dfaefd0102f0772e4d41f4eb4e">More...</a><br /></td></tr>
+<tr class="separator:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
-<tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__face__recognition.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
-<tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__face__recognition.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
+<tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
+<tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
 <tr class="separator:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6cea676c09988229e49e166233e4eaa8"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga6cea676c09988229e49e166233e4eaa8"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga6cea676c09988229e49e166233e4eaa8">HogLiteExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, size_t cell, float *features, size_t featuresStride)</td></tr>
+<tr class="memdesc:ga6cea676c09988229e49e166233e4eaa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts lite HOG features for 8-bit gray image.  <a href="group__hog.html#ga6cea676c09988229e49e166233e4eaa8">More...</a><br /></td></tr>
+<tr class="separator:ga6cea676c09988229e49e166233e4eaa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<p>Functions for face recognition. </p>
+<p>Functions for extraction and processing of HOG features. </p>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="gaf79e620d24e34dab623c577fbb86437e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaf79e620d24e34dab623c577fbb86437e">&#9670;&nbsp;</a></span>SimdHogDirectionHistograms()</h2>
@@ -197,7 +204,7 @@ Functions</h2></td></tr>
 
 <p>Extracts HOG features for 8-bit gray image. </p>
 <p>Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__face__recognition.html#ga9a81f09fee967aa0c9e0386af1e90c23" title="Extracts HOG features for 8-bit gray image. ">Simd::HogExtractFeatures(const View&lt;A&gt; &amp; src, float * features)</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23" title="Extracts HOG features for 8-bit gray image. ">Simd::HogExtractFeatures(const View&lt;A&gt; &amp; src, float * features)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
@@ -392,6 +399,80 @@ else
 
 </div>
 </div>
+<a id="gaa887f3dfaefd0102f0772e4d41f4eb4e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa887f3dfaefd0102f0772e4d41f4eb4e">&#9670;&nbsp;</a></span>SimdHogLiteExtractFeatures()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdHogLiteExtractFeatures </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>features</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>featuresStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extracts lite HOG features for 8-bit gray image. </p>
+<p>Extracts lite (for 8 directions) HOG features 8-bit gray image. 16 features are extracted for 8x8 or 4x4 cell size and 2x2 block size.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__hog.html#ga6cea676c09988229e49e166233e4eaa8" title="Extracts lite HOG features for 8-bit gray image. ">Simd::HogLiteExtractFeatures(const View&lt;A&gt; &amp; src, size_t cell, float * features, size_t featuresStride)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. Its minimal value is cell*3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. Its minimal value is cell*3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cell</td><td>- a size of cell. It must be 4 or 8. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (height/cell - 2)*featuresStride. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">featuresStride</td><td>- a row size of the buffer with features. It must be grater or equal to (width/cell - 2)*16. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga9a81f09fee967aa0c9e0386af1e90c23"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga9a81f09fee967aa0c9e0386af1e90c23">&#9670;&nbsp;</a></span>HogExtractFeatures()</h2>
 
@@ -420,11 +501,64 @@ else
 
 <p>Extracts HOG features for 8-bit gray image. </p>
 <p>Extracts HOG features 8-bit gray image. 31 features are extracted for 8x8 cell size and 2x2 block size. This function is useful for face recognition.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__face__recognition.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts HOG features for 8-bit gray image. ">SimdHogExtractFeatures</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#ga12aa4948ab141ccce6c285daf6276ca9" title="Extracts HOG features for 8-bit gray image. ">SimdHogExtractFeatures</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width and height must be a multiple of 8 and greater or equal to 16. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (width/8)*(height/8)*31. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga6cea676c09988229e49e166233e4eaa8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6cea676c09988229e49e166233e4eaa8">&#9670;&nbsp;</a></span>HogLiteExtractFeatures()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void HogLiteExtractFeatures </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cell</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>features</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>featuresStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Extracts lite HOG features for 8-bit gray image. </p>
+<p>Extracts lite (for 8 directions) HOG features 8-bit gray image. 16 features are extracted for 8x8 or 4x4 cell size and 2x2 block size.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__hog.html#gaa887f3dfaefd0102f0772e4d41f4eb4e" title="Extracts lite HOG features for 8-bit gray image. ">SimdHogLiteExtractFeatures</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. Its width and height must be a multiple of cell and greater or equal to cell*3. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cell</td><td>- a size of cell. It must be 4 or 8. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">features</td><td>- a pointer to buffer with features. Array must has size grater or equal to (height/cell - 2)*featuresStride. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">featuresStride</td><td>- a row size of the buffer with features. It must be grater or equal to (width/cell - 2)*16. </td></tr>
   </table>
   </dd>
 </dl>

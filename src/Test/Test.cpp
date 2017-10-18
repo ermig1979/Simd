@@ -202,7 +202,7 @@ namespace Test
     TEST_ADD_GROUP(HogDeinterleave);
     TEST_ADD_GROUP(HogFilterSeparable);
 
-    TEST_ADD_GROUP(HogLiteExtractFeatures8x8);
+    TEST_ADD_GROUP(HogLiteExtractFeatures);
 
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 

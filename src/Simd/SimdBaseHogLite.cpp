@@ -198,10 +198,18 @@ namespace Simd
             }
         };
 
-        void HogLiteExtractFeatures8x8(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
+        void HogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride)
         {
-            HogLiteFeatureExtractor<8> extractor;
-            extractor.Run(src, srcStride, width, height, features, featuresStride);
+            if (cell == 4)
+            {
+                HogLiteFeatureExtractor<4> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
+            else
+            {
+                HogLiteFeatureExtractor<8> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
         }
     }
 }

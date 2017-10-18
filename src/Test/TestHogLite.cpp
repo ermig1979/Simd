@@ -31,22 +31,26 @@ namespace Test
     {
         struct FuncHLEF
         {
-            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride);
+            typedef void(*FuncPtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride);
 
             FuncPtr func;
             String description;
 
             FuncHLEF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, View & dst) const
+            FuncHLEF(const FuncHLEF & f, size_t c) : func(f.func), description(f.description + "[" + ToString(c) + "]") {}
+
+            void Call(const View & src, size_t cell, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.data, src.stride, src.width, src.height, (float*)dst.data, dst.stride/sizeof(float));
+                func(src.data, src.stride, src.width, src.height, cell, (float*)dst.data, dst.stride/sizeof(float));
             }
         };
     }
 
 #define FUNC_HLEF(function) FuncHLEF(function, #function)
+
+#define ARGS_HLEF(cell, f1, f2) cell, FuncHLEF(f1, cell), FuncHLEF(f2, cell)
 
     void FillCircle(View & view)
     {
@@ -65,7 +69,7 @@ namespace Test
         }
     }
 
-    bool HogLiteExtractFeaturesAutoTest(size_t cell, size_t size, size_t width, size_t height, const FuncHLEF & f1, const FuncHLEF & f2)
+    bool HogLiteExtractFeaturesAutoTest(size_t width, size_t height, size_t size, size_t cell, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
 
@@ -79,34 +83,36 @@ namespace Test
         View dst1(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
         View dst2(dstX*size, dstY, View::Float, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, cell, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, cell, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
 
-    bool HogLiteExtractFeaturesAutoTest(size_t cell, size_t size, const FuncHLEF & f1, const FuncHLEF & f2)
+    bool HogLiteExtractFeaturesAutoTest(const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
 
-        result = result && HogLiteExtractFeaturesAutoTest(cell, size, W, H, f1, f2);
-        result = result && HogLiteExtractFeaturesAutoTest(cell, size, W + O, H - O, f1, f2);
+        result = result && HogLiteExtractFeaturesAutoTest(W, H, 16, ARGS_HLEF(4, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(W + O, H - O, 16, ARGS_HLEF(4, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(W, H, 16, ARGS_HLEF(8, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(W + O, H - O, 16, ARGS_HLEF(8, f1, f2));
 
         return result;
     }
 
-    bool HogLiteExtractFeatures8x8AutoTest()
+    bool HogLiteExtractFeaturesAutoTest()
     {
         bool result = true;
 
-        result = result && HogLiteExtractFeaturesAutoTest(8, 16, FUNC_HLEF(Simd::Base::HogLiteExtractFeatures8x8), FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
+        result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Base::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && HogLiteExtractFeaturesAutoTest(8, 16, FUNC_HLEF(Simd::Sse41::HogLiteExtractFeatures8x8), FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
+            result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Sse41::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif 
 
         return result;
@@ -135,7 +141,7 @@ namespace Test
 
             TEST_SAVE(src);
 
-            f.Call(src, dst1);
+            f.Call(src, cell, dst1);
 
             TEST_SAVE(dst1);
         }
@@ -145,7 +151,7 @@ namespace Test
 
             TEST_LOAD(dst1);
 
-            f.Call(src, dst2);
+            f.Call(src, cell, dst2);
 
             TEST_SAVE(dst2);
 
@@ -155,8 +161,8 @@ namespace Test
         return result;
     }
 
-    bool HogLiteExtractFeatures8x8DataTest(bool create)
+    bool HogLiteExtractFeaturesDataTest(bool create)
     {
-        return HogLiteExtractFeaturesDataTest(create, 8, 16, DW, DH, FUNC_HLEF(SimdHogLiteExtractFeatures8x8));
+        return HogLiteExtractFeaturesDataTest(create, 8, 16, DW, DH, FUNC_HLEF(SimdHogLiteExtractFeatures));
     }
 }

@@ -442,8 +442,8 @@
 */
 
 /*! @ingroup functions
-    @defgroup face_recognition Face Recognition
-    \short Functions for face recognition.
+    @defgroup hog HOG (Histogram of Oriented Gradients)
+    \short Functions for extraction and processing of HOG features.
 */
 
 /*! @ingroup functions
