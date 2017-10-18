@@ -46,6 +46,7 @@ namespace Simd
             Floats _hf[2], _nf[4];
             int _k0[cell], _k1[cell];
             __m128i _kx4, _kx8;
+            __m128 _k, _02, _05, _02357, _eps;
 
             SIMD_INLINE void Init(size_t width)
             {
@@ -69,6 +70,11 @@ namespace Simd
                     _nf[i].Resize(_hx);
                 _kx4 = _mm_setr_epi8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
                 _kx8 = _mm_setr_epi8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
+                _k = _mm_set1_ps(1.0f / Simd::Square(cell * 2));
+                _02 = _mm_set1_ps(0.2f);
+                _05 = _mm_set1_ps(0.5f);
+                _02357 = _mm_set1_ps(0.2357f);
+                _eps = _mm_set1_ps(0.0001f);
             }
 
             template<bool align> static SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, uint8_t * value, uint8_t * index)
@@ -191,75 +197,69 @@ namespace Simd
 
             SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
             {
-                const float k = 1.0f / Simd::Square(cell * 2);
                 Ints & hi = _hi[rowI & 1];
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
 
-                for (size_t i = 0; i < hi.size; ++i)
-                    hf.data[i] = float(hi.data[i])*k;
+                for (size_t i = 0; i < hi.size; i += DF)
+                {
+                    Store<true>(hf.data + i + 0, _mm_mul_ps(_k, _mm_cvtepi32_ps(Load<true>((__m128i*)(hi.data + i + 0)))));
+                    Store<true>(hf.data + i + F, _mm_mul_ps(_k, _mm_cvtepi32_ps(Load<true>((__m128i*)(hi.data + i + F)))));
+                }
                 hi.Clear();
 
                 const float * h = hf.data;
                 for (size_t x = 0; x < _hx; ++x, h += FQ)
                 {
-                    float sum = 0;
-                    for (int i = 0; i < HQ; ++i)
-                        sum += Simd::Square(h[i] + h[i + HQ]);
-                    nf.data[x] = sum;
+                    __m128 h0 = Load<true>(h + 00);
+                    __m128 h1 = Load<true>(h + HQ);
+                    __m128 sum = _mm_add_ps(h0, h1);
+                    _mm_store_ss(nf.data + x, _mm_dp_ps(sum, sum, 0xF1));
                 }
             }
 
             SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
             {
-                const float eps = 0.0001f;
                 float * hf = _hf[(rowI - 1) & 1].data + FQ;
                 float * p0 = _nf[(rowI - 2) & 3].data;
                 float * p1 = _nf[(rowI - 1) & 3].data;
                 float * p2 = _nf[(rowI - 0) & 3].data;
                 for (size_t x = 0; x < _fx; ++x, ++p0, ++p1, ++p2)
                 {
-                    float n1 = 1.0f / sqrt(p1[1] + p1[2] + p2[1] + p2[2] + eps);
-                    float n2 = 1.0f / sqrt(p0[1] + p0[2] + p1[1] + p1[2] + eps);
-                    float n3 = 1.0f / sqrt(p1[0] + p1[1] + p2[0] + p2[1] + eps);
-                    float n4 = 1.0f / sqrt(p0[0] + p0[1] + p1[0] + p1[1] + eps);
+                    __m128 n = _mm_setr_ps(
+                        p1[1] + p1[2] + p2[1] + p2[2],
+                        p0[1] + p0[2] + p1[1] + p1[2],
+                        p1[0] + p1[1] + p2[0] + p2[1],
+                        p0[0] + p0[1] + p1[0] + p1[1]);
 
-                    float t1 = 0;
-                    float t2 = 0;
-                    float t3 = 0;
-                    float t4 = 0;
+                    n = _mm_rsqrt_ps(_mm_add_ps(n, _eps));
 
-                    float * src = hf + FQ*x;
-                    for (size_t o = 0; o < FQ; o++)
+                    __m128 t = _mm_setzero_ps();
+
+                    float * src = hf + x*FQ;
+                    for (int o = 0; o < FQ; o += 4)
                     {
-                        float h1 = Simd::Min(*src * n1, 0.2f);
-                        float h2 = Simd::Min(*src * n2, 0.2f);
-                        float h3 = Simd::Min(*src * n3, 0.2f);
-                        float h4 = Simd::Min(*src * n4, 0.2f);
-                        *dst++ = 0.5f * (h1 + h2 + h3 + h4);
-                        t1 += h1;
-                        t2 += h2;
-                        t3 += h3;
-                        t4 += h4;
-                        src++;
+                        __m128 s = _mm_loadu_ps(src);
+                        __m128 h0 = _mm_min_ps(_mm_mul_ps(Broadcast<0>(s), n), _02);
+                        __m128 h1 = _mm_min_ps(_mm_mul_ps(Broadcast<1>(s), n), _02);
+                        __m128 h2 = _mm_min_ps(_mm_mul_ps(Broadcast<2>(s), n), _02);
+                        __m128 h3 = _mm_min_ps(_mm_mul_ps(Broadcast<3>(s), n), _02);
+                        t = _mm_add_ps(t, _mm_add_ps(_mm_add_ps(h0, h1), _mm_add_ps(h2, h3)));
+                        _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                        dst += F;
+                        src += F;
                     }
 
-                    src = hf + FQ*x;
-                    for (size_t o = 0; o < HQ; o++)
-                    {
-                        float sum = *src + *(src + HQ);
-                        float h1 = Simd::Min(sum * n1, 0.2f);
-                        float h2 = Simd::Min(sum * n2, 0.2f);
-                        float h3 = Simd::Min(sum * n3, 0.2f);
-                        float h4 = Simd::Min(sum * n4, 0.2f);
-                        *dst++ = 0.5f * (h1 + h2 + h3 + h4);
-                        src++;
-                    }
-
-                    *dst++ = 0.2357f * t1;
-                    *dst++ = 0.2357f * t2;
-                    *dst++ = 0.2357f * t3;
-                    *dst++ = 0.2357f * t4;
+                    src = hf + x*FQ;
+                    __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + HQ));
+                    __m128 h0 = _mm_min_ps(_mm_mul_ps(Broadcast<0>(s), n), _02);
+                    __m128 h1 = _mm_min_ps(_mm_mul_ps(Broadcast<1>(s), n), _02);
+                    __m128 h2 = _mm_min_ps(_mm_mul_ps(Broadcast<2>(s), n), _02);
+                    __m128 h3 = _mm_min_ps(_mm_mul_ps(Broadcast<3>(s), n), _02);
+                    _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                    dst += 4;
+                    _mm_storeu_ps(dst, _mm_mul_ps(t, _02357));
+                    dst += 4;
                 }
             }
 
