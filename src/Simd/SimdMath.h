@@ -663,6 +663,11 @@ namespace Simd
         {
             return _mm256_castsi256_ps(_mm256_alignr_epi8(_mm256_castps_si256(s4), _mm256_castps_si256(s0), shift * 4));
         }
+
+        template<int imm> SIMD_INLINE __m256i Shuffle32i(__m256i lo, __m256i hi)
+        {
+            return _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(lo), _mm256_castsi256_ps(hi), imm));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

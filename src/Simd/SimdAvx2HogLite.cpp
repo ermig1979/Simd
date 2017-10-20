@@ -31,9 +31,9 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        const __m128i K8_KX4 = SIMD_MM_SETR_EPI8(
+        const __m256i K8_KX4 = SIMD_MM256_SETR_EPI8(
+            1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1,
             1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
-
         const __m256i K8_KX8 = SIMD_MM256_SETR_EPI8(
             1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1,
             1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
@@ -70,7 +70,7 @@ namespace Simd
                 }
                 for (size_t i = 0; i < 2; ++i)
                 {
-                    _hi[i].Resize(_hx*FQ, true);
+                    _hi[i].Resize((_hx + 8)*FQ, true);
                     _hf[i].Resize(_hx*FQ);
                 }
                 for (size_t i = 0; i < 4; ++i)
@@ -117,33 +117,37 @@ namespace Simd
                 }
             }
 
-            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const __m128i & ky0, const __m128i & ky1, int * h0, int * h1)
+            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const __m256i & ky0, const __m256i & ky1, int * h0, int * h1)
             {
-                __m128i val = Sse2::Load<false>((__m128i*)value);
-                __m128i idx = Sse2::Load<false>((__m128i*)index);
-                __m128i cur0 = Sse2::K_ZERO;
-                __m128i cur1 = Sse2::K8_01;
-                __m128i dirs[4];
+                __m256i val = Load<false>((__m256i*)value);
+                __m256i idx = Load<false>((__m256i*)index);
+                __m256i cur0 = K_ZERO;
+                __m256i cur1 = K8_01;
+                __m256i dirs[4];
                 for (size_t i = 0; i < 4; ++i)
                 {
-                    __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), K8_KX4);
-                    __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), K8_KX4);
-                    dirs[i] = _mm_hadd_epi16(dir0, dir1);
-                    cur0 = _mm_add_epi8(cur0, Sse2::K8_02);
-                    cur1 = _mm_add_epi8(cur1, Sse2::K8_02);
+                    __m256i dir0 = _mm256_maddubs_epi16(_mm256_and_si256(_mm256_cmpeq_epi8(idx, cur0), val), K8_KX4);
+                    __m256i dir1 = _mm256_maddubs_epi16(_mm256_and_si256(_mm256_cmpeq_epi8(idx, cur1), val), K8_KX4);
+                    dirs[i] = _mm256_hadd_epi16(dir0, dir1);
+                    cur0 = _mm256_add_epi8(cur0, K8_02);
+                    cur1 = _mm256_add_epi8(cur1, K8_02);
                 }
-                __m128i hx0 = Sse2::Shuffle32i<0x88>(dirs[0], dirs[1]);
-                __m128i hx1 = Sse2::Shuffle32i<0x88>(dirs[2], dirs[3]);
-                __m128i hx2 = Sse2::Shuffle32i<0xDD>(dirs[0], dirs[1]);
-                __m128i hx3 = Sse2::Shuffle32i<0xDD>(dirs[2], dirs[3]);
-                Sse2::Store<true>((__m128i*)h0 + 0, _mm_add_epi32(Sse2::Load<true>((__m128i*)h0 + 0), _mm_madd_epi16(hx0, ky0)));
-                Sse2::Store<true>((__m128i*)h0 + 1, _mm_add_epi32(Sse2::Load<true>((__m128i*)h0 + 1), _mm_madd_epi16(hx1, ky0)));
-                Sse2::Store<true>((__m128i*)h0 + 4, _mm_add_epi32(Sse2::Load<true>((__m128i*)h0 + 4), _mm_madd_epi16(hx2, ky0)));
-                Sse2::Store<true>((__m128i*)h0 + 5, _mm_add_epi32(Sse2::Load<true>((__m128i*)h0 + 5), _mm_madd_epi16(hx3, ky0)));
-                Sse2::Store<true>((__m128i*)h1 + 0, _mm_add_epi32(Sse2::Load<true>((__m128i*)h1 + 0), _mm_madd_epi16(hx0, ky1)));
-                Sse2::Store<true>((__m128i*)h1 + 1, _mm_add_epi32(Sse2::Load<true>((__m128i*)h1 + 1), _mm_madd_epi16(hx1, ky1)));
-                Sse2::Store<true>((__m128i*)h1 + 4, _mm_add_epi32(Sse2::Load<true>((__m128i*)h1 + 4), _mm_madd_epi16(hx2, ky1)));
-                Sse2::Store<true>((__m128i*)h1 + 5, _mm_add_epi32(Sse2::Load<true>((__m128i*)h1 + 5), _mm_madd_epi16(hx3, ky1)));
+                __m256i hx0 = Shuffle32i<0x88>(dirs[0], dirs[1]);
+                __m256i hx1 = Shuffle32i<0x88>(dirs[2], dirs[3]);
+                __m256i hx2 = Shuffle32i<0xDD>(dirs[0], dirs[1]);
+                __m256i hx3 = Shuffle32i<0xDD>(dirs[2], dirs[3]);
+                __m256i hx0p = _mm256_permute2x128_si256(hx0, hx1, 0x20);
+                __m256i hx1p = _mm256_permute2x128_si256(hx0, hx1, 0x31);
+                __m256i hx2p = _mm256_permute2x128_si256(hx2, hx3, 0x20);
+                __m256i hx3p = _mm256_permute2x128_si256(hx2, hx3, 0x31);
+                Store<true>((__m256i*)h0 + 0, _mm256_add_epi32(Load<true>((__m256i*)h0 + 0), _mm256_madd_epi16(hx0p, ky0)));
+                Store<true>((__m256i*)h0 + 2, _mm256_add_epi32(Load<true>((__m256i*)h0 + 2), _mm256_madd_epi16(hx2p, ky0)));
+                Store<true>((__m256i*)h0 + 4, _mm256_add_epi32(Load<true>((__m256i*)h0 + 4), _mm256_madd_epi16(hx1p, ky0)));
+                Store<true>((__m256i*)h0 + 6, _mm256_add_epi32(Load<true>((__m256i*)h0 + 6), _mm256_madd_epi16(hx3p, ky0)));
+                Store<true>((__m256i*)h1 + 0, _mm256_add_epi32(Load<true>((__m256i*)h1 + 0), _mm256_madd_epi16(hx0p, ky1)));
+                Store<true>((__m256i*)h1 + 2, _mm256_add_epi32(Load<true>((__m256i*)h1 + 2), _mm256_madd_epi16(hx2p, ky1)));
+                Store<true>((__m256i*)h1 + 4, _mm256_add_epi32(Load<true>((__m256i*)h1 + 4), _mm256_madd_epi16(hx1p, ky1)));
+                Store<true>((__m256i*)h1 + 6, _mm256_add_epi32(Load<true>((__m256i*)h1 + 6), _mm256_madd_epi16(hx3p, ky1)));
             }
 
             SIMD_INLINE void UpdateIntegerHistogram4x4(size_t rowI, size_t rowF)
@@ -152,8 +156,8 @@ namespace Simd
                 int * h1 = _hi[(rowI + 1) & 1].data;
                 uint8_t * value = _value.data + A - cell;
                 uint8_t * index = _index.data + A - cell;
-                __m128i ky0 = _mm_set1_epi16((short)_k0[rowF]);
-                __m128i ky1 = _mm_set1_epi16((short)_k1[rowF]);
+                __m256i ky0 = _mm256_set1_epi16((short)_k0[rowF]);
+                __m256i ky1 = _mm256_set1_epi16((short)_k1[rowF]);
                 for (size_t col = 0; col <= _w;)
                 {
                     UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
@@ -161,9 +165,9 @@ namespace Simd
                     h0 += FQ;
                     h1 += FQ;
                     UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
-                    col += 3 * cell;
-                    h0 += 3*FQ;
-                    h1 += 3*FQ;
+                    col += 7 * cell;
+                    h0 += 7 * FQ;
+                    h1 += 7 * FQ;
                 }
             }
 
@@ -184,12 +188,12 @@ namespace Simd
                 }
                 dirs[0] = _mm256_hadd_epi16(dirs[0], dirs[1]);
                 dirs[1] = _mm256_hadd_epi16(dirs[2], dirs[3]);
-                __m256i d0 = _mm256_permute2x128_si256(dirs[0], dirs[1], 0x20);
-                __m256i d1 = _mm256_permute2x128_si256(dirs[0], dirs[1], 0x31);
-                Store<true>((__m256i*)h0 + 0, _mm256_add_epi32(Load<true>((__m256i*)h0 + 0), _mm256_madd_epi16(d0, ky0)));
-                Store<true>((__m256i*)h0 + 2, _mm256_add_epi32(Load<true>((__m256i*)h0 + 2), _mm256_madd_epi16(d1, ky0)));
-                Store<true>((__m256i*)h1 + 0, _mm256_add_epi32(Load<true>((__m256i*)h1 + 0), _mm256_madd_epi16(d0, ky1)));
-                Store<true>((__m256i*)h1 + 2, _mm256_add_epi32(Load<true>((__m256i*)h1 + 2), _mm256_madd_epi16(d1, ky1)));
+                __m256i hx0 = _mm256_permute2x128_si256(dirs[0], dirs[1], 0x20);
+                __m256i hx1 = _mm256_permute2x128_si256(dirs[0], dirs[1], 0x31);
+                Store<true>((__m256i*)h0 + 0, _mm256_add_epi32(Load<true>((__m256i*)h0 + 0), _mm256_madd_epi16(hx0, ky0)));
+                Store<true>((__m256i*)h0 + 2, _mm256_add_epi32(Load<true>((__m256i*)h0 + 2), _mm256_madd_epi16(hx1, ky0)));
+                Store<true>((__m256i*)h1 + 0, _mm256_add_epi32(Load<true>((__m256i*)h1 + 0), _mm256_madd_epi16(hx0, ky1)));
+                Store<true>((__m256i*)h1 + 2, _mm256_add_epi32(Load<true>((__m256i*)h1 + 2), _mm256_madd_epi16(hx1, ky1)));
             }
 
             SIMD_INLINE void UpdateIntegerHistogram8x8(size_t rowI, size_t rowF)
@@ -219,7 +223,7 @@ namespace Simd
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
 
-                for (size_t i = 0; i < hi.size; i += Sse::DF)
+                for (size_t i = 0; i < hf.size; i += Sse::DF)
                 {
                     Sse::Store<true>(hf.data + i + 0, _mm_mul_ps(_k, _mm_cvtepi32_ps(Sse2::Load<true>((__m128i*)(hi.data + i + 0)))));
                     Sse::Store<true>(hf.data + i + Sse2::F, _mm_mul_ps(_k, _mm_cvtepi32_ps(Sse2::Load<true>((__m128i*)(hi.data + i + Sse2::F)))));

@@ -67,7 +67,7 @@ namespace Simd
                 }
                 for (size_t i = 0; i < 2; ++i)
                 {
-                    _hi[i].Resize(_hx*FQ, true);
+                    _hi[i].Resize((_hx + 4)*FQ, true);
                     _hf[i].Resize(_hx*FQ);
                 }
                 for (size_t i = 0; i < 4; ++i)
@@ -159,8 +159,8 @@ namespace Simd
                     h1 += FQ;
                     UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
                     col += 3 * cell;
-                    h0 += 3*FQ;
-                    h1 += 3*FQ;
+                    h0 += 3 * FQ;
+                    h1 += 3 * FQ;
                 }
             }
 
@@ -204,7 +204,7 @@ namespace Simd
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
 
-                for (size_t i = 0; i < hi.size; i += DF)
+                for (size_t i = 0; i < hf.size; i += DF)
                 {
                     Store<true>(hf.data + i + 0, _mm_mul_ps(_k, _mm_cvtepi32_ps(Load<true>((__m128i*)(hi.data + i + 0)))));
                     Store<true>(hf.data + i + F, _mm_mul_ps(_k, _mm_cvtepi32_ps(Load<true>((__m128i*)(hi.data + i + F)))));
