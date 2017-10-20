@@ -1798,7 +1798,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void HogLiteExtractFeatures(const View<A> & src, size_t cell, float * features, size_t featuresStride)
     {
-        assert((cell == 4 || cell == 8) && featuresStride >= (src.width / cell - 2) * 16);
+        assert((cell == 4 || cell == 8) && featuresStride >= (width / cell - 2) * 16);
         assert(src.format == View<A>::Gray8 && src.width >= cell * 3 && src.height >= cell * 3);
 
         SimdHogLiteExtractFeatures(src.data, src.stride, src.width, src.height, cell, features, featuresStride);
