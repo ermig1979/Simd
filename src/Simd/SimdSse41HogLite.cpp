@@ -35,6 +35,7 @@ namespace Simd
         {
             static const size_t FQ = 8;
             static const size_t HQ = FQ / 2;
+            static const size_t DQ = FQ * 2;
 
             typedef Array<uint8_t> Bytes;
             typedef Array<int> Ints;
@@ -43,7 +44,7 @@ namespace Simd
             size_t _hx, _fx, _w, _aw;
             Bytes _value, _index;
             Ints _hi[2];
-            Floats _hf[2], _nf[4];
+            Floats _hf[2], _nf[4], _nb;
             int _k0[cell], _k1[cell];
             __m128i _kx4, _kx8;
             __m128 _k, _02, _05, _02357, _eps;
@@ -67,7 +68,8 @@ namespace Simd
                     _hf[i].Resize(_hx*FQ);
                 }
                 for (size_t i = 0; i < 4; ++i)
-                    _nf[i].Resize(_hx);
+                    _nf[i].Resize(_hx + DF);
+                _nb.Resize(_hx * 4);
                 _kx4 = _mm_setr_epi8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
                 _kx8 = _mm_setr_epi8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
                 _k = _mm_set1_ps(1.0f / Simd::Square(cell * 2));
@@ -218,25 +220,44 @@ namespace Simd
                 }
             }
 
+            SIMD_INLINE void BlockNorm(size_t rowI)
+            {
+                const float * src0 = _nf[(rowI - 2) & 3].data;
+                const float * src1 = _nf[(rowI - 1) & 3].data;
+                const float * src2 = _nf[(rowI - 0) & 3].data;
+                float * dst = _nb.data;
+                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3*F)
+                {
+                    __m128 s00 = Load<false>(src0 + 0);
+                    __m128 s01 = Load<false>(src0 + 1);
+                    __m128 s10 = Load<false>(src1 + 0);
+                    __m128 s11 = Load<false>(src1 + 1);
+                    __m128 s20 = Load<false>(src2 + 0);
+                    __m128 s21 = Load<false>(src2 + 1);
+                    __m128 v00 = _mm_add_ps(s00, s10);
+                    __m128 v01 = _mm_add_ps(s01, s11);
+                    __m128 v10 = _mm_add_ps(s10, s20);
+                    __m128 v11 = _mm_add_ps(s11, s21);
+                    __m128 h0 = _mm_hadd_ps(v00, v01);
+                    __m128 h1 = _mm_hadd_ps(v10, v11);
+                    __m128 d0 = _mm_shuffle_ps(h0, h1, 0x88);
+                    __m128 d1 = _mm_shuffle_ps(h0, h1, 0x99);
+                    __m128 d2 = _mm_shuffle_ps(h0, h1, 0xDD);
+                    Store<true>(dst + 0 * F, Shuffle32f<0x27>(d0));
+                    Store<true>(dst + 1 * F, Shuffle32f<0x72>(d1));
+                    Store<true>(dst + 2 * F, Shuffle32f<0x27>(d2));
+                }
+            }
+
             SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
             {
-                float * hf = _hf[(rowI - 1) & 1].data + FQ;
-                float * p0 = _nf[(rowI - 2) & 3].data;
-                float * p1 = _nf[(rowI - 1) & 3].data;
-                float * p2 = _nf[(rowI - 0) & 3].data;
-                for (size_t x = 0; x < _fx; ++x, ++p0, ++p1, ++p2)
+                const float * hf = _hf[(rowI - 1) & 1].data + FQ;
+                const float * nb = _nb.data;
+                for (size_t x = 0; x < _fx; ++x, nb += 4)
                 {
-                    __m128 n = _mm_setr_ps(
-                        p1[1] + p1[2] + p2[1] + p2[2],
-                        p0[1] + p0[2] + p1[1] + p1[2],
-                        p1[0] + p1[1] + p2[0] + p2[1],
-                        p0[0] + p0[1] + p1[0] + p1[1]);
-
-                    n = _mm_rsqrt_ps(_mm_add_ps(n, _eps));
-
+                    __m128 n = _mm_rsqrt_ps(_mm_add_ps(_mm_load_ps(nb), _eps));
                     __m128 t = _mm_setzero_ps();
-
-                    float * src = hf + x*FQ;
+                    const float * src = hf + x*FQ;
                     for (int o = 0; o < FQ; o += 4)
                     {
                         __m128 s = _mm_loadu_ps(src);
@@ -249,7 +270,6 @@ namespace Simd
                         dst += F;
                         src += F;
                     }
-
                     src = hf + x*FQ;
                     __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + HQ));
                     __m128 h0 = _mm_min_ps(_mm_mul_ps(Broadcast<0>(s), n), _02);
@@ -289,6 +309,7 @@ namespace Simd
                         UpdateFloatHistogram(rowI);
                         if (rowI >= 2)
                         {
+                            BlockNorm(rowI);
                             SetFeatures(rowI, features);
                             features += featuresStride;
                         }
@@ -297,6 +318,7 @@ namespace Simd
                 }
                 size_t rowI = height / cell;
                 UpdateFloatHistogram(rowI);
+                BlockNorm(rowI);
                 SetFeatures(rowI, features);
             }
         };
