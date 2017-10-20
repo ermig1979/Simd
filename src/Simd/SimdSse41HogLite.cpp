@@ -31,6 +31,9 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        const __m128i K8_KX4 = SIMD_MM_SETR_EPI8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
+        const __m128i K8_KX8 = SIMD_MM_SETR_EPI8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
+
         template <size_t cell> class HogLiteFeatureExtractor
         {
             static const size_t FQ = 8;
@@ -70,8 +73,6 @@ namespace Simd
                 for (size_t i = 0; i < 4; ++i)
                     _nf[i].Resize(_hx + DF);
                 _nb.Resize(_hx * 4);
-                _kx4 = _mm_setr_epi8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
-                _kx8 = _mm_setr_epi8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
                 _k = _mm_set1_ps(1.0f / Simd::Square(cell * 2));
                 _02 = _mm_set1_ps(0.2f);
                 _05 = _mm_set1_ps(0.5f);
@@ -113,7 +114,7 @@ namespace Simd
                 }
             }
 
-            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const __m128i & kx, const __m128i & ky0, const __m128i & ky1, int * h0, int * h1)
+            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const __m128i & ky0, const __m128i & ky1, int * h0, int * h1)
             {
                 __m128i val = Load<false>((__m128i*)value);
                 __m128i idx = Load<false>((__m128i*)index);
@@ -122,8 +123,8 @@ namespace Simd
                 __m128i dirs[4];
                 for (size_t i = 0; i < 4; ++i)
                 {
-                    __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), kx);
-                    __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), kx);
+                    __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), K8_KX4);
+                    __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), K8_KX4);
                     dirs[i] = _mm_hadd_epi16(dir0, dir1);
                     cur0 = _mm_add_epi8(cur0, K8_02);
                     cur1 = _mm_add_epi8(cur1, K8_02);
@@ -152,11 +153,11 @@ namespace Simd
                 __m128i ky1 = _mm_set1_epi16((short)_k1[rowF]);
                 for (size_t col = 0; col <= _w;)
                 {
-                    UpdateIntegerHistogram4x4(value + col, index + col, _kx4, ky0, ky1, h0, h1);
+                    UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
                     col += cell;
                     h0 += FQ;
                     h1 += FQ;
-                    UpdateIntegerHistogram4x4(value + col, index + col, _kx4, ky0, ky1, h0, h1);
+                    UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
                     col += 3 * cell;
                     h0 += 3*FQ;
                     h1 += 3*FQ;
@@ -180,8 +181,8 @@ namespace Simd
                     __m128i dirs[4];
                     for (size_t i = 0; i < 4; ++i)
                     {
-                        __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), _kx8);
-                        __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), _kx8);
+                        __m128i dir0 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur0), val), K8_KX8);
+                        __m128i dir1 = _mm_maddubs_epi16(_mm_and_si128(_mm_cmpeq_epi8(idx, cur1), val), K8_KX8);
                         dirs[i] = _mm_hadd_epi16(dir0, dir1);
                         cur0 = _mm_add_epi8(cur0, K8_02);
                         cur1 = _mm_add_epi8(cur1, K8_02);
