@@ -210,5 +210,41 @@ namespace Simd
                 extractor.Run(src, srcStride, width, height, features, featuresStride);
             }
         }
+
+        class HogLiteFeatureFilter
+        {
+        public:
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth > filterSize && srcHeight > filterSize);
+
+                size_t dstWidth = srcWidth - filterSize + 1;
+                size_t dstHeight = srcHeight - filterSize + 1;
+                size_t filterStride = featureSize*filterSize;
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
+                    {
+                        float sum = 0;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            const float * pSrc = src + (dstRow + filterRow)*srcStride + dstCol*featureSize;
+                            const float * pFilter = filter + filterRow*filterStride;
+                            for (size_t filterCol = 0; filterCol < filterStride; ++filterCol)
+                                sum += pSrc[filterCol] * pFilter[filterCol];
+                        }
+                        dst[dstCol] = sum;
+                    }
+                    dst += dstStride;
+                }
+            }
+        };
+
+        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+        {
+            HogLiteFeatureFilter featureFilter;
+            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
+        }
     }
 }

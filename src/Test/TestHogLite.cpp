@@ -27,6 +27,23 @@
 
 namespace Test
 {
+    void FillCircle(View & view)
+    {
+        assert(view.format == View::Gray8);
+        Point c = view.Size() / 2;
+        ptrdiff_t r2 = Simd::Square(Simd::Min(view.width, view.height) / 4);
+        for (size_t y = 0; y < view.height; ++y)
+        {
+            ptrdiff_t y2 = Simd::Square(y - c.y);
+            uint8_t * data = view.data + view.stride*y;
+            for (size_t x = 0; x < view.width; ++x)
+            {
+                ptrdiff_t x2 = Simd::Square(x - c.x);
+                data[x] = x2 + y2 < r2 ? 255 : 0;
+            }
+        }
+    }
+
     namespace
     {
         struct FuncHLEF
@@ -51,23 +68,6 @@ namespace Test
 #define FUNC_HLEF(function) FuncHLEF(function, #function)
 
 #define ARGS_HLEF(cell, f1, f2) cell, FuncHLEF(f1, cell), FuncHLEF(f2, cell)
-
-    void FillCircle(View & view)
-    {
-        assert(view.format == View::Gray8);
-        Point c = view.Size() / 2;
-        ptrdiff_t r2 = Simd::Square(Simd::Min(view.width, view.height)/4);
-        for (size_t y = 0; y < view.height; ++y)
-        {
-            ptrdiff_t y2 = Simd::Square(y - c.y);
-            uint8_t * data = view.data + view.stride*y;
-            for (size_t x = 0; x < view.width; ++x)
-            {
-                ptrdiff_t x2 = Simd::Square(x - c.x);
-                data[x] = x2 + y2 < r2 ? 255 : 0;
-            }
-        }
-    }
 
     bool HogLiteExtractFeaturesAutoTest(size_t width, size_t height, size_t size, size_t cell, const FuncHLEF & f1, const FuncHLEF & f2)
     {
@@ -123,6 +123,86 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHLFF
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLFF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fis) + "x" + ToString(fes) + "]") {}
+
+            void Call(const View & src, size_t featureSize, const View & filter, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), src.width / featureSize, src.height, featureSize,
+                    (float*)filter.data, filter.width / featureSize, (float*)dst.data, dst.stride / sizeof(float));
+            }
+        };
+    }
+
+#define FUNC_HLFF(function) FuncHLFF(function, #function)
+
+#define ARGS_HLFF(fis, fes, f1, f2) fis, fes, FuncHLFF(f1, fis, fes), FuncHLFF(f2, fis, fes)
+
+    bool HogLiteFilterFeaturesAutoTest(size_t srcWidth, size_t srcHeight, size_t filterSize, size_t featureSize, const FuncHLFF & f1, const FuncHLFF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View filter(filterSize*featureSize, filterSize, View::Float, NULL, featureSize*sizeof(float));
+        FillRandom(filter);
+
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize*sizeof(float)));
+        FillRandom(src);
+
+        size_t dstWidth = srcWidth - filterSize + 1;
+        size_t dstHeight = srcHeight - filterSize + 1;
+        View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, featureSize, filter, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, featureSize, filter, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteFilterFeaturesAutoTest(size_t filterSize, size_t featureSize, const FuncHLFF & f1, const FuncHLFF & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterFeaturesAutoTest(W / filterSize, H, filterSize, featureSize, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ filterSize, H - O, filterSize, featureSize, f1, f2);
+
+        return result;
+    }
+
+    bool HogLiteFilterFeaturesAutoTest(const FuncHLFF & f1, const FuncHLFF & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, f1, f2));
+
+        return result;
+    }
+
+    bool HogLiteFilterFeaturesAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Base::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
@@ -169,5 +249,60 @@ namespace Test
     bool HogLiteExtractFeaturesDataTest(bool create)
     {
         return HogLiteExtractFeaturesDataTest(create, 8, 16, DW, DH, FUNC_HLEF(SimdHogLiteExtractFeatures));
+    }
+
+    bool HogLiteFilterFeaturesDataTest(bool create, size_t srcWidth, size_t srcHeight, size_t filterSize, size_t featureSize, const FuncHLFF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View filter(filterSize*featureSize, filterSize, View::Float, NULL, featureSize * sizeof(float));
+        FillRandom(filter);
+
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        FillRandom(src);
+
+        size_t dstWidth = srcWidth - filterSize + 1;
+        size_t dstHeight = srcHeight - filterSize + 1;
+        View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        if (create)
+        {
+            FillRandom(filter);
+            FillRandom(src);
+
+            TEST_SAVE(filter);
+            TEST_SAVE(src);
+
+            f.Call(src, featureSize, filter, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(filter);
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, featureSize, filter, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 64);
+        }
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteFilterFeaturesDataTest(bool create)
+    {
+        return HogLiteFilterFeaturesDataTest(create, DW / 16, DH, 8, 16, FUNC_HLFF(SimdHogLiteFilterFeatures));
     }
 }
