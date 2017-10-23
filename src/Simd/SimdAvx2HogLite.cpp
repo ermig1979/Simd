@@ -43,6 +43,7 @@ namespace Simd
             static const size_t FQ = 8;
             static const size_t HQ = FQ / 2;
             static const size_t DQ = FQ * 2;
+            static const size_t QQ = FQ * 4;
 
             typedef Array<uint8_t> Bytes;
             typedef Array<int> Ints;
@@ -53,7 +54,8 @@ namespace Simd
             Ints _hi[2];
             Floats _hf[2], _nf[4], _nb;
             int _k0[cell], _k1[cell];
-            __m128 _k, _02, _05, _02357, _eps;
+            __m128 _02, _05, _02357, _eps;
+            __m256 _k;
 
             SIMD_INLINE void Init(size_t width)
             {
@@ -76,7 +78,7 @@ namespace Simd
                 for (size_t i = 0; i < 4; ++i)
                     _nf[i].Resize(_hx + Sse2::DF);
                 _nb.Resize(_hx * 4);
-                _k = _mm_set1_ps(1.0f / Simd::Square(cell * 2));
+                _k = _mm256_set1_ps(1.0f / Simd::Square(cell * 2));
                 _02 = _mm_set1_ps(0.2f);
                 _05 = _mm_set1_ps(0.5f);
                 _02357 = _mm_set1_ps(0.2357f);
@@ -223,15 +225,31 @@ namespace Simd
                 Floats & hf = _hf[rowI & 1];
                 Floats & nf = _nf[rowI & 3];
 
-                for (size_t i = 0; i < hf.size; i += Sse::DF)
+                size_t alignedSize = AlignLo(hf.size, DF), i = 0;
+                for (; i < alignedSize; i += DF)
                 {
-                    Sse::Store<true>(hf.data + i + 0, _mm_mul_ps(_k, _mm_cvtepi32_ps(Sse2::Load<true>((__m128i*)(hi.data + i + 0)))));
-                    Sse::Store<true>(hf.data + i + Sse2::F, _mm_mul_ps(_k, _mm_cvtepi32_ps(Sse2::Load<true>((__m128i*)(hi.data + i + Sse2::F)))));
+                    Avx::Store<true>(hf.data + i + 0, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + 0)))));
+                    Avx::Store<true>(hf.data + i + F, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i + F)))));
                 }
+                for (; i < hf.size; i += F)
+                    Avx::Store<true>(hf.data + i, _mm256_mul_ps(_k, _mm256_cvtepi32_ps(Load<true>((__m256i*)(hi.data + i)))));
                 hi.Clear();
 
                 const float * h = hf.data;
-                for (size_t x = 0; x < _hx; ++x, h += FQ)
+                size_t ahx = AlignLo(_hx, 4), x = 0;
+                for (; x < ahx; x += 4, h += QQ)
+                {
+                    __m256 h01 = Load<true>(h + 0 * FQ);
+                    __m256 h23 = Load<true>(h + 1 * FQ);
+                    __m256 h45 = Load<true>(h + 2 * FQ);
+                    __m256 h67 = Load<true>(h + 3 * FQ);
+                    __m256 s01 = _mm256_add_ps(_mm256_permute2f128_ps(h01, h23, 0x20), _mm256_permute2f128_ps(h01, h23, 0x31));
+                    __m256 n01 = Permute4x64<0x88>(_mm256_dp_ps(s01, s01, 0xF1));
+                    __m256 s23 = _mm256_add_ps(_mm256_permute2f128_ps(h45, h67, 0x20), _mm256_permute2f128_ps(h45, h67, 0x31));
+                    __m256 n23 = Permute4x64<0x88>(_mm256_dp_ps(s23, s23, 0xF1));
+                    _mm_storeu_ps(nf.data + x, _mm_shuffle_ps(_mm256_castps256_ps128(n01), _mm256_castps256_ps128(n23), 0x88));
+                }
+                for (; x < _hx; ++x, h += FQ)
                 {
                     __m128 h0 = Sse::Load<true>(h + 00);
                     __m128 h1 = Sse::Load<true>(h + HQ);
