@@ -54,8 +54,7 @@ namespace Simd
             Ints _hi[2];
             Floats _hf[2], _nf[4], _nb;
             int _k0[cell], _k1[cell];
-            __m128 _02, _05, _02357, _eps;
-            __m256 _k;
+            __m256 _k, _02, _05, _02357, _eps;
 
             SIMD_INLINE void Init(size_t width)
             {
@@ -76,13 +75,13 @@ namespace Simd
                     _hf[i].Resize(_hx*FQ);
                 }
                 for (size_t i = 0; i < 4; ++i)
-                    _nf[i].Resize(_hx + Sse2::DF);
-                _nb.Resize(_hx * 4);
+                    _nf[i].Resize(_hx + F);
+                _nb.Resize((_hx + 6)* 4 );
                 _k = _mm256_set1_ps(1.0f / Simd::Square(cell * 2));
-                _02 = _mm_set1_ps(0.2f);
-                _05 = _mm_set1_ps(0.5f);
-                _02357 = _mm_set1_ps(0.2357f);
-                _eps = _mm_set1_ps(0.0001f);
+                _02 = _mm256_set1_ps(0.2f);
+                _05 = _mm256_set1_ps(0.5f);
+                _02357 = _mm256_set1_ps(0.2357f);
+                _eps = _mm256_set1_ps(0.0001f);
             }
 
             template<bool align> static SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, uint8_t * value, uint8_t * index)
@@ -287,36 +286,73 @@ namespace Simd
                 }
             }
 
+            SIMD_INLINE __m256 Features07(const __m256 & n, const __m256 & s, __m256 & t)
+            {
+                __m256 h0 = _mm256_min_ps(_mm256_mul_ps(Broadcast<0>(s), n), _02);
+                __m256 h1 = _mm256_min_ps(_mm256_mul_ps(Broadcast<1>(s), n), _02);
+                __m256 h2 = _mm256_min_ps(_mm256_mul_ps(Broadcast<2>(s), n), _02);
+                __m256 h3 = _mm256_min_ps(_mm256_mul_ps(Broadcast<3>(s), n), _02);
+                t = _mm256_add_ps(t, _mm256_add_ps(_mm256_add_ps(h0, h1), _mm256_add_ps(h2, h3)));
+                return _mm256_mul_ps(_05, _mm256_hadd_ps(_mm256_hadd_ps(h0, h1), _mm256_hadd_ps(h2, h3)));
+            }
+
+            SIMD_INLINE __m256 Features8B(const __m256 & n, const __m256 & s)
+            {
+                __m256 h0 = _mm256_min_ps(_mm256_mul_ps(Broadcast<0>(s), n), _02);
+                __m256 h1 = _mm256_min_ps(_mm256_mul_ps(Broadcast<1>(s), n), _02);
+                __m256 h2 = _mm256_min_ps(_mm256_mul_ps(Broadcast<2>(s), n), _02);
+                __m256 h3 = _mm256_min_ps(_mm256_mul_ps(Broadcast<3>(s), n), _02);
+                return _mm256_mul_ps(_05, _mm256_hadd_ps(_mm256_hadd_ps(h0, h1), _mm256_hadd_ps(h2, h3)));
+            }
+
             SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
             {
                 const float * hf = _hf[(rowI - 1) & 1].data + FQ;
                 const float * nb = _nb.data;
-                for (size_t x = 0; x < _fx; ++x, nb += 4)
+                size_t x = 0, afx = AlignLo(_fx, 2);
+                for (; x < afx; x += 2, nb += 8, dst += QQ)
                 {
-                    __m128 n = _mm_rsqrt_ps(_mm_add_ps(_mm_load_ps(nb), _eps));
+                    __m256 n = _mm256_rsqrt_ps(_mm256_add_ps(_mm256_load_ps(nb), _eps));
+                    __m256 t = _mm256_setzero_ps();
+                    __m256 f[4];
+                    const float * src = hf + x*FQ;
+                    __m256 s0 = Avx::Load<false>(src + 0 * HQ, src + 2 * HQ);
+                    __m256 s1 = Avx::Load<false>(src + 1 * HQ, src + 3 * HQ);
+                    f[0] = Features07(n, s0, t);
+                    f[1] = Features07(n, s1, t);
+                    f[2] = Features8B(n, _mm256_add_ps(s0, s1));
+                    f[3] = _mm256_mul_ps(t, _02357);
+                    Avx::Store<false>(dst + 0 * F, _mm256_permute2f128_ps(f[0], f[1], 0x20));
+                    Avx::Store<false>(dst + 1 * F, _mm256_permute2f128_ps(f[2], f[3], 0x20));
+                    Avx::Store<false>(dst + 2 * F, _mm256_permute2f128_ps(f[0], f[1], 0x31));
+                    Avx::Store<false>(dst + 3 * F, _mm256_permute2f128_ps(f[2], f[3], 0x31));
+                }
+                for (; x < _fx; ++x, nb += 4)
+                {
+                    __m128 n = _mm_rsqrt_ps(_mm_add_ps(_mm_load_ps(nb), _mm256_castps256_ps128(_eps)));
                     __m128 t = _mm_setzero_ps();
                     const float * src = hf + x*FQ;
                     for (int o = 0; o < FQ; o += 4)
                     {
                         __m128 s = _mm_loadu_ps(src);
-                        __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
-                        __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
-                        __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
-                        __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
+                        __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _mm256_castps256_ps128(_02));
+                        __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _mm256_castps256_ps128(_02));
+                        __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _mm256_castps256_ps128(_02));
+                        __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _mm256_castps256_ps128(_02));
                         t = _mm_add_ps(t, _mm_add_ps(_mm_add_ps(h0, h1), _mm_add_ps(h2, h3)));
-                        _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                        _mm_storeu_ps(dst, _mm_mul_ps(_mm256_castps256_ps128(_05), _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
                         dst += Sse2::F;
                         src += Sse2::F;
                     }
                     src = hf + x*FQ;
                     __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + HQ));
-                    __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _02);
-                    __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _02);
-                    __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _02);
-                    __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _02);
-                    _mm_storeu_ps(dst, _mm_mul_ps(_05, _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
+                    __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _mm256_castps256_ps128(_02));
+                    __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _mm256_castps256_ps128(_02));
+                    __m128 h2 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<2>(s), n), _mm256_castps256_ps128(_02));
+                    __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<3>(s), n), _mm256_castps256_ps128(_02));
+                    _mm_storeu_ps(dst, _mm_mul_ps(_mm256_castps256_ps128(_05), _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
                     dst += 4;
-                    _mm_storeu_ps(dst, _mm_mul_ps(t, _02357));
+                    _mm_storeu_ps(dst, _mm_mul_ps(t, _mm256_castps256_ps128(_02357)));
                     dst += 4;
                 }
             }
