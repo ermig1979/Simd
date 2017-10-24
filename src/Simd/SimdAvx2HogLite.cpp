@@ -25,6 +25,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -409,6 +410,178 @@ namespace Simd
                 HogLiteFeatureExtractor<8> extractor;
                 extractor.Run(src, srcStride, width, height, features, featuresStride);
             }
+        }
+
+        namespace HogLiteFeatureFilterDetail
+        {
+            template <int size> struct Feature
+            {
+                template <bool align> static SIMD_INLINE void Sum4x4(const float * src, const float * filter, __m256 * sums);
+            };
+
+            template <> struct Feature<8>
+            {
+                template <bool align> static SIMD_INLINE void Sum4x4(const float * src, const float * filter, __m256 * sums)
+                {
+                    __m256 filter0 = Load<align>(filter + 0 * F);
+                    __m256 src0 = Load<align>(src + 0 * F);
+                    __m256 src1 = Load<align>(src + 1 * F);
+                    __m256 src2 = Load<align>(src + 2 * F);
+                    __m256 src3 = Load<align>(src + 3 * F);
+                    sums[0] = _mm256_fmadd_ps(src0, filter0, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src1, filter0, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src2, filter0, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src3, filter0, sums[3]);
+                    __m256 filter1 = Load<align>(filter + 1 * F);
+                    __m256 src4 = Load<align>(src + 4 * F);
+                    sums[0] = _mm256_fmadd_ps(src1, filter1, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src2, filter1, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src3, filter1, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src4, filter1, sums[3]);
+                    __m256 filter2 = Load<align>(filter + 2 * F);
+                    __m256 src5 = Load<align>(src + 5 * F);
+                    sums[0] = _mm256_fmadd_ps(src2, filter2, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src3, filter2, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src4, filter2, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src5, filter2, sums[3]);
+                    __m256 filter3 = Load<align>(filter + 3 * F);
+                    __m256 src6 = Load<align>(src + 6 * F);
+                    sums[0] = _mm256_fmadd_ps(src3, filter3, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src4, filter3, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src5, filter3, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src6, filter3, sums[3]);
+                }
+            };
+
+            template <> struct Feature<16>
+            {
+                template <bool align> static SIMD_INLINE void Sum4x4(const float * src, const float * filter, __m256 * sums)
+                {
+                    __m256 filter0 = Load<align>(filter + 0 * F);
+                    __m256 src0 = Load<align>(src + 0 * F);
+                    __m256 src2 = Load<align>(src + 2 * F);
+                    __m256 src4 = Load<align>(src + 4 * F);
+                    __m256 src6 = Load<align>(src + 6 * F);
+                    sums[0] = _mm256_fmadd_ps(src0, filter0, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src2, filter0, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src4, filter0, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src6, filter0, sums[3]);
+                    __m256 filter2 = Load<align>(filter + 2 * F);
+                    __m256 src8 = Load<align>(src + 8 * F);
+                    sums[0] = _mm256_fmadd_ps(src2, filter2, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src4, filter2, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src6, filter2, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src8, filter2, sums[3]);
+                    __m256 filter1 = Load<align>(filter + 1 * F);
+                    __m256 src1 = Load<align>(src + 1 * F);
+                    __m256 src3 = Load<align>(src + 3 * F);
+                    __m256 src5 = Load<align>(src + 5 * F);
+                    __m256 src7 = Load<align>(src + 7 * F);
+                    sums[0] = _mm256_fmadd_ps(src1, filter1, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src3, filter1, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src5, filter1, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src7, filter1, sums[3]);
+                    __m256 filter3 = Load<align>(filter + 3 * F);
+                    __m256 src9 = Load<align>(src + 9 * F);
+                    sums[0] = _mm256_fmadd_ps(src3, filter3, sums[0]);
+                    sums[1] = _mm256_fmadd_ps(src5, filter3, sums[1]);
+                    sums[2] = _mm256_fmadd_ps(src7, filter3, sums[2]);
+                    sums[3] = _mm256_fmadd_ps(src9, filter3, sums[3]);
+                }
+            };
+        }
+
+        class HogLiteFeatureFilter
+        {
+            template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m256 & sum)
+            {
+                __m256 _src = Avx::Load<align>(src);
+                __m256 _filter = Avx::Load<align>(filter);
+                sum = _mm256_add_ps(sum, _mm256_mul_ps(_src, _filter));
+            }
+
+            template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, __m256 * sums)
+            {
+                __m256 _filter = Avx::Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+            }
+
+            template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                size_t filterStride = featureSize*filterSize;
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                size_t alignedFilterStride = AlignLo(filterStride, QF);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                        const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            size_t filterCol = 0;
+                            for (; filterCol < alignedFilterStride; filterCol += QF)
+                                HogLiteFeatureFilterDetail::Feature<featureSize>:: template Sum4x4<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                            for (; filterCol < filterStride; filterCol += F)
+                                ProductSum1x4<align, featureSize>(pSrc + filterCol, pFilter + filterCol, sums);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
+                        _mm_storeu_ps(dst + dstCol, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        __m256 sum = _mm256_setzero_ps();
+                        const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += F)
+                                ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        dst[dstCol] = Avx::ExtractSum(sum);
+                    }
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                if (featureSize == 16)
+                    Filter<align, 16>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
+                else
+                    Filter<align, 8>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= filterSize && srcHeight >= filterSize);
+
+                size_t dstWidth = srcWidth - filterSize + 1;
+                size_t dstHeight = srcHeight - filterSize + 1;
+
+                if (Aligned(src) && Aligned(srcStride, F) && Aligned(filter))
+                    Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                else
+                    Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+            }
+        };
+
+        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+        {
+            HogLiteFeatureFilter featureFilter;
+            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
         }
     }
 #endif// SIMD_AVX2_ENABLE
