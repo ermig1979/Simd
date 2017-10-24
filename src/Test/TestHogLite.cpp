@@ -156,10 +156,10 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
 
         View filter(filterSize*featureSize, filterSize, View::Float, NULL, featureSize*sizeof(float));
-        FillRandom(filter);
+        FillRandom32f(filter, 0.5f, 1.5f);
 
         View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize*sizeof(float)));
-        FillRandom(src);
+        FillRandom32f(src, 0.5f, 1.5f);
 
         size_t dstWidth = srcWidth - filterSize + 1;
         size_t dstHeight = srcHeight - filterSize + 1;
@@ -190,6 +190,7 @@ namespace Test
         bool result = true;
 
         result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, f1, f2));
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, f1, f2));
 
         return result;
     }
@@ -199,6 +200,11 @@ namespace Test
         bool result = true;
 
         result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Base::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Sse41::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+#endif 
 
         return result;
     }
@@ -260,10 +266,7 @@ namespace Test
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcWidth << ", " << srcHeight << "].");
 
         View filter(filterSize*featureSize, filterSize, View::Float, NULL, featureSize * sizeof(float));
-        FillRandom(filter);
-
         View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
-        FillRandom(src);
 
         size_t dstWidth = srcWidth - filterSize + 1;
         size_t dstHeight = srcHeight - filterSize + 1;
@@ -272,8 +275,8 @@ namespace Test
 
         if (create)
         {
-            FillRandom(filter);
-            FillRandom(src);
+            FillRandom32f(filter);
+            FillRandom32f(src);
 
             TEST_SAVE(filter);
             TEST_SAVE(src);

@@ -227,12 +227,14 @@ namespace Simd
                     for (size_t dstCol = 0; dstCol < dstWidth; ++dstCol)
                     {
                         float sum = 0;
+                        const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                        const float * pFilter = filter;
                         for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
                         {
-                            const float * pSrc = src + (dstRow + filterRow)*srcStride + dstCol*featureSize;
-                            const float * pFilter = filter + filterRow*filterStride;
                             for (size_t filterCol = 0; filterCol < filterStride; ++filterCol)
                                 sum += pSrc[filterCol] * pFilter[filterCol];
+                            pSrc += srcStride;
+                            pFilter += filterStride;
                         }
                         dst[dstCol] = sum;
                     }
