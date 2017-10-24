@@ -206,6 +206,11 @@ namespace Test
             result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Sse41::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
 #endif 
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Avx::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+#endif 
+
         return result;
     }
 

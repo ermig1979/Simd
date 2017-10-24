@@ -2290,6 +2290,11 @@ SIMD_API void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, 
 
 SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable)
+        Avx::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
         Sse41::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);

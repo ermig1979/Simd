@@ -410,7 +410,7 @@ namespace Simd
             void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
             {
                 assert(featureSize == 8 || featureSize == 16);
-                assert(srcWidth > filterSize && srcHeight > filterSize);
+                assert(srcWidth >= filterSize && srcHeight >= filterSize);
 
                 size_t dstWidth = srcWidth - filterSize + 1;
                 size_t dstHeight = srcHeight - filterSize + 1;

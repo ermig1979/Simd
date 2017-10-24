@@ -2469,11 +2469,29 @@ extern "C"
         \param [in] width - an image width. Its minimal value is cell*3.
         \param [in] height - an image height. Its minimal value is cell*3.
         \param [in] cell - a size of cell. It must be 4 or 8. 
-        \param [out] features - a pointer to buffer with features. Array must has size grater or equal to (height/cell - 2)*featuresStride.
-        \param [in] featuresStride - a row size of the buffer with features. It must be grater or equal to (width/cell - 2)*16.
+        \param [out] features - a pointer to buffer with features. Array must has size greater or equal to (height/cell - 2)*featuresStride.
+        \param [in] featuresStride - a row size of the buffer with features. It must be greater or equal to (width/cell - 2)*16.
     */
     SIMD_API void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride);
 
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+
+        \short Applies filter to lite HOG features.
+
+        Applies filter of square shape to lite HOG features. 
+
+        \param [in] src - a pointer to the 32-bit float array with features.
+        \param [in] srcStride - a row size of input array with features.
+        \param [in] srcWidth - a width of input array with features. Its minimal value is filterSize.
+        \param [in] srcHeight - a height of input array with features. Its minimal value is filterSize.
+        \param [in] featureSize - a size of cell with features. It must be 8 or 16.
+        \param [in] filter - a pointer to the 32-bit float array with filter values. Array must have size equal to filterSize*filterSize*featureSize.
+        \param [in] filterSize - a size (width and height) of used filter. 
+        \param [out] dst - a pointer to output buffer with filtered features. Array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
+        \param [in] dstStride - a row size of the output buffer with filtered features.
+    */
     SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
 
     /*! @ingroup other_conversion
