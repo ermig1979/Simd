@@ -204,6 +204,7 @@ namespace Test
 
     TEST_ADD_GROUP(HogLiteExtractFeatures);
     TEST_ADD_GROUP(HogLiteFilterFeatures);
+    TEST_ADD_GROUP(HogLiteResizeFeatures);
 
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 

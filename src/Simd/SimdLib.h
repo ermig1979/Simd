@@ -2482,7 +2482,7 @@ extern "C"
 
         Applies filter of square shape to lite HOG features. 
 
-        \param [in] src - a pointer to the 32-bit float array with features.
+        \param [in] src - a pointer to the input 32-bit float array with features.
         \param [in] srcStride - a row size of input array with features.
         \param [in] srcWidth - a width of input array with features. Its minimal value is filterSize.
         \param [in] srcHeight - a height of input array with features. Its minimal value is filterSize.
@@ -2493,6 +2493,27 @@ extern "C"
         \param [in] dstStride - a row size of the output buffer with filtered features.
     */
     SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight);
+
+        \short Resizes 2D-array with lite HOG features.
+
+        Resizes 2D-array with lite HOG features. It use method of bilinear interpolation.
+
+        \param [in] src - a pointer to the input 32-bit float array with features.
+        \param [in] srcStride - a row size of input array with features.
+        \param [in] srcWidth - a width of input array with features. 
+        \param [in] srcHeight - a height of input array with features. 
+        \param [in] featureSize - a size of cell with features. It must be 8 or 16.
+        \param [out] dst - a pointer to the output 32-bit float array with features.
+        \param [in] dstStride - a row size of output array with features.
+        \param [in] dstWidth - a width of output array with features.
+        \param [in] dstHeight - a height of output array with features.
+        */
+    SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight);
+
 
     /*! @ingroup other_conversion
 

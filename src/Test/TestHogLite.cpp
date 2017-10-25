@@ -179,8 +179,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteFilterFeaturesAutoTest(W / filterSize, H, filterSize, featureSize, f1, f2);
-        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ filterSize, H - O, filterSize, featureSize, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(W / featureSize, H, filterSize, featureSize, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ featureSize, H - O, filterSize, featureSize, f1, f2);
 
         return result;
     }
@@ -214,6 +214,100 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Avx2::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
+        struct FuncHLRF
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, 
+                float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLRF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            FuncHLRF(const FuncHLRF & f, size_t fs) : func(f.func), description(f.description + "[" + ToString(fs) + "]") {}
+
+            void Call(const View & src, size_t featureSize, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), src.width / featureSize, src.height, featureSize,
+                   (float*)dst.data, dst.stride / sizeof(float), dst.width / featureSize, dst.height);
+            }
+        };
+    }
+
+#define FUNC_HLRF(function) FuncHLRF(function, #function)
+
+#define ARGS_HLRF(fs, f1, f2) fs, FuncHLRF(f1, fs), FuncHLRF(f2, fs)
+
+    bool HogLiteResizeFeaturesAutoTest(size_t srcWidth, size_t srcHeight, double k, size_t featureSize, const FuncHLRF & f1, const FuncHLRF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        FillRandom32f(src, 0.5f, 1.5f);
+
+        size_t dstWidth = size_t(srcWidth*k);
+        size_t dstHeight = size_t(srcHeight*k);
+        View dst1(dstWidth*featureSize, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth*featureSize, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, featureSize, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, featureSize, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteResizeFeaturesAutoTest(double k, size_t featureSize, const FuncHLRF & f1, const FuncHLRF & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteResizeFeaturesAutoTest(W / featureSize, H, k, featureSize, f1, f2);
+        result = result && HogLiteResizeFeaturesAutoTest((W + O) / featureSize, H - O, k, featureSize, f1, f2);
+
+        return result;
+    }
+
+    bool HogLiteResizeFeaturesAutoTest(const FuncHLRF & f1, const FuncHLRF & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteResizeFeaturesAutoTest(0.7, ARGS_HLRF(16, f1, f2));
+        result = result && HogLiteResizeFeaturesAutoTest(0.7, ARGS_HLRF(8, f1, f2));
+
+        return result;
+    }
+
+    bool HogLiteResizeFeaturesAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Base::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Sse41::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Avx::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Avx2::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
 #endif 
 
         return result;
@@ -317,5 +411,53 @@ namespace Test
     bool HogLiteFilterFeaturesDataTest(bool create)
     {
         return HogLiteFilterFeaturesDataTest(create, DW / 16, DH, 8, 16, FUNC_HLFF(SimdHogLiteFilterFeatures));
+    }
+
+    bool HogLiteResizeFeaturesDataTest(bool create, size_t srcWidth, size_t srcHeight, double k, size_t featureSize, const FuncHLRF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        size_t dstWidth = size_t(srcWidth*k);
+        size_t dstHeight = size_t(srcHeight*k);
+        View dst1(dstWidth*featureSize, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth*featureSize, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        if (create)
+        {
+            FillRandom32f(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, featureSize, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, featureSize, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 64);
+        }
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteResizeFeaturesDataTest(bool create)
+    {
+        return HogLiteResizeFeaturesDataTest(create, DW / 16, DH, 0.7, 16, FUNC_HLRF(SimdHogLiteResizeFeatures));
     }
 }

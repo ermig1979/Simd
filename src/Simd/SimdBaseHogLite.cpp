@@ -248,5 +248,86 @@ namespace Simd
             HogLiteFeatureFilter featureFilter;
             featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
         }
+
+        class HogLiteFeatureResizer
+        {
+            typedef Array<int> Ints;
+            typedef Array<float> Floats;
+
+            Ints _iy, _ix;
+            Floats _ky, _kx;
+
+            void InitIndexWeight(size_t srcSize, size_t dstSize, size_t dstStep, Ints & indexes, Floats & weights)
+            {
+                indexes.Resize(dstSize);
+                weights.Resize(dstSize);
+
+                float scale = float(srcSize) / float(dstSize);
+                for (size_t i = 0; i < dstSize; ++i)
+                {
+                    float weight = (float)((i + 0.5f)*scale - 0.5f);
+                    int index = (int)::floor(weight);
+                    weight -= index;
+                    if (index < 0)
+                    {
+                        index = 0;
+                        weight = 0.0f;
+                    }
+                    if (index > (int)srcSize - 2)
+                    {
+                        index = (int)srcSize - 2;
+                        weight = 1.0f;
+                    }
+                    indexes[i] = int(index*dstStep);
+                    weights[i] = weight;
+                }
+            }
+
+            void Resize(const float * src, size_t srcStride, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                for (size_t rowDst = 0; rowDst < dstHeight; ++rowDst)
+                {
+                    float ky1 = _ky[rowDst];
+                    float ky0 = 1.0f - ky1;
+                    const float * pSrc = src + _iy[rowDst];
+                    float * pDst = dst + rowDst*dstStride;
+                    for (size_t colDst = 0; colDst < dstWidth; ++colDst, pDst += featureSize)
+                    {
+                        float kx1 = _kx[colDst];
+                        float kx0 = 1.0f - kx1;
+                        float k00 = ky0*kx0, k01 = ky0*kx1, k10 = ky1*kx0, k11 = ky1*kx1;
+                        const float * pSrc0 = pSrc + _ix[colDst];
+                        const float * pSrc1 = pSrc0 + srcStride;
+                        for (size_t i = 0; i < featureSize; ++i)
+                            pDst[i] = pSrc0[i] * k00 + pSrc0[i + featureSize] * k01 + pSrc1[i] * k10 + pSrc1[i + featureSize] * k11;
+                    }
+                }
+            }
+
+        public:
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+
+                if (srcWidth == dstWidth && srcHeight == dstHeight)
+                {
+                    size_t size = sizeof(float)*srcWidth*featureSize;
+                    for (size_t row = 0; row < dstHeight; ++row)
+                        memcpy(dst + row*dstStride, src + row*srcStride, size);
+                    return;
+                }
+
+                InitIndexWeight(srcWidth, dstWidth, featureSize, _ix, _kx);
+                InitIndexWeight(srcHeight, dstHeight, srcStride, _iy, _ky);
+
+                Resize(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
+            }
+        };
+
+        void HogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+        {
+            HogLiteFeatureResizer featureResizer;
+            featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+        }
     }
 }

@@ -2308,6 +2308,26 @@ SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, siz
         Base::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
 }
 
+SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable)
+        Avx2::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+    else
+#endif
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable)
+        Avx::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+    else
+#endif
+        Base::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
