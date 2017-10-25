@@ -329,5 +329,29 @@ namespace Simd
             HogLiteFeatureResizer featureResizer;
             featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
         }
+
+        void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                const float * s = src;
+                float * d = dst;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    const float * p = pca;
+                    for (size_t i = 0; i < 8; ++i, p += 16)
+                    {
+                        float sum = 0;
+                        for (size_t j = 0; j < 16; ++j)
+                            sum += s[j] * p[j];
+                        d[i] = sum;
+                    }
+                    s += 16;
+                    d += 8;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 }

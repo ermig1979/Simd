@@ -2328,6 +2328,11 @@ SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, siz
         Base::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
 }
 
+SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+{
+    Base::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

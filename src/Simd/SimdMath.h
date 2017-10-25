@@ -816,7 +816,7 @@ namespace Simd
 #ifdef SIMD_X64_ENABLE
             return _tzcnt_u64(mask);
 #else
-            return (__mmask32(col) ? _tzcnt_u32(__mmask32(cols)) : _tzcnt_u32(__mmask32(cols >> 32)) + 32);
+            return (__mmask32(mask) ? _tzcnt_u32(__mmask32(mask)) : _tzcnt_u32(__mmask32(mask >> 32)) + 32);
 #endif
         }
 
@@ -825,7 +825,7 @@ namespace Simd
 #ifdef SIMD_X64_ENABLE
             return 64 - _lzcnt_u64(mask);
 #else
-            return 64 - (__mmask32(col >> 32) ? _lzcnt_u32(__mmask32(cols >> 32)) : _lzcnt_u32(__mmask32(cols)) + 32);
+            return 64 - (__mmask32(mask >> 32) ? _lzcnt_u32(__mmask32(mask >> 32)) : _lzcnt_u32(__mmask32(mask)) + 32);
 #endif
         }
 #endif

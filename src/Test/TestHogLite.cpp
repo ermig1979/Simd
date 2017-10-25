@@ -313,6 +313,73 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHLCF
+        {
+            static const size_t SRC_FEATURE_SIZE = 16;
+            static const size_t DST_FEATURE_SIZE = 8;
+
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLCF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, const View & pca, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), src.width / SRC_FEATURE_SIZE, src.height, (float*)pca.data, (float*)dst.data, dst.stride / sizeof(float));
+            }
+        };
+    }
+
+#define FUNC_HLCF(function) FuncHLCF(function, #function)
+
+    bool HogLiteCompressFeaturesAutoTest(size_t width, size_t height, const FuncHLCF & f1, const FuncHLCF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width*FuncHLCF::SRC_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+        FillRandom32f(src, 0.5f, 1.5f);
+
+        View pca(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE, 1, View::Float, NULL, TEST_ALIGN(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+        FillRandom32f(pca, 0.5f, 1.5f);
+
+        View dst1(width*FuncHLCF::DST_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+        View dst2(width*FuncHLCF::DST_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, pca, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, pca, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteCompressFeaturesAutoTest(const FuncHLCF & f1, const FuncHLCF & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteCompressFeaturesAutoTest(W / FuncHLCF::SRC_FEATURE_SIZE, H, f1, f2);
+        result = result && HogLiteCompressFeaturesAutoTest((W + O) / FuncHLCF::SRC_FEATURE_SIZE, H - O, f1, f2);
+
+        return result;
+    }
+
+    bool HogLiteCompressFeaturesAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Base::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
@@ -459,5 +526,55 @@ namespace Test
     bool HogLiteResizeFeaturesDataTest(bool create)
     {
         return HogLiteResizeFeaturesDataTest(create, DW / 16, DH, 0.7, 16, FUNC_HLRF(SimdHogLiteResizeFeatures));
+    }
+
+    bool HogLiteCompressFeaturesDataTest(bool create, size_t width, size_t height, const FuncHLCF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width*FuncHLCF::SRC_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+        View pca(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE, 1, View::Float, NULL, TEST_ALIGN(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+
+        View dst1(width*FuncHLCF::DST_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+        View dst2(width*FuncHLCF::DST_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
+
+        if (create)
+        {
+            FillRandom32f(src);
+            FillRandom32f(pca);
+
+            TEST_SAVE(src);
+            TEST_SAVE(pca);
+
+            f.Call(src, pca, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(pca);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, pca, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 64);
+        }
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteCompressFeaturesDataTest(bool create)
+    {
+        return HogLiteCompressFeaturesDataTest(create, DW / FuncHLCF::SRC_FEATURE_SIZE, DH, FUNC_HLCF(SimdHogLiteCompressFeatures));
     }
 }

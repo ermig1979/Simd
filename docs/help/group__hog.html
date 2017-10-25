@@ -71,6 +71,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gad1d94072a8bcadb99add4962c9831b91"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gad1d94072a8bcadb99add4962c9831b91">SimdHogLiteResizeFeatures</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float *dst, size_t dstStride, size_t dstWidth, size_t dstHeight)</td></tr>
 <tr class="memdesc:gad1d94072a8bcadb99add4962c9831b91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes 2D-array with lite HOG features.  <a href="#gad1d94072a8bcadb99add4962c9831b91">More...</a><br /></td></tr>
 <tr class="separator:gad1d94072a8bcadb99add4962c9831b91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga8ed42b54ecd78548a04313d6cebd7f11">SimdHogLiteCompressFeatures</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *pca, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compresses 16 features to 8 features for 2D-array.  <a href="#ga8ed42b54ecd78548a04313d6cebd7f11">More...</a><br /></td></tr>
+<tr class="separator:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
 <tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
@@ -647,6 +650,79 @@ else
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output array with features. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of output array with features. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of output array with features. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga8ed42b54ecd78548a04313d6cebd7f11"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8ed42b54ecd78548a04313d6cebd7f11">&#9670;&nbsp;</a></span>SimdHogLiteCompressFeatures()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdHogLiteCompressFeatures </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>pca</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compresses 16 features to 8 features for 2D-array. </p>
+<p>Compresses 16 features to 8 features for 2D-array. The method uses PCA.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array with uncompessed features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input array with uncompessed features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of 2D-array with features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of 2D-array with features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pca</td><td>- a pointer to the PCA matrix with size 16x8. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array with compessed features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output array with compessed features. </td></tr>
   </table>
   </dd>
 </dl>

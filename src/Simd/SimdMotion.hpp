@@ -441,7 +441,7 @@ namespace Simd
                 model.searchRegions.clear();
 
                 Size size(model.frameSize);
-                for (int level = 1; level < model.levelCount; level++)
+                for (size_t level = 1; level < model.levelCount; level++)
                     size = Simd::Scale(size);
 
                 int level = (int)model.levelCount - 1;

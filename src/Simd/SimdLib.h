@@ -2514,6 +2514,25 @@ extern "C"
         */
     SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight);
 
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride);
+
+        \short Compresses 16 features to 8 features for 2D-array.
+
+        Compresses 16 features to 8 features for 2D-array. The method uses PCA.
+
+        \param [in] src - a pointer to the input 32-bit float array with uncompessed features.
+        \param [in] srcStride - a row size of input array with uncompessed features.
+        \param [in] width - a width of 2D-array with features.
+        \param [in] height - a height of 2D-array with features.
+        \param [in] pca - a pointer to the PCA matrix with size 16x8.
+        \param [out] dst - a pointer to the output 32-bit float array with compessed features.
+        \param [in] dstStride - a row size of output array with compessed features.
+    */
+    SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride);
+
+
 
     /*! @ingroup other_conversion
 
