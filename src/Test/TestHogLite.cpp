@@ -377,6 +377,21 @@ namespace Test
 
         result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Base::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Sse41::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Avx::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Avx2::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+#endif 
+
         return result;
     }
 

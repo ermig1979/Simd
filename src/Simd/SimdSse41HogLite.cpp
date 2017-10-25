@@ -228,7 +228,7 @@ namespace Simd
                 const float * src1 = _nf[(rowI - 1) & 3].data;
                 const float * src2 = _nf[(rowI - 0) & 3].data;
                 float * dst = _nb.data;
-                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3*F)
+                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3 * F)
                 {
                     __m128 s00 = Load<false>(src0 + 0);
                     __m128 s01 = Load<false>(src0 + 1);
@@ -302,7 +302,7 @@ namespace Simd
                     SetIndexAndValue(src, srcStride);
                     size_t rowI = row / cell;
                     size_t rowF = row & (cell - 1);
-                    if(cell == 4)
+                    if (cell == 4)
                         UpdateIntegerHistogram4x4(rowI, rowF);
                     else
                         UpdateIntegerHistogram8x8(rowI, rowF);
@@ -346,7 +346,7 @@ namespace Simd
                 __m128 _src = Load<align>(src);
                 __m128 _filter = Load<align>(filter);
                 sum = _mm_add_ps(sum, _mm_mul_ps(_src, _filter));
-            } 
+            }
 
             template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, __m128 * sums)
             {
@@ -399,7 +399,7 @@ namespace Simd
 
             template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
             {
-                if(featureSize == 16)
+                if (featureSize == 16)
                     Filter<align, 16>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
                 else
                     Filter<align, 8>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
@@ -493,7 +493,7 @@ namespace Simd
                         index = 0;
                         weight = 0.0f;
                     }
-                    if (index >(int)srcSize - 2)
+                    if (index > (int)srcSize - 2)
                     {
                         index = (int)srcSize - 2;
                         weight = 1.0f;
@@ -563,6 +563,45 @@ namespace Simd
         {
             HogLiteFeatureResizer featureResizer;
             featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+        }
+
+        template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                const float * s = src;
+                float * d = dst;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    const float * p = pca;
+                    for (size_t i = 0; i < 8; i += 4, p += 64)
+                    {
+                        __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                        for (size_t j = 0; j < 16; j += F)
+                        {
+                            __m128 _s = Load<align>(s + j);
+                            sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(_s, Load<align>(p + j + 00)));
+                            sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(_s, Load<align>(p + j + 16)));
+                            sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(_s, Load<align>(p + j + 32)));
+                            sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(_s, Load<align>(p + j + 48)));
+                        }
+                        Store<align>(d + i, _mm_hadd_ps(_mm_hadd_ps(sums[0], sums[1]), _mm_hadd_ps(sums[2], sums[3])));
+                    }
+                    s += 16;
+                    d += 8;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+
+        }
+
+        void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(pca) && Aligned(dst))
+                HogLiteCompressFeatures<true>(src, srcStride, width, height, pca, dst, dstStride);
+            else
+                HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
         }
     }
 #endif// SIMD_SSE41_ENABLE

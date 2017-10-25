@@ -2330,7 +2330,22 @@ SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, siz
 
 SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
 {
-    Base::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable)
+        Avx2::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable)
+        Avx::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+    else
+#endif
+        Base::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
 }
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)

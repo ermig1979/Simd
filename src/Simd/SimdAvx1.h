@@ -35,6 +35,8 @@ namespace Simd
 
         void HogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight);
 
+        void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride);
+
         void NeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
