@@ -712,13 +712,55 @@ namespace Simd
             featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
         }
 
+        template <bool align> SIMD_INLINE void StoreHorizontalSums(float * ptr, __m256 * sums)
+        {
+            __m256 hsum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
+            Sse::Store<align>(ptr, _mm_add_ps(_mm256_castps256_ps128(hsum), _mm256_extractf128_ps(hsum, 1)));
+        }
+
         template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t alignedWidth = AlignLo(width, 2);
             for (size_t row = 0; row < height; ++row)
             {
                 const float * s = src;
                 float * d = dst;
-                for (size_t col = 0; col < width; ++col)
+                size_t col = 0;
+                for (; col < alignedWidth; col += 2)
+                {
+                    const float * p = pca;
+                    for (size_t i = 0; i < 8; i += 4, p += 64)
+                    {
+                        __m256 sums[8] = { 
+                            _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                            _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                        for (size_t j = 0; j < 16; j += F)
+                        {
+                            __m256 s0 = Load<align>(s + j + 00);
+                            __m256 s1 = Load<align>(s + j + 16);
+                            __m256 p0 = Load<align>(p + j + 00);
+                            sums[0] = _mm256_fmadd_ps(s0, p0, sums[0]);
+                            sums[4] = _mm256_fmadd_ps(s1, p0, sums[4]);
+                            __m256 p1 = Load<align>(p + j + 16);
+                            sums[1] = _mm256_fmadd_ps(s0, p1, sums[1]);
+                            sums[5] = _mm256_fmadd_ps(s1, p1, sums[5]);
+                            __m256 p2 = Load<align>(p + j + 32);
+                            sums[2] = _mm256_fmadd_ps(s0, p2, sums[2]);
+                            sums[6] = _mm256_fmadd_ps(s1, p2, sums[6]);
+                            __m256 p3 = Load<align>(p + j + 48);
+                            sums[3] = _mm256_fmadd_ps(s0, p3, sums[3]);
+                            sums[7] = _mm256_fmadd_ps(s1, p3, sums[7]);
+                        }
+                        StoreHorizontalSums<align>(d + i + 0, sums + 0);
+                        StoreHorizontalSums<align>(d + i + 8, sums + 4);
+                    }
+                    s += 32;
+                    d += 16;
+                }
+                for (; col < width; ++col)
                 {
                     const float * p = pca;
                     for (size_t i = 0; i < 8; i += 4, p += 64)

@@ -120,6 +120,10 @@ namespace Test
             result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Avx2::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Avx512bw::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+#endif
         return result;
     }
 
