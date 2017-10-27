@@ -314,6 +314,11 @@ namespace Test
             result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Avx2::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && HogLiteResizeFeaturesAutoTest(FUNC_HLRF(Simd::Avx512bw::HogLiteResizeFeatures), FUNC_HLRF(SimdHogLiteResizeFeatures));
+#endif 
+
         return result;
     }
 

@@ -2315,6 +2315,11 @@ SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, siz
 
 SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         Avx2::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);

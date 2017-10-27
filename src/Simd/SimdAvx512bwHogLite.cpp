@@ -275,29 +275,6 @@ namespace Simd
                 const float * src1 = _nf[(rowI - 1) & 3].data;
                 const float * src2 = _nf[(rowI - 0) & 3].data;
                 float * dst = _nb.data;
-#if 0
-                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3* Sse::F)
-                {
-                    __m128 s00 = Sse::Load<false>(src0 + 0);
-                    __m128 s01 = Sse::Load<false>(src0 + 1);
-                    __m128 s10 = Sse::Load<false>(src1 + 0);
-                    __m128 s11 = Sse::Load<false>(src1 + 1);
-                    __m128 s20 = Sse::Load<false>(src2 + 0);
-                    __m128 s21 = Sse::Load<false>(src2 + 1);
-                    __m128 v00 = _mm_add_ps(s00, s10);
-                    __m128 v01 = _mm_add_ps(s01, s11);
-                    __m128 v10 = _mm_add_ps(s10, s20);
-                    __m128 v11 = _mm_add_ps(s11, s21);
-                    __m128 h0 = _mm_hadd_ps(v00, v01);
-                    __m128 h1 = _mm_hadd_ps(v10, v11);
-                    __m128 d0 = _mm_shuffle_ps(h0, h1, 0x88);
-                    __m128 d1 = _mm_shuffle_ps(h0, h1, 0x99);
-                    __m128 d2 = _mm_shuffle_ps(h0, h1, 0xDD);
-                    Sse::Store<true>(dst + 0 * Sse::F, Sse2::Shuffle32f<0x27>(d0));
-                    Sse::Store<true>(dst + 1 * Sse::F, Sse2::Shuffle32f<0x72>(d1));
-                    Sse::Store<true>(dst + 2 * Sse::F, Sse2::Shuffle32f<0x27>(d2));
-                }
-#else
                 for (size_t x = 0; x < _fx; x += 12, dst += 3 * F)
                 {
                     __m512 s0 = Avx512f::Load<false>(src0 + x);
@@ -311,7 +288,6 @@ namespace Simd
                     Avx512f::Store<true>(dst + 1 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_1, h1));
                     Avx512f::Store<true>(dst + 2 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_2, h1));
                 }
-#endif
             }
 
             SIMD_INLINE __m256 Features07(const __m256 & n, const __m256 & s, __m256 & t)
@@ -437,6 +413,147 @@ namespace Simd
                 HogLiteFeatureExtractor<8> extractor;
                 extractor.Run(src, srcStride, width, height, features, featuresStride);
             }
+        }
+
+        class HogLiteFeatureResizer
+        {
+            typedef Array<int> Ints;
+            typedef Array<float> Floats;
+
+            Ints _iy, _ix;
+            Floats _ky, _kx;
+
+            void InitIndexWeight(size_t srcSize, size_t dstSize, size_t dstStep, Ints & indexes, Floats & weights)
+            {
+                indexes.Resize(dstSize);
+                weights.Resize(dstSize);
+
+                float scale = float(srcSize) / float(dstSize);
+                for (size_t i = 0; i < dstSize; ++i)
+                {
+                    float weight = (float)((i + 0.5f)*scale - 0.5f);
+                    int index = (int)::floor(weight);
+                    weight -= index;
+                    if (index < 0)
+                    {
+                        index = 0;
+                        weight = 0.0f;
+                    }
+                    if (index >(int)srcSize - 2)
+                    {
+                        index = (int)srcSize - 2;
+                        weight = 1.0f;
+                    }
+                    indexes[i] = int(index*dstStep);
+                    weights[i] = weight;
+                }
+            }
+
+            template<bool align> void Resize8(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                __m512 _1 = _mm512_set1_ps(1.0f);
+                size_t alignedDstWidth = AlignLo(dstWidth, 2);
+                for (size_t rowDst = 0; rowDst < dstHeight; ++rowDst)
+                {
+                    __m512 ky1 = _mm512_set1_ps(_ky[rowDst]);
+                    __m512 ky0 = _mm512_sub_ps(_1, ky1);
+                    const float * pSrc = src + _iy[rowDst];
+                    float * pDst = dst + rowDst*dstStride; 
+                    size_t colDst = 0;
+                    for (; colDst < alignedDstWidth; colDst += 2, pDst += F)
+                    {
+                        __m512 kx1 = _mm512_insertf32x8(_mm512_set1_ps(_kx[colDst + 0]), _mm256_set1_ps(_kx[colDst + 1]), 1);
+                        __m512 kx0 = _mm512_sub_ps(_1, kx1);
+                        __m512 k00 = _mm512_mul_ps(ky0, kx0);
+                        __m512 k01 = _mm512_mul_ps(ky0, kx1);
+                        __m512 k10 = _mm512_mul_ps(ky1, kx0);
+                        __m512 k11 = _mm512_mul_ps(ky1, kx1);
+                        const float * pSrc00 = pSrc + _ix[colDst + 0];
+                        const float * pSrc01 = pSrc + _ix[colDst + 1];
+                        const float * pSrc10 = pSrc00 + srcStride;
+                        const float * pSrc11 = pSrc01 + srcStride;
+                        Avx512f::Store<align>(pDst, _mm512_add_ps(
+                            _mm512_fmadd_ps(Load<align>(pSrc00, pSrc01), k00, _mm512_mul_ps(Load<align>(pSrc00 + Avx2::F, pSrc01 + Avx2::F), k01)),
+                            _mm512_fmadd_ps(Load<align>(pSrc10, pSrc11), k10, _mm512_mul_ps(Load<align>(pSrc10 + Avx2::F, pSrc11 + Avx2::F), k11))));
+                    }
+                    for (; colDst < dstWidth; ++colDst, pDst += Avx2::F)
+                    {
+                        __m256 kx1 = _mm256_set1_ps(_kx[colDst]);
+                        __m256 kx0 = _mm256_sub_ps(_mm512_castps512_ps256(_1), kx1);
+                        __m256 k00 = _mm256_mul_ps(_mm512_castps512_ps256(ky0), kx0);
+                        __m256 k01 = _mm256_mul_ps(_mm512_castps512_ps256(ky0), kx1);
+                        __m256 k10 = _mm256_mul_ps(_mm512_castps512_ps256(ky1), kx0);
+                        __m256 k11 = _mm256_mul_ps(_mm512_castps512_ps256(ky1), kx1);
+                        const float * pSrc0 = pSrc + _ix[colDst];
+                        const float * pSrc1 = pSrc0 + srcStride;
+                        Avx::Store<align>(pDst, _mm256_add_ps(
+                            _mm256_fmadd_ps(Avx::Load<align>(pSrc0), k00, _mm256_mul_ps(Avx::Load<align>(pSrc0 + Avx2::F), k01)),
+                            _mm256_fmadd_ps(Avx::Load<align>(pSrc1), k10, _mm256_mul_ps(Avx::Load<align>(pSrc1 + Avx2::F), k11))));
+                    }
+                }
+            }
+
+            template<bool align> void Resize16(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                __m512 _1 = _mm512_set1_ps(1.0f);
+                for (size_t rowDst = 0; rowDst < dstHeight; ++rowDst)
+                {
+                    __m512 ky1 = _mm512_set1_ps(_ky[rowDst]);
+                    __m512 ky0 = _mm512_sub_ps(_1, ky1);
+                    const float * pSrc = src + _iy[rowDst];
+                    float * pDst = dst + rowDst*dstStride;
+                    for (size_t colDst = 0; colDst < dstWidth; ++colDst, pDst += F)
+                    {
+                        __m512 kx1 = _mm512_set1_ps(_kx[colDst]);
+                        __m512 kx0 = _mm512_sub_ps(_1, kx1);
+                        __m512 k00 = _mm512_mul_ps(ky0, kx0);
+                        __m512 k01 = _mm512_mul_ps(ky0, kx1);
+                        __m512 k10 = _mm512_mul_ps(ky1, kx0);
+                        __m512 k11 = _mm512_mul_ps(ky1, kx1);
+                        const float * pSrc0 = pSrc + _ix[colDst];
+                        const float * pSrc1 = pSrc0 + srcStride;
+                        Avx512f::Store<align>(pDst, _mm512_add_ps(
+                            _mm512_fmadd_ps(Avx512f::Load<align>(pSrc0), k00, _mm512_mul_ps(Avx512f::Load<align>(pSrc0 + F), k01)),
+                            _mm512_fmadd_ps(Avx512f::Load<align>(pSrc1), k10, _mm512_mul_ps(Avx512f::Load<align>(pSrc1 + F), k11))));
+                    }
+                }
+            }
+
+            template<bool align> void Resize(const float * src, size_t srcStride, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                if (featureSize == 8)
+                    Resize8<align>(src, srcStride, dst, dstStride, dstWidth, dstHeight);
+                else
+                    Resize16<align>(src, srcStride, dst, dstStride, dstWidth, dstHeight);
+            }
+
+        public:
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+
+                if (srcWidth == dstWidth && srcHeight == dstHeight)
+                {
+                    size_t size = sizeof(float)*srcWidth*featureSize;
+                    for (size_t row = 0; row < dstHeight; ++row)
+                        memcpy(dst + row*dstStride, src + row*srcStride, size);
+                    return;
+                }
+
+                InitIndexWeight(srcWidth, dstWidth, featureSize, _ix, _kx);
+                InitIndexWeight(srcHeight, dstHeight, srcStride, _iy, _ky);
+
+                if (Aligned(src) && Aligned(dst))
+                    Resize<true>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
+                else
+                    Resize<false>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
+            }
+        };
+
+        void HogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+        {
+            HogLiteFeatureResizer featureResizer;
+            featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
