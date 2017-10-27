@@ -903,6 +903,13 @@ namespace Simd
             return _mm512_min_epi16(K16_00FF, _mm512_max_epi16(value, K_ZERO));
         }
 
+        SIMD_INLINE __m512i Hadd16(__m512i a, __m512i b)
+        {
+            __m512i ab0 = _mm512_permutex2var_epi16(a, K16_PERMUTE_FOR_HADD_0, b);
+            __m512i ab1 = _mm512_permutex2var_epi16(a, K16_PERMUTE_FOR_HADD_1, b);
+            return _mm512_add_epi16(ab0, ab1);
+        }
+
         SIMD_INLINE __m512i Hadd32(__m512i a, __m512i b)
         {
             __m512i ab0 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_0, b);
@@ -950,6 +957,11 @@ namespace Simd
         SIMD_INLINE __m512i MinI16(__m512i a, __m512i b, __m512i c)
         {
             return _mm512_min_epi16(a, _mm512_min_epi16(b, c));
+        }
+
+        template<int imm> SIMD_INLINE __m512i Shuffle32i(__m512i lo, __m512i hi)
+        {
+            return _mm512_castps_si512(_mm512_shuffle_ps(_mm512_castsi512_ps(lo), _mm512_castsi512_ps(hi), imm));
         }
     }
 #endif //SIMD_AVX512BW_ENABLE
