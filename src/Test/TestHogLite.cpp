@@ -138,7 +138,7 @@ namespace Test
 
             FuncHLFF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fis) + "x" + ToString(fes) + "]") {}
+            FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fes) + "]") {}
 
             void Call(const View & src, size_t featureSize, const View & filter, View & dst) const
             {
@@ -218,6 +218,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Avx2::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Avx512bw::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
 #endif 
 
         return result;

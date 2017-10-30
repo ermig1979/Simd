@@ -415,6 +415,213 @@ namespace Simd
             }
         }
 
+        class HogLiteFeatureFilter
+        {
+            template<bool align, bool mask> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m512 & sum, __mmask16 tail = -1)
+            {
+                __m512 _src = Avx512f::Load<align, mask>(src, tail);
+                __m512 _filter = Avx512f::Load<align, mask>(filter, tail);
+                sum = _mm512_fmadd_ps(_src, _filter, sum);
+            }
+
+            template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m256 & sum)
+            {
+                __m256 _src = Avx::Load<align>(src);
+                __m256 _filter = Avx::Load<align>(filter);
+                sum = _mm256_add_ps(sum, _mm256_mul_ps(_src, _filter));
+            }
+
+            template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, __m256 * sums)
+            {
+                __m256 _filter = Avx::Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+            }
+
+            template<bool align> SIMD_INLINE void ProductSum1x4x8(const float * src, const float * filter, __m512 * sums)
+            {
+                __m512 _filter = _mm512_broadcast_f32x8(Avx::Load<align>(filter));
+                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * F), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 1 * F), _filter, sums[1]);
+            }
+
+            template <bool align> static SIMD_INLINE void ProductSum4x4x8(const float * src, const float * filter, __m512 * sums)
+            {
+                __m512 filter0 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 0 * HF));
+                __m512 src0 = Avx512f::Load<align>(src + 0 * HF);
+                __m512 src2 = Avx512f::Load<align>(src + 2 * HF);
+                sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src2, filter0, sums[1]);
+                __m512 filter2 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 2 * HF));
+                __m512 src4 = Avx512f::Load<align>(src + 4 * HF);
+                sums[0] = _mm512_fmadd_ps(src2, filter2, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src4, filter2, sums[1]);
+                __m512 filter1 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 1 * HF));
+                __m512 src1 = Alignr<8>(src0, src2);
+                __m512 src3 = Alignr<8>(src2, src4);
+                sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src3, filter1, sums[1]);
+                __m512 filter3 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 3 * HF));
+                __m512 src5 = Avx512f::Load<false>(src + 5 * HF);
+                sums[0] = _mm512_fmadd_ps(src3, filter3, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src5, filter3, sums[1]);
+            }
+
+            template <bool align> void Filter8(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                size_t filterStride = 8*filterSize;
+                size_t alignedDstWidth = AlignLo(dstWidth, 8);
+                size_t alignedFilterStride = AlignLo(filterStride, DF);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps()};
+                        const float * pSrc = src + dstRow*srcStride + dstCol*8;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            size_t filterCol = 0;
+                            for (; filterCol < alignedFilterStride; filterCol += DF)
+                                ProductSum4x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                            for (; filterCol < filterStride; filterCol += HF)
+                                ProductSum1x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        __m256 sum0 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[0]), _mm512_castps512_ps256(Alignr<8>(sums[0], sums[0])));
+                        __m256 sum1 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[1]), _mm512_castps512_ps256(Alignr<8>(sums[1], sums[1])));
+                        __m256 sum = _mm256_hadd_ps(sum0, sum1);
+                        _mm_storeu_ps(dst + dstCol, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        __m256 sum = _mm256_setzero_ps();
+                        const float * pSrc = src + dstRow*srcStride + dstCol*8;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx::F)
+                                ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        dst[dstCol] = Avx::ExtractSum(sum);
+                    }
+                    dst += dstStride;
+                }
+            } 
+
+            template<bool align> static SIMD_INLINE void ProductSum1x4x16(const float * src, const float * filter, __m512 * sums)
+            {
+                __m512 _filter = Avx512f::Load<align>(filter);
+                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * F), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 1 * F), _filter, sums[1]);
+                sums[2] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 2 * F), _filter, sums[2]);
+                sums[3] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 3 * F), _filter, sums[3]);
+            }
+            
+            template <bool align> static SIMD_INLINE void ProductSum4x4x16(const float * src, const float * filter, __m512 * sums)
+            {
+                __m512 filter0 = Avx512f::Load<align>(filter + 0 * F);
+                __m512 src0 = Avx512f::Load<align>(src + 0 * F);
+                __m512 src1 = Avx512f::Load<align>(src + 1 * F);
+                __m512 src2 = Avx512f::Load<align>(src + 2 * F);
+                __m512 src3 = Avx512f::Load<align>(src + 3 * F);
+                sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src1, filter0, sums[1]);
+                sums[2] = _mm512_fmadd_ps(src2, filter0, sums[2]);
+                sums[3] = _mm512_fmadd_ps(src3, filter0, sums[3]);
+                __m512 filter1 = Avx512f::Load<align>(filter + 1 * F);
+                __m512 src4 = Avx512f::Load<align>(src + 4 * F);
+                sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
+                sums[1] = _mm512_fmadd_ps(src2, filter1, sums[1]);
+                sums[2] = _mm512_fmadd_ps(src3, filter1, sums[2]);
+                sums[3] = _mm512_fmadd_ps(src4, filter1, sums[3]);
+            }
+
+            template <bool align> void Filter16(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                size_t filterStride = 16*filterSize;
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                size_t alignedFilterStride = AlignLo(filterStride, DF);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                        const float * pSrc = src + dstRow*srcStride + dstCol*16;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            size_t filterCol = 0;
+                            for (; filterCol < alignedFilterStride; filterCol += DF)
+                                ProductSum4x4x16<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                            for (; filterCol < filterStride; filterCol += F)
+                                ProductSum1x4x16<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        __m256 sum0 = _mm512_castps512_ps256(_mm512_add_ps(sums[0], Alignr<8>(sums[0], sums[0])));
+                        __m256 sum1 = _mm512_castps512_ps256(_mm512_add_ps(sums[1], Alignr<8>(sums[1], sums[1])));
+                        __m256 sum2 = _mm512_castps512_ps256(_mm512_add_ps(sums[2], Alignr<8>(sums[2], sums[2])));
+                        __m256 sum3 = _mm512_castps512_ps256(_mm512_add_ps(sums[3], Alignr<8>(sums[3], sums[3])));
+                        __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sum0, sum1), _mm256_hadd_ps(sum2, sum3));
+                        _mm_storeu_ps(dst + dstCol, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        __m512 sum = _mm512_setzero_ps();
+                        const float * pSrc = src + dstRow*srcStride + dstCol*16;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                        {
+                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += F)
+                                ProductSum1x1<align, false>(pSrc + filterCol, pFilter + filterCol, sum);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        dst[dstCol] =Avx512f::ExtractSum(sum);
+                    }
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                if (featureSize == 16)
+                    Filter16<align>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
+                else
+                    Filter8<align>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= filterSize && srcHeight >= filterSize);
+
+                size_t dstWidth = srcWidth - filterSize + 1;
+                size_t dstHeight = srcHeight - filterSize + 1;
+
+                if (Aligned(src) && Aligned(srcStride, F) && Aligned(filter) && Aligned(filterSize, F))
+                    Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                else
+                    Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+            }
+        };
+
+        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+        {
+            HogLiteFeatureFilter featureFilter;
+            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
+        }
+
         class HogLiteFeatureResizer
         {
             typedef Array<int> Ints;
