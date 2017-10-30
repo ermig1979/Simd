@@ -18,7 +18,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>$(ProjectDir)\..\cmd\GetVersion.cmd</Command>
+      <Command>"$(ProjectDir)"\..\cmd\GetVersion.cmd</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
