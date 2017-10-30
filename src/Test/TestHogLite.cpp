@@ -354,7 +354,7 @@ namespace Test
 
         View src(width*FuncHLCF::SRC_FEATURE_SIZE, height, View::Float, NULL, TEST_ALIGN(width*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
         FillRandom32f(src, 0.5f, 1.5f);
-
+        
         View pca(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE, 1, View::Float, NULL, TEST_ALIGN(FuncHLCF::SRC_FEATURE_SIZE*FuncHLCF::SRC_FEATURE_SIZE * sizeof(float)));
         FillRandom32f(pca, 0.5f, 1.5f);
 
@@ -399,6 +399,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Avx2::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Avx512bw::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
 #endif 
 
         return result;

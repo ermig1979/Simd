@@ -721,7 +721,7 @@ namespace Simd
         template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
         {
             if (align)
-                assert(Aligned(src) && Aligned(dst));
+                assert(Aligned(src) && Aligned(pca) && Aligned(dst));
 
             size_t alignedWidth = AlignLo(width, 2);
             for (size_t row = 0; row < height; ++row)
@@ -774,8 +774,7 @@ namespace Simd
                             sums[2] = _mm256_fmadd_ps(_s, Load<align>(p + j + 32), sums[2]);
                             sums[3] = _mm256_fmadd_ps(_s, Load<align>(p + j + 48), sums[3]);
                         }
-                        __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
-                        Sse::Store<align>(d + i, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                        StoreHorizontalSums<align>(d + i, sums);
                     }
                     s += 16;
                     d += 8;

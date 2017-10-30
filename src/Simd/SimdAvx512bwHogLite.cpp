@@ -555,6 +555,61 @@ namespace Simd
             HogLiteFeatureResizer featureResizer;
             featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
         }
+
+        template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(pca) && Aligned(dst));
+
+            SIMD_ALIGNED(32) float pca2[128];
+            for (size_t i = 0; i < 8; ++i)
+            {
+                for (size_t j = 0; j < 8; ++j)
+                    pca2[j * 16 + i + 0] = pca[i * 16 + j + 0];
+                for (size_t j = 0; j < 8; ++j)
+                    pca2[j * 16 + i + 8] = pca[i * 16 + j + 8];
+            }
+            __m512 _pca[8];
+            for (size_t i = 0; i < 8; ++i)
+                _pca[i] = Avx512f::Load<true>(pca2 + i*F);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                const float * s = src;
+                float * d = dst;
+                for (size_t col = 0; col < width; ++col)
+                {
+                     __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+                     __m512 _src = Avx512f::Load<align>(s);
+                     __m512 src0 = Shuffle2x<0x44>(_src);
+                     __m512 src1 = Shuffle2x<0xEE>(_src);
+                     sums[0] = _mm512_fmadd_ps(Broadcast<0>(src0), _pca[0], sums[0]);
+                     sums[1] = _mm512_fmadd_ps(Broadcast<0>(src1), _pca[4], sums[1]);
+                     sums[0] = _mm512_fmadd_ps(Broadcast<1>(src0), _pca[1], sums[0]);
+                     sums[1] = _mm512_fmadd_ps(Broadcast<1>(src1), _pca[5], sums[1]);
+                     sums[0] = _mm512_fmadd_ps(Broadcast<2>(src0), _pca[2], sums[0]);
+                     sums[1] = _mm512_fmadd_ps(Broadcast<2>(src1), _pca[6], sums[1]);
+                     sums[0] = _mm512_fmadd_ps(Broadcast<3>(src0), _pca[3], sums[0]);
+                     sums[1] = _mm512_fmadd_ps(Broadcast<3>(src1), _pca[7], sums[1]);
+                     sums[0] = _mm512_add_ps(sums[0], sums[1]);
+                     sums[0] = _mm512_add_ps(sums[0], Avx512f::Alignr<8>(sums[0], _mm512_setzero_ps()));
+                     Avx::Store<align>(d, _mm512_castps512_ps256(sums[0]));
+                    s += 16;
+                    d += 8;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+
+        }
+
+        void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(pca) && Aligned(dst))
+                HogLiteCompressFeatures<true>(src, srcStride, width, height, pca, dst, dstStride);
+            else
+                HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

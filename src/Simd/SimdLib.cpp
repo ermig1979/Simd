@@ -2340,6 +2340,11 @@ SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, siz
 
 SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         Avx2::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
