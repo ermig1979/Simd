@@ -23,6 +23,7 @@
 */
 #include "Test/TestPerformance.h"
 #include "Test/TestUtils.h"
+#include "Test/TestTable.h"
 
 #if defined(_MSC_VER)
 #define NOMINMAX
@@ -246,6 +247,10 @@ namespace Test
         T vmx;
         T vsx;
         T neon;
+
+        size_t Size() const { return sizeof(Statistic) / sizeof(T); };
+        T & operator [] (size_t i) { return (&simd)[i]; }
+        const T & operator [] (size_t i) const { return (&simd)[i]; }
     };
     typedef std::pair<PerformanceMeasurer, PerformanceMeasurer> Function;
     typedef Statistic<Function> FunctionStatistic;
@@ -305,6 +310,9 @@ namespace Test
             if (enable.avx) ss << printer.Improving(printer.data.avx);
             if (enable.avx2) ss << printer.Improving(printer.data.avx2);
             if (enable.avx512) ss << printer.Improving(printer.data.avx512);
+            if (enable.vmx) ss << printer.Improving(printer.data.vmx);
+            if (enable.vsx) ss << printer.Improving(printer.data.vsx);
+            if (enable.neon) ss << printer.Improving(printer.data.neon);
             ss << printer.Separator();
         }
 
@@ -721,6 +729,27 @@ namespace Test
         }
     };
 
+    template <class Value> void AddRow(Table & table, size_t row, const String & name, const Statistic<Value> & statistic, const StatisticEnable & enable, bool align)
+    {
+        size_t col = 0;
+        table.SetCell(col++, row, name);
+        for (size_t i = 0; i < statistic.Size(); ++i)
+            if (enable[i])
+                table.SetCell(col++, row, statistic[i].first.Average()*1000.0);
+        for (size_t i = 2; i < statistic.Size(); ++i)
+            if (enable[i])
+                table.SetCell(col++, row, Test::Relation(statistic[1].first, statistic[i].first));
+        for (size_t i = 2; i < statistic.Size(); ++i)
+            if (enable[i])
+                table.SetCell(col++, row, Test::Relation(Previous(statistic[i]).first, statistic[i].first));
+        if (align)
+        {
+            for (size_t i = 0; i < statistic.Size(); ++i)
+                if (enable[i])
+                    table.SetCell(col++, row, Test::Relation(statistic[i].second, statistic[i].first));
+        }
+    }
+
     bool PerformanceMeasurerStorage::HtmlReport(const String & path, bool align) const
     {
         Html html(path);
@@ -797,6 +826,25 @@ namespace Test
         html.WriteEnd("table", true, true);
         html.WriteEnd("body", true, true);
         html.WriteEnd("html", true, true);
+
+        {
+            size_t n = 0;
+            for (size_t i = 2; i < enable.Size(); ++i)
+            {
+                if (enable[i])
+                    n++;
+            }
+            size_t w = 1 + 2 + n * 3 + (align ? 2 + n : 0);
+            size_t h = 1 + 1 + functions.size();
+
+            Table table(w, h);
+
+            size_t row = 1;
+            AddRow(table, row++, "Common", common, enable, align);
+            for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
+                AddRow(table, row++, it->first, it->second, enable, align);
+
+        }
 
         return true;
     }

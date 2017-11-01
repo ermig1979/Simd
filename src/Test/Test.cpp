@@ -524,8 +524,9 @@ namespace Test
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
         TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.TextReport(options.printAlign, false));
-
-        //Test::PerformanceMeasurerStorage::s_storage.HtmlReport("perf.html");
+#ifndef NDEBUG
+        Test::PerformanceMeasurerStorage::s_storage.HtmlReport("perf.html");
+#endif
 #endif
         return 0;
     }

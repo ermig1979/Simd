@@ -80,6 +80,7 @@ namespace Test
     typedef Point Size;
     typedef Simd::Rectangle<ptrdiff_t> Rect;
     typedef uint32_t Histogram[Simd::HISTOGRAM_SIZE];
+    typedef std::vector<int> Ints;
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
