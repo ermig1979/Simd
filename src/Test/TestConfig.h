@@ -28,6 +28,8 @@
 #define TEST_PERFORMANCE_TEST_ENABLE
 #endif
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdlib.h>
 
 #include <iostream>

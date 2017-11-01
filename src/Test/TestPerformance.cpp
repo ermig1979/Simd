@@ -265,124 +265,134 @@ namespace Test
     {
         std::stringstream ss;
 
-        ss << name << " | ";
+        ss << name << " " << printer.Separator();
 
-        ss << printer.Average(printer.data.simd) << " ";
-        ss << printer.Average(printer.data.base) << " ";
-        if (enable.sse) ss << printer.Average(printer.data.sse) << " ";
-        if (enable.sse2) ss << printer.Average(printer.data.sse2) << " ";
-        if (enable.ssse3) ss << printer.Average(printer.data.ssse3) << " ";
-        if (enable.sse41) ss << printer.Average(printer.data.sse41) << " ";
-        if (enable.avx) ss << printer.Average(printer.data.avx) << " ";
-        if (enable.avx2) ss << printer.Average(printer.data.avx2) << " ";
-        if (enable.avx512) ss << printer.Average(printer.data.avx512) << " ";
-        if (enable.vmx) ss << printer.Average(printer.data.vmx) << " ";
-        if (enable.vsx) ss << printer.Average(printer.data.vsx) << " ";
-        if (enable.neon) ss << printer.Average(printer.data.neon) << " ";
-        ss << "| ";
+        ss << printer.Average(printer.data.simd);
+        ss << printer.Average(printer.data.base);
+        if (enable.sse) ss << printer.Average(printer.data.sse);
+        if (enable.sse2) ss << printer.Average(printer.data.sse2);
+        if (enable.ssse3) ss << printer.Average(printer.data.ssse3);
+        if (enable.sse41) ss << printer.Average(printer.data.sse41);
+        if (enable.avx) ss << printer.Average(printer.data.avx);
+        if (enable.avx2) ss << printer.Average(printer.data.avx2);
+        if (enable.avx512) ss << printer.Average(printer.data.avx512);
+        if (enable.vmx) ss << printer.Average(printer.data.vmx);
+        if (enable.vsx) ss << printer.Average(printer.data.vsx);
+        if (enable.neon) ss << printer.Average(printer.data.neon);
+        ss << printer.Separator();
 
         if (enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2 || enable.avx512 || enable.vmx || enable.vsx || enable.neon)
         {
-            if (enable.sse) ss << printer.Relation(printer.data.base, printer.data.sse) << " ";
-            if (enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2) << " ";
-            if (enable.ssse3) ss << printer.Relation(printer.data.base, printer.data.ssse3) << " ";
-            if (enable.sse41) ss << printer.Relation(printer.data.base, printer.data.sse41) << " ";
-            if (enable.avx) ss << printer.Relation(printer.data.base, printer.data.avx) << " ";
-            if (enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2) << " ";
-            if (enable.avx512) ss << printer.Relation(printer.data.base, printer.data.avx512) << " ";
-            if (enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx) << " ";
-            if (enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx) << " ";
-            if (enable.neon) ss << printer.Relation(printer.data.base, printer.data.neon) << " ";
-            ss << "| ";
+            if (enable.sse) ss << printer.Relation(printer.data.base, printer.data.sse);
+            if (enable.sse2) ss << printer.Relation(printer.data.base, printer.data.sse2);
+            if (enable.ssse3) ss << printer.Relation(printer.data.base, printer.data.ssse3);
+            if (enable.sse41) ss << printer.Relation(printer.data.base, printer.data.sse41);
+            if (enable.avx) ss << printer.Relation(printer.data.base, printer.data.avx);
+            if (enable.avx2) ss << printer.Relation(printer.data.base, printer.data.avx2);
+            if (enable.avx512) ss << printer.Relation(printer.data.base, printer.data.avx512);
+            if (enable.vmx) ss << printer.Relation(printer.data.base, printer.data.vmx);
+            if (enable.vsx) ss << printer.Relation(printer.data.base, printer.data.vsx);
+            if (enable.neon) ss << printer.Relation(printer.data.base, printer.data.neon);
+            ss << printer.Separator();
         }
 
         if (enable.sse || enable.sse2 || enable.ssse3 || enable.sse41 || enable.avx || enable.avx2 || enable.avx512)
         {
-            if (enable.sse) ss << printer.Improving(printer.data.sse) << " ";
-            if (enable.sse2) ss << printer.Improving(printer.data.sse2) << " ";
-            if (enable.ssse3) ss << printer.Improving(printer.data.ssse3) << " ";
-            if (enable.sse41) ss << printer.Improving(printer.data.sse41) << " ";
-            if (enable.avx) ss << printer.Improving(printer.data.avx) << " ";
-            if (enable.avx2) ss << printer.Improving(printer.data.avx2) << " ";
-            if (enable.avx512) ss << printer.Improving(printer.data.avx512) << " ";
-            ss << "| ";
+            if (enable.sse) ss << printer.Improving(printer.data.sse);
+            if (enable.sse2) ss << printer.Improving(printer.data.sse2);
+            if (enable.ssse3) ss << printer.Improving(printer.data.ssse3);
+            if (enable.sse41) ss << printer.Improving(printer.data.sse41);
+            if (enable.avx) ss << printer.Improving(printer.data.avx);
+            if (enable.avx2) ss << printer.Improving(printer.data.avx2);
+            if (enable.avx512) ss << printer.Improving(printer.data.avx512);
+            ss << printer.Separator();
         }
 
         if (align)
         {
-            ss << printer.Alignment(printer.data.simd) << " ";
-            ss << printer.Alignment(printer.data.base) << " ";
-            if (enable.sse) ss << printer.Alignment(printer.data.sse) << " ";
-            if (enable.sse2) ss << printer.Alignment(printer.data.sse2) << " ";
-            if (enable.ssse3) ss << printer.Alignment(printer.data.ssse3) << " ";
-            if (enable.sse41) ss << printer.Alignment(printer.data.sse41) << " ";
-            if (enable.avx) ss << printer.Alignment(printer.data.avx) << " ";
-            if (enable.avx2) ss << printer.Alignment(printer.data.avx2) << " ";
-            if (enable.avx512) ss << printer.Alignment(printer.data.avx512) << " ";
-            if (enable.vmx) ss << printer.Alignment(printer.data.vmx) << " ";
-            if (enable.vsx) ss << printer.Alignment(printer.data.vsx) << " ";
-            if (enable.neon) ss << printer.Alignment(printer.data.neon) << " ";
-            ss << "| ";
+            ss << printer.Alignment(printer.data.simd);
+            ss << printer.Alignment(printer.data.base);
+            if (enable.sse) ss << printer.Alignment(printer.data.sse);
+            if (enable.sse2) ss << printer.Alignment(printer.data.sse2);
+            if (enable.ssse3) ss << printer.Alignment(printer.data.ssse3);
+            if (enable.sse41) ss << printer.Alignment(printer.data.sse41);
+            if (enable.avx) ss << printer.Alignment(printer.data.avx);
+            if (enable.avx2) ss << printer.Alignment(printer.data.avx2);
+            if (enable.avx512) ss << printer.Alignment(printer.data.avx512);
+            if (enable.vmx) ss << printer.Alignment(printer.data.vmx);
+            if (enable.vsx) ss << printer.Alignment(printer.data.vsx);
+            if (enable.neon) ss << printer.Alignment(printer.data.neon);
+            ss << printer.Separator();
         }
 
         return ss.str();
     }
 
-    struct HeaderPrinter
+    struct TextHeaderPrinter
     {
         const StatisticNames & data;
         size_t average, relation, fraction;
 
-        HeaderPrinter(const StatisticNames & d, size_t a, size_t r, size_t f)
+        TextHeaderPrinter(const StatisticNames & d, size_t a, size_t r, size_t f)
             : data(d), average(a), relation(r), fraction(f) {}
 
         String Average(const Name & a) const
         {
-            return ExpandToLeft(std::string(a.full), average + fraction + 1);
+            return ExpandToLeft(std::string(a.full), average + fraction + 1) + " ";
         }
 
         String Relation(const Name & a, const Name & b) const
         {
-            return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction);
+            return ExpandToLeft(std::string(a.brief) + "/" + std::string(b.brief), relation + fraction) + " ";
         }
 
         String Improving(const Name & a) const
         {
-            return ExpandToLeft("P/" + std::string(a.brief), relation + fraction);
+            return ExpandToLeft("P/" + std::string(a.brief), relation + fraction) + " ";
         }
 
         String Alignment(const Name & a) const
         {
-            return ExpandToLeft(std::string(a.brief) + ":U/A", relation + fraction + 1);
+            return ExpandToLeft(std::string(a.brief) + ":U/A", relation + fraction + 1) + " ";
+        }
+
+        String Separator() const
+        {
+            return "| ";
         }
     };
 
-    template<class Value> struct ValuePrinter
+    template<class Value> struct TextValuePrinter
     {
         const Statistic<Value> & data;
         size_t average, relation, fraction;
 
-        ValuePrinter(const Statistic<Value> & d, size_t a, size_t r, size_t f)
+        TextValuePrinter(const Statistic<Value> & d, size_t a, size_t r, size_t f)
             : data(d), average(a), relation(r), fraction(f) {}
 
         String Average(const Value & a) const
         {
-            return ToString(a.first.Average()*1000.0, average, fraction);
+            return ToString(a.first.Average()*1000.0, average, fraction) + " ";
         }
 
         String Relation(const Value & a, const Value & b) const
         {
-            return ToString(Test::Relation(a.first, b.first), relation, fraction - 1);
+            return ToString(Test::Relation(a.first, b.first), relation, fraction - 1) + " ";
         }
 
         String Improving(const Value & a) const
         {
-            return ToString(Test::Relation(Previous(a).first, a.first), relation, fraction - 1);
+            return ToString(Test::Relation(Previous(a).first, a.first), relation, fraction - 1) + " ";
         }
 
         String Alignment(const Value & a) const
         {
-            return ToString(Test::Relation(a.second, a.first), relation, fraction);
+            return ToString(Test::Relation(a.second, a.first), relation, fraction) + " ";
+        }
+
+        String Separator() const
+        {
+            return "| ";
         }
     };
 
@@ -450,7 +460,7 @@ namespace Test
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
     }
 
-    String PerformanceMeasurerStorage::Report(bool align, bool raw) const
+    String PerformanceMeasurerStorage::TextReport(bool align, bool raw) const
     {
         FunctionMap map;
         {
@@ -488,11 +498,11 @@ namespace Test
         const size_t relative = 3;
         const size_t fraction = 3;
 
-        String header = Print(ExpandToRight("Function", sizeMax), HeaderPrinter(names, average, relative, fraction), enable, align);
+        String header = Print(ExpandToRight("Function", sizeMax), TextHeaderPrinter(names, average, relative, fraction), enable, align);
 
         std::vector<std::string> statistics;
         for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
-            statistics.push_back(Print(ExpandToRight(it->first, sizeMax), ValuePrinter<Function>(it->second, average, relative, fraction), enable, align));
+            statistics.push_back(Print(ExpandToRight(it->first, sizeMax), TextValuePrinter<Function>(it->second, average, relative, fraction), enable, align));
         std::sort(statistics.begin(), statistics.end());
 
         std::stringstream separator;
@@ -513,7 +523,7 @@ namespace Test
             report << separator.str() << std::endl;
             report << header << std::endl;
             report << separator.str() << std::endl;
-            report << Print(ExpandToRight("Common", sizeMax), ValuePrinter<Common>(common, average, relative, fraction), enable, align) << std::endl;
+            report << Print(ExpandToRight("Common", sizeMax), TextValuePrinter<Common>(common, average, relative, fraction), enable, align) << std::endl;
             report << separator.str() << std::endl;
             for (size_t i = 0; i < statistics.size(); ++i)
                 report << statistics[i] << std::endl;
@@ -526,5 +536,268 @@ namespace Test
     void PerformanceMeasurerStorage::Clear()
     {
         _map.clear();
+    }
+
+    static const char * INDENT = "  ";
+    const char * STYLE_HEADER = "background-color:#eeeeee; font-weight:bold";
+
+    typedef std::pair<String, String> Attribute;
+    typedef std::vector<Attribute> Attributes;
+
+    static inline Attributes Attr()
+    {
+        return Attributes();
+    }
+
+    static inline Attributes Attr(
+        const String & name0, const String & value0)
+    {
+        Attributes attrbutes;
+        attrbutes.push_back(Attribute(name0, value0));
+        return attrbutes;
+    }
+
+    static inline Attributes Attr(
+        const String & name0, const String & value0,
+        const String & name1, const String & value1)
+    {
+        Attributes attrbutes;
+        attrbutes.push_back(Attribute(name0, value0));
+        attrbutes.push_back(Attribute(name1, value1));
+        return attrbutes;
+    }
+
+    static inline Attributes Attr(
+        const String & name0, const String & value0,
+        const String & name1, const String & value1,
+        const String & name2, const String & value2)
+    {
+        Attributes attrbutes;
+        attrbutes.push_back(Attribute(name0, value0));
+        attrbutes.push_back(Attribute(name1, value1));
+        attrbutes.push_back(Attribute(name2, value2));
+        return attrbutes;
+    }
+
+    struct Html
+    {
+        Html(const String & path)
+            : _indent(0)
+        {
+            _stream.open(path.c_str());
+        }
+
+        ~Html()
+        {
+            if(_stream.is_open())
+                _stream.close();
+        }
+
+        bool Good() const
+        {
+            return _stream.is_open();
+        }
+
+        void WriteIndent()
+        {
+            for (int i = 0; i < _indent; ++i)
+                _stream << INDENT;
+        }
+
+        void WriteAtribute(const Attribute & attribute)
+        {
+            _stream << " " << attribute.first << "=\"" << attribute.second << "\"";
+        }
+
+        void WriteBegin(const String & name, const Attributes & attributes, bool indent, bool line)
+        {
+            WriteIndent();
+            _stream << "<" << name;
+            for (size_t i = 0; i < attributes.size(); ++i)
+                WriteAtribute(attributes[i]);
+            _stream << ">";
+            if (line)
+                _stream << std::endl;
+            if (indent)
+                _indent++;
+        }
+
+        void WriteEnd(const String & name, bool indent, bool line)
+        {
+            if (indent)
+            {
+                _indent--;
+                WriteIndent();
+            }
+            _stream << "</" << name << ">";
+            if (line)
+                _stream << std::endl;
+        }
+
+        void WriteValue(const String & name, const Attributes & attributes, const String & value, bool line)
+        {
+            WriteBegin(name, attributes, false, false);
+            _stream << value;
+            WriteEnd(name, false, line);
+        }
+
+        void WriteText(const String & text, bool indent, bool line)
+        {
+            if (indent)
+                WriteIndent();
+            _stream << text;
+            if (line)
+                _stream << std::endl;
+        }
+       
+    private:
+        std::ofstream _stream;
+        int _indent;
+    };
+
+    struct HtmlHeaderPrinter
+    {
+        const StatisticNames & data;
+
+        HtmlHeaderPrinter(const StatisticNames & d)
+            : data(d) {}
+
+        String Average(const Name & a) const
+        {
+            return std::string(a.full) + "</td><td>";
+        }
+
+        String Relation(const Name & a, const Name & b) const
+        {
+            return std::string(a.brief) + "/" + std::string(b.brief)+ "</td><td>";
+        }
+
+        String Improving(const Name & a) const
+        {
+            return "P/" + std::string(a.brief) + "</td><td>";
+        }
+
+        String Alignment(const Name & a) const
+        {
+            return std::string(a.brief) + ":U/A" + "</td><td>";
+        }
+
+        String Separator() const
+        {
+            return "</td><td>";
+        }
+    };
+
+    template<class Value> struct HtmlValuePrinter
+    {
+        const Statistic<Value> & data;
+
+        HtmlValuePrinter(const Statistic<Value> & d)
+            : data(d) {}
+
+        String Average(const Value & a) const
+        {
+            return ToString(a.first.Average()*1000.0) + "</td><td>";
+        }
+
+        String Relation(const Value & a, const Value & b) const
+        {
+            return ToString(Test::Relation(a.first, b.first)) + "</td><td>";
+        }
+
+        String Improving(const Value & a) const
+        {
+            return ToString(Test::Relation(Previous(a).first, a.first)) + "</td><td>";
+        }
+
+        String Alignment(const Value & a) const
+        {
+            return ToString(Test::Relation(a.second, a.first)) + "</td><td>";
+        }
+
+        String Separator() const
+        {
+            return "</td><td>";
+        }
+    };
+
+    bool PerformanceMeasurerStorage::HtmlReport(const String & path, bool align) const
+    {
+        Html html(path);
+        if (!html.Good())
+            return false;
+
+        html.WriteBegin("html", Attr(), true, true);
+        html.WriteValue("title", Attr(), "Simd Library Perfromance Report", true);
+        html.WriteBegin("body", Attr(), true, true);
+
+        html.WriteValue("h1", Attr("id", "home"), "Simd Library Perfromance Report", true);
+
+        html.WriteText("Test generation time: " + GetCurrentDateTimeString(), true, true);
+
+        Attributes attributes;
+        attributes.push_back(Attribute("align", "center"));
+        attributes.push_back(Attribute("cellpadding", "2"));
+        attributes.push_back(Attribute("cellspacing", "0"));
+        attributes.push_back(Attribute("border", "1"));
+        attributes.push_back(Attribute("cellpadding", "2"));
+        attributes.push_back(Attribute("width", "100%"));
+        html.WriteBegin("table", attributes, true, true);
+
+        FunctionMap map;
+        {
+            std::lock_guard<std::recursive_mutex> lock(_mutex);
+            for (ThreadMap::const_iterator thread = _map.begin(); thread != _map.end(); ++thread)
+            {
+                for (FunctionMap::const_iterator function = thread->second.map.begin(); function != thread->second.map.end(); ++function)
+                {
+                    if (map.find(function->first) == map.end())
+                        map[function->first].reset(new PerformanceMeasurer(function->first));
+                    map[function->first]->Combine(*function->second);
+                }
+            }
+        }
+
+        FunctionStatisticMap functions;
+        CommonStatistic common;
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false };
+        StatisticNames names = { { "Simd", "S" },{ "Base", "B" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5", "A5" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "N" } };
+        for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
+        {
+            const PerformanceMeasurer & pm = *it->second;
+            String name = FunctionShortName(pm.Description());
+            AddToFunction(pm, functions[name], enable);
+        }
+
+        for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
+            AddToCommon(it->second, enable, common);
+
+        html.WriteBegin("tr", Attr("style", STYLE_HEADER), true, true);
+        html.WriteBegin("td", Attr(), false, false);
+        html.WriteText(Print("Function", HtmlHeaderPrinter(names), enable, align), false, false);
+        html.WriteEnd("td", false, false);
+        html.WriteEnd("tr", true, true);
+
+        html.WriteBegin("tr", Attr(), true, true);
+        html.WriteBegin("td", Attr(), false, false);
+        html.WriteText(Print("Common", HtmlValuePrinter<Common>(common), enable, align), false, false);
+        html.WriteEnd("td", false, false);
+        html.WriteEnd("tr", true, true);
+
+        for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
+        {
+            html.WriteBegin("tr", Attr(), true, true);
+            html.WriteBegin("td", Attr(), false, false);
+            html.WriteText(Print(it->first, HtmlValuePrinter<Function>(it->second), enable, align), false, false);
+            html.WriteEnd("td", false, false);
+            html.WriteEnd("tr", true, true);
+
+        }
+
+        html.WriteEnd("table", true, true);
+        html.WriteEnd("body", true, true);
+        html.WriteEnd("html", true, true);
+
+        return true;
     }
 }

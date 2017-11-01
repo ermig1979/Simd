@@ -117,7 +117,9 @@ namespace Test
 
         size_t Align(size_t size);
 
-        String Report(bool align = false, bool raw = false) const;
+        String TextReport(bool align = false, bool raw = false) const;
+
+        bool HtmlReport(const String & path, bool align = false) const;
 
         void Clear();
     };

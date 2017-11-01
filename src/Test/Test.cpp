@@ -523,7 +523,9 @@ namespace Test
         TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.Report(options.printAlign, false));
+        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.TextReport(options.printAlign, false));
+
+        //Test::PerformanceMeasurerStorage::s_storage.HtmlReport("perf.html");
 #endif
         return 0;
     }

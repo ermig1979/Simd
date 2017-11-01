@@ -2948,7 +2948,7 @@ namespace Test
         TEST_LOG_SS(Info, std::setprecision(6) << "Predict error : (value = " << error.first << " ; count = " << error.second << ")." << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.Report(false, true));
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.TextReport(false, true));
         PerformanceMeasurerStorage::s_storage.Clear();
 #endif
 
@@ -3007,7 +3007,7 @@ namespace Test
         net.Train(data.train.src, data.train.dst, options, logger);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.Report(false, true));
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.TextReport(false, true));
         PerformanceMeasurerStorage::s_storage.Clear();
 #endif
 
