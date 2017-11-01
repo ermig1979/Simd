@@ -729,6 +729,27 @@ namespace Test
         }
     };
 
+	void AddHeader(Table & table, const StatisticNames & names, const StatisticEnable & enable, bool align)
+	{
+		size_t col = 0;
+		table.SetCell(col++, 0, "Function");
+		for (size_t i = 0; i < names.Size(); ++i)
+			if (enable[i])
+				table.SetCell(col++, 0, names[i].full);
+		for (size_t i = 2; i < names.Size(); ++i)
+			if (enable[i])
+				table.SetCell(col++, 0, String(names[1].brief) + "/" + names[i].brief);
+		for (size_t i = 2; i < names.Size(); ++i)
+			if (enable[i])
+				table.SetCell(col++, 0, String("P/") + names[i].brief);
+		if (align)
+		{
+			for (size_t i = 0; i < names.Size(); ++i)
+				if (enable[i])
+					table.SetCell(col++, 0, String(names[i].brief) + ":U/A");
+		}
+	}
+
     template <class Value> void AddRow(Table & table, size_t row, const String & name, const Statistic<Value> & statistic, const StatisticEnable & enable, bool align)
     {
         size_t col = 0;
@@ -830,15 +851,16 @@ namespace Test
         {
             size_t n = 0;
             for (size_t i = 2; i < enable.Size(); ++i)
-            {
                 if (enable[i])
                     n++;
-            }
-            size_t w = 1 + 2 + n * 3 + (align ? 2 + n : 0);
-            size_t h = 1 + 1 + functions.size();
+            Table table(3 + n * 3 + (align ? 2 + n : 0), 3 + functions.size());
+			table.SetRowProperty(0, Table::Property(Table::Left, true, true, false, 3, 0xEEEEEE));
+			table.SetRowProperty(1, Table::Property(Table::Left, true, true));
+			for(size_t i = 0; i < n + 1; ++i)
+				table.SetColProperty(1 + i, Table::Property(Table::Right));
+			table.SetColProperty(2 + n, Table::Property(Table::Right, false, true));
 
-            Table table(w, h);
-
+			AddHeader(table, names, enable, align);
             size_t row = 1;
             AddRow(table, row++, "Common", common, enable, align);
             for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)

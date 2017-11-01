@@ -37,23 +37,25 @@ namespace Test
             Html,
         };
 
-        enum Aligment
+        enum Alignment
         {
-            None,
             Left,
             Center,
-            Rigth,
+            Right,
         };
 
         struct Property
         {
-            Aligment aligment;
+            Alignment alignment;
             bool bold, separator, zero;
-            int precision, foreground, background;
-            Property() : aligment(None), bold(false), separator(false), zero(false), precision(3), foreground(0x000000), background(0xffffff) {}
+            int precision, color;
+            Property(Alignment a = Left, bool b = false, bool s = false, bool z = false, int p = 3, int c = 0xffffff)
+				: alignment(a), bold(b), separator(s), zero(z), precision(p), color(c) {}
         };
 
         Table(size_t width, size_t height);
+
+		Test::Size Size() const;
 
         void SetColProperty(size_t col, const Property & property);
         void SetRowProperty(size_t row, const Property & property);
@@ -64,7 +66,7 @@ namespace Test
         String Generate(Format format);
 
     private:
-        Size _size;
+		Test::Size _size;
         typedef std::vector<Property> Properties;
         Properties _cols, _rows;
         Ints _widths;

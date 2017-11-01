@@ -35,6 +35,11 @@ namespace Test
         _widths.resize(width, 0);
     }
 
+	Test::Size Table::Size() const
+	{
+		return _size;
+	}
+
     void Table::SetColProperty(size_t col, const Property & property)
     {
         _cols[col] = property;
