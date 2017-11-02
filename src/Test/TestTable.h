@@ -31,12 +31,6 @@ namespace Test
     class Table
     {
     public:
-        enum Format
-        {
-            Text,
-            Html,
-        };
-
         enum Alignment
         {
             Left,
@@ -44,40 +38,46 @@ namespace Test
             Right,
         };
 
-        struct Property
-        {
-            Alignment alignment;
-            bool bold, separator, zero;
-            int precision, color;
-            Property(Alignment a = Left, bool b = false, bool s = false, bool z = false, int p = 3, int c = 0xffffff)
-				: alignment(a), bold(b), separator(s), zero(z), precision(p), color(c) {}
-        };
-
         Table(size_t width, size_t height);
 
 		Test::Size Size() const;
 
-        void SetColProperty(size_t col, const Property & property);
-        void SetRowProperty(size_t row, const Property & property);
+        void SetHeader(size_t col, const String & name, bool separator = false, Alignment alignment = Left);
+        void SetRowProp(size_t row, bool separator = false, bool bold = false);
 
         void SetCell(size_t col, size_t row, const String & value);
-        void SetCell(size_t col, size_t row, const double & value);
 
-        String Generate(Format format);
+        String GenerateText(size_t indent = 0);
+        String GenerateHtml(size_t indent = 0);
 
     private:
 		Test::Size _size;
-        typedef std::vector<Property> Properties;
-        Properties _cols, _rows;
-        Ints _widths;
+
+        struct RowProp
+        {
+            bool separator;
+            bool bold;
+            RowProp(bool s = false, bool b = false)
+                : separator(s), bold(b){}
+        };
+        typedef std::vector<RowProp> RowProps;
+        RowProps _rows;
+
+        struct Header
+        {
+            String name;
+            bool separator;
+            Alignment alignment;
+            size_t width;
+            Header(const String n = String(), bool s = false, Alignment a = Left)
+                : name(n), separator(s), alignment(a), width(n.size()) {}
+        };
+        typedef std::vector<Header> Headers;
+        Headers _headers;
+
         Strings _cells;
-        int _indent;
-        std::stringstream _stream;
 
-        void GenerateText();
-
-        void GenerateHtml();
-
+        static String ExpandText(const String & value, const Header & header);
     };
 }
 

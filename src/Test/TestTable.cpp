@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestTable.h"
+#include "Test/TestHtml.h"
 #include "Test/TestUtils.h"
 
 namespace Test
@@ -30,9 +31,8 @@ namespace Test
         : _size(width, height)
     {
         _cells.resize(width*height);
-        _cols.resize(width);
+        _headers.resize(width);
         _rows.resize(height);
-        _widths.resize(width, 0);
     }
 
 	Test::Size Table::Size() const
@@ -40,51 +40,105 @@ namespace Test
 		return _size;
 	}
 
-    void Table::SetColProperty(size_t col, const Property & property)
+    void Table::SetHeader(size_t col, const String & name, bool separator, Alignment alignment)
     {
-        _cols[col] = property;
+        _headers[col] = Header(name, separator, alignment);
     }
 
-    void Table::SetRowProperty(size_t row, const Property & property)
+    void Table::SetRowProp(size_t row, bool separator, bool bold)
     {
-        _rows[row] = property;
+        _rows[row] = RowProp(separator, bold);
     }
 
     void Table::SetCell(size_t col, size_t row, const String & value)
     {
         _cells[row*_size.x + col] = value;
+        _headers[col].width = std::max(_headers[col].width, value.size());
     }
 
-    void Table::SetCell(size_t col, size_t row, const double & value)
+    String Table::GenerateText(size_t indent_)
     {
-        std::stringstream ss;
-        ss << std::setprecision(_cols[col].precision) << std::fixed << value;
-        _cells[row*_size.x + col] = (value != 0 || _cols[col].zero) ? ss.str() : "";
-    }
-
-    String Table::Generate(Format format)
-    {
-        _stream.clear();
-        switch (format)
+        std::stringstream header, separator, table, indent;
+        for (size_t i = 0; i < indent_; ++i)
+            indent << " ";
+        header << "| ";
+        for (ptrdiff_t col = 0; col < _size.x; ++col)
         {
-        case Text: 
-            GenerateText(); 
-            break;
-        case Html: 
-            GenerateHtml(); 
-            break;
-        default:
-            break;
+            header << ExpandText(_headers[col].name, _headers[col]) << " ";
+            if(_headers[col].separator)
+                header << "|" << (col < _size.x - 1 ? " " : "");
         }
-        return _stream.str();
+        for (size_t i = 0; i < header.str().size(); ++i)
+            separator << "-";
+        table << indent.str() << separator.str() << std::endl;
+        table << indent.str() << header.str() << std::endl;
+        table << indent.str() << separator.str() << std::endl;
+        for (ptrdiff_t row = 0; row < _size.y; ++row)
+        {
+            table << indent.str() << "| ";
+            for (ptrdiff_t col = 0; col < _size.x; ++col)
+            {
+                table << ExpandText(_cells[row*_size.x + col], _headers[col]) << " ";
+                if (_headers[col].separator)
+                    table << "|" << (col < _size.x - 1 ? " " : "");
+            }
+            table << std::endl;
+            if(_rows[row].separator)
+                table << indent.str() << separator.str() << std::endl;
+        }
+        table << indent.str() << separator.str() << std::endl;
+        return table.str();
     }
 
-    void Table::GenerateText()
+    String Table::ExpandText(const String & value, const Header & header)
     {
+        if (header.alignment == Left)
+            return ExpandToRight(value, header.width);
+        if (header.alignment == Right)
+            return ExpandToLeft(value, header.width);
+        return String();
     }
 
-    void Table::GenerateHtml()
+    String Table::GenerateHtml(size_t indent)
     {
-        _indent = 0;
+        std::stringstream stream;
+        Html html(stream, indent);
+
+        html.WriteBegin("style", Html::Attr("type", "text/css"), true, true);
+        html.WriteText("th.th0 { border-left: 0px solid #000000; border-top: 0px solid #000000; border-right: 0px solid #000000; border-bottom: 1px solid #000000;}", true, true);
+        html.WriteText("th.th1 { border-left: 0px solid #000000; border-top: 0px solid #000000; border-right: 1px solid #000000; border-bottom: 1px solid #000000;}", true, true);
+        html.WriteText("td.td0 { border-left: 0px solid #000000; border-top: 0px solid #000000; border-right: 0px solid #000000; border-bottom: 0px solid #000000;}", true, true);
+        html.WriteText("td.td1 { border-left: 0px solid #000000; border-top: 0px solid #000000; border-right: 1px solid #000000; border-bottom: 0px solid #000000;}", true, true);
+        html.WriteEnd("style", true, true);
+
+        Html::Attributes attributes;
+        attributes.push_back(Html::Attribute("align", "center"));
+        attributes.push_back(Html::Attribute("cellpadding", "2"));
+        attributes.push_back(Html::Attribute("cellspacing", "0"));
+        attributes.push_back(Html::Attribute("border", "1"));
+        attributes.push_back(Html::Attribute("cellpadding", "2"));
+        attributes.push_back(Html::Attribute("width", "100%"));
+        attributes.push_back(Html::Attribute("style", "border-collapse:collapse"));
+        html.WriteBegin("table", attributes, true, true);
+
+        html.WriteBegin("tr", Html::Attr("style", "background-color:#e0e0e0; font-weight:bold;"), true, false);
+        for (ptrdiff_t col = 0; col < _size.x; ++col)
+            html.WriteValue("th", Html::Attr("class", String("th") + ToString(_headers[col].separator)),_headers[col].name, false);
+        html.WriteEnd("tr", true, true);
+
+        for (ptrdiff_t row = 0; row < _size.y; ++row)
+        {
+            std::stringstream style;
+            if (_rows[row].bold)
+                style << "font-weight: bold; background-color:#f0f0f0";
+            html.WriteBegin("tr", Html::Attr("align", "center", "style", style.str()), true, false);
+            for (ptrdiff_t col = 0; col < _size.x; ++col)
+                html.WriteValue("td", Html::Attr("class", String("td") + ToString(_headers[col].separator)), _cells[row*_size.x + col], false);
+            html.WriteEnd("tr", true, true);
+        }
+
+        html.WriteEnd("table", true, true);
+
+        return stream.str();
     }
 }

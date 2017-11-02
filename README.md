@@ -131,7 +131,7 @@ The test suite is needed for testing of correctness of work of the library and a
 There is a set of tests for every function from API of the library. 
 There is an example of test application using:
 
-	./Test -m=a -t=1 -f=Sobel -o=log.txt
+	./Test -m=a -t=1 -f=Sobel -ot=log.txt
 
 Where next parameters were used:
 
@@ -144,13 +144,13 @@ and `-m=s` (running of special tests).
 * `-f=Sobel` - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 If you miss this parameter then full testing will be performed.
 You can use several filters - function name has to satisfy at least one of them.
-* `-o=log.txt` - a file name with test report. The test's report also will be output to console.
+* `-ot=log.txt` - a file name with test report (in TEXT file format). The test's report also will be output to console.
     
 Also you can use parameters:
 
-* `-h` or `-?` in order to print help message.
+* `-help` or `-?` in order to print help message.
 * `-r=../..` to set project root directory.
 * `-pa=1` to print alignment statistics.
 * `-w=1920` width of test image for performance testing.
 * `-h=1080` height of test image for performance testing.
-	
+* `-oh=log.html` - a file name with test report (in HTML file format).	

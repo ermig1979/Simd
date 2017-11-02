@@ -107,6 +107,9 @@ namespace Test
 
         Thread & ThisThread();
 
+        typedef std::shared_ptr<class Table> TablePtr;
+        TablePtr GenerateTable(bool align) const;
+
     public:
         static PerformanceMeasurerStorage s_storage;
 

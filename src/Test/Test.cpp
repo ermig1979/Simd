@@ -386,7 +386,7 @@ namespace Test
 
         Strings filters;
 
-        String output;
+        String text, html;
 
         size_t threads;
 
@@ -429,9 +429,13 @@ namespace Test
                 {
                     filters.push_back(arg.substr(3, arg.size() - 3));
                 }
-                else if (arg.find("-o=") == 0)
+                else if (arg.find("-ot=") == 0)
                 {
-                    output = arg.substr(3, arg.size() - 3);
+                    text = arg.substr(4, arg.size() - 4);
+                }
+                else if (arg.find("-oh=") == 0)
+                {
+                    html = arg.substr(4, arg.size() - 4);
                 }
                 else if (arg.find("-r=") == 0)
                 {
@@ -524,9 +528,8 @@ namespace Test
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
         TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.TextReport(options.printAlign, false));
-#ifndef NDEBUG
-        Test::PerformanceMeasurerStorage::s_storage.HtmlReport("perf.html");
-#endif
+        if(!options.html.empty())
+            Test::PerformanceMeasurerStorage::s_storage.HtmlReport(options.html, options.printAlign);
 #endif
         return 0;
     }
@@ -572,34 +575,35 @@ namespace Test
     {
         std::cout << "Test framework of Simd Library." << std::endl << std::endl;
         std::cout << "Using example:" << std::endl << std::endl;
-        std::cout << "  ./Test -m=a -t=1 -f=Sobel -o=log.txt" << std::endl << std::endl;
+        std::cout << "  ./Test -m=a -t=1 -f=Sobel -ot=log.txt" << std::endl << std::endl;
         std::cout << "Where next parameters were used:" << std::endl << std::endl;
-        std::cout << "-m=a       - a auto checking mode which includes performance testing" << std::endl;
-        std::cout << "             (only for library built in Release mode)." << std::endl;
-        std::cout << "             In this case different implementations of each functions" << std::endl;
-        std::cout << "             will be compared between themselves " << std::endl;
-        std::cout << "             (for example a scalar implementation and implementations" << std::endl;
-        std::cout << "             with using of different SIMD instructions such as SSE2, " << std::endl;
-        std::cout << "             AVX2, and other). Also it can be: " << std::endl;
-        std::cout << "             -m=c - creation of test data for cross-platform testing), " << std::endl;
-        std::cout << "             -m=v - cross - platform testing with using of early " << std::endl;
-        std::cout << "             prepared test data)," << std::endl;
-        std::cout << "             -m=s - running of special tests." << std::endl << std::endl;
-        std::cout << "-t=1       - a number of used threads(every thread run all tests)" << std::endl;
-        std::cout << "             for simulation of multi - thread loading." << std::endl << std::endl;
-        std::cout << "-f=Sobel   - a filter. In current case will be tested only functions" << std::endl;
-        std::cout << "             which contain word 'Sobel' in their names." << std::endl;
-        std::cout << "             If you miss this parameter then full testing will be" << std::endl;
-        std::cout << "             performed. You can use several filters - function name" << std::endl;
-        std::cout << "             has to satisfy at least one of them. " << std::endl << std::endl;
-        std::cout << "-o=log.txt - a file name with test report." << std::endl;
-        std::cout << "             The test's report also will be output to console." << std::endl << std::endl;
+        std::cout << "-m=a         - a auto checking mode which includes performance testing" << std::endl;
+        std::cout << "               (only for library built in Release mode)." << std::endl;
+        std::cout << "               In this case different implementations of each functions" << std::endl;
+        std::cout << "               will be compared between themselves " << std::endl;
+        std::cout << "               (for example a scalar implementation and implementations" << std::endl;
+        std::cout << "               with using of different SIMD instructions such as SSE2, " << std::endl;
+        std::cout << "               AVX2, and other). Also it can be: " << std::endl;
+        std::cout << "               -m=c - creation of test data for cross-platform testing), " << std::endl;
+        std::cout << "               -m=v - cross - platform testing with using of early " << std::endl;
+        std::cout << "               prepared test data)," << std::endl;
+        std::cout << "               -m=s - running of special tests." << std::endl << std::endl;
+        std::cout << "-t=1         - a number of used threads(every thread run all tests)" << std::endl;
+        std::cout << "               for simulation of multi - thread loading." << std::endl << std::endl;
+        std::cout << "-f=Sobel     - a filter. In current case will be tested only functions" << std::endl;
+        std::cout << "               which contain word 'Sobel' in their names." << std::endl;
+        std::cout << "               If you miss this parameter then full testing will be" << std::endl;
+        std::cout << "               performed. You can use several filters - function name" << std::endl;
+        std::cout << "               has to satisfy at least one of them. " << std::endl << std::endl;
+        std::cout << "-ot=log.txt  - a file name with test report (in TEXT format)." << std::endl;
+        std::cout << "               The test's report also will be output to console." << std::endl << std::endl;
         std::cout << "Also you can use parameters: " << std::endl << std::endl;
-        std::cout << "    -help or -? to print this help message." << std::endl << std::endl;
-        std::cout << "    -r=../.. to set project root directory." << std::endl << std::endl;
-        std::cout << "    -pa=1    to print alignment statistics." << std::endl << std::endl;
-        std::cout << "    -w=1920  width of test image for performance testing." << std::endl << std::endl;
-        std::cout << "    -h=1080  height of test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -help or -?   to print this help message." << std::endl << std::endl;
+        std::cout << "    -r=../..      to set project root directory." << std::endl << std::endl;
+        std::cout << "    -pa=1         to print alignment statistics." << std::endl << std::endl;
+        std::cout << "    -w=1920       width of test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -h=1080       height of test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -oh=log.html  a file name with test report (in HTML format)." << std::endl << std::endl;
         return 0;
     }
 
@@ -626,8 +630,8 @@ int main(int argc, char* argv[])
     if (options.help)
         return Test::PrintHelp();
 
-    if (!options.output.empty())
-        Test::Log::s_log.SetLogFile(options.output);
+    if (!options.text.empty())
+        Test::Log::s_log.SetLogFile(options.text);
 
     Test::Groups groups;
     for (const Test::Group & group : Test::g_groups)

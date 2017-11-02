@@ -102,6 +102,14 @@ namespace Test
         return ss.str();
     }
 
+    SIMD_INLINE String ToString(double value, int precision, bool zero)
+    {
+        std::stringstream ss;
+        if(value || zero)
+            ss << std::setprecision(precision) << std::fixed << value;
+        return ss.str();
+    }
+
     template <class T> SIMD_INLINE T FromString(const String & str)
     {
         std::stringstream ss(str);
