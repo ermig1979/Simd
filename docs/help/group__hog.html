@@ -74,6 +74,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga8ed42b54ecd78548a04313d6cebd7f11">SimdHogLiteCompressFeatures</a> (const float *src, size_t srcStride, size_t width, size_t height, const float *pca, float *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compresses 16 features to 8 features for 2D-array.  <a href="#ga8ed42b54ecd78548a04313d6cebd7f11">More...</a><br /></td></tr>
 <tr class="separator:ga8ed42b54ecd78548a04313d6cebd7f11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1b661ba3fa5ca276c031b817692c895c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga1b661ba3fa5ca276c031b817692c895c">SimdHogLiteFilterSeparable</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float *hFilter, size_t hSize, const float *vFilter, size_t vSize, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga1b661ba3fa5ca276c031b817692c895c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to lite HOG features.  <a href="#ga1b661ba3fa5ca276c031b817692c895c">More...</a><br /></td></tr>
+<tr class="separator:ga1b661ba3fa5ca276c031b817692c895c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
 <tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
@@ -723,6 +726,113 @@ else
     <tr><td class="paramdir">[in]</td><td class="paramname">pca</td><td>- a pointer to the PCA matrix with size 16x8. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array with compessed features. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output array with compessed features. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga1b661ba3fa5ca276c031b817692c895c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1b661ba3fa5ca276c031b817692c895c">&#9670;&nbsp;</a></span>SimdHogLiteFilterSeparable()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdHogLiteFilterSeparable </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>featureSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>hFilter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>hSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>vFilter</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>vSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Applies separable filter to lite HOG features. </p>
+<p>For every point (except border): </p><pre class="fragment">for(
+sum = 0;
+for(dy = 0; dy &lt; vSize; dy++)
+    for(dx = 0; dx &lt; hSize*featureSize; dx++)
+        sum += src[x*featureSize + dx, y + dy]*vFilter[dy]*hFilter[dx];
+dst[x, y] = sum;
+</pre><dl class="section note"><dt>Note</dt><dd>Input image has to have size at least not less then size of filter: (srcWidth &lt;= hSize and srcHeight &lt;= vSize).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array with features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of input array with features. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of input array with features. Its minimal value is hSize. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of input array with features. Its minimal value is vSize. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">featureSize</td><td>- a size of cell with features. It must be 8 or 16. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hFilter</td><td>- a pointer to 32-bit float point array with horizontal filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">hSize</td><td>- a size of horizontal filter (in featureSize). Total size of horizontal filter is hSize*featureSize. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vFilter</td><td>- a pointer to 32-bit float point array with vertical filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">vSize-</td><td>a size of vertical filter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float point image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output image. </td></tr>
   </table>
   </dd>
 </dl>

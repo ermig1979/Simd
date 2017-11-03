@@ -2532,7 +2532,37 @@ extern "C"
     */
     SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride);
 
+    /*! @ingroup hog
 
+        \fn void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride);
+
+        \short Applies separable filter to lite HOG features.
+
+        For every point (except border):
+        \verbatim
+        for(
+        sum = 0;
+        for(dy = 0; dy < vSize; dy++)
+            for(dx = 0; dx < hSize*featureSize; dx++)
+                sum += src[x*featureSize + dx, y + dy]*vFilter[dy]*hFilter[dx];
+        dst[x, y] = sum;
+        \endverbatim
+
+        \note Input image has to have size at least not less then size of filter: (srcWidth <= hSize and srcHeight <= vSize).
+
+        \param [in] src - a pointer to the input 32-bit float array with features.
+        \param [in] srcStride - a row size of input array with features.
+        \param [in] srcWidth - a width of input array with features. Its minimal value is hSize.
+        \param [in] srcHeight - a height of input array with features. Its minimal value is vSize.
+        \param [in] featureSize - a size of cell with features. It must be 8 or 16.
+        \param [in] hFilter - a pointer to 32-bit float point array with horizontal filter.
+        \param [in] hSize - a size of horizontal filter (in featureSize). Total size of horizontal filter is hSize*featureSize.
+        \param [in] vFilter - a pointer to 32-bit float point array with vertical filter.
+        \param [in] vSize- a size of vertical filter.
+        \param [out] dst - a pointer to output 32-bit float point image.
+        \param [in] dstStride - a row size of output image.
+    */
+    SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride);
 
     /*! @ingroup other_conversion
 

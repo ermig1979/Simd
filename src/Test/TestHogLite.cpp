@@ -414,6 +414,90 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHLFS
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLFS(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            FuncHLFS(const FuncHLFS & f, size_t hs, size_t vs, size_t fs) : func(f.func), description(f.description + "[" + ToString(hs) + "x" + ToString(vs) + "x" + ToString(fs) + "]") {}
+
+            void Call(const View & src, size_t featureSize, const View & hFilter, const View & vFilter, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), src.width / featureSize, src.height, featureSize,
+                    (float*)hFilter.data, hFilter.width / featureSize, (float*)vFilter.data, vFilter.width, (float*)dst.data, dst.stride / sizeof(float));
+            }
+        };
+    }
+
+#define FUNC_HLFS(function) FuncHLFS(function, #function)
+
+#define ARGS_HLFS(hs, vs, fs, f1, f2) hs, vs, fs, FuncHLFS(f1, hs, vs, fs), FuncHLFS(f2, hs, vs, fs)
+
+    bool HogLiteFilterSeparableAutoTest(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize, size_t featureSize, const FuncHLFS & f1, const FuncHLFS & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View hFilter(hSize*featureSize, 1, View::Float, NULL, featureSize * sizeof(float));
+        FillRandom32f(hFilter, 0.5f, 1.5f);
+
+        View vFilter(vSize, 1, View::Float, NULL, sizeof(float));
+        FillRandom32f(vFilter, 0.5f, 1.5f);
+
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        FillRandom32f(src, 0.5f, 1.5f);
+
+        size_t dstWidth = srcWidth - hSize + 1;
+        size_t dstHeight = srcHeight - vSize + 1;
+        View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, featureSize, hFilter, vFilter, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, featureSize, hFilter, vFilter, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteFilterSeparableAutoTest(size_t hSize, size_t vSize, size_t featureSize, const FuncHLFS & f1, const FuncHLFS & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterSeparableAutoTest(W / featureSize, H, hSize, vSize, featureSize, f1, f2);
+        result = result && HogLiteFilterSeparableAutoTest((W + O) / featureSize, H - O, hSize, vSize, featureSize, f1, f2);
+
+        return result;
+    }
+
+    bool HogLiteFilterSeparableAutoTest(const FuncHLFS & f1, const FuncHLFS & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 16, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 8, f1, f2));
+
+        return result;
+    }
+
+    bool HogLiteFilterSeparableAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Base::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
@@ -610,5 +694,61 @@ namespace Test
     bool HogLiteCompressFeaturesDataTest(bool create)
     {
         return HogLiteCompressFeaturesDataTest(create, DW / FuncHLCF::SRC_FEATURE_SIZE, DH, FUNC_HLCF(SimdHogLiteCompressFeatures));
+    }
+
+    bool HogLiteFilterSeparableDataTest(bool create, size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize, size_t featureSize, const FuncHLFS & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View hFilter(hSize*featureSize, 1, View::Float, NULL, featureSize * sizeof(float));
+        View vFilter(vSize, 1, View::Float, NULL, sizeof(float));
+        View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        size_t dstWidth = srcWidth - hSize + 1;
+        size_t dstHeight = srcHeight - vSize + 1;
+        View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
+
+        if (create)
+        {
+            FillRandom32f(hFilter, 0.5f, 1.5f);
+            FillRandom32f(vFilter, 0.5f, 1.5f);
+            FillRandom32f(src);
+
+            TEST_SAVE(hFilter);
+            TEST_SAVE(vFilter);
+            TEST_SAVE(src);
+
+            f.Call(src, featureSize, hFilter, vFilter, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(hFilter);
+            TEST_LOAD(vFilter);
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, featureSize, hFilter, vFilter, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 64);
+        }
+
+        result = result && Compare(dst1, dst2, EPS, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteFilterSeparableDataTest(bool create)
+    {
+        return HogLiteFilterSeparableDataTest(create, DW / 16, DH, 8, 8, 16, FUNC_HLFS(SimdHogLiteFilterSeparable));
     }
 }

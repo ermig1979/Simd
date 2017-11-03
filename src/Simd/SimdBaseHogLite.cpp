@@ -353,5 +353,74 @@ namespace Simd
                 dst += dstStride;
             }
         }
+
+        class HogLiteSeparableFilter
+        {
+            typedef Array<float> Array32f;
+
+            size_t _dstWidth, _dstHeight;
+            Array32f _buffer;
+
+            void Init(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize)
+            {
+                _dstWidth = srcWidth - hSize + 1;
+                _dstHeight = srcHeight - vSize + 1;
+                _buffer.Resize(_dstWidth*srcHeight);
+            }
+
+            void FilterH(const float * src, size_t srcStride, size_t width, size_t height, size_t step, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        const float * s = src + col*step;
+                        float sum = 0;
+                        for (size_t i = 0; i < size; ++i)
+                            sum += s[i] * filter[i];
+                        dst[col] = sum;
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        const float * s = src + col;
+                        float sum = 0;
+                        for (size_t i = 0; i < size; ++i)
+                            sum += s[i*srcStride] * filter[i];
+                        dst[col] = sum;
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= hSize && srcHeight >= vSize);
+
+                Init(srcWidth, srcHeight, hSize, vSize);
+
+                FilterH(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstWidth);
+
+                FilterV(_buffer.data, _dstWidth, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+            }
+        };
+
+        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+        {
+            HogLiteSeparableFilter filter;
+            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+        }
     }
 }
