@@ -2370,6 +2370,11 @@ SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, s
 
 SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable)
+        Avx2::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable)
         Avx::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);

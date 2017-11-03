@@ -792,6 +792,129 @@ namespace Simd
             else
                 HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
         }
+
+        class HogLiteSeparableFilter
+        {
+            typedef Array<float> Array32f;
+            typedef Array<__m256> Array256f;
+
+            size_t _dstWidth, _dstHeight, _dstStride;
+            Array32f _buffer;
+            Array256f _filter;
+
+            void Init(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize)
+            {
+                _dstWidth = srcWidth - hSize + 1;
+                _dstStride = AlignHi(_dstWidth, F);
+                _dstHeight = srcHeight - vSize + 1;
+                _buffer.Resize(_dstStride*srcHeight);
+            }
+
+            template<bool align> static SIMD_INLINE void FilterHx1(const float * src, const float * filter, __m256 & sum)
+            {
+                __m256 _src = Avx::Load<align>(src);
+                __m256 _filter = Avx::Load<align>(filter);
+                sum = _mm256_fmadd_ps(_src, _filter, sum);
+            }
+
+            template<bool align, size_t step> static SIMD_INLINE void FilterHx4(const float * src, const float * filter, __m256 * sums)
+            {
+                __m256 _filter = Avx::Load<align>(filter);
+                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+            }
+
+            template <bool align, size_t step> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                size_t alignedWidth = AlignLo(width, 4);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < alignedWidth; col += 4)
+                    {
+                        __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                        const float * s = src + col*step;
+                        for (size_t i = 0; i < size; i += F)
+                            FilterHx4<align, step>(s + i, filter + i, sums);
+                        __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
+                        Sse::Store<true>(dst + col, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                    }
+                    for (; col < width; ++col)
+                    {
+                        __m256 sum = _mm256_setzero_ps();
+                        const float * s = src + col*step;
+                        for (size_t i = 0; i < size; i += F)
+                            FilterHx1<align>(s + i, filter + i, sum);
+                        dst[col] = Avx::ExtractSum(sum);
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, size_t step, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                if (step == 16)
+                    FilterH<align, 16>(src, srcStride, width, height, filter, size, dst, dstStride);
+                else
+                    FilterH<align, 8>(src, srcStride, width, height, filter, size, dst, dstStride);
+            }
+
+            template <bool srcAlign, bool dstAlign> static SIMD_INLINE void FilterV(const float * src, size_t stride, const __m256 * filter, size_t size, float * dst)
+            {
+                __m256 sum = _mm256_setzero_ps();
+                for (size_t i = 0; i < size; ++i, src += stride)
+                    sum = _mm256_fmadd_ps(Avx::Load<srcAlign>(src), filter[i], sum);
+                Avx::Store<dstAlign>(dst, sum);
+            }
+
+            template <bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                _filter.Resize(size);
+                for (size_t i = 0; i < size; ++i)
+                    _filter[i] = _mm256_set1_ps(filter[i]);
+
+                size_t alignedWidth = AlignLo(width, F);
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += F)
+                        FilterV<true, align>(src + col, srcStride, _filter.data, size, dst + col);
+                    if (alignedWidth != width)
+                        FilterV<false, false>(src + width - F, srcStride, _filter.data, size, dst + width - F);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= hSize && srcHeight >= vSize);
+
+                Init(srcWidth, srcHeight, hSize, vSize);
+
+                if (Aligned(src) && Aligned(srcStride) && Aligned(hFilter))
+                    FilterH<true>(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstStride);
+                else
+                    FilterH<false>(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstStride);
+
+                if (Aligned(dst) && Aligned(dstStride))
+                    FilterV<true>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                else
+                    FilterV<false>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+            }
+        };
+
+        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+        {
+            HogLiteSeparableFilter filter;
+            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

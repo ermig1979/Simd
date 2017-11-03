@@ -505,6 +505,11 @@ namespace Test
             result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Avx::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Avx2::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+#endif 
+
         return result;
     }
 
