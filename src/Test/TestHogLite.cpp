@@ -485,6 +485,8 @@ namespace Test
 
         result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 16, f1, f2));
         result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 8, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(6, 6, 16, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(6, 6, 8, f1, f2));
 
         return result;
     }

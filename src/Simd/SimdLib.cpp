@@ -2370,18 +2370,19 @@ SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, s
 
 SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
 {
+    size_t dstWidth = srcWidth - hSize + 1;
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable)
+    if (Avx2::Enable && dstWidth >= Avx2::F)
         Avx2::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
+    if (Avx::Enable && dstWidth >= Avx::F)
         Avx::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable)
+    if (Sse41::Enable && dstWidth >= Sse41::F)
         Sse41::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
     else
 #endif
