@@ -304,4 +304,16 @@
 #define SIMD_ALIGN 4
 #endif
 
+#if (defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512F_ENABLE))
+#ifdef SIMD_X64_ENABLE
+#ifndef _MSC_VER
+#define SIMD_ZMM_COUNT 32
+#else
+#define SIMD_ZMM_COUNT 16
+#endif
+#else
+#define SIMD_ZMM_COUNT 8
+#endif
+#endif
+
 #endif//__SimdDefs_h__

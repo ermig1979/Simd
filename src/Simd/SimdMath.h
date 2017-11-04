@@ -563,6 +563,18 @@ namespace Simd
             __m256 hi = PermutedHorizontalAdd(PermutedHorizontalAdd(src[4], src[5]), PermutedHorizontalAdd(src[6], src[7]));
             _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), PermutedHorizontalAdd(lo, hi)));
         }
+
+        template <bool condition> SIMD_INLINE __m256 Masked(const __m256 & value, const __m256 & mask);
+
+        template <> SIMD_INLINE __m256 Masked<false>(const __m256 & value, const __m256 & mask)
+        {
+            return value;
+        }
+
+        template <> SIMD_INLINE __m256 Masked<true>(const __m256 & value, const __m256 & mask)
+        {
+            return _mm256_and_ps(value, mask);
+        }
     }
 #endif//SIMD_AVX_ENABLE
 

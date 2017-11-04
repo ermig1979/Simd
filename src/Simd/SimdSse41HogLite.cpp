@@ -26,6 +26,7 @@
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdUpdate.h"
 
 namespace Simd
 {
@@ -649,7 +650,7 @@ namespace Simd
                         const float * s = src + col*step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Store<true>(dst + col, _mm_hadd_ps(_mm_hadd_ps(sums[0], sums[1]), _mm_hadd_ps(sums[2], sums[3])));
+                        Store<true>(dst + col, Sse3::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -672,36 +673,45 @@ namespace Simd
                     FilterH<align, 8>(src, srcStride, width, height, filter, size, dst, dstStride);
             }
 
-            template <bool srcAlign, bool dstAlign> static SIMD_INLINE void FilterV(const float * src, size_t stride, const __m128 * filter, size_t size, float * dst)
+            template <bool srcAlign, bool dstAlign, UpdateType update, bool masked> static SIMD_INLINE void FilterV(const float * src, size_t stride, const __m128 * filter, size_t size, float * dst, const __m128 & mask)
             {
                 __m128 sum = _mm_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
                     sum = _mm_add_ps(sum, _mm_mul_ps(Load<srcAlign>(src), filter[i]));
-                Store<dstAlign>(dst, sum);
+                Update<update, dstAlign>(dst, Masked<masked && update != UpdateSet>(sum, mask));
             }
 
-            template <bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            template <UpdateType update, bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
                 _filter.Resize(size);
                 for (size_t i = 0; i < size; ++i)
                     _filter[i] = _mm_set1_ps(filter[i]);
 
                 size_t alignedWidth = AlignLo(width, F);
+                __m128 tailMask = RightNotZero(width - alignedWidth);
 
                 for (size_t row = 0; row < height; ++row)
                 {
                     for (size_t col = 0; col < alignedWidth; col += F)
-                        FilterV<true, align>(src + col, srcStride, _filter.data, size, dst + col);
+                        FilterV<true, align, update, false>(src + col, srcStride, _filter.data, size, dst + col, tailMask);
                     if (alignedWidth != width)
-                        FilterV<false, false>(src + width - F, srcStride, _filter.data, size, dst + width - F);
+                        FilterV<false, false, update, true>(src + width - F, srcStride, _filter.data, size, dst + width - F, tailMask);
                     src += srcStride;
                     dst += dstStride;
                 }
             }
 
+            template <UpdateType update> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                if (Aligned(dst) && Aligned(dstStride))
+                    FilterV<update, true>(src, srcStride, width, height, filter, size, dst, dstStride);
+                else
+                    FilterV<update, false>(src, srcStride, width, height, filter, size, dst, dstStride);
+            }
+
         public:
 
-            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
             {
                 assert(featureSize == 8 || featureSize == 16);
                 assert(srcWidth >= hSize && srcHeight >= vSize);
@@ -713,17 +723,17 @@ namespace Simd
                 else
                     FilterH<false>(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstStride);
 
-                if(Aligned(dst) && Aligned(dstStride))
-                    FilterV<true>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                if(add)
+                    FilterV<UpdateAdd>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
                 else
-                    FilterV<false>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                    FilterV<UpdateSet>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
             }
         };
 
-        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
         {
             HogLiteSeparableFilter filter;
-            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
     }
 #endif// SIMD_SSE41_ENABLE

@@ -1322,7 +1322,7 @@ namespace Simd
                 dst += dstStride;
             }
             size_t i = 0, n = Simd::AlignLo(coreX*coreY, 4);
-#ifndef _MSC_VER
+#if SIMD_ZMM_COUNT == 32
             for (; i < n; i += 4)
                 Add4ExtractedSums(_sums + i, sums + i);
 #endif
@@ -1359,7 +1359,7 @@ namespace Simd
                 dst += dstStride;
             }
             size_t i = 0, n = Simd::AlignLo(coreX*coreY, 4);
-#ifndef _MSC_VER
+#if SIMD_ZMM_COUNT == 32
             for (; i < n; i += 4)
                 Add4ExtractedSums(_sums + i, sums + i);
 #endif
@@ -1401,7 +1401,7 @@ namespace Simd
                 dst += dstStride;
             }
             size_t i = 0, n = Simd::AlignLo(coreX*coreY, 4);
-#ifndef _MSC_VER
+#if SIMD_ZMM_COUNT == 32
             for (; i < n; i += 4)
                 Add4ExtractedSums(_sums + i, sums + i);
 #endif
@@ -1873,7 +1873,7 @@ namespace Simd
                     size_t K16 = Simd::AlignLo(K, 16);
                     __mmask16 tailMask = TailMask16(K - K16);
                     size_t i = 0;
-#ifndef _MSC_VER
+#if SIMD_ZMM_COUNT == 32
                     for (; i < M4; i += 4)
                     {
                         const float * pa = a + i*K;

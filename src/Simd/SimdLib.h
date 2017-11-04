@@ -2448,7 +2448,7 @@ extern "C"
         \param [in] rowSize- a size of row filter.
         \param [in] colFilter - a pointer to 32-bit float point array with column filter.
         \param [in] colSize- a size of column filter.
-        \param [out] dst - a pointer to output 32-bit float point image.
+        \param [in, out] dst - a pointer to output 32-bit float point image.
         \param [in] dstStride - a row size of output image.
         \param [in] add - a flag which signalizes that result has to be added to existing image.
     */
@@ -2534,18 +2534,20 @@ extern "C"
 
     /*! @ingroup hog
 
-        \fn void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride);
+        \fn void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add);
 
         \short Applies separable filter to lite HOG features.
 
         For every point (except border):
         \verbatim
-        for(
         sum = 0;
         for(dy = 0; dy < vSize; dy++)
             for(dx = 0; dx < hSize*featureSize; dx++)
                 sum += src[x*featureSize + dx, y + dy]*vFilter[dy]*hFilter[dx];
-        dst[x, y] = sum;
+        if(add)
+            dst[x, y] += sum;
+        else
+            dst[x, y] = sum;
         \endverbatim
 
         \note Input image has to have size at least not less then size of filter: (srcWidth <= hSize and srcHeight <= vSize).
@@ -2559,10 +2561,11 @@ extern "C"
         \param [in] hSize - a size of horizontal filter (in featureSize). Total size of horizontal filter is hSize*featureSize.
         \param [in] vFilter - a pointer to 32-bit float point array with vertical filter.
         \param [in] vSize- a size of vertical filter.
-        \param [out] dst - a pointer to output 32-bit float point image.
+        \param [in, out] dst - a pointer to output 32-bit float point image.
         \param [in] dstStride - a row size of output image.
+        \param [in] add - a flag which signalizes that result has to be added to existing image.
     */
-    SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride);
+    SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add);
 
     /*! @ingroup other_conversion
 

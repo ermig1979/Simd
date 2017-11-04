@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdArray.h"
+#include "Simd/SimdUpdate.h"
 
 namespace Simd
 {
@@ -385,7 +386,7 @@ namespace Simd
                 }
             }
 
-            void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            template<UpdateType update> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
                 for (size_t row = 0; row < height; ++row)
                 {
@@ -395,7 +396,7 @@ namespace Simd
                         float sum = 0;
                         for (size_t i = 0; i < size; ++i)
                             sum += s[i*srcStride] * filter[i];
-                        dst[col] = sum;
+                        Update<update>(dst + col, sum);
                     }
                     src += srcStride;
                     dst += dstStride;
@@ -403,8 +404,7 @@ namespace Simd
             }
 
         public:
-
-            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
             {
                 assert(featureSize == 8 || featureSize == 16);
                 assert(srcWidth >= hSize && srcHeight >= vSize);
@@ -413,14 +413,17 @@ namespace Simd
 
                 FilterH(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstWidth);
 
-                FilterV(_buffer.data, _dstWidth, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                if(add)
+                    FilterV<UpdateAdd>(_buffer.data, _dstWidth, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                else
+                    FilterV<UpdateSet>(_buffer.data, _dstWidth, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
             }
         };
 
-        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
         {
             HogLiteSeparableFilter filter;
-            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
     }
 }

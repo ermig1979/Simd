@@ -2368,25 +2368,29 @@ SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, s
         Base::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
 }
 
-SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride)
+SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
 {
-    size_t dstWidth = srcWidth - hSize + 1;
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && dstWidth >= Avx2::F)
-        Avx2::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+    if (Avx2::Enable && srcWidth >= hSize - 1 + Avx2::F)
+        Avx2::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable && dstWidth >= Avx::F)
-        Avx::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+    if (Avx::Enable && srcWidth >= hSize - 1 + Avx::F)
+        Avx::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && dstWidth >= Sse41::F)
-        Sse41::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+    if (Sse41::Enable && srcWidth >= hSize - 1 + Sse41::F)
+        Sse41::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
     else
 #endif
-        Base::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride);
+        Base::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
 }
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
