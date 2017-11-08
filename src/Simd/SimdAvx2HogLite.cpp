@@ -40,6 +40,9 @@ namespace Simd
             1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1,
             1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
 
+        const __m256i K32_PERMUTE_BN_0 = SIMD_MM256_SETR_EPI32(1, 0, 3, 2, 2, 1, 4, 3);
+        const __m256i K32_PERMUTE_BN_1 = SIMD_MM256_SETR_EPI32(5, 4, 3, 2, 6, 5, 4, 3);
+
         template <size_t cell> class HogLiteFeatureExtractor
         {
             static const size_t FQ = 8;
@@ -265,26 +268,20 @@ namespace Simd
                 const float * src1 = _nf[(rowI - 1) & 3].data;
                 const float * src2 = _nf[(rowI - 0) & 3].data;
                 float * dst = _nb.data;
-                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3* Sse::F)
+                for (size_t x = 0; x < _fx; x += 6, dst += 3 * F)
                 {
-                    __m128 s00 = Sse::Load<false>(src0 + 0);
-                    __m128 s01 = Sse::Load<false>(src0 + 1);
-                    __m128 s10 = Sse::Load<false>(src1 + 0);
-                    __m128 s11 = Sse::Load<false>(src1 + 1);
-                    __m128 s20 = Sse::Load<false>(src2 + 0);
-                    __m128 s21 = Sse::Load<false>(src2 + 1);
-                    __m128 v00 = _mm_add_ps(s00, s10);
-                    __m128 v01 = _mm_add_ps(s01, s11);
-                    __m128 v10 = _mm_add_ps(s10, s20);
-                    __m128 v11 = _mm_add_ps(s11, s21);
-                    __m128 h0 = _mm_hadd_ps(v00, v01);
-                    __m128 h1 = _mm_hadd_ps(v10, v11);
-                    __m128 d0 = _mm_shuffle_ps(h0, h1, 0x88);
-                    __m128 d1 = _mm_shuffle_ps(h0, h1, 0x99);
-                    __m128 d2 = _mm_shuffle_ps(h0, h1, 0xDD);
-                    Sse::Store<true>(dst + 0 * Sse::F, Sse2::Shuffle32f<0x27>(d0));
-                    Sse::Store<true>(dst + 1 * Sse::F, Sse2::Shuffle32f<0x72>(d1));
-                    Sse::Store<true>(dst + 2 * Sse::F, Sse2::Shuffle32f<0x27>(d2));
+                    __m256 s0 = Avx::Load<false>(src0 + x);
+                    __m256 s1 = Avx::Load<false>(src1 + x);
+                    __m256 s2 = Avx::Load<false>(src2 + x);
+                    __m256 v0 = _mm256_add_ps(s0, s1);
+                    __m256 v1 = _mm256_add_ps(s1, s2);
+                    __m256 h0 = _mm256_add_ps(v0, Alignr<1>(v0, Permute4x64<0xEE>(v0)));
+                    __m256 h1 = _mm256_add_ps(v1, Alignr<1>(v1, Permute4x64<0xEE>(v1)));
+                    __m256 h0p = _mm256_permutevar8x32_ps(h0, K32_PERMUTE_BN_0);
+                    __m256 h1p = _mm256_permutevar8x32_ps(h1, K32_PERMUTE_BN_0);
+                    Avx::Store<true>(dst + 0 * F, _mm256_unpacklo_ps(h1p, h0p));
+                    Avx::Store<true>(dst + 1 * F, _mm256_unpackhi_ps(h1p, h0p));
+                    Avx::Store<true>(dst + 2 * F, _mm256_unpacklo_ps(_mm256_permutevar8x32_ps(h1, K32_PERMUTE_BN_1), _mm256_permutevar8x32_ps(h0, K32_PERMUTE_BN_1)));
                 }
             }
 

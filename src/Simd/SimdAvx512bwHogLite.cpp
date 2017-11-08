@@ -819,7 +819,6 @@ namespace Simd
                 HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
         }
 
-
         class HogLiteSeparableFilter
         {
             typedef Array<float> Array32f;
@@ -837,24 +836,25 @@ namespace Simd
                 _buffer.Resize(_dstStride*srcHeight);
             }
 
-            template<bool align> static SIMD_INLINE void FilterHx1(const float * src, const float * filter, __m256 & sum)
+            template<bool align> static SIMD_INLINE void FilterHx1x8(const float * src, const float * filter, __m256 & sum)
             {
                 __m256 _src = Avx::Load<align>(src);
                 __m256 _filter = Avx::Load<align>(filter);
                 sum = _mm256_fmadd_ps(_src, _filter, sum);
             }
 
-            template<bool align, size_t step> static SIMD_INLINE void FilterHx4(const float * src, const float * filter, __m256 * sums)
+            template<bool align> static SIMD_INLINE void FilterHx4x8(const float * src, const float * filter, __m256 * sums)
             {
                 __m256 _filter = Avx::Load<align>(filter);
-                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * step), _filter, sums[0]);
-                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * step), _filter, sums[1]);
-                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * step), _filter, sums[2]);
-                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * step), _filter, sums[3]);
+                sums[0] = _mm256_fmadd_ps(Avx::Load<align>(src + 0 * Avx::F), _filter, sums[0]);
+                sums[1] = _mm256_fmadd_ps(Avx::Load<align>(src + 1 * Avx::F), _filter, sums[1]);
+                sums[2] = _mm256_fmadd_ps(Avx::Load<align>(src + 2 * Avx::F), _filter, sums[2]);
+                sums[3] = _mm256_fmadd_ps(Avx::Load<align>(src + 3 * Avx::F), _filter, sums[3]);
             }
 
-            template <bool align, size_t step> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            template <bool align> void FilterHx8o(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
             {
+                const size_t step = 8;
                 size_t alignedWidth = AlignLo(width, 4);
                 for (size_t row = 0; row < height; ++row)
                 {
@@ -864,7 +864,7 @@ namespace Simd
                         __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
                         const float * s = src + col*step;
                         for (size_t i = 0; i < size; i += Avx::F)
-                            FilterHx4<align, step>(s + i, filter + i, sums);
+                            FilterHx4x8<align>(s + i, filter + i, sums);
                         Sse::Store<true>(dst + col, Avx::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
@@ -872,7 +872,44 @@ namespace Simd
                         __m256 sum = _mm256_setzero_ps();
                         const float * s = src + col*step;
                         for (size_t i = 0; i < size; i += Avx::F)
-                            FilterHx1<align>(s + i, filter + i, sum);
+                            FilterHx1x8<align>(s + i, filter + i, sum);
+                        dst[col] = Avx::ExtractSum(sum);
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template<bool align> static SIMD_INLINE void FilterHx4x8(const float * src, const float * filter, __m512 * sums)
+            {
+                __m512 _filter = Avx512f::Load<align>(filter);
+                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * HF), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Avx512f::Load<false>(src + 1 * HF), _filter, sums[1]);
+                sums[2] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 2 * HF), _filter, sums[2]);
+                sums[3] = _mm512_fmadd_ps(Avx512f::Load<false>(src + 3 * HF), _filter, sums[3]);
+            }
+
+            template <bool align> void FilterHx8e(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                const size_t step = 8;
+                size_t alignedWidth = AlignLo(width, 4);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < alignedWidth; col += 4)
+                    {
+                        __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                        const float * s = src + col*step;
+                        for (size_t i = 0; i < size; i += F)
+                            FilterHx4x8<align>(s + i, filter + i, sums);
+                        Sse::Store<true>(dst + col, Avx512f::Extract4Sums(sums));
+                    }
+                    for (; col < width; ++col)
+                    {
+                        __m256 sum = _mm256_setzero_ps();
+                        const float * s = src + col*step;
+                        for (size_t i = 0; i < size; i += Avx::F)
+                            FilterHx1x8<align>(s + i, filter + i, sum);
                         dst[col] = Avx::ExtractSum(sum);
                     }
                     src += srcStride;
@@ -952,7 +989,12 @@ namespace Simd
                 if (step == 16)
                     FilterHx16<align>(src, srcStride, width, height, filter, size, dst, dstStride);
                 else
-                    FilterH<align, 8>(src, srcStride, width, height, filter, size, dst, dstStride);
+                {
+                    if(size&1)
+                        FilterHx8o<align>(src, srcStride, width, height, filter, size, dst, dstStride);
+                    else
+                        FilterHx8e<align>(src, srcStride, width, height, filter, size, dst, dstStride);
+                }
             }
 
             template <bool srcAlign, bool dstAlign, UpdateType update, bool mask> static SIMD_INLINE void FilterV(const float * src, size_t stride, const __m512 * filter, size_t size, float * dst, __mmask16 tail = -1)
