@@ -425,5 +425,25 @@ namespace Simd
             HogLiteSeparableFilter filter;
             filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
+
+        void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
+        {
+            *pValue = FLT_MIN;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < 7; ++col)
+                {
+                    float value = a[col] + b[col];
+                    if (value > *pValue)
+                    {
+                        *pValue = value;
+                        *pCol = col;
+                        *pRow = row;
+                    }
+                }
+                a += aStride;
+                b += bStride;
+            }
+        }
     }
 }

@@ -2567,6 +2567,41 @@ extern "C"
     */
     SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add);
 
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
+
+        \short Adds two 32-bit float point 2D-array with size 7x7 and finds value and position of maximum in the result array.
+
+        Algorithm description:
+        \verbatim
+        value = FLT_MIN;
+        for (y = 0; y < height; ++y)
+        {
+            for (size_t x = 0; x < 7; ++x)
+            {
+                v = a[x, y] + b[x, y];
+                if (v > value)
+                {
+                    value = v;
+                    col = x;
+                    row = y;
+                }
+            }
+        }
+        \endverbatim
+
+        \param [in] a - a pointer to the first input 32-bit float array with size 7x7.
+        \param [in] aStride - a row size of the first input array.
+        \param [in] b - a pointer to the second input 32-bit float array with size 7x7.
+        \param [in] bStride - a row size of the second input array.
+        \param [in] height - a height of the input arrays. It must be equal or less then 7.
+        \param [out] value - a pointer to the output 32-bit float value with maximum.
+        \param [out] col - a pointer to the output integer value with x-position of maximum.
+        \param [out] row - a pointer to the output integer value with y-position of maximum.
+    */
+    SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
+
     /*! @ingroup other_conversion
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);

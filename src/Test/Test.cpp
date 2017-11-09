@@ -207,6 +207,7 @@ namespace Test
     TEST_ADD_GROUP(HogLiteResizeFeatures);
     TEST_ADD_GROUP(HogLiteCompressFeatures);
     TEST_ADD_GROUP(HogLiteFilterSeparable);
+    TEST_ADD_GROUP(HogLiteFindMax7x7);
 
     TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
 

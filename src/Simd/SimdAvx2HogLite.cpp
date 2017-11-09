@@ -920,6 +920,37 @@ namespace Simd
             HogLiteSeparableFilter filter;
             filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
+
+        __m256i K32_TAIL_MASK = SIMD_MM256_SETR_EPI32(-1, -1, -1, -1, -1, -1, -1, 0);
+
+        void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
+        {
+            __m256 sums[7];
+            __m256 min = _mm256_set1_ps(FLT_MIN);
+            __m256 max = min;
+            for (size_t row = 0; row < height; ++row)
+            {
+                sums[row] = _mm256_add_ps(Load<false>(a), Load<false>(b));
+                max = _mm256_max_ps(max, sums[row]);
+                a += aStride;
+                b += bStride;
+            }
+            max = _mm256_blendv_ps(min, max, _mm256_castsi256_ps(K32_TAIL_MASK));
+            max = _mm256_max_ps(Alignr<1>(max, max), max);
+            max = _mm256_max_ps(Alignr<2>(max, max), max);
+            max = _mm256_max_ps(max, _mm256_permute2f128_ps(max, max, 0x01));
+            _mm_store_ss(pValue, _mm256_castps256_ps128(max));
+            for (size_t row = 0; row < height; ++row)
+            {
+                int mask = _mm256_movemask_epi8(_mm256_castps_si256(_mm256_cmp_ps(max, sums[row], _CMP_EQ_OQ)));
+                if (mask)
+                {
+                    *pRow = row;
+                    *pCol = _tzcnt_u32(mask) >> 2;
+                    break;
+                }
+            }
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

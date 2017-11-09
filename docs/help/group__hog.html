@@ -77,6 +77,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaffec79500f98ec07460506ab5d468db8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gaffec79500f98ec07460506ab5d468db8">SimdHogLiteFilterSeparable</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float *hFilter, size_t hSize, const float *vFilter, size_t vSize, float *dst, size_t dstStride, int add)</td></tr>
 <tr class="memdesc:gaffec79500f98ec07460506ab5d468db8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies separable filter to lite HOG features.  <a href="#gaffec79500f98ec07460506ab5d468db8">More...</a><br /></td></tr>
 <tr class="separator:gaffec79500f98ec07460506ab5d468db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga61fc3b652ece779e7388147fa519f4b1"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga61fc3b652ece779e7388147fa519f4b1">SimdHogLiteFindMax7x7</a> (const float *a, size_t aStride, const float *b, size_t bStride, size_t height, float *value, size_t *col, size_t *row)</td></tr>
+<tr class="memdesc:ga61fc3b652ece779e7388147fa519f4b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds two 32-bit float point 2D-array with size 7x7 and finds value and position of maximum in the result array.  <a href="#ga61fc3b652ece779e7388147fa519f4b1">More...</a><br /></td></tr>
+<tr class="separator:ga61fc3b652ece779e7388147fa519f4b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
 <tr class="memdesc:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts HOG features for 8-bit gray image.  <a href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">More...</a><br /></td></tr>
@@ -842,6 +845,99 @@ else
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float point image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag which signalizes that result has to be added to existing image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga61fc3b652ece779e7388147fa519f4b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga61fc3b652ece779e7388147fa519f4b1">&#9670;&nbsp;</a></span>SimdHogLiteFindMax7x7()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdHogLiteFindMax7x7 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>aStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>value</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>col</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>row</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds two 32-bit float point 2D-array with size 7x7 and finds value and position of maximum in the result array. </p>
+<p>Algorithm description: </p><pre class="fragment">value = FLT_MIN;
+for (y = 0; y &lt; height; ++y)
+{
+    for (size_t x = 0; x &lt; 7; ++x)
+    {
+        v = a[x, y] + b[x, y];
+        if (v &gt; value)
+        {
+            value = v;
+            col = x;
+            row = y;
+        }
+    }
+}
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to the first input 32-bit float array with size 7x7. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aStride</td><td>- a row size of the first input array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second input 32-bit float array with size 7x7. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bStride</td><td>- a row size of the second input array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of the input arrays. It must be equal or less then 7. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">value</td><td>- a pointer to the output 32-bit float value with maximum. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">col</td><td>- a pointer to the output integer value with x-position of maximum. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">row</td><td>- a pointer to the output integer value with y-position of maximum. </td></tr>
   </table>
   </dd>
 </dl>

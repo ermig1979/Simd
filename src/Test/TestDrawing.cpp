@@ -25,6 +25,62 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+//#define TEST_FONT_GENERATION
+
+#if defined(WIN32) && defined(TEST_FONT_GENERATION)
+using namespace std;
+#define NOMINMAX
+#include <windows.h>
+#include <gdiplus.h>
+#pragma comment (lib, "GDIPlus.lib")
+
+namespace Test
+{
+    struct GdiPlus
+    {
+        GdiPlus()
+        {
+            Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+            Gdiplus::GdiplusStartup(&_gdiPlusToken, &gdiplusStartupInput, NULL);
+        }
+
+        ~GdiPlus()
+        {
+            Gdiplus::GdiplusShutdown(_gdiPlusToken);
+        }
+
+    private:
+        ULONG_PTR _gdiPlusToken;
+    };
+
+    bool GenerateFont()
+    {
+        const int NUMBER = 128;
+
+        GdiPlus gdiPlus;
+
+        View bgra(512, 256, View::Bgra32);
+        Gdiplus::Bitmap bitmap((int)bgra.width, (int)bgra.height, (int)bgra.stride, PixelFormat32bppARGB, bgra.data);
+        Gdiplus::Font font(L"consolas.ttf", 15.2);
+        Gdiplus::SolidBrush brush(Gdiplus::Color::Black);
+        Gdiplus::Graphics graphics(&bitmap);
+
+        wchar_t text[3] = { 0, 0, 0 };
+        for (int i = 32; i < NUMBER; ++i)
+        {
+            text[0] = i;
+            graphics.DrawString(text, -1, &font, Gdiplus::PointF((i%16)*16, (i / 16) * 16), &brush);
+        }
+
+        bgra.Save("font.ppm");
+
+        return true;
+    }
+
+    bool generateFont = GenerateFont();
+}
+#endif
+
 namespace Test
 {
     namespace

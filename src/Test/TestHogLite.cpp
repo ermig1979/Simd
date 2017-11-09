@@ -525,6 +525,75 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHLFM
+        {
+            typedef void(*FuncPtr)(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLFM(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & a, const View & b, View & value, View & row, View & col) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                for(size_t i = 0; i < value.width; ++i)
+                    func((float*)a.data + i, a.stride / sizeof(float), (float*)b.data + i, b.stride / sizeof(float), a.height, 
+                        (float*)value.data + i, (size_t*)((uint64_t*)col.data + i), (size_t*)((uint64_t*)row.data + i));
+            }
+        };
+    }
+
+#define FUNC_HLFM(function) FuncHLFM(function, #function)
+
+    bool HogLiteFindMax7x7AutoTest(size_t number, const FuncHLFM & f1, const FuncHLFM & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << number << "].");
+
+        View a(number + 6, 7, View::Float, NULL, TEST_ALIGN(number));
+        FillRandom32f(a, 0.5f, 1.5f);
+
+        View b(number + 6, 7, View::Float, NULL, TEST_ALIGN(number));
+        FillRandom32f(b, 0.5f, 1.5f);
+
+        View value1(number, 1, View::Float, NULL, TEST_ALIGN(number));
+        View col1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View row1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+
+        View value2(number, 1, View::Float, NULL, TEST_ALIGN(number));
+        View col2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View row2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, value1, col1, row1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, value2, col2, row2));
+
+        result = result && Compare(value1, value2, EPS, true, 64, "value");
+        result = result && Compare(col1, col2, 0, true, 64, 0, "col");
+        result = result && Compare(row1, row2, 0, true, 64, 0, "row");
+
+        return result;
+    }
+
+    bool HogLiteFindMax7x7AutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Base::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Avx2::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
@@ -781,5 +850,67 @@ namespace Test
     bool HogLiteFilterSeparableDataTest(bool create)
     {
         return HogLiteFilterSeparableDataTest(create, DW / 16, DH, 8, 8, 16, 1, FUNC_HLFS(SimdHogLiteFilterSeparable));
+    }
+
+
+    bool HogLiteFindMax7x7DataTest(bool create, size_t number, const FuncHLFM & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << number << "].");
+
+        View a(number + 6, 7, View::Float, NULL, TEST_ALIGN(number));
+        View b(number + 6, 7, View::Float, NULL, TEST_ALIGN(number));
+
+        View value1(number, 1, View::Float, NULL, TEST_ALIGN(number));
+        View col1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View row1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+
+        View value2(number, 1, View::Float, NULL, TEST_ALIGN(number));
+        View col2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View row2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+
+        if (create)
+        {
+            FillRandom32f(a, 0.5f, 1.5f);
+            FillRandom32f(b, 0.5f, 1.5f);
+
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(a, b, value1, col1, row1);
+
+            TEST_SAVE(value1);
+            TEST_SAVE(col1);
+            TEST_SAVE(row1);
+        }
+        else
+        {
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+
+            TEST_LOAD(value2);
+            TEST_LOAD(col2);
+            TEST_LOAD(row2);
+
+            f.Call(a, b, value2, col2, row2);
+
+            TEST_SAVE(value2);
+            TEST_SAVE(col2);
+            TEST_SAVE(row2);
+
+            result = result && Compare(value1, value2, EPS, true, 64, "value");
+            result = result && Compare(col1, col2, 0, true, 64, 0, "col");
+            result = result && Compare(row1, row2, 0, true, 64, 0, "row");
+        }
+
+        return result;
+    }
+
+    bool HogLiteFindMax7x7DataTest(bool create)
+    {
+        return HogLiteFindMax7x7DataTest(create, DW, FUNC_HLFM(SimdHogLiteFindMax7x7));
     }
 }

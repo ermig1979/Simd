@@ -523,6 +523,11 @@ namespace Simd
         {
             return _mm_cvtepi16_epi32(_mm_srli_si128(a, 8));
         }
+
+        template<int shift> SIMD_INLINE __m128 Alignr(const __m128 & s0, const __m128 & s4)
+        {
+            return _mm_castsi128_ps(_mm_alignr_epi8(_mm_castps_si128(s4), _mm_castps_si128(s0), shift * 4));
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 

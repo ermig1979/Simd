@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <memory.h>
 #include <limits.h>
+#include <float.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <cmath>

@@ -2393,6 +2393,14 @@ SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, si
         Base::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
 }
 
+typedef void(*SimdHogLiteFindMax7x7Ptr) (const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
+SimdHogLiteFindMax7x7Ptr simdHogLiteFindMax7x7 = SIMD_FUNC1(HogLiteFindMax7x7, SIMD_AVX2_FUNC);
+
+SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row)
+{
+    simdHogLiteFindMax7x7(a, aStride, b, bStride, height, value, col, row);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
