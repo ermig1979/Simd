@@ -942,7 +942,7 @@ namespace Simd
             _mm_store_ss(pValue, _mm256_castps256_ps128(max));
             for (size_t row = 0; row < height; ++row)
             {
-                int mask = _mm256_movemask_epi8(_mm256_castps_si256(_mm256_cmp_ps(max, sums[row], _CMP_EQ_OQ)));
+                int mask = _mm256_movemask_epi8(_mm256_castps_si256(_mm256_cmp_ps(max, sums[row], _CMP_EQ_UQ))) & 0x0FFFFFFF;
                 if (mask)
                 {
                     *pRow = row;

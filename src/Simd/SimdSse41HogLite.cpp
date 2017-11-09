@@ -735,6 +735,56 @@ namespace Simd
             HogLiteSeparableFilter filter;
             filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
+
+        uint8_t g_tzcnt_table[256] =
+        {
+            8, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            7, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            6, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            5, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+            4, 0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0,
+        };
+
+        void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
+        {
+            __m128 sums[7][2];
+            __m128 max = _mm_set1_ps(FLT_MIN);
+            for (size_t row = 0; row < height; ++row)
+            {
+                sums[row][0] = _mm_add_ps(Load<false>(a + 0), Load<false>(b + 0));
+                sums[row][1] = _mm_add_ps(Load<false>(a + 3), Load<false>(b + 3));
+                max = _mm_max_ps(max, _mm_max_ps(sums[row][0], sums[row][1]));
+                a += aStride;
+                b += bStride;
+            }
+            max = _mm_max_ps(Alignr<1>(max, max), max);
+            max = _mm_max_ps(Alignr<2>(max, max), max);
+            _mm_store_ss(pValue, max);
+            for (size_t row = 0; row < height; ++row)
+            {
+                __m128i m03 = _mm_castps_si128(_mm_cmpeq_ps(max, sums[row][0]));
+                __m128i m36 = _mm_castps_si128(_mm_cmpeq_ps(max, sums[row][1]));
+                __m128i m06 = _mm_packs_epi32(m03, _mm_srli_si128(m36, 4));
+                if (!_mm_testz_si128(m06, K_INV_ZERO))
+                {
+                    int mask = _mm_movemask_epi8(_mm_packs_epi16(m06, _mm_setzero_si128()));
+                    *pRow = row;
+                    *pCol = g_tzcnt_table[mask];
+                    break;
+                }
+            }
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 }

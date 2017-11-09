@@ -2394,7 +2394,7 @@ SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, si
 }
 
 typedef void(*SimdHogLiteFindMax7x7Ptr) (const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
-SimdHogLiteFindMax7x7Ptr simdHogLiteFindMax7x7 = SIMD_FUNC1(HogLiteFindMax7x7, SIMD_AVX2_FUNC);
+SimdHogLiteFindMax7x7Ptr simdHogLiteFindMax7x7 = SIMD_FUNC2(HogLiteFindMax7x7, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
 SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row)
 {

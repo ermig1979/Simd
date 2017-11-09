@@ -586,6 +586,11 @@ namespace Test
 
         result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Base::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Sse41::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
+#endif 
+
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Avx2::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
