@@ -528,6 +528,16 @@ namespace Simd
         {
             return _mm_castsi128_ps(_mm_alignr_epi8(_mm_castps_si128(s4), _mm_castps_si128(s0), shift * 4));
         }
+
+        SIMD_INLINE int TestZ(__m128 value)
+        {
+            return _mm_testz_si128(_mm_castps_si128(value), K_INV_ZERO);
+        }
+
+        SIMD_INLINE int TestZ(__m128i value)
+        {
+            return _mm_testz_si128(value, K_INV_ZERO);
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 

@@ -131,29 +131,43 @@ namespace Test
     {
         struct FuncHLFF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride);
 
             FuncPtr func;
             String description;
 
             FuncHLFF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fes) + "]") {}
+            FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes, int um) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fes) + "-" + ToString(um) + "]") {}
 
-            void Call(const View & src, size_t featureSize, const View & filter, View & dst) const
+            void Call(const View & src, size_t featureSize, const View & filter, const View & mask, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
                 func((float*)src.data, src.stride / sizeof(float), src.width / featureSize, src.height, featureSize,
-                    (float*)filter.data, filter.width / featureSize, (float*)dst.data, dst.stride / sizeof(float));
+                    (float*)filter.data, filter.width / featureSize, (uint32_t*)mask.data, mask.stride / sizeof(uint32_t),
+                    (float*)dst.data, dst.stride / sizeof(float));
             }
         };
     }
 
 #define FUNC_HLFF(function) FuncHLFF(function, #function)
 
-#define ARGS_HLFF(fis, fes, f1, f2) fis, fes, FuncHLFF(f1, fis, fes), FuncHLFF(f2, fis, fes)
+#define ARGS_HLFF(fis, fes, um, f1, f2) fis, fes, um, FuncHLFF(f1, fis, fes, um), FuncHLFF(f2, fis, fes, um)
 
-    bool HogLiteFilterFeaturesAutoTest(size_t srcWidth, size_t srcHeight, size_t filterSize, size_t featureSize, const FuncHLFF & f1, const FuncHLFF & f2)
+    void FillCorrelatedMask(View & mask, int range)
+    {
+        uint8_t * data = mask.data;
+        size_t size = mask.DataSize();
+        while (size)
+        {
+            size_t length = std::min<size_t>(Random(range)*mask.PixelSize(), size);
+            memset(data, Random(2) ? 0xFF : 0x00, length);
+            size -= length;
+            data += length;
+        }
+    }
+
+    bool HogLiteFilterFeaturesAutoTest(size_t srcWidth, size_t srcHeight, size_t filterSize, size_t featureSize, int useMask, const FuncHLFF & f1, const FuncHLFF & f2)
     {
         bool result = true;
 
@@ -167,24 +181,30 @@ namespace Test
 
         size_t dstWidth = srcWidth - filterSize + 1;
         size_t dstHeight = srcHeight - filterSize + 1;
+        View mask;
+        if (useMask)
+        {
+            mask.Recreate(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(uint32_t)));
+            FillCorrelatedMask(mask, 16);
+        }
         View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
         View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, featureSize, filter, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, featureSize, filter, mask, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, featureSize, filter, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, featureSize, filter, mask, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
 
-    bool HogLiteFilterFeaturesAutoTest(size_t filterSize, size_t featureSize, const FuncHLFF & f1, const FuncHLFF & f2)
+    bool HogLiteFilterFeaturesAutoTest(size_t filterSize, size_t featureSize, int useMask, const FuncHLFF & f1, const FuncHLFF & f2)
     {
         bool result = true;
 
-        result = result && HogLiteFilterFeaturesAutoTest(W / featureSize, H, filterSize, featureSize, f1, f2);
-        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ featureSize, H - O, filterSize, featureSize, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(W / featureSize, H, filterSize, featureSize, useMask, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ featureSize, H - O, filterSize, featureSize, useMask, f1, f2);
 
         return result;
     }
@@ -193,9 +213,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, f1, f2));
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, f1, f2));
-
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, 1, f1, f2));
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 1, f1, f2));
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, 0, f1, f2));
+        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 0, f1, f2));
         return result;
     }
 
@@ -660,29 +681,33 @@ namespace Test
 
         size_t dstWidth = srcWidth - filterSize + 1;
         size_t dstHeight = srcHeight - filterSize + 1;
+        View mask(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(uint32_t)));
         View dst1(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
         View dst2(dstWidth, dstHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize * sizeof(float)));
 
         if (create)
         {
-            FillRandom32f(filter);
             FillRandom32f(src);
+            FillRandom32f(filter);
+            FillCorrelatedMask(mask, 16);
 
-            TEST_SAVE(filter);
             TEST_SAVE(src);
+            TEST_SAVE(filter);
+            TEST_SAVE(mask);
 
-            f.Call(src, featureSize, filter, dst1);
+            f.Call(src, featureSize, filter, mask, dst1);
 
             TEST_SAVE(dst1);
         }
         else
         {
-            TEST_LOAD(filter);
             TEST_LOAD(src);
+            TEST_LOAD(filter);
+            TEST_LOAD(mask);
 
             TEST_LOAD(dst1);
 
-            f.Call(src, featureSize, filter, dst2);
+            f.Call(src, featureSize, filter, mask, dst2);
 
             TEST_SAVE(dst2);
 

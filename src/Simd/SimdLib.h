@@ -2476,11 +2476,23 @@ extern "C"
 
     /*! @ingroup hog
 
-        \fn void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+        \fn void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride);
 
         \short Applies filter to lite HOG features.
 
         Applies filter of square shape to lite HOG features. 
+
+        For every point of output image:
+        \verbatim
+        if(mask[x, y])
+            sum = 0;
+            for(dy = 0; dy < filterSize; dy++)
+                for(dx = 0; dx < filterSize*featureSize; dx++)
+                    sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
+            dst[x, y] = sum;
+        else
+            dst[x, y] = 0;
+        \endverbatim
 
         \param [in] src - a pointer to the input 32-bit float array with features.
         \param [in] srcStride - a row size of input array with features.
@@ -2489,10 +2501,12 @@ extern "C"
         \param [in] featureSize - a size of cell with features. It must be 8 or 16.
         \param [in] filter - a pointer to the 32-bit float array with filter values. Array must have size equal to filterSize*filterSize*featureSize.
         \param [in] filterSize - a size (width and height) of used filter. 
-        \param [out] dst - a pointer to output buffer with filtered features. Array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
-        \param [in] dstStride - a row size of the output buffer with filtered features.
+        \param [in] mask - a pointer to the 32-bit integer array with mask (0 or -1). Pointer can be null otherwise the array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
+        \param [in] maskStride - a row size of mask array. 
+        \param [out] dst - a pointer to output buffer with result of filtration. Array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
+        \param [in] dstStride - a row size of the output buffer with result of filtration.
     */
-    SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride);
+    SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride);
 
     /*! @ingroup hog
 
@@ -2586,6 +2600,7 @@ extern "C"
                     value = v;
                     col = x;
                     row = y;
+                    break;
                 }
             }
         }

@@ -516,6 +516,64 @@ namespace Simd
                 }
             } 
 
+            template <bool align> void Filter8(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                size_t filterStride = 8 * filterSize;
+                size_t alignedDstWidth = AlignLo(dstWidth, 8);
+                size_t alignedFilterStride = AlignLo(filterStride, DF);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
+                        if (Sse41::TestZ(_mask))
+                            _mm_storeu_ps(dst + dstCol, _mask);
+                        else
+                        {
+                            __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            const float * pSrc = src + dstRow*srcStride + dstCol * 8;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                            {
+                                size_t filterCol = 0;
+                                for (; filterCol < alignedFilterStride; filterCol += DF)
+                                    ProductSum4x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                for (; filterCol < filterStride; filterCol += HF)
+                                    ProductSum1x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            __m256 sum0 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[0]), _mm512_castps512_ps256(Alignr<8>(sums[0], sums[0])));
+                            __m256 sum1 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[1]), _mm512_castps512_ps256(Alignr<8>(sums[1], sums[1])));
+                            __m256 sum = _mm256_hadd_ps(sum0, sum1);
+                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1))));
+                        }
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        if (mask[dstCol])
+                        {
+                            __m256 sum = _mm256_setzero_ps();
+                            const float * pSrc = src + dstRow*srcStride + dstCol * 8;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                            {
+                                for (size_t filterCol = 0; filterCol < filterStride; filterCol += Avx::F)
+                                    ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            dst[dstCol] = Avx::ExtractSum(sum);
+                        }
+                        else
+                            dst[dstCol] = 0;
+                    }
+                    dst += dstStride;
+                    mask += maskStride;
+                }
+            }
+
             template<bool align> static SIMD_INLINE void ProductSum1x4x16(const float * src, const float * filter, __m512 * sums)
             {
                 __m512 _filter = Avx512f::Load<align>(filter);
@@ -592,6 +650,66 @@ namespace Simd
                 }
             }
 
+            template <bool align> void Filter16(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                size_t filterStride = 16 * filterSize;
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                size_t alignedFilterStride = AlignLo(filterStride, DF);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
+                        if (Sse41::TestZ(_mask))
+                            _mm_storeu_ps(dst + dstCol, _mask);
+                        else
+                        {
+                            __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            const float * pSrc = src + dstRow*srcStride + dstCol * 16;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                            {
+                                size_t filterCol = 0;
+                                for (; filterCol < alignedFilterStride; filterCol += DF)
+                                    ProductSum4x4x16<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                for (; filterCol < filterStride; filterCol += F)
+                                    ProductSum1x4x16<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            __m256 sum0 = _mm512_castps512_ps256(_mm512_add_ps(sums[0], Alignr<8>(sums[0], sums[0])));
+                            __m256 sum1 = _mm512_castps512_ps256(_mm512_add_ps(sums[1], Alignr<8>(sums[1], sums[1])));
+                            __m256 sum2 = _mm512_castps512_ps256(_mm512_add_ps(sums[2], Alignr<8>(sums[2], sums[2])));
+                            __m256 sum3 = _mm512_castps512_ps256(_mm512_add_ps(sums[3], Alignr<8>(sums[3], sums[3])));
+                            __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sum0, sum1), _mm256_hadd_ps(sum2, sum3));
+                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1))));
+                        }
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        if (mask[dstCol])
+                        {
+                            __m512 sum = _mm512_setzero_ps();
+                            const float * pSrc = src + dstRow*srcStride + dstCol * 16;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
+                            {
+                                for (size_t filterCol = 0; filterCol < filterStride; filterCol += F)
+                                    ProductSum1x1<align, false>(pSrc + filterCol, pFilter + filterCol, sum);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            dst[dstCol] = Avx512f::ExtractSum(sum);
+                        }
+                        else
+                            dst[dstCol] = 0;
+                    }
+                    dst += dstStride;
+                    mask += maskStride;
+                }
+            }
+
             template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
             {
                 if (featureSize == 16)
@@ -600,9 +718,17 @@ namespace Simd
                     Filter8<align>(src, srcStride, dstWidth, dstHeight, filter, filterSize, dst, dstStride);
             }
 
+            template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                if (featureSize == 16)
+                    Filter16<align>(src, srcStride, dstWidth, dstHeight, filter, filterSize, mask, maskStride, dst, dstStride);
+                else
+                    Filter8<align>(src, srcStride, dstWidth, dstHeight, filter, filterSize, mask, maskStride, dst, dstStride);
+            }
+
         public:
 
-            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
             {
                 assert(featureSize == 8 || featureSize == 16);
                 assert(srcWidth >= filterSize && srcHeight >= filterSize);
@@ -610,17 +736,27 @@ namespace Simd
                 size_t dstWidth = srcWidth - filterSize + 1;
                 size_t dstHeight = srcHeight - filterSize + 1;
 
-                if (Aligned(src) && Aligned(srcStride, F) && Aligned(filter) && Aligned(filterSize, F))
-                    Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                if (mask)
+                {
+                    if (Aligned(src) && Aligned(srcStride) && Aligned(filter))
+                        Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+                    else
+                        Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+                }
                 else
-                    Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                {
+                    if (Aligned(src) && Aligned(srcStride) && Aligned(filter))
+                        Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                    else
+                        Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterSize, dst, dstStride);
+                }
             }
         };
 
-        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, float * dst, size_t dstStride)
+        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
         {
             HogLiteFeatureFilter featureFilter;
-            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, dst, dstStride);
+            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
         }
 
         class HogLiteFeatureResizer
