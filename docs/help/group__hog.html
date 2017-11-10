@@ -577,7 +577,7 @@ else
             sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
     dst[x, y] = sum;
 else
-    dst[x, y] = 0;
+    dst[x, y] = FLT_MIN;
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array with features. </td></tr>

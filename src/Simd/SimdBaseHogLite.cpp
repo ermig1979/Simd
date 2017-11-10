@@ -259,7 +259,7 @@ namespace Simd
                             dst[dstCol] = sum;
                         }
                         else
-                            dst[dstCol] = 0;
+                            dst[dstCol] = FLT_MIN;
                     }
                     dst += dstStride;
                     mask += maskStride;

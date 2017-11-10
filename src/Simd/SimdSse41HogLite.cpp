@@ -402,6 +402,7 @@ namespace Simd
             {
                 size_t filterStride = featureSize*filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                __m128 _min = _mm_set1_ps(FLT_MIN);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -409,7 +410,7 @@ namespace Simd
                     {
                         __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
                         if (TestZ(_mask))
-                            _mm_storeu_ps(dst + dstCol, _mask);
+                            _mm_storeu_ps(dst + dstCol, _min);
                         else
                         {
                             __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
@@ -423,7 +424,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, _mm_hadd_ps(_mm_hadd_ps(sums[0], sums[1]), _mm_hadd_ps(sums[2], sums[3]))));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Sse3::Extract4Sums(sums), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -443,7 +444,7 @@ namespace Simd
                             dst[dstCol] = Sse3::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = 0;
+                            dst[dstCol] = FLT_MIN;
                     }
                     dst += dstStride;
                     mask += maskStride;

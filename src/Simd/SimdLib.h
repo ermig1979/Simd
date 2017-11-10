@@ -2491,7 +2491,7 @@ extern "C"
                     sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
             dst[x, y] = sum;
         else
-            dst[x, y] = 0;
+            dst[x, y] = FLT_MIN;
         \endverbatim
 
         \param [in] src - a pointer to the input 32-bit float array with features.

@@ -521,6 +521,7 @@ namespace Simd
                 size_t filterStride = 8 * filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 8);
                 size_t alignedFilterStride = AlignLo(filterStride, DF);
+                __m128 _min = _mm_set1_ps(FLT_MIN);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -528,7 +529,7 @@ namespace Simd
                     {
                         __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
                         if (Sse41::TestZ(_mask))
-                            _mm_storeu_ps(dst + dstCol, _mask);
+                            _mm_storeu_ps(dst + dstCol, _min);
                         else
                         {
                             __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
@@ -547,7 +548,7 @@ namespace Simd
                             __m256 sum0 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[0]), _mm512_castps512_ps256(Alignr<8>(sums[0], sums[0])));
                             __m256 sum1 = _mm256_hadd_ps(_mm512_castps512_ps256(sums[1]), _mm512_castps512_ps256(Alignr<8>(sums[1], sums[1])));
                             __m256 sum = _mm256_hadd_ps(sum0, sum1);
-                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1))));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -567,7 +568,7 @@ namespace Simd
                             dst[dstCol] = Avx::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = 0;
+                            dst[dstCol] = FLT_MIN;
                     }
                     dst += dstStride;
                     mask += maskStride;
@@ -655,6 +656,7 @@ namespace Simd
                 size_t filterStride = 16 * filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
                 size_t alignedFilterStride = AlignLo(filterStride, DF);
+                __m128 _min = _mm_set1_ps(FLT_MIN);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -662,7 +664,7 @@ namespace Simd
                     {
                         __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
                         if (Sse41::TestZ(_mask))
-                            _mm_storeu_ps(dst + dstCol, _mask);
+                            _mm_storeu_ps(dst + dstCol, _min);
                         else
                         {
                             __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
@@ -683,7 +685,7 @@ namespace Simd
                             __m256 sum2 = _mm512_castps512_ps256(_mm512_add_ps(sums[2], Alignr<8>(sums[2], sums[2])));
                             __m256 sum3 = _mm512_castps512_ps256(_mm512_add_ps(sums[3], Alignr<8>(sums[3], sums[3])));
                             __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sum0, sum1), _mm256_hadd_ps(sum2, sum3));
-                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1))));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -703,7 +705,7 @@ namespace Simd
                             dst[dstCol] = Avx512f::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = 0;
+                            dst[dstCol] = FLT_MIN;
                     }
                     dst += dstStride;
                     mask += maskStride;

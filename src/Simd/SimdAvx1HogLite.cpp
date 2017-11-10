@@ -95,6 +95,7 @@ namespace Simd
             {
                 size_t filterStride = featureSize*filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                __m128 _min = _mm_set1_ps(FLT_MIN);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -102,7 +103,7 @@ namespace Simd
                     {
                         __m128 _mask = _mm_castsi128_ps(_mm_loadu_si128((__m128i*)(mask + dstCol)));
                         if (Sse41::TestZ(_mask))
-                            _mm_storeu_ps(dst + dstCol, _mask);
+                            _mm_storeu_ps(dst + dstCol, _min);
                         else
                         {
                             __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
@@ -116,7 +117,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            _mm_storeu_ps(dst + dstCol, _mm_and_ps(_mask, Avx::Extract4Sums(sums)));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Avx::Extract4Sums(sums), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -136,7 +137,7 @@ namespace Simd
                             dst[dstCol] = Avx::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = 0;
+                            dst[dstCol] = FLT_MIN;
                     }
                     dst += dstStride;
                     mask += maskStride;
