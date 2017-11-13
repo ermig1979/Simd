@@ -108,8 +108,7 @@ namespace Simd
 
         SIMD_INLINE __m128 ValidSqrt(__m128 value)
         {
-            __m128 mask = _mm_cmpgt_ps(value, _mm_set1_ps(0.0f));
-            return _mm_sqrt_ps(_mm_or_ps(_mm_and_ps(mask, value), _mm_andnot_ps(mask, _mm_set1_ps(1.0f))));
+            return _mm_blendv_ps(_mm_set1_ps(1.0f), _mm_sqrt_ps(value), _mm_cmpgt_ps(value, _mm_set1_ps(0.0f)));
         }
 
         SIMD_INLINE __m128i Sum32ip(uint32_t * const ptr[4], size_t offset)
@@ -157,9 +156,7 @@ namespace Simd
         SIMD_INLINE void StageSum32f(const float * leaves, float threshold, const __m128 & sum, const __m128 & norm, __m128 & stageSum)
         {
             __m128 mask = _mm_cmplt_ps(sum, _mm_mul_ps(_mm_set1_ps(threshold), norm));
-            __m128 leaf0 = _mm_and_ps(mask, _mm_set1_ps(leaves[0]));
-            __m128 leaf1 = _mm_andnot_ps(mask, _mm_set1_ps(leaves[1]));
-            stageSum = _mm_add_ps(stageSum, _mm_or_ps(leaf0, leaf1));
+            stageSum = _mm_add_ps(stageSum, _mm_blendv_ps(_mm_set1_ps(leaves[1]), _mm_set1_ps(leaves[0]), mask));
         }
 
         void Detect32f(const HidHaarCascade & hid, size_t offset, const __m128 & norm, __m128i & result)
