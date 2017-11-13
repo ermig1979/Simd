@@ -2491,7 +2491,7 @@ extern "C"
                     sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
             dst[x, y] = sum;
         else
-            dst[x, y] = FLT_MIN;
+            dst[x, y] = -FLT_MAX;
         \endverbatim
 
         \param [in] src - a pointer to the input 32-bit float array with features.
@@ -2589,7 +2589,7 @@ extern "C"
 
         Algorithm description:
         \verbatim
-        value = FLT_MIN;
+        value = -FLT_MAX;
         for (y = 0; y < height; ++y)
         {
             for (size_t x = 0; x < 7; ++x)

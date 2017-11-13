@@ -555,7 +555,7 @@ namespace Simd
                 size_t filterStride = featureSize*filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
                 size_t alignedFilterStride = AlignLo(filterStride, QF);
-                __m128 _min = _mm_set1_ps(FLT_MIN);
+                __m128 _min = _mm_set1_ps(-FLT_MAX);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -599,7 +599,7 @@ namespace Simd
                             dst[dstCol] = Avx::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = FLT_MIN;
+                            dst[dstCol] = -FLT_MAX;
                     }
                     dst += dstStride;
                     mask += maskStride;
@@ -1000,7 +1000,7 @@ namespace Simd
         void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
         {
             __m256 sums[7];
-            __m256 min = _mm256_set1_ps(FLT_MIN);
+            __m256 min = _mm256_set1_ps(-FLT_MAX);
             __m256 max = min;
             for (size_t row = 0; row < height; ++row)
             {

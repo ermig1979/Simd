@@ -577,7 +577,7 @@ else
             sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
     dst[x, y] = sum;
 else
-    dst[x, y] = FLT_MIN;
+    dst[x, y] = -FLT_MAX;
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array with features. </td></tr>
@@ -936,7 +936,7 @@ else
 </div><div class="memdoc">
 
 <p>Adds two 32-bit float point 2D-array with size 7x7 and finds value and position of maximum in the result array. </p>
-<p>Algorithm description: </p><pre class="fragment">value = FLT_MIN;
+<p>Algorithm description: </p><pre class="fragment">value = -FLT_MAX;
 for (y = 0; y &lt; height; ++y)
 {
     for (size_t x = 0; x &lt; 7; ++x)

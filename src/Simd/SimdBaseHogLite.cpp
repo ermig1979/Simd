@@ -259,7 +259,7 @@ namespace Simd
                             dst[dstCol] = sum;
                         }
                         else
-                            dst[dstCol] = FLT_MIN;
+                            dst[dstCol] = -FLT_MAX;
                     }
                     dst += dstStride;
                     mask += maskStride;
@@ -464,7 +464,7 @@ namespace Simd
 
         void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
         {
-            *pValue = FLT_MIN;
+            *pValue = -FLT_MAX;
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < 7; ++col)

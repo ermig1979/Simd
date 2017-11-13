@@ -95,7 +95,7 @@ namespace Simd
             {
                 size_t filterStride = featureSize*filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
-                __m128 _min = _mm_set1_ps(FLT_MIN);
+                __m128 _min = _mm_set1_ps(-FLT_MAX);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
                     size_t dstCol = 0;
@@ -137,7 +137,7 @@ namespace Simd
                             dst[dstCol] = Avx::ExtractSum(sum);
                         }
                         else
-                            dst[dstCol] = FLT_MIN;
+                            dst[dstCol] = -FLT_MAX;
                     }
                     dst += dstStride;
                     mask += maskStride;
