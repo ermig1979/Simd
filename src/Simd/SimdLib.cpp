@@ -3801,7 +3801,7 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
     uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
+    if (Avx512bw::Enable && dstWidth >= Avx512bw::A)
         Avx512bw::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif

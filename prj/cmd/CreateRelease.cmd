@@ -42,6 +42,7 @@ erase %TMP_DIR%\prj\*.layout /q /s /f
 erase %TMP_DIR%\prj\*.cbTemp /q /s /f
 erase %TMP_DIR%\prj\*.pdb /q /s /f
 erase %TMP_DIR%\prj\*.pgm /q /s /f
+erase %TMP_DIR%\prj\*.ppm /q /s /f
 erase %TMP_DIR%\prj\*.jpg /q /s /f
 erase %TMP_DIR%\prj\Ocv.props /q /s /f
 erase %TMP_DIR%\prj\cmd\UpdateCopyrights.cmd /q /s /f
