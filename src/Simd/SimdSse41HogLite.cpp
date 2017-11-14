@@ -856,6 +856,67 @@ namespace Simd
                 }
             }
         }
+
+        template<bool align> SIMD_INLINE void Fill7x7(uint32_t * dst, size_t stride)
+        {
+            for (size_t row = 0; row < 7; ++row)
+            {
+                Store<align>((__m128i*)(dst + 0), Sse2::K_INV_ZERO);
+                Store<align>((__m128i*)(dst + 3), Sse2::K_INV_ZERO);
+                dst += stride;
+            }
+        }
+
+        template <size_t scale> void HogLiteCreateMask7x7(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, uint32_t * dst, size_t dstStride)
+        {
+            size_t dstStartEnd = 7 - scale;
+            size_t dstRowSize = (srcWidth*scale + 7 - scale) * sizeof(uint32_t);
+            for (size_t dstRow = 0; dstRow < dstStartEnd; ++dstRow)
+                memset(dst + dstRow*dstStride, 0, dstRowSize);
+
+            size_t alignedSrcWidth = AlignLo(srcWidth, F);
+            __m128 _threshold = _mm_set1_ps(*threshold);
+            for (size_t srcRow = 0; srcRow < srcHeight; ++srcRow)
+            {
+                for (size_t dstRow = 0; dstRow < scale; ++dstRow)
+                    memset(dst + (dstStartEnd + dstRow)*dstStride, 0, dstRowSize);
+
+                size_t srcCol = 0;
+                for (; srcCol < alignedSrcWidth; srcCol += F)
+                {
+                    int mask = _mm_movemask_ps(_mm_cmpgt_ps(Load<false>(src + srcCol), _threshold));
+                    if (mask)
+                    {
+                        uint32_t * pDst = dst + srcCol * scale;
+                        if (mask & 1)
+                            Fill7x7<false>(pDst + 0 * scale, dstStride);
+                        if (mask & 2)
+                            Fill7x7<false>(pDst + 1 * scale, dstStride);
+                        if (mask & 4)
+                            Fill7x7<false>(pDst + 2 * scale, dstStride);
+                        if (mask & 8)
+                            Fill7x7<false>(pDst + 3 * scale, dstStride);
+                    }
+                }
+                for (; srcCol < srcWidth; ++srcCol)
+                {
+                    if (src[srcCol] > *threshold)
+                        Fill7x7<false>(dst + srcCol * scale, dstStride);
+                }
+                src += srcStride;
+                dst += dstStride * scale;
+            }
+        }
+
+        void HogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
+        {
+            if (scale == 1 && size == 7)
+                HogLiteCreateMask7x7<1>(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
+            else if (scale == 2 && size == 7)
+                HogLiteCreateMask7x7<2>(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
+            else
+                Base::HogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 }

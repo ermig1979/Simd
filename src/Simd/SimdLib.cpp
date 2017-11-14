@@ -2401,6 +2401,14 @@ SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float
     simdHogLiteFindMax7x7(a, aStride, b, bStride, height, value, col, row);
 }
 
+typedef void(*SimdHogLiteCreateMaskPtr) (const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
+SimdHogLiteCreateMaskPtr simdHogLiteCreateMask = SIMD_FUNC1(HogLiteCreateMask, SIMD_SSE41_FUNC);
+
+SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
+{
+    simdHogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

@@ -620,6 +620,83 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncHLCM
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
+
+            FuncPtr func;
+            String description;
+
+            FuncHLCM(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            FuncHLCM(const FuncHLCM & f, size_t si, size_t sc, float th)
+                : func(f.func), description(f.description + "[" + ToString(si) + "x" + ToString(sc) + "-" + ToString((double)th, 1, true) + "]") {}
+
+
+            void Call(const View & src, float threshold, size_t scale, size_t size, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.stride / sizeof(float), src.width, src.height, &threshold, scale, size, (uint32_t*)dst.data, dst.stride / sizeof(uint32_t));
+            }
+        };
+    }
+
+#define FUNC_HLCM(function) FuncHLCM(function, #function)
+
+#define ARGS_HLCM(si, sc, th, f1, f2) si, sc, th, FuncHLCM(f1, si, sc, th), FuncHLCM(f2, si, sc, th)
+
+    bool HogLiteCreateMaskAutoTest(size_t srcWidth, size_t srcHeight, size_t size, size_t scale, float threshold, const FuncHLCM & f1, const FuncHLCM & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View src(srcWidth, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*sizeof(float)));
+        FillRandom32f(src, 0.0f, 1.0f);
+
+        size_t dstWidth = srcWidth*scale + size - scale;
+        size_t dstHeight = srcHeight*scale + size - scale;
+        View dst1(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth * sizeof(float)));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, scale, size, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, scale, size, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
+    bool HogLiteCreateMaskAutoTest(const FuncHLCM & f1, const FuncHLCM & f2)
+    {
+        bool result = true;
+
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 1, 0.5f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 1, 0.9f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 2, 0.5f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 2, 0.9f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W + O, H - O, ARGS_HLCM(7, 2, 0.9f, f1, f2));
+
+        return result;
+    }
+
+    bool HogLiteCreateMaskAutoTest()
+    {
+        bool result = true;
+
+        result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Base::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Sse41::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool HogLiteExtractFeaturesDataTest(bool create, size_t cell, size_t size, int width, int height, const FuncHLEF & f)
@@ -882,7 +959,6 @@ namespace Test
         return HogLiteFilterSeparableDataTest(create, DW / 16, DH, 8, 8, 16, 1, FUNC_HLFS(SimdHogLiteFilterSeparable));
     }
 
-
     bool HogLiteFindMax7x7DataTest(bool create, size_t number, const FuncHLFM & f)
     {
         bool result = true;
@@ -921,9 +997,9 @@ namespace Test
             TEST_LOAD(a);
             TEST_LOAD(b);
 
-            TEST_LOAD(value2);
-            TEST_LOAD(col2);
-            TEST_LOAD(row2);
+            TEST_LOAD(value1);
+            TEST_LOAD(col1);
+            TEST_LOAD(row1);
 
             f.Call(a, b, value2, col2, row2);
 
@@ -942,5 +1018,51 @@ namespace Test
     bool HogLiteFindMax7x7DataTest(bool create)
     {
         return HogLiteFindMax7x7DataTest(create, DW, FUNC_HLFM(SimdHogLiteFindMax7x7));
+    }
+
+    bool HogLiteCreateMaskDataTest(bool create, size_t srcWidth, size_t srcHeight, size_t size, size_t scale, float threshold, const FuncHLCM & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcWidth << ", " << srcHeight << "].");
+
+        View src(srcWidth, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth * sizeof(float)));
+
+        size_t dstWidth = srcWidth*scale + size - scale;
+        size_t dstHeight = srcHeight*scale + size - scale;
+        View dst1(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth * sizeof(float)));
+        View dst2(dstWidth, dstHeight, View::Int32, NULL, TEST_ALIGN(srcWidth * sizeof(float)));
+
+        if (create)
+        {
+            FillRandom32f(src, 0.0f, 1.0f);
+
+            TEST_SAVE(src);
+
+            f.Call(src, threshold, scale, size, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, threshold, scale, size, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool HogLiteCreateMaskDataTest(bool create)
+    {
+        return HogLiteCreateMaskDataTest(create, DW, DH, 7, 2, 0.5f, FUNC_HLCM(SimdHogLiteCreateMask));
     }
 }

@@ -2499,9 +2499,12 @@ extern "C"
         \param [in] srcWidth - a width of input array with features. Its minimal value is filterSize.
         \param [in] srcHeight - a height of input array with features. Its minimal value is filterSize.
         \param [in] featureSize - a size of cell with features. It must be 8 or 16.
-        \param [in] filter - a pointer to the 32-bit float array with filter values. Array must have size equal to filterSize*filterSize*featureSize.
+        \param [in] filter - a pointer to the 32-bit float array with filter values. 
+                    Array must have size equal to filterSize*filterSize*featureSize.
         \param [in] filterSize - a size (width and height) of used filter. 
-        \param [in] mask - a pointer to the 32-bit integer array with mask (0 or -1). Pointer can be null otherwise the array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
+        \param [in] mask - a pointer to the 32-bit integer array with mask (0 or -1). 
+                    Pointer can be null otherwise the array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
+                    A function ::SimdHogLiteCreateMask is usefull in order to create this mask.
         \param [in] maskStride - a row size of mask array. 
         \param [out] dst - a pointer to output buffer with result of filtration. Array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize).
         \param [in] dstStride - a row size of the output buffer with result of filtration.
@@ -2592,7 +2595,7 @@ extern "C"
         value = -FLT_MAX;
         for (y = 0; y < height; ++y)
         {
-            for (size_t x = 0; x < 7; ++x)
+            for (x = 0; x < 7; ++x)
             {
                 v = a[x, y] + b[x, y];
                 if (v > value)
@@ -2616,6 +2619,32 @@ extern "C"
         \param [out] row - a pointer to the output integer value with y-position of maximum.
     */
     SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
+
+    /*! @ingroup hog
+
+        \fn void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
+
+        \short Creates mask for function ::SimdHogLiteFilterFeatures.
+
+        Zeroes destination mask. Then for every source point:
+        \verbatim
+        if(src[x, y] > threshold)
+            for (dy = 0; dy < size; ++dy)
+                for (dx = 0; dx < size; ++dx)
+                    dst[x*scale + dx, y*scale + dy] = -1;
+        \endverbatim
+
+        \param [in] src - a pointer to the input 32-bit float 2D array.
+        \param [in] srcStride - a row size of the input array.
+        \param [in] srcWidth - a width of input array.
+        \param [in] srcHeight - a height of input array.
+        \param [in] threshold - a pointer to 32-bit float threshold.
+        \param [in] scale - a scale coefficient between input and output array.
+        \param [in] size - a size of neighborhood.
+        \param [out] dst - a pointer to the output 32-bit integer array with mask (0 or -1).
+        \param [in] dstStride - a row size of the output array.
+    */
+    SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
 
     /*! @ingroup other_conversion
 
