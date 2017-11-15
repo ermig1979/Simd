@@ -29,13 +29,13 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
-        __m256i K8_SUM_MASK = SIMD_MM256_SETR_EPI8(
+        const __m256i K8_SUM_MASK = SIMD_MM256_SETR_EPI8(
             0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00,
             0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00);
 
-        __m256i K32_PACK_64_TO_32 = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
+        const __m256i K32_PACK_64_TO_32 = SIMD_MM256_SETR_EPI32(0, 2, 4, 6, 1, 3, 5, 7);
 
         void IntegralSum(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint32_t * sum, size_t sumStride)
         {

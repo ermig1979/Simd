@@ -482,12 +482,44 @@ namespace Simd
             }
         }
 
+        template<size_t size> void HogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, uint32_t * dst, size_t dstStride)
+        {
+            size_t dstStartEnd = size - scale;
+            size_t dstRowSize = (srcWidth*scale + size - scale) * sizeof(uint32_t);
+            for (size_t srcRow = 0; srcRow < srcHeight; ++srcRow)
+            {
+                for (size_t dstRow = 0; dstRow < scale; ++dstRow)
+                    memset(dst + (dstStartEnd + dstRow)*dstStride, 0, dstRowSize);
+
+                for (size_t srcCol = 0; srcCol < srcWidth; ++srcCol)
+                {
+                    if (src[srcCol] > *threshold)
+                    {
+                        uint32_t * pDst = dst + srcCol * scale;
+                        for (size_t dstRow = 0; dstRow < size; ++dstRow)
+                        {
+                            memset(pDst, -1, size * sizeof(uint32_t));
+                            pDst += dstStride;
+                        }
+                    }
+                }
+                src += srcStride;
+                dst += dstStride*scale;
+            }
+        }
+
         void HogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
         {
             size_t dstStartEnd = size - scale;
             size_t dstRowSize = (srcWidth*scale + size - scale) * sizeof(uint32_t);
             for (size_t dstRow = 0; dstRow < dstStartEnd; ++dstRow)
                 memset(dst + dstRow*dstStride, 0, dstRowSize);
+
+            switch (size)
+            {
+            case 7: HogLiteCreateMask<7>(src, srcStride, srcWidth, srcHeight, threshold, scale, dst, dstStride); return;
+            default: break;
+            }
 
             for (size_t srcRow = 0; srcRow < srcHeight; ++srcRow)
             {

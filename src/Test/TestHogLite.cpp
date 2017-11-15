@@ -674,10 +674,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 1, 0.5f, f1, f2));
         result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 1, 0.9f, f1, f2));
-        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 2, 0.5f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 1, 0.5f, f1, f2));
         result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 2, 0.9f, f1, f2));
+        result = result && HogLiteCreateMaskAutoTest(W, H, ARGS_HLCM(7, 2, 0.5f, f1, f2));
         result = result && HogLiteCreateMaskAutoTest(W + O, H - O, ARGS_HLCM(7, 2, 0.9f, f1, f2));
 
         return result;
@@ -692,6 +692,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Sse41::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Avx2::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
 #endif 
 
         return result;
