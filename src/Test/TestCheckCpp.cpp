@@ -104,9 +104,10 @@ namespace Test
     static void TestPyramid()
     {
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
-        Pyramid p(16, 16, 3);
-        Fill(p, 1);
-        Build(p, ::SimdReduce2x2);
+        Pyramid p1(16, 16, 3), p2(16, 16, 3);
+        Fill(p1, 1);
+        Build(p1, ::SimdReduce2x2);
+        Simd::Copy(p1, p2);
     }
 
     static void TestStdVector()

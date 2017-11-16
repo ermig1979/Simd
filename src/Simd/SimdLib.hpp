@@ -3673,6 +3673,24 @@ namespace Simd
 
     /*! @ingroup cpp_pyramid_functions
 
+        \fn void Copy(const Pyramid<A> & src, Pyramid<A> & dst)
+
+        \short Copies one pyramid to another pyramid.
+
+        \note Input and output pyramids must have the same size.
+
+        \param [in] src - an input pyramid.
+        \param [out] dst - an output pyramid.
+    */
+    template<template<class> class A> SIMD_INLINE void Copy(const Pyramid<A> & src, Pyramid<A> & dst)
+    {
+        assert(src.Size() == dst.Size());
+        for (size_t level = 0; level < src.Size(); ++level)
+            Simd::Copy(src.At(level), dst.At(level));
+    }
+
+    /*! @ingroup cpp_pyramid_functions
+
         \fn void Build(Pyramid<A> & pyramid, ::SimdReduceType reduceType, bool compensation = true)
 
         \short Builds the pyramid (fills upper levels on the base of the lowest level).

@@ -54,6 +54,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2b06f80af8e67a719c4d2ac40284befb"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga2b06f80af8e67a719c4d2ac40284befb">Fill</a> (<a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;pyramid, uint8_t value)</td></tr>
 <tr class="memdesc:ga2b06f80af8e67a719c4d2ac40284befb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Fills pixels data of images in the pyramid by given value.  <a href="group__cpp__pyramid__functions.html#ga2b06f80af8e67a719c4d2ac40284befb">More...</a><br /></td></tr>
 <tr class="separator:ga2b06f80af8e67a719c4d2ac40284befb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga18771361cca4473c7f21aa3fae12e4d0">Copy</a> (const <a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;dst)</td></tr>
+<tr class="memdesc:ga18771361cca4473c7f21aa3fae12e4d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies one pyramid to another pyramid.  <a href="group__cpp__pyramid__functions.html#ga18771361cca4473c7f21aa3fae12e4d0">More...</a><br /></td></tr>
+<tr class="separator:ga18771361cca4473c7f21aa3fae12e4d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3245eb1d835d51750864be6317d58c9e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga3245eb1d835d51750864be6317d58c9e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">Build</a> (<a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;pyramid, ::<a class="el" href="group__c__types.html#gaa7d77022f5dee443673bfa4c07183e0f">SimdReduceType</a> reduceType, bool compensation=true)</td></tr>
 <tr class="memdesc:ga3245eb1d835d51750864be6317d58c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the pyramid (fills upper levels on the base of the lowest level).  <a href="group__cpp__pyramid__functions.html#ga3245eb1d835d51750864be6317d58c9e">More...</a><br /></td></tr>
@@ -96,6 +100,44 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">pyramid</td><td>- a pyramid. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">value</td><td>- a value to fill the pyramid. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga18771361cca4473c7f21aa3fae12e4d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga18771361cca4473c7f21aa3fae12e4d0">&#9670;&nbsp;</a></span>Copy()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Copy </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_pyramid.html">Pyramid</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Copies one pyramid to another pyramid. </p>
+<dl class="section note"><dt>Note</dt><dd>Input and output pyramids must have the same size.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input pyramid. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- an output pyramid. </td></tr>
   </table>
   </dd>
 </dl>
