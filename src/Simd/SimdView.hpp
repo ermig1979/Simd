@@ -327,7 +327,7 @@ namespace Simd
 
             \param [in] x - a x-coordinate of the pixel.
             \param [in] y - a y-coordinate of the pixel.
-            \return - a const reference to pixel of arbitrary type.
+            \return - a constant reference to pixel of arbitrary type.
         */
         template <class T> const T & At(size_t x, size_t y) const;
 
@@ -344,7 +344,7 @@ namespace Simd
             Gets constant reference to the pixel of arbitrary type into current view with specified coordinates.
 
             \param [in] p - a point with coordinates of the pixel.
-            \return - a const reference to pixel of arbitrary type.
+            \return - a constant reference to pixel of arbitrary type.
         */
         template <class T> const T & At(const Point<ptrdiff_t> & p) const;
 
@@ -355,6 +355,22 @@ namespace Simd
             \return - a reference to pixel of arbitrary type.
         */
         template <class T> T & At(const Point<ptrdiff_t> & p);
+
+        /*!
+            Gets constant pointer to the first pixel of specified row.
+
+            \param [in] row - a row of the image.
+            \return - a constant pointer to the first pixel.
+        */
+        template <class T> const T * Row(size_t row) const;
+
+        /*!
+            Gets pointer to the first pixel of specified row.
+
+            \param [in] row - a row of the image.
+            \return - a pointer to the first pixel.
+        */
+        template <class T> T * Row(size_t row);
 
         /*!
             \fn size_t PixelSize(Format format);
@@ -826,6 +842,18 @@ namespace Simd
     template <template<class> class A> template<class T> SIMD_INLINE T & View<A>::At(const Point<ptrdiff_t> & p)
     {
         return At<T>(p.x, p.y);
+    }
+
+    template <template<class> class A> template<class T> SIMD_INLINE const T * View<A>::Row(size_t row) const
+    {
+        assert(row < height);
+        return ((const T*)(data + row*stride));
+    }
+
+    template <template<class> class A> template<class T> SIMD_INLINE T * View<A>::Row(size_t row)
+    {
+        assert(row < height);
+        return ((T*)(data + row*stride));
     }
 
     template <template<class> class A> SIMD_INLINE size_t View<A>::PixelSize(Format format)

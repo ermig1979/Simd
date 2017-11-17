@@ -174,6 +174,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab3e10788491e23da44992a50fe6a2b34"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
 <tr class="memitem:ab3e10788491e23da44992a50fe6a2b34"><td class="memTemplItemLeft" align="right" valign="top">T &amp;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ab3e10788491e23da44992a50fe6a2b34">At</a> (const <a class="el" href="struct_simd_1_1_point.html">Point</a>&lt; ptrdiff_t &gt; &amp;p)</td></tr>
 <tr class="separator:ab3e10788491e23da44992a50fe6a2b34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4efe9b3d024b09f97458c4f5877fe4b"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:ae4efe9b3d024b09f97458c4f5877fe4b"><td class="memTemplItemLeft" align="right" valign="top">const T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ae4efe9b3d024b09f97458c4f5877fe4b">Row</a> (size_t row) const</td></tr>
+<tr class="separator:ae4efe9b3d024b09f97458c4f5877fe4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8751e26af4e644375f9e8b4a30f69672"><td class="memTemplParams" colspan="2">template&lt;class T &gt; </td></tr>
+<tr class="memitem:a8751e26af4e644375f9e8b4a30f69672"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a8751e26af4e644375f9e8b4a30f69672">Row</a> (size_t row)</td></tr>
+<tr class="separator:a8751e26af4e644375f9e8b4a30f69672"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a53ee5055bef66de9887ee7d7d83c7435"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a53ee5055bef66de9887ee7d7d83c7435">PixelSize</a> () const</td></tr>
 <tr class="separator:a53ee5055bef66de9887ee7d7d83c7435"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8a38c7ad08288593b725786b84194ba4"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a8a38c7ad08288593b725786b84194ba4">ChannelSize</a> () const</td></tr>
@@ -1051,7 +1057,7 @@ int main()
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a const reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>- a constant reference to pixel of arbitrary type. </dd></dl>
 
 </div>
 </div>
@@ -1114,7 +1120,7 @@ int main()
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>- a const reference to pixel of arbitrary type. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>- a constant reference to pixel of arbitrary type. </dd></dl>
 
 </div>
 </div>
@@ -1141,6 +1147,58 @@ int main()
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>- a reference to pixel of arbitrary type. </dd></dl>
+
+</div>
+</div>
+<a id="ae4efe9b3d024b09f97458c4f5877fe4b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae4efe9b3d024b09f97458c4f5877fe4b">&#9670;&nbsp;</a></span>Row() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const T* Row </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>row</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets constant pointer to the first pixel of specified row.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- a row of the image. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a constant pointer to the first pixel. </dd></dl>
+
+</div>
+</div>
+<a id="a8751e26af4e644375f9e8b4a30f69672"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8751e26af4e644375f9e8b4a30f69672">&#9670;&nbsp;</a></span>Row() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">T* Row </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>row</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets pointer to the first pixel of specified row.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">row</td><td>- a row of the image. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a pointer to the first pixel. </dd></dl>
 
 </div>
 </div>
