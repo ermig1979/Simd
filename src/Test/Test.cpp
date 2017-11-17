@@ -154,6 +154,8 @@ namespace Test
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawEllipse);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawCircle);
 
+    TEST_ADD_GROUP_ONLY_SPECIAL(FontDraw);
+
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);
     TEST_ADD_GROUP(EdgeBackgroundGrowRangeFast);
     TEST_ADD_GROUP(EdgeBackgroundIncrementCount);
