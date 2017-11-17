@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse41.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdExtract.h"
@@ -1197,7 +1196,7 @@ namespace Simd
                         CreateMask7x7x2(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
                 }
                 else
-                    Sse41::HogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
+                    Base::HogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
             }
         };
 

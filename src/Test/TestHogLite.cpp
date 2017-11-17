@@ -699,6 +699,11 @@ namespace Test
             result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Avx2::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Avx512bw::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
+#endif 
+
         return result;
     }
 

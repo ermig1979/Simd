@@ -1198,6 +1198,178 @@ namespace Simd
             HogLiteSeparableFilter filter;
             filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
         }
+
+        const __m512i K64_15 = SIMD_MM512_SET1_EPI64(15);
+        const __m512i K32_64_TO_32_2 = SIMD_MM512_SETR_EPI32(0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14);
+
+        class HogLiteMaskCreater
+        {
+            typedef Simd::Array<uint32_t> Ints;
+            Ints _sums[8];
+            size_t _dstWidth, _alignedDstWidth, _dstHeight;
+            __mmask16 _dstWidthTail;
+
+            void Init(size_t srcWidth, size_t srcHeight, size_t scale, size_t size)
+            {
+                _dstWidth = srcWidth*scale + size - scale;
+                _alignedDstWidth = AlignLo(_dstWidth, F);
+                _dstWidthTail = TailMask16(_dstWidth - _alignedDstWidth);
+                _dstHeight = srcHeight*scale + size - scale;
+                size_t sumSize = AlignHi(_dstWidth, F) + 2*F;
+                for (size_t i = 0; i < 8; ++i)
+                    _sums[i].Resize(sumSize, true);
+            }
+
+            template<size_t step, bool align, bool mask> SIMD_INLINE void SetDstRow(const uint32_t * sum0, const uint32_t * sum1, uint32_t * dst, __mmask16 tail = -1)
+            {
+                __m512i s00 = Load<false>(sum0 - step);
+                __m512i s10 = Load<false>(sum1 - step);
+                __m512i s01 = Load<true>(sum0);
+                __m512i s11 = Load<true>(sum1);
+                __m512i sum = _mm512_sub_epi32(_mm512_sub_epi32(s11, s10), _mm512_sub_epi32(s01, s00));
+                __m512i value = _mm512_movm_epi32(_mm512_cmpgt_epi32_mask(sum, K_ZERO));
+                Store<align, mask>(dst, value, tail);
+            }
+
+            template<size_t step> SIMD_INLINE void SetDstRow(const uint32_t * sum0, const uint32_t * sum1, uint32_t * dst)
+            {
+                size_t dstCol = 0;
+                for (; dstCol < _alignedDstWidth; dstCol += F)
+                    SetDstRow<step, false, false>(sum0 + dstCol, sum1 + dstCol, dst + dstCol);
+                if(dstCol < _dstWidth)
+                    SetDstRow<step, false, true>(sum0 + dstCol, sum1 + dstCol, dst + dstCol, _dstWidthTail);
+            }
+
+            void CreateMask7x7x1(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, uint32_t * dst, size_t dstStride)
+            {
+                size_t alignedSrcWidth = AlignLo(srcWidth, F);
+                __m512 _threshold = _mm512_set1_ps(*threshold);
+                for (size_t row = 0; row < srcHeight; ++row)
+                {
+                    uint32_t * sum0 = _sums[(row + 0) & 7].data + F;
+                    uint32_t * sum6 = _sums[(row + 6) & 7].data + F;
+                    uint32_t * sum7 = _sums[(row + 7) & 7].data + F;
+
+                    __m512i _rowSums = K_ZERO;
+                    size_t col = 0;
+                    for (; col < alignedSrcWidth; col += F)
+                    {
+                        __mmask16 mmask = _mm512_cmp_ps_mask(Avx512f::Load<false>(src + col), _threshold, _CMP_GT_OQ);
+
+                        __mmask64 lo = ((mmask & 0xFF) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
+                        _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(lo), K_ZERO));
+                        _mm256_storeu_si256((__m256i*)(sum7 + col + 00), _mm256_add_epi32(_mm512_cvtepi64_epi32(_rowSums), _mm256_loadu_si256((__m256i*)(sum6 + col + 00))));
+                        _rowSums = _mm512_permutexvar_epi64(K64_15, _rowSums);
+
+                        __mmask64 hi = ((mmask >> 8) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
+                        _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(hi), K_ZERO));
+                        _mm256_storeu_si256((__m256i*)(sum7 + col + HF), _mm256_add_epi32(_mm512_cvtepi64_epi32(_rowSums), _mm256_loadu_si256((__m256i*)(sum6 + col + HF))));
+                        _rowSums = _mm512_permutexvar_epi64(K64_15, _rowSums);
+                    }
+                    uint32_t rowSum = sum7[col - 1] - sum6[col - 1];
+                    for (; col < srcWidth; ++col)
+                    {
+                        if (src[col] > *threshold)
+                            rowSum += 0xFF;
+                        sum7[col] = rowSum + sum6[col];
+                    }
+                    for (; col < _dstWidth; ++col)
+                        sum7[col] = sum7[col - 1];
+
+                    SetDstRow<7>(sum0, sum7, dst);
+
+                    src += srcStride;
+                    dst += dstStride;
+                }
+
+                for (size_t row = srcHeight; row < _dstHeight; ++row)
+                {
+                    uint32_t * sum0 = _sums[(row + 0) & 7].data + F;
+                    uint32_t * sum7 = _sums[(srcHeight - 1 + 7) & 7].data + F;
+                    SetDstRow<7>(sum0, sum7, dst);
+                    dst += dstStride;
+                }
+            }
+
+            void CreateMask7x7x2(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, uint32_t * dst, size_t dstStride)
+            {
+                size_t alignedSrcWidth = AlignLo(srcWidth, F);
+                __m512 _threshold = _mm512_set1_ps(*threshold);
+                for (size_t srcRow = 0; srcRow < srcHeight; ++srcRow)
+                {
+                    size_t dstRow = srcRow * 2;
+                    uint32_t * sum0 = _sums[(srcRow + 0) & 7].data + F;
+                    uint32_t * sum1 = _sums[(srcRow + 1) & 7].data + F;
+                    uint32_t * sum3 = _sums[(srcRow + 3) & 7].data + F;
+                    uint32_t * sum4 = _sums[(srcRow + 4) & 7].data + F;
+
+                    __m512i _rowSums = K_ZERO;
+                    size_t srcCol = 0, dstCol = 0;
+                    for (; srcCol < alignedSrcWidth; srcCol += F, dstCol += DF)
+                    {
+                        __mmask16 mmask = _mm512_cmp_ps_mask(Avx512f::Load<false>(src + srcCol), _threshold, _CMP_GT_OQ);
+
+                        __mmask64 lo = ((mmask & 0xFF) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
+                        _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(lo), K_ZERO));
+                        Store<false>(sum4 + dstCol + 0, _mm512_add_epi32(_mm512_permutexvar_epi32(K32_64_TO_32_2, _rowSums), Load<false>(sum3 + dstCol + 0)));
+                        _rowSums = _mm512_permutexvar_epi64(K64_15, _rowSums);
+
+                        __mmask64 hi = ((mmask >> 8) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
+                        _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(hi), K_ZERO));
+                        Store<false>(sum4 + dstCol + F, _mm512_add_epi32(_mm512_permutexvar_epi32(K32_64_TO_32_2, _rowSums), Load<false>(sum3 + dstCol + F)));
+                        _rowSums = _mm512_permutexvar_epi64(K64_15, _rowSums);
+                    }
+                    uint32_t rowSum = sum4[dstCol - 1] - sum3[dstCol - 1];
+                    for (; srcCol < srcWidth; srcCol += 1, dstCol += 2)
+                    {
+                        if (src[srcCol] > *threshold)
+                            rowSum += 0xFF;
+                        sum4[dstCol + 0] = rowSum + sum3[dstCol + 0];
+                        sum4[dstCol + 1] = rowSum + sum3[dstCol + 1];
+                    }
+                    for (; dstCol < _dstWidth; ++dstCol)
+                        sum4[dstCol] = sum4[dstCol - 1];
+
+                    SetDstRow<7>(sum0, sum4, dst);
+                    dst += dstStride;
+                    SetDstRow<7>(sum1, sum4, dst);
+                    dst += dstStride;
+                    src += srcStride;
+                }
+
+                uint32_t * sum0 = _sums[(srcHeight + 0) & 7].data + F;
+                uint32_t * sum1 = _sums[(srcHeight + 1) & 7].data + F;
+                uint32_t * sum2 = _sums[(srcHeight + 2) & 7].data + F;
+                uint32_t * sum3 = _sums[(srcHeight + 3) & 7].data + F;
+                SetDstRow<7>(sum0, sum3, dst + 0 * dstStride);
+                SetDstRow<7>(sum1, sum3, dst + 1 * dstStride);
+                SetDstRow<7>(sum1, sum3, dst + 2 * dstStride);
+                SetDstRow<7>(sum2, sum3, dst + 3 * dstStride);
+                SetDstRow<7>(sum2, sum3, dst + 4 * dstStride);
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
+            {
+                if (size == 7 && (scale == 1 || scale == 2))
+                {
+                    Init(srcWidth, srcHeight, scale, size);
+                    if (scale == 1)
+                        CreateMask7x7x1(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
+                    else
+                        CreateMask7x7x2(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
+                }
+                else
+                    Base::HogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
+            }
+        };
+
+        void HogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
+        {
+            HogLiteMaskCreater maskCreater;
+            maskCreater.Run(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
