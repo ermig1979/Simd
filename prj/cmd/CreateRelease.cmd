@@ -48,6 +48,7 @@ erase %TMP_DIR%\prj\Ocv.props /q /s /f
 erase %TMP_DIR%\prj\cmd\UpdateCopyrights.cmd /q /s /f
 erase %TMP_DIR%\prj\cmd\CreateRelease.cmd /q /s /f
 erase %TMP_DIR%\prj\cmd\GenerateHelp.cmd /q /s /f
+erase %TMP_DIR%\prj\vs*\*.txt /q /s /f
 erase %TMP_DIR%\docs\*.tmp /q /s /f
 
 echo Create ZIP archive:

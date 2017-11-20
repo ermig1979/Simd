@@ -108,15 +108,17 @@ namespace Test
         View gray(TEST_SIZE_MAX, TEST_SIZE_MAX, View::Gray8);
         Simd::Fill(bgra, 0);
         Gdiplus::Bitmap bitmap((int)bgra.width, (int)bgra.height, (int)bgra.stride, PixelFormat32bppARGB, bgra.data);
-        Gdiplus::Font font(Gdiplus::FontFamily::GenericMonospace(), TEST_FONT_SIZE);
+        Gdiplus::Font font(Gdiplus::FontFamily::GenericMonospace(), TEST_FONT_SIZE, Gdiplus::FontStyleBold);
         Gdiplus::SolidBrush brush(Gdiplus::Color::White);
         Gdiplus::Graphics graphics(&bitmap);
 
-        Gdiplus::RectF r0, r1;
-        graphics.MeasureString(L" ", -1, &font, Gdiplus::PointF(0, 0), &r0);
-        graphics.MeasureString(L"1", -1, &font, Gdiplus::PointF(0, 0), &r1);
-        ptrdiff_t indent = (ptrdiff_t)::floor(r0.Width*0.5f);
-        Size sizeMax((ptrdiff_t)::ceil(r1.Width) - 2*indent, (ptrdiff_t)::ceil(r1.Height));
+        Gdiplus::RectF r12, r11, r21;
+        graphics.MeasureString(L"12", -1, &font, Gdiplus::PointF(0, 0), &r12);
+        graphics.MeasureString(L"1", -1, &font, Gdiplus::PointF(0, 0), &r11);
+        graphics.MeasureString(L"1\n2", -1, &font, Gdiplus::PointF(0, 0), &r21);
+        ptrdiff_t indentX = (ptrdiff_t)::floor(r11.Width - r12.Width*0.5f);
+        ptrdiff_t indentY = (ptrdiff_t)::floor(r11.Height - r21.Height*0.5f);
+        Size sizeMax((ptrdiff_t)::ceil(r11.Width) - 2*indentX, (ptrdiff_t)::ceil(r11.Height) - 2*indentY);
 
         FontData data;
         if (!data.Good())
@@ -125,6 +127,8 @@ namespace Test
         data.Write(TEST_CHAR_MAX);
         data.Write(sizeMax.x);
         data.Write(sizeMax.y);
+        data.Write(indentX);
+        data.Write(indentY);
         for (int s = TEST_CHAR_MIN; s < TEST_CHAR_MAX; ++s)
         {
             Simd::Fill(bgra, 0);
@@ -155,7 +159,7 @@ namespace Test
                 assert(!above);
             }
 
-            ptrdiff_t top = 0, bottom = 0;
+            ptrdiff_t top = indentY, bottom = indentY;
             for (ptrdiff_t y = 0; y < sizeMax.y; ++y)
             {
                 if (rows[y].size())
@@ -174,13 +178,13 @@ namespace Test
             }
 
             data.Write(s);
-            data.Write(top);
-            data.Write(bottom);
+            data.Write(top - indentY);
+            data.Write(bottom - indentY);
             for (ptrdiff_t y = top; y < bottom; ++y)
             {
                 data.Write(rows[y].size()/2);
                 for (size_t i = 0; i < rows[y].size(); ++i)
-                    data.Write(rows[y][i] - indent);
+                    data.Write(std::max<ptrdiff_t>(0, rows[y][i] - indentX));
             }
         }
 
@@ -197,13 +201,25 @@ namespace Test
 {
     bool FontDrawSpecialTest()
     {
+        typedef Simd::Pixel::Bgra32 Color;
+
         View image(W, H, View::Bgra32);
+        for (size_t y = 0; y < image.height; ++y)
+        {
+            Color * row = image.Row<Color>(y);
+            for (size_t x = 0; x < image.width; ++x)
+                row[x] = Color(255, (uint8_t)x, (uint8_t)y);
+        }
 
-        Simd::FillBgra(image, 0, 64, 128, 255);
-
-        Simd::Font font(64);
-
-        font.Draw(image, "Test string __---", Point(100, 100), 0xFFFF7777);
+        String text = "First_string,\nSecond-line.";
+        Simd::Font font(16);
+        font.Draw(image, text, Point(0, 0), Color(255, 255, 255));
+        for (size_t i = 0; i < 10; ++i)
+        {
+            font.Resize(Random(H / 2) + 16);
+            font.Draw(image, text, Point(Random(W), Random(H)*2/3),
+                Color(Random(255), Random(255), Random(255)));
+        }
 
         image.Save("texts.ppm");
 
