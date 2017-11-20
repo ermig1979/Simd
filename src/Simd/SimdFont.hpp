@@ -32,19 +32,37 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_drawing
+
+        \short The Font class provides text drawing.
+    */
     class Font
     {
     public:
-        typedef std::string String;
-        typedef Simd::Point<ptrdiff_t> Point;
-        typedef Simd::View<Simd::Allocator> View;
+        typedef std::string String; /*!< String type definition. */
+        typedef Simd::Point<ptrdiff_t> Point; /*!< Point type definition. */
+        typedef Simd::View<Simd::Allocator> View; /*!< Image time definition. */
 
+        /*!
+            Creates a new Font class with given height.
+
+            \note The font is generated on the base of the generic monospace font from Gdiplus.
+
+            \param [in] height - initial height value. By default it is equal to 16.
+        */
         Font(size_t height = 16)
         {
             LoadDefault();
             Resize(height);
         }
 
+        /*!
+            Sets a new height value to font.
+
+            \param [in] height - a new height value. 
+
+            \return a result of the operation.
+        */
         bool Resize(size_t height)
         {
             if (height < 4u || height > (size_t)_originalSize.y)
@@ -78,35 +96,50 @@ namespace Simd
             return true;
         }
 
+        /*!
+            Gets height of the font.
+
+            \return current height of the font.
+        */
         size_t Height() const
         {
             return _currentSize.y;
         }
 
+        /*!
+            Draws a text at the image.
+
+            \param [out] canvas - a canvas (image where we draw text).
+            \param [in] text - a text to draw.
+            \param [in] position - a start position to draw text.
+            \param [in] color - a color of the text.
+
+            \return a result of the operation.
+        */
         template <class Color> bool Draw(View & canvas, const String & text, const Point & position, const Color & color) const
         {
             assert(sizeof(color) == canvas.PixelSize());
 
-            Point size = canvas.Size() - position;
             View alpha;
-            AlphaMask(size, text, alpha);
-            size.x = std::min(size.x, alpha.Size().x);
-            size.y = std::min(size.y, alpha.Size().y);
+            Rect canvasRect, alphaRect;
+            CreateAlpha(text, Rect(canvas.Size()), position, alpha, canvasRect, alphaRect);
 
-            View foreground(size, canvas.format);
-            for (ptrdiff_t y = 0; y < size.y; ++y)
+            View foreground(alpha.Size(), canvas.format);
+            for (size_t y = 0; y < foreground.height; ++y)
             {
                 Color * row = foreground.Row<Color>(y);
-                for (ptrdiff_t x = 0; x < size.x; ++x)
+                for (size_t x = 0; x < foreground.width; ++x)
                     row[x] = color;
             }
 
-            Simd::AlphaBlending(foreground, alpha.Region(size, View::TopLeft), canvas.Region(position, position + size).Ref());
+            Simd::AlphaBlending(foreground.Region(alphaRect), alpha.Region(alphaRect), canvas.Region(canvasRect).Ref());
 
             return true;
         }
 
     private:
+        typedef Simd::Rectangle<ptrdiff_t> Rect;
+        typedef std::vector<Rect> Rects;
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
         typedef std::vector<Point> Points;
 
@@ -121,37 +154,46 @@ namespace Simd
         Point _originalSize, _currentSize, _originalIndent, _currentIndent;
         char _symbolMin, _symbolMax;
 
-        void AlphaMask(const Point & sizeMax, const String & text, View & alpha) const
+        void CreateAlpha(const String & text, const Rect & canvas, const Point & shift, View & alpha, Rect & canvasRect, Rect & alphaRect) const
         {
-            Point size, current = _currentIndent;
-            Points points;
-            points.reserve(text.size());
+            Rects rects;
+            rects.reserve(text.size());
             String symbols;
             symbols.reserve(text.size());
+            Point curr;
             for (size_t i = 0; i < text.size(); ++i)
             {
                 char value = text[i];
                 if (value >= _symbolMin && value <= _symbolMax)
                 {
-                    if (current.x < sizeMax.x && current.y < sizeMax.y)
+                    Rect current(curr, curr + _currentSize);
+                    Rect shifted = current.Shifted(shift + _currentIndent);
+                    if (!canvas.Intersection(shifted).Empty())
                     {
+                        alphaRect |= current;
+                        canvasRect |= shifted;
+                        rects.push_back(current);
                         symbols.push_back(value);
-                        points.push_back(current);
                     }
-                    current.x += _currentSize.x;
+                    curr.x += _currentSize.x;
                 }
                 else if (value == '\n')
                 {
-                    current.x = _currentIndent.x;
-                    current.y += _currentSize.y;
+                    curr.x = 0;
+                    curr.y += _currentSize.y;
                 }
-                size.x = std::max(size.x, current.x + _currentSize.x);
-                size.y = std::max(size.y, current.y + _currentSize.y);
             }
-            alpha.Recreate(size, View::Gray8);
+            alpha.Recreate(alphaRect.Size(), View::Gray8);
             Simd::Fill(alpha, 0);
             for (size_t i = 0; i < symbols.size(); ++i)
-                Simd::Copy(_currentSymbols[symbols[i] - _symbolMin].image, alpha.Region(points[i], points[i] + _currentSize).Ref());
+                Simd::Copy(_currentSymbols[symbols[i] - _symbolMin].image, alpha.Region(rects[i].Shifted(-alphaRect.TopLeft())).Ref());
+            Rect old = canvasRect;
+            canvasRect &= canvas;
+            alphaRect.Shift(-alphaRect.TopLeft());
+            alphaRect.left += canvasRect.left - old.left;
+            alphaRect.top += canvasRect.top - old.top;
+            alphaRect.right += canvasRect.right - old.right;
+            alphaRect.bottom += canvasRect.bottom - old.bottom;
         }
 
         uint8_t LoadValue(const uint8_t * & data, size_t & size)
@@ -1768,10 +1810,11 @@ namespace Simd
 
             return Load(data, sizeof(data));
         }
-
+        /// \cond DO_NOT_DOCUMENT
 #ifdef TEST_GENERATE_FONT
         friend Test::GenerateFont;
 #endif
+        /// \endcond
     };
 }
 

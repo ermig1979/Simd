@@ -213,11 +213,11 @@ namespace Test
 
         String text = "First_string,\nSecond-line.";
         Simd::Font font(16);
-        font.Draw(image, text, Point(0, 0), Color(255, 255, 255));
+        font.Draw(image, text, Point(-10, 0), Color(255, 255, 255));
         for (size_t i = 0; i < 10; ++i)
         {
             font.Resize(Random(H / 2) + 16);
-            font.Draw(image, text, Point(Random(W), Random(H)*2/3),
+            font.Draw(image, text, Point(Random(W) - W/3, Random(H) - H/2),
                 Color(Random(255), Random(255), Random(255)));
         }
 

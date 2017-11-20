@@ -1,6 +1,6 @@
 PROJECT_NAME="Simd Library"
 OUTPUT_DIRECTORY=..\..\docs
-INPUT=..\txt\DoxygenData.txt ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp ..\..\src\Simd\SimdRectangle.hpp ..\..\src\Simd\SimdView.hpp ..\..\src\Simd\SimdPixel.hpp ..\..\src\Simd\SimdLib.hpp ..\..\src\Simd\SimdFrame.hpp ..\..\src\Simd\SimdPyramid.hpp ..\..\src\Simd\SimdDetection.hpp ..\..\src\Simd\SimdNeural.hpp ..\..\src\Simd\SimdContour.hpp  ..\..\src\Simd\SimdShift.hpp ..\..\src\Simd\SimdDrawing.hpp  ..\..\src\Simd\SimdImageMatcher.hpp
+INPUT=..\txt\DoxygenData.txt ..\..\src\Simd\SimdLib.h ..\..\src\Simd\SimdAllocator.hpp ..\..\src\Simd\SimdPoint.hpp ..\..\src\Simd\SimdRectangle.hpp ..\..\src\Simd\SimdView.hpp ..\..\src\Simd\SimdPixel.hpp ..\..\src\Simd\SimdLib.hpp ..\..\src\Simd\SimdFrame.hpp ..\..\src\Simd\SimdPyramid.hpp ..\..\src\Simd\SimdDetection.hpp ..\..\src\Simd\SimdNeural.hpp ..\..\src\Simd\SimdContour.hpp  ..\..\src\Simd\SimdShift.hpp ..\..\src\Simd\SimdDrawing.hpp ..\..\src\Simd\SimdFont.hpp ..\..\src\Simd\SimdImageMatcher.hpp
 EXTRACT_ALL=NO
 SHOW_INCLUDE_FILES=NO
 SHOW_USED_FILES=NO
