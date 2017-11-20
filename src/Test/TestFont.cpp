@@ -112,15 +112,11 @@ namespace Test
         Gdiplus::SolidBrush brush(Gdiplus::Color::White);
         Gdiplus::Graphics graphics(&bitmap);
 
-        Size sizeMax;
-        for (int s = TEST_CHAR_MIN; s < TEST_CHAR_MAX; ++s)
-        {
-            Gdiplus::RectF rectf;
-            wchar_t text[2] = { wchar_t(s) };
-            graphics.MeasureString(text, -1, &font, Gdiplus::PointF(0, 0), &rectf);
-            sizeMax.x = Simd::Max(sizeMax.x, (ptrdiff_t)::ceil(rectf.Width));
-            sizeMax.y = Simd::Max(sizeMax.y, (ptrdiff_t)::ceil(rectf.Height));
-        }
+        Gdiplus::RectF r0, r1;
+        graphics.MeasureString(L" ", -1, &font, Gdiplus::PointF(0, 0), &r0);
+        graphics.MeasureString(L"1", -1, &font, Gdiplus::PointF(0, 0), &r1);
+        ptrdiff_t indent = (ptrdiff_t)::floor(r0.Width*0.5f);
+        Size sizeMax((ptrdiff_t)::ceil(r1.Width) - 2*indent, (ptrdiff_t)::ceil(r1.Height));
 
         FontData data;
         if (!data.Good())
@@ -184,7 +180,7 @@ namespace Test
             {
                 data.Write(rows[y].size()/2);
                 for (size_t i = 0; i < rows[y].size(); ++i)
-                    data.Write(rows[y][i]);
+                    data.Write(rows[y][i] - indent);
             }
         }
 
@@ -205,9 +201,9 @@ namespace Test
 
         Simd::FillBgra(image, 0, 64, 128, 255);
 
-        Simd::Font font(16);
+        Simd::Font font(64);
 
-        font.Draw(image, "Test string", Point(100, 100), 0xFFFF7777);
+        font.Draw(image, "Test string __---", Point(100, 100), 0xFFFF7777);
 
         image.Save("texts.ppm");
 
