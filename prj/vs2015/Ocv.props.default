@@ -10,5 +10,8 @@
       <AdditionalDependencies>opencv_world320.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>c:\opencv\build\x64\vc14\lib;c:\opencv\build\x64\vc14\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
+	<PostBuildEvent>
+      <Command>xcopy c:\opencv\build\x64\vc14\bin\*.dll $(OutDir) /y /i /s</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
 </Project>
