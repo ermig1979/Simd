@@ -70,9 +70,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:adb537cfa71cc25fd76f3fd035b1d0466"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18442381d29616afabbb72a5548e9855"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_font.html#a18442381d29616afabbb72a5548e9855">Height</a> () const</td></tr>
 <tr class="separator:a18442381d29616afabbb72a5548e9855"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a848a95f72b486c8226bf4bd481a55d14"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_simd_1_1_font.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_font.html#a848a95f72b486c8226bf4bd481a55d14">Measure</a> (const <a class="el" href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">String</a> &amp;text) const</td></tr>
+<tr class="separator:a848a95f72b486c8226bf4bd481a55d14"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43d92594ee95f57bc46aed43d2c4ac5d"><td class="memTemplParams" colspan="2">template&lt;class Color &gt; </td></tr>
 <tr class="memitem:a43d92594ee95f57bc46aed43d2c4ac5d"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="class_simd_1_1_font.html#a43d92594ee95f57bc46aed43d2c4ac5d">Draw</a> (<a class="el" href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> &amp;canvas, const <a class="el" href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">String</a> &amp;text, const <a class="el" href="class_simd_1_1_font.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;position, const Color &amp;color) const</td></tr>
 <tr class="separator:a43d92594ee95f57bc46aed43d2c4ac5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a535dc958fcca9e32dbab20b87e379cc4"><td class="memTemplParams" colspan="2">template&lt;class Color &gt; </td></tr>
+<tr class="memitem:a535dc958fcca9e32dbab20b87e379cc4"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="class_simd_1_1_font.html#a535dc958fcca9e32dbab20b87e379cc4">Draw</a> (<a class="el" href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> &amp;canvas, const <a class="el" href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">String</a> &amp;text, const <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">View::Position</a> &amp;position, const Color &amp;color) const</td></tr>
+<tr class="separator:a535dc958fcca9e32dbab20b87e379cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing. ">Font</a> class provides text drawing. </p>
@@ -195,8 +200,34 @@ Public Member Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a848a95f72b486c8226bf4bd481a55d14"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a848a95f72b486c8226bf4bd481a55d14">&#9670;&nbsp;</a></span>Measure()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_simd_1_1_font.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> Measure </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">String</a> &amp;&#160;</td>
+          <td class="paramname"><em>text</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Measures a size of region is need to draw given text.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>measured size. </dd></dl>
+
+</div>
+</div>
 <a id="a43d92594ee95f57bc46aed43d2c4ac5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a43d92594ee95f57bc46aed43d2c4ac5d">&#9670;&nbsp;</a></span>Draw()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a43d92594ee95f57bc46aed43d2c4ac5d">&#9670;&nbsp;</a></span>Draw() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -238,6 +269,57 @@ Public Member Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas (image where we draw text). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- a start position to draw text. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of the operation. </dd></dl>
+
+</div>
+</div>
+<a id="a535dc958fcca9e32dbab20b87e379cc4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a535dc958fcca9e32dbab20b87e379cc4">&#9670;&nbsp;</a></span>Draw() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Draw </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> &amp;&#160;</td>
+          <td class="paramname"><em>canvas</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_simd_1_1_font.html#afbeda3fd1bdc8c37d01bdf9f5c8274ff">String</a> &amp;&#160;</td>
+          <td class="paramname"><em>text</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">View::Position</a> &amp;&#160;</td>
+          <td class="paramname"><em>position</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const Color &amp;&#160;</td>
+          <td class="paramname"><em>color</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Draws a text at the image.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">canvas</td><td>- a canvas (image where we draw text). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">text</td><td>- a text to draw. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">position</td><td>- a position to draw text (see <a class="el" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83">Simd::View::Position</a>). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">color</td><td>- a color of the text.</td></tr>
   </table>
   </dd>

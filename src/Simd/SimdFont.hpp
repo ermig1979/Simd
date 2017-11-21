@@ -107,6 +107,33 @@ namespace Simd
         }
 
         /*!
+            Measures a size of region is need to draw given text.
+
+            \param [in] text - a text to draw.
+
+            \return measured size.
+        */
+        Point Measure(const String & text) const
+        {
+            Point size, curr;
+            for (size_t i = 0; i < text.size(); ++i)
+            {
+                if (text[i] >= _symbolMin && text[i] <= _symbolMax)
+                {
+                    curr.x += _currentSize.x;
+                    size.x = std::max(size.x, curr.x);
+                    size.y = std::max(size.y, curr.y + _currentSize.y);
+                }
+                else if (text[i] == '\n')
+                {
+                    curr.x = 0;
+                    curr.y += _currentSize.y;
+                }
+            }
+            return size.x ? size + 2 * _currentIndent : Point();
+        }
+
+        /*!
             Draws a text at the image.
 
             \param [out] canvas - a canvas (image where we draw text).
@@ -135,6 +162,21 @@ namespace Simd
             Simd::AlphaBlending(foreground.Region(alphaRect), alpha.Region(alphaRect), canvas.Region(canvasRect).Ref());
 
             return true;
+        }
+
+        /*!
+            Draws a text at the image.
+
+            \param [out] canvas - a canvas (image where we draw text).
+            \param [in] text - a text to draw.
+            \param [in] position - a position to draw text (see Simd::View::Position).
+            \param [in] color - a color of the text.
+
+            \return a result of the operation.
+        */
+        template <class Color> bool Draw(View & canvas, const String & text, const View::Position & position, const Color & color) const
+        {
+            return Draw(canvas.Region(Measure(text), position).Ref(), text, Point(0, 0), color);
         }
 
     private:
