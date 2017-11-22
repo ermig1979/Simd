@@ -208,6 +208,42 @@ namespace Simd
 
     /*! @ingroup cpp_drawing
 
+        \fn void DrawRectangle(View<A> & canvas, const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight, const Color & color, size_t width = 1)
+
+        \short Draws a rectangle at the image.
+
+        \param [out] canvas - a canvas (image where we draw rectangle).
+        \param [in] topLeft - a top-left corner of the rectangle.
+        \param [in] bottomRight - a bottom-right corner of the rectangle.
+        \param [in] color - a color of the rectangle frame.
+        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, const Point<ptrdiff_t> & topLeft, const Point<ptrdiff_t> & bottomRight, const Color & color, size_t width = 1)
+    {
+        DrawRectangle<A, Color>(canvas, Rectangle<ptrdiff_t>(topLeft, bottomRight), color, width);
+    }
+
+    /*! @ingroup cpp_drawing
+
+        \fn void DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1)
+
+        \short Draws a rectangle at the image.
+
+        \param [out] canvas - a canvas (image where we draw rectangle).
+        \param [in] left - a left of the rectangle.
+        \param [in] top - a top of the rectangl.
+        \param [in] right - a right of the rectangl.
+        \param [in] bottom - a bottom of the rectangl.
+        \param [in] color - a color of the rectangle frame.
+        \param [in] width - a width of the rectangle frame. By default it is equal to 1.
+    */
+    template<template<class> class A, class Color> SIMD_INLINE void DrawRectangle(View<A> & canvas, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, const Color & color, size_t width = 1)
+    {
+        DrawRectangle<A, Color>(canvas, Rectangle<ptrdiff_t>(left, top, right, bottom), color, width);
+    }
+
+    /*! @ingroup cpp_drawing
+
         \fn void DrawFilledRectangle(View<A> & canvas, Rectangle<ptrdiff_t> rect, const Color & color)
 
         \short Draws a filled rectangle at the image.
