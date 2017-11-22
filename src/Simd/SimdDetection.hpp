@@ -33,6 +33,10 @@
 
 #include <limits.h>
 
+#ifndef SIMD_CHECK_PERFORMANCE
+#define SIMD_CHECK_PERFORMANCE()
+#endif
+
 namespace Simd
 {
     /*! @ingroup cpp_detection
@@ -268,6 +272,8 @@ namespace Simd
         bool Detect(const View & src, Objects & objects, int groupSizeMin = 3, double sizeDifferenceMax = 0.2,
             bool motionMask = false, const Rects & motionRegions = Rects())
         {
+            SIMD_CHECK_PERFORMANCE();
+
             if (_levels.empty() || src.Size() != _imageSize)
                 return false;
 
@@ -337,6 +343,8 @@ namespace Simd
 
             void Detect(const View & mask, const Rect & rect, View & dst, size_t threadNumber, bool throughColumn)
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Size s = dst.Size() - data->size;
                 View m = mask.Region(s, View::MiddleCenter);
                 Rect r = rect.Shifted(-data->size / 2).Intersection(Rect(s));
@@ -346,7 +354,7 @@ namespace Simd
                 Parallel(r.top, r.bottom, [&](size_t thread, size_t begin, size_t end)
                 {
                     detect(handle, m.data, m.stride, r.left, begin, r.right, end, dst.data, dst.stride);
-                }, threadNumber, throughColumn ? 2 : 1);
+                }, rect.Area() >= (data->Haar() ? 10000 : 30000) ? threadNumber : 1, throughColumn ? 2 : 1);
             }
         };
         typedef std::vector<Hid> Hids;

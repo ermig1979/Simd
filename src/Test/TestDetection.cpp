@@ -545,6 +545,10 @@ namespace Test
 
 //-----------------------------------------------------------------------------
 
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+#define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(__FUNCTION__)
+#endif
+
 #include "Simd/SimdDetection.hpp"
 
 namespace Test
@@ -581,6 +585,11 @@ namespace Test
             Simd::DrawRectangle(dst, objects[i].rect, uint8_t(255));
         }
         dst.Save(String("faces_") + ToString(threadNumber) + ".pgm");
+
+#ifdef TEST_PERFORMANCE_TEST_ENABLE
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.TextReport(false, true));
+        PerformanceMeasurerStorage::s_storage.Clear();
+#endif
     }
 
     bool DetectionSpecialTest()
@@ -597,7 +606,14 @@ namespace Test
 
         DetectionSpecialTest(detection, os, 1);
 
-        DetectionSpecialTest(detection, om, std::thread::hardware_concurrency());
+        if (std::thread::hardware_concurrency() >= 2)
+            DetectionSpecialTest(detection, om, 2);
+
+        if(std::thread::hardware_concurrency() >= 4)
+            DetectionSpecialTest(detection, om, 4);
+
+        if (std::thread::hardware_concurrency() >= 8)
+            DetectionSpecialTest(detection, om, 8);
 
         bool result = true;
         if (os.size() != om.size())
