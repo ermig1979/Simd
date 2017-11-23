@@ -1213,12 +1213,16 @@ namespace Simd
                 {
                     if (!_reordered)
                     {
-                        Vector buffer(_weight.size());
-                        for (ptrdiff_t i = 0; i < _dst.width; ++i)
-                            for (ptrdiff_t j = 0; j < _src.width; ++j)
-                                buffer[i*_src.width + j] = _weight[j*_dst.width + i];
-                        _weight.swap(buffer);
-                        _reordered = true;
+                        std::lock_guard<std::mutex> lock(_mutex);
+                        if (!_reordered)
+                        {
+                            Vector buffer(_weight.size());
+                            for (ptrdiff_t i = 0; i < _dst.width; ++i)
+                                for (ptrdiff_t j = 0; j < _src.width; ++j)
+                                    buffer[i*_src.width + j] = _weight[j*_dst.width + i];
+                            _weight.swap(buffer);
+                            _reordered = true;                        
+                        }
                     }
                     for (size_t i = 0; i < sum.size(); ++i)
                         ::SimdNeuralProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
@@ -1267,6 +1271,7 @@ namespace Simd
 
         protected:
             bool _reordered;
+            std::mutex _mutex;
         };
 
         /*! @ingroup cpp_neural
@@ -1628,15 +1633,30 @@ namespace Simd
             }
 
             /*!
+                \short Sets thread number.
+                
+                \note Call this function if you want to call method Predict from dirrerent thread.
+
+                \param [in] number - a number of threads.
+                \param [in] train - a train process boolean flag. By default it is equal to False.
+            */
+            void SetThreadNumber(size_t number, bool train = false)
+            {
+                for (size_t i = 0; i < _layers.size(); ++i)
+                    _layers[i]->SetThreadNumber(number, train);
+            }
+
+            /*!
                 \short Classifies given sample.
 
                 \param [in] x - an input sample.
+                \param [in] thread - a work thread number. By default it is equal to 0.
                 \param [in] method - a method of prediction. By default it is equal to Layer::Fast.
                 \return a result of classification (vector with predicted probabilities).
             */
-            SIMD_INLINE const Vector & Predict(const Vector & x, Layer::Method method = Layer::Fast)
+            SIMD_INLINE const Vector & Predict(const Vector & x, size_t thread = 0, Layer::Method method = Layer::Fast)
             {
-                return Forward(x, 0, method);
+                return Forward(x, thread, method);
             }
 
             /*!

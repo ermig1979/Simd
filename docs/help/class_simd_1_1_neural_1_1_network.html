@@ -82,9 +82,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a5db4c42a8f50b1a589a42c4f5b09b691"><td class="memTemplItemLeft" align="right" valign="top">bool&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a5db4c42a8f50b1a589a42c4f5b09b691">Train</a> (const <a class="el" href="namespace_simd_1_1_neural.html#aad5a51ea811517b5771641657cc80b4f">Vectors</a> &amp;src, const <a class="el" href="namespace_simd_1_1_neural.html#aad5a51ea811517b5771641657cc80b4f">Vectors</a> &amp;dst, const <a class="el" href="struct_simd_1_1_neural_1_1_train_options.html">TrainOptions</a> &amp;options, Logger logger)</td></tr>
 <tr class="memdesc:a5db4c42a8f50b1a589a42c4f5b09b691"><td class="mdescLeft">&#160;</td><td class="mdescRight">Trains the neural network.  <a href="#a5db4c42a8f50b1a589a42c4f5b09b691">More...</a><br /></td></tr>
 <tr class="separator:a5db4c42a8f50b1a589a42c4f5b09b691"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#aba72d1b38e0a7570bb3cf3bec776b97c">Predict</a> (const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;x, <a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0f">Layer::Method</a> method=<a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0fa44e0add47cd0ec96505d444d425b70af">Layer::Fast</a>)</td></tr>
-<tr class="memdesc:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies given sample.  <a href="#aba72d1b38e0a7570bb3cf3bec776b97c">More...</a><br /></td></tr>
-<tr class="separator:aba72d1b38e0a7570bb3cf3bec776b97c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64ea595193760970f51cc41faac7e58e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#a64ea595193760970f51cc41faac7e58e">SetThreadNumber</a> (size_t number, bool train=false)</td></tr>
+<tr class="memdesc:a64ea595193760970f51cc41faac7e58e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets thread number.  <a href="#a64ea595193760970f51cc41faac7e58e">More...</a><br /></td></tr>
+<tr class="separator:a64ea595193760970f51cc41faac7e58e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afdc9653e8e788ee260a45cf75d2c4f74"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#afdc9653e8e788ee260a45cf75d2c4f74">Predict</a> (const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;x, size_t thread=0, <a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0f">Layer::Method</a> method=<a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0fa44e0add47cd0ec96505d444d425b70af">Layer::Fast</a>)</td></tr>
+<tr class="memdesc:afdc9653e8e788ee260a45cf75d2c4f74"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies given sample.  <a href="#afdc9653e8e788ee260a45cf75d2c4f74">More...</a><br /></td></tr>
+<tr class="separator:afdc9653e8e788ee260a45cf75d2c4f74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abab7d7ec110a04877974ed615a2bdc0c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_simd_1_1_neural_1_1_network.html#abab7d7ec110a04877974ed615a2bdc0c">Load</a> (const void *data, size_t size, bool train=false)</td></tr>
 <tr class="memdesc:abab7d7ec110a04877974ed615a2bdc0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads the weights of neural network from an external buffer.  <a href="#abab7d7ec110a04877974ed615a2bdc0c">More...</a><br /></td></tr>
 <tr class="separator:abab7d7ec110a04877974ed615a2bdc0c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -303,8 +306,46 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 
 </div>
 </div>
-<a id="aba72d1b38e0a7570bb3cf3bec776b97c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba72d1b38e0a7570bb3cf3bec776b97c">&#9670;&nbsp;</a></span>Predict()</h2>
+<a id="a64ea595193760970f51cc41faac7e58e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a64ea595193760970f51cc41faac7e58e">&#9670;&nbsp;</a></span>SetThreadNumber()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SetThreadNumber </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>number</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>train</em> = <code>false</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets thread number. </p>
+<dl class="section note"><dt>Note</dt><dd>Call this function if you want to call method Predict from dirrerent thread.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">number</td><td>- a number of threads. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">train</td><td>- a train process boolean flag. By default it is equal to False. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="afdc9653e8e788ee260a45cf75d2c4f74"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afdc9653e8e788ee260a45cf75d2c4f74">&#9670;&nbsp;</a></span>Predict()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -314,6 +355,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
           <td>(</td>
           <td class="paramtype">const <a class="el" href="namespace_simd_1_1_neural.html#af41b47464b159f1d8c7bef18c1a907b9">Vector</a> &amp;&#160;</td>
           <td class="paramname"><em>x</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>thread</em> = <code>0</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -333,6 +380,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">x</td><td>- an input sample. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">thread</td><td>- a work thread number. By default it is equal to 0. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">method</td><td>- a method of prediction. By default it is equal to <a class="el" href="class_simd_1_1_neural_1_1_layer.html#a2a3c0067e44c5ef3210a256d06c16b0fa44e0add47cd0ec96505d444d425b70af" title="The fastest method. It is incompatible with train process. ">Layer::Fast</a>. </td></tr>
   </table>
   </dd>
