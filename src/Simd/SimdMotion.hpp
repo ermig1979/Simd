@@ -44,11 +44,54 @@ namespace Simd
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Point<ptrdiff_t> Point;
         typedef std::vector<Point> Points;
+        typedef Simd::Point<double> FSize;
+        typedef Simd::Point<double> FPoint;
+        typedef std::vector<FPoint> FPoints;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
         typedef std::vector<Rect> Rects;
         typedef Simd::View<Simd::Allocator> View;
         typedef Simd::Frame<Simd::Allocator> Frame;
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+
+        SIMD_INLINE double ScreenToOnvifX(ptrdiff_t x, ptrdiff_t width)
+        {
+            return double(2 * x - width) / width;
+        }
+
+        SIMD_INLINE double ScreenToOnvifY(ptrdiff_t y, ptrdiff_t height)
+        {
+            return double(height - 2 * y) / height;
+        }
+
+        SIMD_INLINE FPoint ScreenToOnvif(const Point & screen, const Point & size)
+        {
+            return FPoint(ScreenToOnvifX(screen.x, size.x), ScreenToOnvifY(screen.y, size.y));
+        }
+
+        SIMD_INLINE FSize ScreenToOnvifSize(const Size & screen, const Point & size)
+        {
+            return FSize(double(screen.x * 2 / size.x), double(screen.y * 2 / size.y));
+        }
+
+        SIMD_INLINE ptrdiff_t OnvifToScreenX(double x, ptrdiff_t width)
+        {
+            return std::max(ptrdiff_t(0), std::min(width - 1, (ptrdiff_t)Simd::Round((1.0 + x)*width / 2.0)));
+        }
+
+        SIMD_INLINE ptrdiff_t OnvifToScreenY(double y, ptrdiff_t height)
+        {
+            return std::max(ptrdiff_t(0), std::min(height - 1, (ptrdiff_t)Simd::Round((1.0 - y)*height / 2.0)));
+        }
+
+        SIMD_INLINE Point OnvifToScreen(const FPoint & onvif, const Point & size)
+        {
+            return Point(OnvifToScreenX(onvif.x, size.x), OnvifToScreenY(onvif.y, size.y));
+        }
+
+        SIMD_INLINE Size OnvifToScreenSize(const FSize & onvif, const Point & size)
+        {
+            return Size(Round(onvif.x*size.x / 2.0), Round(onvif.y*size.y / 2.0));
+        }
 
         struct Position
         {
@@ -72,8 +115,8 @@ namespace Simd
 
         struct Model
         {
-            Size size;
-            Points roi;
+            FSize size; // Minimal detected object size (Onvif coordinates).
+            FPoints roi; // ROI (Onvif coordinates). 
 
             Model(const Model & m)
                 : size(m.size)
@@ -81,23 +124,28 @@ namespace Simd
             {
             }
 
-            Model(const Size & s = Size(), const Points & r = Points())
+            Model(const FSize & s = FSize(0.1, 0.1), const FPoints & r = FPoints())
                 : size(s)
                 , roi(r)
             {
                 if (roi.size() < 3)
                 {
                     roi.clear();
-                    roi.push_back(Point(0, 0));
-                    roi.push_back(Point(size.x, 0));
-                    roi.push_back(Point(size.x, size.y));
-                    roi.push_back(Point(0, size.y));
+                    roi.push_back(FPoint(-1.0, 1.0));
+                    roi.push_back(FPoint(1.0, 1.0));
+                    roi.push_back(FPoint(1.0, -1.0));
+                    roi.push_back(FPoint(-1.0, -1.0));
                 }
             }
         };
 
         struct Options
         {
+            int CalibrationScaleLevelMax;
+            int CalibrationLevelCountMin;
+            int CalibrationTopLevelSizeMin;
+            int CalibrationObjectAreaMin;
+
             int TextureGradientSaturation;
             int TextureGradientBoost;
 
@@ -110,12 +158,21 @@ namespace Simd
             double BackgroundGrowTime;
             double BackgroundIncrementTime;
 
+            double SegmentationCreateThreshold;
+            double SegmentationExpandCoefficient;
+
             int DebugDrawLevel;
             int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
             bool DebugAnnotateMovingRegions;
+            bool DebugAnnotateModel;
 
             Options()
             {
+                CalibrationScaleLevelMax = 3;
+                CalibrationLevelCountMin = 3;
+                CalibrationTopLevelSizeMin = 32;
+                CalibrationObjectAreaMin = 16;
+
                 TextureGradientSaturation = 16;
                 TextureGradientBoost = 4;
 
@@ -128,9 +185,13 @@ namespace Simd
                 BackgroundGrowTime = 1.0;
                 BackgroundIncrementTime = 1.0;
 
+                SegmentationCreateThreshold = 0.5;
+                SegmentationExpandCoefficient = 0.75;
+
                 DebugDrawLevel = 1;
                 DebugDrawBottomRight = 1;
                 DebugAnnotateMovingRegions = true;
+                DebugAnnotateModel = true;
             }
         };
 
@@ -211,11 +272,16 @@ namespace Simd
 
             struct Model
             {
+                Size originalFrameSize;
+
                 Size frameSize;
-                Points roi;
+                size_t scale;
+                size_t scaleLevel;
 
                 size_t levelCount;
+                int areaRegionMinEstimated;
 
+                Points roi;
                 Pyramid roiMask;
                 SearchRegions searchRegions;
             };
@@ -365,7 +431,6 @@ namespace Simd
 
                 int differenceCreationMin;
                 int differenceExpansionMin;
-                int movingRegionAreaMin;
 
                 MovingRegionPtrs movingRegions;
             };
@@ -373,7 +438,7 @@ namespace Simd
             struct Scene
             {
                 Frame input, *output;
-                View gray;
+                Pyramid scaled;
 
                 Pyramid buffer;
 
@@ -391,11 +456,14 @@ namespace Simd
 
                 void Create(const Options & options)
                 {
-                    gray.Recreate(model.frameSize, View::Gray8);
+                    scaled.Recreate(model.originalFrameSize, model.scaleLevel + 1);
                     buffer.Recreate(model.frameSize, model.levelCount);
                     texture.Create(model.frameSize, model.levelCount, options);
                     difference.Recreate(model.frameSize, model.levelCount);
+
                     segmentation.mask.Recreate(model.frameSize, model.levelCount);
+                    segmentation.differenceCreationMin = int(255 * options.SegmentationCreateThreshold);
+                    segmentation.differenceExpansionMin = int(255 * options.SegmentationExpandCoefficient*options.SegmentationCreateThreshold);
                 }
             };
 
@@ -405,7 +473,8 @@ namespace Simd
 
                 _scene.input = input;
                 _scene.output = output;
-                Simd::Convert(input, Frame(_scene.gray).Ref());
+                Simd::Convert(input, Frame(_scene.scaled[0]).Ref());
+                Simd::Build(_scene.scaled, SimdReduce2x2);
 
                 return true;
             }
@@ -414,26 +483,58 @@ namespace Simd
             {
                 Model & model = _scene.model;
 
-                if (model.frameSize == frameSize)
+                if (model.originalFrameSize == frameSize)
                     return true;
 
-                if (model.frameSize == Size())
-                {
-                    model.frameSize = frameSize;
-                    model.roi.clear();
-                    model.roi.push_back(Point(0, 0));
-                    model.roi.push_back(Point(frameSize.x, 0));
-                    model.roi.push_back(Point(frameSize.x, frameSize.y));
-                    model.roi.push_back(Point(0, frameSize.y));
-                    model.levelCount = 3;
-                }
+                model.originalFrameSize = frameSize;
 
+                EstimateModelParameters(model);
+                SetScreenRoi(model);
                 GenerateSearchRegion(model);
                 GenerateSearchRegionScanlines(model);
 
                 _scene.Create(_options);
 
                 return true;
+            }
+
+            void EstimateModelParameters(Model & model)
+            {
+                Size objectSize = OnvifToScreenSize(_model.size, model.originalFrameSize);
+                Size size = model.originalFrameSize;
+                model.areaRegionMinEstimated = int(objectSize.x*objectSize.y);
+                int levelCount = 1;
+                while (size.x >= _options.CalibrationTopLevelSizeMin && size.y >= _options.CalibrationTopLevelSizeMin && model.areaRegionMinEstimated > _options.CalibrationObjectAreaMin)
+                {
+                    size = Simd::Scale(size);
+                    ++levelCount;
+                    model.areaRegionMinEstimated /= 4;
+                }
+                model.areaRegionMinEstimated = std::max(model.areaRegionMinEstimated, _options.CalibrationObjectAreaMin / 4 + 1);
+                model.scaleLevel = std::min(std::max(levelCount - _options.CalibrationLevelCountMin, 0), _options.CalibrationScaleLevelMax);
+                model.levelCount = levelCount - model.scaleLevel;
+                model.scale = size_t(1) << model.scaleLevel;
+                model.frameSize = model.originalFrameSize;
+                for (size_t level = 0; level < model.scaleLevel; ++level)
+                    model.frameSize = Simd::Scale(model.frameSize);
+            }
+
+            void SetScreenRoi(Model & model)
+            {
+                if (_model.roi.size() > 2)
+                {
+                    model.roi.resize(_model.roi.size());
+                    for (size_t i = 0; i < _model.roi.size(); ++i)
+                        model.roi[i] = OnvifToScreen(_model.roi[i], model.frameSize);
+                }
+                else
+                {
+                    model.roi.clear();
+                    model.roi.push_back(Point(0, 0));
+                    model.roi.push_back(Point(model.frameSize.x, 0));
+                    model.roi.push_back(Point(model.frameSize.x, model.frameSize.y));
+                    model.roi.push_back(Point(0, model.frameSize.y));
+                }
             }
 
             void GenerateSearchRegion(Model & model)
@@ -495,7 +596,7 @@ namespace Simd
 
                 Texture & texture = _scene.texture;
 
-                Simd::Copy(_scene.gray, texture.gray.value[0]);
+                Simd::Copy(_scene.scaled.Top(), texture.gray.value[0]);
                 Simd::Build(texture.gray.value, SimdReduce4x4);
 
                 for (size_t i = 0; i < texture.gray.value.Size(); ++i)
@@ -555,10 +656,6 @@ namespace Simd
                 const Model & model = _scene.model;
                 const Time & time = _scene.input.timestamp;
 
-                segmentation.differenceCreationMin = 128;
-                segmentation.differenceExpansionMin = 96;
-                segmentation.movingRegionAreaMin = 16;
-
                 segmentation.movingRegions.clear();
 
                 Simd::Fill(segmentation.mask, Segmentation::MaskNotVisited);
@@ -614,7 +711,7 @@ namespace Simd
                                     }
                                 }
 
-                                if (region->rect.Area() <= segmentation.movingRegionAreaMin)
+                                if (region->rect.Area() <= model.areaRegionMinEstimated)
                                     Simd::SegmentationChangeIndex(segmentation.mask[region->level].Region(region->rect).Ref(), region->index, Segmentation::MaskInvalid);
                                 else
                                 {
@@ -836,6 +933,7 @@ namespace Simd
             bool DebugAnnotation()
             {
                 Frame * output = _scene.output;
+                size_t scale = _scene.model.scale;
 
                 if (output && output->format == Frame::Bgr24)
                 {
@@ -858,8 +956,21 @@ namespace Simd
                         for (size_t i = 0; i < _scene.segmentation.movingRegions.size(); ++i)
                         {
                             const MovingRegion & region = *_scene.segmentation.movingRegions[i];
-                            Simd::DrawRectangle(output->planes[0], region.rect, color, 1);
+                            Simd::DrawRectangle(output->planes[0], region.rect*scale, color, 1);
                         }
+                    }
+
+                    if (_options.DebugAnnotateModel)
+                    {
+                        Simd::Pixel::Bgr24 color(0, 255, 255);
+                        for (size_t i = 0; i < _scene.model.roi.size(); ++i)
+                        {
+                            Point p0 = i ? _scene.model.roi[i - 1] : _scene.model.roi.back(), p1 = _scene.model.roi[i];
+                            Simd::DrawLine(output->planes[0], p0*scale, p1*scale, color);
+                        }
+                        Rect objectMin(OnvifToScreenSize(_model.size, _scene.model.originalFrameSize));
+                        objectMin.Shift(Point(scale, scale));
+                        Simd::DrawRectangle(output->planes[0], objectMin, color);
                     }
                 }
 
