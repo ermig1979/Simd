@@ -41,6 +41,7 @@ namespace Simd
     namespace Motion
     {
         typedef double Time;
+        typedef std::string String;
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Point<ptrdiff_t> Point;
         typedef std::vector<Point> Points;
@@ -108,9 +109,33 @@ namespace Simd
         };
         typedef std::vector<Object> Objects;
 
+        struct Event
+        {
+            enum Type
+            {
+                Empty,
+                ObjectIn,
+                ObjectOut,
+                SabotageOn,
+                SabotageOff,
+            } type;
+
+            String text;
+            int objectId;
+
+            Event(Type type_ = Empty, const String & text_ = String(), int objectId_ = -1)
+                : type(type_)
+                , text(text_)
+                , objectId(objectId_)
+            {
+            }
+        };
+        typedef std::vector<Event> Events;
+
         struct Metadata
         {
             Objects objects;
+            Events events;
         };
 
         struct Model
@@ -161,6 +186,11 @@ namespace Simd
             double SegmentationCreateThreshold;
             double SegmentationExpandCoefficient;
 
+            double StabilityRegionAreaMax;
+
+            size_t TrackingTrajectoryMax;
+            double TrackingRemoveTime;
+
             int DebugDrawLevel;
             int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
             bool DebugAnnotateMovingRegions;
@@ -187,6 +217,11 @@ namespace Simd
 
                 SegmentationCreateThreshold = 0.5;
                 SegmentationExpandCoefficient = 0.75;
+
+                StabilityRegionAreaMax = 0.5;
+
+                TrackingTrajectoryMax = 1000;
+                TrackingRemoveTime = 1.0;
 
                 DebugDrawLevel = 1;
                 DebugDrawBottomRight = 1;
@@ -227,6 +262,10 @@ namespace Simd
                 if (!Calibrate(input.Size()))
                     return false;
 
+                metadata.objects.clear();
+                metadata.events.clear();
+                _scene.events = &metadata.events;
+
                 SetFrame(input, output);
 
                 EstimateTextures();
@@ -235,7 +274,9 @@ namespace Simd
 
                 PerformSegmentation();
 
-                _scene.stability.sceneState = Stability::Stable;
+                VerifyStability();
+
+                TrackObjects();
 
                 UpdateBackground();
 
@@ -286,6 +327,8 @@ namespace Simd
                 SearchRegions searchRegions;
             };
 
+            struct Object;
+
             struct MovingRegion
             {
                 Rects rects;
@@ -295,12 +338,15 @@ namespace Simd
                 int level;
                 Time time;
                 Point point;
+                Detector::Object * object, * nearest;
 
                 MovingRegion(const uint8_t & index_, const Rect & rect_, int level_, const Time & time_)
                     : index(index_)
                     , rect(rect_)
                     , level(level_)
                     , time(time_)
+                    , object(NULL)
+                    , nearest(NULL)
                 {
                     rects.resize(level + 1);
                 }
@@ -391,28 +437,13 @@ namespace Simd
             {
                 enum State
                 {
-                    Empty,
-                    Ready
-                };
-
-                State state;
-
-                enum SceneState
-                {
                     Unknown,
                     Stable,
                     Sabotage
-                } sceneState;
-
-                bool sabotage;
-                int kMovingRegionScore;
-                int kMovingRegionThreshold;
-                int kMovingRegionMinShortage;
+                } state;
 
                 Stability()
-                    : state(Empty)
-                    , sceneState(Unknown)
-                    , sabotage(false)
+                    : state(Unknown)
                 {
                 }
             };
@@ -435,10 +466,54 @@ namespace Simd
                 MovingRegionPtrs movingRegions;
             };
 
+            struct Object
+            {
+                const int id;
+                Point center; 
+                Rect rect; 
+                MovingRegionPtrs trajectory; 
+
+                enum Type
+                {
+                    Empty = 0,
+                    Static,
+                    Moving,
+                } type;
+
+                Point pointStart;
+                Time timeStart;
+
+                Object(const int id_, const MovingRegionPtr & region)
+                    : id(id_)
+                    , center(region->rect.Center())
+                    , rect(region->rect)
+                    , type(Empty)
+                    , pointStart(region->rect.Center())
+                    , timeStart(region->time)
+                {
+                    trajectory.push_back(region);
+                }
+            };
+            typedef std::shared_ptr<Object> ObjectPtr;
+            typedef std::vector<ObjectPtr> ObjectPtrs;
+
+            struct Tracking
+            {
+                ObjectPtrs objects;
+                ObjectPtrs justDeletedObjects;
+                int id; 
+
+                Tracking() 
+                    : id(0)
+                {
+                }
+            };
+
             struct Scene
             {
-                Frame input, *output;
+                Frame input, * output;
                 Pyramid scaled;
+                Events * events;
 
                 Pyramid buffer;
 
@@ -453,6 +528,8 @@ namespace Simd
                 Pyramid difference;
 
                 Segmentation segmentation;
+
+                Tracking tracking;
 
                 void Create(const Options & options)
                 {
@@ -485,6 +562,8 @@ namespace Simd
 
                 if (model.originalFrameSize == frameSize)
                     return true;
+
+                SIMD_CHECK_PERFORMANCE();
 
                 model.originalFrameSize = frameSize;
 
@@ -646,6 +725,8 @@ namespace Simd
 
             bool PerformSegmentation()
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Point neighbours[4];
                 neighbours[0] = Point(-1, 0);
                 neighbours[1] = Point(0, -1);
@@ -793,6 +874,108 @@ namespace Simd
                 }
             }
 
+            void VerifyStability()
+            {
+                View mask = _scene.segmentation.mask[0];
+                uint32_t count;
+                Simd::ConditionalCount8u(mask, Segmentation::MaskIndexSize, SimdCompareGreaterOrEqual, count);
+                bool sabotage = count >= mask.Area()*_options.StabilityRegionAreaMax;
+                if (sabotage)
+                {
+                    if (_scene.stability.state != Stability::Sabotage)
+                        _scene.events->push_back(Event(Event::SabotageOn, "SabotageOn"));
+                    _scene.stability.state = Stability::Sabotage;
+                }
+                else
+                {
+                    if (_scene.stability.state == Stability::Sabotage)
+                        _scene.events->push_back(Event(Event::SabotageOff, "SabotageOff"));
+                    _scene.stability.state = Stability::Stable;
+                }
+            }
+
+            void TrackObjects()
+            {
+                if (_scene.background.state != Background::Update)
+                {
+                    RemoveAllObjects();
+                    return;
+                }
+
+                RefreshObjectsTrajectory();
+
+                DeleteObsoleteObjects();
+
+                SetNearestObjects();
+            }
+
+            void RemoveAllObjects()
+            {
+                if (_scene.tracking.objects.size())
+                {
+                    for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
+                    {
+                        ObjectPtr & object = _scene.tracking.objects[i];
+                        if (object->type == Object::Moving)
+                            _scene.events->push_back(Event(Event::ObjectOut, "ObjectOut", object->id));
+                        _scene.tracking.justDeletedObjects.push_back(object);
+                    }
+                    _scene.tracking.objects.clear();
+                }
+            }
+
+            void RefreshObjectsTrajectory()
+            {
+                ObjectPtrs & objects = _scene.tracking.objects;
+                for (size_t j = 0; j < objects.size(); ++j)
+                {
+                    ObjectPtr & object = objects[j];
+                    if (object->trajectory.size() > _options.TrackingTrajectoryMax)
+                        object->trajectory.erase(object->trajectory.begin());
+                }
+            }
+
+            void DeleteObsoleteObjects()
+            {
+                Time current = _scene.input.timestamp;
+                Tracking & tracking = _scene.tracking;
+                tracking.justDeletedObjects.clear();
+                ObjectPtrs buffer;
+                for (size_t i = 0; i < tracking.objects.size(); ++i)
+                {
+                    const ObjectPtr & object = tracking.objects[i];
+                    if (current - object->trajectory.back()->time < _options.TrackingRemoveTime)
+                        buffer.push_back(object);
+                    else
+                    {
+                        tracking.justDeletedObjects.push_back(object);
+                        if (object->type == Object::Moving)
+                            _scene.events->push_back(Event(Event::ObjectOut, "ObjectOut", object->id));
+                    }
+                }
+                tracking.objects.swap(buffer);
+            }
+
+            void SetNearestObjects()
+            {
+                for (size_t i = 0; i < _scene.segmentation.movingRegions.size(); ++i)
+                {
+                    MovingRegion & region = *_scene.segmentation.movingRegions[i];
+                    region.nearest = NULL;
+                    ptrdiff_t minDifferenceSquared = std::numeric_limits<ptrdiff_t>::max();
+                    for (size_t j = 0; j < _scene.tracking.objects.size(); ++j)
+                    {
+                        Detector::Object * object = _scene.tracking.objects[j].get();
+                        const ptrdiff_t differenceSquared = Simd::SquaredDistance(object->center, region.rect.Center());
+                        if (differenceSquared < minDifferenceSquared)
+                        {
+                            minDifferenceSquared = differenceSquared;
+                            region.nearest = object;
+                        }
+                    }
+                }
+            }
+
             struct InitUpdater
             {
                 void operator()(View & value, View & loValue, View & loCount, View & hiValue, View & hiCount) const
@@ -845,13 +1028,13 @@ namespace Simd
                 SIMD_CHECK_PERFORMANCE();
 
                 Background & background = _scene.background;
-                const Stability::SceneState & stabilityState = _scene.stability.sceneState;
+                const Stability::State & stability = _scene.stability.state;
                 const Time & time = _scene.input.timestamp;
 
                 switch (background.state)
                 {
                 case Background::Update:
-                    switch (stabilityState)
+                    switch (stability)
                     {
                     case Stability::Stable:
                         Apply(_scene.texture.features, IncrementCountUpdater());
@@ -878,7 +1061,7 @@ namespace Simd
                         assert(0);
                     }
 
-                    if (stabilityState != Stability::Sabotage)
+                    if (stability != Stability::Sabotage)
                     {
                         background.sabotageCounter = 0;
                     }
@@ -886,7 +1069,7 @@ namespace Simd
 
                 case Background::Grow:
 
-                    if (stabilityState == Stability::Sabotage)
+                    if (stability == Stability::Sabotage)
                     {
                         InitBackground();
                     }
@@ -894,7 +1077,7 @@ namespace Simd
                     {
                         Apply(_scene.texture.features, GrowRangeUpdater());
 
-                        if (stabilityState != Stability::Stable && _scene.stability.state != Stability::Empty)
+                        if (stability != Stability::Stable)
                         {
                             background.expandEndTime = time + _options.BackgroundGrowTime;
                         }
@@ -932,6 +1115,8 @@ namespace Simd
 
             bool DebugAnnotation()
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 Frame * output = _scene.output;
                 size_t scale = _scene.model.scale;
 
