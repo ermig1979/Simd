@@ -1789,7 +1789,7 @@ namespace Simd
                     const Layer & layer = *_layers[i];
                     memcpy(ptr, layer._weight.data(), layer._weight.size() * sizeof(Type));
                     ptr += layer._weight.size();
-                    memcpy(ptr, layer._weight.data(), layer._bias.size() * sizeof(Type));
+                    memcpy(ptr, layer._bias.data(), layer._bias.size() * sizeof(Type));
                     ptr += layer._bias.size();
                 }
                 if (train)
@@ -1797,9 +1797,9 @@ namespace Simd
                     for (size_t i = 0; i < _layers.size(); ++i)
                     {
                         const Layer & layer = *_layers[i];
-                        memcpy(ptr, layer._weight.data(), layer._gWeight.size() * sizeof(Type));
+                        memcpy(ptr, layer._gWeight.data(), layer._gWeight.size() * sizeof(Type));
                         ptr += layer._gWeight.size();
-                        memcpy(ptr, layer._weight.data(), layer._gBias.size() * sizeof(Type));
+                        memcpy(ptr, layer._gBias.data(), layer._gBias.size() * sizeof(Type));
                         ptr += layer._gBias.size();
                     }
                 }
