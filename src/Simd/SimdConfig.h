@@ -50,6 +50,8 @@
 
 //#define SIMD_NEON_DISABLE
 
+//#define SIMD_NEON_FP16_DISABLE
+
 //#define SIMD_MSA_DISABLE
 
 //#define SIMD_STATIC

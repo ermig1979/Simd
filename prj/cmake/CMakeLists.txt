@@ -135,7 +135,11 @@ elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUA
         set(CXX_NEON_FLAG "-mfpu=neon -mfpu=neon-fp16 -mfp16-format=ieee")
     else()
         set(CXX_NEON_FLAG "")
-    endif() 
+    endif()
+
+	if((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER MATCHES "clang"))	
+		add_definitions(-DSIMD_NEON_FP16_DISABLE)
+    endif()	
 
     file(GLOB_RECURSE SIMD_BASE_SRC ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
 	set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
