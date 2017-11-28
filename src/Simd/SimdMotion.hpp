@@ -50,6 +50,7 @@ namespace Simd
         typedef std::vector<FPoint> FPoints;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
         typedef std::vector<Rect> Rects;
+        typedef Simd::Rectangle<double> FRect;
         typedef Simd::View<Simd::Allocator> View;
         typedef Simd::Frame<Simd::Allocator> Frame;
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
@@ -190,11 +191,14 @@ namespace Simd
 
             size_t TrackingTrajectoryMax;
             double TrackingRemoveTime;
+            double TrackingAdditionalLinking;
+            double TrackingUpdateBoundSpeed;
 
             int DebugDrawLevel;
             int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
-            bool DebugAnnotateMovingRegions;
             bool DebugAnnotateModel;
+            bool DebugAnnotateMovingRegions;
+            bool DebugAnnotateTrackingObjects;
 
             Options()
             {
@@ -222,11 +226,14 @@ namespace Simd
 
                 TrackingTrajectoryMax = 1000;
                 TrackingRemoveTime = 1.0;
+                TrackingAdditionalLinking = 0.0;
+                TrackingUpdateBoundSpeed = 0.1;
 
                 DebugDrawLevel = 1;
                 DebugDrawBottomRight = 1;
-                DebugAnnotateMovingRegions = true;
                 DebugAnnotateModel = true;
+                DebugAnnotateMovingRegions = true;
+                DebugAnnotateTrackingObjects = true;
             }
         };
 
@@ -904,9 +911,13 @@ namespace Simd
 
                 RefreshObjectsTrajectory();
 
-                DeleteObsoleteObjects();
+                DeleteOldObjects();
 
                 SetNearestObjects();
+
+                LinkObjects();
+
+                AddNewObjects();
             }
 
             void RemoveAllObjects()
@@ -935,7 +946,7 @@ namespace Simd
                 }
             }
 
-            void DeleteObsoleteObjects()
+            void DeleteOldObjects()
             {
                 Time current = _scene.input.timestamp;
                 Tracking & tracking = _scene.tracking;
@@ -972,6 +983,80 @@ namespace Simd
                             minDifferenceSquared = differenceSquared;
                             region.nearest = object;
                         }
+                    }
+                }
+            }
+
+            void LinkObjects()
+            {
+                for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
+                {
+                    ObjectPtr & object = _scene.tracking.objects[i];
+                    MovingRegionPtr nearest;
+                    ptrdiff_t minDifferenceSquared = std::numeric_limits<ptrdiff_t>::max();
+                    for (size_t j = 0; j < _scene.segmentation.movingRegions.size(); ++j)
+                    {
+                        MovingRegionPtr & region = _scene.segmentation.movingRegions[j];
+                        if (region->object != NULL)
+                            continue;
+                        if (object.get() != region->nearest)
+                            continue;
+                        Rect regionRect = Enlarged(region->rect);
+                        Rect objectRect = Enlarged(object->rect);
+                        ptrdiff_t differenceSquared = Simd::SquaredDistance(object->center, region->rect.Center());
+                        if (regionRect.Contains(object->center) || objectRect.Contains(region->rect.Center()))
+                        {
+                            if (differenceSquared < minDifferenceSquared)
+                            {
+                                minDifferenceSquared = differenceSquared;
+                                nearest = region;
+                            }
+                        }
+                    }
+                    if (nearest)
+                    {
+                        nearest->object = object.get();
+                        FRect rect = _options.TrackingUpdateBoundSpeed*FRect(nearest->rect) + (1.0 - _options.TrackingUpdateBoundSpeed)*FRect(object->rect);
+                        object->rect = Rect(rect);
+                        object->rect.Shift(nearest->rect.Center() - object->rect.Center());
+                        object->center = nearest->rect.Center();
+                        object->trajectory.push_back(nearest);
+                    }
+                }
+            }
+
+            SIMD_INLINE Rect Enlarged(Rect rect)
+            {
+                ptrdiff_t size = (rect.Width() + rect.Height()) / 2;
+                ptrdiff_t border = ptrdiff_t(::ceil(size*_options.TrackingAdditionalLinking));
+                rect.AddBorder(border);
+                return rect;
+            }
+
+            void AddNewObjects()
+            {
+                for (size_t j = 0; j < _scene.segmentation.movingRegions.size(); ++j)
+                {
+                    const MovingRegionPtr & region = _scene.segmentation.movingRegions[j];
+                    if (region->object != NULL)
+                        continue;
+                    bool contained = false;
+                    const Point & regCenter = region->rect.Center();
+                    for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
+                    {
+                        const ObjectPtr & object = _scene.tracking.objects[i];
+                        if (object->rect.Contains(region->rect.Center()))
+                        {
+                            contained = true;
+                            break;
+                        }
+                    }
+                    if (!contained)
+                    {
+                        ObjectPtr object(new Object(_scene.tracking.id++, region));
+                        region->object = object.get();
+                        object->type = Object::Static;
+                        _scene.tracking.objects.push_back(object);
                     }
                 }
             }
@@ -1113,7 +1198,7 @@ namespace Simd
                 background.incrementCounterTime = 0;
             }
 
-            bool DebugAnnotation()
+            void DebugAnnotation()
             {
                 SIMD_CHECK_PERFORMANCE();
 
@@ -1135,16 +1220,6 @@ namespace Simd
                         Simd::GrayToBgr(src, output->planes[0].Region(src.Size(), View::BottomRight).Ref());
                     }
 
-                    if (_options.DebugAnnotateMovingRegions)
-                    {
-                        Simd::Pixel::Bgr24 color(0, 255, 0);
-                        for (size_t i = 0; i < _scene.segmentation.movingRegions.size(); ++i)
-                        {
-                            const MovingRegion & region = *_scene.segmentation.movingRegions[i];
-                            Simd::DrawRectangle(output->planes[0], region.rect*scale, color, 1);
-                        }
-                    }
-
                     if (_options.DebugAnnotateModel)
                     {
                         Simd::Pixel::Bgr24 color(0, 255, 255);
@@ -1157,9 +1232,30 @@ namespace Simd
                         objectMin.Shift(Point(scale, scale));
                         Simd::DrawRectangle(output->planes[0], objectMin, color);
                     }
-                }
 
-                return true;
+                    if (_options.DebugAnnotateMovingRegions)
+                    {
+                        Simd::Pixel::Bgr24 color(0, 255, 0);
+                        for (size_t i = 0; i < _scene.segmentation.movingRegions.size(); ++i)
+                        {
+                            const MovingRegion & region = *_scene.segmentation.movingRegions[i];
+                            Simd::DrawRectangle(output->planes[0], region.rect*scale, color, 1);
+                        }
+                    }
+
+                    if (_options.DebugAnnotateTrackingObjects)
+                    {
+                        Simd::Pixel::Bgr24 color(0, 255, 255);
+                        for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
+                        {
+                            const Object & object = *_scene.tracking.objects[i];
+                            Simd::DrawRectangle(output->planes[0], object.rect*scale, color, 1);
+                            const MovingRegionPtrs & regions = object.trajectory;
+                            for (size_t j = 1; j < regions.size(); ++j)
+                                Simd::DrawLine(output->planes[0], regions[j]->point*scale, regions[j - 1]->point*scale, color, 1);
+                        }
+                    }
+                }
             }
 
             Scene _scene;
