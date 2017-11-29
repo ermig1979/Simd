@@ -649,9 +649,7 @@ namespace Simd
                 for (size_t i = 0; i < model.searchRegions.size(); ++i)
                 {
                     SearchRegion & region = model.searchRegions[i];
-                    int scale = region.scale;
-
-                    assert(scale < (int)model.roiMask.Size());
+                    assert(region.scale < (int)model.roiMask.Size());
 
                     const View & view = model.roiMask[region.scale];
                     const Rect & rect = region.rect;
@@ -1041,7 +1039,6 @@ namespace Simd
                     if (region->object != NULL)
                         continue;
                     bool contained = false;
-                    const Point & regCenter = region->rect.Center();
                     for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
                     {
                         const ObjectPtr & object = _scene.tracking.objects[i];

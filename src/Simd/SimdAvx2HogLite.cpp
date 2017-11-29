@@ -1130,7 +1130,6 @@ namespace Simd
                 __m256 _threshold = _mm256_set1_ps(*threshold);
                 for (size_t srcRow = 0; srcRow < srcHeight; ++srcRow)
                 {
-                    size_t dstRow = srcRow * 2;
                     uint32_t * sum0 = _sums[(srcRow + 0) & 7].data + F;
                     uint32_t * sum1 = _sums[(srcRow + 1) & 7].data + F;
                     uint32_t * sum3 = _sums[(srcRow + 3) & 7].data + F;

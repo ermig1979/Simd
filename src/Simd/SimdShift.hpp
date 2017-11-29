@@ -446,8 +446,7 @@ namespace Simd
 
         void InitLevels(const Rect & region, const Point & maxShift, ptrdiff_t regionAreaMin)
         {
-            const Point & size = _current[0].Size();
-            assert(region.Left() >= 0 && region.Top() >= 0 && region.Right() <= size.x && region.Bottom() <= size.y);
+            assert(region.Left() >= 0 && region.Top() >= 0 && region.Right() <= _current[0].Size().x && region.Bottom() <= _current[0].Size().y);
 
             size_t levelCount = 0;
             for (size_t i = 0; i < _current.Size(); ++i)

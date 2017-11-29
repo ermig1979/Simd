@@ -29,10 +29,10 @@
     <ClInclude Include="..\..\src\Simd\Simd*.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
 	<ClCompile Include="..\..\src\Simd\SimdLib.cpp">
- 	    <AdditionalOptions Condition="'$(Platform)'=='x86'">%(AdditionalOptions) -mavx2</AdditionalOptions>
-	    <AdditionalOptions Condition="'$(Platform)'=='x64'">%(AdditionalOptions) -mavx2</AdditionalOptions>
-        <EnableNeonCodegen Condition="'$(Platform)'=='ARM'">true</EnableNeonCodegen>
+ 	    <AdditionalOptions Condition="'$(Platform)'=='x86' Or '$(Platform)'=='x64'">%(AdditionalOptions) -mavx2</AdditionalOptions>
+        <EnableNeonCodegen Condition="'$(Platform)'=='ARM' Or '$(Platform)'=='ARM64'">true</EnableNeonCodegen>
         <FloatABI Condition="'$(Platform)'=='ARM'">softfp</FloatABI>
+        <PreprocessorDefinitions Condition="'$(Platform)'=='ARM' Or '$(Platform)'=='ARM64'">SIMD_NEON_FP16_DISABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
