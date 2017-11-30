@@ -44,28 +44,80 @@ namespace Test
     {
         Filter()
         {
-
         }
 
         virtual bool Process(const Frame & input, Frame & output)
         {
             Simd::Motion::Metadata metadata;
             _detector.NextFrame(input, metadata, &output);
-
-            Simd::Pixel::Bgr24 yellow(0, 255, 255);
-            size_t width = 2;
-
-            for (size_t i = 0; i < metadata.objects.size(); ++i)
-            {
-                const Simd::Motion::Object & object = metadata.objects[i];
-                Simd::DrawRectangle(output.planes[0], object.current.rect, yellow, width);
-            }
-
+            AnnotateMetadata(metadata, output.planes[0]);
             return true;
         }
 
     private:
+        typedef Simd::Pixel::Bgr24 Color;
+        typedef std::list<Simd::Motion::Event> Events;
+        Events _events;
         Simd::Motion::Detector _detector;
+        Simd::Font _font;
+
+        void AnnotateMetadata(const Simd::Motion::Metadata & metadata, View & canvas)
+        {
+            _font.Resize(canvas.height / 32);
+            for (size_t i = 0; i < metadata.objects.size(); i++)
+            {
+                const Simd::Motion::Object & object = metadata.objects[i];
+                bool alarmed = false;
+                for (size_t j = 0; j < metadata.events.size(); ++j)
+                {
+                    const Simd::Motion::Event & event = metadata.events[j];
+                    if (event.objectId == object.id)
+                    {
+                        alarmed = true;
+                        break;
+                    }
+                }
+                Color color = alarmed ? Color(0, 0, 255) : Color(0, 255, 255);
+                int width = alarmed ? 2 : 1;
+                Simd::DrawRectangle(canvas, object.rect, color, width);
+                _font.Draw(canvas, Simd::Motion::ToString(object.id), Point(object.rect.left, object.rect.top - _font.Height()), color);
+                for (size_t j = 1; j < object.trajectory.size(); ++j)
+                    Simd::DrawLine(canvas, object.trajectory[j - 1].point, object.trajectory[j].point, color, width);
+            }
+            for (size_t i = 0; i < metadata.events.size(); ++i)
+            {
+                _events.push_front(metadata.events[i]);
+                if (_events.size()*_font.Height() > canvas.height)
+                    _events.pop_back();
+            }
+            Point location;
+            for (Events::const_iterator it = _events.begin(); it != _events.end(); ++it)
+            {
+                std::stringstream ss;
+                Color color = Color(255, 255, 255);
+                switch (it->type)
+                {
+                case Simd::Motion::Event::ObjectIn:
+                    ss << "in " << it->objectId;
+                    color = Color(255, 255, 255);
+                    break;
+                case Simd::Motion::Event::ObjectOut:
+                    ss << "out " << it->objectId;
+                    color = Color(255, 255, 255);
+                    break;
+                case Simd::Motion::Event::SabotageOn:
+                    ss << "SABOTAGE ON";
+                    color = Color(0, 0, 255);
+                    break;
+                case Simd::Motion::Event::SabotageOff:
+                    ss << "SABOTAGE OFF";
+                    color = Color(0, 0, 255);
+                    break;
+                };
+                _font.Draw(canvas, ss.str(), location, color);
+                location.y += _font.Height();
+            }
+        }
     };
 
     bool MotionSpecialTest()

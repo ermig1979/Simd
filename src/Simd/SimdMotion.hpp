@@ -28,9 +28,11 @@
 #include "Simd/SimdRectangle.hpp"
 #include "Simd/SimdFrame.hpp"
 #include "Simd/SimdDrawing.hpp"
+#include "Simd/SimdFont.hpp"
 
 #include <vector>
 #include <stack>
+#include <sstream>
 
 #ifndef SIMD_CHECK_PERFORMANCE
 #define SIMD_CHECK_PERFORMANCE()
@@ -41,6 +43,7 @@ namespace Simd
     namespace Motion
     {
         typedef double Time;
+        typedef int Id;
         typedef std::string String;
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Point<ptrdiff_t> Point;
@@ -95,18 +98,25 @@ namespace Simd
             return Size(Round(onvif.x*size.x / 2.0), Round(onvif.y*size.y / 2.0));
         }
 
+        SIMD_INLINE String ToString(Id id)
+        {
+            std::stringstream ss;
+            ss << id;
+            return ss.str();
+        }
+
         struct Position
         {
             Point point;
             Time time;
-            Rect rect;
         };
         typedef std::vector<Position> Positions;
 
         struct Object
         {
+            Id id;
+            Rect rect;
             Positions trajectory;
-            Position current;
         };
         typedef std::vector<Object> Objects;
 
@@ -114,7 +124,6 @@ namespace Simd
         {
             enum Type
             {
-                Empty,
                 ObjectIn,
                 ObjectOut,
                 SabotageOn,
@@ -122,9 +131,9 @@ namespace Simd
             } type;
 
             String text;
-            int objectId;
+            Id objectId;
 
-            Event(Type type_ = Empty, const String & text_ = String(), int objectId_ = -1)
+            Event(Type type_, const String & text_ = String(), Id objectId_ = -1)
                 : type(type_)
                 , text(text_)
                 , objectId(objectId_)
@@ -183,16 +192,20 @@ namespace Simd
 
             double BackgroundGrowTime;
             double BackgroundIncrementTime;
+            int BackgroundSabbotageCountMax;
 
             double SegmentationCreateThreshold;
             double SegmentationExpandCoefficient;
 
             double StabilityRegionAreaMax;
 
-            size_t TrackingTrajectoryMax;
+            int TrackingTrajectoryMax;
             double TrackingRemoveTime;
             double TrackingAdditionalLinking;
-            double TrackingUpdateBoundSpeed;
+            int TrackingAveragingHalfRange;
+
+            double ClassificationShiftMin;
+            double ClassificationTimeMin;
 
             int DebugDrawLevel;
             int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
@@ -218,22 +231,26 @@ namespace Simd
 
                 BackgroundGrowTime = 1.0;
                 BackgroundIncrementTime = 1.0;
+                BackgroundSabbotageCountMax = 3;
 
                 SegmentationCreateThreshold = 0.5;
                 SegmentationExpandCoefficient = 0.75;
 
                 StabilityRegionAreaMax = 0.5;
 
-                TrackingTrajectoryMax = 1000;
+                TrackingTrajectoryMax = 1024;
                 TrackingRemoveTime = 1.0;
                 TrackingAdditionalLinking = 0.0;
-                TrackingUpdateBoundSpeed = 0.1;
+                TrackingAveragingHalfRange = 12;
+
+                ClassificationShiftMin = 0.075;
+                ClassificationTimeMin = 1.0;
 
                 DebugDrawLevel = 1;
-                DebugDrawBottomRight = 1;
-                DebugAnnotateModel = true;
-                DebugAnnotateMovingRegions = true;
-                DebugAnnotateTrackingObjects = true;
+                DebugDrawBottomRight = 0;
+                DebugAnnotateModel = false;
+                DebugAnnotateMovingRegions = false;
+                DebugAnnotateTrackingObjects = false;
             }
         };
 
@@ -269,9 +286,8 @@ namespace Simd
                 if (!Calibrate(input.Size()))
                     return false;
 
-                metadata.objects.clear();
-                metadata.events.clear();
-                _scene.events = &metadata.events;
+                _scene.metadata = &metadata;
+                _scene.metadata->events.clear();
 
                 SetFrame(input, output);
 
@@ -285,7 +301,11 @@ namespace Simd
 
                 TrackObjects();
 
+                ClassifyObjects();
+
                 UpdateBackground();
+
+                SetMetadata();
 
                 DebugAnnotation();
 
@@ -430,7 +450,7 @@ namespace Simd
                 State state;
                 int count;
                 int sabotageCounter;
-                Time expandEndTime;
+                Time growEndTime;
                 Time lastFrameTime;
                 Time incrementCounterTime;
 
@@ -444,13 +464,12 @@ namespace Simd
             {
                 enum State
                 {
-                    Unknown,
                     Stable,
                     Sabotage
                 } state;
 
                 Stability()
-                    : state(Unknown)
+                    : state(Stable)
                 {
                 }
             };
@@ -475,14 +494,13 @@ namespace Simd
 
             struct Object
             {
-                const int id;
+                Id trackingId, classificationId;
                 Point center; 
                 Rect rect; 
                 MovingRegionPtrs trajectory; 
 
                 enum Type
                 {
-                    Empty = 0,
                     Static,
                     Moving,
                 } type;
@@ -490,11 +508,12 @@ namespace Simd
                 Point pointStart;
                 Time timeStart;
 
-                Object(const int id_, const MovingRegionPtr & region)
-                    : id(id_)
+                Object(const Id trackingId_, const MovingRegionPtr & region)
+                    : trackingId(trackingId_)
+                    , classificationId(-1)
                     , center(region->rect.Center())
                     , rect(region->rect)
-                    , type(Empty)
+                    , type(Static)
                     , pointStart(region->rect.Center())
                     , timeStart(region->time)
                 {
@@ -508,9 +527,20 @@ namespace Simd
             {
                 ObjectPtrs objects;
                 ObjectPtrs justDeletedObjects;
-                int id; 
+                Id id; 
 
                 Tracking() 
+                    : id(0)
+                {
+                }
+            };
+
+            struct Classification
+            {
+                ptrdiff_t squareShiftMin;
+                Id id;
+
+                Classification()
                     : id(0)
                 {
                 }
@@ -520,10 +550,10 @@ namespace Simd
             {
                 Frame input, * output;
                 Pyramid scaled;
-                Events * events;
+                Metadata * metadata;
 
+                Font font;
                 Pyramid buffer;
-
                 Detector::Model model;
 
                 Texture texture;
@@ -538,20 +568,27 @@ namespace Simd
 
                 Tracking tracking;
 
+                Classification classification;
+
                 void Create(const Options & options)
                 {
                     scaled.Recreate(model.originalFrameSize, model.scaleLevel + 1);
+                    font.Resize(model.originalFrameSize.y / 32);
                     buffer.Recreate(model.frameSize, model.levelCount);
+
                     texture.Create(model.frameSize, model.levelCount, options);
                     difference.Recreate(model.frameSize, model.levelCount);
 
                     segmentation.mask.Recreate(model.frameSize, model.levelCount);
                     segmentation.differenceCreationMin = int(255 * options.SegmentationCreateThreshold);
                     segmentation.differenceExpansionMin = int(255 * options.SegmentationExpandCoefficient*options.SegmentationCreateThreshold);
+
+                    classification.squareShiftMin = ptrdiff_t(Simd::SquaredDistance(model.frameSize, Point())*
+                        options.ClassificationShiftMin*options.ClassificationShiftMin);
                 }
             };
 
-            bool SetFrame(const Frame & input, Frame * output)
+            void SetFrame(const Frame & input, Frame * output)
             {
                 SIMD_CHECK_PERFORMANCE();
 
@@ -559,8 +596,6 @@ namespace Simd
                 _scene.output = output;
                 Simd::Convert(input, Frame(_scene.scaled[0]).Ref());
                 Simd::Build(_scene.scaled, SimdReduce2x2);
-
-                return true;
             }
 
             bool Calibrate(const Size & frameSize)
@@ -674,26 +709,22 @@ namespace Simd
                 }
             }
 
-            bool EstimateTextures()
+            void EstimateTextures()
             {
                 SIMD_CHECK_PERFORMANCE();
 
                 Texture & texture = _scene.texture;
-
                 Simd::Copy(_scene.scaled.Top(), texture.gray.value[0]);
                 Simd::Build(texture.gray.value, SimdReduce4x4);
-
                 for (size_t i = 0; i < texture.gray.value.Size(); ++i)
                 {
                     Simd::TextureBoostedSaturatedGradient(texture.gray.value[i],
                         _options.TextureGradientSaturation, _options.TextureGradientBoost,
                         texture.dx.value[i], texture.dy.value[i]);
                 }
-
-                return true;
             }
 
-            bool EstimateDifference()
+            void EstimateDifference()
             {
                 SIMD_CHECK_PERFORMANCE();
 
@@ -709,7 +740,6 @@ namespace Simd
                         Simd::AddFeatureDifference(feature.value[i], feature.lo.value[i], feature.hi.value[i], feature.weight, difference[i]);
                     }
                 }
-
                 if (_options.DifferencePropagateForward)
                 {
                     for (size_t i = 1; i < difference.Size(); ++i)
@@ -718,17 +748,14 @@ namespace Simd
                         Simd::OperationBinary8u(difference[i], buffer[i], difference[i], SimdOperationBinary8uMaximum);
                     }
                 }
-
                 if (_options.DifferenceRoiMaskEnable)
                 {
                     for (size_t i = 0; i < difference.Size(); ++i)
                         Simd::OperationBinary8u(difference[i], _scene.model.roiMask[i], difference[i], SimdOperationBinary8uAnd);
                 }
-
-                return true;
             }
 
-            bool PerformSegmentation()
+            void PerformSegmentation()
             {
                 SIMD_CHECK_PERFORMANCE();
 
@@ -781,7 +808,7 @@ namespace Simd
                                 std::stack<Point> stack;
                                 stack.push(Point(x, y));
                                 if (segmentation.movingRegions.size() + Segmentation::MaskIndexSize > UINT8_MAX)
-                                    return false;
+                                    return;
                                 MovingRegionPtr region(new MovingRegion(uint8_t(segmentation.movingRegions.size() + Segmentation::MaskIndexSize), Rect(), level, time));
                                 while (!stack.empty())
                                 {
@@ -805,10 +832,7 @@ namespace Simd
                                     if (!region->rect.Empty())
                                     {
                                         region->level = searchRegion.scale;
-                                        //if (motion.detectLevel)
-                                        //    region->rect = region->rect * (1 << motion.detectLevel);
                                         region->point = region->rect.Center();
-                                        //region->inRoi = model.roi.HasPoint(region->point);
                                         segmentation.movingRegions.push_back(region);
                                     }
                                 }
@@ -816,7 +840,6 @@ namespace Simd
                         }
                     }
                 }
-                return true;
             }
 
             SIMD_INLINE void ShrinkRoi(const View & mask, Rect & roi, uint8_t index)
@@ -881,6 +904,10 @@ namespace Simd
 
             void VerifyStability()
             {
+                SIMD_CHECK_PERFORMANCE();
+
+                if (_scene.background.state == Background::Init)
+                    return;
                 View mask = _scene.segmentation.mask[0];
                 uint32_t count;
                 Simd::ConditionalCount8u(mask, Segmentation::MaskIndexSize, SimdCompareGreaterOrEqual, count);
@@ -888,19 +915,21 @@ namespace Simd
                 if (sabotage)
                 {
                     if (_scene.stability.state != Stability::Sabotage)
-                        _scene.events->push_back(Event(Event::SabotageOn, "SabotageOn"));
+                        _scene.metadata->events.push_back(Event(Event::SabotageOn, "SabotageOn"));
                     _scene.stability.state = Stability::Sabotage;
                 }
                 else
                 {
                     if (_scene.stability.state == Stability::Sabotage)
-                        _scene.events->push_back(Event(Event::SabotageOff, "SabotageOff"));
+                        _scene.metadata->events.push_back(Event(Event::SabotageOff, "SabotageOff"));
                     _scene.stability.state = Stability::Stable;
                 }
             }
 
             void TrackObjects()
             {
+                SIMD_CHECK_PERFORMANCE();
+
                 if (_scene.background.state != Background::Update)
                 {
                     RemoveAllObjects();
@@ -920,13 +949,14 @@ namespace Simd
 
             void RemoveAllObjects()
             {
+                _scene.tracking.justDeletedObjects.clear();
                 if (_scene.tracking.objects.size())
                 {
                     for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
                     {
                         ObjectPtr & object = _scene.tracking.objects[i];
                         if (object->type == Object::Moving)
-                            _scene.events->push_back(Event(Event::ObjectOut, "ObjectOut", object->id));
+                            _scene.metadata->events.push_back(Event(Event::ObjectOut, "ObjectOut", object->classificationId));
                         _scene.tracking.justDeletedObjects.push_back(object);
                     }
                     _scene.tracking.objects.clear();
@@ -959,7 +989,7 @@ namespace Simd
                     {
                         tracking.justDeletedObjects.push_back(object);
                         if (object->type == Object::Moving)
-                            _scene.events->push_back(Event(Event::ObjectOut, "ObjectOut", object->id));
+                            _scene.metadata->events.push_back(Event(Event::ObjectOut, "ObjectOut", object->classificationId));
                     }
                 }
                 tracking.objects.swap(buffer);
@@ -1014,11 +1044,15 @@ namespace Simd
                     if (nearest)
                     {
                         nearest->object = object.get();
-                        FRect rect = _options.TrackingUpdateBoundSpeed*FRect(nearest->rect) + (1.0 - _options.TrackingUpdateBoundSpeed)*FRect(object->rect);
-                        object->rect = Rect(rect);
-                        object->rect.Shift(nearest->rect.Center() - object->rect.Center());
-                        object->center = nearest->rect.Center();
                         object->trajectory.push_back(nearest);
+                        Rect sum;
+                        size_t end = object->trajectory.size(), start = std::max<ptrdiff_t>(0, end - _options.TrackingAveragingHalfRange);
+                        for (size_t j = start; j < end; ++j)
+                            sum += object->trajectory[j]->rect;
+                        object->rect = sum / (end - start);
+                        object->rect.Shift(nearest->rect.Center() - object->rect.Center());
+                        object->rect &= Rect(_scene.model.frameSize);
+                        object->center = nearest->rect.Center();
                     }
                 }
             }
@@ -1052,8 +1086,26 @@ namespace Simd
                     {
                         ObjectPtr object(new Object(_scene.tracking.id++, region));
                         region->object = object.get();
-                        object->type = Object::Static;
                         _scene.tracking.objects.push_back(object);
+                    }
+                }
+            }
+
+            void ClassifyObjects()
+            {
+                for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
+                {
+                    Object & object = *_scene.tracking.objects[i];
+                    if (object.type == Object::Static)
+                    {
+                        Time time = _scene.input.timestamp - object.timeStart;
+                        ptrdiff_t squareShift = Simd::SquaredDistance(object.trajectory.back()->point, object.pointStart);
+                        if (time >= _options.ClassificationTimeMin && squareShift >= _scene.classification.squareShiftMin)
+                        {
+                            object.type = Object::Moving;
+                            object.classificationId = _scene.classification.id++;
+                            _scene.metadata->events.push_back(Event(Event::ObjectIn, "ObjectIn", object.classificationId));
+                        }
                     }
                 }
             }
@@ -1105,14 +1157,13 @@ namespace Simd
                 }
             }
 
-            bool UpdateBackground()
+            void UpdateBackground()
             {
                 SIMD_CHECK_PERFORMANCE();
 
                 Background & background = _scene.background;
                 const Stability::State & stability = _scene.stability.state;
                 const Time & time = _scene.input.timestamp;
-
                 switch (background.state)
                 {
                 case Background::Update:
@@ -1122,77 +1173,91 @@ namespace Simd
                         Apply(_scene.texture.features, IncrementCountUpdater());
                         ++background.count;
                         background.incrementCounterTime += time - background.lastFrameTime;
-
-                        if (background.count >= 127 || (background.incrementCounterTime > _options.BackgroundIncrementTime && background.count >= 8))
+                        if (background.count >= CHAR_MAX || (background.incrementCounterTime > _options.BackgroundIncrementTime && background.count >= 8))
                         {
                             Apply(_scene.texture.features, AdjustRangeUpdater());
-
                             background.incrementCounterTime = 0;
                             background.count = 0;
                         }
                         break;
                     case Stability::Sabotage:
                         background.sabotageCounter++;
-                        if (background.sabotageCounter > 0)//_sabotageCounterMax)
-                        {
+                        if (background.sabotageCounter > _options.BackgroundSabbotageCountMax)
                             InitBackground();
-                        }
                         break;
-
                     default:
                         assert(0);
                     }
-
                     if (stability != Stability::Sabotage)
-                    {
                         background.sabotageCounter = 0;
-                    }
                     break;
-
                 case Background::Grow:
-
                     if (stability == Stability::Sabotage)
-                    {
                         InitBackground();
-                    }
                     else
                     {
                         Apply(_scene.texture.features, GrowRangeUpdater());
-
                         if (stability != Stability::Stable)
-                        {
-                            background.expandEndTime = time + _options.BackgroundGrowTime;
-                        }
-
-                        if (background.expandEndTime < time)
+                            background.growEndTime = time + _options.BackgroundGrowTime;
+                        if (background.growEndTime < time)
                         {
                             background.state = Background::Update;
                             background.count = 0;
                         }
                     }
                     break;
-
                 case Background::Init:
                     InitBackground();
                     break;
                 default:
                     assert(0);
                 }
-
                 background.lastFrameTime = time;
-                return true;
             }
 
             void InitBackground()
             {
                 Background & background = _scene.background;
-
                 Apply(_scene.texture.features, InitUpdater());
-
-                background.expandEndTime = _scene.input.timestamp + _options.BackgroundGrowTime;
+                background.growEndTime = _scene.input.timestamp + _options.BackgroundGrowTime;
                 background.state = Background::Grow;
                 background.count = 0;
                 background.incrementCounterTime = 0;
+            }
+
+            void SetMetadata()
+            {
+                _scene.metadata->objects.clear();
+                AddToMetadata(_scene.tracking.objects);
+                AddToMetadata(_scene.tracking.justDeletedObjects);
+            }
+
+            void AddToMetadata(const ObjectPtrs & objects)
+            {
+                size_t scale = _scene.model.scale;
+                for (size_t i = 0; i < objects.size(); ++i)
+                {
+                    Object & srcObject = *objects[i];
+                    if (srcObject.type == Object::Moving)
+                    {
+                        Motion::Object dstObject;
+                        dstObject.id = srcObject.classificationId;
+                        dstObject.rect = srcObject.rect*scale;
+                        for (size_t j = 0; j < srcObject.trajectory.size(); ++j)
+                        {
+                            ptrdiff_t begin = std::max<ptrdiff_t>(0, j - _options.TrackingAveragingHalfRange);
+                            ptrdiff_t end = std::min<ptrdiff_t>(srcObject.trajectory.size(), j + _options.TrackingAveragingHalfRange);
+                            Point sum;
+                            for (ptrdiff_t l = begin; l < end; ++l)
+                                sum += srcObject.trajectory[l]->point*scale;
+                            Motion::Position position;
+                            position.time = srcObject.trajectory[j]->time;
+                            position.point = sum / (end - begin);
+                            dstObject.trajectory.push_back(position);
+                        }
+                        _scene.metadata->objects.push_back(dstObject);
+                    }
+                }
             }
 
             void DebugAnnotation()
@@ -1204,6 +1269,8 @@ namespace Simd
 
                 if (output && output->format == Frame::Bgr24)
                 {
+                    View & canvas = output->planes[0];
+
                     if (_options.DebugDrawBottomRight)
                     {
                         View src;
@@ -1214,7 +1281,7 @@ namespace Simd
                         case 3: src = _scene.texture.dx.value[_options.DebugDrawLevel]; break;
                         case 4: src = _scene.texture.dy.value[_options.DebugDrawLevel]; break;
                         }
-                        Simd::GrayToBgr(src, output->planes[0].Region(src.Size(), View::BottomRight).Ref());
+                        Simd::GrayToBgr(src, canvas.Region(src.Size(), View::BottomRight).Ref());
                     }
 
                     if (_options.DebugAnnotateModel)
@@ -1223,11 +1290,11 @@ namespace Simd
                         for (size_t i = 0; i < _scene.model.roi.size(); ++i)
                         {
                             Point p0 = i ? _scene.model.roi[i - 1] : _scene.model.roi.back(), p1 = _scene.model.roi[i];
-                            Simd::DrawLine(output->planes[0], p0*scale, p1*scale, color);
+                            Simd::DrawLine(canvas, p0*scale, p1*scale, color);
                         }
                         Rect objectMin(OnvifToScreenSize(_model.size, _scene.model.originalFrameSize));
-                        objectMin.Shift(Point(scale, scale));
-                        Simd::DrawRectangle(output->planes[0], objectMin, color);
+                        objectMin.Shift(Point(_scene.model.originalFrameSize.x - objectMin.right - 2*scale, scale));
+                        Simd::DrawRectangle(canvas, objectMin, color);
                     }
 
                     if (_options.DebugAnnotateMovingRegions)
@@ -1236,7 +1303,7 @@ namespace Simd
                         for (size_t i = 0; i < _scene.segmentation.movingRegions.size(); ++i)
                         {
                             const MovingRegion & region = *_scene.segmentation.movingRegions[i];
-                            Simd::DrawRectangle(output->planes[0], region.rect*scale, color, 1);
+                            Simd::DrawRectangle(canvas, region.rect*scale, color, 1);
                         }
                     }
 
@@ -1246,10 +1313,11 @@ namespace Simd
                         for (size_t i = 0; i < _scene.tracking.objects.size(); ++i)
                         {
                             const Object & object = *_scene.tracking.objects[i];
-                            Simd::DrawRectangle(output->planes[0], object.rect*scale, color, 1);
+                            Simd::DrawRectangle(canvas, object.rect*scale, color, 1);
+                            _scene.font.Draw(canvas, ToString(object.trackingId), Point(object.rect.Center().x*scale, object.rect.top*scale - _scene.font.Height()), color);
                             const MovingRegionPtrs & regions = object.trajectory;
                             for (size_t j = 1; j < regions.size(); ++j)
-                                Simd::DrawLine(output->planes[0], regions[j]->point*scale, regions[j - 1]->point*scale, color, 1);
+                                Simd::DrawLine(canvas, regions[j]->point*scale, regions[j - 1]->point*scale, color, 1);
                         }
                     }
                 }

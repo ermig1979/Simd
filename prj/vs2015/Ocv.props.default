@@ -7,7 +7,7 @@
       <PreprocessorDefinitions>SIMD_OPENCV_ENABLE;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
 	<Link>
-      <AdditionalDependencies>opencv_world320.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opencv_world331.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>c:\opencv\build\x64\vc14\lib;c:\opencv\build\x64\vc14\bin;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
 	<PostBuildEvent>

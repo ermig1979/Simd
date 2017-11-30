@@ -65,6 +65,9 @@ namespace Simd
         */
         bool Resize(size_t height)
         {
+            if (height == _currentSize.y)
+                return true;
+
             if (height < 4u || height > (size_t)_originalSize.y)
                 return false;
 
