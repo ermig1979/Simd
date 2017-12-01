@@ -801,14 +801,12 @@ namespace Test
             result = result && Compare(dst1, dst2, EPS, true, 64);
         }
 
-        result = result && Compare(dst1, dst2, EPS, true, 64);
-
         return result;
     }
 
     bool HogLiteFilterFeaturesDataTest(bool create)
     {
-        return HogLiteFilterFeaturesDataTest(create, DW / 16, DH, 8, 16, FUNC_HLFF(SimdHogLiteFilterFeatures));
+        return HogLiteFilterFeaturesDataTest(create, DW, DH, 8, 16, FUNC_HLFF(SimdHogLiteFilterFeatures));
     }
 
     bool HogLiteResizeFeaturesDataTest(bool create, size_t srcWidth, size_t srcHeight, double k, size_t featureSize, const FuncHLRF & f)
@@ -848,8 +846,6 @@ namespace Test
 
             result = result && Compare(dst1, dst2, EPS, true, 64);
         }
-
-        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -898,8 +894,6 @@ namespace Test
 
             result = result && Compare(dst1, dst2, EPS, true, 64);
         }
-
-        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -958,8 +952,6 @@ namespace Test
 
             result = result && Compare(dstDst1, dstDst2, EPS, true, 64);
         }
-
-        result = result && Compare(dstDst1, dstDst2, EPS, true, 64);
 
         return result;
     }
