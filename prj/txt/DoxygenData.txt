@@ -97,6 +97,16 @@
     \code
     #include "Simd/SimdDetection.hpp"
     \endcode
+	
+	In order to use Simd::Neural framework you must include:
+    \code
+    #include "Simd/SimdNeural.hpp"
+    \endcode
+	
+	In order to use Simd::Motion framework you must include:
+    \code
+    #include "Simd/SimdMotion.hpp"
+    \endcode
 
     \section s6 Interaction with OpenCV:
 
@@ -216,6 +226,11 @@
 /*! @ingroup cpp_types
     @defgroup cpp_neural Neural
     \short Simd::Neural is C++ framework for running and learning of Convolutional Neural Network.
+*/
+
+/*! @ingroup cpp_types
+    @defgroup cpp_motion Motion
+    \short Simd::Motion is C++ framework for motion detection.
 */
 
 /*! @ingroup cpp_types

@@ -40,64 +40,138 @@
 
 namespace Simd
 {
+    /*! @ingroup cpp_motion
+
+        \short Contains Framework for motion detection.
+
+        \note This is wrapper around low-level \ref motion_detection API.
+    */
     namespace Motion
     {
-        typedef double Time;
-        typedef int Id;
-        typedef std::string String;
-        typedef Simd::Point<ptrdiff_t> Size;
-        typedef Simd::Point<ptrdiff_t> Point;
-        typedef std::vector<Point> Points;
-        typedef Simd::Point<double> FSize;
-        typedef Simd::Point<double> FPoint;
-        typedef std::vector<FPoint> FPoints;
-        typedef Simd::Rectangle<ptrdiff_t> Rect;
-        typedef std::vector<Rect> Rects;
-        typedef Simd::Rectangle<double> FRect;
-        typedef Simd::View<Simd::Allocator> View;
-        typedef Simd::Frame<Simd::Allocator> Frame;
-        typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+        typedef double Time; /*!< \brief Time type. */
+        typedef int Id; /*!< \brief ID type. */
+        typedef std::string String; /*!< \brief String type. */
+        typedef Simd::Point<ptrdiff_t> Size; /*!< \brief screen 2D-size (width and height). */
+        typedef Simd::Point<ptrdiff_t> Point; /*!< \brief screen point (x and y). */
+        typedef std::vector<Point> Points; /*!< \brief Vector of screen 2D-points. */
+        typedef Simd::Rectangle<ptrdiff_t> Rect; /*!< \brief Screen rectangle. */
+        typedef Simd::Point<double> FSize; /*!< \brief ONVIF 2D-size (width and height). ONVIF size is restricted by range [0, 2]. */
+        typedef Simd::Point<double> FPoint; /*!< \brief ONVIF 2D-point (x and y). ONVIF coordinates are restricted by range [-1, 1]. */
+        typedef std::vector<FPoint> FPoints; /*!< \brief Vector of ONVIF 2D-points. */
+        typedef Simd::View<Simd::Allocator> View; /*!< \brief Image type. */
+        typedef Simd::Frame<Simd::Allocator> Frame; /*!< \brief Frame type. */
 
-        SIMD_INLINE double ScreenToOnvifX(ptrdiff_t x, ptrdiff_t width)
+        /*! @ingroup cpp_motion
+
+            \short Converts screen X-coordinate to ONVIF X-coordinate.
+
+            \param [in] x - a screen X-coordinate.
+            \param [in] screenWidth - a screen width.
+            \return ONVIF X-coordinate.
+        */
+        SIMD_INLINE double ScreenToOnvifX(ptrdiff_t x, ptrdiff_t screenWidth)
         {
-            return double(2 * x - width) / width;
+            return double(2 * x - screenWidth) / screenWidth;
         }
 
-        SIMD_INLINE double ScreenToOnvifY(ptrdiff_t y, ptrdiff_t height)
+        /*! @ingroup cpp_motion
+
+            \short Converts screen Y-coordinate to ONVIF Y-coordinate.
+
+            \param [in] y - a screen Y-coordinate.
+            \param [in] screenHeight - a screen height.
+            \return ONVIF Y-coordinate.
+        */
+        SIMD_INLINE double ScreenToOnvifY(ptrdiff_t y, ptrdiff_t screenHeight)
         {
-            return double(height - 2 * y) / height;
+            return double(screenHeight - 2 * y) / screenHeight;
         }
 
-        SIMD_INLINE FPoint ScreenToOnvif(const Point & screen, const Point & size)
+        /*! @ingroup cpp_motion
+
+            \short Converts screen 2D-coordinates to ONVIF 2D-coordinates.
+
+            \param [in] point - a screen 2D-coordinates.
+            \param [in] screenSize - a screen size (width and height).
+            \return ONVIF 2D-coordinate.
+        */
+        SIMD_INLINE FPoint ScreenToOnvif(const Point & point, const Point & screenSize)
         {
-            return FPoint(ScreenToOnvifX(screen.x, size.x), ScreenToOnvifY(screen.y, size.y));
+            return FPoint(ScreenToOnvifX(point.x, screenSize.x), ScreenToOnvifY(point.y, screenSize.y));
         }
 
-        SIMD_INLINE FSize ScreenToOnvifSize(const Size & screen, const Point & size)
+        /*! @ingroup cpp_motion
+
+            \short Converts screen 2D-size to ONVIF 2D-size.
+
+            \param [in] size - a screen 2D-size.
+            \param [in] screenSize - a screen size (width and height).
+            \return ONVIF 2D-size.
+        */
+        SIMD_INLINE FSize ScreenToOnvifSize(const Size & size, const Point & screenSize)
         {
-            return FSize(double(screen.x * 2 / size.x), double(screen.y * 2 / size.y));
+            return FSize(double(size.x * 2 / screenSize.x), double(size.y * 2 / screenSize.y));
         }
 
-        SIMD_INLINE ptrdiff_t OnvifToScreenX(double x, ptrdiff_t width)
+        /*! @ingroup cpp_motion
+
+            \short Converts ONVIF X-coordinate to screen X-coordinate.
+
+            \param [in] x - a ONVIF X-coordinate. ONVIF coordinates are restricted by range [-1, 1].
+            \param [in] screenWidth - a screen width.
+            \return screen X-coordinate.
+        */
+        SIMD_INLINE ptrdiff_t OnvifToScreenX(double x, ptrdiff_t screenWidth)
         {
-            return std::max(ptrdiff_t(0), std::min(width - 1, (ptrdiff_t)Simd::Round((1.0 + x)*width / 2.0)));
+            return std::max(ptrdiff_t(0), std::min(screenWidth - 1, (ptrdiff_t)Simd::Round((1.0 + x)*screenWidth / 2.0)));
         }
 
-        SIMD_INLINE ptrdiff_t OnvifToScreenY(double y, ptrdiff_t height)
+        /*! @ingroup cpp_motion
+
+            \short Converts ONVIF Y-coordinate to screen Y-coordinate.
+
+            \param [in] y - a ONVIF Y-coordinate. ONVIF coordinates are restricted by range [-1, 1].
+            \param [in] screenHeight - a screen height.
+            \return screen Y-coordinate.
+        */
+        SIMD_INLINE ptrdiff_t OnvifToScreenY(double y, ptrdiff_t screenHeight)
         {
-            return std::max(ptrdiff_t(0), std::min(height - 1, (ptrdiff_t)Simd::Round((1.0 - y)*height / 2.0)));
+            return std::max(ptrdiff_t(0), std::min(screenHeight - 1, (ptrdiff_t)Simd::Round((1.0 - y)*screenHeight / 2.0)));
         }
 
-        SIMD_INLINE Point OnvifToScreen(const FPoint & onvif, const Point & size)
+        /*! @ingroup cpp_motion
+
+            \short Converts ONVIF 2D-coordinates to screen 2D-coordinates.
+
+            \param [in] point - a ONVIF 2D-coordinates. ONVIF coordinates are restricted by range [-1, 1].
+            \param [in] screenSize - a screen size (width and height).
+            \return screen 2D-coordinate.
+        */
+        SIMD_INLINE Point OnvifToScreen(const FPoint & point, const Point & screenSize)
         {
-            return Point(OnvifToScreenX(onvif.x, size.x), OnvifToScreenY(onvif.y, size.y));
+            return Point(OnvifToScreenX(point.x, screenSize.x), OnvifToScreenY(point.y, screenSize.y));
         }
 
-        SIMD_INLINE Size OnvifToScreenSize(const FSize & onvif, const Point & size)
+        /*! @ingroup cpp_motion
+
+            \short Converts ONVIF 2D-size to screen 2D-size.
+
+            \param [in] size - a ONVIF 2D-size. ONVIF size is restricted by range [0, 2].
+            \param [in] screenSize - a screen size (width and height).
+            \return screen 2D-size.
+        */
+        SIMD_INLINE Size OnvifToScreenSize(const FSize & size, const Point & screenSize)
         {
-            return Size(Round(onvif.x*size.x / 2.0), Round(onvif.y*size.y / 2.0));
+            return Size(Round(size.x*screenSize.x / 2.0), Round(size.y*screenSize.y / 2.0));
         }
 
+        /*! @ingroup cpp_motion
+
+            \short Converts ID to string.
+
+            \param [in] id - an ID.
+            \return string representation of ID.
+        */
         SIMD_INLINE String ToString(Id id)
         {
             std::stringstream ss;
@@ -105,34 +179,64 @@ namespace Simd
             return ss.str();
         }
 
+        /*! @ingroup cpp_motion
+
+            \short Position structure.
+
+            Describes position (2D-point and time) of detected object.
+        */
         struct Position
         {
-            Point point;
-            Time time;
+            Point point; /*!< \brief Screen 2D-point. */
+            Time time; /*!< \brief A timestamp. */
         };
-        typedef std::vector<Position> Positions;
+        typedef std::vector<Position> Positions; /*!< \brief Vector of object positions. */
 
+        /*! @ingroup cpp_motion
+
+            \short Object structure.
+
+            Describes object detected at screen by Simd::Motion::Detector.
+        */
         struct Object
         {
-            Id id;
-            Rect rect;
-            Positions trajectory;
+            Id id; /*!< \brief An object ID. */
+            Rect rect; /*!< \brief A bounding box around the object. */
+            Positions trajectory; /*!< \brief A trajectory of the object. */
         };
-        typedef std::vector<Object> Objects;
+        typedef std::vector<Object> Objects; /*!< \brief Vector of objects. */
 
+        /*! @ingroup cpp_motion
+
+            \short Event structure.
+
+            Describes event generated by Simd::Motion::Detector.
+        */
         struct Event
         {
+            /*!
+                \enum Type
+
+                Describes types of event.
+            */
             enum Type
             {
-                ObjectIn,
-                ObjectOut,
-                SabotageOn,
-                SabotageOff,
-            } type;
+                ObjectIn, /*!< \brief An appearing of new object. */
+                ObjectOut, /*!< \brief A disappearing of object */
+                SabotageOn, /*!< \brief An appearing of too big motion on the screen. */
+                SabotageOff, /*!< \brief A disappearing of too big motion on the screen. */
+            } type; /*!< \brief A type of event. */
 
-            String text;
-            Id objectId;
+            String text; /*!< \brief Event text description. */
+            Id objectId; /*!< \brief ID of object concerned with this event or -1. */
 
+            /*!
+                Constructs Event structure.
+
+                \param [in] type_ - a type of a new event.
+                \param [in] text_ - a text description of the event. It is equal to empty string by default.
+                \param [in] objectId_ - an ID of object concerned with this event. It is equal to -1 by default.
+            */
             Event(Type type_, const String & text_ = String(), Id objectId_ = -1)
                 : type(type_)
                 , text(text_)
@@ -140,28 +244,51 @@ namespace Simd
             {
             }
         };
-        typedef std::vector<Event> Events;
+        typedef std::vector<Event> Events; /*!< \brief Vector of events. */
 
+        /*! @ingroup cpp_motion
+
+            \short Metadata structure.
+
+            Contains lists of detected objects and events generated by Simd::Motion::Detector at current frame.
+        */
         struct Metadata
         {
-            Objects objects;
-            Events events;
+            Objects objects; /*!< \brief A list of objects detected by Simd::Motion::Detector at current frame. */
+            Events events; /*!< \brief A list of events generated by Simd::Motion::Detector at current frame. */
         };
 
+        /*! @ingroup cpp_motion
+
+            \short Model structure.
+
+            Describes screen scene. It is used by Simd::Motion::Detector for algorithm calibration.
+        */
         struct Model
         {
-            FSize size; // Minimal detected object size (Onvif coordinates).
-            FPoints roi; // ROI (Onvif coordinates). 
+            FSize size; /*!< \brief A minimal size of object to detect. ONVIF size is restricted by range [0, 2]. */ 
+            FPoints roi; /*!< \brief A ROI (region of interest). ONVIF coordinates is restricted by range [-1, 1]. */ 
 
-            Model(const Model & m)
-                : size(m.size)
-                , roi(m.roi)
+            /*!
+                Copy constructor of Model.
+
+                \param [in] model - other model.
+            */
+            Model(const Model & model)
+                : size(model.size)
+                , roi(model.roi)
             {
             }
 
-            Model(const FSize & s = FSize(0.1, 0.1), const FPoints & r = FPoints())
-                : size(s)
-                , roi(r)
+            /*!
+                Constructs Event structure.
+
+                \param [in] size_ - a minimal size of detected object. It is default value is (0.1, 0.1) ~ 0.25% of screen area. 
+                \param [in] roi_ - a ROI (region of interest). It is empty by default (all screen).
+            */
+            Model(const FSize & size_ = FSize(0.1, 0.1), const FPoints & roi_ = FPoints())
+                : size(size_)
+                , roi(roi_)
             {
                 if (roi.size() < 3)
                 {
@@ -174,54 +301,51 @@ namespace Simd
             }
         };
 
+        /*! @ingroup cpp_motion
+
+            \short Options structure.
+
+            Describes options used by Simd::Motion::Detector.
+        */
         struct Options
         {
-            int CalibrationScaleLevelMax;
-            int CalibrationLevelCountMin;
-            int CalibrationTopLevelSizeMin;
-            int CalibrationObjectAreaMin;
+            int CalibrationScaleLevelMax;  /*!< \brief A maximum scale of input frame. By default it is equal to 3 (maximum scale in 8 times). */ 
 
-            int TextureGradientSaturation;
-            int TextureGradientBoost;
+            int DifferenceGrayFeatureWeight; /*!< \brief A weight of gray feature for difference estimation. By default it is equal to 18. */ 
+            int DifferenceDxFeatureWeight; /*!< \brief A weight of X-gradient feature for difference estimation. By default it is equal to 18. */ 
+            int DifferenceDyFeatureWeight; /*!< \brief A weight of Y-gradient feature for difference estimation. By default it is equal to 18. */ 
+            bool DifferencePropagateForward; /*!< \brief An additional boosting of estimated difference. By default it is true. */ 
+            bool DifferenceRoiMaskEnable; /*!< \brief A flag to restrict difference estimation by ROI. By default it is true. */ 
 
-            int DifferenceGrayFeatureWeight;
-            int DifferenceDxFeatureWeight;
-            int DifferenceDyFeatureWeight;
-            bool DifferencePropagateForward;
-            bool DifferenceRoiMaskEnable;
+            double BackgroundGrowTime; /*!< \brief Initial time (in seconds) of updated background in fast mode. By default it is equal to 1 second. */ 
+            double BackgroundIncrementTime; /*!< \brief Background update speed (in seconds) in normal mode. By default it is equal to 1 second. */ 
+            int BackgroundSabotageCountMax; /*!< \brief Maximal count of frame with sabotage without scene reinitialization. By default it is equal to 3. */
 
-            double BackgroundGrowTime;
-            double BackgroundIncrementTime;
-            int BackgroundSabbotageCountMax;
+            double SegmentationCreateThreshold; /*!< \brief Threshold of segmentation to create motion region. It is restricted by range [0, 1]. By default it is equal to 0.5. */
+            double SegmentationExpandCoefficient; /*!< \brief Segmentation coefficient of area expansion of motion region. It is restricted by range [0, 1]. By default it is equal to 0.75. */
 
-            double SegmentationCreateThreshold;
-            double SegmentationExpandCoefficient;
+            double StabilityRegionAreaMax; /*!< \brief Defines maximal total area of motion regions othervise sabotage event is generated. It is restricted by range [0, 1]. By default it is equal to 0.5. */
 
-            double StabilityRegionAreaMax;
+            int TrackingTrajectoryMax; /*!< \brief Maximal length of object trajectory. By default it is equal to 1024. */
+            double TrackingRemoveTime; /*!< \brief A time (in seconds) to remove absent object. By default it is equal to 1 second. */
+            double TrackingAdditionalLinking; /*!< \brief A coefficient to boost trajectory linking. By default it is equal to 0. */
+            int TrackingAveragingHalfRange; /*!< \brief A half range parameter used to average object trajectory. By default it is equal to 12. */
 
-            int TrackingTrajectoryMax;
-            double TrackingRemoveTime;
-            double TrackingAdditionalLinking;
-            int TrackingAveragingHalfRange;
+            double ClassificationShiftMin; /*!< \brief A minimal shift (in screen diagonals) of motion region to detect object. By default it is equal to 0.075. */
+            double ClassificationTimeMin; /*!< \brief A minimal life time (in seconds) of motion region to detect object. By default it is equal to 1 second. */
 
-            double ClassificationShiftMin;
-            double ClassificationTimeMin;
+            int DebugDrawLevel; /*!< \brief A pyramid level used for debug annotation. By default it is equal to 1. */
+            int DebugDrawBottomRight; /*!< \brief A type of debug annotation in right bottom corner (0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value). By default it is equal to 0. */
+            bool DebugAnnotateModel; /*!< \brief Debug annotation of model. By default it is equal to false. */
+            bool DebugAnnotateMovingRegions; /*!< \brief Debug annotation of moving region. By default it is equal to false. */
+            bool DebugAnnotateTrackingObjects; /*!< \brief Debug annotation of tracked objects. By default it is equal to false. */
 
-            int DebugDrawLevel;
-            int DebugDrawBottomRight; // 0 - empty; 1 = difference; 2 - texture.gray.value; 3 - texture.dx.value; 4 - texture.dy.value;
-            bool DebugAnnotateModel;
-            bool DebugAnnotateMovingRegions;
-            bool DebugAnnotateTrackingObjects;
-
+            /*!
+                Default constructor of Options.
+            */
             Options()
             {
                 CalibrationScaleLevelMax = 3;
-                CalibrationLevelCountMin = 3;
-                CalibrationTopLevelSizeMin = 32;
-                CalibrationObjectAreaMin = 16;
-
-                TextureGradientSaturation = 16;
-                TextureGradientBoost = 4;
 
                 DifferenceGrayFeatureWeight = 18;
                 DifferenceDxFeatureWeight = 18;
@@ -231,7 +355,7 @@ namespace Simd
 
                 BackgroundGrowTime = 1.0;
                 BackgroundIncrementTime = 1.0;
-                BackgroundSabbotageCountMax = 3;
+                BackgroundSabotageCountMax = 3;
 
                 SegmentationCreateThreshold = 0.5;
                 SegmentationExpandCoefficient = 0.75;
@@ -254,28 +378,62 @@ namespace Simd
             }
         };
 
-        struct Detector
+        /*! @ingroup cpp_motion
+
+            \short Class Detector.
+
+            Performs motion detection.
+        */
+        class Detector
         {
+        public:
+
+            /*!
+                Default constructor of Detector.
+            */
             Detector()
             {
             }
 
-            ~Detector()
+            /*!
+                Destructor of Detector.
+            */
+            virtual ~Detector()
             {
             }
 
-            bool SetOptions(const Options & options)
+            /*!
+                Sets options of motion detector.
+
+                \param [in] options - options of motion detector.
+                \return a result of the operation.
+            */
+            bool SetOptions(const Simd::Motion::Options & options)
             {
-                _options = options;
+                *(Simd::Motion::Options*)(&_options) = options;
                 return true;
             }
 
+            /*!
+                Sets model of scene of motion detector.
+
+                \param [in] model - a model of scene.
+                \return a result of the operation.
+            */
             bool SetModel(const Model & model)
             {
                 _model = model;
                 return true;
             }
 
+            /*!
+                Processes next frame. You have to successively process all frame of a movie with using of this function.
+
+                \param [in] input - a current input frame.
+                \param [out] metadata - a metadata (sets of detected objects and generated events). It is a result of processing of current frame.
+                \param [out] output - a pointer to output frame with debug annotation. Can be NULL.
+                \return a result of the operation.
+            */
             bool NextFrame(const Frame & input, Metadata & metadata, Frame * output = NULL)
             {
                 SIMD_CHECK_PERFORMANCE();
@@ -313,11 +471,35 @@ namespace Simd
             }
 
         private:
-            Options _options;
             Simd::Motion::Model _model;
+
+            struct Options : public Simd::Motion::Options
+            {
+                int CalibrationLevelCountMin;
+                int CalibrationTopLevelSizeMin;
+                int CalibrationObjectAreaMin;
+
+                int TextureGradientSaturation;
+                int TextureGradientBoost;
+
+
+                Options()
+                    : Simd::Motion::Options()
+                {
+                    CalibrationLevelCountMin = 3;
+                    CalibrationTopLevelSizeMin = 32;
+                    CalibrationObjectAreaMin = 16;
+
+                    TextureGradientSaturation = 16;
+                    TextureGradientBoost = 4;
+                }
+            } _options;
 
             typedef std::pair<size_t, size_t> Scanline;
             typedef std::vector<Scanline> Scanlines;
+            typedef std::vector<Rect> Rects;
+            typedef Simd::Rectangle<double> FRect;
+            typedef Simd::Pyramid<Simd::Allocator> Pyramid;
 
             struct SearchRegion
             {
@@ -587,6 +769,7 @@ namespace Simd
                         options.ClassificationShiftMin*options.ClassificationShiftMin);
                 }
             };
+            Scene _scene;
 
             void SetFrame(const Frame & input, Frame * output)
             {
@@ -1182,7 +1365,7 @@ namespace Simd
                         break;
                     case Stability::Sabotage:
                         background.sabotageCounter++;
-                        if (background.sabotageCounter > _options.BackgroundSabbotageCountMax)
+                        if (background.sabotageCounter > _options.BackgroundSabotageCountMax)
                             InitBackground();
                         break;
                     default:
@@ -1322,8 +1505,6 @@ namespace Simd
                     }
                 }
             }
-
-            Scene _scene;
         };
     }
 }
