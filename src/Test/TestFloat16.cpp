@@ -411,7 +411,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SquaredDifferenceSum16fDataTest(create, DH, EPS, FUNC_S(SimdSquaredDifferenceSum16f));
+        result = result && SquaredDifferenceSum16fDataTest(create, DH, EPS*2, FUNC_S(SimdSquaredDifferenceSum16f));
 
         return result;
     }

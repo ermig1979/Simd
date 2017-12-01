@@ -958,7 +958,7 @@ namespace Test
 
     bool HogLiteFilterSeparableDataTest(bool create)
     {
-        return HogLiteFilterSeparableDataTest(create, DW / 16, DH, 8, 8, 16, 1, FUNC_HLFS(SimdHogLiteFilterSeparable));
+        return HogLiteFilterSeparableDataTest(create, DW, DH, 8, 8, 16, 1, FUNC_HLFS(SimdHogLiteFilterSeparable));
     }
 
     bool HogLiteFindMax7x7DataTest(bool create, size_t number, const FuncHLFM & f)

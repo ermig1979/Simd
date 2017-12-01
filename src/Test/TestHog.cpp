@@ -591,7 +591,7 @@ namespace Test
 
             TEST_LOAD(dstDst1);
 
-            f.Call(src, col, row, dstSrc, dstDst1, add);
+            f.Call(src, col, row, dstSrc, dstDst2, add);
 
             TEST_SAVE(dstDst2);
 

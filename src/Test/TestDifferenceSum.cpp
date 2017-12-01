@@ -674,7 +674,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DifferenceSum32fDataTest(create, DH, EPS*EPS, FUNC_F(SimdSquaredDifferenceKahanSum32f));
+        result = result && DifferenceSum32fDataTest(create, DH, (float)::pow(EPS, 1.5), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 
         return result;
     }

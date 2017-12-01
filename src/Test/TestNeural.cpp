@@ -2443,7 +2443,7 @@ namespace Test
         {
             FillRandom32f(src, 0, 1);
             FillRandom32f(weights, -1, 1);
-            FillRandom32f(dstSrc, -1000, 1000);
+            FillRandom32f(dstSrc, 1000, 2000);
 
             TEST_SAVE(src);
             TEST_SAVE(weights);
@@ -2465,7 +2465,7 @@ namespace Test
 
             TEST_SAVE(dstDst2);
 
-            result = Compare(dstDst1, dstDst2, eps, true, 32, false);
+            result = Compare(dstDst1, dstDst2, eps, true, 32, true);
         }
 
         return result;
