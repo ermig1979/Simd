@@ -109,6 +109,14 @@ In order to use [Simd::Detection](http://ermig1979.github.io/Simd/help/struct_si
 
     #include "Simd/SimdDetection.hpp"
 	
+In order to use [Simd::Neural](http://ermig1979.github.io/Simd/help/namespace_simd_1_1_neural.html) you must include:
+
+    #include "Simd/SimdNeural.hpp"
+	
+In order to use [Simd::Motion](http://ermig1979.github.io/Simd/help/namespace_simd_1_1_motion.html) you must include:
+
+    #include "Simd/SimdMotion.hpp"
+	
 Interaction with OpenCV
 =======================
 
