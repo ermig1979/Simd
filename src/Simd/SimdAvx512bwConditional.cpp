@@ -405,7 +405,7 @@ namespace Simd
             height -= 2;
 
             size_t alignedWidth = Simd::AlignLo(width - 1, A);
-            size_t fullAlignedWidth = Simd::AlignLo(alignedWidth - A, QA) + A;
+            size_t fullAlignedWidth = alignedWidth ? Simd::AlignLo(alignedWidth -  A, QA) + A : 0;
             __mmask64 noseMask = NoseMask64(A - 1);
             __mmask64 tailMask = TailMask64(width - 1 - alignedWidth);
             if (width <= A)
