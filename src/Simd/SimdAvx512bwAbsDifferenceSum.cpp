@@ -244,6 +244,7 @@ namespace Simd
                 _sums[i] = _mm512_setzero_si512();
 
             size_t row = 0;
+#if SIMD_ZMM_COUNT == 32
             for (; row < alignedHeight; row += 2)
             {
                 size_t col = 0;
@@ -254,6 +255,7 @@ namespace Simd
                 current += 2 * currentStride;
                 background += 2 * backgroundStride;
             }
+#endif
             for (; row < height; ++row)
             {
                 size_t col = 0;
@@ -363,6 +365,7 @@ namespace Simd
                 _sums[i] = _mm512_setzero_si512();
 
             size_t row = 0;
+#if SIMD_ZMM_COUNT == 32
             for (; row < alignedHeight; row += 2)
             {
                 size_t col = 0;
@@ -374,6 +377,7 @@ namespace Simd
                 background += 2 * backgroundStride;
                 mask += 2 * maskStride;
             }
+#endif
             for (; row < height; ++row)
             {
                 size_t col = 0;
