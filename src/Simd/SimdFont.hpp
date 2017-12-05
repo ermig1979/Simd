@@ -182,6 +182,24 @@ namespace Simd
             return Draw(canvas.Region(Measure(text), position).Ref(), text, Point(0, 0), color);
         }
 
+        /*!
+            Draws a text at the image. Fills the text background by given color.
+
+            \param [out] canvas - a canvas (image where we draw text).
+            \param [in] text - a text to draw.
+            \param [in] position - a position to draw text (see Simd::View::Position).
+            \param [in] color - a color of the text.
+            \param [in] background - background color.
+
+            \return a result of the operation.
+        */
+        template <class Color> bool Draw(View & canvas, const String & text, const View::Position & position, const Color & color, const Color & background) const
+        {
+            View region = canvas.Region(Measure(text), position);
+            Simd::DrawFilledRectangle(region, Rect(region.Size()), background);
+            return Draw(region, text, Point(0, 0), color);
+        }
+
     private:
         typedef Simd::Rectangle<ptrdiff_t> Rect;
         typedef std::vector<Rect> Rects;
