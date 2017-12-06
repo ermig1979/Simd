@@ -53,6 +53,7 @@ Examples g_examples;
 #endif
 
 USE_ADD_OPENCV_EXAMPLE(FaceDetection);
+USE_ADD_OPENCV_EXAMPLE(MotionDetector);
 
 void Print()
 {
