@@ -165,5 +165,59 @@ namespace Simd
             }
 #endif        
         }
+
+        void FillUv(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t u, uint8_t v)
+        {
+#ifdef SIMD_BIG_ENDIAN
+            uint16_t uv16 = uint32_t(v) | (uint32_t(u) << 8);
+#else
+            uint16_t uv16 = uint32_t(u) | (uint32_t(v) << 8);
+#endif
+
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+            uint64_t uv64 = uint64_t(uv16) | (uint64_t(uv16) << 16) | (uint64_t(uv16) << 32) | (uint64_t(uv16) << 48);
+            size_t alignedWidth = AlignLo(width, 4);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += 4)
+                    *((uint64_t*)((uint16_t*)dst + col)) = uv64;
+                if (width != alignedWidth)
+                    ((uint16_t*)dst)[width - 1] = uv16;
+                dst += stride;
+            }
+#else
+            uint32_t uv32 = uint32_t(uv16) | (uint32_t(uv16) << 16);
+            size_t alignedWidth = AlignLo(width, 2);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += 2)
+                    *((uint32_t*)((uint16_t*)dst + col)) = uv32;
+                if (width != alignedWidth)
+                    ((uint16_t*)dst)[width - 1] = uv16;
+                dst += stride;
+        }
+#endif        
+        }
+
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        {
+            switch (pixelSize)
+            {
+            case 1: 
+                Fill(dst, stride, width, height, 1, pixel[0]); 
+                break;
+            case 2: 
+                FillUv(dst, stride, width, height, pixel[0], pixel[1]);
+                break;
+            case 3: 
+                FillBgr(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+                break;
+            case 4: 
+                FillBgra(dst, stride, width, height, pixel[0], pixel[1], pixel[2], pixel[3]);
+                break;
+            default:
+                assert(0);
+            }
+        }
     }
 }

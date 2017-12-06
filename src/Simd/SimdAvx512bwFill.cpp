@@ -122,6 +122,62 @@ namespace Simd
             else
                 FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
         }
+
+        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m512i & pixel)
+        {
+            size_t fullAlignedWidth = AlignLo(width, QA);
+            size_t alignedWidth = AlignLo(width, A);
+            __mmask64 tailMask = TailMask64(width - alignedWidth);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < fullAlignedWidth; col += QA)
+                {
+                    Store<align>(dst + col + 0 * A, pixel);
+                    Store<align>(dst + col + 1 * A, pixel);
+                    Store<align>(dst + col + 2 * A, pixel);
+                    Store<align>(dst + col + 3 * A, pixel);
+                }
+                for (; col < alignedWidth; col += A)
+                    Store<align>(dst + col, pixel);
+                if (col < width)
+                    Store<align, true>(dst + col, pixel, tailMask);
+                dst += stride;
+            }
+        }
+
+        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        {
+            if (pixelSize == 3)
+                FillBgr<align>(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+            else
+            {
+                __m512i _pixel;
+                switch (pixelSize)
+                {
+                case 1:
+                    _pixel = _mm512_set1_epi8(*pixel);
+                    break;
+                case 2:
+                    _pixel = _mm512_set1_epi16(*(uint16_t*)pixel);
+                    break;
+                case 4:
+                    _pixel = _mm512_set1_epi32(*(uint32_t*)pixel);
+                    break;
+                default:
+                    assert(0);
+                }
+                FillPixel<align>(dst, stride, width*pixelSize, height, _pixel);
+            }
+        }
+
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        {
+            if (Aligned(dst) && Aligned(stride))
+                FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
+            else
+                FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -168,6 +168,7 @@ namespace Test
     TEST_ADD_GROUP(FillFrame);
     TEST_ADD_GROUP(FillBgra);
     TEST_ADD_GROUP(FillBgr);
+    TEST_ADD_GROUP(FillPixel);
 
     TEST_ADD_GROUP(Float32ToFloat16);
     TEST_ADD_GROUP(Float16ToFloat32);

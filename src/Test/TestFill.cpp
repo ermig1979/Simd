@@ -354,6 +354,90 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncFP
+        {
+            typedef void(*FuncPtr)(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
+
+            FuncPtr func;
+            String description;
+
+            FuncFP(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            FuncFP(const FuncFP & f, size_t s) : func(f.func), description(f.description + "[" + ToString(s) + "]") {}
+
+            void Call(View & dst, const uint8_t * pixel, size_t size) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(dst.data, dst.stride, dst.width/size, dst.height, pixel, size);
+            }
+        };
+    }
+
+#define FUNC_FP(function) FuncFP(function, std::string(#function))
+
+#define ARGS_FP(s, f1, f2) s, FuncFP(f1, s), FuncFP(f2, s)
+
+    const size_t PIXEL_SIZE_MAX = 4;
+
+    bool FillPixelAutoTest(int width, int height, size_t size, const FuncFP & f1, const FuncFP & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        uint8_t pixel[PIXEL_SIZE_MAX] = { 1, 2, 3, 4 };
+
+        View d1(width*size, height, View::Gray8, NULL, TEST_ALIGN(width*size));
+        View d2(width*size, height, View::Gray8, NULL, TEST_ALIGN(width*size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, pixel, size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, pixel, size));
+
+        result = result && Compare(d1, d2, 0, true, 32);
+
+        return result;
+    }
+
+    bool FillPixelAutoTest(const FuncFP & f1, const FuncFP & f2)
+    {
+        bool result = true;
+
+        for (size_t s = 1; s <= PIXEL_SIZE_MAX; ++s)
+        {
+            result = result && FillPixelAutoTest(W, H, ARGS_FP(s, f1, f2));
+            result = result && FillPixelAutoTest(W + O, H - O, ARGS_FP(s, f1, f2));
+        }
+
+        return result;
+    }
+
+    bool FillPixelAutoTest()
+    {
+        bool result = true;
+
+        result = result && FillPixelAutoTest(FUNC_FP(Simd::Base::FillPixel), FUNC_FP(SimdFillPixel));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Sse2::FillPixel), FUNC_FP(SimdFillPixel));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Avx2::FillPixel), FUNC_FP(SimdFillPixel));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Avx512bw::FillPixel), FUNC_FP(SimdFillPixel));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool FillDataTest(bool create, View::Format format, int width, int height, const Func & f)
@@ -547,6 +631,48 @@ namespace Test
         bool result = true;
 
         result = result && FillBgraDataTest(create, DW, DH, FUNC_BGRA(SimdFillBgra));
+
+        return result;
+    }
+
+    bool FillPixelDataTest(bool create, int width, int height, size_t size, const FuncFP & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << ", " << size << "].");
+
+        View dst1(width*size, height, View::Bgra32, NULL, TEST_ALIGN(width*size));
+        View dst2(width*size, height, View::Bgra32, NULL, TEST_ALIGN(width*size));
+
+        uint8_t pixel[PIXEL_SIZE_MAX] = { 1, 2, 3, 4 };
+
+        if (create)
+        {
+            f.Call(dst1, pixel, size);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(dst1);
+
+            f.Call(dst2, pixel, size);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool FillPixelDataTest(bool create)
+    {
+        bool result = true;
+
+        result = result && FillPixelDataTest(create, DW, DH, 3, FUNC_FP(SimdFillPixel));
 
         return result;
     }

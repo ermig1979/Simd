@@ -2064,6 +2064,23 @@ extern "C"
     SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t height,
         uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+    /*! @ingroup filling
+
+        \fn void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
+
+        \short Fills image by value of given pixel.
+
+        \note This function has a C++ wrapper Simd::FillPixel(View<A> & dst, const Pixel & pixel).
+
+        \param [out] dst - a pointer to pixels data of destination image.
+        \param [in] stride - a row size of the dst image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] pixel - a pointer to pixel to fill.
+        \param [in] pixelSize - a size of the image pixel.
+    */
+    SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
+
     /*! @ingroup float16
 
         \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);

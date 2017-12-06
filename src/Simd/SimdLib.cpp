@@ -1843,6 +1843,26 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
         Base::FillBgra(dst, stride, width, height, blue, green, red, alpha);
 }
 
+SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::FillPixel(dst, stride, width, height, pixel, pixelSize);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::FillPixel(dst, stride, width, height, pixel, pixelSize);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::FillPixel(dst, stride, width, height, pixel, pixelSize);
+    else
+#endif
+        Base::FillPixel(dst, stride, width, height, pixel, pixelSize);
+}
+
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

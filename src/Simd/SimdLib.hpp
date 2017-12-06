@@ -1528,6 +1528,24 @@ namespace Simd
         SimdFillBgra(dst.data, dst.stride, dst.width, dst.height, blue, green, red, alpha);
     }
 
+    /*! @ingroup filling
+
+        \fn void FillPixel(View<A> & dst, const Pixel & pixel)
+
+        \short Fills image by value of given pixel.
+
+        \note This function is a C++ wrapper for function ::SimdFillPixel.
+
+        \param [out] dst - a destination image.
+        \param [in] pixel - a pixel of type which correspond to image format.
+    */
+    template<template<class> class A, class Pixel> SIMD_INLINE void FillPixel(View<A> & dst, const Pixel & pixel)
+    {
+        assert(dst.PixelSize() == sizeof(Pixel));
+
+        SimdFillPixel(dst.data, dst.stride, dst.width, dst.height, (uint8_t*)&pixel, sizeof(Pixel));
+    }
+
     /*! @ingroup other_filter
 
         \fn void GaussianBlur3x3(const View<A>& src, View<A>& dst)
