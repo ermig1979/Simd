@@ -25,6 +25,7 @@
 #define __SimdFont_hpp__
 
 #include "Simd/SimdLib.hpp"
+#include "Simd/SimdDrawing.hpp"
 
 #include <vector>
 #include <string>
