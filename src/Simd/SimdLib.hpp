@@ -202,7 +202,7 @@ namespace Simd
 
         For every point:
         \verbatim
-        dst[i] = (src[i]*alpha[i] + dst[i]*(255 - alpha[i]))/255;
+        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
         \endverbatim
 
         This function is used for image drawing.
@@ -218,6 +218,34 @@ namespace Simd
         assert(Compatible(src, dst) && EqualSize(src, alpha) && alpha.format == View<A>::Gray8 && src.ChannelSize() == 1);
 
         SimdAlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
+    }
+
+    /*! @ingroup drawing
+
+        \fn void AlphaFilling(View<A> & dst, const Pixel & pixel, const View<A> & alpha)
+
+        \short Performs alpha filling operation.
+
+        All images must have the same width and height. Destination images must have 8 bit per channel (for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
+
+        For every point:
+        \verbatim
+        dst[x, y, c] = (pixel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
+        \endverbatim
+
+        This function is used for image drawing.
+
+        \note This function is a C++ wrapper for function ::SimdAlphaFilling.
+
+        \param [in, out] dst - a background image.
+        \param [in] pixel - a foreground color.
+        \param [in] alpha - an image with alpha channel.
+    */
+    template<template<class> class A, class Pixel> SIMD_INLINE void AlphaFilling(View<A> & dst, const Pixel & pixel, const View<A> & alpha)
+    {
+        assert(EqualSize(dst, alpha) && alpha.format == View<A>::Gray8 && dst.ChannelSize() == 1 && dst.ChannelCount() == sizeof(Pixel));
+
+        SimdAlphaFilling(dst.data, dst.stride, dst.width, dst.height, (uint8_t*)&pixel, sizeof(Pixel), alpha.data, alpha.stride);
     }
 
     /*! @ingroup background
@@ -1537,7 +1565,7 @@ namespace Simd
         \note This function is a C++ wrapper for function ::SimdFillPixel.
 
         \param [out] dst - a destination image.
-        \param [in] pixel - a pixel of type which correspond to image format.
+        \param [in] pixel - a pixel of type which correspond to image format. The size of the type is restricted by range [1, 4].
     */
     template<template<class> class A, class Pixel> SIMD_INLINE void FillPixel(View<A> & dst, const Pixel & pixel)
     {

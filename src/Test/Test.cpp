@@ -146,6 +146,7 @@ namespace Test
     TEST_ADD_GROUP_ONLY_SPECIAL(Detection);
 
     TEST_ADD_GROUP(AlphaBlending);
+    TEST_ADD_GROUP(AlphaFilling);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawLine);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawRectangle);
     TEST_ADD_GROUP_ONLY_SPECIAL(DrawFilledRectangle);

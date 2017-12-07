@@ -510,7 +510,7 @@ extern "C"
 
         For every point:
         \verbatim
-        dst[i] = (src[i]*alpha[i] + dst[i]*(255 - alpha[i]))/255;
+        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
         \endverbatim
 
         This function is used for image drawing.
@@ -529,6 +529,34 @@ extern "C"
     */
     SIMD_API void SimdAlphaBlending(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
         const uint8_t * alpha, size_t alphaStride, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup drawing
+
+        \fn void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
+
+        \short Performs alpha filling operation.
+
+        All images must have the same width and height. Destination images must have 8 bit per channel (for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
+
+        For every point:
+        \verbatim
+        dst[x, y, c] = (channel[c]*alpha[x, y] + dst[x, y, c]*(255 - alpha[x, y]))/255;
+        \endverbatim
+
+        This function is used for image drawing.
+
+        \note This function has a C++ wrapper Simd::AlphaFilling(View<A> & dst, const Pixel & pixel, const View<A> & alpha).
+
+        \param [in, out] dst - a pointer to pixels data of background image.
+        \param [in] dstStride - a row size of the background image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channel - a pointer to pixel with foreground color.
+        \param [in] channelCount - a channel count for foreground color and background images (1 <= channelCount <= 4).
+        \param [in] alpha - a pointer to pixels data of image with alpha channel.
+        \param [in] alphaStride - a row size of the alpha image.
+    */
+    SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
 
     /*! @ingroup background
 
@@ -2077,7 +2105,7 @@ extern "C"
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] pixel - a pointer to pixel to fill.
-        \param [in] pixelSize - a size of the image pixel.
+        \param [in] pixelSize - a size of the image pixel. Parameter is restricted by range [1, 4]. 
     */
     SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 

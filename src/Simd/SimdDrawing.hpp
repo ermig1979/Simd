@@ -256,13 +256,17 @@ namespace Simd
     {
         assert(canvas.PixelSize() == sizeof(color));
 
-        rect &= Rectangle<ptrdiff_t>(canvas.Size());
-
-        for (ptrdiff_t row = rect.top; row < rect.bottom; ++row)
+        if (sizeof(Color) <= 4)
+            Simd::FillPixel<A, Color>(canvas.Region(rect).Ref(), color);
+        else
         {
-            Color * dst = &At<A, Color>(canvas, 0, row);
-            for (ptrdiff_t col = rect.left; col < rect.right; ++col)
-                dst[col] = color;
+            rect &= Rectangle<ptrdiff_t>(canvas.Size());
+            for (ptrdiff_t row = rect.top; row < rect.bottom; ++row)
+            {
+                Color * dst = &At<A, Color>(canvas, 0, row);
+                for (ptrdiff_t col = rect.left; col < rect.right; ++col)
+                    dst[col] = color;
+            }
         }
     }
 

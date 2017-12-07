@@ -376,6 +376,31 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
+SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+    else
+#endif
+        Base::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

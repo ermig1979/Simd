@@ -155,15 +155,7 @@ namespace Simd
             Rect canvasRect, alphaRect;
             CreateAlpha(text, Rect(canvas.Size()), position, alpha, canvasRect, alphaRect);
 
-            View foreground(alpha.Size(), canvas.format);
-            for (size_t y = 0; y < foreground.height; ++y)
-            {
-                Color * row = foreground.Row<Color>(y);
-                for (size_t x = 0; x < foreground.width; ++x)
-                    row[x] = color;
-            }
-
-            Simd::AlphaBlending(foreground.Region(alphaRect), alpha.Region(alphaRect), canvas.Region(canvasRect).Ref());
+            Simd::AlphaFilling(canvas.Region(canvasRect).Ref(), color, alpha.Region(alphaRect));
 
             return true;
         }
@@ -197,7 +189,7 @@ namespace Simd
         template <class Color> bool Draw(View & canvas, const String & text, const View::Position & position, const Color & color, const Color & background) const
         {
             View region = canvas.Region(Measure(text), position);
-            Simd::DrawFilledRectangle(region, Rect(region.Size()), background);
+            Simd::FillPixel(region, background);
             return Draw(region, text, Point(0, 0), color);
         }
 

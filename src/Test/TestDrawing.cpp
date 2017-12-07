@@ -130,6 +130,99 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncAF
+        {
+            typedef void(*FuncPtr)(uint8_t * dst, size_t dstStride, size_t width, size_t height, 
+                const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
+            FuncPtr func;
+            String description;
+
+            FuncAF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & pixel, const View & alpha, const View & dstSrc, View & dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(dstDst.data, dstDst.stride, dstDst.width, dstDst.height, pixel.data, pixel.ChannelCount(), alpha.data, alpha.stride);
+            }
+        };
+    }
+
+#define FUNC_AF(func) FuncAF(func, #func)
+
+    bool AlphaFillingAutoTest(View::Format format, int width, int height, const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+
+        View p(1, 1, format, NULL, TEST_ALIGN(width));
+        FillRandom(p);
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(a);
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(b);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, a, b, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, a, b, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool AlphaFillingAutoTest(const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
+
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            FuncAF f1c = FuncAF(f1.func, f1.description + ColorDescription(format));
+            FuncAF f2c = FuncAF(f2.func, f2.description + ColorDescription(format));
+
+            result = result && AlphaFillingAutoTest(format, W, H, f1c, f2c);
+            result = result && AlphaFillingAutoTest(format, W + O, H - O, f1c, f2c);
+            result = result && AlphaFillingAutoTest(format, W - O, H + O, f1c, f2c);
+        }
+
+        return result;
+    }
+
+    bool AlphaFillingAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Base::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Ssse3::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Avx2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Avx512bw::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool AlphaBlendingDataTest(bool create, View::Format format, int width, int height, const FuncAB & f)
@@ -188,6 +281,67 @@ namespace Test
         for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
             result = result && AlphaBlendingDataTest(create, format, DW, DH, FuncAB(f.func, f.description + Data::Description(format)));
+        }
+
+        return result;
+    }
+
+    bool AlphaFillingDataTest(bool create, View::Format format, int width, int height, const FuncAF & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View p(1, 1, format, NULL, TEST_ALIGN(width));
+        View a(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        if (create)
+        {
+            FillRandom(p);
+            FillRandom(a);
+            FillRandom(b);
+
+            TEST_SAVE(p);
+            TEST_SAVE(a);
+            TEST_SAVE(b);
+
+            f.Call(p, a, b, d1);
+
+            TEST_SAVE(d1);
+        }
+        else
+        {
+            TEST_LOAD(p);
+            TEST_LOAD(a);
+            TEST_LOAD(b);
+
+            TEST_LOAD(d1);
+
+            f.Call(p, a, b, d2);
+
+            TEST_SAVE(d2);
+
+            result = result && Compare(d1, d2, 0, true, 64);
+        }
+
+        return result;
+    }
+
+    bool AlphaFillingDataTest(bool create)
+    {
+        bool result = true;
+
+        FuncAF f = FUNC_AF(SimdAlphaFilling);
+
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            result = result && AlphaFillingDataTest(create, format, DW, DH, FuncAF(f.func, f.description + Data::Description(format)));
         }
 
         return result;

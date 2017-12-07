@@ -461,7 +461,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pixel</td><td>- a pointer to pixel to fill. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of the image pixel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pixelSize</td><td>- a size of the image pixel. Parameter is restricted by range [1, 4]. </td></tr>
   </table>
   </dd>
 </dl>
@@ -693,7 +693,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pixel</td><td>- a pixel of type which correspond to image format. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">pixel</td><td>- a pixel of type which correspond to image format. The size of the type is restricted by range [1, 4]. </td></tr>
   </table>
   </dd>
 </dl>

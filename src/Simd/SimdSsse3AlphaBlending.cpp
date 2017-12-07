@@ -128,6 +128,117 @@ namespace Simd
             else
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
+
+
+        template <bool align, size_t channelCount> struct AlphaFiller
+        {
+            void operator() (__m128i * dst, const __m128i * channel, __m128i alpha);
+        };
+
+        template <bool align> struct AlphaFiller<align, 1>
+        {
+            SIMD_INLINE void operator()(__m128i * dst, const __m128i * channel, __m128i alpha)
+            {
+                Sse2::AlphaFilling<align>(dst, channel[0], channel[0], alpha);
+            }
+        };
+
+        template <bool align> struct AlphaFiller<align, 2>
+        {
+            SIMD_INLINE void operator()(__m128i * dst, const __m128i * channel, __m128i alpha)
+            {
+                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(alpha, alpha));
+                Sse2::AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(alpha, alpha));
+            }
+        };
+
+        template <bool align> struct AlphaFiller<align, 3>
+        {
+            SIMD_INLINE void operator()(__m128i * dst, const __m128i * channel, __m128i alpha)
+            {
+                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[1], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
+                Sse2::AlphaFilling<align>(dst + 1, channel[2], channel[0], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
+                Sse2::AlphaFilling<align>(dst + 2, channel[1], channel[2], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
+            }
+        };
+
+        template <bool align> struct AlphaFiller<align, 4>
+        {
+            SIMD_INLINE void operator()(__m128i * dst, const __m128i * channel, __m128i alpha)
+            {
+                __m128i lo = UnpackU8<0>(alpha, alpha);
+                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(lo, lo));
+                Sse2::AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(lo, lo));
+                __m128i hi = UnpackU8<1>(alpha, alpha);
+                Sse2::AlphaFilling<align>(dst + 2, channel[0], channel[0], UnpackU8<0>(hi, hi));
+                Sse2::AlphaFilling<align>(dst + 3, channel[0], channel[0], UnpackU8<1>(hi, hi));
+            }
+        };
+
+        template <bool align, size_t channelCount> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const __m128i * channel, const uint8_t * alpha, size_t alphaStride)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            size_t step = channelCount * A;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
+                {
+                    __m128i _alpha = Load<align>((__m128i*)(alpha + col));
+                    AlphaFiller<align, channelCount>()((__m128i*)(dst + offset), channel, _alpha);
+                }
+                if (alignedWidth != width)
+                {
+                    __m128i _alpha = _mm_and_si128(Load<false>((__m128i*)(alpha + width - A)), tailMask);
+                    AlphaFiller<false, channelCount>()((__m128i*)(dst + (width - A)*channelCount), channel, _alpha);
+                }
+                alpha += alphaStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(alpha) && Aligned(alphaStride));
+            }
+
+            __m128i _channel[3];
+            switch (channelCount)
+            {
+            case 1:
+                _channel[0] = UnpackU8<0>(_mm_set1_epi8(*(uint8_t*)channel));
+                AlphaFilling<align, 1>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            case 2:
+                _channel[0] = UnpackU8<0>(_mm_set1_epi16(*(uint16_t*)channel));
+                AlphaFilling<align, 2>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            case 3:
+                _channel[0] = _mm_setr_epi16(channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], channel[0], channel[1]);
+                _channel[1] = _mm_setr_epi16(channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], channel[0]);
+                _channel[2] = _mm_setr_epi16(channel[1], channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2]);
+                AlphaFilling<align, 3>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            case 4:
+                _channel[0] = UnpackU8<0>(_mm_set1_epi32(*(uint32_t*)channel));
+                AlphaFilling<align, 4>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
+        {
+            if (Aligned(dst) && Aligned(dstStride) && Aligned(alpha) && Aligned(alphaStride))
+                AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+            else
+                AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+        }
     }
 #endif// SIMD_SSSE3_ENABLE
 }

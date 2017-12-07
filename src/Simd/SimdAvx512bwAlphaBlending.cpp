@@ -147,6 +147,133 @@ namespace Simd
             else
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
+
+        template <bool align, bool mask> SIMD_INLINE void AlphaFilling(uint8_t * dst, __m512i channelLo, __m512i channelHi, __m512i alpha, __mmask64 m)
+        {
+            __m512i _dst = Load<align, mask>(dst, m);
+            __m512i lo = AlphaBlendingI16(channelLo, UnpackU8<0>(_dst), UnpackU8<0>(alpha));
+            __m512i hi = AlphaBlendingI16(channelHi, UnpackU8<1>(_dst), UnpackU8<1>(alpha));
+            Store<align, mask>(dst, _mm512_packus_epi16(lo, hi), m);
+        }
+
+        template <bool align, bool mask, size_t channelCount> struct AlphaFiller
+        {
+            void operator()(uint8_t * dst, const __m512i * channel, const uint8_t * alpha, __mmask64 m[channelCount + 1]);
+        };
+
+        template <bool align, bool mask> struct AlphaFiller<align, mask, 1>
+        {
+            SIMD_INLINE void operator()(uint8_t * dst, const __m512i * channel, const uint8_t * alpha, __mmask64 m[2])
+            {
+                __m512i _alpha = Load<align, mask>(alpha, m[0]);
+                AlphaFilling<align, mask>(dst, channel[0], channel[0], _alpha, m[1]);
+            }
+        };
+
+        template <bool align, bool mask> struct AlphaFiller<align, mask, 2>
+        {
+            SIMD_INLINE void operator()(uint8_t * dst, const __m512i * channel, const uint8_t * alpha, __mmask64 m[3])
+            {
+                __m512i _alpha = Load<align, mask>(alpha, m[0]);
+                _alpha = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, _alpha);
+                AlphaFilling<align, mask>(dst + 0 * A, channel[0], channel[0], UnpackU8<0>(_alpha, _alpha), m[1]);
+                AlphaFilling<align, mask>(dst + 1 * A, channel[0], channel[0], UnpackU8<1>(_alpha, _alpha), m[2]);
+            }
+        };
+
+        template <bool align, bool mask> struct AlphaFiller<align, mask, 3>
+        {
+            SIMD_INLINE void operator()(uint8_t * dst, const __m512i * channel, const uint8_t * alpha, __mmask64 m[4])
+            {
+                __m512i _alpha = Load<align, mask>(alpha, m[0]);
+                AlphaFilling<align, mask>(dst + 0 * A, channel[0], channel[1], GrayToBgr<0>(_alpha), m[1]);
+                AlphaFilling<align, mask>(dst + 1 * A, channel[2], channel[0], GrayToBgr<1>(_alpha), m[2]);
+                AlphaFilling<align, mask>(dst + 2 * A, channel[1], channel[2], GrayToBgr<2>(_alpha), m[3]);
+            }
+        };
+
+        template <bool align, bool mask> struct AlphaFiller<align, mask, 4>
+        {
+            SIMD_INLINE void operator()(uint8_t * dst, const __m512i * channel, const uint8_t * alpha, __mmask64 m[5])
+            {
+                __m512i _alpha = Load<align, mask>(alpha, m[0]);
+                _alpha = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _alpha);
+                __m512i lo = UnpackU8<0>(_alpha, _alpha);
+                AlphaFilling<align, mask>(dst + 0 * A, channel[0], channel[0], UnpackU8<0>(lo, lo), m[1]);
+                AlphaFilling<align, mask>(dst + 1 * A, channel[0], channel[0], UnpackU8<1>(lo, lo), m[2]);
+                __m512i hi = UnpackU8<1>(_alpha, _alpha);
+                AlphaFilling<align, mask>(dst + 2 * A, channel[0], channel[0], UnpackU8<0>(hi, hi), m[3]);
+                AlphaFilling<align, mask>(dst + 3 * A, channel[0], channel[0], UnpackU8<1>(hi, hi), m[4]);
+            }
+        };
+
+        template <bool align, size_t channelCount> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const __m512i * channel, const uint8_t * alpha, size_t alphaStride)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __mmask64 tailMasks[channelCount + 1];
+            tailMasks[0] = TailMask64(width - alignedWidth);
+            for (size_t c = 0; c < channelCount; ++c)
+                tailMasks[c + 1] = TailMask64((width - alignedWidth)*channelCount - A * c);
+            size_t step = channelCount * A;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0, offset = 0;
+                for (; col < alignedWidth; col += A, offset += step)
+                    AlphaFiller<align, false, channelCount>()(dst + offset, channel, alpha + col, tailMasks);
+                if (col < width)
+                    AlphaFiller<align, true, channelCount>()(dst + offset, channel, alpha + col, tailMasks);
+                alpha += alphaStride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(alpha) && Aligned(alphaStride));
+            }
+
+            __m512i _channel[3];
+            switch (channelCount)
+            {
+            case 1:
+                _channel[0] = UnpackU8<0>(_mm512_set1_epi8(*(uint8_t*)channel));
+                AlphaFilling<align, 1>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            case 2:
+                _channel[0] = UnpackU8<0>(_mm512_set1_epi16(*(uint16_t*)channel));
+                AlphaFilling<align, 2>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            case 3:
+            {
+                uint64_t _0120 = uint64_t(channel[0]) | (uint64_t(channel[1]) << 16) | (uint64_t(channel[2]) << 32) | (uint64_t(channel[0]) << 48);
+                uint64_t _1201 = uint64_t(channel[1]) | (uint64_t(channel[2]) << 16) | (uint64_t(channel[0]) << 32) | (uint64_t(channel[1]) << 48);
+                uint64_t _2012 = uint64_t(channel[2]) | (uint64_t(channel[0]) << 16) | (uint64_t(channel[1]) << 32) | (uint64_t(channel[2]) << 48);
+                _channel[0] = _mm512_setr_epi64(_0120, _1201, _1201, _2012, _2012, _0120, _0120, _1201);
+                _channel[1] = _mm512_setr_epi64(_2012, _0120, _0120, _1201, _1201, _2012, _2012, _0120);
+                _channel[2] = _mm512_setr_epi64(_1201, _2012, _2012, _0120, _0120, _1201, _1201, _2012);
+                AlphaFilling<align, 3>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            }
+            case 4:
+                _channel[0] = UnpackU8<0>(_mm512_set1_epi32(*(uint32_t*)channel));
+                AlphaFilling<align, 4>(dst, dstStride, width, height, _channel, alpha, alphaStride);
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
+        {
+            if (Aligned(dst) && Aligned(dstStride) && Aligned(alpha) && Aligned(alphaStride))
+                AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+            else
+                AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

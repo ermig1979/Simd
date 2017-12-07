@@ -1091,7 +1091,6 @@ namespace Test
         return result;
     }
 
-
     bool BackgroundInitMaskDataTest(bool create, int width, int height, const Func6 & f)
     {
         bool result = true;
