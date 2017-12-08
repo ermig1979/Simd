@@ -739,9 +739,6 @@ namespace Simd
 
         class HogSeparableFilter
         {
-            typedef Array<float> Array32f;
-            typedef Array<__m512> Array512f;
-
             size_t _w, _h, _s;
             Array32f _buffer;
             Array512f _filter;

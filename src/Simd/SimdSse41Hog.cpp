@@ -306,9 +306,6 @@ namespace Simd
             static const size_t Q = 9;
             static const size_t Q2 = 18;
 
-            typedef Array<int> Array32i;
-            typedef Array<float> Array32f;
-
             size_t _sx, _sy, _hs;
 
             __m128i _pos[5];

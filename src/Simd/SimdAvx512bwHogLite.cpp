@@ -959,9 +959,6 @@ namespace Simd
 
         class HogLiteSeparableFilter
         {
-            typedef Array<float> Array32f;
-            typedef Array<__m512> Array512f;
-
             size_t _dstWidth, _dstHeight, _dstStride;
             Array32f _buffer;
             Array512f _filter;

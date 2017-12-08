@@ -75,6 +75,39 @@ namespace Simd
             return data[i];
         }
     };
+
+    typedef Array<int32_t> Array32i;
+    typedef Array<float> Array32f;
+
+#if defined(__GNUC__) && __GNUC__ >= 6
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wignored-attributes"
+#endif
+
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        typedef Array<__m128> Array128f;
+    }
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        typedef Array<__m256> Array256f;
+    }
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+    namespace Avx512f
+    {
+        typedef Array<__m512> Array512f;
+    }
+#endif
+
+#if defined(__GNUC__) && __GNUC__ >= 6
+#pragma GCC diagnostic pop
+#endif
 }
 
 #endif//__SimdArray_h__
