@@ -77,19 +77,19 @@ To build the library for PowePC(64) and ARM(32/64) platforms you can also use to
 There is an example of using for PowerPC (64 bit):
 
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
 	make
 	
 For ARM (32 bit):
 
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release"
+	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
 	make
 	
 And for ARM (64 bit):
 
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
+    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
     make
 
 As result the library and the test application will be built in the current directory.

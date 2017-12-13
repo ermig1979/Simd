@@ -64,19 +64,19 @@
 	There is an example of using for PowerPC (64 bit):
 	\code
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
 	make
 	\endcode
 	For ARM (32 bit):
 	\code
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release"
+	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
 	make
 	\endcode
     And for ARM (64 bit):
     \code
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/path_to_your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
+    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
     make
     \endcode
 	As result the library and the test application will be built in the current directory.
