@@ -370,7 +370,7 @@ namespace Test
             void Call(View & dst, const uint8_t * pixel, size_t size) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(dst.data, dst.stride, dst.width/size, dst.height, pixel, size);
+                func(dst.data, dst.stride, dst.width / size, dst.height, pixel, size);
             }
         };
     }

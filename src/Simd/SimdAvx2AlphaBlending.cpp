@@ -97,7 +97,7 @@ namespace Simd
         {
             size_t alignedWidth = AlignLo(width, A);
             __m256i tailMask = SetMask<uint8_t>(0, A - width + alignedWidth, 0xFF);
-            size_t step = channelCount*A;
+            size_t step = channelCount * A;
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
@@ -252,7 +252,7 @@ namespace Simd
                     channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], channel[0],
                     channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], channel[0], channel[1]);
                 _channel[2] = _mm256_setr_epi16(
-                    channel[1], channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], 
+                    channel[1], channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2],
                     channel[2], channel[0], channel[1], channel[2], channel[0], channel[1], channel[2], channel[0]);
                 AlphaFilling<align, 3>(dst, dstStride, width, height, _channel, alpha, alphaStride);
                 break;

@@ -134,7 +134,7 @@ namespace Test
     {
         struct FuncAF
         {
-            typedef void(*FuncPtr)(uint8_t * dst, size_t dstStride, size_t width, size_t height, 
+            typedef void(*FuncPtr)(uint8_t * dst, size_t dstStride, size_t width, size_t height,
                 const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
             FuncPtr func;
             String description;
@@ -366,8 +366,8 @@ namespace Test
         {
             ptrdiff_t x1 = Random(W * 2) - W / 2;
             ptrdiff_t y1 = Random(H * 2) - H / 2;
-            ptrdiff_t x2 = i%m == 0 ? x1 : Random(W * 2) - W / 2;
-            ptrdiff_t y2 = i%m == 1 ? y1 : Random(H * 2) - H / 2;
+            ptrdiff_t x2 = i % m == 0 ? x1 : Random(W * 2) - W / 2;
+            ptrdiff_t y2 = i % m == 1 ? y1 : Random(H * 2) - H / 2;
             Simd::DrawLine(image, x1, y1, x2, y2, uint8_t(i), Random(w) + 1);
         }
 
@@ -394,7 +394,7 @@ namespace Test
             Simd::DrawRectangle(image, Rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2)), uint8_t(i), Random(w) + 1);
         }
 
-        Simd::DrawRectangle(image, Point(W/20, H/20), Point(W / 10, H / 10), uint8_t(64), 2);
+        Simd::DrawRectangle(image, Point(W / 20, H / 20), Point(W / 10, H / 10), uint8_t(64), 2);
         Simd::DrawRectangle(image, W / 25, H / 25, W / 15, H / 15, uint8_t(96), 3);
 
         image.Save("rectangles.pgm");

@@ -35,43 +35,43 @@ namespace Simd
     {
         SIMD_INLINE int BgrToGray(int blue, int green, int red)
         {
-            return (BLUE_TO_GRAY_WEIGHT*blue + GREEN_TO_GRAY_WEIGHT*green +
-                RED_TO_GRAY_WEIGHT*red + BGR_TO_GRAY_ROUND_TERM) >> BGR_TO_GRAY_AVERAGING_SHIFT;
+            return (BLUE_TO_GRAY_WEIGHT*blue + GREEN_TO_GRAY_WEIGHT * green +
+                RED_TO_GRAY_WEIGHT * red + BGR_TO_GRAY_ROUND_TERM) >> BGR_TO_GRAY_AVERAGING_SHIFT;
         }
 
         SIMD_INLINE int BgrToY(int blue, int green, int red)
         {
-            return RestrictRange(((BLUE_TO_Y_WEIGHT*blue + GREEN_TO_Y_WEIGHT*green + RED_TO_Y_WEIGHT*red +
+            return RestrictRange(((BLUE_TO_Y_WEIGHT*blue + GREEN_TO_Y_WEIGHT * green + RED_TO_Y_WEIGHT * red +
                 BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + Y_ADJUST);
         }
 
         SIMD_INLINE int BgrToU(int blue, int green, int red)
         {
-            return RestrictRange(((BLUE_TO_U_WEIGHT*blue + GREEN_TO_U_WEIGHT*green + RED_TO_U_WEIGHT*red +
+            return RestrictRange(((BLUE_TO_U_WEIGHT*blue + GREEN_TO_U_WEIGHT * green + RED_TO_U_WEIGHT * red +
                 BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
         }
 
         SIMD_INLINE int BgrToV(int blue, int green, int red)
         {
-            return RestrictRange(((BLUE_TO_V_WEIGHT*blue + GREEN_TO_V_WEIGHT*green + RED_TO_V_WEIGHT*red +
+            return RestrictRange(((BLUE_TO_V_WEIGHT*blue + GREEN_TO_V_WEIGHT * green + RED_TO_V_WEIGHT * red +
                 BGR_TO_YUV_ROUND_TERM) >> BGR_TO_YUV_AVERAGING_SHIFT) + UV_ADJUST);
         }
 
         SIMD_INLINE int YuvToBlue(int y, int u)
         {
-            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + U_TO_BLUE_WEIGHT*(u - UV_ADJUST) +
+            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + U_TO_BLUE_WEIGHT * (u - UV_ADJUST) +
                 YUV_TO_BGR_ROUND_TERM) >> YUV_TO_BGR_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE int YuvToGreen(int y, int u, int v)
         {
-            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + U_TO_GREEN_WEIGHT*(u - UV_ADJUST) +
-                V_TO_GREEN_WEIGHT*(v - UV_ADJUST) + YUV_TO_BGR_ROUND_TERM) >> YUV_TO_BGR_AVERAGING_SHIFT);
+            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + U_TO_GREEN_WEIGHT * (u - UV_ADJUST) +
+                V_TO_GREEN_WEIGHT * (v - UV_ADJUST) + YUV_TO_BGR_ROUND_TERM) >> YUV_TO_BGR_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE int YuvToRed(int y, int v)
         {
-            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + V_TO_RED_WEIGHT*(v - UV_ADJUST) +
+            return RestrictRange((Y_TO_RGB_WEIGHT*(y - Y_ADJUST) + V_TO_RED_WEIGHT * (v - UV_ADJUST) +
                 YUV_TO_BGR_ROUND_TERM) >> YUV_TO_BGR_AVERAGING_SHIFT);
         }
 
@@ -326,7 +326,7 @@ namespace Simd
                 int sector = hue * 6 / 255;
                 int max;
                 if (lightness <= 128)
-                    max = lightness*(255 + saturation) / 255;
+                    max = lightness * (255 + saturation) / 255;
                 else
                     max = ((255 - lightness)*saturation + lightness * 255) / 255;
                 int min = (255 - saturation)*max / 255;

@@ -81,7 +81,7 @@ namespace Simd
                 }
                 for (size_t i = 0; i < 4; ++i)
                     _nf[i].Resize(_hx + F);
-                _nb.Resize((_hx + 6)* 4 );
+                _nb.Resize((_hx + 6) * 4);
                 _k = _mm256_set1_ps(1.0f / Simd::Square(cell * 2));
                 _02 = _mm256_set1_ps(0.2f);
                 _05 = _mm256_set1_ps(0.5f);
@@ -314,7 +314,7 @@ namespace Simd
                     __m256 n = _mm256_rsqrt_ps(_mm256_add_ps(_mm256_load_ps(nb), _eps));
                     __m256 t = _mm256_setzero_ps();
                     __m256 f[4];
-                    const float * src = hf + x*FQ;
+                    const float * src = hf + x * FQ;
                     __m256 s0 = Avx::Load<false>(src + 0 * HQ, src + 2 * HQ);
                     __m256 s1 = Avx::Load<false>(src + 1 * HQ, src + 3 * HQ);
                     f[0] = Features07(n, s0, t);
@@ -330,7 +330,7 @@ namespace Simd
                 {
                     __m128 n = _mm_rsqrt_ps(_mm_add_ps(_mm_load_ps(nb), _mm256_castps256_ps128(_eps)));
                     __m128 t = _mm_setzero_ps();
-                    const float * src = hf + x*FQ;
+                    const float * src = hf + x * FQ;
                     for (int o = 0; o < FQ; o += 4)
                     {
                         __m128 s = _mm_loadu_ps(src);
@@ -343,7 +343,7 @@ namespace Simd
                         dst += Sse2::F;
                         src += Sse2::F;
                     }
-                    src = hf + x*FQ;
+                    src = hf + x * FQ;
                     __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + HQ));
                     __m128 h0 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<0>(s), n), _mm256_castps256_ps128(_02));
                     __m128 h1 = _mm_min_ps(_mm_mul_ps(Sse2::Broadcast<1>(s), n), _mm256_castps256_ps128(_02));
@@ -373,7 +373,7 @@ namespace Simd
                     SetIndexAndValue(src, srcStride);
                     size_t rowI = row / cell;
                     size_t rowF = row & (cell - 1);
-                    if(cell == 4)
+                    if (cell == 4)
                         UpdateIntegerHistogram4x4(rowI, rowF);
                     else
                         UpdateIntegerHistogram8x8(rowI, rowF);
@@ -509,7 +509,7 @@ namespace Simd
 
             template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, float * dst, size_t dstStride)
             {
-                size_t filterStride = featureSize*filterSize;
+                size_t filterStride = featureSize * filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
                 size_t alignedFilterStride = AlignLo(filterStride, QF);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
@@ -518,7 +518,7 @@ namespace Simd
                     for (; dstCol < alignedDstWidth; dstCol += 4)
                     {
                         __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                        const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                        const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
                         const float * pFilter = filter;
                         for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
                         {
@@ -535,7 +535,7 @@ namespace Simd
                     for (; dstCol < dstWidth; ++dstCol)
                     {
                         __m256 sum = _mm256_setzero_ps();
-                        const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                        const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
                         const float * pFilter = filter;
                         for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
                         {
@@ -552,7 +552,7 @@ namespace Simd
 
             template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
             {
-                size_t filterStride = featureSize*filterSize;
+                size_t filterStride = featureSize * filterSize;
                 size_t alignedDstWidth = AlignLo(dstWidth, 4);
                 size_t alignedFilterStride = AlignLo(filterStride, QF);
                 __m128 _min = _mm_set1_ps(-FLT_MAX);
@@ -567,7 +567,7 @@ namespace Simd
                         else
                         {
                             __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                            const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                            const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
                             const float * pFilter = filter;
                             for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
                             {
@@ -587,7 +587,7 @@ namespace Simd
                         if (mask[dstCol])
                         {
                             __m256 sum = _mm256_setzero_ps();
-                            const float * pSrc = src + dstRow*srcStride + dstCol*featureSize;
+                            const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
                             const float * pFilter = filter;
                             for (size_t filterRow = 0; filterRow < filterSize; ++filterRow)
                             {
@@ -711,7 +711,7 @@ namespace Simd
                         index = 0;
                         weight = 0.0f;
                     }
-                    if (index >(int)srcSize - 2)
+                    if (index > (int)srcSize - 2)
                     {
                         index = (int)srcSize - 2;
                         weight = 1.0f;
@@ -729,7 +729,7 @@ namespace Simd
                     __m256 ky1 = _mm256_set1_ps(_ky[rowDst]);
                     __m256 ky0 = _mm256_sub_ps(_1, ky1);
                     const float * pSrc = src + _iy[rowDst];
-                    float * pDst = dst + rowDst*dstStride;
+                    float * pDst = dst + rowDst * dstStride;
                     for (size_t colDst = 0; colDst < dstWidth; ++colDst, pDst += featureSize)
                     {
                         __m256 kx1 = _mm256_set1_ps(_kx[colDst]);
@@ -763,7 +763,7 @@ namespace Simd
                 {
                     size_t size = sizeof(float)*srcWidth*featureSize;
                     for (size_t row = 0; row < dstHeight; ++row)
-                        memcpy(dst + row*dstStride, src + row*srcStride, size);
+                        memcpy(dst + row * dstStride, src + row * srcStride, size);
                     return;
                 }
 
@@ -805,7 +805,7 @@ namespace Simd
                     const float * p = pca;
                     for (size_t i = 0; i < 8; i += 4, p += 64)
                     {
-                        __m256 sums[8] = { 
+                        __m256 sums[8] = {
                             _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
                             _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
                         for (size_t j = 0; j < 16; j += F)
@@ -903,7 +903,7 @@ namespace Simd
                     for (; col < alignedWidth; col += 4)
                     {
                         __m256 sums[4] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                        const float * s = src + col*step;
+                        const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
                         Sse::Store<true>(dst + col, Avx::Extract4Sums(sums));
@@ -911,7 +911,7 @@ namespace Simd
                     for (; col < width; ++col)
                     {
                         __m256 sum = _mm256_setzero_ps();
-                        const float * s = src + col*step;
+                        const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx1<align>(s + i, filter + i, sum);
                         dst[col] = Avx::ExtractSum(sum);
@@ -1041,9 +1041,9 @@ namespace Simd
 
             void Init(size_t srcWidth, size_t srcHeight, size_t scale, size_t size)
             {
-                _dstWidth = srcWidth*scale + size - scale;
+                _dstWidth = srcWidth * scale + size - scale;
                 _alignedDstWidth = AlignLo(_dstWidth, F);
-                _dstHeight = srcHeight*scale + size - scale;
+                _dstHeight = srcHeight * scale + size - scale;
                 size_t sumSize = AlignHi(_dstWidth, F) + F;
                 for (size_t i = 0; i < 8; ++i)
                     _sums[i].Resize(sumSize, true);
@@ -1086,13 +1086,13 @@ namespace Simd
 
                         __m256i lo = _mm256_shuffle_epi8(_mm256_permute4x64_epi64(mask, 0x44), K8_SUM_SUFFLE);
                         _rowSums = _mm256_add_epi32(_rowSums, _mm256_sad_epu8(lo, K_ZERO));
-                        _mm_storeu_si128((__m128i*)(sum7 + col + 00), _mm_add_epi32(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(_rowSums, 
+                        _mm_storeu_si128((__m128i*)(sum7 + col + 00), _mm_add_epi32(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(_rowSums,
                             K32_64_TO_32_1)), _mm_loadu_si128((__m128i*)(sum6 + col + 00))));
                         _rowSums = _mm256_permute4x64_epi64(_rowSums, 0xFF);
 
                         __m256i hi = _mm256_shuffle_epi8(_mm256_permute4x64_epi64(mask, 0xEE), K8_SUM_SUFFLE);
                         _rowSums = _mm256_add_epi32(_rowSums, _mm256_sad_epu8(hi, K_ZERO));
-                        _mm_storeu_si128((__m128i*)(sum7 + col + HF), _mm_add_epi32(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(_rowSums, 
+                        _mm_storeu_si128((__m128i*)(sum7 + col + HF), _mm_add_epi32(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(_rowSums,
                             K32_64_TO_32_1)), _mm_loadu_si128((__m128i*)(sum6 + col + HF))));
                         _rowSums = _mm256_permute4x64_epi64(_rowSums, 0xFF);
                     }
@@ -1186,8 +1186,8 @@ namespace Simd
                 if (size == 7 && (scale == 1 || scale == 2))
                 {
                     Init(srcWidth, srcHeight, scale, size);
-                    if(scale == 1)
-                        CreateMask7x7x1(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride); 
+                    if (scale == 1)
+                        CreateMask7x7x1(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
                     else
                         CreateMask7x7x2(src, srcStride, srcWidth, srcHeight, threshold, dst, dstStride);
                 }

@@ -55,10 +55,10 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                size_t rowOffset = row*dstStride;
+                size_t rowOffset = row * dstStride;
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    const float * s = src + count*col;
+                    const float * s = src + count * col;
                     size_t offset = rowOffset + col;
                     for (size_t i = 0; i < alignedCount; i += F)
                         HogDeinterleave(s, count, dst, offset, i);
@@ -68,7 +68,7 @@ namespace Simd
                 if (alignedWidth != width)
                 {
                     size_t col = width - F;
-                    const float * s = src + count*col;
+                    const float * s = src + count * col;
                     size_t offset = rowOffset + col;
                     for (size_t i = 0; i < alignedCount; i += F)
                         HogDeinterleave(s, count, dst, offset, i);

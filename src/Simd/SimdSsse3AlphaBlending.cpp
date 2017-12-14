@@ -79,7 +79,7 @@ namespace Simd
         {
             size_t alignedWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
-            size_t step = channelCount*A;
+            size_t step = channelCount * A;
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)

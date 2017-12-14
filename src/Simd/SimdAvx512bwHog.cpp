@@ -196,7 +196,7 @@ namespace Simd
 
             void AddRowToBuffer(const uint8_t * src, size_t stride, Buffer & buffer, size_t row, size_t width, size_t aligned)
             {
-                const uint8_t * s = src + stride*row;
+                const uint8_t * s = src + stride * row;
                 for (size_t col = 1; col < aligned; col += HA)
                     HogDirectionHistograms<true>(s, stride, buffer, col);
                 HogDirectionHistograms<false>(s, stride, buffer, width - 1 - HA);
@@ -240,7 +240,7 @@ namespace Simd
                 typedef float f18_t[18];
 
                 float * src = (float*)buffer.hist;
-                f18_t * h0 = (f18_t*)histograms + row*width - width - 1;
+                f18_t * h0 = (f18_t*)histograms + row * width - width - 1;
                 f18_t * h1 = h0 + width;
 
                 if (row == 0)
@@ -369,7 +369,7 @@ namespace Simd
 
                 for (size_t row = 1; row < height - 1; ++row)
                 {
-                    const uint8_t * s = src + stride*row;
+                    const uint8_t * s = src + stride * row;
                     for (size_t col = 1; col < alignedWidth; col += HA)
                         HogDirectionHistograms<true>(s, stride, buffer, col);
                     HogDirectionHistograms<false>(s, stride, buffer, width - 1 - HA);
@@ -465,7 +465,7 @@ namespace Simd
 
             void AddRowToBuffer(const uint8_t * src, size_t stride, size_t row, size_t width, size_t aligned)
             {
-                const uint8_t * s = src + stride*row;
+                const uint8_t * s = src + stride * row;
                 GetHistogram<false>(s, stride, 1);
                 for (size_t col = HA; col < aligned; col += HA)
                     GetHistogram<false>(s, stride, col);
@@ -490,7 +490,7 @@ namespace Simd
                 typedef float f18_t[18];
 
                 float * src = _buffer.data;
-                f18_t * h0 = (f18_t*)_histogram.data + row*_hs;
+                f18_t * h0 = (f18_t*)_histogram.data + row * _hs;
                 f18_t * h1 = h0 + _hs;
 
                 for (size_t cell = 0; cell <= width; ++cell)
@@ -571,7 +571,7 @@ namespace Simd
                     const float * h = _histogram.data + ((y + 1)*_hs + 1)*Q2;
                     float * n = _norm.data + (y + 1)*_hs + 1;
                     for (size_t x = 0; x < _sx; x++, i++)
-                        n[x] = GetNorm(h + x*Q2);
+                        n[x] = GetNorm(h + x * Q2);
                 }
             }
 
@@ -588,7 +588,7 @@ namespace Simd
                     {
                         float * dst = features + (y*_sx + x) * 31;
 
-                        float * p0 = _norm.data + y*_hs + x;
+                        float * p0 = _norm.data + y * _hs + x;
                         float * p1 = p0 + _hs;
                         float * p2 = p1 + _hs;
 
@@ -602,7 +602,7 @@ namespace Simd
 
                         __m128 t = _mm_setzero_ps();
 
-                        float * src = ph + x*Q2;
+                        float * src = ph + x * Q2;
                         for (int o = 0; o < 16; o += 4)
                         {
                             __m128 s = _mm_loadu_ps(src);
@@ -624,7 +624,7 @@ namespace Simd
                             dst += 2;
                         }
 
-                        src = ph + x*Q2;
+                        src = ph + x * Q2;
                         for (int o = 0; o < 8; o += 4)
                         {
                             __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + Q));
@@ -695,10 +695,10 @@ namespace Simd
 
             for (size_t row = 0; row < height; ++row)
             {
-                size_t rowOffset = row*dstStride;
+                size_t rowOffset = row * dstStride;
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    const float * s = src + count*col;
+                    const float * s = src + count * col;
                     size_t offset = rowOffset + col;
                     for (size_t i = 0; i < alignedCount; i += Sse::F)
                         HogDeinterleave(s, count, dst, offset, i);
@@ -708,7 +708,7 @@ namespace Simd
                 if (alignedWidth != width)
                 {
                     size_t col = width - F;
-                    const float * s = src + count*col;
+                    const float * s = src + count * col;
                     size_t offset = rowOffset + col;
                     for (size_t i = 0; i < alignedCount; i += Sse::F)
                         HogDeinterleave(s, count, dst, offset, i);

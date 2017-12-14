@@ -89,14 +89,14 @@ namespace Simd
                     float vx1 = 1.0f - vx0;
 
                     if (ixp >= 0)
-                        h[ixp*quantization + index] += vx1*vy0*value;
+                        h[ixp*quantization + index] += vx1 * vy0*value;
                     if (ixp + 1 < blockX)
-                        h[(ixp + 1)*quantization + index] += vx0*vy0*value;
+                        h[(ixp + 1)*quantization + index] += vx0 * vy0*value;
                 }
             }
             else if (iyp + 1 == blockY)
             {
-                float * h = histograms + iyp*blockStride;
+                float * h = histograms + iyp * blockStride;
                 for (size_t col = 1; col < width - 1; ++col)
                 {
                     float value = values[col];
@@ -108,14 +108,14 @@ namespace Simd
                     float vx1 = 1.0f - vx0;
 
                     if (ixp >= 0)
-                        h[ixp*quantization + index] += vx1*vy1*value;
+                        h[ixp*quantization + index] += vx1 * vy1*value;
                     if (ixp + 1 < blockX)
-                        h[(ixp + 1)*quantization + index] += vx0*vy1*value;
+                        h[(ixp + 1)*quantization + index] += vx0 * vy1*value;
                 }
             }
             else
             {
-                float * h0 = histograms + iyp*blockStride;
+                float * h0 = histograms + iyp * blockStride;
                 float * h1 = histograms + (iyp + 1)*blockStride;
                 size_t col = 1;
                 for (; col < noseEnd; ++col)
@@ -127,8 +127,8 @@ namespace Simd
                     int ixp = (int)floor(xp);
                     float vx0 = xp - ixp;
 
-                    h0[(ixp + 1)*quantization + index] += vx0*vy1*value;
-                    h1[(ixp + 1)*quantization + index] += vx0*vy0*value;
+                    h0[(ixp + 1)*quantization + index] += vx0 * vy1*value;
+                    h1[(ixp + 1)*quantization + index] += vx0 * vy0*value;
                 }
 
                 for (; col < bodyEnd; ++col)
@@ -141,10 +141,10 @@ namespace Simd
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
 
-                    h0[ixp*quantization + index] += vx1*vy1*value;
-                    h1[ixp*quantization + index] += vx1*vy0*value;
-                    h0[(ixp + 1)*quantization + index] += vx0*vy1*value;
-                    h1[(ixp + 1)*quantization + index] += vx0*vy0*value;
+                    h0[ixp*quantization + index] += vx1 * vy1*value;
+                    h1[ixp*quantization + index] += vx1 * vy0*value;
+                    h0[(ixp + 1)*quantization + index] += vx0 * vy1*value;
+                    h1[(ixp + 1)*quantization + index] += vx0 * vy0*value;
                 }
 
                 for (; col < width - 1; ++col)
@@ -157,8 +157,8 @@ namespace Simd
                     float vx0 = xp - ixp;
                     float vx1 = 1.0f - vx0;
 
-                    h0[ixp*quantization + index] += vx1*vy1*value;
-                    h1[ixp*quantization + index] += vx1*vy0*value;
+                    h0[ixp*quantization + index] += vx1 * vy1*value;
+                    h1[ixp*quantization + index] += vx1 * vy0*value;
                 }
             }
         }
@@ -174,7 +174,7 @@ namespace Simd
 
             for (size_t row = 1; row < height - 1; ++row)
             {
-                const uint8_t * src1 = src + stride*row;
+                const uint8_t * src1 = src + stride * row;
                 const uint8_t * src0 = src1 - stride;
                 const uint8_t * src2 = src1 + stride;
 
@@ -183,7 +183,7 @@ namespace Simd
                 {
                     float dy = (float)(src2[col] - src0[col]);
                     float dx = (float)(src1[col + 1] - src1[col - 1]);
-                    float value = (float)::sqrt(dx*dx + dy*dy);
+                    float value = (float)::sqrt(dx*dx + dy * dy);
 
                     float bestDot = 0;
                     int index = 0;
@@ -211,7 +211,7 @@ namespace Simd
                 {
                     float dy = (float)(src2[col] - src0[col]);
                     float dx = (float)(src1[col + 1] - src1[col - 1]);
-                    float value = (float)::sqrt(dx*dx + dy*dy);
+                    float value = (float)::sqrt(dx*dx + dy * dy);
                     float ady = std::abs(dy);
                     float adx = std::abs(dx);
 
@@ -290,10 +290,10 @@ namespace Simd
                         int index = _index[col];
                         float vx0 = _k[i];
                         float vx1 = 1.0f - vx0;
-                        h0[index] += vx1*vy1*value;
-                        h1[index] += vx1*vy0*value;
-                        h0[Q2 + index] += vx0*vy1*value;
-                        h1[Q2 + index] += vx0*vy0*value;
+                        h0[index] += vx1 * vy1*value;
+                        h1[index] += vx1 * vy0*value;
+                        h0[Q2 + index] += vx0 * vy1*value;
+                        h1[Q2 + index] += vx0 * vy0*value;
                     }
                     h0 += Q2;
                     h1 += Q2;
@@ -305,7 +305,7 @@ namespace Simd
                 _histogram.Clear();
                 for (size_t row = 1; row < height - 1; ++row)
                 {
-                    const uint8_t * src1 = src + stride*row;
+                    const uint8_t * src1 = src + stride * row;
                     const uint8_t * src0 = src1 - stride;
                     const uint8_t * src2 = src1 + stride;
 
@@ -313,7 +313,7 @@ namespace Simd
                     {
                         float dy = (float)(src2[col] - src0[col]);
                         float dx = (float)(src1[col + 1] - src1[col - 1]);
-                        float value = (float)::sqrt(dx*dx + dy*dy);
+                        float value = (float)::sqrt(dx*dx + dy * dy);
                         float ady = std::abs(dy);
                         float adx = std::abs(dx);
 
@@ -350,7 +350,7 @@ namespace Simd
                     float * pn = _norm.data + (y + 1)*_hs + 1;
                     for (size_t x = 0; x < _sx; ++x)
                     {
-                        const float * h = ph + x*Q2;
+                        const float * h = ph + x * Q2;
                         for (int o = 0; o < Q; ++o)
                             pn[x] += Simd::Square(h[o] + h[o + Q]);
                     }
@@ -368,7 +368,7 @@ namespace Simd
 
                         float *psrc, n1, n2, n3, n4;
 
-                        float * p0 = _norm.data + y*_hs + x;
+                        float * p0 = _norm.data + y * _hs + x;
                         float * p1 = p0 + _hs;
                         float * p2 = p1 + _hs;
 
@@ -462,8 +462,8 @@ namespace Simd
         {
             for (size_t row = 0; row < height; ++row)
             {
-                const float * psrc = src + row*srcStride;
-                size_t offset = row*dstStride;
+                const float * psrc = src + row * srcStride;
+                size_t offset = row * dstStride;
                 for (size_t col = 0; col < width; ++col)
                 {
                     for (size_t i = 0; i < count; ++i)

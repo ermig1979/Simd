@@ -198,7 +198,7 @@ namespace Test
     TEST_ADD_GROUP(Histogram);
     TEST_ADD_GROUP(HistogramMasked);
     TEST_ADD_GROUP(HistogramConditional);
-    TEST_ADD_GROUP(AbsSecondDerivativeHistogram); 
+    TEST_ADD_GROUP(AbsSecondDerivativeHistogram);
     TEST_ADD_GROUP(ChangeColors);
 
     TEST_ADD_GROUP(HogDirectionHistograms);
@@ -535,7 +535,7 @@ namespace Test
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
         TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.TextReport(options.printAlign, false));
-        if(!options.html.empty())
+        if (!options.html.empty())
             Test::PerformanceMeasurerStorage::s_storage.HtmlReport(options.html, options.printAlign);
 #endif
         return 0;

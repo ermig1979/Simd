@@ -125,7 +125,7 @@ namespace Simd
                 __m128i _pixel;
                 switch (pixelSize)
                 {
-                case 1: 
+                case 1:
                     _pixel = _mm_set1_epi8(*pixel);
                     break;
                 case 2:

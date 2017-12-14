@@ -62,7 +62,7 @@ namespace Simd
             size_t alignedWidth = AlignLo(width, A);
             __mmask64 tailMasks[5];
             for (size_t c = 0; c < 4; ++c)
-                tailMasks[c] = TailMask64((width - alignedWidth) * 4 - A*c);
+                tailMasks[c] = TailMask64((width - alignedWidth) * 4 - A * c);
             tailMasks[4] = TailMask64(width - alignedWidth);
             for (size_t row = 0; row < height; ++row)
             {

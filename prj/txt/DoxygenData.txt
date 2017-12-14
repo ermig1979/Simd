@@ -7,10 +7,10 @@
     It provides many useful high performance algorithms for image processing such as: pixel format conversion, image scaling and filtration, 
     extraction of statistic information from images, motion detection, object detection (HAAR and LBP classifier cascades) and classification, neural network.
     
-	The algorithms are optimized with using of different SIMD CPU extensions. 
+    The algorithms are optimized with using of different SIMD CPU extensions. 
     In particular the library supports following CPU extensions: SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2 and AVX-512 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
     
-	The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
+    The %Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API.
     The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
     \section s1 Library folder's structure
@@ -31,15 +31,15 @@
      - `simd/data/network/` - contains examples of trained networks.
      - `simd/docs/` - contains documentation of the library.
 
-	\section s2 The library building for Windows
+    \section s2 The library building for Windows
 
-	To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2015 (or 2017). 
-	These project files are in the directory: 
-	\n`simd/prj/vs2015/.`
-	\n By default the library is built as	a DLL (Dynamic Linked Library).
-	You also may build it as a static library. 
-	To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also define macro `SIMD_STATIC` in file:
-	\n`simd/src/Simd/SimdConfig.h.`
+    To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2015 (or 2017). 
+    These project files are in the directory:
+    \n`simd/prj/vs2015/.`
+    \n By default the library is built as a DLL (Dynamic Linked Library).
+    You also may build it as a static library. 
+    To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also define macro `SIMD_STATIC` in file:
+    \n`simd/src/Simd/SimdConfig.h.`
 
     \section s3 The library building for Android
 
@@ -48,38 +48,38 @@
     `simd/prj/vs2017a/`
     By default the library is built as a SO (Dynamic Library).
 
-	\section s4 The library building for Linux
+    \section s4 The library building for Linux
 
-	To build the library and test application for Linux 32/64 you need to use CMake build systems.
-	Files of CMake build systems are placed in the directory:
-	`simd/prj/cmake/.`
-	The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers.
-	With using of native compiler (g++) for current platform it is simple:
-	\code
-	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="" -DTARGET=""
-	make
-	\endcode
-	To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation.
-	There is an example of using for PowerPC (64 bit):
-	\code
-	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
-	make
-	\endcode
-	For ARM (32 bit):
-	\code
-	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
-	make
-	\endcode
+    To build the library and test application for Linux 32/64 you need to use CMake build systems.
+    Files of CMake build systems are placed in the directory:
+    `simd/prj/cmake/.`
+    The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers.
+    With using of native compiler (g++) for current platform it is simple:
+    \code
+    cd ./prj/cmake
+    cmake . -DTOOLCHAIN="" -DTARGET=""
+    make
+    \endcode
+    To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation.
+    There is an example of using for PowerPC (64 bit):
+    \code
+    cd ./prj/cmake
+    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    make
+    \endcode
+    For ARM (32 bit):
+    \code
+    cd ./prj/cmake
+    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    make
+    \endcode
     And for ARM (64 bit):
     \code
     cd ./prj/cmake
     cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
     make
     \endcode
-	As result the library and the test application will be built in the current directory.
+    As result the library and the test application will be built in the current directory.
 
     \section s5 The library using
 
@@ -97,13 +97,13 @@
     \code
     #include "Simd/SimdDetection.hpp"
     \endcode
-	
-	In order to use Simd::Neural framework you must include:
+    
+    In order to use Simd::Neural framework you must include:
     \code
     #include "Simd/SimdNeural.hpp"
     \endcode
-	
-	In order to use Simd::Motion framework you must include:
+    
+    In order to use Simd::Motion framework you must include:
     \code
     #include "Simd/SimdMotion.hpp"
     \endcode
@@ -124,22 +124,22 @@
     \section s7 Test Framework
 
     The test suite is needed for testing of correctness of work of the library and also for its performance testing.
-	There is a set of tests for every function from API of the library. 
-	There is an example of test application using:
-	\code
-	./Test -m=a -t=1 -f=Sobel -ot=log.txt
-	\endcode
-	Where next parameters were used:
-	 - `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
-	In this case different implementations of each functions will be compared between themselves 
-	(for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
-	Also it can be -m=c (creation of test data for cross-platform testing), `-m=v` (cross-platform testing with using of early prepared test data)
+    There is a set of tests for every function from API of the library. 
+    There is an example of test application using:
+    \code
+    ./Test -m=a -t=1 -f=Sobel -ot=log.txt
+    \endcode
+    Where next parameters were used:
+     - `-m=a` - a auto checking mode which includes performance testing (only for library built in Release mode). 
+    In this case different implementations of each functions will be compared between themselves 
+    (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other).
+    Also it can be -m=c (creation of test data for cross-platform testing), `-m=v` (cross-platform testing with using of early prepared test data)
     and `-m=s` (running of special tests).
-	 - `-t=1` - a number of used threads (every thread runs all tests) for simulation of multi-thread loading.
-	 - `-f=Sobel` - a filter. In current case will be tested only functions which contain word `Sobel` in their names. 
-	If you miss this parameter then full testing will be performed.
+     - `-t=1` - a number of used threads (every thread runs all tests) for simulation of multi-thread loading.
+     - `-f=Sobel` - a filter. In current case will be tested only functions which contain word `Sobel` in their names. 
+    If you miss this parameter then full testing will be performed.
     You can use several filters - function name has to satisfy at least one of them.
-	 - `-ot=log.txt` - a file name with test report (in TEXT file format). The test's report also will be output to console.
+     - `-ot=log.txt` - a file name with test report (in TEXT file format). The test's report also will be output to console.
     
     Also you can use parameters:
      - `-help` or `-?` in order to print help message.
@@ -147,7 +147,7 @@
      - `-pa=1` to print alignment statistics.
      - `-w=1920` width of test image for performance testing.
      - `-h=1080` height of test image for performance testing.
-	 - `-oh=log.html` - a file name with test report (in HTML file format).
+     - `-oh=log.html` - a file name with test report (in HTML file format).
 */
 
 /*! @defgroup c_types C Types
@@ -283,8 +283,8 @@
 */
 
 /*! @ingroup conversion
-	@defgroup universal_conversion Universal
-	\short Universal functions for image format conversions.
+    @defgroup universal_conversion Universal
+    \short Universal functions for image format conversions.
 */
 
 /*! @ingroup conversion
@@ -468,8 +468,8 @@
 */
 
 /*! @ingroup functions
-	@defgroup neural Neural Network
-	\short Artificial Neural Network's functions for accelerating of Simd::Neural.
+    @defgroup neural Neural Network
+    \short Artificial Neural Network's functions for accelerating of Simd::Neural.
 */
 
 /*! @ingroup functions

@@ -103,8 +103,8 @@ namespace Simd
             __mmask64 tailMasks[channelCount + 1];
             tailMasks[0] = TailMask64(width - alignedWidth);
             for (size_t channel = 0; channel < channelCount; ++channel)
-                tailMasks[channel + 1] = TailMask64((width - alignedWidth)*channelCount - A*channel);
-            size_t step = channelCount*A;
+                tailMasks[channel + 1] = TailMask64((width - alignedWidth)*channelCount - A * channel);
+            size_t step = channelCount * A;
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0, offset = 0;

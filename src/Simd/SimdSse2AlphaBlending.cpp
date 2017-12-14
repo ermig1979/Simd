@@ -70,7 +70,7 @@ namespace Simd
         {
             size_t alignedWidth = AlignLo(width, A);
             __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
-            size_t step = channelCount*A;
+            size_t step = channelCount * A;
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
@@ -192,13 +192,13 @@ namespace Simd
 
             switch (channelCount)
             {
-            case 1: 
+            case 1:
                 AlphaFilling<align, 1>(dst, dstStride, width, height, UnpackU8<0>(_mm_set1_epi8(*(uint8_t*)channel)), alpha, alphaStride);
                 break;
-            case 2: 
+            case 2:
                 AlphaFilling<align, 2>(dst, dstStride, width, height, UnpackU8<0>(_mm_set1_epi16(*(uint16_t*)channel)), alpha, alphaStride);
                 break;
-            case 4: 
+            case 4:
                 AlphaFilling<align, 4>(dst, dstStride, width, height, UnpackU8<0>(_mm_set1_epi32(*(uint32_t*)channel)), alpha, alphaStride);
                 break;
             default:
