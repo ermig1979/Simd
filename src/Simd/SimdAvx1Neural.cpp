@@ -1113,81 +1113,97 @@ namespace Simd
                     _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), sum128));
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x4x8(const __m256 & a0, const __m256 & a1, size_t K, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel3x4x8(const __m256 * a, size_t K, const float * b, __m256 * sums)
                 {
-                    __m256 b0 = Avx::Load<align>(b + 0 * K);
-                    sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(a0, b0));
-                    sums[4] = _mm256_add_ps(sums[4], _mm256_mul_ps(a1, b0));
-                    __m256 b1 = Avx::Load<align>(b + 1 * K);
-                    sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(a0, b1));
-                    sums[5] = _mm256_add_ps(sums[5], _mm256_mul_ps(a1, b1));
-                    __m256 b2 = Avx::Load<align>(b + 2 * K);
-                    sums[2] = _mm256_add_ps(sums[2], _mm256_mul_ps(a0, b2));
-                    sums[6] = _mm256_add_ps(sums[6], _mm256_mul_ps(a1, b2));
-                    __m256 b3 = Avx::Load<align>(b + 3 * K);
-                    sums[3] = _mm256_add_ps(sums[3], _mm256_mul_ps(a0, b3));
-                    sums[7] = _mm256_add_ps(sums[7], _mm256_mul_ps(a1, b3));
+                    __m256 _b;
+                    _b = Avx::Load<align>(b + 0 * K);
+                    sums[0x0] = _mm256_add_ps(sums[0x0], _mm256_mul_ps(a[0], _b));
+                    sums[0x4] = _mm256_add_ps(sums[0x4], _mm256_mul_ps(a[1], _b));
+                    sums[0x8] = _mm256_add_ps(sums[0x8], _mm256_mul_ps(a[2], _b));
+                    _b = Avx::Load<align>(b + 1 * K);
+                    sums[0x1] = _mm256_add_ps(sums[0x1], _mm256_mul_ps(a[0], _b));
+                    sums[0x5] = _mm256_add_ps(sums[0x5], _mm256_mul_ps(a[1], _b));
+                    sums[0x9] = _mm256_add_ps(sums[0x9], _mm256_mul_ps(a[2], _b));
+                    _b = Avx::Load<align>(b + 2 * K);
+                    sums[0x2] = _mm256_add_ps(sums[0x2], _mm256_mul_ps(a[0], _b));
+                    sums[0x6] = _mm256_add_ps(sums[0x6], _mm256_mul_ps(a[1], _b));
+                    sums[0xA] = _mm256_add_ps(sums[0xA], _mm256_mul_ps(a[2], _b));
+                    _b = Avx::Load<align>(b + 3 * K);
+                    sums[0x3] = _mm256_add_ps(sums[0x3], _mm256_mul_ps(a[0], _b));
+                    sums[0x7] = _mm256_add_ps(sums[0x7], _mm256_mul_ps(a[1], _b));
+                    sums[0xB] = _mm256_add_ps(sums[0xB], _mm256_mul_ps(a[2], _b));
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x1x8(const __m256 & a0, const __m256 & a1, const float * b, __m256 * sums)
+                template <bool align> static SIMD_INLINE void Kernel3x1x8(const __m256 * a, const float * b, __m256 * sums)
                 {
-                    sums[0] = _mm256_add_ps(sums[0], _mm256_mul_ps(a0, Load<align>(b)));
-                    sums[1] = _mm256_add_ps(sums[1], _mm256_mul_ps(a1, Load<align>(b)));
+                    __m256 _b = Avx::Load<align>(b);
+                    sums[0x0] = _mm256_add_ps(sums[0x0], _mm256_mul_ps(a[0], _b));
+                    sums[0x1] = _mm256_add_ps(sums[0x1], _mm256_mul_ps(a[1], _b));
+                    sums[0x2] = _mm256_add_ps(sums[0x2], _mm256_mul_ps(a[2], _b));
                 }
 
                 template <bool align> void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
-                    size_t M2 = Simd::AlignLo(M, 2);
+                    size_t M3 = M / 3 * 3;
                     size_t N4 = Simd::AlignLo(N, 4);
                     size_t K8 = Simd::AlignLo(K, 8);
                     __m256 tailMask = RightNotZero(K - K8);
                     size_t i = 0;
-                    for (; i < M2; i += 2)
+                    for (; i < M3; i += 3)
                     {
-                        const float * pa0 = a + i*K;
-                        const float * pa1 = a + i*K + K;
-                        float * pc0 = c + i*N;
-                        float * pc1 = c + i*N + N;
+                        const float * pa = a + i * K;
+                        float * pc = c + i * N;
                         size_t j = 0;
                         for (; j < N4; j += 4)
                         {
-                            const float * pb = b + j*K;
-                            __m256 sums[8] = { _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            const float * pb = b + j * K;
+                            __m256 sums[12] = {
+                                _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                                _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                                _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            __m256 _a[3];
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                __m256 _a0 = Avx::Load<false>(pa0 + k);
-                                __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                Kernel2x4x8<align>(_a0, _a1, K, pb + k, sums);
+                                _a[0] = Avx::Load<false>(pa + k + 0 * K);
+                                _a[1] = Avx::Load<false>(pa + k + 1 * K);
+                                _a[2] = Avx::Load<false>(pa + k + 2 * K);
+                                Kernel3x4x8<align>(_a, K, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
-                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                Kernel2x4x8<false>(_a0, _a1, K, pb + k, sums);
+                                _a[0] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 0 * K));
+                                _a[1] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 1 * K));
+                                _a[2] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 2 * K));
+                                Kernel3x4x8<false>(_a, K, pb + k, sums);
                             }
-                            Add4ExtractedSums(sums + 0, pc0 + j);
-                            Add4ExtractedSums(sums + 4, pc1 + j);
+                            Add4ExtractedSums(sums + 0, pc + j + 0 * N);
+                            Add4ExtractedSums(sums + 4, pc + j + 1 * N);
+                            Add4ExtractedSums(sums + 8, pc + j + 2 * N);
                         }
                         for (; j < N; ++j)
                         {
-                            const float * pb = b + j*K;
-                            __m256 sums[2] = { _mm256_setzero_ps(), _mm256_setzero_ps() };
+                            const float * pb = b + j * K;
+                            __m256 sums[3] = { _mm256_setzero_ps(), _mm256_setzero_ps() , _mm256_setzero_ps() };
+                            __m256 _a[3];
                             for (size_t k = 0; k < K8; k += 8)
                             {
-                                __m256 _a0 = Avx::Load<false>(pa0 + k);
-                                __m256 _a1 = Avx::Load<false>(pa1 + k);
-                                Kernel2x1x8<align>(_a0, _a1, pb + k, sums);
+                                _a[0] = Avx::Load<false>(pa + k + 0 * K);
+                                _a[1] = Avx::Load<false>(pa + k + 1 * K);
+                                _a[2] = Avx::Load<false>(pa + k + 2 * K);
+                                Kernel3x1x8<align>(_a, pb + k, sums);
                             }
                             if (K8 < K)
                             {
                                 size_t k = K - 8;
-                                __m256 _a0 = _mm256_and_ps(tailMask, Avx::Load<false>(pa0 + k));
-                                __m256 _a1 = _mm256_and_ps(tailMask, Avx::Load<false>(pa1 + k));
-                                Kernel2x1x8<false>(_a0, _a1, pb + k, sums);
+                                _a[0] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 0 * K));
+                                _a[1] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 1 * K));
+                                _a[2] = _mm256_and_ps(tailMask, Avx::Load<false>(pa + k + 2 * K));
+                                Kernel3x1x8<false>(_a, pb + k, sums);
                             }
-                            pc0[j] += Avx::ExtractSum(sums[0]);
-                            pc1[j] += Avx::ExtractSum(sums[1]);
+                            pc[j + 0 * N] += Avx::ExtractSum(sums[0]);
+                            pc[j + 1 * N] += Avx::ExtractSum(sums[1]);
+                            pc[j + 2 * N] += Avx::ExtractSum(sums[2]);
                         }
                     }
                     for (; i < M; ++i)

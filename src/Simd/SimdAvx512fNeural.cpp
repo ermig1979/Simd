@@ -1819,22 +1819,6 @@ namespace Simd
                     sums[0xF] = _mm512_fmadd_ps(a[3], b3, sums[0xF]);
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x4x16(const __m512 * a, size_t K, const float * b, __m512 * sums)
-                {
-                    __m512 b0 = Load<align>(b + 0 * K);
-                    sums[0x0] = _mm512_fmadd_ps(a[0], b0, sums[0x0]);
-                    sums[0x4] = _mm512_fmadd_ps(a[1], b0, sums[0x4]);
-                    __m512 b1 = Load<align>(b + 1 * K);
-                    sums[0x1] = _mm512_fmadd_ps(a[0], b1, sums[0x1]);
-                    sums[0x5] = _mm512_fmadd_ps(a[1], b1, sums[0x5]);
-                    __m512 b2 = Load<align>(b + 2 * K);
-                    sums[0x2] = _mm512_fmadd_ps(a[0], b2, sums[0x2]);
-                    sums[0x6] = _mm512_fmadd_ps(a[1], b2, sums[0x6]);
-                    __m512 b3 = Load<align>(b + 3 * K);
-                    sums[0x3] = _mm512_fmadd_ps(a[0], b3, sums[0x3]);
-                    sums[0x7] = _mm512_fmadd_ps(a[1], b3, sums[0x7]);
-                }
-
                 template <bool align> static SIMD_INLINE void Kernel4x1x16(const __m512 * a, const float * b, __m512 * sums)
                 {
                     __m512 b0 = Load<align>(b);
@@ -1844,11 +1828,33 @@ namespace Simd
                     sums[3] = _mm512_fmadd_ps(a[3], b0, sums[3]);
                 }
 
-                template <bool align> static SIMD_INLINE void Kernel2x1x16(const __m512 * a, const float * b, __m512 * sums)
+                template <bool align> static SIMD_INLINE void Kernel3x4x16(const __m512 * a, size_t K, const float * b, __m512 * sums)
                 {
-                    __m512 b0 = Load<align>(b);
-                    sums[0] = _mm512_fmadd_ps(a[0], b0, sums[0]);
-                    sums[1] = _mm512_fmadd_ps(a[1], b0, sums[1]);
+                    __m512 _b;
+                    _b = Load<align>(b + 0 * K);
+                    sums[0x0] = _mm512_fmadd_ps(a[0], _b, sums[0x0]);
+                    sums[0x4] = _mm512_fmadd_ps(a[1], _b, sums[0x4]);
+                    sums[0x8] = _mm512_fmadd_ps(a[2], _b, sums[0x8]);
+                    _b = Load<align>(b + 1 * K);
+                    sums[0x1] = _mm512_fmadd_ps(a[0], _b, sums[0x1]);
+                    sums[0x5] = _mm512_fmadd_ps(a[1], _b, sums[0x5]);
+                    sums[0x9] = _mm512_fmadd_ps(a[2], _b, sums[0x9]);
+                    _b = Load<align>(b + 2 * K);
+                    sums[0x2] = _mm512_fmadd_ps(a[0], _b, sums[0x2]);
+                    sums[0x6] = _mm512_fmadd_ps(a[1], _b, sums[0x6]);
+                    sums[0xA] = _mm512_fmadd_ps(a[2], _b, sums[0xA]);
+                    _b = Load<align>(b + 3 * K);
+                    sums[0x3] = _mm512_fmadd_ps(a[0], _b, sums[0x3]);
+                    sums[0x7] = _mm512_fmadd_ps(a[1], _b, sums[0x7]);
+                    sums[0xB] = _mm512_fmadd_ps(a[2], _b, sums[0xB]);
+                }
+
+                template <bool align> static SIMD_INLINE void Kernel3x1x16(const __m512 * a, const float * b, __m512 * sums)
+                {
+                    __m512 _b = Load<align>(b);
+                    sums[0x0] = _mm512_fmadd_ps(a[0], _b, sums[0x0]);
+                    sums[0x1] = _mm512_fmadd_ps(a[1], _b, sums[0x1]);
+                    sums[0x2] = _mm512_fmadd_ps(a[2], _b, sums[0x2]);
                 }
 
                 template <bool align, bool mask> static SIMD_INLINE void Load4(const float * p, __m512 * a, size_t step, __mmask16 tail = -1)
@@ -1859,15 +1865,16 @@ namespace Simd
                     a[3] = Load<align, mask>(p + 3 * step, tail);
                 }
 
-                template <bool align, bool mask> static SIMD_INLINE void Load2(const float * p, __m512 * a, size_t step, __mmask16 tail = -1)
+                template <bool align, bool mask> static SIMD_INLINE void Load3(const float * p, __m512 * a, size_t step, __mmask16 tail = -1)
                 {
                     a[0] = Load<align, mask>(p + 0 * step, tail);
                     a[1] = Load<align, mask>(p + 1 * step, tail);
+                    a[2] = Load<align, mask>(p + 2 * step, tail);
                 }
 
                 template <bool align> void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
                 {
-                    size_t M2 = Simd::AlignLo(M, 2);
+                    size_t M3 = M / 3 * 3;
                     size_t M4 = Simd::AlignLo(M, 4);
                     size_t N4 = Simd::AlignLo(N, 4);
                     size_t K16 = Simd::AlignLo(K, 16);
@@ -1926,49 +1933,52 @@ namespace Simd
                         }
                     }
 #endif
-                    for (; i < M2; i += 2)
+                    for (; i < M3; i += 3)
                     {
                         const float * pa = a + i*K;
                         float * pc = c + i*N;
                         size_t j = 0;
-                        register __m512 _a[2];
+                        register __m512 _a[3];
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[8] = {
+                            register __m512 sums[12] = {
+                                _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
-                                Load2<false, false>(pa + k, _a, K);
-                                Kernel2x4x16<align>(_a, K, pb + k, sums);
+                                Load3<false, false>(pa + k, _a, K);
+                                Kernel3x4x16<align>(_a, K, pb + k, sums);
                             }
                             if (k < K)
                             {
-                                Load2<false, true>(pa + k, _a, K, tailMask);
-                                Kernel2x4x16<false>(_a, K, pb + k, sums);
+                                Load3<false, true>(pa + k, _a, K, tailMask);
+                                Kernel3x4x16<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0x0, pc + 0 * N + j);
                             Add4ExtractedSums(sums + 0x4, pc + 1 * N + j);
+                            Add4ExtractedSums(sums + 0x8, pc + 2 * N + j);
                         }
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            register __m512 sums[3] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
-                                Load2<false, false>(pa + k, _a, K);
-                                Kernel2x1x16<align>(_a, pb + k, sums);
+                                Load3<false, false>(pa + k, _a, K);
+                                Kernel3x1x16<align>(_a, pb + k, sums);
                             }
                             if (k < K)
                             {
-                                Load2<false, true>(pa + k, _a, K, tailMask);
-                                Kernel2x1x16<false>(_a, pb + k, sums);
+                                Load3<false, true>(pa + k, _a, K, tailMask);
+                                Kernel3x1x16<false>(_a, pb + k, sums);
                             }
                             pc[0 * N + j] += ExtractSum(sums[0]);
                             pc[1 * N + j] += ExtractSum(sums[1]);
+                            pc[2 * N + j] += ExtractSum(sums[2]);
                         }
                     }
                     for (; i < M; ++i)
