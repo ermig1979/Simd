@@ -1054,7 +1054,38 @@ namespace Simd
                         }
                         src = tmp;
                     }
-                    if (cell == 16)
+                    if (cell == 24)
+                    {
+                        for (size_t j = 0; j < N; j += cell)
+                        {
+                            size_t n = Simd::Min(cell, N - j);
+                            if (n == cell)
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k * N;
+                                    Avx::Store<false>(dst + 0x00, Avx::Load<false>(psrc + 0x00));
+                                    Avx::Store<false>(dst + 0x08, Avx::Load<false>(psrc + 0x08));
+                                    Avx::Store<false>(dst + 0x10, Avx::Load<false>(psrc + 0x10));
+                                    dst += 24;
+                                }
+                            }
+                            else
+                            {
+                                for (size_t k = 0; k < K; ++k)
+                                {
+                                    const float * psrc = src + k * N;
+                                    size_t c = 0;
+                                    for (; c < n; ++c)
+                                        *(dst++) = *(psrc++);
+                                    for (; c < cell; ++c)
+                                        *(dst++) = 0;
+                                }
+                            }
+                            src += cell;
+                        }
+                    }
+                    else if (cell == 16)
                     {
                         for (size_t j = 0; j < N; j += cell)
                         {
@@ -1130,7 +1161,7 @@ namespace Simd
                     {
                         __m256 b0 = Load<align>(b);
                         for (size_t s = 0; s < m; ++s)
-                            sums[s] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + s), b0, sums[s]);
+                            sums[s] = _mm256_fmadd_ps(_mm256_set1_ps(a[s]), b0, sums[s]);
                         b += 8;
                         a += m;
                     }
@@ -1143,10 +1174,10 @@ namespace Simd
                     for (size_t k = 0; k < K; ++k)
                     {
                         __m256 b0 = Load<align>(b);
-                        sums[0] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 0), b0, sums[0]);
-                        sums[1] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 1), b0, sums[1]);
-                        sums[2] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 2), b0, sums[2]);
-                        sums[3] = _mm256_fmadd_ps(_mm256_broadcast_ss(a + 3), b0, sums[3]);
+                        sums[0] = _mm256_fmadd_ps(_mm256_set1_ps(a[0]), b0, sums[0]);
+                        sums[1] = _mm256_fmadd_ps(_mm256_set1_ps(a[1]), b0, sums[1]);
+                        sums[2] = _mm256_fmadd_ps(_mm256_set1_ps(a[2]), b0, sums[2]);
+                        sums[3] = _mm256_fmadd_ps(_mm256_set1_ps(a[3]), b0, sums[3]);
                         b += 8;
                         a += 4;
                     }
@@ -1210,7 +1241,7 @@ namespace Simd
                         __m256 b1 = Load<align>(b + 8);
                         for (size_t s = 0; s < m; ++s)
                         {
-                            __m256 a0 = _mm256_broadcast_ss(a + s);
+                            __m256 a0 = _mm256_set1_ps(a[s]);
                             sums[s + 0] = _mm256_fmadd_ps(b0, a0, sums[s + 0]);
                             sums[s + 4] = _mm256_fmadd_ps(b1, a0, sums[s + 4]);
                         }
@@ -1228,16 +1259,16 @@ namespace Simd
                     {
                         __m256 b0 = Load<align>(b + 0);
                         __m256 b1 = Load<align>(b + 8);
-                        __m256 a0 = _mm256_broadcast_ss(a + 0);
+                        __m256 a0 = _mm256_set1_ps(a[0]);
                         sums[0] = _mm256_fmadd_ps(b0, a0, sums[0]);
                         sums[4] = _mm256_fmadd_ps(b1, a0, sums[4]);
-                        __m256 a1 = _mm256_broadcast_ss(a + 1);
+                        __m256 a1 = _mm256_set1_ps(a[1]);
                         sums[1] = _mm256_fmadd_ps(b0, a1, sums[1]);
                         sums[5] = _mm256_fmadd_ps(b1, a1, sums[5]);
-                        __m256 a2 = _mm256_broadcast_ss(a + 2);
+                        __m256 a2 = _mm256_set1_ps(a[2]);
                         sums[2] = _mm256_fmadd_ps(b0, a2, sums[2]);
                         sums[6] = _mm256_fmadd_ps(b1, a2, sums[6]);
-                        __m256 a3 = _mm256_broadcast_ss(a + 3);
+                        __m256 a3 = _mm256_set1_ps(a[3]);
                         sums[3] = _mm256_fmadd_ps(b0, a3, sums[3]);
                         sums[7] = _mm256_fmadd_ps(b1, a3, sums[7]);
                         b += 16;
@@ -1271,6 +1302,117 @@ namespace Simd
                     }
                 }
 
+                SIMD_INLINE void AddSums24(const __m256 * sums, size_t size, const float * mask, float * dst, size_t stride)
+                {
+                    if (mask)
+                    {
+                        __m256 mask0 = _mm256_loadu_ps(mask + 0 * F);
+                        __m256 mask1 = _mm256_loadu_ps(mask + 1 * F);
+                        __m256 mask2 = _mm256_loadu_ps(mask + 2 * F);
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(_mm256_and_ps(mask0, sums[i + 0]), dst + 0 * F);
+                            AddSum(_mm256_and_ps(mask1, sums[i + 4]), dst + 1 * F);
+                            AddSum(_mm256_and_ps(mask2, sums[i + 8]), dst + 2 * F);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < size; ++i, dst += stride)
+                        {
+                            AddSum(sums[i + 0], dst + 0 * F);
+                            AddSum(sums[i + 4], dst + 1 * F);
+                            AddSum(sums[i + 8], dst + 2 * F);
+                        }
+                    }
+                }
+
+                template <bool align> SIMD_INLINE void KernelMx24(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask, size_t m)
+                {
+                    __m256 sums[12] = { 
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    __m256 _b[3];
+                    for (size_t k = 0; k < K; ++k)
+                    {   
+                        _b[0] = Load<align>(b + 0 * F);
+                        _b[1] = Load<align>(b + 1 * F);
+                        _b[2] = Load<align>(b + 2 * F);
+                        for (size_t s = 0; s < m; ++s)
+                        {
+                            __m256 _a = _mm256_set1_ps(a[s]);
+                            sums[s + 0] = _mm256_fmadd_ps(_b[0], _a, sums[s + 0]);
+                            sums[s + 4] = _mm256_fmadd_ps(_b[1], _a, sums[s + 4]);
+                            sums[s + 8] = _mm256_fmadd_ps(_b[2], _a, sums[s + 8]);
+                        }
+                        b += 24;
+                        a += m;
+                    }
+                    AddSums24(sums, m, mask, c, N);
+                }
+
+                template <bool align> SIMD_INLINE void Kernel4x24(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                {
+                    register __m256 sums[12] = {
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
+                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
+                    register __m256 _b[3], _a;
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        _b[0] = Load<align>(b + 0 * F);
+                        _b[1] = Load<align>(b + 1 * F);
+                        _b[2] = Load<align>(b + 2 * F);
+                        _a = _mm256_set1_ps(a[0]);
+                        sums[0x0] = _mm256_fmadd_ps(_b[0], _a, sums[0x0]);
+                        sums[0x4] = _mm256_fmadd_ps(_b[1], _a, sums[0x4]);
+                        sums[0x8] = _mm256_fmadd_ps(_b[2], _a, sums[0x8]);
+                        _a = _mm256_set1_ps(a[1]);
+                        sums[0x1] = _mm256_fmadd_ps(_b[0], _a, sums[0x1]);
+                        sums[0x5] = _mm256_fmadd_ps(_b[1], _a, sums[0x5]);
+                        sums[0x9] = _mm256_fmadd_ps(_b[2], _a, sums[0x9]);
+                        _a = _mm256_set1_ps(a[2]);
+                        sums[0x2] = _mm256_fmadd_ps(_b[0], _a, sums[0x2]);
+                        sums[0x6] = _mm256_fmadd_ps(_b[1], _a, sums[0x6]);
+                        sums[0xA] = _mm256_fmadd_ps(_b[2], _a, sums[0xA]);
+                        _a = _mm256_set1_ps(a[3]);
+                        sums[0x3] = _mm256_fmadd_ps(_b[0], _a, sums[0x3]);
+                        sums[0x7] = _mm256_fmadd_ps(_b[1], _a, sums[0x7]);
+                        sums[0xB] = _mm256_fmadd_ps(_b[2], _a, sums[0xB]);
+                        b += 24;
+                        a += 4;
+                    }
+                    AddSums24(sums, 4, mask, c, N);
+                }
+
+                template <bool align> void Execute4x24(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
+                {
+                    size_t M4 = Simd::AlignLo(M, 4);
+                    size_t N24 = N/24*24;
+                    const int32_t mask[48] = { 
+                        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    const float * tail = (float*)mask + 24 - N + N24;
+                    size_t i = 0;
+                    for (; i < M4; i += 4)
+                    {
+                        size_t j = 0;
+                        for (; j < N24; j += 24)
+                            Kernel4x24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL);
+                        if (N24 < N)
+                            Kernel4x24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail);
+                    }
+                    if (M4 < M)
+                    {
+                        size_t j = 0;
+                        for (; j < N24; j += 24)
+                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL, M - M4);
+                        if (N24 < N)
+                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, M - M4);
+                    }
+                }
+
                 void Execute(size_t M, size_t N, size_t K, const float * a, const float * b, float * c, size_t cellA, size_t cellB)
                 {
                     if (cellA == 4)
@@ -1279,6 +1421,8 @@ namespace Simd
                             Execute4x8<false>(M, N, K, a, b, c);
                         if (cellB == 16)
                             Execute4x16<false>(M, N, K, a, b, c);
+                        if (cellB == 24)
+                            Execute4x24<false>(M, N, K, a, b, c);
                     }
                 }
             }
@@ -1472,9 +1616,9 @@ namespace Simd
                         break;
                     case Ver1:
                         cellA = 4;
-                        cellB = 16;
+                        cellB = 24;
                         sizeA = M*K;
-                        strideB = Simd::AlignHi(N, cellB);
+                        strideB = (N + cellB - 1)/cellB*cellB;
                         sizeB = strideB*K;
                         if (kernelX*kernelY > 1)
                             sizeT = sizeB;
