@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
+option(AVX512 "AVX512 enable" ON)
+
 set(TRUNK_DIR ${CMAKE_SOURCE_DIR}/../..)
 
 if(CMAKE_BUILD_TYPE STREQUAL "")
@@ -89,10 +91,11 @@ if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL 
         file(GLOB_RECURSE SIMD_AVX512BW_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512bw*.cpp)
         set_source_files_properties(${SIMD_AVX512BW_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512bw -mavx512vl -mavx512dq -mbmi -mlzcnt -mfma")
         
-        set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mavx512bw")
-        set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512F_SRC} ${SIMD_AVX512BW_SRC})
-        
-        message("Use AVX-512F and AVX-512BW")
+		if(AVX512)
+			set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mavx512bw")
+			set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512F_SRC} ${SIMD_AVX512BW_SRC})
+			message("Use AVX-512F and AVX-512BW")
+		endif()
     endif()
 
     file(GLOB_RECURSE SIMD_LIB_SRC ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
