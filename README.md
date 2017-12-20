@@ -22,6 +22,8 @@ The Simd Library has next folder's structure:
 * `simd/src/Simd/` - contains source codes of the library.
 * `simd/src/Test/` - contains test framework of the library.
 * `simd/src/Use/` - contains the use examples of the library.
+* `simd/prj/vs2012/` - contains project files of Microsoft Visual Studio 2012.
+* `simd/prj/vs2013/` - contains project files of Microsoft Visual Studio 2013.
 * `simd/prj/vs2015/` - contains project files of Microsoft Visual Studio 2015.
 * `simd/prj/vs2017w/` - contains project files of Microsoft Visual Studio 2017 (for Windows).
 * `simd/prj/vs2017a/` - contains project files of Microsoft Visual Studio 2017 (for Android).
@@ -37,7 +39,7 @@ The Simd Library has next folder's structure:
 The library building for Windows
 ================================
 
-To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2015 (or 2017). 
+To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2015 (or 2012/2013/2017). 
 The project files are in the directory: 
 
 `simd/prj/vs2015/`
