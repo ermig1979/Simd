@@ -802,6 +802,18 @@ namespace Simd
 #endif
         }
 
+        template<bool mask> SIMD_INLINE __m512 Mask(__m512 a, __mmask16 m);
+
+        template<> SIMD_INLINE __m512 Mask<true>(__m512 a, __mmask16 m)
+        {
+            return _mm512_maskz_mov_ps(m, a);
+        }
+
+        template<> SIMD_INLINE __m512 Mask<false>(__m512 a, __mmask16 m)
+        {
+            return a;
+        }        
+        
         template<int shift> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi)
         {
             return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
@@ -815,6 +827,11 @@ namespace Simd
         template<> SIMD_INLINE __m512 Alignr<F>(const __m512 & lo, const __m512 & hi)
         {
             return hi;
+        }
+
+        template<int shift, bool mask> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi, __mmask16 m)
+        {
+            return Mask<mask>(Alignr<shift>(lo, hi), m);
         }
     }
 #endif //SIMD_AVX512F_ENABLE

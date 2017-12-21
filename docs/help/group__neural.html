@@ -80,6 +80,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga155f403167e9d9c81f5f7ff6e7102728"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#ga155f403167e9d9c81f5f7ff6e7102728">SimdNeuralDerivativeRelu</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
 <tr class="memdesc:ga155f403167e9d9c81f5f7ff6e7102728"><td class="mdescLeft">&#160;</td><td class="mdescRight">Multiplies output 32-bit float array by derivative of Relu (rectified linear unit) from input 32-bit float array.  <a href="#ga155f403167e9d9c81f5f7ff6e7102728">More...</a><br /></td></tr>
 <tr class="separator:ga155f403167e9d9c81f5f7ff6e7102728"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae2a91295d707b7ef7ba357bbaed1055e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gae2a91295d707b7ef7ba357bbaed1055e">SimdNeuralPow</a> (const float *src, size_t size, const float *exponent, float *dst)</td></tr>
+<tr class="memdesc:gae2a91295d707b7ef7ba357bbaed1055e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates Pow function for 32-bit float array.  <a href="#gae2a91295d707b7ef7ba357bbaed1055e">More...</a><br /></td></tr>
+<tr class="separator:gae2a91295d707b7ef7ba357bbaed1055e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafea0568d1f019caf6a28d198c139ae10"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__neural.html#gafea0568d1f019caf6a28d198c139ae10">SimdNeuralProductSum</a> (const float *a, const float *b, size_t size, float *sum)</td></tr>
 <tr class="memdesc:gafea0568d1f019caf6a28d198c139ae10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of products for two 32-bit float arrays.  <a href="#gafea0568d1f019caf6a28d198c139ae10">More...</a><br /></td></tr>
 <tr class="separator:gafea0568d1f019caf6a28d198c139ae10"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -717,6 +720,60 @@ dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the slope parameter. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to output array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae2a91295d707b7ef7ba357bbaed1055e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae2a91295d707b7ef7ba357bbaed1055e">&#9670;&nbsp;</a></span>SimdNeuralPow()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdNeuralPow </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>exponent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates Pow function for 32-bit float array. </p>
+<p>All arrays must have the same size.</p>
+<p>For every element: </p><pre class="fragment">dst[i] =  Pow(src[i], exponent[0]);
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a class="el" href="struct_simd_1_1_neural_1_1_function.html" title="Activation Function structure. ">Simd::Neural::Function</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">exponent</td><td>- a pointer to exponent parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output array. </td></tr>
   </table>
   </dd>
 </dl>

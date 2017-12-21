@@ -3114,6 +3114,14 @@ SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const flo
     simdNeuralDerivativeRelu(src, size, slope, dst);
 }
 
+typedef void(*SimdNeuralPowPtr) (const float * src, size_t size, const float * exponent, float * dst);
+SimdNeuralPowPtr simdNeuralPow = SIMD_FUNC0(NeuralPow);
+
+SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst)
+{
+    simdNeuralPow(src, size, exponent, dst);
+}
+
 typedef void(*SimdNeuralUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
 SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC4(NeuralUpdateWeights, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 

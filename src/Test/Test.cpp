@@ -243,6 +243,7 @@ namespace Test
     TEST_ADD_GROUP(NeuralDerivativeTanh);
     TEST_ADD_GROUP(NeuralRelu);
     TEST_ADD_GROUP(NeuralDerivativeRelu);
+    TEST_ADD_GROUP(NeuralPow);
     TEST_ADD_GROUP(NeuralUpdateWeights);
     TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
     TEST_ADD_GROUP(NeuralAddConvolution2x2Forward);

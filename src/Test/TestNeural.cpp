@@ -510,14 +510,14 @@ namespace Test
     }
 #define FUNC_AF(function) FuncAF(function, #function)
 
-    bool NeuralActivateFunctionAutoTest(int size, float error, bool relative, float slope, const FuncAF & f1, const FuncAF & f2)
+    bool NeuralActivateFunctionAutoTest(int size, float error, bool relative, float slope, float lo, float hi, const FuncAF & f1, const FuncAF & f2)
     {
         bool result = true;
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
 
         View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
-        FillRandom32f(src, -10.0f, 10.0f);
+        FillRandom32f(src, lo, hi);
 
         View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
         View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
@@ -535,9 +535,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, slope, f1, f2);
-        result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, slope, f1, f2);
-        result = result && NeuralActivateFunctionAutoTest(W*H - O, error, relative, slope, f1, f2);
+        const float lo = -10.0f, hi = 10.0f;
+        result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, slope, lo, hi, f1, f2);
+        result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, slope, lo, hi, f1, f2);
 
         return result;
     }
@@ -682,6 +682,26 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Neon::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
+
+        return result;
+    }
+
+    bool NeuralPowAutoTest(float error, bool relative, const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
+
+        const float lo = 0.001f, hi = 9.999f, exponent = -0.75;
+        result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, exponent, lo, hi, f1, f2);
+        result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, exponent, lo, hi, f1, f2);
+
+        return result;
+    }
+
+    bool NeuralPowAutoTest()
+    {
+        bool result = true;
+
+        result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Base::NeuralPow), FUNC_AF(SimdNeuralPow));
 
         return result;
     }
@@ -2130,7 +2150,7 @@ namespace Test
         return result;
     }
 
-    bool NeuralActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, const FuncAF & f)
+    bool NeuralActivateFunctionDataTest(bool create, int size, float error, bool relative, float slope, float lo, float hi, const FuncAF & f)
     {
         bool result = true;
 
@@ -2144,7 +2164,7 @@ namespace Test
 
         if (create)
         {
-            FillRandom32f(src, -10.0f, 10.0f);
+            FillRandom32f(src, lo, hi);
 
             TEST_SAVE(src);
 
@@ -2170,56 +2190,37 @@ namespace Test
 
     bool NeuralSigmoidDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralSigmoid));
-
-        return result;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, -10.0f, 10.0f, FUNC_AF(SimdNeuralSigmoid));
     }
 
     bool NeuralRoughSigmoidDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid));
-
-        return result;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, -10.0f, 10.0f, FUNC_AF(SimdNeuralRoughSigmoid));
     }
 
     bool NeuralRoughSigmoid2DataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, FUNC_AF(SimdNeuralRoughSigmoid2));
-
-        return result;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, true, 3.0f, -10.0f, 10.0f, FUNC_AF(SimdNeuralRoughSigmoid2));
     }
 
     bool NeuralTanhDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_AF(SimdNeuralTanh));
-
-        return result;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, -10.0f, 10.0f, FUNC_AF(SimdNeuralTanh));
     }
 
     bool NeuralRoughTanhDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, FUNC_AF(SimdNeuralRoughTanh));
-
-        return result;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, false, 3.0f, -10.0f, 10.0f, FUNC_AF(SimdNeuralRoughTanh));
     }
 
     bool NeuralReluDataTest(bool create)
     {
-        bool result = true;
+        return NeuralActivateFunctionDataTest(create, DH, EPS, false, 0.5f, -10.0f, 10.0f, FUNC_AF(SimdNeuralRelu));
+    }
 
-        result = result && NeuralActivateFunctionDataTest(create, DH, EPS, false, 0.5f, FUNC_AF(SimdNeuralRelu));
-
-        return result;
+    bool NeuralPowDataTest(bool create)
+    {
+        return NeuralActivateFunctionDataTest(create, DH, EPS, false, -0.75f, 0.001f, 9.999f, FUNC_AF(SimdNeuralPow));
     }
 
     bool NeuralActivateDerivativeDataTest(bool create, int size, float error, bool relative, float slope, const FuncAD & f)

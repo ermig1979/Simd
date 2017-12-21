@@ -3378,6 +3378,28 @@ extern "C"
 
     /*! @ingroup neural
 
+        \fn void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
+
+        \short Calculates Pow function for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] =  Pow(src[i], exponent[0]);
+        \endverbatim
+
+        \note This function is used in Simd::Neural::Function.
+
+        \param [in] src - a pointer to the input array.
+        \param [in] size - a size of arrays.
+        \param [in] exponent - a pointer to exponent parameter.
+        \param [out] dst - a pointer to output array.
+    */
+    SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst);
+
+    /*! @ingroup neural
+
         \fn void SimdNeuralProductSum(const float * a, const float * b, size_t size, float * sum);
 
         \short Calculates sum of products for two 32-bit float arrays.
