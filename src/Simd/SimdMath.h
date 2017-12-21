@@ -260,6 +260,15 @@ namespace Simd
             gradient[offset] += d*d;
             weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
         }
+
+        SIMD_INLINE float Pow(float basis, float exponent)
+        {
+#if defined(__GNUC__) && defined(SIMD_X86_ENABLE)
+
+#else
+            return ::expf(::logf(basis)*exponent);
+#endif
+        }
     }
 
 #ifdef SIMD_SSE_ENABLE

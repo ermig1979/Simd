@@ -224,6 +224,87 @@ namespace Simd
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
 
+
+        class Power
+        {
+            __m256i _exponent, _mantissa;
+            __m256 _one;
+
+            void Init()
+            {
+                _exponent = _mm256_set1_epi32(0x7F800000);
+                _mantissa = _mm256_set1_epi32(0x007FFFFF);
+                _one = _mm256_set1_ps(1.0f);
+            }
+
+            SIMD_INLINE __m256 Poly5(__m256 x, float a, float b, float c, float d, float e, float f)
+            {
+                __m256 p = _mm256_set1_ps(f);
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(e));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(d));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(c));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(b));
+                p = _mm256_fmadd_ps(x, p, _mm256_set1_ps(a));
+                return p;
+            }
+
+            SIMD_INLINE __m256 Exp2(__m256 x)
+            {
+                x = _mm256_max_ps(_mm256_min_ps(x, _mm256_set1_ps(129.00000f)), _mm256_set1_ps(-126.99999f));
+                __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _mm256_set1_ps(0.5f)));
+                __m256 fpart = _mm256_sub_ps(x, _mm256_cvtepi32_ps(ipart));
+                __m256 expipart = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_add_epi32(ipart, _mm256_set1_epi32(127)), 23));
+                __m256 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return _mm256_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m256 Log2(__m256 x)
+            {
+                __m256i i = _mm256_castps_si256(x);
+                __m256 e = _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_srli_epi32(_mm256_and_si256(i, _exponent), 23), _mm256_set1_epi32(127)));
+                __m256 m = _mm256_or_ps(_mm256_castsi256_ps(_mm256_and_si256(i, _mantissa)), _one);
+                __m256 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return _mm256_fmadd_ps(p, _mm256_sub_ps(m, _one), e);
+            }
+
+            SIMD_INLINE __m256 Pow(__m256 basis, __m256 exponent)
+            {
+                return Exp2(_mm256_mul_ps(Log2(basis), exponent));
+            }
+
+            template<bool align> void Run(const float * src, size_t size, const float * exponent, float * dst)
+            {
+                if (align)
+                    assert(Aligned(src) && Aligned(dst));
+
+                float e = exponent[0];
+                size_t alignedSize = AlignLo(size, F);
+                __m256 _e = _mm256_set1_ps(e);
+                size_t i = 0;
+                for (; i < alignedSize; i += F)
+                    Avx::Store<align>(dst + i, Pow(Avx::Load<align>(src + i), _e));
+                for (; i < size; ++i)
+                    dst[i] = Base::Pow(src[i], e);
+            }
+
+        public:
+            void Run(const float * src, size_t size, const float * exponent, float * dst)
+            {
+                Init();
+
+                if (Aligned(src) && Aligned(dst))
+                    Run<true>(src, size, exponent, dst);
+                else
+                    Run<false>(src, size, exponent, dst);
+            }
+        };
+
+        void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
+        {
+            Power power;
+            power.Run(src, size, exponent, dst);
+        }
+
         template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);

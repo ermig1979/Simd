@@ -195,7 +195,7 @@ namespace Simd
         {
             float e = exponent[0];
             for (size_t i = 0; i < size; ++i)
-                dst[i] = ::powf(src[i],e);
+                dst[i] = Pow(src[i], e);
         }
 
         void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
