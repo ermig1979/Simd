@@ -224,7 +224,6 @@ namespace Simd
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
         }
 
-
         class Power
         {
             __m256i _exponent, _mantissa;

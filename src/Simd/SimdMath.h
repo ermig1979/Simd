@@ -748,6 +748,15 @@ namespace Simd
 #endif
         }
 
+        SIMD_INLINE __m512 Or(const __m512 & a, const __m512 & b)
+        {
+#if defined(__clang__)
+            return (__m512)_mm512_or_epi32((__m512i)a, (__m512i)b);
+#else
+            return _mm512_castsi512_ps(_mm512_or_epi32(_mm512_castps_si512(a), _mm512_castps_si512(b)));
+#endif
+        }
+
         SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
         {
 #if defined(__clang__)

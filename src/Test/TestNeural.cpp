@@ -713,6 +713,11 @@ namespace Test
             result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx2::NeuralPow), FUNC_AF(SimdNeuralPow));
 #endif 
 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx512f::NeuralPow), FUNC_AF(SimdNeuralPow));
+#endif
+
         return result;
     }
 
