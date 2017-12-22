@@ -33,6 +33,13 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+		const size_t F = Sse::F;
+		using Sse::Load;
+		using Sse::Store;
+		using Sse::RightNotZero;
+#endif
+
         const __m128i K8_KX4 = SIMD_MM_SETR_EPI8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
         const __m128i K8_KX8 = SIMD_MM_SETR_EPI8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
 
@@ -539,7 +546,6 @@ namespace Simd
                 }
             };
         }
-
 
         class HogLiteFeatureResizer
         {

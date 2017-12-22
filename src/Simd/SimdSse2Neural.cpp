@@ -31,6 +31,10 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+		const size_t F = Sse::F;
+#endif
+
         template <bool inversion> __m128i Invert(__m128i value);
 
         template <> __m128i Invert<true>(__m128i value)
