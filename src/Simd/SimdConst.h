@@ -90,6 +90,11 @@ namespace Simd
     namespace Sse2
     {
         using namespace Sse;
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Sse::F;
+        using Sse::DF;
+        using Sse::QF;
+#endif
 
         const size_t A = sizeof(__m128i);
         const size_t DA = 2 * A;
@@ -160,6 +165,11 @@ namespace Simd
     namespace Sse3
     {
         using namespace Sse2;
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Sse::F;
+        using Sse::DF;
+        using Sse::QF;
+#endif
     }
 #endif// SIMD_SSE3_ENABLE
 
@@ -202,6 +212,11 @@ namespace Simd
     namespace Sse41
     {
         using namespace Ssse3;
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Sse::F;
+        using Sse::DF;
+        using Sse::QF;
+#endif
     }
 #endif// SIMD_SSE41_ENABLE
 
@@ -226,6 +241,11 @@ namespace Simd
     namespace Avx2
     {
         using namespace Avx;
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Avx::F;
+        using Avx::DF;
+        using Avx::QF;
+#endif
 
         const size_t A = sizeof(__m256i);
         const size_t DA = 2 * A;

@@ -30,12 +30,6 @@ namespace Simd
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
     {
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
-        const size_t F = Sse::F;
-        using Sse::Load;
-        using Sse::RightNotZero;
-#endif
-
         template<size_t kernelX, size_t kernelY> struct Convolution
         {
             template <bool align> static SIMD_INLINE void Sum(const float * src, const __m128 & dst, __m128 * sums);

@@ -127,6 +127,13 @@ namespace Simd
     }
 #endif// SIMD_SSSE3_ENABLE
 
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        using Sse::Aligned;
+    }
+#endif// SIMD_SSE41_ENABLE
+
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {

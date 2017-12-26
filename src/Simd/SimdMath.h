@@ -494,6 +494,15 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSE3_ENABLE
+    namespace Sse3
+    {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Sse::RightNotZero;
+#endif
+    }
+#endif//SIMD_SSE3_ENABLE
+
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
@@ -521,6 +530,10 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Sse::RightNotZero;
+#endif
+
         template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
 
         template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)
@@ -605,6 +618,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+        using Avx::RightNotZero;
+#endif
+
         SIMD_INLINE __m256i SaturateI16ToU8(__m256i value)
         {
             return _mm256_min_epi16(K16_00FF, _mm256_max_epi16(value, K_ZERO));
