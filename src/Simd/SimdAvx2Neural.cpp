@@ -1208,7 +1208,7 @@ namespace Simd
                     }
                 }
 
-                SIMD_INLINE void AddSum(const __m256 & sum, float * dst)
+                SIMD_INLINE void AddSum(__m256 sum, float * dst)
                 {
                     Avx::Store<false>(dst, _mm256_add_ps(Load<false>(dst), sum));
                 }
@@ -1426,38 +1426,63 @@ namespace Simd
                     AddSums24(sums, m, mask, c, N);
                 }
 
-                template <bool align> SIMD_INLINE void Kernel4x24(size_t N, size_t K, const float * a, const float * b, float * c, const float * mask)
+                void Kernel4x24(size_t N, size_t K, const float * a, const float * b, float * c)
                 {
-                    register __m256 sums[12] = {
-                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
-                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(),
-                        _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps(), _mm256_setzero_ps() };
-                    register __m256 _b[3], _a;
+                    register __m256 _a, b0, b1, b2, c00, c01, c02, c10, c11, c12, c20, c21, c22, c30, c31, c32;
+
+                    c00 = _mm256_setzero_ps();
+                    c01 = _mm256_setzero_ps();
+                    c02 = _mm256_setzero_ps();
+                    c10 = _mm256_setzero_ps();
+                    c11 = _mm256_setzero_ps();
+                    c12 = _mm256_setzero_ps();
+                    c20 = _mm256_setzero_ps();
+                    c21 = _mm256_setzero_ps();
+                    c22 = _mm256_setzero_ps();
+                    c30 = _mm256_setzero_ps();
+                    c31 = _mm256_setzero_ps();
+                    c32 = _mm256_setzero_ps();
+
                     for (size_t k = 0; k < K; ++k)
                     {
-                        _b[0] = Load<align>(b + 0 * F);
-                        _b[1] = Load<align>(b + 1 * F);
-                        _b[2] = Load<align>(b + 2 * F);
+                        b0 = _mm256_loadu_ps(b + 0 * F);
+                        b1 = _mm256_loadu_ps(b + 1 * F);
+                        b2 = _mm256_loadu_ps(b + 2 * F);
                         _a = _mm256_set1_ps(a[0]);
-                        sums[0x0] = _mm256_fmadd_ps(_b[0], _a, sums[0x0]);
-                        sums[0x4] = _mm256_fmadd_ps(_b[1], _a, sums[0x4]);
-                        sums[0x8] = _mm256_fmadd_ps(_b[2], _a, sums[0x8]);
+                        c00 = _mm256_fmadd_ps(b0, _a, c00);
+                        c01 = _mm256_fmadd_ps(b1, _a, c01);
+                        c02 = _mm256_fmadd_ps(b2, _a, c02);
                         _a = _mm256_set1_ps(a[1]);
-                        sums[0x1] = _mm256_fmadd_ps(_b[0], _a, sums[0x1]);
-                        sums[0x5] = _mm256_fmadd_ps(_b[1], _a, sums[0x5]);
-                        sums[0x9] = _mm256_fmadd_ps(_b[2], _a, sums[0x9]);
+                        c10 = _mm256_fmadd_ps(b0, _a, c10);
+                        c11 = _mm256_fmadd_ps(b1, _a, c11);
+                        c12 = _mm256_fmadd_ps(b2, _a, c12);
                         _a = _mm256_set1_ps(a[2]);
-                        sums[0x2] = _mm256_fmadd_ps(_b[0], _a, sums[0x2]);
-                        sums[0x6] = _mm256_fmadd_ps(_b[1], _a, sums[0x6]);
-                        sums[0xA] = _mm256_fmadd_ps(_b[2], _a, sums[0xA]);
+                        c20 = _mm256_fmadd_ps(b0, _a, c20);
+                        c21 = _mm256_fmadd_ps(b1, _a, c21);
+                        c22 = _mm256_fmadd_ps(b2, _a, c22);
                         _a = _mm256_set1_ps(a[3]);
-                        sums[0x3] = _mm256_fmadd_ps(_b[0], _a, sums[0x3]);
-                        sums[0x7] = _mm256_fmadd_ps(_b[1], _a, sums[0x7]);
-                        sums[0xB] = _mm256_fmadd_ps(_b[2], _a, sums[0xB]);
+                        c30 = _mm256_fmadd_ps(b0, _a, c30);
+                        c31 = _mm256_fmadd_ps(b1, _a, c31);
+                        c32 = _mm256_fmadd_ps(b2, _a, c32);
                         b += 24;
                         a += 4;
                     }
-                    AddSums24(sums, 4, mask, c, N);
+
+                    AddSum(c00, c + 0 * F);
+                    AddSum(c01, c + 1 * F);
+                    AddSum(c02, c + 2 * F);
+                    c += N;
+                    AddSum(c10, c + 0 * F);
+                    AddSum(c11, c + 1 * F);
+                    AddSum(c12, c + 2 * F);
+                    c += N;
+                    AddSum(c20, c + 0 * F);
+                    AddSum(c21, c + 1 * F);
+                    AddSum(c22, c + 2 * F);
+                    c += N;
+                    AddSum(c30, c + 0 * F);
+                    AddSum(c31, c + 1 * F);
+                    AddSum(c32, c + 2 * F);
                 }
 
                 template <bool align> void Execute4x24(size_t M, size_t N, size_t K, const float * a, const float * b, float * c)
@@ -1473,9 +1498,9 @@ namespace Simd
                     {
                         size_t j = 0;
                         for (; j < N24; j += 24)
-                            Kernel4x24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL);
+                            Kernel4x24(N, K, a + i * K, b + j * K, c + i * N + j);
                         if (N24 < N)
-                            Kernel4x24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail);
+                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, 4);
                     }
                     if (M4 < M)
                     {
@@ -1676,7 +1701,7 @@ namespace Simd
                     N = dstHeight*dstWidth;
                     K = kernelX*kernelY*srcDepth;
 
-                    if (dstWidth*dstHeight / kernelX <= 2000)
+                    if (dstWidth*dstHeight / kernelX <= 1000)
                         alg = Ver0;
                     else
                         alg = Ver1;
