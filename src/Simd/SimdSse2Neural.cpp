@@ -99,7 +99,7 @@ namespace Simd
                 NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
         }
 
-        class Power
+        class PowEstimator
         {
             __m128i _exponent, _mantissa;
             __m128 _one;
@@ -175,8 +175,89 @@ namespace Simd
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
-            Power power;
-            power.Run(src, size, exponent, dst);
+            PowEstimator estimator;
+            estimator.Run(src, size, exponent, dst);
+        }
+
+        class SigmoidEstimator
+        {
+            __m128i _exponent, _mantissa, _127;
+            __m128 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _slope;
+
+            void Init(float slope)
+            {
+                _exponent = _mm_set1_epi32(0x7F800000);
+                _mantissa = _mm_set1_epi32(0x007FFFFF);
+                _127 = _mm_set1_epi32(127);
+                _1_0 = _mm_set1_ps(1.0f);
+                _0_5 = _mm_set1_ps(0.5f);
+                _min = _mm_set1_ps(-126.99999f);
+                _max = _mm_set1_ps(129.00000f);
+                _exp0 = _mm_set1_ps(9.9999994e-1f);
+                _exp1 = _mm_set1_ps(6.9315308e-1f);
+                _exp2 = _mm_set1_ps(2.4015361e-1f);
+                _exp3 = _mm_set1_ps(5.5826318e-2f);
+                _exp4 = _mm_set1_ps(8.9893397e-3f);
+                _exp5 = _mm_set1_ps(1.8775767e-3f);
+                _slope = _mm_set1_ps(-slope / 0.69314718056f);
+            }
+
+            SIMD_INLINE __m128 Poly5(__m128 x)
+            {
+                __m128 p = _exp5;
+                p = _mm_add_ps(_mm_mul_ps(x, p), _exp4);
+                p = _mm_add_ps(_mm_mul_ps(x, p), _exp3);
+                p = _mm_add_ps(_mm_mul_ps(x, p), _exp2);
+                p = _mm_add_ps(_mm_mul_ps(x, p), _exp1);
+                p = _mm_add_ps(_mm_mul_ps(x, p), _exp0);
+                return p;
+            }
+
+            SIMD_INLINE __m128 Exp2(__m128 x)
+            {
+                x = _mm_max_ps(_mm_min_ps(x, _max), _min);
+                __m128i ipart = _mm_cvtps_epi32(_mm_sub_ps(x, _0_5));
+                __m128 fpart = _mm_sub_ps(x, _mm_cvtepi32_ps(ipart));
+                __m128 expipart = _mm_castsi128_ps(_mm_slli_epi32(_mm_add_epi32(ipart, _127), 23));
+                __m128 expfpart = Poly5(fpart);
+                return _mm_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m128 Sigmoid(__m128 value)
+            {
+                __m128 exp = Exp2(_mm_mul_ps(_slope, value));
+                return _mm_div_ps(_1_0, _mm_add_ps(_1_0, exp));
+            }
+
+            template<bool align> void Run(const float * src, size_t size, const float * slope, float * dst)
+            {
+                if (align)
+                    assert(Aligned(src) && Aligned(dst));
+
+                size_t alignedSize = AlignLo(size, F);
+                size_t i = 0;
+                for (; i < alignedSize; i += F)
+                    Sse::Store<align>(dst + i, Sigmoid(Sse::Load<align>(src + i)));
+                for (; i < size; ++i)
+                    dst[i] = Base::Sigmoid(src[i] * slope[0]);
+            }
+
+        public:
+            void Run(const float * src, size_t size, const float * slope, float * dst)
+            {
+                Init(slope[0]);
+
+                if (Aligned(src) && Aligned(dst))
+                    Run<true>(src, size, slope, dst);
+                else
+                    Run<false>(src, size, slope, dst);
+            }
+        };
+
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            SigmoidEstimator estimator;
+            estimator.Run(src, size, slope, dst);
         }
     }
 #endif// SIMD_SSE2_ENABLE

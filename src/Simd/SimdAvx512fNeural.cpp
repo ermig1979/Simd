@@ -190,6 +190,87 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
+        class SigmoidEstimator
+        {
+            __m512i _exponent, _mantissa, _127;
+            __m512 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _slope;
+
+            void Init(float slope)
+            {
+                _exponent = _mm512_set1_epi32(0x7F800000);
+                _mantissa = _mm512_set1_epi32(0x007FFFFF);
+                _127 = _mm512_set1_epi32(127);
+                _1_0 = _mm512_set1_ps(1.0f);
+                _0_5 = _mm512_set1_ps(0.5f);
+                _min = _mm512_set1_ps(-126.99999f);
+                _max = _mm512_set1_ps(129.00000f);
+                _exp0 = _mm512_set1_ps(9.9999994e-1f);
+                _exp1 = _mm512_set1_ps(6.9315308e-1f);
+                _exp2 = _mm512_set1_ps(2.4015361e-1f);
+                _exp3 = _mm512_set1_ps(5.5826318e-2f);
+                _exp4 = _mm512_set1_ps(8.9893397e-3f);
+                _exp5 = _mm512_set1_ps(1.8775767e-3f);
+                _slope = _mm512_set1_ps(-slope / 0.69314718056f);
+            }
+
+            SIMD_INLINE __m512 Poly5(__m512 x)
+            {
+                __m512 p = _exp5;
+                p = _mm512_fmadd_ps(x, p, _exp4);
+                p = _mm512_fmadd_ps(x, p, _exp3);
+                p = _mm512_fmadd_ps(x, p, _exp2);
+                p = _mm512_fmadd_ps(x, p, _exp1);
+                p = _mm512_fmadd_ps(x, p, _exp0);
+                return p;
+            }
+
+            SIMD_INLINE __m512 Exp2(__m512 x)
+            {
+                x = _mm512_max_ps(_mm512_min_ps(x, _max), _min);
+                __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _0_5));
+                __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
+                __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _127), 23));
+                __m512 expfpart = Poly5(fpart);
+                return _mm512_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m512 Sigmoid(__m512 value)
+            {
+                __m512 exp = Exp2(_mm512_mul_ps(_slope, value));
+                return _mm512_div_ps(_1_0, _mm512_add_ps(_1_0, exp));
+            }
+
+            template<bool align> void Run(const float * src, size_t size, const float * slope, float * dst)
+            {
+                if (align)
+                    assert(Aligned(src) && Aligned(dst));
+
+                size_t alignedSize = AlignLo(size, F);
+                size_t i = 0;
+                for (; i < alignedSize; i += F)
+                    Avx512f::Store<align>(dst + i, Sigmoid(Avx512f::Load<align>(src + i)));
+                for (; i < size; ++i)
+                    dst[i] = Base::Sigmoid(src[i] * slope[0]);
+            }
+
+        public:
+            void Run(const float * src, size_t size, const float * slope, float * dst)
+            {
+                Init(slope[0]);
+
+                if (Aligned(src) && Aligned(dst))
+                    Run<true>(src, size, slope, dst);
+                else
+                    Run<false>(src, size, slope, dst);
+            }
+        };
+
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            SigmoidEstimator estimator;
+            estimator.Run(src, size, slope, dst);
+        }
+
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid(const float * src, const __m512 & _0, const __m512 & _1,
             const __m512 & a, const __m512 & b, const __m512 & slope, float * dst, __mmask16 m = -1)
         {
@@ -507,7 +588,7 @@ namespace Simd
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
 
-        class Power
+        class PowEstimator
         {
             __m512i _exponent, _mantissa, _127;
             __m512 _1_0, _0_5;
@@ -588,8 +669,8 @@ namespace Simd
 #if defined(_MSC_VER) && _MSC_VER <= 1912
             Avx2::NeuralPow(src, size, exponent, dst);
 #else
-            Power power;
-            power.Run(src, size, exponent, dst);
+            PowEstimator estimator;
+            estimator.Run(src, size, exponent, dst);
 #endif
         }
 

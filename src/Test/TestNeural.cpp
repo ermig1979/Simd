@@ -546,7 +546,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+        result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Base::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Sse2::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Avx2::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Avx512f::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+#endif 
 
         return result;
     }

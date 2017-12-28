@@ -274,6 +274,8 @@ namespace Simd
 
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
+
         void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
