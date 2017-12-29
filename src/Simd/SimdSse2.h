@@ -202,6 +202,8 @@ namespace Simd
 
         void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
+        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst);
+
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,

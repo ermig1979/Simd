@@ -179,12 +179,12 @@ namespace Simd
             estimator.Run(src, size, exponent, dst);
         }
 
-        class SigmoidEstimator
+        class ExpEstimator
         {
             __m128i _exponent, _mantissa, _127;
-            __m128 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _slope;
+            __m128 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
-            void Init(float slope)
+            void Init(float k)
             {
                 _exponent = _mm_set1_epi32(0x7F800000);
                 _mantissa = _mm_set1_epi32(0x007FFFFF);
@@ -199,7 +199,7 @@ namespace Simd
                 _exp3 = _mm_set1_ps(5.5826318e-2f);
                 _exp4 = _mm_set1_ps(8.9893397e-3f);
                 _exp5 = _mm_set1_ps(1.8775767e-3f);
-                _slope = _mm_set1_ps(-slope / 0.69314718056f);
+                _k = _mm_set1_ps(k / 0.69314718056f);
             }
 
             SIMD_INLINE __m128 Poly5(__m128 x)
@@ -225,15 +225,16 @@ namespace Simd
 
             SIMD_INLINE __m128 Sigmoid(__m128 value)
             {
-                __m128 exp = Exp2(_mm_mul_ps(_slope, value));
+                __m128 exp = Exp2(_mm_mul_ps(_k, value));
                 return _mm_div_ps(_1_0, _mm_add_ps(_1_0, exp));
             }
 
-            template<bool align> void Run(const float * src, size_t size, const float * slope, float * dst)
+            template<bool align> void Sigmoid(const float * src, size_t size, const float * slope, float * dst)
             {
                 if (align)
                     assert(Aligned(src) && Aligned(dst));
 
+                Init(-slope[0]);
                 size_t alignedSize = AlignLo(size, F);
                 size_t i = 0;
                 for (; i < alignedSize; i += F)
@@ -242,22 +243,54 @@ namespace Simd
                     dst[i] = Base::Sigmoid(src[i] * slope[0]);
             }
 
-        public:
-            void Run(const float * src, size_t size, const float * slope, float * dst)
+            SIMD_INLINE __m128 Tanh(__m128 value)
             {
-                Init(slope[0]);
+                __m128 exp = Exp2(_mm_mul_ps(_k, value));
+                return _mm_div_ps(_mm_sub_ps(_1_0, exp), _mm_add_ps(_1_0, exp));
+            }
 
+            template<bool align> void Tanh(const float * src, size_t size, const float * slope, float * dst)
+            {
+                if (align)
+                    assert(Aligned(src) && Aligned(dst));
+
+                Init(-2.0f*slope[0]);
+                size_t alignedSize = AlignLo(size, F);
+                size_t i = 0;
+                for (; i < alignedSize; i += F)
+                    Sse::Store<align>(dst + i, Tanh(Sse::Load<align>(src + i)));
+                for (; i < size; ++i)
+                    dst[i] = Base::Tanh(src[i] * slope[0]);
+            }
+
+        public:
+            void Sigmoid(const float * src, size_t size, const float * slope, float * dst)
+            {
                 if (Aligned(src) && Aligned(dst))
-                    Run<true>(src, size, slope, dst);
+                    Sigmoid<true>(src, size, slope, dst);
                 else
-                    Run<false>(src, size, slope, dst);
+                    Sigmoid<false>(src, size, slope, dst);
+            }
+
+            void Tanh(const float * src, size_t size, const float * slope, float * dst)
+            {
+                if (Aligned(src) && Aligned(dst))
+                    Tanh<true>(src, size, slope, dst);
+                else
+                    Tanh<false>(src, size, slope, dst);
             }
         };
 
         void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
-            SigmoidEstimator estimator;
-            estimator.Run(src, size, slope, dst);
+            ExpEstimator estimator;
+            estimator.Sigmoid(src, size, slope, dst);
+        }
+
+        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            ExpEstimator estimator;
+            estimator.Tanh(src, size, slope, dst);
         }
     }
 #endif// SIMD_SSE2_ENABLE

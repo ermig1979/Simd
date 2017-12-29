@@ -638,7 +638,22 @@ namespace Test
     {
         bool result = true;
 
-        result = result && NeuralActivateFunctionAutoTest(EPS, false, 3.0f, FUNC_AF(Simd::Base::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+        result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Base::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Sse2::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx2::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+#endif
 
         return result;
     }
