@@ -1607,22 +1607,45 @@ namespace Simd
                         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                     const float * tail = (float*)mask + 24 - N + N24;
-                    size_t i = 0;
-                    for (; i < M4; i += 4)
+                    if (M > N)
                     {
-                        size_t j = 0;
-                        for (; j < N24; j += 24)
-                            Kernel4x24(N, K, a + i * K, b + j * K, c + i * N + j);
-                        if (N24 < N)
-                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, 4);
+                        size_t i = 0;
+                        for (; i < M4; i += 4)
+                        {
+                            size_t j = 0;
+                            for (; j < N24; j += 24)
+                                Kernel4x24(N, K, a + i * K, b + j * K, c + i * N + j);
+                            if (N24 < N)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, 4);
+                        }
+                        if (M4 < M)
+                        {
+                            size_t j = 0;
+                            for (; j < N24; j += 24)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL, M - M4);
+                            if (N24 < N)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, M - M4);
+                        }
                     }
-                    if (M4 < M)
+                    else
                     {
                         size_t j = 0;
                         for (; j < N24; j += 24)
-                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL, M - M4);
+                        {
+                            size_t i = 0;
+                            for (; i < M4; i += 4)
+                                Kernel4x24(N, K, a + i * K, b + j * K, c + i * N + j);
+                            if (M4 < M)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, NULL, M - M4);
+                        }
                         if (N24 < N)
-                            KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, M - M4);
+                        {
+                            size_t i = 0;
+                            for (; i < M4; i += 4)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, 4);
+                            if (M4 < M)
+                                KernelMx24<align>(N, K, a + i * K, b + j * K, c + i * N + j, tail, M - M4);
+                        }
                     }
                 }
 
@@ -1667,7 +1690,6 @@ namespace Simd
                 template <bool align, size_t kernelX, size_t kernelY> void AddConvolution8x8(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, float * dst, size_t dstDepth)
                 {
-                    __m256 _weight[kernelX*kernelY];
                     for (size_t dstChannel = 0; dstChannel < dstDepth; ++dstChannel)
                     {
                         __m256 _dst[8];
@@ -1676,6 +1698,7 @@ namespace Simd
                             _dst[row] = Avx::Load<align>(pdst);
                         if (kernelY < 4)
                         {
+                            __m256 _weight[kernelX*kernelY];
                             for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                             {
                                 const float * psrc = src + srcWidth*srcHeight*srcChannel;
@@ -1690,6 +1713,7 @@ namespace Simd
                         }
                         else
                         {
+                            __m256 _weight[kernelX];
                             for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                             {
                                 const float * psrc = src + srcWidth*srcHeight*srcChannel;

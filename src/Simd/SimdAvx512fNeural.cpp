@@ -2617,22 +2617,45 @@ namespace Simd
                     __mmask16 tailMasks[2];
                     for (size_t i = 0; i < 2; ++i)
                         tailMasks[i] = TailMask16(N - N32 - F*i);
-                    size_t i = 0;
-                    for (; i < M4; i += 4)
+                    if (M > N)
                     {
-                        size_t j = 0;
-                        for (; j < N32; j += 32)
-                            Kernel4x32(N, K, a + i * K, b + j * K, c + i * N + j);
-                        if (j < N)
-                            KernelMx32<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, 4, tailMasks);
+                        size_t i = 0;
+                        for (; i < M4; i += 4)
+                        {
+                            size_t j = 0;
+                            for (; j < N32; j += 32)
+                                Kernel4x32(N, K, a + i * K, b + j * K, c + i * N + j);
+                            if (j < N)
+                                KernelMx32<align, true>(N, K, a + i * K, b + j * K, c + i * N + j, 4, tailMasks);
+                        }
+                        if (i < M)
+                        {
+                            size_t j = 0;
+                            for (; j < N32; j += 32)
+                                KernelMx32<align, false>(N, K, a + i * K, b + j * K, c + i * N + j, M - M4, tailMasks);
+                            if (j < N)
+                                KernelMx32<align, true>(N, K, a + i * K, b + j * K, c + i * N + j, M - M4, tailMasks);
+                        }
                     }
-                    if (i < M)
+                    else
                     {
                         size_t j = 0;
                         for (; j < N32; j += 32)
-                            KernelMx32<align, false>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4, tailMasks);
-                        if (j < N)
-                            KernelMx32<align, true>(N, K, a + i*K, b + j*K, c + i*N + j, M - M4, tailMasks);
+                        {
+                            size_t i = 0;
+                            for (; i < M4; i += 4)
+                                Kernel4x32(N, K, a + i * K, b + j * K, c + i * N + j);
+                            if (M4 < M)
+                                KernelMx32<align, false>(N, K, a + i * K, b + j * K, c + i * N + j, M - M4, tailMasks);
+                        }
+                        if (N32 < N)
+                        {
+                            size_t i = 0;
+                            for (; i < M4; i += 4)
+                                KernelMx32<align, true>(N, K, a + i * K, b + j * K, c + i * N + j, 4, tailMasks);
+                            if (M4 < M)
+                                KernelMx32<align, true>(N, K, a + i * K, b + j * K, c + i * N + j, M - M4, tailMasks);
+                        }
                     }
                 }
 
