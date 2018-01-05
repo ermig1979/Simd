@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -1777,10 +1777,79 @@ namespace Simd
                     }
                 }
 
+                void AddConvolution1x1x16(const float * src, size_t srcDepth, const float * weight, float * dst, size_t dstDepth)
+                {
+                    size_t dstDepth4 = dstDepth/4*4;
+                    size_t dstChannel = 0;
+                    for (; dstChannel < dstDepth4; dstChannel += 4)
+                    {
+                        __m256 dst00 = _mm256_loadu_ps(dst + 0 * F);
+                        __m256 dst01 = _mm256_loadu_ps(dst + 1 * F);
+                        __m256 dst10 = _mm256_loadu_ps(dst + 2 * F);
+                        __m256 dst11 = _mm256_loadu_ps(dst + 3 * F);
+                        __m256 dst20 = _mm256_loadu_ps(dst + 4 * F);
+                        __m256 dst21 = _mm256_loadu_ps(dst + 5 * F);
+                        __m256 dst30 = _mm256_loadu_ps(dst + 6 * F);
+                        __m256 dst31 = _mm256_loadu_ps(dst + 7 * F);
+                        const float * psrc = src;
+                        const float * pw0 = weight;
+                        const float * pw1 = pw0 + srcDepth;
+                        const float * pw2 = pw1 + srcDepth;
+                        const float * pw3 = pw2 + srcDepth;
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        {
+                            __m256 _weight;
+                            __m256 src0 = _mm256_loadu_ps(psrc + 0 * F);
+                            __m256 src1 = _mm256_loadu_ps(psrc + 1 * F);
+                            _weight = _mm256_set1_ps(pw0[srcChannel]);
+                            dst00 = _mm256_fmadd_ps(_weight, src0, dst00);
+                            dst01 = _mm256_fmadd_ps(_weight, src1, dst01);
+                            _weight = _mm256_set1_ps(pw1[srcChannel]);
+                            dst10 = _mm256_fmadd_ps(_weight, src0, dst10);
+                            dst11 = _mm256_fmadd_ps(_weight, src1, dst11);
+                            _weight = _mm256_set1_ps(pw2[srcChannel]);
+                            dst20 = _mm256_fmadd_ps(_weight, src0, dst20);
+                            dst21 = _mm256_fmadd_ps(_weight, src1, dst21);
+                            _weight = _mm256_set1_ps(pw3[srcChannel]);
+                            dst30 = _mm256_fmadd_ps(_weight, src0, dst30);
+                            dst31 = _mm256_fmadd_ps(_weight, src1, dst31);
+                            psrc += 16;
+                        }
+                        _mm256_storeu_ps(dst + 0 * F, dst00);
+                        _mm256_storeu_ps(dst + 1 * F, dst01);
+                        _mm256_storeu_ps(dst + 2 * F, dst10);
+                        _mm256_storeu_ps(dst + 3 * F, dst11);
+                        _mm256_storeu_ps(dst + 4 * F, dst20);
+                        _mm256_storeu_ps(dst + 5 * F, dst21);
+                        _mm256_storeu_ps(dst + 6 * F, dst30);
+                        _mm256_storeu_ps(dst + 7 * F, dst31);
+                        dst += 16*4;
+                        weight += srcDepth * 4;
+                    }
+                    for (; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        __m256 dst0 = _mm256_loadu_ps(dst + 0 * F);
+                        __m256 dst1 = _mm256_loadu_ps(dst + 1 * F);
+                        const float * psrc = src;
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        {
+                            __m256 weight0 = _mm256_set1_ps(*weight++);
+                            dst0 = _mm256_fmadd_ps(weight0, _mm256_loadu_ps(psrc + 0 * F), dst0);
+                            dst1 = _mm256_fmadd_ps(weight0, _mm256_loadu_ps(psrc + 1 * F), dst1);
+                            psrc += 16;
+                        }
+                        _mm256_storeu_ps(dst + 0 * F, dst0);
+                        _mm256_storeu_ps(dst + 1 * F, dst1);
+                        dst += 16;
+                    }
+                }
+
                 void Execute(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, size_t kernelX, size_t kernelY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     assert(kernelX == kernelY);
+                    if (kernelX == 1 && dstWidth*dstHeight == 16)
+                        AddConvolution1x1x16(src, srcDepth, weight, dst, dstDepth);
                     if (kernelX == 2)
                         AddConvolution<false, 2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
                     else if (kernelX == 3)
@@ -1795,9 +1864,11 @@ namespace Simd
 
                 bool Preferable(size_t srcDepth, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
-                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
+                    if (kernelX == kernelY && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                        if (kernelX >= 2 && kernelX <= 5 && dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                            return true;
+                        if (kernelX == 1 && (dstWidth*dstHeight == 16))// || dstWidth * dstHeight == 64))
                             return true;
                     }
                     return false;

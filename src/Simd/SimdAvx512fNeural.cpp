@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -2834,11 +2834,63 @@ namespace Simd
                         }
                     }
                 }
+                void AddConvolution1x1x16(const float * src, size_t srcDepth, const float * weight, float * dst, size_t dstDepth)
+                {
+                    size_t dstDepth4 = dstDepth / 4 * 4;
+                    size_t dstChannel = 0;
+                    for (; dstChannel < dstDepth4; dstChannel += 4)
+                    {
+                        __m512 dst00 = _mm512_loadu_ps(dst + 0 * F);
+                        __m512 dst10 = _mm512_loadu_ps(dst + 1 * F);
+                        __m512 dst20 = _mm512_loadu_ps(dst + 2 * F);
+                        __m512 dst30 = _mm512_loadu_ps(dst + 3 * F);
+                        const float * psrc = src;
+                        const float * pw0 = weight;
+                        const float * pw1 = pw0 + srcDepth;
+                        const float * pw2 = pw1 + srcDepth;
+                        const float * pw3 = pw2 + srcDepth;
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        {
+                            __m512 _weight;
+                            __m512 src0 = _mm512_loadu_ps(psrc + 0 * F);
+                            _weight = _mm512_set1_ps(pw0[srcChannel]);
+                            dst00 = _mm512_fmadd_ps(_weight, src0, dst00);
+                            _weight = _mm512_set1_ps(pw1[srcChannel]);
+                            dst10 = _mm512_fmadd_ps(_weight, src0, dst10);
+                            _weight = _mm512_set1_ps(pw2[srcChannel]);
+                            dst20 = _mm512_fmadd_ps(_weight, src0, dst20);
+                            _weight = _mm512_set1_ps(pw3[srcChannel]);
+                            dst30 = _mm512_fmadd_ps(_weight, src0, dst30);
+                            psrc += 16;
+                        }
+                        _mm512_storeu_ps(dst + 0 * F, dst00);
+                        _mm512_storeu_ps(dst + 1 * F, dst10);
+                        _mm512_storeu_ps(dst + 2 * F, dst20);
+                        _mm512_storeu_ps(dst + 3 * F, dst30);
+                        dst += 16 * 4;
+                        weight += srcDepth * 4;
+                    }
+                    for (; dstChannel < dstDepth; ++dstChannel)
+                    {
+                        __m512 dst0 = _mm512_loadu_ps(dst + 0 * F);
+                        const float * psrc = src;
+                        for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
+                        {
+                            __m512 weight0 = _mm512_set1_ps(*weight++);
+                            dst0 = _mm512_fmadd_ps(weight0, _mm512_loadu_ps(psrc + 0 * F), dst0);
+                            psrc += 16;
+                        }
+                        _mm512_storeu_ps(dst + 0 * F, dst0);
+                        dst += 16;
+                    }
+                }
 
                 void Execute(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth,
                     const float * weight, size_t kernelX, size_t kernelY, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     assert(kernelX == kernelY);
+                    if (kernelX == 1 && dstWidth*dstHeight == 16)
+                        AddConvolution1x1x16(src, srcDepth, weight, dst, dstDepth);
                     if (kernelX == 2)
                         AddConvolution<false, 2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
                     else if (kernelX == 3)
@@ -2853,9 +2905,11 @@ namespace Simd
 
                 bool Preferable(size_t srcDepth, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
-                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
+                    if (kernelX == kernelY && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                        if (kernelX >= 2 && kernelX <= 5 && dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                            return true;
+                        if (kernelX == 1 && (dstWidth*dstHeight == 16))// || dstWidth * dstHeight == 64))
                             return true;
                     }
                     return false;
