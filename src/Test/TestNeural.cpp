@@ -1875,7 +1875,7 @@ namespace Test
     bool NeuralConvolutionForwardAutoTest(float eps, const FuncCF & f1, const FuncCF & f2)
     {
         bool result = true;
-        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5);
+        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5), _7(7, 7);
 
 #ifdef NDEBUG
         result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
@@ -1903,7 +1903,9 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 64), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 3), _7, _2, _2, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _2, _1, _1, 1, eps, f1, f2);
         //result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        

@@ -1850,7 +1850,7 @@ namespace Simd
                     assert(kernelX == kernelY);
                     if (kernelX == 1 && dstWidth*dstHeight == 16)
                         AddConvolution1x1x16(src, srcDepth, weight, dst, dstDepth);
-                    if (kernelX == 2)
+                    else if (kernelX == 2)
                         AddConvolution<false, 2, 2>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
                     else if (kernelX == 3)
                         AddConvolution<false, 3, 3>(src, srcWidth, srcHeight, srcDepth, weight, dst, dstWidth, dstHeight, dstDepth);
