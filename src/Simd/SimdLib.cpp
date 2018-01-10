@@ -4674,6 +4674,11 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
 
 SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if(Avx2::Enable && width >= Avx2::A)
         Avx2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);

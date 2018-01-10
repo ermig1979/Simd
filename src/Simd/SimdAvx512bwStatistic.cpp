@@ -555,6 +555,62 @@ namespace Simd
                 SquareSum<false>(src, stride, width, height, sum);
         }
 
+        template <int index> void ValueSquareSum(const __m512i & value, __m512i * valueSums, __m512i * squareSums)
+        {
+            valueSums[index] = _mm512_add_epi64(valueSums[index], _mm512_sad_epu8(value, K_ZERO));
+            squareSums[index] = _mm512_add_epi32(squareSums[index], SquareSum(value));
+        }
+
+        template <bool align> void ValueSquareSum4(const uint8_t * src, __m512i * valueSums, __m512i * squareSums)
+        {
+            ValueSquareSum<0>(Load<align>(src + 0 * A), valueSums, squareSums);
+            ValueSquareSum<1>(Load<align>(src + 1 * A), valueSums, squareSums);
+            ValueSquareSum<2>(Load<align>(src + 2 * A), valueSums, squareSums);
+            ValueSquareSum<3>(Load<align>(src + 3 * A), valueSums, squareSums);
+        }
+
+        template <bool align> void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            assert(width < 256 * 256 * F);
+            if (align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t alignedWidth = Simd::AlignLo(width, A);
+            size_t fullAlignedWidth = Simd::AlignLo(width, QA);
+            __mmask64 tailMask = TailMask64(width - alignedWidth);
+            size_t blockSize = (256 * 256 * F) / width;
+            size_t blockCount = height / blockSize + 1;
+            __m512i valueSums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+            __m512i fullSquareSum = _mm512_setzero_si512();
+            for (size_t block = 0; block < blockCount; ++block)
+            {
+                __m512i squareSums[4] = { _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512(), _mm512_setzero_si512() };
+                for (size_t row = block * blockSize, endRow = Simd::Min(row + blockSize, height); row < endRow; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < fullAlignedWidth; col += QA)
+                        ValueSquareSum4<align>(src + col, valueSums, squareSums);
+                    for (; col < alignedWidth; col += A)
+                        ValueSquareSum<0>(Load<align>(src + col), valueSums, squareSums);
+                    if (col < width)
+                        ValueSquareSum<0>(Load<align, true>(src + col, tailMask), valueSums, squareSums);
+                    src += stride;
+                }
+                fullSquareSum = _mm512_add_epi64(fullSquareSum, HorizontalSum32(
+                    _mm512_add_epi32(_mm512_add_epi32(squareSums[0], squareSums[1]), _mm512_add_epi32(squareSums[2], squareSums[3]))));
+            }
+            *valueSum = ExtractSum<uint64_t>(_mm512_add_epi64(_mm512_add_epi64(valueSums[0], valueSums[1]), _mm512_add_epi64(valueSums[2], valueSums[3])));
+            *squareSum = ExtractSum<uint64_t>(fullSquareSum);
+        }
+
+        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            if (Aligned(src) && Aligned(stride))
+                ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
+            else
+                ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
+        }
+
         SIMD_INLINE __m512i CorrelationSum(__m512i a, __m512i b)
         {
             const __m512i lo = _mm512_madd_epi16(_mm512_unpacklo_epi8(a, _mm512_setzero_si512()), _mm512_unpacklo_epi8(b, _mm512_setzero_si512()));
