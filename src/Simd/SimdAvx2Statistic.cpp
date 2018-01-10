@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -538,6 +538,46 @@ namespace Simd
                 SquareSum<false>(src, stride, width, height, sum);
         }
 
+        template <bool align> void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t bodyWidth = AlignLo(width, A);
+            __m256i tailMask = SetMask<uint8_t>(0, A - width + bodyWidth, 0xFF);
+            __m256i fullValueSum = _mm256_setzero_si256();
+            __m256i fullSquareSum = _mm256_setzero_si256();
+            for (size_t row = 0; row < height; ++row)
+            {
+                __m256i rowSquareSum = _mm256_setzero_si256();
+                for (size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const __m256i value = Load<align>((__m256i*)(src + col));
+                    fullValueSum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), fullValueSum);
+                    rowSquareSum = _mm256_add_epi32(rowSquareSum, Square(value));
+                }
+                if (width - bodyWidth)
+                {
+                    const __m256i value = _mm256_and_si256(tailMask, Load<false>((__m256i*)(src + width - A)));
+                    fullValueSum = _mm256_add_epi64(_mm256_sad_epu8(value, K_ZERO), fullValueSum);
+                    rowSquareSum = _mm256_add_epi32(rowSquareSum, Square(value));
+                }
+                fullSquareSum = _mm256_add_epi64(fullSquareSum, HorizontalSum32(rowSquareSum));
+                src += stride;
+            }
+            *valueSum = ExtractSum<uint64_t>(fullValueSum);
+            *squareSum = ExtractSum<uint64_t>(fullSquareSum);
+        }
+
+        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            if (Aligned(src) && Aligned(stride))
+                ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
+            else
+                ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
+        }
+		
         SIMD_INLINE __m256i Correlation(__m256i a, __m256i b)
         {
             const __m256i lo = _mm256_madd_epi16(_mm256_unpacklo_epi8(a, _mm256_setzero_si256()), _mm256_unpacklo_epi8(b, _mm256_setzero_si256()));

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar,
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -4670,6 +4670,21 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
     else
 #endif
         Base::SquareSum(src, stride, width, height, sum);
+}
+
+SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+{
+#ifdef SIMD_AVX2_ENABLE
+    if(Avx2::Enable && width >= Avx2::A)
+        Avx2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable && width >= Sse2::A)
+        Sse2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+    else
+#endif
+        Base::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
 }
 
 SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)

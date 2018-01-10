@@ -65,6 +65,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga00049d662f51b1d0b6a045b93b21928c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga00049d662f51b1d0b6a045b93b21928c">SimdSquareSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:ga00049d662f51b1d0b6a045b93b21928c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of squared value of pixels for gray 8-bit image .  <a href="#ga00049d662f51b1d0b6a045b93b21928c">More...</a><br /></td></tr>
 <tr class="separator:ga00049d662f51b1d0b6a045b93b21928c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga81a212c048fdb44521a84b80c8fa7f00"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga81a212c048fdb44521a84b80c8fa7f00">SimdValueSquareSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *valueSum, uint64_t *squareSum)</td></tr>
+<tr class="memdesc:ga81a212c048fdb44521a84b80c8fa7f00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum and squared sum of value of pixels for gray 8-bit image.  <a href="#ga81a212c048fdb44521a84b80c8fa7f00">More...</a><br /></td></tr>
+<tr class="separator:ga81a212c048fdb44521a84b80c8fa7f00"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab40431fe7f7142929d6d761547db72ac"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gab40431fe7f7142929d6d761547db72ac">SimdCorrelationSum</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:gab40431fe7f7142929d6d761547db72ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of pixel correlation for two gray 8-bit images.  <a href="#gab40431fe7f7142929d6d761547db72ac">More...</a><br /></td></tr>
 <tr class="separator:gab40431fe7f7142929d6d761547db72ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -88,6 +91,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga5cffade3d22d35969426ea9e766c2fde"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga5cffade3d22d35969426ea9e766c2fde">SquareSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;sum)</td></tr>
 <tr class="memdesc:ga5cffade3d22d35969426ea9e766c2fde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of squared value of pixels for gray 8-bit image.  <a href="group__other__statistic.html#ga5cffade3d22d35969426ea9e766c2fde">More...</a><br /></td></tr>
 <tr class="separator:ga5cffade3d22d35969426ea9e766c2fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac0b8f2da839461f48e31e14d01570881"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gac0b8f2da839461f48e31e14d01570881"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gac0b8f2da839461f48e31e14d01570881">ValueSquareSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;valueSum, uint64_t &amp;squareSum)</td></tr>
+<tr class="memdesc:gac0b8f2da839461f48e31e14d01570881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum and sum of squared value of pixels for gray 8-bit image.  <a href="group__other__statistic.html#gac0b8f2da839461f48e31e14d01570881">More...</a><br /></td></tr>
+<tr class="separator:gac0b8f2da839461f48e31e14d01570881"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga042126ee7cc332e144a2480741491ab1"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga042126ee7cc332e144a2480741491ab1"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga042126ee7cc332e144a2480741491ab1">CorrelationSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, uint64_t &amp;sum)</td></tr>
 <tr class="memdesc:ga042126ee7cc332e144a2480741491ab1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of pixel correlation for two gray 8-bit images.  <a href="group__other__statistic.html#ga042126ee7cc332e144a2480741491ab1">More...</a><br /></td></tr>
@@ -463,6 +470,72 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="ga81a212c048fdb44521a84b80c8fa7f00"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga81a212c048fdb44521a84b80c8fa7f00">&#9670;&nbsp;</a></span>SimdValueSquareSum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdValueSquareSum </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>valueSum</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>squareSum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets sum and squared sum of value of pixels for gray 8-bit image. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__other__statistic.html#gac0b8f2da839461f48e31e14d01570881" title="Gets sum and sum of squared value of pixels for gray 8-bit image. ">Simd::ValueSquareSum(const View&lt;A&gt;&amp; src, uint64_t &amp; valueSum, uint64_t &amp; squareSum)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">valueSum</td><td>- the result value sum. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">squareSum</td><td>- the result square sum. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gab40431fe7f7142929d6d761547db72ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gab40431fe7f7142929d6d761547db72ac">&#9670;&nbsp;</a></span>SimdCorrelationSum()</h2>
 
@@ -794,6 +867,51 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a result sum. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gac0b8f2da839461f48e31e14d01570881"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac0b8f2da839461f48e31e14d01570881">&#9670;&nbsp;</a></span>ValueSquareSum()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ValueSquareSum </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>valueSum</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>squareSum</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets sum and sum of squared value of pixels for gray 8-bit image. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga81a212c048fdb44521a84b80c8fa7f00" title="Gets sum and squared sum of value of pixels for gray 8-bit image. ">SimdValueSquareSum</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">valueSum</td><td>- a result value sum. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">squareSum</td><td>- a result square sum. </td></tr>
   </table>
   </dd>
 </dl>

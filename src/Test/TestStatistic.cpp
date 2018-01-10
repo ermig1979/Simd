@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -644,6 +644,78 @@ namespace Test
 
     namespace
     {
+        struct FuncVSS
+        {
+            typedef void(*FuncPtr)(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
+
+            FuncPtr func;
+            String description;
+
+            FuncVSS(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(const View & src, uint64_t * valueSum, uint64_t * squareSum) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, valueSum, squareSum);
+            }
+        };
+    }
+
+#define FUNC_VSS(function) FuncVSS(function, #function)
+
+    bool ValueSquareSumAutoTest(int width, int height, const FuncVSS & f1, const FuncVSS & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        uint64_t valueSum1, valueSum2, squareSum1, squareSum2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, &valueSum1, &squareSum1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, &valueSum2, &squareSum2));
+
+        TEST_CHECK_VALUE(valueSum);
+        TEST_CHECK_VALUE(squareSum);
+
+        return result;
+    }
+
+    bool ValueSquareSumAutoTest(const FuncVSS & f1, const FuncVSS & f2)
+    {
+        bool result = true;
+
+        result = result && ValueSquareSumAutoTest(W, H, f1, f2);
+        result = result && ValueSquareSumAutoTest(W + O, H - O, f1, f2);
+        result = result && ValueSquareSumAutoTest(W - O, H + O, f1, f2);
+
+        return result;
+    }
+
+    bool ValueSquareSumAutoTest()
+    {
+        bool result = true;
+
+        result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Base::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sse2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
         struct Func5
         {
             typedef void(*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
@@ -1015,6 +1087,53 @@ namespace Test
         result = result && SumDataTest(create, DW, DH, FUNC4(SimdLaplaceAbsSum));
 
         return result;
+    }
+
+    bool ValueSquareSumDataTest(bool create, int width, int height, const FuncVSS & f)
+    {
+        bool result = true;
+
+        Data data(f.description);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+
+        View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+
+        uint64_t valueSum1, valueSum2, squareSum1, squareSum2;
+
+        if (create)
+        {
+            FillRandom(src);
+
+            TEST_SAVE(src);
+
+            f.Call(src, &valueSum1, &squareSum1);
+
+            TEST_SAVE(valueSum1);
+            TEST_SAVE(squareSum1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(valueSum1);
+            TEST_LOAD(squareSum1);
+
+            f.Call(src, &valueSum2, &squareSum2);
+
+            TEST_SAVE(valueSum2);
+            TEST_SAVE(squareSum2);
+
+            TEST_CHECK_VALUE(valueSum);
+            TEST_CHECK_VALUE(squareSum);
+        }
+
+        return result;
+    }
+
+    bool ValueSquareSumDataTest(bool create)
+    {
+        return ValueSquareSumDataTest(create, DW, DH, FUNC_VSS(SimdValueSquareSum));
     }
 
     bool CorrelationSumDataTest(bool create, int width, int height, const Func5 & f)

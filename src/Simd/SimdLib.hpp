@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar,
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -3226,6 +3226,25 @@ namespace Simd
         assert(src.format == View<A>::Gray8);
 
         SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
+    }
+	
+	    /*! @ingroup other_statistic
+
+        \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
+
+        \short Gets sum and sum of squared value of pixels for gray 8-bit image.
+
+        \note This function is a C++ wrapper for function ::SimdValueSquareSum.
+
+        \param [in] src - an input image.
+        \param [out] valueSum - a result value sum.
+		\param [out] squareSum - a result square sum.
+    */
+    template<template<class> class A> SIMD_INLINE void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
+    {
+        assert(src.format == View<A>::Gray8);
+
+        SimdValueSquareSum(src.data, src.stride, src.width, src.height, &valueSum, &squareSum);
     }
 
     /*! @ingroup other_statistic

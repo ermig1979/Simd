@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -521,10 +521,49 @@ namespace Simd
             else
                 SquareSum<false>(src, stride, width, height, sum);
         }
+		
+		template <bool align> void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t bodyWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+            __m128i fullValueSum = _mm_setzero_si128();
+			__m128i fullSquareSum = _mm_setzero_si128();
+            for (size_t row = 0; row < height; ++row)
+            {
+				__m128i rowSquareSum = _mm_setzero_si128();
+                for (size_t col = 0; col < bodyWidth; col += A)
+                {
+                    const __m128i value = Load<align>((__m128i*)(src + col));
+                    fullValueSum = _mm_add_epi64(_mm_sad_epu8(value, K_ZERO), fullValueSum);
+                    rowSquareSum = _mm_add_epi32(rowSquareSum, Square(value));
+                }
+                if (width - bodyWidth)
+                {
+                    const __m128i value = _mm_and_si128(tailMask, Load<false>((__m128i*)(src + width - A)));
+                    fullValueSum = _mm_add_epi64(_mm_sad_epu8(value, K_ZERO), fullValueSum);
+                    rowSquareSum = _mm_add_epi32(rowSquareSum, Square(value));
+                }
+                fullSquareSum = _mm_add_epi64(fullSquareSum, HorizontalSum32(rowSquareSum));
+                src += stride;
+            }
+            *valueSum = ExtractInt64Sum(fullValueSum);
+			*squareSum = ExtractInt64Sum(fullSquareSum);
+        }
+		
+		void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+		{
+			if (Aligned(src) && Aligned(stride))
+                ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
+            else
+                ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
+		}
 
         SIMD_INLINE __m128i Correlation(__m128i a, __m128i b)
-        {
-            const __m128i lo = _mm_madd_epi16(_mm_unpacklo_epi8(a, _mm_setzero_si128()), _mm_unpacklo_epi8(b, _mm_setzero_si128()));
+        {            const __m128i lo = _mm_madd_epi16(_mm_unpacklo_epi8(a, _mm_setzero_si128()), _mm_unpacklo_epi8(b, _mm_setzero_si128()));
             const __m128i hi = _mm_madd_epi16(_mm_unpackhi_epi8(a, _mm_setzero_si128()), _mm_unpackhi_epi8(b, _mm_setzero_si128()));
             return _mm_add_epi32(lo, hi);
         }

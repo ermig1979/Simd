@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar,
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -4768,8 +4768,26 @@ extern "C"
         \param [in] height - an image height.
         \param [out] sum - the result sum.
     */
+	
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
+	
+	    /*! @ingroup other_statistic
 
+        \fn void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
+
+        \short Gets sum and squared sum of value of pixels for gray 8-bit image.
+
+        \note This function has a C++ wrappers: Simd::ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum).
+
+        \param [in] src - a pointer to pixels data of the image.
+        \param [in] stride - a row size of the image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] valueSum - the result value sum.
+		\param [out] squareSum - the result square sum.
+    */
+    SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
+	
     /*! @ingroup other_statistic
 
         \fn void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);

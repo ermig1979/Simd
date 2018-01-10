@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -217,6 +217,28 @@ namespace Simd
                 for (size_t col = 0; col < width; ++col)
                     rowSum += Square(src[col]);
                 *sum += rowSum;
+                src += stride;
+            }
+        }
+		
+		void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
+        {
+            assert(width < 0x10000);
+
+            *valueSum = 0;
+			*squareSum = 0;
+            for (size_t row = 0; row < height; ++row)
+            {
+                int rowValueSum = 0;
+				int rowSquareSum = 0;
+                for (size_t col = 0; col < width; ++col)
+				{
+                    int value = src[col];
+                    rowValueSum += value;
+                    rowSquareSum += Square(value);
+				}
+                *valueSum += rowValueSum;
+				*squareSum += rowSquareSum;
                 src += stride;
             }
         }

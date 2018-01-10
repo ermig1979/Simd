@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar,
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
 *               2014-2017 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -300,6 +300,7 @@ namespace Test
     TEST_ADD_GROUP(SobelDxAbsSum);
     TEST_ADD_GROUP(SobelDyAbsSum);
     TEST_ADD_GROUP(LaplaceAbsSum);
+    TEST_ADD_GROUP(ValueSquareSum);
     TEST_ADD_GROUP(CorrelationSum);
 
     TEST_ADD_GROUP(StretchGray2x2);
