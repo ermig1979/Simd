@@ -94,7 +94,8 @@ namespace Simd
                 tinyxml2::XMLNode * child = parent->FirstChild();
                 if (child == NULL)
                     SIMD_EX("Invalid node!");
-                std::stringstream ss(tinyxml2::XMLUtil::SkipWhiteSpace(child->Value()));
+                int curLineNum = 0;
+                std::stringstream ss(tinyxml2::XMLUtil::SkipWhiteSpace(child->Value(), &curLineNum));
                 std::vector<T> values;
                 while (!ss.eof())
                 {
