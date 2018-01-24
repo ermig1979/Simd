@@ -217,6 +217,7 @@ namespace Test
         result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 1, f1, f2));
         result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, 0, f1, f2));
         result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 0, f1, f2));
+        //result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(5, 8, 0, f1, f2));
         return result;
     }
 

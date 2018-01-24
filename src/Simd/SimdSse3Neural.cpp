@@ -912,7 +912,7 @@ namespace Simd
 
                 bool Preferable(size_t srcDepth, size_t kernelX, size_t kernelY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
-                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1)
+                    if (kernelX == kernelY && kernelX >= 2 && kernelX <= 5 && strideX*strideY*dilationX*dilationY == 1 && dstWidth >= F)
                     {
                         if (dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 5 * 5)
                             return true;
