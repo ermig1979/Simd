@@ -2191,6 +2191,26 @@ extern "C"
     */
     SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst);
 
+    /*! @ingroup correlation
+
+        \fn void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance);
+
+        \short Calculates cosine distance of two 32-bit float arrays.
+
+        All arrays must have the same size.
+
+        Algorithm description:
+        \verbatim
+        distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        \endverbatim
+
+        \param [in] a - a pointer to the first 32-bit float array.
+        \param [in] b - a pointer to the second 32-bit float array.
+        \param [in] size - a size of arrays.
+        \param [out] distance - a pointer to 32-bit float with cosine distance.
+    */
+    SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance);
+
     /*! @ingroup other_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);

@@ -1993,6 +1993,14 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
         Base::Uint8ToFloat32(src, size, lower, upper, dst);
 }
 
+typedef void(*SimdCosineDistance32fPtr) (const float * a, const float * b, size_t size, float * distance);
+SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC4(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance)
+{
+    simdCosineDistance32f(a, b, size, distance);
+}
+
 SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                      size_t channelCount, uint8_t * dst, size_t dstStride)
 {

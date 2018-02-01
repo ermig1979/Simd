@@ -69,5 +69,19 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Uint8ToFloat32(src[i], _lower, boost);
         }
+
+        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
+        {
+            float aa = 0, ab = 0, bb = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                float _a = a[i];
+                float _b = b[i];
+                aa += _a * _a;
+                ab += _a * _b;
+                bb += _b * _b;
+            }
+            *distance = ab / ::sqrt(aa*bb);
+        }
     }
 }

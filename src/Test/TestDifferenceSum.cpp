@@ -472,6 +472,35 @@ namespace Test
         return result;
     }
 
+    bool CosineDistance32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Base::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx2::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Avx512bw::CosineDistance32f), FUNC_F(SimdCosineDistance32f));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool DifferenceSumsDataTest(bool create, int width, int height, const FuncS & f, int count)
@@ -662,20 +691,16 @@ namespace Test
 
     bool SquaredDifferenceSum32fDataTest(bool create)
     {
-        bool result = true;
-
-        result = result && DifferenceSum32fDataTest(create, DH, EPS, FUNC_F(SimdSquaredDifferenceSum32f));
-
-        return result;
+        return DifferenceSum32fDataTest(create, DH, EPS, FUNC_F(SimdSquaredDifferenceSum32f));
     }
-
 
     bool SquaredDifferenceKahanSum32fDataTest(bool create)
     {
-        bool result = true;
+        return DifferenceSum32fDataTest(create, DH, (float)::pow(EPS, 1.5), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+    }
 
-        result = result && DifferenceSum32fDataTest(create, DH, (float)::pow(EPS, 1.5), FUNC_F(SimdSquaredDifferenceKahanSum32f));
-
-        return result;
+    bool CosineDistance32fDataTest(bool create)
+    {
+        return DifferenceSum32fDataTest(create, DH, EPS, FUNC_F(SimdCosineDistance32f));
     }
 }
