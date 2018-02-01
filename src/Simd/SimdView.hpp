@@ -1039,7 +1039,7 @@ namespace Simd
         if (!(format == View<A>::Gray8 || format == View<A>::Bgr24 || format == View<A>::Bgra32))
             return false;
 
-        std::ofstream ofs(path.c_str(), std::ifstream::binary);
+        std::ofstream ofs(path.c_str(), std::ofstream::binary);
         if (ofs.is_open())
         {
             if (format == View<A>::Gray8)
