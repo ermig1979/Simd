@@ -483,7 +483,7 @@ Functions</h2></td></tr>
 
 <p>Calculates cosine distance of two 32-bit float arrays. </p>
 <p>All arrays must have the same size.</p>
-<p>Algorithm description: </p><pre class="fragment">distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+<p>Algorithm description: </p><pre class="fragment">distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
 </pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to the first 32-bit float array. </td></tr>

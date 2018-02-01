@@ -158,7 +158,7 @@ namespace Simd
                 ab += _a * _b;
                 bb += _b * _b;
             }
-            *distance = ab / ::sqrt(aa*bb);
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
     }
 }

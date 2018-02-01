@@ -164,7 +164,7 @@ namespace Simd
                 ab += _a * _b;
                 bb += _b * _b;
             }
-            *distance = ab / ::sqrt(aa*bb);
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
 
         void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)

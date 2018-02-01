@@ -2163,7 +2163,7 @@ extern "C"
 
         Algorithm description:
         \verbatim
-        distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
         \endverbatim
 
         \param [in] a - a pointer to the first 16-bit float array.
@@ -2221,7 +2221,7 @@ extern "C"
 
         Algorithm description:
         \verbatim
-        distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        distance = 1 - Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
         \endverbatim
 
         \param [in] a - a pointer to the first 32-bit float array.

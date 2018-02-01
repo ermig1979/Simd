@@ -200,7 +200,7 @@ namespace Simd
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
             }
             float aa = Avx::ExtractSum(_aa[0]), ab = Avx::ExtractSum(_ab[0]), bb = Avx::ExtractSum(_bb[0]);
-            *distance = ab / ::sqrt(aa*bb);
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
 
         void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)

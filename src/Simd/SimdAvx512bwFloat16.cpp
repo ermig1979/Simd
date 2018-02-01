@@ -253,7 +253,7 @@ namespace Simd
             float aa = Avx512f::ExtractSum(_mm512_add_ps(_aa[0], _aa[1]));
             float ab = Avx512f::ExtractSum(_mm512_add_ps(_ab[0], _ab[1]));
             float bb = Avx512f::ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
-            *distance = ab / ::sqrt(aa*bb);
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
 
         void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
