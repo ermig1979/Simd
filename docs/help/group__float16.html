@@ -59,6 +59,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gac02d71f08f456ffc98adc8328002ceb0"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#gac02d71f08f456ffc98adc8328002ceb0">SimdSquaredDifferenceSum16f</a> (const uint16_t *a, const uint16_t *b, size_t size, float *sum)</td></tr>
 <tr class="memdesc:gac02d71f08f456ffc98adc8328002ceb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared differences for two 16-bit float arrays.  <a href="#gac02d71f08f456ffc98adc8328002ceb0">More...</a><br /></td></tr>
 <tr class="separator:gac02d71f08f456ffc98adc8328002ceb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga716e819eece22d718bb0313dde3b0782"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#ga716e819eece22d718bb0313dde3b0782">SimdCosineDistance16f</a> (const uint16_t *a, const uint16_t *b, size_t size, float *distance)</td></tr>
+<tr class="memdesc:ga716e819eece22d718bb0313dde3b0782"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates cosine distance of two 16-bit float arrays.  <a href="#ga716e819eece22d718bb0313dde3b0782">More...</a><br /></td></tr>
+<tr class="separator:ga716e819eece22d718bb0313dde3b0782"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for conversion between 16-bit and 32-bit float numbers and other. </p>
@@ -198,6 +201,59 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second 16-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a pointer to 32-bit float point sum of squared differences. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga716e819eece22d718bb0313dde3b0782"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga716e819eece22d718bb0313dde3b0782">&#9670;&nbsp;</a></span>SimdCosineDistance16f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdCosineDistance16f </td>
+          <td>(</td>
+          <td class="paramtype">const uint16_t *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint16_t *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>distance</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates cosine distance of two 16-bit float arrays. </p>
+<p>All arrays must have the same size.</p>
+<p>Algorithm description: </p><pre class="fragment">distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to the first 16-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second 16-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">distance</td><td>- a pointer to 32-bit float with cosine distance. </td></tr>
   </table>
   </dd>
 </dl>

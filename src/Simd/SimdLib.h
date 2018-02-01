@@ -2153,6 +2153,26 @@ extern "C"
     */
     SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
+    /*! @ingroup float16
+
+        \fn void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
+
+        \short Calculates cosine distance of two 16-bit float arrays.
+
+        All arrays must have the same size.
+
+        Algorithm description:
+        \verbatim
+        distance = Sum(a[i]*b[i])/Sqrt(Sum(a[i]*a[i])*Sum(b[i]*b[i]));
+        \endverbatim
+
+        \param [in] a - a pointer to the first 16-bit float array.
+        \param [in] b - a pointer to the second 16-bit float array.
+        \param [in] size - a size of arrays.
+        \param [out] distance - a pointer to 32-bit float with cosine distance.
+    */
+    SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
+
     /*! @ingroup other_conversion
 
         \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);

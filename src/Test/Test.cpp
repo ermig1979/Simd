@@ -175,6 +175,7 @@ namespace Test
     TEST_ADD_GROUP(Float32ToFloat16);
     TEST_ADD_GROUP(Float16ToFloat32);
     TEST_ADD_GROUP(SquaredDifferenceSum16f);
+    TEST_ADD_GROUP(CosineDistance16f);
 
     TEST_ADD_GROUP(Float32ToUint8);
     TEST_ADD_GROUP(Uint8ToFloat32);

@@ -1943,6 +1943,21 @@ SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b
         Base::SquaredDifferenceSum16f(a, b, size, sum);
 }
 
+SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::CosineDistance16f(a, b, size, distance);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && size >= Avx2::F)
+        Avx2::CosineDistance16f(a, b, size, distance);
+    else
+#endif
+        Base::CosineDistance16f(a, b, size, distance);
+}
+
 SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

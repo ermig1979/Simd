@@ -146,5 +146,19 @@ namespace Simd
                 sums[0] += SquaredDifference16f(a[i], b[i]);
             *sum = sums[0] + sums[1] + sums[2] + sums[3];
         }
+
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        {
+            float aa = 0, ab = 0, bb = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                float _a = Float16ToFloat32(a[i]);
+                float _b = Float16ToFloat32(b[i]);
+                aa += _a * _a;
+                ab += _a * _b;
+                bb += _b * _b;
+            }
+            *distance = ab / ::sqrt(aa*bb);
+        }
     }
 }

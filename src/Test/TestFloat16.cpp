@@ -197,9 +197,11 @@ namespace Test
         }
     };
 
+    typedef void(*CheckPtr)(const float * a, const float * b, size_t size, float * sum);
+
 #define FUNC_S(function) FuncS(function, #function)
 
-    bool SquaredDifferenceSum16fAutoTest(int size, float eps, const FuncS & f1, const FuncS & f2)
+    bool DifferenceSum16fAutoTest(int size, float eps, const FuncS & f1, const FuncS & f2, CheckPtr check)
     {
         bool result = true;
 
@@ -220,20 +222,20 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
 
-        ::SimdSquaredDifferenceSum32f((float*)aOrigin.data, (float*)bOrigin.data, a.width, &s3);
+        check((float*)aOrigin.data, (float*)bOrigin.data, a.width, &s3);
 
         result = Compare(s1, s2, eps, true, "s1 & s2");
-        result = Compare(s2, s3, eps, true, "s2 & s3");
+        result = Compare(s2, s3, eps*2, true, "s2 & s3");
 
         return result;
     }
 
-    bool SquaredDifferenceSum16fAutoTest(float eps, const FuncS & f1, const FuncS & f2)
+    bool DifferenceSum16fAutoTest(float eps, const FuncS & f1, const FuncS & f2, CheckPtr check)
     {
         bool result = true;
 
-        result = result && SquaredDifferenceSum16fAutoTest(W*H, eps, f1, f2);
-        result = result && SquaredDifferenceSum16fAutoTest(W*H - O, eps, f1, f2);
+        result = result && DifferenceSum16fAutoTest(W*H, eps, f1, f2, check);
+        result = result && DifferenceSum16fAutoTest(W*H - O, eps, f1, f2, check);
 
         return result;
     }
@@ -242,22 +244,45 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+        CheckPtr check = ::SimdSquaredDifferenceSum32f;
+
+        result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx2::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx2::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
 #endif
 
 #if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable)
-            result = result && SquaredDifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Neon::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f));
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Neon::SquaredDifferenceSum16f), FUNC_S(SimdSquaredDifferenceSum16f), check);
 #endif 
+
+        return result;
+    }
+
+    bool CosineDistance16fAutoTest()
+    {
+        bool result = true;
+
+        CheckPtr check = ::SimdCosineDistance32f;
+
+        result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Base::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx2::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
+#endif
 
         return result;
     }
@@ -360,7 +385,7 @@ namespace Test
         return result;
     }
 
-    bool SquaredDifferenceSum16fDataTest(bool create, int size, float eps, const FuncS & f)
+    bool DifferenceSum16fDataTest(bool create, int size, float eps, const FuncS & f)
     {
         bool result = true;
 
@@ -409,10 +434,11 @@ namespace Test
 
     bool SquaredDifferenceSum16fDataTest(bool create)
     {
-        bool result = true;
+        return DifferenceSum16fDataTest(create, DH, EPS * 2, FUNC_S(SimdSquaredDifferenceSum16f));
+    }
 
-        result = result && SquaredDifferenceSum16fDataTest(create, DH, EPS*2, FUNC_S(SimdSquaredDifferenceSum16f));
-
-        return result;
+    bool CosineDistance16fDataTest(bool create)
+    {
+        return DifferenceSum16fDataTest(create, DH, EPS * 2, FUNC_S(SimdCosineDistance16f));
     }
 }

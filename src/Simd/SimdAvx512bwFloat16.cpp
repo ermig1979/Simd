@@ -202,6 +202,67 @@ namespace Simd
             else
                 SquaredDifferenceSum16f<false>(a, b, size, sum);
         }
+
+        template <int part> SIMD_INLINE void CosineDistance16f(const __m512i & a, const __m512i & b, __m512 * aa, __m512 * ab, __m512 * bb)
+        {
+            __m512 a0 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(a, part));
+            __m512 b0 = _mm512_cvtph_ps(_mm512_extracti64x4_epi64(b, part));
+            aa[part] = _mm512_fmadd_ps(a0, a0, aa[part]);
+            ab[part] = _mm512_fmadd_ps(a0, b0, ab[part]);
+            bb[part] = _mm512_fmadd_ps(b0, b0, bb[part]);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void CosineDistance16f2(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb, __mmask32 tail = -1)
+        {
+            __m512i a0 = Load<align, mask>(a, tail);
+            __m512i b0 = Load<align, mask>(b, tail);
+            CosineDistance16f<0>(a0, b0, aa, ab, bb);
+            CosineDistance16f<1>(a0, b0, aa, ab, bb);
+        }
+
+        template <bool align> SIMD_INLINE void CosineDistance16f4(const uint16_t * a, const uint16_t * b, __m512 * aa, __m512 * ab, __m512 * bb)
+        {
+            __m512i a0 = Load<align>(a + 00);
+            __m512i b0 = Load<align>(b + 00);
+            CosineDistance16f<0>(a0, b0, aa, ab, bb);
+            CosineDistance16f<1>(a0, b0, aa, ab, bb);
+            __m512i a1 = Load<align>(a + HA);
+            __m512i b1 = Load<align>(b + HA);
+            CosineDistance16f<0>(a1, b1, aa, ab, bb);
+            CosineDistance16f<1>(a1, b1, aa, ab, bb);
+        }
+
+        template<bool align> void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            size_t alignedSize = AlignLo(size, DF);
+            __mmask32 tailMask = TailMask32(size - alignedSize);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            __m512 _aa[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+            __m512 _ab[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+            __m512 _bb[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
+            for (; i < fullAlignedSize; i += QF)
+                CosineDistance16f4<align>(a + i, b + i, _aa, _ab, _bb);
+            for (; i < alignedSize; i += DF)
+                CosineDistance16f2<align, false>(a + i, b + i, _aa, _ab, _bb);
+            if (i < size)
+                CosineDistance16f2<align, true>(a + i, b + i, _aa, _ab, _bb, tailMask);
+            float aa = Avx512f::ExtractSum(_mm512_add_ps(_aa[0], _aa[1]));
+            float ab = Avx512f::ExtractSum(_mm512_add_ps(_ab[0], _ab[1]));
+            float bb = Avx512f::ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
+            *distance = ab / ::sqrt(aa*bb);
+        }
+
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        {
+            if (Aligned(a) && Aligned(b))
+                CosineDistance16f<true>(a, b, size, distance);
+            else
+                CosineDistance16f<false>(a, b, size, distance);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

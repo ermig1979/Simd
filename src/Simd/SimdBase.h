@@ -227,6 +227,8 @@ namespace Simd
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
 
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
+
         void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
 
         void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst);
