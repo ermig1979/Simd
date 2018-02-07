@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
+*               2018-2018 Radchenko Andrey.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +59,40 @@ namespace Simd
             private:
                 void *_p;
             };
+
+            struct Index
+            {
+                int src, dst;
+                uint8_t shuffle[Simd::Neon::A];
+            };
+
+            struct BufferG
+            {
+                BufferG(size_t width, size_t blocks, size_t height)
+                {
+                    _p = Simd::Allocate(3 * width + sizeof(int) * 2 * height + blocks * sizeof(Index) + 2 * A);
+                    bx[0] = (uint8_t*)_p;
+                    bx[1] = bx[0] + width + A;
+                    ax = bx[1] + width + A;
+                    ix = (Index*)(ax + width);
+                    iy = (int*)(ix + blocks);
+                    ay = iy + height;
+                }
+
+                ~BufferG()
+                {
+                    Free(_p);
+                }
+
+                uint8_t * bx[2];
+                uint8_t * ax;
+                Index * ix;
+                int * ay;
+                int * iy;
+            private:
+                void *_p;
+            };
+
         }
 
         template <size_t channelCount> void EstimateAlphaIndexX(size_t srcSize, size_t dstSize, int * indexes, uint8_t * alphas)
@@ -76,7 +111,7 @@ namespace Simd
                     alpha = 0;
                 }
 
-                if (index > (ptrdiff_t)srcSize - 2)
+                if (index >(ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;
@@ -89,6 +124,55 @@ namespace Simd
                     ((uint16_t*)alphas)[channel] = *(uint16_t*)alphas;
                 alphas += 2 * channelCount;
             }
+        }
+
+        void EstimateAlphaIndexX(int srcSize, int dstSize, Index * indexes, uint8_t * alphas, size_t & blockCount)
+        {
+            float scale = (float)srcSize / dstSize;
+            int block = 0;
+            indexes[0].src = 0;
+            indexes[0].dst = 0;
+            for (int dstIndex = 0; dstIndex < dstSize; ++dstIndex)
+            {
+                float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
+                int srcIndex = (int)::floor(alpha);
+                alpha -= srcIndex;
+
+                if (srcIndex < 0)
+                {
+                    srcIndex = 0;
+                    alpha = 0;
+                }
+
+                if (srcIndex > srcSize - 2)
+                {
+                    srcIndex = srcSize - 2;
+                    alpha = 1;
+                }
+
+                int dst = 2 * dstIndex - indexes[block].dst;
+                int src = srcIndex - indexes[block].src;
+                if (src >= A - 1 || dst >= A)
+                {
+                    block++;
+                    indexes[block].src = Simd::Min(srcIndex, srcSize - (int)A);
+                    indexes[block].dst = 2 * dstIndex;
+                    dst = 0;
+                    src = srcIndex - indexes[block].src;
+                }
+                indexes[block].shuffle[dst] = src;
+                indexes[block].shuffle[dst + 1] = src + 1;
+
+                alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
+                alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
+                alphas += 2;
+            }
+            blockCount = block + 1;
+        }
+
+        SIMD_INLINE size_t BlockCountMax(size_t src, size_t dst)
+        {
+            return (size_t)Simd::Max(::ceil(float(src) / (A - 1)), ::ceil(float(dst) / HA));
         }
 
         template <size_t channelCount> void InterpolateX(const uint8_t * alpha, uint8_t * buffer);
@@ -172,7 +256,7 @@ namespace Simd
             size_t size = 2 * dstWidth*channelCount;
             size_t bufferSize = AlignHi(dstWidth, A)*channelCount * 2;
             size_t alignedSize = AlignHi(size, DA) - DA;
-            const size_t step = A*channelCount;
+            const size_t step = A * channelCount;
 
             Buffer buffer(bufferSize, dstWidth, dstHeight);
 
@@ -221,6 +305,84 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void LoadGray(const uint8_t * src, const Index & index, uint8_t * dst)
+        {
+
+            uint8x16_t _src = vld1q_u8(src + index.src);
+            uint8x16_t _shuffle = vld1q_u8(index.shuffle);
+
+            uint8x8x2_t src1;
+            src1.val[0] = vget_low_u8(_src);
+            src1.val[1] = vget_high_u8(_src);
+
+            uint8x8_t dstLow = vtbl2_u8(src1, vget_low_u8(_shuffle));
+            uint8x8_t dstHigh = vtbl2_u8(src1, vget_high_u8(_shuffle));
+
+            uint8x16_t _dst = vcombine_u8(dstLow, dstHigh);
+
+            vst1q_u8(dst + index.dst, _dst);
+
+        }
+
+        void ResizeBilinearGray(
+            const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
+        {
+            assert(dstWidth >= A);
+
+            size_t bufferWidth = AlignHi(dstWidth, A) * 2;
+            size_t blockCount = BlockCountMax(srcWidth, dstWidth);
+            size_t size = 2 * dstWidth;
+            size_t alignedSize = AlignHi(size, DA) - DA;
+            const size_t step = A;
+
+            BufferG buffer(bufferWidth, blockCount, dstHeight);
+
+            Base::EstimateAlphaIndex(srcHeight, dstHeight, buffer.iy, buffer.ay, 1);
+
+            EstimateAlphaIndexX((int)srcWidth, (int)dstWidth, buffer.ix, buffer.ax, blockCount);
+
+            ptrdiff_t previous = -2;
+
+            uint16x8_t a[2];
+
+            for (size_t yDst = 0; yDst < dstHeight; yDst++, dst += dstStride)
+            {
+                a[0] = vdupq_n_u16(Base::FRACTION_RANGE - buffer.ay[yDst]);
+                a[1] = vdupq_n_u16(buffer.ay[yDst]);
+
+                ptrdiff_t sy = buffer.iy[yDst];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(buffer.bx[0], buffer.bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    const uint8_t * psrc = src + (sy + k)*srcStride;
+                    uint8_t * pdst = buffer.bx[k];
+                    for (size_t i = 0; i < blockCount; ++i)
+                        LoadGray(psrc, buffer.ix[i], pdst);
+
+                    uint8_t * pbx = buffer.bx[k];
+                    for (size_t i = 0; i < bufferWidth; i += step)
+                        InterpolateX<1>(buffer.ax + i, pbx + i);
+                }
+
+                for (size_t ib = 0, id = 0; ib < alignedSize; ib += DA, id += A)
+                    InterpolateY<true>(buffer.bx[0] + ib, buffer.bx[1] + ib, a, dst + id);
+                size_t i = size - DA;
+                InterpolateY<false>(buffer.bx[0] + i, buffer.bx[1] + i, a, dst + i / 2);
+            }
+        }
+
         void ResizeBilinear(
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)
@@ -228,7 +390,10 @@ namespace Simd
             switch (channelCount)
             {
             case 1:
-                ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+                if (srcWidth >= A && srcWidth < 4 * dstWidth)
+                    ResizeBilinearGray(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+                else
+                    ResizeBilinear<1>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
                 break;
             case 2:
                 ResizeBilinear<2>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
