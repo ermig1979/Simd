@@ -4712,6 +4712,11 @@ SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t widt
         Sse2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+    else
+#endif
         Base::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
 }
 
