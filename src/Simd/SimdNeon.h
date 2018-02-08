@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
+*               2018-2018 Radchenko Andrey.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -408,7 +409,7 @@ namespace Simd
 
         void SquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
 		
-        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum, uint64_t *sqSum);
+        void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
 
         void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 

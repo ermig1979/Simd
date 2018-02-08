@@ -111,7 +111,7 @@ namespace Simd
                     alpha = 0;
                 }
 
-                if (index >(ptrdiff_t)srcSize - 2)
+                if (index > (ptrdiff_t)srcSize - 2)
                 {
                     index = srcSize - 2;
                     alpha = 1;

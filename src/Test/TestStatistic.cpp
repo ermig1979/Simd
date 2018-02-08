@@ -716,6 +716,11 @@ namespace Test
             result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx512bw::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#endif
+
         return result;
     }
 
