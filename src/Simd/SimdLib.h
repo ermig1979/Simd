@@ -4898,6 +4898,28 @@ extern "C"
     */
     SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
+    /*! @ingroup synet
+
+        \fn void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+
+        \short Adds a bias to given vector.
+
+        Algorithm's details:
+        \verbatim
+         for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[i*size + j] += bias[i];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] bias - a pointer to the 32-bit float array with bias.
+        \param [in] count - a size of bias array.
+        \param [in] size - an internal size of bias addition.
+        \param [in, out] dst - a pointer to cumulative 32-bit float array. The size of the array must be equal to count*size.
+    */
+    SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+
     /*! @ingroup texture_estimation
 
         \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);

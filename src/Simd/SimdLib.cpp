@@ -4812,6 +4812,14 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
         Base::SvmSumLinear(x, svs, weights, length, count, sum);
 }
 
+typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t count, size_t size, float * dst);
+volatile SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC3(SynetAddBias, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst)
+{
+    simdSynetAddBias(bias, count, size, dst);
+}
+
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 {

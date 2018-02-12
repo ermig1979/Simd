@@ -102,6 +102,8 @@ namespace Simd
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
+
+        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst);
     }
 #endif// SIMD_AVX_ENABLE
 }

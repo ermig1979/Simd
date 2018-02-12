@@ -309,6 +309,8 @@ namespace Test
 
     TEST_ADD_GROUP(SvmSumLinear);
 
+    TEST_ADD_GROUP(SynetAddBias);
+
     TEST_ADD_GROUP(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP(TextureBoostedUv);
     TEST_ADD_GROUP(TextureGetDifferenceSum);

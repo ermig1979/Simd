@@ -30,13 +30,14 @@
 
 <hr/>
 
-<h3 id="R063">March 1, 2018 (version X.X.63.1XXX)</h3> 
+<h3 id="R063">March X, 2018 (version X.X.63.1XXX)</h3> 
 
 <h4>Algorithms</h4>
 <h5>New features</h5>
 <ul>
  <li>Base implementation, SSE, AVX, AVX2 and AVX-512BW optimizations of function CosineDistance32f.</li>
  <li>Base implementation, AVX2 and AVX-512BW optimizations of function CosineDistance16f.</li>
+ <li>Base implementation, SSE, AVX and AVX-512F optimizations of function SynetAddBias.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -49,6 +50,8 @@
 <ul>
  <li>Tests for verifying functionality of function CosineDistance32f.</li>
  <li>Tests for verifying functionality of function CosineDistance16f.</li>
+ <li>Tests for verifying functionality of NEON optimization of function ValueSquareSum.</li>
+ <li>Tests for verifying functionality of function SynetAddBias.</li>
 </ul>
 
 <a href="#HOME">Home</a> 
