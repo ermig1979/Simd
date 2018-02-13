@@ -34,14 +34,14 @@ namespace Test
             typedef void(*FuncPtr)(const float * bias, size_t count, size_t size, float * dst);
 
             FuncPtr func;
-            String description;
+            String desc;
 
-            FuncAB(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncAB(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
             void Call(const View & bias, size_t count, size_t size, const View & dstSrc, View & dstDst) const
             {
                 Simd::Copy(dstSrc, dstDst);
-                TEST_PERFORMANCE_TEST(description);
+                TEST_PERFORMANCE_TEST(desc);
                 func((float*)bias.data, count, size, (float*)dstDst.data);
             }
         };
@@ -53,7 +53,7 @@ namespace Test
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << count << ", " << size << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
 
         View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dstSrc(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -106,15 +106,108 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncSLF
+        {
+            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+            FuncSLF(const FuncSLF & f, bool bias) : func(f.func), desc(f.desc + (bias ? "[1]" : "[0]")) {}
+
+            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_SLF(function) FuncSLF(function, #function)
+#define ARGS_SLF(bias, f1, f2) bias, FuncSLF(f1, bias), FuncSLF(f2, bias)
+
+    bool SynetScaleLayerForwardAutoTest(size_t count, size_t size, bool hasBias, const FuncSLF & f1, const FuncSLF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View scale(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias;
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(scale, -10.0, 10.0);
+        if (hasBias)
+        {
+            bias.Recreate(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+            FillRandom32f(bias, -10.0, 10.0);
+        }
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetScaleLayerForwardAutoTest(const FuncSLF & f1, const FuncSLF & f2)
+    {
+        bool result = true;
+
+        result = result && SynetScaleLayerForwardAutoTest(H, W, ARGS_SLF(true, f1, f2));
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, ARGS_SLF(true, f1, f2));
+        result = result && SynetScaleLayerForwardAutoTest(H, W, ARGS_SLF(false, f1, f2));
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, ARGS_SLF(false, f1, f2));
+
+        return result;
+    }
+
+    bool SynetScaleLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Base::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Sse::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Avx::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Avx512f::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool SynetAddBiasDataTest(bool create, size_t count, size_t size, const FuncAB & f)
     {
         bool result = true;
 
-        Data data(f.description);
+        Data data(f.desc);
 
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << count << ", " << size << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << count << ", " << size << "].");
 
         View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dstSrc(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -153,5 +246,56 @@ namespace Test
     bool SynetAddBiasDataTest(bool create)
     {
         return SynetAddBiasDataTest(create, DH, DW, FUNC_AB(SimdSynetAddBias));
+    }
+
+    bool SynetScaleLayerForwardDataTest(bool create, size_t count, size_t size, const FuncSLF & f)
+    {
+        bool result = true;
+
+        Data data(f.desc);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View scale(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        if (create)
+        {
+            FillRandom32f(src, -10.0, 10.0);
+            FillRandom32f(scale, -10.0, 10.0);
+            FillRandom32f(bias, -10.0, 10.0);
+
+            TEST_SAVE(src);
+            TEST_SAVE(scale);
+            TEST_SAVE(bias);
+
+            f.Call(src, scale, bias, count, size, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(scale);
+            TEST_LOAD(bias);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, scale, bias, count, size, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        }
+
+        return result;
+    }
+
+    bool SynetScaleLayerForwardDataTest(bool create)
+    {
+        return SynetScaleLayerForwardDataTest(create, DH, DW, FUNC_SLF(SimdSynetScaleLayerForward));
     }
 }

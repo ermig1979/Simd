@@ -4913,12 +4913,36 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients.
         \param [in] count - a size of bias array.
         \param [in] size - an internal size of bias addition.
         \param [in, out] dst - a pointer to cumulative 32-bit float array. The size of the array must be equal to count*size.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+
+        \short This function is used for forward propagation of ScaleLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. Can be NULL.
+        \param [in] count - a size of scale and bias arrays.
+        \param [in] size - an internal size of the operation.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+    */
+    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
 
     /*! @ingroup texture_estimation
 

@@ -46,5 +46,49 @@ namespace Simd
                 dst += size;
             }
         }
+
+        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
+        {
+            register size_t aligned = Simd::AlignLo(size, 4);
+            if (bias)
+            {
+                for (size_t i = 0; i < count; ++i)
+                {
+                    register float s = scale[i];
+                    register float b = bias[i];
+                    register size_t j = 0;
+                    for (; j < aligned; j += 4)
+                    {
+                        dst[j + 0] = src[j + 0] * s + b;
+                        dst[j + 1] = src[j + 1] * s + b;
+                        dst[j + 2] = src[j + 2] * s + b;
+                        dst[j + 3] = src[j + 3] * s + b;
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = src[j] * s + b;
+                    src += size;
+                    dst += size;
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < count; ++i)
+                {
+                    register float s = scale[i];
+                    register size_t j = 0;
+                    for (; j < aligned; j += 4)
+                    {
+                        dst[j + 0] = src[j + 0] * s;
+                        dst[j + 1] = src[j + 1] * s;
+                        dst[j + 2] = src[j + 2] * s;
+                        dst[j + 3] = src[j + 3] * s;
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = src[j] * s;
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
     }
 }
