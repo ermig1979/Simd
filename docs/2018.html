@@ -37,13 +37,14 @@
 <ul>
  <li>Base implementation, SSE, AVX, AVX2 and AVX-512BW optimizations of function CosineDistance32f.</li>
  <li>Base implementation, AVX2 and AVX-512BW optimizations of function CosineDistance16f.</li>
+ <li>NEON optimization of function ValueSquareSum.</li>
  <li>Base implementation, SSE, AVX and AVX-512F optimizations of function SynetAddBias.</li>
  <li>Base implementation, SSE, AVX, AVX2 and AVX-512F optimizations of function SynetScaleLayerForward.</li>
+ <li>Base implementation, SSE, AVX, AVX2 and AVX-512F optimizations of function SynetEltwiseLayerForward.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
  <li>NEON optimization of function ResizeBilinear.</li>
- <li>NEON optimization of function ValueSquareSum.</li>
 </ul>
 
 <h4>Test framework</h4>
@@ -54,6 +55,7 @@
  <li>Tests for verifying functionality of NEON optimization of function ValueSquareSum.</li>
  <li>Tests for verifying functionality of function SynetAddBias.</li>
  <li>Tests for verifying functionality of function SynetScaleLayerForward.</li>
+ <li>Tests for verifying functionality of function SynetEltwiseLayerForward.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

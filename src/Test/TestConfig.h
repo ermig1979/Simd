@@ -77,6 +77,7 @@ namespace Test
     typedef std::string String;
     typedef std::vector<String> Strings;
     typedef Simd::View<Simd::Allocator> View;
+    typedef std::vector<View> Views;
     typedef Simd::Point<ptrdiff_t> Point;
     typedef std::vector<Point> Points;
     typedef Point Size;
@@ -86,6 +87,7 @@ namespace Test
     typedef std::vector<uint32_t> Sums;
     typedef std::vector<uint64_t> Sums64;
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
+    typedef std::vector<float*> FloatPtrs;
 
     const int E = 10;
     const int O = 9;

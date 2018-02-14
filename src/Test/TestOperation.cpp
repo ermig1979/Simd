@@ -113,7 +113,7 @@ namespace Test
             return "<Sub>";
         }
         assert(0);
-        return "<Unknown";
+        return "<Unknown>";
     }
 
 #define ARGS_OB8U(format, width, height, type, function1, function2) \

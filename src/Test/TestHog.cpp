@@ -216,10 +216,10 @@ namespace Test
 
             FuncHD(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, const size_t width, size_t count, float ** dst, size_t dstStride) const
+            void Call(const View & src, const size_t width, size_t count, FloatPtrs dst, size_t dstStride) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride / 4, width, src.height, count, dst, dstStride);
+                func((float*)src.data, src.stride / 4, width, src.height, count, dst.data(), dstStride);
             }
         };
     }
@@ -240,16 +240,16 @@ namespace Test
 
         View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
         View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
-        std::vector<float*> d1(count), d2(count);
+        FloatPtrs d1(count), d2(count);
         for (size_t i = 0; i < count; ++i)
         {
             d1[i] = (float*)(dst1.data + dst1.stride*height*i);
             d2[i] = (float*)(dst2.data + dst2.stride*height*i);
         }
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, width, count, d1.data(), dst1.stride / 4));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, width, count, d1, dst1.stride / 4));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, width, count, d2.data(), dst2.stride / 4));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, width, count, d2, dst2.stride / 4));
 
         result = result && Compare(dst1, dst2, EPS, true, 64);
 
@@ -504,7 +504,7 @@ namespace Test
 
         View dst1(width, height*count, View::Float, NULL, TEST_ALIGN(width));
         View dst2(width, height*count, View::Float, NULL, TEST_ALIGN(width));
-        std::vector<float*> d1(count), d2(count);
+        FloatPtrs d1(count), d2(count);
         for (int i = 0; i < count; ++i)
         {
             d1[i] = (float*)(dst1.data + dst1.stride*height*i);
@@ -520,7 +520,7 @@ namespace Test
 
             TEST_SAVE(src);
 
-            f.Call(src, width, count, d1.data(), dst1.stride / 4);
+            f.Call(src, width, count, d1, dst1.stride / 4);
 
             TEST_SAVE(dst1);
         }
@@ -530,7 +530,7 @@ namespace Test
 
             TEST_LOAD(dst1);
 
-            f.Call(src, width, count, d2.data(), dst2.stride / 4);
+            f.Call(src, width, count, d2, dst2.stride / 4);
 
             TEST_SAVE(dst2);
 

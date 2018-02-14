@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -101,6 +101,114 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Avx512f::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#endif 
+
+        return result;
+    }
+
+    SIMD_INLINE String ToString(SimdSynetEltwiseOperationType type)
+    {
+        switch (type)
+        {
+        case SimdSynetEltwiseOperationProduct:
+            return "<P>";
+        case SimdSynetEltwiseOperationSum:
+            return "<S>";
+        case SimdSynetEltwiseOperationMax:
+            return "<M>";
+        }
+        assert(0);
+        return "<U>";
+    }
+
+    namespace
+    {
+        struct FuncELF
+        {
+            typedef void(*FuncPtr)(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncELF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+            FuncELF(const FuncELF & f, SimdSynetEltwiseOperationType type, size_t count) : func(f.func), desc(f.desc + ToString(type) + "[" + ToString(count) + "]") {}
+
+            void Call(FloatPtrs src, const View & weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.data(), (float*)weight.data, count, size, type, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_ELF(function) FuncELF(function, #function)
+#define ARGS_ELF(count, type, f1, f2) count, type, FuncELF(f1, type, count), FuncELF(f2, type, count)
+
+    bool SynetEltwiseLayerForwardAutoTest(size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f1, const FuncELF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(size, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(src, -1.0, 1.0);
+        FloatPtrs psrc(count);
+        for (size_t i = 0; i < count; ++i)
+            psrc[i] = src.Row<float>(i);
+        View weight(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FillRandom32f(weight, -1.0, 1.0);
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(psrc, weight, count, size, type, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(psrc, weight, count, size, type, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetEltwiseLayerForwardAutoTest(const FuncELF & f1, const FuncELF & f2)
+    {
+        bool result = true;
+
+        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMax; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
+        {
+            for (size_t count = 2; count <= 3; ++count)
+            {
+                result = result && SynetEltwiseLayerForwardAutoTest(H*W, ARGS_ELF(count, type, f1, f2));
+                result = result && SynetEltwiseLayerForwardAutoTest(H*W + O, ARGS_ELF(count, type, f1, f2));
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetEltwiseLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Base::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sse::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx512f::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
         return result;
@@ -246,6 +354,61 @@ namespace Test
     bool SynetAddBiasDataTest(bool create)
     {
         return SynetAddBiasDataTest(create, DH, DW, FUNC_AB(SimdSynetAddBias));
+    }
+
+    bool SynetEltwiseLayerForwardDataTest(bool create, size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f)
+    {
+        bool result = true;
+
+        Data data(f.desc);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << size << "].");
+        View src(size, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        FloatPtrs psrc(count);
+        for (size_t i = 0; i < count; ++i)
+            psrc[i] = src.Row<float>(i);
+        View weight(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        if (create)
+        {
+            FillRandom32f(src, -1.0, 1.0);
+            FillRandom32f(weight, -1.0, 1.0);
+
+            TEST_SAVE(src);
+            TEST_SAVE(weight);
+
+            f.Call(psrc, weight, count, size, type, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+            TEST_LOAD(weight);
+
+            TEST_LOAD(dst1);
+
+            f.Call(psrc, weight, count, size, type, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        }
+
+        return result;
+    }
+
+    bool SynetEltwiseLayerForwardDataTest(bool create)
+    {
+        bool result = true; 
+
+        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMax; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
+            for (size_t count = 2; count <= 2; ++count)
+                result = result && SynetEltwiseLayerForwardDataTest(create, DH*DW, count, type, FuncELF(FUNC_ELF(SimdSynetEltwiseLayerForward), type, count));
+       
+        return result;
     }
 
     bool SynetScaleLayerForwardDataTest(bool create, size_t count, size_t size, const FuncSLF & f)

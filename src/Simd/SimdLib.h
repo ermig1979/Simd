@@ -4921,6 +4921,60 @@ extern "C"
     SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
 
     /*! @ingroup synet
+        Describes operation type used in function ::SimdSynetEltwiseLayerForward.
+    */
+    enum SimdSynetEltwiseOperationType
+    {
+        SimdSynetEltwiseOperationProduct, /*!< Product. */
+        SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
+        SimdSynetEltwiseOperationMax, /*!< Maximum. */
+    };
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
+
+        \short This function is used for forward propagation of EltwiseLayer.
+
+        Algorithm's details for ::SimdSynetEltwiseOperationProduct:
+        \verbatim
+        for(j = 0; j < size; ++j)
+            dst[j] = 1;
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[j] *= src[i][j];
+        \endverbatim
+
+        Algorithm's details for ::SimdSynetEltwiseOperationSum:
+        \verbatim
+        for(j = 0; j < size; ++j)
+            dst[j] = 0;
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[j] += src[i][j]*weight[i];
+        \endverbatim
+
+        Algorithm's details for ::SimdSynetEltwiseOperationMax:
+        \verbatim
+        for(j = 0; j < size; ++j)
+            dst[j] = -FLT_MAX;
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[j] = max(dst[j], src[i][j]);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to poitres to the input 32-bit float arrays. 
+        \param [in] weight - a pointer to the 32-bit float array with sum coefficients. It is need only for ::SimdSynetEltwiseOperationSum operation type otherwise it can be NULL.
+        \param [in] count - a count of input arrays. Must be at least 2.
+        \param [in] size - a size of the input and output arrays.
+        \param [in] type - a type of operation (see ::SimdSynetEltwiseOperationType).
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
+
+    /*! @ingroup synet
 
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
 
