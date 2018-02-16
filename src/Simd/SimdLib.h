@@ -4923,12 +4923,12 @@ extern "C"
     /*! @ingroup synet
         Describes operation type used in function ::SimdSynetEltwiseLayerForward.
     */
-    enum SimdSynetEltwiseOperationType
+    typedef enum
     {
         SimdSynetEltwiseOperationProduct, /*!< Product. */
         SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
         SimdSynetEltwiseOperationMax, /*!< Maximum. */
-    };
+    } SimdSynetEltwiseOperationType;
 
     /*! @ingroup synet
 
