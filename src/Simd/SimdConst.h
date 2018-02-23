@@ -90,7 +90,7 @@ namespace Simd
     namespace Sse2
     {
         using namespace Sse;
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug
         using Sse::F;
         using Sse::DF;
         using Sse::QF;
@@ -165,7 +165,7 @@ namespace Simd
     namespace Sse3
     {
         using namespace Sse2;
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
         using Sse::F;
         using Sse::DF;
         using Sse::QF;
@@ -212,7 +212,7 @@ namespace Simd
     namespace Sse41
     {
         using namespace Ssse3;
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
         using Sse::F;
         using Sse::DF;
         using Sse::QF;
@@ -241,7 +241,7 @@ namespace Simd
     namespace Avx2
     {
         using namespace Avx;
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
+#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug    
         using Avx::F;
         using Avx::DF;
         using Avx::QF;

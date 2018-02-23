@@ -1282,7 +1282,7 @@ namespace Simd
         */
         class DropoutLayer : public Layer
         {
-            const size_t RANDOM_SIZE = 256;
+            static size_t SIMD_INLINE RandomSize() { return 256; }
         public:
             /*!
             \short Creates new DropoutLayer class.
@@ -1344,7 +1344,7 @@ namespace Simd
                 _specific.resize(number);
                 if (train)
                 {
-                    _mask.resize(_src.Volume()*(1 + RANDOM_SIZE));
+                    _mask.resize(_src.Volume()*(1 + RandomSize()));
                     for (size_t i = 0; i < _mask.size(); ++i)
                         _mask[i] = Detail::RandomUniform(0.0f, 1.0f) <= _rate ? 1.0f : 0.0f;
                 }
@@ -1362,7 +1362,7 @@ namespace Simd
 
             const float * Mask()
             {
-                size_t start = Detail::RandomUniform(0, int(RANDOM_SIZE*_src.Volume()));
+                size_t start = Detail::RandomUniform(0, int(RandomSize()*_src.Volume()));
                 return _mask.data() + start;
             }
         };
