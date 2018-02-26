@@ -25,6 +25,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdStream.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -99,84 +100,28 @@ namespace Simd
                 NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
         }
 
-        class PowEstimator
+        template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
-            __m128i _exponent, _mantissa;
-            __m128 _one;
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
 
-            void Init()
-            {
-                _exponent = _mm_set1_epi32(0x7F800000);
-                _mantissa = _mm_set1_epi32(0x007FFFFF);
-                _one = _mm_set1_ps(1.0f);
-            }
-
-            SIMD_INLINE __m128 Poly5(__m128 x, float a, float b, float c, float d, float e, float f)
-            {
-                __m128 p = _mm_set1_ps(f);
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(e));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(d));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(c));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(b));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(a));
-                return p;
-            }
-
-            SIMD_INLINE __m128 Exp2(__m128 x)
-            {
-                x = _mm_max_ps(_mm_min_ps(x, _mm_set1_ps(129.00000f)), _mm_set1_ps(-126.99999f));
-                __m128i ipart = _mm_cvtps_epi32(_mm_sub_ps(x, _mm_set1_ps(0.5f)));
-                __m128 fpart = _mm_sub_ps(x, _mm_cvtepi32_ps(ipart));
-                __m128 expipart = _mm_castsi128_ps(_mm_slli_epi32(_mm_add_epi32(ipart, _mm_set1_epi32(127)), 23));
-                __m128 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
-                return _mm_mul_ps(expipart, expfpart);
-            }
-
-            SIMD_INLINE __m128 Log2(__m128 x)
-            {
-                __m128i i = _mm_castps_si128(x);
-                __m128 e = _mm_cvtepi32_ps(_mm_sub_epi32(_mm_srli_epi32(_mm_and_si128(i, _exponent), 23), _mm_set1_epi32(127)));
-                __m128 m = _mm_or_ps(_mm_castsi128_ps(_mm_and_si128(i, _mantissa)), _one);
-                __m128 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
-                return _mm_add_ps(_mm_mul_ps(p, _mm_sub_ps(m, _one)), e);
-            }
-
-            SIMD_INLINE __m128 Pow(__m128 basis, __m128 exponent)
-            {
-                return Exp2(_mm_mul_ps(Log2(basis), exponent));
-            }
-
-            template<bool align> void Run(const float * src, size_t size, const float * exponent, float * dst)
-            {
-                if (align)
-                    assert(Aligned(src) && Aligned(dst));
-
-                float e = exponent[0];
-                size_t alignedSize = AlignLo(size, F);
-                __m128 _e = _mm_set1_ps(e);
-                size_t i = 0;
-                for (; i < alignedSize; i += F)
-                    Sse::Store<align>(dst + i, Pow(Sse::Load<align>(src + i), _e));
-                for (; i < size; ++i)
-                    dst[i] = Base::Pow(src[i], e);
-            } 
-
-        public:
-            void Run(const float * src, size_t size, const float * exponent, float * dst)
-            {
-                Init();
-
-                if (Aligned(src) && Aligned(dst))
-                    Run<true>(src, size, exponent, dst);
-                else
-                    Run<false>(src, size, exponent, dst);
-            }
-        };
+            float e = exponent[0];
+            size_t alignedSize = AlignLo(size, F);
+            __m128 _e = _mm_set1_ps(e);
+            Pow pow;
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+                Sse::Store<align>(dst + i, pow(Sse::Load<align>(src + i), _e));
+            for (; i < size; ++i)
+                dst[i] = Base::Pow(src[i], e);
+        }
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
-            PowEstimator estimator;
-            estimator.Run(src, size, exponent, dst);
+            if (Aligned(src) && Aligned(dst))
+                NeuralPow<true>(src, size, exponent, dst);
+            else
+                NeuralPow<false>(src, size, exponent, dst);
         }
 
         class ExpEstimator

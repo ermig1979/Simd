@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -259,15 +259,6 @@ namespace Simd
             float d = delta[offset] * norm;
             gradient[offset] += d*d;
             weight[offset] -= alpha * d / ::sqrt(gradient[offset] + epsilon);
-        }
-
-        SIMD_INLINE float Pow(float basis, float exponent)
-        {
-#if defined(__GNUC__) && defined(SIMD_X86_ENABLE)
-
-#else
-            return ::expf(::logf(basis)*exponent);
-#endif
         }
     }
 

@@ -25,6 +25,8 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdAvx1.h"
+#include "Simd/SimdArray.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -101,6 +103,62 @@ namespace Simd
                 SynetEltwiseLayerForwardSum<true>(src, weight, count, size, dst);
             else
                 SynetEltwiseLayerForwardSum<false>(src, weight, count, size, dst);
+        }
+
+        template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            size_t aligned = AlignLo(size, F);
+            Array32f sum(size, true), zero(size, true);
+
+            for (size_t i = 0; i < half; ++i)
+            {
+                const float * pos = src + i * size;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    __m256 _pos = Avx::Load<align>(pos + j);
+                    Avx::Store<true>(sum.data + j, _mm256_fmadd_ps(_pos, _pos, Avx::Load<true>(sum.data + j)));
+                }
+                for (; j < size; ++j)
+                    sum[j] += Simd::Square(pos[j]);
+            }
+
+            __m256 k0 = _mm256_set1_ps(k[0]);
+            __m256 k1 = _mm256_set1_ps(k[1]);
+            __m256 k2 = _mm256_set1_ps(k[2]);
+            Avx2::Pow pow;
+            for (size_t i = 0; i < count; ++i)
+            {
+                const float * pos = (i < count - half) ? src + half * size : zero.data;
+                const float * neg = (i >= half) ? src - half * size : zero.data;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    __m256 _pos = Avx::Load<align>(pos + j);
+                    __m256 _neg = Avx::Load<align>(neg + j);
+                    __m256 _sum = Avx::Load<true>(sum.data + j);
+                    _sum = _mm256_fmadd_ps(_pos, _pos, _mm256_fnmadd_ps(_neg, _neg, _sum));
+                    __m256 _src = Avx::Load<align>(src + j);
+                    Avx::Store<true>(sum.data + j, _sum);
+                    Avx::Store<align>(dst + j, _mm256_mul_ps(_src, pow(_mm256_fmadd_ps(k1, _sum, k0), k2)));
+                }
+                for (; j < size; ++j)
+                {
+                    sum[j] += Simd::Square(pos[j]);
+                    sum[j] -= Simd::Square(neg[j]);
+                    dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                }
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(size))
+                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
+            else
+                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
         }
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m256 & scale, const __m256 & bias, float * dst, size_t offset)

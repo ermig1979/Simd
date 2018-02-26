@@ -311,6 +311,7 @@ namespace Test
 
     TEST_ADD_GROUP(SynetAddBias);
     TEST_ADD_GROUP(SynetEltwiseLayerForward);
+    TEST_ADD_GROUP(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP(SynetScaleLayerForward);
 
     TEST_ADD_GROUP(TextureBoostedSaturatedGradient);

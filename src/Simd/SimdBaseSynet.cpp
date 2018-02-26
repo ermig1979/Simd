@@ -21,7 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
+#include "Simd/SimdArray.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -154,6 +155,33 @@ namespace Simd
                 break;
             default:
                 assert(0);
+            }
+        }
+
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            float k0 = k[0], k1 = k[1], k2 = k[2];
+            Array32f sum(size, true), zero(size, true);
+
+            for (size_t i = 0; i < half; ++i)
+            {
+                const float * pos = src + i * size;
+                for (size_t j = 0; j < size; ++j)
+                    sum[j] += Simd::Square(pos[j]);
+            }
+
+            for (size_t i = 0; i < count; ++i)
+            {
+                const float * pos = (i < count - half) ? src + half * size : zero.data;
+                const float * neg = (i >= half) ? src - half * size : zero.data;
+                for (size_t j = 0; j < size; ++j)
+                {
+                    sum[j] += Simd::Square(pos[j]);
+                    sum[j] -= Simd::Square(neg[j]);
+                    dst[j] = src[j] * Pow(k0 + k1 * sum[j], k2);
+                }
+                src += size;
+                dst += size;
             }
         }
 

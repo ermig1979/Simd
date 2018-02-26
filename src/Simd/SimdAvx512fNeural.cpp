@@ -27,6 +27,7 @@
 #include "Simd/SimdStream.h"
 #include "Simd/SimdNeural.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -621,90 +622,35 @@ namespace Simd
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
         }
 
-        class PowEstimator
+        template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
-            __m512i _exponent, _mantissa, _127;
-            __m512 _1_0, _0_5;
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
 
-            void Init()
+            float e = exponent[0];
+            size_t aligned = AlignLo(size, F);
+            __m512 _e = _mm512_set1_ps(e);
+            Pow pow;
+            size_t i = 0;
+            for (; i < aligned; i += F)
+                Avx512f::Store<align>(dst + i, pow(Avx512f::Load<align>(src + i), _e));
+            if (i < size)
             {
-                _exponent = _mm512_set1_epi32(0x7F800000);
-                _mantissa = _mm512_set1_epi32(0x007FFFFF);
-                _127 = _mm512_set1_epi32(127);
-                _1_0 = _mm512_set1_ps(1.0f);
-                _0_5 = _mm512_set1_ps(0.5f);
+                __mmask16 tail = TailMask16(size - i);
+                Avx512f::Store<align, true>(dst + i, pow(Avx512f::Load<align, true>(src + i, tail), _e), tail);
             }
-
-            SIMD_INLINE __m512 Poly5(__m512 x, float a, float b, float c, float d, float e, float f)
-            {
-                __m512 p = _mm512_set1_ps(f);
-                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(e));
-                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(d));
-                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(c));
-                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(b));
-                p = _mm512_fmadd_ps(x, p, _mm512_set1_ps(a));
-                return p;
-            }
-
-            SIMD_INLINE __m512 Exp2(__m512 x)
-            {
-                x = _mm512_max_ps(_mm512_min_ps(x, _mm512_set1_ps(129.00000f)), _mm512_set1_ps(-126.99999f));
-                __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _0_5));
-                __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
-                __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _mm512_set1_epi32(127)), 23));
-                __m512 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
-                return _mm512_mul_ps(expipart, expfpart);
-            }
-
-            SIMD_INLINE __m512 Log2(__m512 x)
-            {
-                __m512i i = _mm512_castps_si512(x);
-                __m512 e = _mm512_cvtepi32_ps(_mm512_sub_epi32(_mm512_srli_epi32(_mm512_and_si512(i, _exponent), 23), _127));
-                __m512 m = _mm512_or_ps(_mm512_castsi512_ps(_mm512_and_si512(i, _mantissa)), _1_0);
-                __m512 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
-                return _mm512_fmadd_ps(p, _mm512_sub_ps(m, _1_0), e);
-            }
-
-            SIMD_INLINE __m512 Pow(__m512 basis, __m512 exponent)
-            {
-                return Exp2(_mm512_mul_ps(Log2(basis), exponent));
-            }
-
-            template<bool align> void Run(const float * src, size_t size, const float * exponent, float * dst)
-            {
-                if (align)
-                    assert(Aligned(src) && Aligned(dst));
-
-                float e = exponent[0];
-                size_t alignedSize = AlignLo(size, F);
-                __m512 _e = _mm512_set1_ps(e);
-                size_t i = 0;
-                for (; i < alignedSize; i += F)
-                    Store<align>(dst + i, Pow(Load<align>(src + i), _e));
-                for (; i < size; ++i)
-                    dst[i] = Base::Pow(src[i], e);
-            }
-
-        public:
-            void Run(const float * src, size_t size, const float * exponent, float * dst)
-            {
-                Init();
-
-                if (Aligned(src) && Aligned(dst))
-                    Run<true>(src, size, exponent, dst);
-                else
-                    Run<false>(src, size, exponent, dst);
-            }
-        };
+        }
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
 #if defined(_MSC_VER) && _MSC_VER <= 1912
             Avx2::NeuralPow(src, size, exponent, dst);
-#else
-            PowEstimator estimator;
-            estimator.Run(src, size, exponent, dst);
-#endif
+#else            
+            if (Aligned(src) && Aligned(dst))
+                NeuralPow<true>(src, size, exponent, dst);
+            else
+                NeuralPow<false>(src, size, exponent, dst);
+#endif        
         }
 
         template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float * x, const __m512 & a, const __m512 & b, float * d, float * w, __mmask16 m)

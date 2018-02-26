@@ -216,6 +216,83 @@ namespace Test
 
     namespace
     {
+        struct FuncLLCC
+        {
+            typedef void(*FuncPtr)(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncLLCC(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Call(const View & src, size_t half, size_t count, size_t size, const float * k, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, half, count, size, k, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_LLCC(function) FuncLLCC(function, #function)
+
+    bool SynetLrnLayerCrossChannelsAutoTest(size_t half, size_t count, size_t size, const FuncLLCC & f1, const FuncLLCC & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        float k[3] = { 1.00, 0.10, -0.75 };
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, half, count, size, k, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, half, count, size, k, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetLrnLayerCrossChannelsAutoTest(const FuncLLCC & f1, const FuncLLCC & f2)
+    {
+        bool result = true;
+
+        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, f1, f2);
+        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetLrnLayerCrossChannelsAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Sse2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncSLF
         {
             typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
@@ -409,6 +486,51 @@ namespace Test
                 result = result && SynetEltwiseLayerForwardDataTest(create, DH*DW, count, type, FuncELF(FUNC_ELF(SimdSynetEltwiseLayerForward), type, count));
        
         return result;
+    }
+
+    bool SynetLrnLayerCrossChannelsDataTest(bool create, size_t half, size_t count, size_t size, const FuncLLCC & f)
+    {
+        bool result = true;
+
+        Data data(f.desc);
+
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        float k[3] = { 1.00, 0.10, -0.75 };
+
+        if (create)
+        {
+            FillRandom32f(src, -10.0, 10.0);
+
+            TEST_SAVE(src);
+
+            f.Call(src, half, count, size, k, dst1);
+
+            TEST_SAVE(dst1);
+        }
+        else
+        {
+            TEST_LOAD(src);
+
+            TEST_LOAD(dst1);
+
+            f.Call(src, half, count, size, k, dst2);
+
+            TEST_SAVE(dst2);
+
+            result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        }
+
+        return result;
+    }
+
+    bool SynetLrnLayerCrossChannelsDataTest(bool create)
+    {
+        return SynetLrnLayerCrossChannelsDataTest(create, 2, DH, DW, FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
     }
 
     bool SynetScaleLayerForwardDataTest(bool create, size_t count, size_t size, const FuncSLF & f)

@@ -24,6 +24,9 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdPow.h"
+#include "Simd/SimdAvx2.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -226,6 +229,71 @@ namespace Simd
                 SynetEltwiseLayerForward<true>(src, weight, count, size, type, dst);
             else
                 SynetEltwiseLayerForward<false>(src, weight, count, size, type, dst);
+        }
+
+        template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            size_t aligned = AlignLo(size, F);
+            __mmask16 tail = TailMask16(size - aligned);
+            Array32f sum(size, true), zero(size, true);
+
+            for (size_t i = 0; i < half; ++i)
+            {
+                const float * pos = src + i * size;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    __m512 _pos = Avx512f::Load<align>(pos + j);
+                    Avx512f::Store<true>(sum.data + j, _mm512_fmadd_ps(_pos, _pos, Avx512f::Load<true>(sum.data + j)));
+                }
+                if (j < size)
+                {
+                    __m512 _pos = Avx512f::Load<align, true>(pos + j, tail);
+                    __m512 _sum = Avx512f::Load<true, true>(sum.data + j, tail);
+                    Avx512f::Store<true, true>(sum.data + j, _mm512_fmadd_ps(_pos, _pos, _sum), tail);
+                }
+            }
+
+            __m512 k0 = _mm512_set1_ps(k[0]);
+            __m512 k1 = _mm512_set1_ps(k[1]);
+            __m512 k2 = _mm512_set1_ps(k[2]);
+            Avx512f::Pow pow;
+            for (size_t i = 0; i < count; ++i)
+            {
+                const float * pos = (i < count - half) ? src + half * size : zero.data;
+                const float * neg = (i >= half) ? src - half * size : zero.data;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    __m512 _pos = Avx512f::Load<align>(pos + j);
+                    __m512 _neg = Avx512f::Load<align>(neg + j);
+                    __m512 _sum = Avx512f::Load<true>(sum.data + j);
+                    _sum = _mm512_fmadd_ps(_pos, _pos, _mm512_fnmadd_ps(_neg, _neg, _sum));
+                    __m512 _src = Avx512f::Load<align>(src + j);
+                    Avx512f::Store<true>(sum.data + j, _sum);
+                    Avx512f::Store<align>(dst + j, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)));
+                }
+                if (j < size)
+                {
+                    __m512 _pos = Avx512f::Load<align, true>(pos + j, tail);
+                    __m512 _neg = Avx512f::Load<align, true>(neg + j, tail);
+                    __m512 _sum = Avx512f::Load<true, true>(sum.data + j, tail);
+                    _sum = _mm512_fmadd_ps(_pos, _pos, _mm512_fnmadd_ps(_neg, _neg, _sum));
+                    __m512 _src = Avx512f::Load<align, true>(src + j, tail);
+                    Avx512f::Store<true, true>(sum.data + j, _sum, tail);
+                    Avx512f::Store<align, true>(dst + j, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)), tail);
+                }
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(size))
+                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
+            else
+                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m512 & scale, const __m512 & bias, float * dst, size_t offset, __mmask16 tail = -1)

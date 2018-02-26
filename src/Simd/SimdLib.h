@@ -4976,6 +4976,37 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+
+        \short This function is used for forward propagation of LrnLayer (cross channels normalization).
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+            {
+                lo = Max(0, i - half);
+                ln = Min(count, i + half + 1);
+                sum = 0;
+                for(l = lo; l < ln; ++l)
+                    sum += Square(src[l*size + j]);
+                dst[i*size + j] = src[i*size + j]*Pow(k[0] + sum*k[1], k[2]);
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] half - a local normalization half size.
+        \param [in] count - a channels count.
+        \param [in] size - an internal size of the operation.
+        \param [in] k - a pointer to the 32-bit float array with 3 coefficients (see algorithm details). 
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+    */
+    SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
 
         \short This function is used for forward propagation of ScaleLayer.
