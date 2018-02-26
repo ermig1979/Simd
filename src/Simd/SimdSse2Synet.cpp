@@ -56,7 +56,7 @@ namespace Simd
             for (size_t i = 0; i < count; ++i)
             {
                 const float * pos = (i < count - half) ? src + half * size : zero.data;
-                const float * neg = (i >= half) ? src - half * size : zero.data;
+                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
                 size_t j = 0;
                 for (; j < aligned; j += F)
                 {

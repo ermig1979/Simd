@@ -173,7 +173,7 @@ namespace Simd
             for (size_t i = 0; i < count; ++i)
             {
                 const float * pos = (i < count - half) ? src + half * size : zero.data;
-                const float * neg = (i >= half) ? src - half * size : zero.data;
+                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
                 for (size_t j = 0; j < size; ++j)
                 {
                     sum[j] += Simd::Square(pos[j]);
