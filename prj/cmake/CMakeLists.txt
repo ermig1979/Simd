@@ -103,6 +103,9 @@ if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL 
     add_library(Simd ${LIBRARY} ${SIMD_LIB_SRC} ${SIMD_ALG_SRC})
 
     file(GLOB_RECURSE TEST_SRC_C ${TRUNK_DIR}/src/Test/*.c)
+	if((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang")) 
+	    set_source_files_properties(${TEST_SRC_C} PROPERTIES COMPILE_FLAGS "${CMAKE_C_FLAGS} -x c")
+	endif()
     file(GLOB_RECURSE TEST_SRC_CPP ${TRUNK_DIR}/src/Test/*.cpp)
     if(NOT ${TARGET} STREQUAL "")
         set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${SIMD_LIB_FLAGS} -std=c++11")
