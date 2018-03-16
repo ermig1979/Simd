@@ -49,7 +49,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdEnable.h"
-#include "Simd/SimdVersion.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdLog.h"
 
@@ -68,6 +67,15 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdMsa.h"
+
+#if !defined(SIMD_VERSION)
+#include "Simd/SimdVersion.h"
+#endif
+
+SIMD_API const char * SimdVersion()
+{
+    return SIMD_VERSION;
+}
 
 using namespace Simd;
 
@@ -117,11 +125,6 @@ SIMD_API int SimdCpuInfo()
     info |= Msa::Enable ? (1 << SimdCpuInfoMsa) : 0;
 #endif
     return info;
-}
-
-SIMD_API const char * SimdVersion()
-{
-    return SIMD_VERSION;
 }
 
 SIMD_API void * SimdAllocate(size_t size, size_t align)
