@@ -134,6 +134,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a31d8d56286c8c4c6d0cdec6f9dec47f1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a552b4c4d467a3fb68b2291d0b0ffdfcb"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a552b4c4d467a3fb68b2291d0b0ffdfcb">operator cv::Mat</a> () const</td></tr>
 <tr class="separator:a552b4c4d467a3fb68b2291d0b0ffdfcb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a347a853e760709bf1c05bcfd84a12e41"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a347a853e760709bf1c05bcfd84a12e41">ToTFTensor</a> (tensorflow::Tensor &amp;tensor, float shift=0, float scale=1) const</td></tr>
+<tr class="separator:a347a853e760709bf1c05bcfd84a12e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a915d36f71d32cff4aab211a7df100dc0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a915d36f71d32cff4aab211a7df100dc0">ToTFTensor</a> (tensorflow::Tensor &amp;tensor, int batchIndex, float shift=0, float scale=0) const</td></tr>
+<tr class="separator:a915d36f71d32cff4aab211a7df100dc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20180798df36bad984a0073c1c3513a0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a20180798df36bad984a0073c1c3513a0">Clone</a> () const</td></tr>
 <tr class="separator:a20180798df36bad984a0073c1c3513a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade09f01a94c8f95b525ac2321de7af64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_view.html">View</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ade09f01a94c8f95b525ac2321de7af64">operator=</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a> &amp;view)</td></tr>
@@ -609,6 +613,86 @@ int main()
 <p>Creates an OpenCV Mat which references this image.</p>
 <dl class="section note"><dt>Note</dt><dd>You have to define SIMD_OPENCV_ENABLE in order to use this functionality.</dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>an OpenCV Mat which references to this image. </dd></dl>
+
+</div>
+</div>
+<a id="a347a853e760709bf1c05bcfd84a12e41"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a347a853e760709bf1c05bcfd84a12e41">&#9670;&nbsp;</a></span>ToTFTensor() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE void ToTFTensor </td>
+          <td>(</td>
+          <td class="paramtype">tensorflow::Tensor &amp;&#160;</td>
+          <td class="paramname"><em>tensor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>shift</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em> = <code>1</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Creates an Tensorflow Tensor which references this image.</p>
+<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an Tensorflow Tensor which references to this image. </dd></dl>
+
+</div>
+</div>
+<a id="a915d36f71d32cff4aab211a7df100dc0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a915d36f71d32cff4aab211a7df100dc0">&#9670;&nbsp;</a></span>ToTFTensor() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE void ToTFTensor </td>
+          <td>(</td>
+          <td class="paramtype">tensorflow::Tensor &amp;&#160;</td>
+          <td class="paramname"><em>tensor</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>batchIndex</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>shift</em> = <code>0</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>scale</em> = <code>0</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Creates an Tensorflow Tensor which references this image.</p>
+<dl class="section note"><dt>Note</dt><dd>You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>an Tensorflow Tensor which references to this image. </dd></dl>
 
 </div>
 </div>
