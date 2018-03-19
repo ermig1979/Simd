@@ -77,9 +77,9 @@ namespace Simd
                 {
                     dstOffset = dstWidth - A - (evenWidth != srcWidth ? 1 : 0);
                     srcOffset = evenWidth - DA;
-                    Store<align>((__m128i*)(dst + dstOffset), Average8(
-                        Load<align>((__m128i*)(src0 + srcOffset)), Load<align>((__m128i*)(src0 + srcOffset + A)),
-                        Load<align>((__m128i*)(src1 + srcOffset)), Load<align>((__m128i*)(src1 + srcOffset + A))));
+                    Store<false>((__m128i*)(dst + dstOffset), Average8(
+                        Load<false>((__m128i*)(src0 + srcOffset)), Load<false>((__m128i*)(src0 + srcOffset + A)),
+                        Load<false>((__m128i*)(src1 + srcOffset)), Load<false>((__m128i*)(src1 + srcOffset + A))));
                     if (evenWidth != srcWidth)
                     {
                         dst[dstWidth - 1] = Base::Average(src0[evenWidth], src1[evenWidth]);
