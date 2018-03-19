@@ -71,7 +71,7 @@ namespace Simd
 
         SIMD_INLINE __m256 Uint8ToFloat32(const __m128i & value, const __m256 & lower, const __m256 & boost)
         {
-            return _mm256_sub_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(value)), boost), lower);
+            return _mm256_add_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(value)), boost), lower);
         }
 
         template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)

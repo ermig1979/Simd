@@ -649,9 +649,8 @@ namespace Simd
     }
 #endif
 
-
 #ifdef SIMD_TENSORFLOW_ENABLE
-template <template<class> class A> SIMD_INLINE void View<A>::ToTFTensor( tensorflow::Tensor & tensor, float shift, float scale) const
+    template <template<class> class A> SIMD_INLINE void View<A>::ToTFTensor( tensorflow::Tensor & tensor, float shift, float scale) const
     {
         auto mapped = tensor.tensor<float, 3>();
 
@@ -692,7 +691,6 @@ template <template<class> class A> SIMD_INLINE void View<A>::ToTFTensor( tensorf
             }
         }
     }
-
 
     template <template<class> class A> SIMD_INLINE void View<A>::ToTFTensor( tensorflow::Tensor & tensor, int batchIndex, float shift, float scale) const
     {

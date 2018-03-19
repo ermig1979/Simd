@@ -76,7 +76,7 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const __m128i & value, const __m512 & lower, const __m512 & boost, float * dst, __mmask16 tail)
         {
-            Avx512f::Store<align, mask>(dst, _mm512_sub_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
+            Avx512f::Store<align, mask>(dst, _mm512_add_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m512 & lower, const __m512 & boost, float * dst, __mmask64 srcTail, const __mmask16 * dstTails)

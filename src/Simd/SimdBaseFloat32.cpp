@@ -51,7 +51,7 @@ namespace Simd
 
         SIMD_INLINE float Uint8ToFloat32(int value, float lower, float boost)
         {
-            return value*boost - lower;
+            return value*boost + lower;
         }
 
         void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst)
