@@ -180,6 +180,8 @@ namespace Test
     TEST_ADD_GROUP(Float32ToUint8);
     TEST_ADD_GROUP(Uint8ToFloat32);
 
+    TEST_ADD_GROUP(Gemm32fNN);
+
     TEST_ADD_GROUP(MeanFilter3x3);
     TEST_ADD_GROUP(MedianFilterRhomb3x3);
     TEST_ADD_GROUP(MedianFilterRhomb5x5);

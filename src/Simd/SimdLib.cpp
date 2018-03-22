@@ -2056,6 +2056,14 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
+typedef void(*SimdGemm32fNNPtr) (size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
+SimdGemm32fNNPtr simdGemm32fNN = SIMD_FUNC0(Gemm32fNN);
+
+SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
+{
+    simdGemm32fNN(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+}
+
 SIMD_API void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

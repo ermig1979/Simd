@@ -2259,6 +2259,28 @@ extern "C"
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup matrix
+
+        \fn void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
+
+        \short Performs general matrix multiplication (for 32-bit float numbers).
+
+        C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+
+        \param [in] M - a height of A and C matrices.
+        \param [in] N - a width of B and C matrices.
+        \param [in] K - a width of A and height of C matrices.
+        \param [in] alpha - a pointer to multiplier of the first term.
+        \param [in] A - a pointer to input A matrix.
+        \param [in] lda - a leading dimension of A matrix.
+        \param [in] B - a pointer to input B matrix.
+        \param [in] ldb - a leading dimension of B matrix.
+        \param [in] beta - a pointer to multiplier of the second term.
+        \param [out] C - a pointer to output C matrix.
+        \param [in] ldc - a leading dimension of C matrix.
+    */
+    SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
+
     /*! @ingroup gray_conversion
 
         \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);

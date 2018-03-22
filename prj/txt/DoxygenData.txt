@@ -493,3 +493,8 @@
     @defgroup synet Synet Framework
     \short Functions for accelerating of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
+
+/*! @ingroup functions
+    @defgroup matrix Matrix Operations
+    \short Matrix operations.
+*/
