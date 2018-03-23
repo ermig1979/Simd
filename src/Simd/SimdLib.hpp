@@ -2592,9 +2592,9 @@ namespace Simd
         \note This function is a C++ wrapper for function ::SimdResizeBilinear.
 
         \param [in] src - an original input image.
-        \param [out] dst - a reduced output image.
+        \param [out] dst - a resized output image.
     */
-    template<template<class> class A> SIMD_INLINE void ResizeBilinear(const View<A>& src, View<A>& dst)
+    template<template<class> class A> SIMD_INLINE void ResizeBilinear(const View<A> & src, View<A> & dst)
     {
         assert(src.format == dst.format && src.ChannelSize() == 1);
 
@@ -2606,6 +2606,42 @@ namespace Simd
         {
             SimdResizeBilinear(src.data, src.width, src.height, src.stride,
                 dst.data, dst.width, dst.height, dst.stride, src.ChannelCount());
+        }
+    }
+
+    /*! @ingroup resizing
+
+        \fn void ResizeAreaGray(const View<A> & src, View<A> & dst)
+
+        \short Performs resizing of input image with using area interpolation.
+
+        All images must have the same format (8-bit gray).
+
+        \param [in] src - an original input image.
+        \param [out] dst - a resized output image.
+    */
+    template<template<class> class A> SIMD_INLINE void ResizeAreaGray(const View<A> & src, View<A> & dst)
+    {
+        assert(src.format == dst.format && src.format == View<A>::Gray8);
+
+        if (EqualSize(src, dst))
+        {
+            Copy(src, dst);
+        }
+        else
+        {
+            size_t level = 0;
+            for (; (dst.width << (level + 1)) < (size_t)src.width; level++);
+            Point size = src.Size() << level;
+            if (level)
+            {
+                Pyramid pyramid(size, level + 1);
+                Simd::ResizeBilinear(src, pyramid[0]);
+                Simd::Build(pyramid, SimdReduce2x2);
+                Simd::Copy(pyramid[level], dst);
+            }
+            else
+                Simd::ResizeBilinear(src, dst);
         }
     }
 

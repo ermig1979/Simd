@@ -91,7 +91,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(1024, 1024, 1024, f1, f2);
+        result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
+        result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
 
         return result;
     }
@@ -101,6 +103,11 @@ namespace Test
         bool result = true;
 
         result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Sse::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+#endif 
 
         return result;
     }

@@ -92,6 +92,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gade5047dc4b419a9d7dbbab980deefb4f"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gade5047dc4b419a9d7dbbab980deefb4f">ResizeBilinear</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gade5047dc4b419a9d7dbbab980deefb4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using bilinear interpolation.  <a href="group__resizing.html#gade5047dc4b419a9d7dbbab980deefb4f">More...</a><br /></td></tr>
 <tr class="separator:gade5047dc4b419a9d7dbbab980deefb4f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga3b8b4d3f80b3b56cdec02096a7a4e76b">ResizeAreaGray</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
+<tr class="memdesc:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs resizing of input image with using area interpolation.  <a href="group__resizing.html#ga3b8b4d3f80b3b56cdec02096a7a4e76b">More...</a><br /></td></tr>
+<tr class="separator:ga3b8b4d3f80b3b56cdec02096a7a4e76b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafc8d7f38e2911f7db847c01bb1d14982"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:gafc8d7f38e2911f7db847c01bb1d14982"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__resizing.html#gafc8d7f38e2911f7db847c01bb1d14982">StretchGray2x2</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;dst)</td></tr>
 <tr class="memdesc:gafc8d7f38e2911f7db847c01bb1d14982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stretches input 8-bit gray image in two times.  <a href="group__resizing.html#gafc8d7f38e2911f7db847c01bb1d14982">More...</a><br /></td></tr>
@@ -890,7 +894,45 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a reduced output image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga3b8b4d3f80b3b56cdec02096a7a4e76b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3b8b4d3f80b3b56cdec02096a7a4e76b">&#9670;&nbsp;</a></span>ResizeAreaGray()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ResizeAreaGray </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs resizing of input image with using area interpolation. </p>
+<p>All images must have the same format (8-bit gray).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an original input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a resized output image. </td></tr>
   </table>
   </dd>
 </dl>

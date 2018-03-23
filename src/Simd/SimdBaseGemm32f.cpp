@@ -32,13 +32,15 @@ namespace Simd
             register float b = beta[0];
             for (size_t i = 0; i < M; ++i)
             {
+                float * pC = C + i * ldc;
                 for (size_t j = 0; j < N; ++j)
-                    C[i*ldc + j] *= b;
+                    pC[j] = b * pC[j];
                 for (size_t k = 0; k < K; ++k)
                 {
+                    const float * pB = B + k * ldb;
                     register float a = alpha[0] * A[i*lda + k];
                     for (size_t j = 0; j < N; ++j)
-                        C[i*ldc + j] += a * B[k*ldb + j];
+                        pC[j] = a * pB[j] + pC[j];
                 }
             }
         }
