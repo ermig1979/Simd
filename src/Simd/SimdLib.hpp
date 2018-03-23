@@ -2632,12 +2632,13 @@ namespace Simd
         {
             size_t level = 0;
             for (; (dst.width << (level + 1)) < (size_t)src.width; level++);
-            Point size = src.Size() << level;
+            Point<ptrdiff_t> size = src.Size() << level;
             if (level)
             {
-                Pyramid pyramid(size, level + 1);
+                Pyramid<A> pyramid(size, level + 1);
                 Simd::ResizeBilinear(src, pyramid[0]);
-                Simd::Build(pyramid, SimdReduce2x2);
+                for (size_t i = 0; i < level; ++i)
+                    Simd::ReduceGray(pyramid.At(i), pyramid.At(i + 1), ::SimdReduce2x2);
                 Simd::Copy(pyramid[level], dst);
             }
             else
