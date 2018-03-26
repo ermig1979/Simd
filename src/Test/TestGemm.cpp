@@ -67,11 +67,11 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(M, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View B(K, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View srcC(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC1(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC2(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View A(K, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View B(N, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         const float alpha = 1.5f, beta = 0.5f;
         FillRandom32f(A, -1.0f, 1.0f);
@@ -91,9 +91,11 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
+        //result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
         result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
-        result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
+        result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
+        //result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
+        result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
 
         return result;
     }
@@ -122,11 +124,11 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(M, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View B(K, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View srcC(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC1(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC2(M, N, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View A(K, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View B(N, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         const float alpha = 1.5f, beta = 0.5f;
 
