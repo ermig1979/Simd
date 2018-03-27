@@ -36,61 +36,9 @@ namespace Simd
             _mm_storeu_ps(ptr, _mm_mul_ps(_mm_loadu_ps(ptr), value));
         }
 
-        SIMD_INLINE void AddTo(float * ptr, __m128 value)
+        SIMD_INLINE void AddProduct(float * ptr, __m128 value, __m128 alpha)
         {
-            _mm_storeu_ps(ptr, _mm_add_ps(_mm_loadu_ps(ptr), value));
-        }
-
-        static void Kernel4x4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
-        {
-            register __m128 c0 = _mm_setzero_ps();
-            register __m128 c1 = _mm_setzero_ps();
-            register __m128 c2 = _mm_setzero_ps();
-            register __m128 c3 = _mm_setzero_ps();
-            const float * a0 = A + lda * 0;
-            const float * a1 = A + lda * 1;
-            const float * a2 = A + lda * 2;
-            const float * a3 = A + lda * 3;
-            register __m128 b0;
-            for (size_t k = 0; k < K; k++)
-            {
-                b0 = _mm_loadu_ps(B);
-                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a0++)), c0);
-                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a1++)), c1);
-                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a2++)), c2);
-                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a3++)), c3);
-                B += ldb;
-            }
-            __m128 _alpha = _mm_set1_ps(alpha);
-            AddTo(C + 0 * ldc, _mm_mul_ps(_alpha, c0));
-            AddTo(C + 1 * ldc, _mm_mul_ps(_alpha, c1));
-            AddTo(C + 2 * ldc, _mm_mul_ps(_alpha, c2));
-            AddTo(C + 3 * ldc, _mm_mul_ps(_alpha, c3));
-        }
-
-        static void KernelMx4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
-        {
-            register __m128 c[4];
-            register const float * a[4];
-            for (size_t i = 0; i < M; ++i)
-            {
-                c[i] = _mm_setzero_ps();
-                a[i] = A + lda * i;
-            }
-            register __m128 b0, a0;
-            for (size_t k = 0; k < K; k++)
-            {
-                b0 = _mm_loadu_ps(B + 0 * F);
-                for (size_t i = 0; i < M; ++i)
-                {
-                    a0 = _mm_set1_ps(*a[i]++);
-                    c[i] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i]);
-                }
-                B += ldb;
-            }
-            __m128 _alpha = _mm_set1_ps(alpha);
-            for (size_t i = 0; i < M; ++i)
-                AddTo(C + i*ldc, _mm_mul_ps(_alpha, c[i]));
+            _mm_storeu_ps(ptr, _mm_add_ps(_mm_mul_ps(value, alpha), _mm_loadu_ps(ptr)));
         }
 
         static void Kernel4x12(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -136,57 +84,95 @@ namespace Simd
                 B += ldb;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c00));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c01));
-            AddTo(C + 2 * F, _mm_mul_ps(_alpha, c02));
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01);
+            AddProduct(C + 2 * F, _alpha, c02);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c10));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c11));
-            AddTo(C + 2 * F, _mm_mul_ps(_alpha, c12));
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11);
+            AddProduct(C + 2 * F, _alpha, c12);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c20));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c21));
-            AddTo(C + 2 * F, _mm_mul_ps(_alpha, c22));
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21);
+            AddProduct(C + 2 * F, _alpha, c22);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c30));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c31));
-            AddTo(C + 2 * F, _mm_mul_ps(_alpha, c32));
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31);
+            AddProduct(C + 2 * F, _alpha, c32);
         }
 
-        static void KernelMx12(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
-            register __m128 c[4][3];
-            register const float * a[4];
-            for (size_t i = 0; i < M; ++i)
-            {
-                c[i][0] = _mm_setzero_ps();
-                c[i][1] = _mm_setzero_ps();
-                c[i][2] = _mm_setzero_ps();
-                a[i] = A + lda * i;
-            }
-            register __m128 b0, b1, b2, a0;
+            register __m128 c00 = _mm_setzero_ps();
+            register __m128 c10 = _mm_setzero_ps();
+            register __m128 c20 = _mm_setzero_ps();
+            register __m128 c30 = _mm_setzero_ps();
+            register __m128 c01 = _mm_setzero_ps();
+            register __m128 c11 = _mm_setzero_ps();
+            register __m128 c21 = _mm_setzero_ps();
+            register __m128 c31 = _mm_setzero_ps();
+            const float * A0 = A + lda * 0;
+            const float * A1 = A + lda * 1;
+            const float * A2 = A + lda * 2;
+            const float * A3 = A + lda * 3;
+            register __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
                 b1 = _mm_loadu_ps(B + 1 * F);
-                b2 = _mm_loadu_ps(B + 2 * F);
-                for (size_t i = 0; i < M; ++i)
-                {
-                    a0 = _mm_set1_ps(*a[i]++);
-                    c[i][0] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i][0]);
-                    c[i][1] = _mm_add_ps(_mm_mul_ps(b1, a0), c[i][1]);
-                    c[i][2] = _mm_add_ps(_mm_mul_ps(b2, a0), c[i][2]);
-                }
+                a0 = _mm_set1_ps(*A0++);
+                c00 = _mm_add_ps(_mm_mul_ps(a0, b0), c00);
+                c01 = _mm_add_ps(_mm_mul_ps(a0, b1), c01);
+                a0 = _mm_set1_ps(*A1++);
+                c10 = _mm_add_ps(_mm_mul_ps(a0, b0), c10);
+                c11 = _mm_add_ps(_mm_mul_ps(a0, b1), c11);
+                a0 = _mm_set1_ps(*A2++);
+                c20 = _mm_add_ps(_mm_mul_ps(a0, b0), c20);
+                c21 = _mm_add_ps(_mm_mul_ps(a0, b1), c21);
+                a0 = _mm_set1_ps(*A3++);
+                c30 = _mm_add_ps(_mm_mul_ps(a0, b0), c30);
+                c31 = _mm_add_ps(_mm_mul_ps(a0, b1), c31);
                 B += ldb;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
-            for (size_t i = 0; i < M; ++i)
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01);
+            C += ldc;
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11);
+            C += ldc;
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21);
+            C += ldc;
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31);
+        }
+
+        static void Kernel4x4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        {
+            register __m128 c0 = _mm_setzero_ps();
+            register __m128 c1 = _mm_setzero_ps();
+            register __m128 c2 = _mm_setzero_ps();
+            register __m128 c3 = _mm_setzero_ps();
+            const float * a0 = A + lda * 0;
+            const float * a1 = A + lda * 1;
+            const float * a2 = A + lda * 2;
+            const float * a3 = A + lda * 3;
+            register __m128 b0;
+            for (size_t k = 0; k < K; k++)
             {
-                AddTo(C + 0 * F, _mm_mul_ps(_alpha, c[i][0]));
-                AddTo(C + 1 * F, _mm_mul_ps(_alpha, c[i][1]));
-                AddTo(C + 2 * F, _mm_mul_ps(_alpha, c[i][2]));
-                C += ldc;
+                b0 = _mm_loadu_ps(B);
+                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a0++)), c0);
+                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a1++)), c1);
+                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a2++)), c2);
+                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a3++)), c3);
+                B += ldb;
             }
+            __m128 _alpha = _mm_set1_ps(alpha);
+            AddProduct(C + 0 * ldc, _alpha, c0);
+            AddProduct(C + 1 * ldc, _alpha, c1);
+            AddProduct(C + 2 * ldc, _alpha, c2);
+            AddProduct(C + 3 * ldc, _alpha, c3);
         }
 
         static void Kernel6x8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -235,23 +221,94 @@ namespace Simd
                 B += ldb;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c00));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c01));
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c10));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c11));
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c20));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c21));
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c30));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c31));
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c40));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c41));
+            AddProduct(C + 0 * F, _alpha, c40);
+            AddProduct(C + 1 * F, _alpha, c41);
             C += ldc;
-            AddTo(C + 0 * F, _mm_mul_ps(_alpha, c50));
-            AddTo(C + 1 * F, _mm_mul_ps(_alpha, c51));
+            AddProduct(C + 0 * F, _alpha, c50);
+            AddProduct(C + 1 * F, _alpha, c51);
+        }
+
+        static void Kernel6x4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        {
+            register __m128 c0 = _mm_setzero_ps();
+            register __m128 c1 = _mm_setzero_ps();
+            register __m128 c2 = _mm_setzero_ps();
+            register __m128 c3 = _mm_setzero_ps();
+            register __m128 c4 = _mm_setzero_ps();
+            register __m128 c5 = _mm_setzero_ps();
+            const float * a0 = A + lda * 0;
+            const float * a1 = A + lda * 1;
+            const float * a2 = A + lda * 2;
+            const float * a3 = A + lda * 3;
+            const float * a4 = A + lda * 4;
+            const float * a5 = A + lda * 5;
+            register __m128 b0;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = _mm_loadu_ps(B);
+                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a0++)), c0);
+                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a1++)), c1);
+                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a2++)), c2);
+                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a3++)), c3);
+                c4 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a4++)), c4);
+                c5 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a5++)), c5);
+                B += ldb;
+            }
+            __m128 _alpha = _mm_set1_ps(alpha);
+            AddProduct(C + 0 * ldc, _alpha, c0);
+            AddProduct(C + 1 * ldc, _alpha, c1);
+            AddProduct(C + 2 * ldc, _alpha, c2);
+            AddProduct(C + 3 * ldc, _alpha, c3);
+            AddProduct(C + 4 * ldc, _alpha, c4);
+            AddProduct(C + 5 * ldc, _alpha, c5);
+        }
+
+        static void KernelMx12(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        {
+            register __m128 c[4][3];
+            register const float * a[4];
+            for (size_t i = 0; i < M; ++i)
+            {
+                c[i][0] = _mm_setzero_ps();
+                c[i][1] = _mm_setzero_ps();
+                c[i][2] = _mm_setzero_ps();
+                a[i] = A + lda * i;
+            }
+            register __m128 b0, b1, b2, a0;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = _mm_loadu_ps(B + 0 * F);
+                b1 = _mm_loadu_ps(B + 1 * F);
+                b2 = _mm_loadu_ps(B + 2 * F);
+                for (size_t i = 0; i < M; ++i)
+                {
+                    a0 = _mm_set1_ps(*a[i]++);
+                    c[i][0] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i][0]);
+                    c[i][1] = _mm_add_ps(_mm_mul_ps(b1, a0), c[i][1]);
+                    c[i][2] = _mm_add_ps(_mm_mul_ps(b2, a0), c[i][2]);
+                }
+                B += ldb;
+            }
+            __m128 _alpha = _mm_set1_ps(alpha);
+            for (size_t i = 0; i < M; ++i)
+            {
+                AddProduct(C + 0 * F, _alpha, c[i][0]);
+                AddProduct(C + 1 * F, _alpha, c[i][1]);
+                AddProduct(C + 2 * F, _alpha, c[i][2]);
+                C += ldc;
+            }
         }
 
         static void KernelMx8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -280,10 +337,40 @@ namespace Simd
             __m128 _alpha = _mm_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
             {
-                AddTo(C + 0 * F, _mm_mul_ps(_alpha, c[i][0]));
-                AddTo(C + 1 * F, _mm_mul_ps(_alpha, c[i][1]));
+                AddProduct(C + 0 * F, _alpha, c[i][0]);
+                AddProduct(C + 1 * F, _alpha, c[i][1]);
                 C += ldc;
             }
+        }
+
+        static void KernelMx4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        {
+#ifdef SIMD_X64_ENABLE
+            register __m128 c[6];
+            register const float * a[6];
+#else
+            register __m128 c[4];
+            register const float * a[4];
+#endif
+            for (size_t i = 0; i < M; ++i)
+            {
+                c[i] = _mm_setzero_ps();
+                a[i] = A + lda * i;
+            }
+            register __m128 b0, a0;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = _mm_loadu_ps(B + 0 * F);
+                for (size_t i = 0; i < M; ++i)
+                {
+                    a0 = _mm_set1_ps(*a[i]++);
+                    c[i] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i]);
+                }
+                B += ldb;
+            }
+            __m128 _alpha = _mm_set1_ps(alpha);
+            for (size_t i = 0; i < M; ++i)
+                AddProduct(C + i * ldc, _alpha, c[i]);
         }
 
         static void MulBy(float * ptr, size_t stride, size_t height, size_t width, float value)
@@ -400,7 +487,7 @@ namespace Simd
             typedef void (*MicroKernelPtr)(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc);
             Array<float> _A, _B;
             size_t _lda, _ldb, _microM, _microN, _macroM, _macroN;
-            MicroKernelPtr _microKernelMain, _microKernelEdge;
+            MicroKernelPtr _microKernelMainMain, _microKernelMainEdge, _microKernelEdgeMain, _microKernelEdgeEdge;
  
             void Init(size_t M, size_t N, size_t K)
             {
@@ -409,24 +496,32 @@ namespace Simd
                 {
                     _microM = 6;
                     _microN = 8;
-                    _microKernelMain = Kernel6x8;
-                    _microKernelEdge = KernelMx8;
+                    size_t tail = AlignLoAny(N, _microN) - N;
+                    _microKernelMainMain = Kernel6x8;
+                    _microKernelMainEdge = tail > F ? Kernel6x8 : Kernel6x4;
+                    _microKernelEdgeMain = KernelMx8;
+                    _microKernelEdgeEdge = tail > F ? KernelMx8 : KernelMx4;
                 }
                 else
                 {
                     _microM = 4;
                     _microN = 12;
-                    _microKernelMain = Kernel4x12;
-                    _microKernelEdge = KernelMx12;
+                    size_t tail = AlignLoAny(N, _microN) - N;
+                    _microKernelMainMain = Kernel4x12;
+                    _microKernelMainEdge = tail > DF ? Kernel4x12 : (tail > F ? Kernel4x8 : Kernel4x4);
+                    _microKernelEdgeMain = KernelMx12;
+                    _microKernelEdgeEdge = tail > DF ? KernelMx12 : (tail > F ? KernelMx8 : KernelMx4);
                 }
 #else
                 _microM = 4;
                 _microN = 4;
-                _microKernelMain = Kernel4x4;
-                _microKernelEdge = KernelMx4;
+                _microKernelMainMain = Kernel4x4;
+                _microKernelMainEdge = Kernel4x4;
+                _microKernelEdgeMain = KernelMx4;
+                _microKernelEdgeEdge = KernelMx4;
 #endif
-                _macroM = 256 / _microM * _microM;
-                _macroN = 128 / _microN * _microN;
+                _macroM = AlignLoAny(256, _microM);
+                _macroN = AlignLoAny(128, _microN);
                 _lda = AlignHi(K, F);
                 _ldb = AlignHiAny(N, _microN);
 
@@ -439,13 +534,25 @@ namespace Simd
                 MulBy(C, ldc, M, N, beta);
 
                 size_t MA = AlignLoAny(M, _microM);
+                size_t NA = AlignLoAny(N, _microN);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    for (size_t j = 0; j < N; j += _microN)
-                        _microKernelMain(M, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                {
+                    size_t j = 0;
+                    for (; j < NA; j += _microN)
+                        _microKernelMainMain(M, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                    if(j < N)
+                        _microKernelMainEdge(M, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+
+                }
                 if (i < M)
-                    for (size_t j = 0; j < N; j += _microN)
-                        _microKernelEdge(M - MA, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                {
+                    size_t j = 0;
+                    for (; j < NA; j += _microN)
+                        _microKernelEdgeMain(M - MA, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                    if (j < N)
+                        _microKernelEdgeEdge(M - MA, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                }
             }
 
         public:
