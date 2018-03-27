@@ -2057,7 +2057,7 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
 }
 
 typedef void(*SimdGemm32fNNPtr) (size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
-SimdGemm32fNNPtr simdGemm32fNN = SIMD_FUNC1(Gemm32fNN, SIMD_SSE_FUNC);
+SimdGemm32fNNPtr simdGemm32fNN = SIMD_FUNC2(Gemm32fNN, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
 SIMD_API void SimdGemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
 {

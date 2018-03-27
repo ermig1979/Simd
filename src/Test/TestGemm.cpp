@@ -111,6 +111,11 @@ namespace Test
             result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Sse::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif 
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Avx::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+#endif 
+
         return result;
     }
 
