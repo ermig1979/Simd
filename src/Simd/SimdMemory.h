@@ -30,6 +30,16 @@
 
 namespace Simd
 {
+    SIMD_INLINE size_t AlignHiAny(size_t size, size_t align)
+    {
+        return (size + align - 1) / align * align;
+    }
+
+    SIMD_INLINE size_t AlignLoAny(size_t size, size_t align)
+    {
+        return size / align * align;
+    }
+
     SIMD_INLINE size_t AlignHi(size_t size, size_t align)
     {
         return (size + align - 1) & ~(align - 1);
