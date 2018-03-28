@@ -987,14 +987,14 @@ namespace Simd
             void Init(size_t M, size_t N, size_t K)
             {
 #if SIMD_ZMM_COUNT == 32
-                if (false)
+                if (K > 4024)
                 {
                     _microM = 12;
                     _microN = 32;
                     size_t tail = AlignLoAny(N, _microN) - N;
                     _microKernelMainMain = Kernel12x32;
                     _microKernelMainEdge = tail > F ? Kernel12x32 : Kernel12x16;
-                    _microKernelEdgeMain = KernelMx16;
+                    _microKernelEdgeMain = KernelMx32;
                     _microKernelEdgeEdge = tail > F ? KernelMx32 : KernelMx16;
                 }
                 else
@@ -1008,7 +1008,7 @@ namespace Simd
                     _microKernelEdgeEdge = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
                  }
 #elif SIMD_ZMM_COUNT == 16
-                if (true)
+                if (K > 4024)
                 {
                     _microM = 6;
                     _microN = 32;
@@ -1036,12 +1036,10 @@ namespace Simd
                 _microKernelEdgeMain = KernelMx16;
                 _microKernelEdgeEdge = KernelMx16;
 #endif
-                _macroM = AlignLoAny(256, _microM);
-                _macroN = AlignLoAny(128, _microN);
-
+                _macroM = Simd::Max(_microM, AlignLoAny(256, _microM));
+                _macroN = Simd::Max(_microN, AlignLoAny(_microN, _microN));
                 _lda = AlignHi(K, F);
                 _ldb = AlignHiAny(N, _microN);
-
                 _A.Resize(_lda*_macroM);
                 _B.Resize(_ldb*K);
             }

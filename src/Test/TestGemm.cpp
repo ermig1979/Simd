@@ -82,7 +82,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(alpha, A, B, beta, srcC, dstC2));
 
-        result = result && Compare(dstC1, dstC2, EPS, true, 32, false);
+        result = result && Compare(dstC1, dstC2, EPS*10.0f, true, 32, false);
 
         return result;
     }
@@ -91,12 +91,27 @@ namespace Test
     {
         bool result = true;
 
+        //result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
+        //result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
         //result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
-        result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
-        result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
         //result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
-        result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
+        //result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
 
+        result = result && Gemm32fAutoTest(32, 173056, 27, f1, f2);
+        result = result && Gemm32fAutoTest(64, 43264, 288, f1, f2);
+        result = result && Gemm32fAutoTest(128, 10816, 576, f1, f2);
+        result = result && Gemm32fAutoTest(64, 10816, 128, f1, f2);
+        result = result && Gemm32fAutoTest(256, 2704, 1152, f1, f2);
+        result = result && Gemm32fAutoTest(256, 2704, 128, f1, f2);
+        result = result && Gemm32fAutoTest(512, 676, 2304, f1, f2);
+        result = result && Gemm32fAutoTest(256, 676, 512, f1, f2);
+        result = result && Gemm32fAutoTest(1024, 169, 4608, f1, f2);
+        result = result && Gemm32fAutoTest(512, 169, 1024, f1, f2);
+        result = result && Gemm32fAutoTest(1024, 169, 9216, f1, f2);
+        result = result && Gemm32fAutoTest(64, 676, 512, f1, f2);
+        result = result && Gemm32fAutoTest(1024, 169, 11520, f1, f2);
+        result = result && Gemm32fAutoTest(425, 169, 1024, f1, f2);
+ 
         return result;
     }
 

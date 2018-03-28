@@ -492,7 +492,7 @@ namespace Simd
             void Init(size_t M, size_t N, size_t K)
             {
 #ifdef SIMD_X64_ENABLE
-                if (true)
+                if (K > 4024)
                 {
                     _microM = 6;
                     _microN = 8;
@@ -520,11 +520,10 @@ namespace Simd
                 _microKernelEdgeMain = KernelMx4;
                 _microKernelEdgeEdge = KernelMx4;
 #endif
-                _macroM = AlignLoAny(256, _microM);
-                _macroN = AlignLoAny(128, _microN);
+                _macroM = Simd::Max(_microM, AlignLoAny(256, _microM));
+                _macroN = Simd::Max(_microN, AlignLoAny(_microN * 4, _microN));
                 _lda = AlignHi(K, F);
                 _ldb = AlignHiAny(N, _microN);
-
                 _A.Resize(_lda*_macroM);
                 _B.Resize(_ldb*K);
             }
