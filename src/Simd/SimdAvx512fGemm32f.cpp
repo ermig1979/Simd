@@ -931,34 +931,40 @@ namespace Simd
             for (size_t j = 0; j < N; j += cell)
             {
                 size_t n = Simd::Min(cell, N - j);
-                if (n == cell && cell == 8)
+                if (cell == 1 * F)
                 {
+                    __mmask16 mask0 = TailMask16(n - 0 * F);
                     for (size_t k = 0; k < K; ++k)
                     {
                         const float * psrc = src + k * srcStride;
-                        _mm512_storeu_ps(dst + 0 * F, _mm512_loadu_ps(psrc + 0 * F));
-                        dst += 8;
+                        _mm512_storeu_ps(dst + 0 * F, _mm512_maskz_loadu_ps(mask0, psrc + 0 * F));
+                        dst += cell;
                     }
                 }
-                else if (n == cell && cell == 16)
+                else if (cell == 2 * F)
                 {
+                    __mmask16 mask0 = TailMask16(n - 0 * F);
+                    __mmask16 mask1 = TailMask16(n - 1 * F);
                     for (size_t k = 0; k < K; ++k)
                     {
                         const float * psrc = src + k * srcStride;
-                        _mm512_storeu_ps(dst + 0*F, _mm512_loadu_ps(psrc + 0 * F));
-                        _mm512_storeu_ps(dst + 1*F, _mm512_loadu_ps(psrc + 1 * F));
-                        dst += 16;
+                        _mm512_storeu_ps(dst + 0 * F, _mm512_maskz_loadu_ps(mask0, psrc + 0 * F));
+                        _mm512_storeu_ps(dst + 1 * F, _mm512_maskz_loadu_ps(mask1, psrc + 1 * F));
+                        dst += cell;
                     }
                 }
-                else if (n == cell && cell == 24)
+                else if (cell == 3 * F)
                 {
+                    __mmask16 mask0 = TailMask16(n - 0 * F);
+                    __mmask16 mask1 = TailMask16(n - 1 * F);
+                    __mmask16 mask2 = TailMask16(n - 2 * F);
                     for (size_t k = 0; k < K; ++k)
                     {
                         const float * psrc = src + k * srcStride;
-                        _mm512_storeu_ps(dst + 0 * F, _mm512_loadu_ps(psrc + 0 * F));
-                        _mm512_storeu_ps(dst + 1 * F, _mm512_loadu_ps(psrc + 1 * F));
-                        _mm512_storeu_ps(dst + 2 * F, _mm512_loadu_ps(psrc + 2 * F));
-                        dst += 24;
+                        _mm512_storeu_ps(dst + 0 * F, _mm512_maskz_loadu_ps(mask0, psrc + 0 * F));
+                        _mm512_storeu_ps(dst + 1 * F, _mm512_maskz_loadu_ps(mask1, psrc + 1 * F));
+                        _mm512_storeu_ps(dst + 2 * F, _mm512_maskz_loadu_ps(mask2, psrc + 2 * F));
+                        dst += cell;
                     }
                 }
                 else
@@ -992,7 +998,7 @@ namespace Simd
                 {
                     _microM = 12;
                     _microN = 32;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel12x32;
                     _microKernelMainEdge = tail > F ? Kernel12x32 : Kernel12x16;
                     _microKernelEdgeMain = KernelMx32;
@@ -1002,7 +1008,7 @@ namespace Simd
                 {
                     _microM = 8;
                     _microN = 48;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel8x48;
                     _microKernelMainEdge = tail > DF ? Kernel8x48 : (tail > F ? Kernel8x32 : Kernel8x16);
                     _microKernelEdgeMain = KernelMx48;
@@ -1013,7 +1019,7 @@ namespace Simd
                 {
                     _microM = 6;
                     _microN = 32;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel6x32;
                     _microKernelMainEdge = tail > F ? Kernel6x32 : Kernel6x16;
                     _microKernelEdgeMain = KernelMx32;
@@ -1023,7 +1029,7 @@ namespace Simd
                 {
                     _microM = 4;
                     _microN = 48;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel4x48;
                     _microKernelMainEdge = tail > DF ? Kernel4x48 : (tail > F ? Kernel4x32 : Kernel4x16);
                     _microKernelEdgeMain = KernelMx48;

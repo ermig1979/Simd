@@ -436,47 +436,90 @@ namespace Simd
             for (size_t j = 0; j < N; j += cell)
             {
                 size_t n = Simd::Min(cell, N - j);
-                if (n == cell && cell == 4)
+                size_t k = 0;
+                if (cell == 1 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm_storeu_ps(dst + 0, _mm_loadu_ps(psrc + 0));
-                        dst += 4;
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
+                            dst += cell;
+                        }
+                    }
+                    else
+                    {
+                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else if (n == cell && cell == 8)
+                else if (cell == 2 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm_storeu_ps(dst + 0, _mm_loadu_ps(psrc + 0));
-                        _mm_storeu_ps(dst + 4, _mm_loadu_ps(psrc + 4));
-                        dst += 8;
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
+                            _mm_storeu_ps(dst + 1 * F, _mm_loadu_ps(psrc + 1 * F));
+                            dst += cell;
+                        }
+                    }
+                    else
+                    {
+                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
+                        __m128 mask1 = Sse::LeftNotZero(n - 1 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
+                            _mm_storeu_ps(dst + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(psrc + 1 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else if (n == cell && cell == 12)
+                else if (cell == 3 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm_storeu_ps(dst + 0, _mm_loadu_ps(psrc + 0));
-                        _mm_storeu_ps(dst + 4, _mm_loadu_ps(psrc + 4));
-                        _mm_storeu_ps(dst + 8, _mm_loadu_ps(psrc + 8));
-                        dst += 12;
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
+                            _mm_storeu_ps(dst + 1 * F, _mm_loadu_ps(psrc + 1 * F));
+                            _mm_storeu_ps(dst + 2 * F, _mm_loadu_ps(psrc + 2 * F));
+                            dst += cell;
+                        }
+                    }
+                    else
+                    {
+                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
+                        __m128 mask1 = Sse::LeftNotZero(n - 1 * F);
+                        __m128 mask2 = Sse::LeftNotZero(n - 2 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
+                            _mm_storeu_ps(dst + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(psrc + 1 * F)));
+                            _mm_storeu_ps(dst + 2 * F, _mm_and_ps(mask2, _mm_loadu_ps(psrc + 2 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else
+                for (; k < K; ++k)
                 {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        const float * psrc = src + k * srcStride;
-                        size_t c = 0;
-                        for (; c < n; ++c)
-                            *(dst++) = *(psrc++);
-                        for (; c < cell; ++c)
-                            *(dst++) = 0;
-                    }
+                    const float * psrc = src + k * srcStride;
+                    size_t c = 0;
+                    for (; c < n; ++c)
+                        *(dst++) = *(psrc++);
+                    for (; c < cell; ++c)
+                        *(dst++) = 0;
                 }
                 src += cell;
             }
@@ -497,7 +540,7 @@ namespace Simd
                 {
                     _microM = 6;
                     _microN = 8;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel6x8;
                     _microKernelMainEdge = tail > F ? Kernel6x8 : Kernel6x4;
                     _microKernelEdgeMain = KernelMx8;
@@ -507,7 +550,7 @@ namespace Simd
                 {
                     _microM = 4;
                     _microN = 12;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel4x12;
                     _microKernelMainEdge = tail > DF ? Kernel4x12 : (tail > F ? Kernel4x8 : Kernel4x4);
                     _microKernelEdgeMain = KernelMx12;

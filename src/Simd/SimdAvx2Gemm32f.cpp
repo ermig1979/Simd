@@ -454,47 +454,90 @@ namespace Simd
             for (size_t j = 0; j < N; j += cell)
             {
                 size_t n = Simd::Min(cell, N - j);
-                if (n == cell && cell == 8)
+                size_t k = 0;
+                if (cell == 1 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
+                    {                    
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0 * F, _mm256_loadu_ps(psrc + 0 * F));
+                            dst += cell;
+                        }
+                    }
+                    else
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm256_storeu_ps(dst + 0 * F, _mm256_loadu_ps(psrc + 0 * F));
-                        dst += 8;
+                        __m256 mask0 = Avx::LeftNotZero(n - 0 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0 * F, _mm256_and_ps(mask0, _mm256_loadu_ps(psrc + 0 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else if (n == cell && cell == 16)
+                else if (cell == 2 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm256_storeu_ps(dst + 0*F, _mm256_loadu_ps(psrc + 0 * F));
-                        _mm256_storeu_ps(dst + 1*F, _mm256_loadu_ps(psrc + 1 * F));
-                        dst += 16;
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0*F, _mm256_loadu_ps(psrc + 0 * F));
+                            _mm256_storeu_ps(dst + 1*F, _mm256_loadu_ps(psrc + 1 * F));
+                            dst += cell;
+                        }                    
+                    }
+                    else
+                    {
+                        __m256 mask0 = Avx::LeftNotZero(n - 0 * F);
+                        __m256 mask1 = Avx::LeftNotZero(n - 1 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0 * F, _mm256_and_ps(mask0, _mm256_loadu_ps(psrc + 0 * F)));
+                            _mm256_storeu_ps(dst + 1 * F, _mm256_and_ps(mask1, _mm256_loadu_ps(psrc + 1 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else if (n == cell && cell == 24)
+                else if (cell == 3 * F)
                 {
-                    for (size_t k = 0; k < K; ++k)
+                    if (n == cell)
                     {
-                        const float * psrc = src + k * srcStride;
-                        _mm256_storeu_ps(dst + 0 * F, _mm256_loadu_ps(psrc + 0 * F));
-                        _mm256_storeu_ps(dst + 1 * F, _mm256_loadu_ps(psrc + 1 * F));
-                        _mm256_storeu_ps(dst + 2 * F, _mm256_loadu_ps(psrc + 2 * F));
-                        dst += 24;
+                        for (; k < K; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0 * F, _mm256_loadu_ps(psrc + 0 * F));
+                            _mm256_storeu_ps(dst + 1 * F, _mm256_loadu_ps(psrc + 1 * F));
+                            _mm256_storeu_ps(dst + 2 * F, _mm256_loadu_ps(psrc + 2 * F));
+                            dst += cell;
+                        }
+                    }
+                    else
+                    {
+                        __m256 mask0 = Avx::LeftNotZero(n - 0 * F);
+                        __m256 mask1 = Avx::LeftNotZero(n - 1 * F);
+                        __m256 mask2 = Avx::LeftNotZero(n - 2 * F);
+                        for (; k < K - 1; ++k)
+                        {
+                            const float * psrc = src + k * srcStride;
+                            _mm256_storeu_ps(dst + 0 * F, _mm256_and_ps(mask0, _mm256_loadu_ps(psrc + 0 * F)));
+                            _mm256_storeu_ps(dst + 1 * F, _mm256_and_ps(mask1, _mm256_loadu_ps(psrc + 1 * F)));
+                            _mm256_storeu_ps(dst + 2 * F, _mm256_and_ps(mask2, _mm256_loadu_ps(psrc + 2 * F)));
+                            dst += cell;
+                        }
                     }
                 }
-                else
+                for (; k < K; ++k)
                 {
-                    for (size_t k = 0; k < K; ++k)
-                    {
-                        const float * psrc = src + k * srcStride;
-                        size_t c = 0;
-                        for (; c < n; ++c)
-                            *(dst++) = *(psrc++);
-                        for (; c < cell; ++c)
-                            *(dst++) = 0;
-                    }
+                    const float * psrc = src + k * srcStride;
+                    size_t c = 0;
+                    for (; c < n; ++c)
+                        *(dst++) = *(psrc++);
+                    for (; c < cell; ++c)
+                        *(dst++) = 0;
                 }
                 src += cell;
             }
@@ -515,7 +558,7 @@ namespace Simd
                 {
                     _microM = 6;
                     _microN = 16;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel6x16;
                     _microKernelMainEdge = tail > F ? Kernel6x16 : Kernel6x8;
                     _microKernelEdgeMain = KernelMx16;
@@ -525,7 +568,7 @@ namespace Simd
                 {
                     _microM = 4;
                     _microN = 24;
-                    size_t tail = AlignLoAny(N, _microN) - N;
+                    size_t tail = N - AlignLoAny(N, _microN);
                     _microKernelMainMain = Kernel4x24;
                     _microKernelMainEdge = tail > DF ? Kernel4x24 : (tail > F ? Kernel4x16 : Kernel4x8);
                     _microKernelEdgeMain = KernelMx24;

@@ -287,16 +287,16 @@ namespace Simd
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
         }
 
-        SIMD_INLINE __m128 RightNotZero(size_t count)
+        SIMD_INLINE __m128 RightNotZero(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
-            return _mm_loadu_ps((float*)(mask + count));
+            return _mm_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
-        SIMD_INLINE __m128 LeftNotZero(size_t count)
+        SIMD_INLINE __m128 LeftNotZero(ptrdiff_t count)
         {
             const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
-            return _mm_loadu_ps((float*)(mask + 4 - count));
+            return _mm_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
         template <bool condition> SIMD_INLINE __m128 Masked(const __m128 & value, const __m128 & mask);
@@ -574,10 +574,16 @@ namespace Simd
             return _mm256_mul_ps(_mm256_rsqrt_ps(_mm256_max_ps(value, _mm256_set1_ps(0.00000001f))), value);
         }
 
-        SIMD_INLINE __m256 RightNotZero(size_t count)
+        SIMD_INLINE __m256 RightNotZero(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
-            return _mm256_loadu_ps((float*)(mask + count));
+            return _mm256_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE __m256 LeftNotZero(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return _mm256_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
         SIMD_INLINE __m256 PermutedHorizontalAdd(__m256 a, __m256 b)
