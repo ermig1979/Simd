@@ -523,6 +523,7 @@ namespace Simd
 
             void Init(size_t M, size_t N, size_t K)
             {
+                const size_t MACRO_M_MAX = 1024;
 #ifdef SIMD_X64_ENABLE
                 if (K > 4024)
                 {
@@ -552,18 +553,18 @@ namespace Simd
                 _microKernelEdgeMain = KernelMx8;
                 _microKernelEdgeEdge = KernelMx8;
 #endif
-                _macroM = Simd::Max(_microM, AlignLoAny(256, _microM));
-                _macroN = Simd::Max(_microN, AlignLoAny(_microN, _microN));
+                _macroM = Simd::Max(_microM, AlignLoAny(MACRO_M_MAX, _microM));
+                _macroN = _microN;
                 _lda = AlignHi(K, F);
-                _ldb = AlignHiAny(N, _microN);
-                _A.Resize(_lda*_macroM);
-                _B.Resize(_ldb*K);
+                _ldb = _macroN;
+                _A.Resize(_lda * _macroM);
+                _B.Resize(_ldb * K);
             }
 
-            void MacroKernel(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * Ap, const float * B, size_t ldb, const float * Bp, float beta, float * C, size_t ldc)
+            void MacroKernel(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * Ap, const float * B, size_t ldb, float beta, float * C, size_t ldc)
             {
                 MulBy(C, ldc, M, N, beta);
-
+                PackB(B, ldb, K, N, _microN, _B.data);
                 size_t MA = AlignLoAny(M, _microM);
                 size_t NA = AlignLoAny(N, _microN);
                 size_t i = 0;
@@ -571,18 +572,17 @@ namespace Simd
                 {
                     size_t j = 0;
                     for (; j < NA; j += _microN)
-                        _microKernelMainMain(M, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                        _microKernelMainMain(M, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
                     if (j < N)
-                        _microKernelMainEdge(M, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
-
+                        _microKernelMainEdge(M, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
                 }
                 if (i < M)
                 {
                     size_t j = 0;
                     for (; j < NA; j += _microN)
-                        _microKernelEdgeMain(M - MA, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                        _microKernelEdgeMain(M - MA, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
                     if (j < N)
-                        _microKernelEdgeEdge(M - MA, K, alpha, A + i * lda, lda, Bp + j * K, _microN, C + i * ldc + j, ldc);
+                        _microKernelEdgeEdge(M - MA, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
                 }
             }
 
@@ -590,8 +590,6 @@ namespace Simd
             void Run(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
             {
                 Init(M, N, K);
-
-                PackB(B, ldb, K, N, _microN, _B.data);
                 for (size_t i = 0; i < M; i += _macroM)
                 {
                     size_t macroM = Simd::Min(M, i + _macroM) - i;
@@ -599,7 +597,7 @@ namespace Simd
                     for (size_t j = 0; j < N; j += _macroN)
                     {
                         size_t macroN = Simd::Min(N, j + _macroN) - j;
-                        MacroKernel(macroM, macroN, K, *alpha, A + i * lda, lda, _A.data, B + j, ldb, _B.data + j*K, *beta, C + i * ldc + j, ldc);
+                        MacroKernel(macroM, macroN, K, *alpha, A + i * lda, lda, _A.data, B + j, ldb, *beta, C + i * ldc + j, ldc);
                     }
                 }
             }
