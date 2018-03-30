@@ -21,27 +21,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdExtract.h"
-#include "Simd/SimdArray.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        SIMD_INLINE void MulBy(float * ptr, __m128 value)
-        {
-            _mm_storeu_ps(ptr, _mm_mul_ps(_mm_loadu_ps(ptr), value));
-        }
-
         SIMD_INLINE void AddProduct(float * ptr, __m128 value, __m128 alpha)
         {
             _mm_storeu_ps(ptr, _mm_add_ps(_mm_mul_ps(value, alpha), _mm_loadu_ps(ptr)));
         }
 
-        static void Kernel4x12(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x12(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -101,7 +94,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32);
         }
 
-        static void Kernel4x8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -148,7 +141,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31);
         }
 
-        static void Kernel4x4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c0 = _mm_setzero_ps();
             register __m128 c1 = _mm_setzero_ps();
@@ -175,7 +168,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3);
         }
 
-        static void Kernel6x8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel6x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -240,7 +233,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51);
         }
 
-        static void Kernel6x4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel6x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c0 = _mm_setzero_ps();
             register __m128 c1 = _mm_setzero_ps();
@@ -275,7 +268,7 @@ namespace Simd
             AddProduct(C + 5 * ldc, _alpha, c5);
         }
 
-        static void KernelMx12(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx12(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c[4][3];
             register const float * a[4];
@@ -311,7 +304,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx8(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx8(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             register __m128 c[6][2];
             register const float * a[6];
@@ -343,7 +336,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx4(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx4(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
 #ifdef SIMD_X64_ENABLE
             register __m128 c[6];
@@ -373,26 +366,41 @@ namespace Simd
                 AddProduct(C + i * ldc, _alpha, c[i]);
         }
 
-        static void MulBy(float * ptr, size_t stride, size_t height, size_t width, float value)
+        SIMD_INLINE void ScaleC(float * C, __m128 beta)
         {
-            size_t aligned = AlignLo(width, QF);
-            size_t partial = AlignLo(width, F);
-            __m128 _value = _mm_set1_ps(value);
-            for (size_t i = 0; i < height; ++i)
+            _mm_storeu_ps(C, _mm_mul_ps(_mm_loadu_ps(C), beta));
+        }
+
+        void ScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
+        {
+            if (beta == 1.0f)
+                return;
+            else if (beta == 0.0f)
             {
-                size_t j = 0;
-                for (; j < aligned; j += QF)
+                for (size_t i = 0; i < M; ++i)
+                    memset(C + i * ldc, 0, N * sizeof(float));
+            }
+            else
+            {
+                size_t NQF = AlignLo(N, QF);
+                size_t NF = AlignLo(N, F);
+                __m128 _beta = _mm_set1_ps(beta);
+                for (size_t i = 0; i < M; ++i)
                 {
-                    MulBy(ptr + j + F * 0, _value);
-                    MulBy(ptr + j + F * 1, _value);
-                    MulBy(ptr + j + F * 2, _value);
-                    MulBy(ptr + j + F * 3, _value);
+                    size_t j = 0;
+                    for (; j < NQF; j += QF)
+                    {
+                        ScaleC(C + j + F * 0, _beta);
+                        ScaleC(C + j + F * 1, _beta);
+                        ScaleC(C + j + F * 2, _beta);
+                        ScaleC(C + j + F * 3, _beta);
+                    }
+                    for (; j < NF; j += F)
+                        ScaleC(C + j, _beta);
+                    for (; j < N; ++j)
+                        C[j] *= beta;
+                    C += ldc;
                 }
-                for (; j < partial; j += F)
-                    MulBy(ptr + j, _value);
-                for (; j < width; ++j)
-                    ptr[j] *= value;
-                ptr += stride;
             }
         }
 
@@ -431,21 +439,21 @@ namespace Simd
             }
         }
 
-        static void PackB(const float * src, size_t srcStride, size_t K, size_t N, size_t cell, float * dst)
+        static void PackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB)
         {
-            for (size_t j = 0; j < N; j += cell)
+            for (size_t j = 0; j < N; j += microN)
             {
-                size_t n = Simd::Min(cell, N - j);
+                size_t n = Simd::Min(microN, N - j);
                 size_t k = 0;
-                if (cell == 1 * F)
+                if (microN == 1 * F)
                 {
-                    if (n == cell)
+                    if (n == microN)
                     {
                         for (; k < K; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_loadu_ps(b + 0 * F));
+                            pB += microN;
                         }
                     }
                     else
@@ -453,22 +461,22 @@ namespace Simd
                         __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
                         for (; k < K - 1; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(b + 0 * F)));
+                            pB += microN;
                         }
                     }
                 }
-                else if (cell == 2 * F)
+                else if (microN == 2 * F)
                 {
-                    if (n == cell)
+                    if (n == microN)
                     {
                         for (; k < K; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
-                            _mm_storeu_ps(dst + 1 * F, _mm_loadu_ps(psrc + 1 * F));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_loadu_ps(b + 0 * F));
+                            _mm_storeu_ps(pB + 1 * F, _mm_loadu_ps(b + 1 * F));
+                            pB += microN;
                         }
                     }
                     else
@@ -477,24 +485,24 @@ namespace Simd
                         __m128 mask1 = Sse::LeftNotZero(n - 1 * F);
                         for (; k < K - 1; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
-                            _mm_storeu_ps(dst + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(psrc + 1 * F)));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(b + 0 * F)));
+                            _mm_storeu_ps(pB + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(b + 1 * F)));
+                            pB += microN;
                         }
                     }
                 }
-                else if (cell == 3 * F)
+                else if (microN == 3 * F)
                 {
-                    if (n == cell)
+                    if (n == microN)
                     {
                         for (; k < K; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_loadu_ps(psrc + 0 * F));
-                            _mm_storeu_ps(dst + 1 * F, _mm_loadu_ps(psrc + 1 * F));
-                            _mm_storeu_ps(dst + 2 * F, _mm_loadu_ps(psrc + 2 * F));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_loadu_ps(b + 0 * F));
+                            _mm_storeu_ps(pB + 1 * F, _mm_loadu_ps(b + 1 * F));
+                            _mm_storeu_ps(pB + 2 * F, _mm_loadu_ps(b + 2 * F));
+                            pB += microN;
                         }
                     }
                     else
@@ -504,120 +512,70 @@ namespace Simd
                         __m128 mask2 = Sse::LeftNotZero(n - 2 * F);
                         for (; k < K - 1; ++k)
                         {
-                            const float * psrc = src + k * srcStride;
-                            _mm_storeu_ps(dst + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(psrc + 0 * F)));
-                            _mm_storeu_ps(dst + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(psrc + 1 * F)));
-                            _mm_storeu_ps(dst + 2 * F, _mm_and_ps(mask2, _mm_loadu_ps(psrc + 2 * F)));
-                            dst += cell;
+                            const float * b = B + k * ldb;
+                            _mm_storeu_ps(pB + 0 * F, _mm_and_ps(mask0, _mm_loadu_ps(b + 0 * F)));
+                            _mm_storeu_ps(pB + 1 * F, _mm_and_ps(mask1, _mm_loadu_ps(b + 1 * F)));
+                            _mm_storeu_ps(pB + 2 * F, _mm_and_ps(mask2, _mm_loadu_ps(b + 2 * F)));
+                            pB += microN;
                         }
                     }
                 }
                 for (; k < K; ++k)
                 {
-                    const float * psrc = src + k * srcStride;
+                    const float * b = B + k * ldb;
                     size_t c = 0;
                     for (; c < n; ++c)
-                        *(dst++) = *(psrc++);
-                    for (; c < cell; ++c)
-                        *(dst++) = 0;
+                        *(pB++) = *(b++);
+                    for (; c < microN; ++c)
+                        *(pB++) = 0;
                 }
-                src += cell;
+                B += microN;
             }
         }
 
-        class Gemm32fAlg
-        {
-            typedef void (*MicroKernelPtr)(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc);
-            Array<float> _A, _B;
-            size_t _lda, _ldb, _microM, _microN, _macroM, _macroN;
-            MicroKernelPtr _microKernelMainMain, _microKernelMainEdge, _microKernelEdgeMain, _microKernelEdgeEdge;
- 
-            void Init(size_t M, size_t N, size_t K)
-            {
-                const size_t MACRO_M_MAX = 1024;
-#ifdef SIMD_X64_ENABLE
-                if (K > 4024)
-                {
-                    _microM = 6;
-                    _microN = 8;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _microKernelMainMain = Kernel6x8;
-                    _microKernelMainEdge = tail > F ? Kernel6x8 : Kernel6x4;
-                    _microKernelEdgeMain = KernelMx8;
-                    _microKernelEdgeEdge = tail > F ? KernelMx8 : KernelMx4;
-                }
-                else
-                {
-                    _microM = 4;
-                    _microN = 12;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _microKernelMainMain = Kernel4x12;
-                    _microKernelMainEdge = tail > DF ? Kernel4x12 : (tail > F ? Kernel4x8 : Kernel4x4);
-                    _microKernelEdgeMain = KernelMx12;
-                    _microKernelEdgeEdge = tail > DF ? KernelMx12 : (tail > F ? KernelMx8 : KernelMx4);
-                }
-#else
-                _microM = 4;
-                _microN = 4;
-                _microKernelMainMain = Kernel4x4;
-                _microKernelMainEdge = Kernel4x4;
-                _microKernelEdgeMain = KernelMx4;
-                _microKernelEdgeEdge = KernelMx4;
-#endif
-                _macroM = Simd::Max(_microM, AlignLoAny(MACRO_M_MAX, _microM));
-                _macroN = _microN * 4;
-                _lda = AlignHi(K, F);
-                _ldb = _macroN;
-                _A.Resize(_lda * _macroM);
-                _B.Resize(_ldb * K);
-            }
-
-            void MacroKernel(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * Ap, const float * B, size_t ldb, float beta, float * C, size_t ldc)
-            {
-                MulBy(C, ldc, M, N, beta);
-                PackB(B, ldb, K, N, _microN, _B.data);
-                size_t MA = AlignLoAny(M, _microM);
-                size_t NA = AlignLoAny(N, _microN);
-                size_t i = 0;
-                for (; i < MA; i += _microM)
-                {
-                    size_t j = 0;
-                    for (; j < NA; j += _microN)
-                        _microKernelMainMain(M, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
-                    if (j < N)
-                        _microKernelMainEdge(M, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
-                }
-                if (i < M)
-                {
-                    size_t j = 0;
-                    for (; j < NA; j += _microN)
-                        _microKernelEdgeMain(M - MA, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
-                    if (j < N)
-                        _microKernelEdgeEdge(M - MA, K, alpha, A + i * lda, lda, _B.data + j * K, _microN, C + i * ldc + j, ldc);
-                }
-            }
-
-        public:
-            void Run(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
-            {
-                Init(M, N, K);
-                for (size_t i = 0; i < M; i += _macroM)
-                {
-                    size_t macroM = Simd::Min(M, i + _macroM) - i;
-                    //PackA(A + i * lda, lda, macroM, K, _microM, _A.data);
-                    for (size_t j = 0; j < N; j += _macroN)
-                    {
-                        size_t macroN = Simd::Min(N, j + _macroN) - j;
-                        MacroKernel(macroM, macroN, K, *alpha, A + i * lda, lda, _A.data, B + j, ldb, *beta, C + i * ldc + j, ldc);
-                    }
-                }
-            }
-        };
-
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            Gemm32fAlg alg;
-            alg.Run(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+            const size_t CACHE_L1_SIZE = 32 * 1024;
+            const size_t CACHE_L2_SIZE = 256 * 1024;
+            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            typedef Simd::GemmNN<float> GemmNN;
+            GemmNN::Main kernelMM, kernelMT;
+            GemmNN::Tail kernelTM, kernelTT;
+            size_t microM, microN, L1, L2;
+#ifdef SIMD_X64_ENABLE
+            if (K > 4024)
+            {
+                microM = 6;
+                microN = 8;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel6x8;
+                kernelMT = tail > F ? Kernel6x8 : Kernel6x4;
+                kernelTM = KernelMx8;
+                kernelTT = tail > F ? KernelMx8 : KernelMx4;
+            }
+            else
+            {
+                microM = 4;
+                microN = 12;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel4x12;
+                kernelMT = tail > DF ? Kernel4x12 : (tail > F ? Kernel4x8 : Kernel4x4);
+                kernelTM = KernelMx12;
+                kernelTT = tail > DF ? KernelMx12 : (tail > F ? KernelMx8 : KernelMx4);
+            }
+#else
+            microM = 4;
+            microN = 4;
+            kernelMM = Kernel4x4;
+            kernelMT = Kernel4x4;
+            kernelTM = KernelMx4;
+            kernelTT = KernelMx4;
+#endif
+            L1 = N > 4024 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
+            L2 = N > 4024 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
+            GemmNN gemmNN(kernelMM, kernelMT, kernelTM, kernelTT, ScaleC, PackB,
+                microM, microN, L1, L2, CACHE_L3_SIZE);
+            gemmNN.Run(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
 #endif// SIMD_SSE_ENABLE
