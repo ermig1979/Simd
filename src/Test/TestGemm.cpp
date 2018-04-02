@@ -91,11 +91,11 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
-        //result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
-        //result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
-        //result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
-        //result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
+        result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
+        result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
+        result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
+        result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
 
         result = result && Gemm32fAutoTest(32, 173056, 27, f1, f2);
         result = result && Gemm32fAutoTest(64, 43264, 288, f1, f2);

@@ -85,8 +85,8 @@ namespace Test
         }
         else
         {
-            View _obj = obj.Region(obj.Size() * 4 / 7, View::MiddleCenter);
-            size_t size = 32;
+            View _obj = obj.Region(obj.Size() * 5 / 7, View::MiddleCenter);
+            size_t size = 64;
             View _dst = dst.Region(Size(size, size), View::MiddleCenter);
             Simd::ResizeBilinear(_obj, _dst);
         }
@@ -562,7 +562,7 @@ namespace Test
 
         View roi(src.Size(), View::Gray8);
         Simd::Fill(roi, 255);
-        Simd::Fill(roi.Region(Size(W, H) / 2, View::MiddleCenter).Ref(), 0);
+        Simd::Fill(roi.Region(Size(W/3, H/2), View::MiddleRight).Ref(), 0);
 
         double time = GetTime();
         detection.Init(src.Size(), 1.1, Size(), Size(INT_MAX, INT_MAX), roi, threadNumber);
