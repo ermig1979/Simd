@@ -324,6 +324,26 @@ extern "C"
     */
     SIMD_API size_t SimdAlignment();
 
+    /*! @ingroup thread
+
+        \fn size_t SimdGetThreadNumber();
+
+        \short Gets number of threads used by Simd Library to parallelize some algorithms.
+
+        \return current thread number.
+    */
+    SIMD_API size_t SimdGetThreadNumber();
+
+    /*! @ingroup thread
+
+        \fn void SimdSetThreadNumber(size_t threadNumber);
+
+        \short Sets number of threads used by Simd Library to parallelize some algorithms.
+
+        \param [in] threadNumber - a number of threads.
+    */
+    SIMD_API void SimdSetThreadNumber(size_t threadNumber);
+
     /*! @ingroup hash
 
         \fn uint32_t SimdCrc32c(const void * src, size_t size);

@@ -335,14 +335,14 @@ namespace Test
 
     class Task
     {
-        const Groups & _groups;
+        Groups _groups;
         std::thread _thread;
         volatile double _progress;
     public:
         static volatile bool s_stopped;
 
-        Task(const Groups & groups, bool start)
-            : _groups(groups)
+        Task(Groups::const_iterator begin, Groups::const_iterator end, bool start)
+            : _groups(begin, end)
             , _progress(0)
         {
             if (start)
@@ -406,14 +406,15 @@ namespace Test
 
         String text, html;
 
-        size_t threads;
+        size_t testThreads, workThreads;
 
         bool printAlign;
 
         Options(int argc, char* argv[])
             : mode(Auto)
             , help(false)
-            , threads(0)
+            , testThreads(0)
+            , workThreads(1)
             , printAlign(false)
         {
             for (int i = 1; i < argc; ++i)
@@ -437,10 +438,10 @@ namespace Test
                         exit(1);
                     }
                 }
-                else if (arg.find("-t=") == 0)
+                else if (arg.find("-tt=") == 0)
                 {
 #ifdef NDEBUG
-                    threads = FromString<size_t>(arg.substr(3, arg.size() - 3));
+                    testThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
 #endif
                 }
                 else if (arg.find("-f=") == 0)
@@ -475,6 +476,10 @@ namespace Test
                 {
                     printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
+                else if (arg.find("-wt=") == 0)
+                {
+                    workThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -508,15 +513,22 @@ namespace Test
 
     int MakeAutoTests(const Groups & groups, const Options & options)
     {
-        if (options.threads > 0)
+        if (options.testThreads > 0)
         {
-            TEST_LOG_SS(Info, "Test threads count = " << options.threads);
+            TEST_LOG_SS(Info, "Test threads count = " << options.testThreads);
 
             Test::Log::s_log.SetLevel(Test::Log::Error);
 
             Test::TaskPtrs tasks;
-            for (size_t i = 0; i < options.threads; ++i)
-                tasks.push_back(Test::TaskPtr(new Test::Task(groups, true)));
+            size_t n = options.testThreads;
+            size_t total = groups.size();
+            size_t block = (total + n - 1) / n;
+            for (size_t i = 0; i < n; ++i)
+            {
+                size_t begin = i * block;
+                size_t end = std::min(total, begin + block);
+                tasks.push_back(Test::TaskPtr(new Test::Task(groups.begin() + begin, groups.begin() + end, true)));
+            }
 
             std::cout << std::endl;
             double progress;
@@ -535,7 +547,7 @@ namespace Test
         }
         else
         {
-            Test::Task task(groups, false);
+            Test::Task task(groups.begin(), groups.end(), false);
             task.Run();
         }
 
@@ -593,7 +605,7 @@ namespace Test
     {
         std::cout << "Test framework of Simd Library." << std::endl << std::endl;
         std::cout << "Using example:" << std::endl << std::endl;
-        std::cout << "  ./Test -m=a -t=1 -f=Sobel -ot=log.txt" << std::endl << std::endl;
+        std::cout << "  ./Test -m=a -tt=1 -f=Sobel -ot=log.txt" << std::endl << std::endl;
         std::cout << "Where next parameters were used:" << std::endl << std::endl;
         std::cout << "-m=a         - a auto checking mode which includes performance testing" << std::endl;
         std::cout << "               (only for library built in Release mode)." << std::endl;
@@ -606,8 +618,7 @@ namespace Test
         std::cout << "               -m=v - cross - platform testing with using of early " << std::endl;
         std::cout << "               prepared test data)," << std::endl;
         std::cout << "               -m=s - running of special tests." << std::endl << std::endl;
-        std::cout << "-t=1         - a number of used threads(every thread run all tests)" << std::endl;
-        std::cout << "               for simulation of multi - thread loading." << std::endl << std::endl;
+        std::cout << "-tt=1        - a number of test threads." << std::endl;
         std::cout << "-f=Sobel     - a filter. In current case will be tested only functions" << std::endl;
         std::cout << "               which contain word 'Sobel' in their names." << std::endl;
         std::cout << "               If you miss this parameter then full testing will be" << std::endl;
@@ -622,6 +633,8 @@ namespace Test
         std::cout << "    -w=1920       width of test image for performance testing." << std::endl << std::endl;
         std::cout << "    -h=1080       height of test image for performance testing." << std::endl << std::endl;
         std::cout << "    -oh=log.html  a file name with test report (in HTML format)." << std::endl << std::endl;
+        std::cout << "    -s=sample.avi a video source (Simd::Motion test)." << std::endl << std::endl;
+        std::cout << "    -wt=1         a thread number used to parallelize algorithms." << std::endl << std::endl;
         return 0;
     }
 
@@ -665,6 +678,8 @@ int main(int argc, char* argv[])
         TEST_LOG_SS(Error, ss.str());
         return 1;
     }
+
+    ::SimdSetThreadNumber(options.workThreads);
 
     switch (options.mode)
     {

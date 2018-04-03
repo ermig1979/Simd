@@ -31,6 +31,10 @@ namespace Simd
 {
     namespace Base
     {
+        size_t GetThreadNumber();
+
+        void SetThreadNumber(size_t threadNumber);
+
         uint32_t Crc32c(const void * src, size_t size);
 
         void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,

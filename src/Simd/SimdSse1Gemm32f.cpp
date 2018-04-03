@@ -34,7 +34,7 @@ namespace Simd
             _mm_storeu_ps(ptr, _mm_add_ps(_mm_mul_ps(value, alpha), _mm_loadu_ps(ptr)));
         }
 
-        static void Kernel4x12(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x12(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -94,7 +94,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32);
         }
 
-        static void Kernel4x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -141,7 +141,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31);
         }
 
-        static void Kernel4x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel4x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c0 = _mm_setzero_ps();
             register __m128 c1 = _mm_setzero_ps();
@@ -168,7 +168,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3);
         }
 
-        static void Kernel6x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel6x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c00 = _mm_setzero_ps();
             register __m128 c10 = _mm_setzero_ps();
@@ -233,7 +233,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51);
         }
 
-        static void Kernel6x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void Kernel6x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c0 = _mm_setzero_ps();
             register __m128 c1 = _mm_setzero_ps();
@@ -268,7 +268,7 @@ namespace Simd
             AddProduct(C + 5 * ldc, _alpha, c5);
         }
 
-        static void KernelMx12(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx12(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c[4][3];
             register const float * a[4];
@@ -304,7 +304,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx8(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx8(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
             register __m128 c[6][2];
             register const float * a[6];
@@ -336,7 +336,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx4(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static void KernelMx4(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const int *)
         {
 #ifdef SIMD_X64_ENABLE
             register __m128 c[6];
@@ -538,7 +538,7 @@ namespace Simd
             const size_t CACHE_L1_SIZE = 32 * 1024;
             const size_t CACHE_L2_SIZE = 256 * 1024;
             const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
-            typedef Simd::GemmNN<float> GemmNN;
+            typedef Simd::GemmNN<float, int> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN, L1, L2;
@@ -573,9 +573,9 @@ namespace Simd
 #endif
             L1 = N > 4024 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4024 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
-            GemmNN gemmNN(kernelMM, kernelMT, kernelTM, kernelTT, ScaleC, PackB,
-                microM, microN, L1, L2, CACHE_L3_SIZE);
-            gemmNN.Run(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE,
+                kernelMM, kernelMT, kernelTM, kernelTT, ScaleC, PackB, NULL); 
+            gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
 #endif// SIMD_SSE_ENABLE

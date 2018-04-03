@@ -147,6 +147,16 @@ SIMD_API size_t SimdAlignment()
     return Simd::ALIGNMENT;
 }
 
+SIMD_API size_t SimdGetThreadNumber()
+{
+    return Base::GetThreadNumber();
+}
+
+SIMD_API void SimdSetThreadNumber(size_t threadNumber)
+{
+    Base::SetThreadNumber(threadNumber);
+}
+
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 {
 #ifdef SIMD_SSE42_ENABLE

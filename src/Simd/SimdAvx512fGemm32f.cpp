@@ -21,10 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdExtract.h"
-#include "Simd/SimdArray.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
@@ -984,149 +982,67 @@ namespace Simd
             }
         }
 
-        class GemmNN
+        void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
             const size_t CACHE_L1_SIZE = 32 * 1024;
             const size_t CACHE_L2_SIZE = 256 * 1024;
-            const size_t CACHE_L3_SIZE = 2*1024 * 1024;
-        public:
-            typedef void(*Main)(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask);
-            typedef void(*Tail)(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask);
-            typedef void(*ScaleC)(size_t M, size_t N, float beta, float * C, size_t ldc);
-            typedef void(*PackB)(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
-
-            GemmNN(size_t M, size_t N, size_t K)
-                : _M(M)
-                , _N(N)
-                , _K(K)
-                , _scaleC(Avx512f::ScaleC)
-                , _packB(Avx512f::PackB)
-            {
+            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            typedef Simd::GemmNN<float, __mmask16> GemmNN;
+            GemmNN::Main kernelMM, kernelMT;
+            GemmNN::Tail kernelTM, kernelTT;
+            size_t microM, microN;
 #if SIMD_ZMM_COUNT == 32
-                if (K > 4024 && false)
-                {
-                    _microM = 12;
-                    _microN = 32;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _kernelMM = Kernel12x32;
-                    _kernelMT = tail > F ? Kernel12x32 : Kernel12x16;
-                    _kernelTM = KernelMx32;
-                    _kernelTT = tail > F ? KernelMx32 : KernelMx16;
-                }
-                else
-                {
-                    _microM = 8;
-                    _microN = 48;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _kernelMM = Kernel8x48;
-                    _kernelMT = tail > DF ? Kernel8x48 : (tail > F ? Kernel8x32 : Kernel8x16);
-                    _kernelTM = KernelMx48;
-                    _kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
-                }
+            if (K > 4024 && false)
+            {
+                microM = 12;
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel12x32;
+                kernelMT = tail > F ? Kernel12x32 : Kernel12x16;
+                kernelTM = KernelMx32;
+                kernelTT = tail > F ? KernelMx32 : KernelMx16;
+            }
+            else
+            {
+                microM = 8;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel8x48;
+                kernelMT = tail > DF ? Kernel8x48 : (tail > F ? Kernel8x32 : Kernel8x16);
+                kernelTM = KernelMx48;
+                kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
+            }
 #elif SIMD_ZMM_COUNT == 16
-                if (K > 4024)
-                {
-                    _microM = 6;
-                    _microN = 32;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _kernelMM = Kernel6x32;
-                    _kernelMT = tail > F ? Kernel6x32 : Kernel6x16;
-                    _kernelTM = KernelMx32;
-                    _kernelTT = tail > F ? KernelMx32 : KernelMx16;
-                }
-                else
-                {
-                    _microM = 4;
-                    _microN = 48;
-                    size_t tail = N - AlignLoAny(N, _microN);
-                    _kernelMM = Kernel4x48;
-                    _kernelMT = tail > DF ? Kernel4x48 : (tail > F ? Kernel4x32 : Kernel4x16);
-                    _kernelTM = KernelMx48;
-                    _kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
-                }
+            if (K > 4024)
+            {
+                microM = 6;
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel6x32;
+                kernelMT = tail > F ? Kernel6x32 : Kernel6x16;
+                kernelTM = KernelMx32;
+                kernelTT = tail > F ? KernelMx32 : KernelMx16;
+        }
+            else
+            {
+                microM = 4;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel4x48;
+                kernelMT = tail > DF ? Kernel4x48 : (tail > F ? Kernel4x32 : Kernel4x16);
+                kernelTM = KernelMx48;
+                kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
+            }
 #else
-                _microM = 4;
-                _microN = 16;
-                _kernelMM = Kernel4x16;
-                _kernelMT = Kernel4x16;
-                _kernelTM = KernelMx16;
-                _kernelTT = KernelMx16;
+            microM = 4;
+            microN = 16;
+            kernelMM = Kernel4x16;
+            kernelMT = Kernel4x16;
+            kernelTM = KernelMx16;
+            kernelTT = KernelMx16;
 #endif
-                _macroK = CACHE_L2_SIZE / sizeof(float) / _microN;
-                _macroM = AlignLoAny(CACHE_L3_SIZE / sizeof(float) / _macroK, _microM);
-                _macroN = AlignLoAny(CACHE_L3_SIZE / sizeof(float) / _macroK, _microN);
-                _pA.Resize(_macroM * _macroK);
-                _pB.Resize(_macroN * _macroK);
-                size_t NA = AlignLoAny(N, _microN);
-                for (size_t j = 0; j < 3; ++j)
-                {
-                    _main[j] = __mmask16(-1);
-                    _tail[j] = TailMask16(N - NA - F * j);
-                }
-            }
-
-            void Run(const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
-            {
-                for (size_t j = 0; j < _N; j += _macroN)
-                {
-                    size_t macroN = Simd::Min(_N, j + _macroN) - j;
-                    for (size_t k = 0; k < _K; k += _macroK)
-                    {
-                        size_t macroK = Simd::Min(_K, k + _macroK) - k;
-                        //PackA(A + i * lda, lda, macroM, K, _microM, _A.data);
-                        for (size_t i = 0; i < _M; i += _macroM)
-                        {
-                            size_t macroM = Simd::Min(_M, i + _macroM) - i;
-                            if (k == 0)
-                                _scaleC(macroM, macroN, *beta, C + i * ldc + j, ldc);
-                            MacroKernel(macroM, macroN, macroK, *alpha, A + i * lda + k, lda, B + k * ldb + j, ldb, *beta, C + i * ldc + j, ldc, i == 0);
-                        }
-                    }
-                }
-            }
-
-        private:
-            void MacroKernel(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float beta, float * C, size_t ldc, bool packB)
-            {
-                size_t MA = AlignLoAny(M, _microM);
-                size_t NA = AlignLoAny(N, _microN);
-                size_t j = 0;
-                for (; j < NA; j += _microN)
-                {
-                    float * pB = _pB.data + j * _macroK;
-                    if (packB)
-                        _packB(B + j, ldb, K, _microN, _microN, pB);
-                    size_t i = 0;
-                    for (; i < MA; i += _microM)
-                        _kernelMM(K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
-                    if (i < M)
-                        _kernelTM(M - i, _microN, K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
-                }
-                if (j < N)
-                {
-                    float * pB = _pB.data + j * _macroK;
-                    if (packB)
-                        _packB(B + j, ldb, K, N - j, _microN, pB);
-                    size_t i = 0;
-                    for (; i < MA; i += _microM)
-                        _kernelMT(K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
-                    if (i < M)
-                        _kernelTT(M - i, NA - j, K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
-                }
-            }
-
-            Array<float> _pA, _pB;
-            size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK;
-            Main _kernelMM, _kernelMT;
-            Tail _kernelTM, _kernelTT;
-            ScaleC _scaleC;
-            PackB _packB;
-            __mmask16 _main[3], _tail[3];
-        };
-
-        void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
-        {
-            GemmNN gemmNN(M, N, K);
+            GemmNN gemmNN(M, N, K, microM, microN, CACHE_L2_SIZE, CACHE_L3_SIZE, CACHE_L3_SIZE,
+                kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::ScaleC, Avx512f::PackB, TailMask16);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }

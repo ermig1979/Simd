@@ -90,9 +90,9 @@ Interaction with OpenCV:</h1>
 </ul>
 <h1><a class="anchor" id="s7"></a>
 Test Framework</h1>
-<p>The test suite is needed for testing of correctness of work of the library and also for its performance testing. There is a set of tests for every function from API of the library. There is an example of test application using: </p><div class="fragment"><div class="line">./Test -m=a -t=1 -f=Sobel -ot=log.txt</div></div><!-- fragment --><p> Where next parameters were used:</p><ul>
-<li><code>-m=a</code> - a auto checking mode which includes performance testing (only for library built in Release mode). In this case different implementations of each functions will be compared between themselves (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other). Also it can be -m=c (creation of test data for cross-platform testing), <code>-m=v</code> (cross-platform testing with using of early prepared test data) and <code>-m=s</code> (running of special tests).</li>
-<li><code>-t=1</code> - a number of used threads (every thread runs all tests) for simulation of multi-thread loading.</li>
+<p>The test suite is needed for testing of correctness of work of the library and also for its performance testing. There is a set of tests for every function from API of the library. There is an example of test application using: </p><div class="fragment"><div class="line">./Test -m=a -tt=1 -f=Sobel -ot=log.txt</div></div><!-- fragment --><p> Where next parameters were used:</p><ul>
+<li><code>-m=a</code> - a auto checking mode which includes performance testing (only for library built in Release mode). In this case different implementations of each functions will be compared between themselves (for example a scalar implementation and implementations with using of different SIMD instructions such as SSE2, AVX2, and other). Also it can be <code>-m=c</code> (creation of test data for cross-platform testing), <code>-m=v</code> (cross-platform testing with using of early prepared test data) and <code>-m=s</code> (running of special tests).</li>
+<li><code>-tt=1</code> - a number of test threads.</li>
 <li><code>-f=Sobel</code> - a filter. In current case will be tested only functions which contain word <code>Sobel</code> in their names. If you miss this parameter then full testing will be performed. You can use several filters - function name has to satisfy at least one of them.</li>
 <li><code>-ot=log.txt</code> - a file name with test report (in TEXT file format). The test's report also will be output to console.</li>
 </ul>
@@ -102,7 +102,9 @@ Test Framework</h1>
 <li><code>-pa=1</code> to print alignment statistics.</li>
 <li><code>-w=1920</code> width of test image for performance testing.</li>
 <li><code>-h=1080</code> height of test image for performance testing.</li>
-<li><code>-oh=log.html</code> - a file name with test report (in HTML file format). </li>
+<li><code>-oh=log.html</code> a file name with test report (in HTML file format).</li>
+<li><code>-s=sample.avi</code> a video source (<a class="el" href="namespace_simd_1_1_motion.html" title="Contains Framework for motion detection. ">Simd::Motion</a> test).</li>
+<li><code>-wt=1</code> a thread number used to parallelize algorithms. </li>
 </ul>
 </div></div><!-- contents -->
 <div id="nav-path" class="navpath">

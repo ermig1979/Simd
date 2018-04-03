@@ -77,6 +77,10 @@ namespace Test
     {
         bool result = true;
 
+#ifdef _DEBUG
+        width = std::max(256, width);
+#endif
+
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         const int reducedWidth = (width + 1) / 2;
@@ -102,9 +106,12 @@ namespace Test
     {
         bool result = true;
 
+#ifdef _DEBUG
+        result = result && ReduceGrayAutoTest(W*2, H, f1, f2);
+#else
         result = result && ReduceGrayAutoTest(W, H, f1, f2);
+#endif
         result = result && ReduceGrayAutoTest(W + E, H - E, f1, f2);
-        result = result && ReduceGrayAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
