@@ -2287,6 +2287,8 @@ extern "C"
 
         C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
 
+        \note This function supports multithreading (See functions ::SimdGetThreadNumber and ::SimdSetThreadNumber).
+
         \param [in] M - a height of A and C matrices.
         \param [in] N - a width of B and C matrices.
         \param [in] K - a width of A and height of C matrices.

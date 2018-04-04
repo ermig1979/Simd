@@ -77,10 +77,6 @@ namespace Test
     {
         bool result = true;
 
-#ifdef _DEBUG
-        width = std::max(256, width);
-#endif
-
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         const int reducedWidth = (width + 1) / 2;
