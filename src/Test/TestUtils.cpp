@@ -326,7 +326,7 @@ namespace Test
     }
 
     bool Compare(const float * a, size_t aStride, const float * b, size_t bStride, size_t width, size_t height, float differenceMax, bool printError,
-        int errorCountMax, bool relative, const String & description)
+        int errorCountMax, DifferenceType differenceType, const String & description)
     {
         std::stringstream message;
         int errorCount = 0;
@@ -334,8 +334,17 @@ namespace Test
         {
             for (size_t col = 0; col < width; ++col)
             {
-                float difference = relative ? ::fabs(a[col] - b[col]) / Simd::Max(::fabs(a[col]), ::fabs(b[col])) : ::fabs(a[col] - b[col]);
-                if (difference >= differenceMax)
+                float absolute = ::fabs(a[col] - b[col]);
+                float relative = ::fabs(a[col] - b[col]) / Simd::Max(::fabs(a[col]), ::fabs(b[col]));
+                bool error = false;
+                switch (differenceType)
+                {
+                case DifferenceAbsolute: error = absolute > differenceMax; break;
+                case DifferenceRelative: error = relative > differenceMax; break;
+                case DifferenceBoth: error = absolute > differenceMax && relative > differenceMax; break;
+                case DifferenceAny: error = absolute > differenceMax || relative > differenceMax; break;
+                }
+                if (error)
                 {
                     errorCount++;
                     if (printError)
@@ -345,7 +354,8 @@ namespace Test
                         message << "Error at [";
                         if (height > 1)
                             message << row << ", ";
-                        message << col << "] : " << a[col] << " != " << b[col] << "; (" << (relative ? "relative" : "absolute") << " difference = " << difference << ")!" << std::endl;
+                        message << col << "] : " << a[col] << " != " << b[col] << ";" 
+                            << " (absolute = " << absolute << ", relative = " << relative << ")!" << std::endl;
                     }
                     if (errorCount > errorCountMax)
                     {
@@ -364,13 +374,19 @@ namespace Test
         return errorCount == 0;
     }
 
-    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float differenceMax, bool printError, int errorCountMax, DifferenceType differenceType, const String & description)
     {
         assert(a.size() == b.size());
-        return Compare(a.data(), 0, b.data(), 0, a.size(), 1, relativeDifferenceMax, printError, errorCountMax, relative, description);
+        return Compare(a.data(), 0, b.data(), 0, a.size(), 1, differenceMax, printError, errorCountMax, differenceType, description);
     }
 
-    bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax, bool printError, int errorCountMax, const String & description)
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float differenceMax, bool printError,
+        int errorCountMax, bool relative, const String & description)
+    {
+        return Compare(a, b, differenceMax, printError, errorCountMax, relative ? DifferenceRelative : DifferenceAbsolute, description);
+    }
+
+    bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float differenceMax, bool printError, int errorCountMax, const String & description)
     {
         assert(a.size() == b.size() && a.size() % cycle == 0);
         std::stringstream message;
@@ -391,11 +407,11 @@ namespace Test
                 ns += norm;
             }
             float rdn = float(::fabs(ds)*sqrt(cycle) / ns);
-            if (rdn > relativeDifferenceMax)
+            if (rdn > differenceMax)
             {
                 for (size_t c = 0; c < cycle && errorCount <= errorCountMax; ++c)
                 {
-                    if (rds[c] >= relativeDifferenceMax)
+                    if (rds[c] >= differenceMax)
                     {
                         errorCount++;
                         if (printError)
@@ -413,15 +429,21 @@ namespace Test
         return errorCount == 0;
     }
 
-    bool Compare(const View & a, const View & b, float relativeDifferenceMax, bool printError, int errorCountMax, bool relative, const String & description)
+    bool Compare(const View & a, const View & b, float differenceMax, bool printError, int errorCountMax, DifferenceType differenceType, const String & description)
     {
         assert(Simd::EqualSize(a, b) && a.format == View::Float);
-        return Compare((float*)a.data, a.stride / 4, (float*)b.data, b.stride / 4, a.width, a.height, relativeDifferenceMax, printError, errorCountMax, relative, description);
+        return Compare((float*)a.data, a.stride / 4, (float*)b.data, b.stride / 4, a.width, a.height, differenceMax, printError, errorCountMax, differenceType, description);
     }
 
-    bool Compare(const float & a, const float & b, float relativeDifferenceMax, bool printError, const String & description)
+    bool Compare(const View & a, const View & b, float differenceMax, bool printError,
+        int errorCountMax, bool relative, const String & description)
     {
-        return Compare(&a, 0, &b, 0, 1, 1, relativeDifferenceMax, printError, 0, true, description);
+        return Compare(a, b, differenceMax, printError, errorCountMax, relative ? DifferenceRelative : DifferenceAbsolute, description);
+    }
+
+    bool Compare(const float & a, const float & b, float differenceMax, bool printError, const String & description)
+    {
+        return Compare(&a, 0, &b, 0, 1, 1, differenceMax, printError, 0, DifferenceRelative, description);
     }
 
     String ColorDescription(View::Format format)

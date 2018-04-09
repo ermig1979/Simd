@@ -29,12 +29,17 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        SIMD_INLINE void AddProduct(float * ptr, __m512 value, __m512 alpha)
+        {
+            _mm512_storeu_ps(ptr, _mm512_fmadd_ps(value, alpha, _mm512_loadu_ps(ptr)));
+        }
+
         SIMD_INLINE void AddProduct(float * ptr, __m512 value, __m512 alpha, __mmask16 mask)
         {
             _mm512_mask_storeu_ps(ptr, mask, _mm512_fmadd_ps(value, alpha, _mm512_maskz_loadu_ps(mask, ptr)));
         }
 
-        static void Kernel4x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel4x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -77,24 +82,24 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c02, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01);
+            AddProduct(C + 2 * F, _alpha, c02, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c12, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11);
+            AddProduct(C + 2 * F, _alpha, c12, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c22, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21);
+            AddProduct(C + 2 * F, _alpha, c22, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c32, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31);
+            AddProduct(C + 2 * F, _alpha, c32, mask);
         }
 
-        static void Kernel4x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel4x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -128,20 +133,20 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31, mask);
         }
 
-        static void Kernel4x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel4x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c0 = _mm512_setzero_ps();
             register __m512 c1 = _mm512_setzero_ps();
@@ -162,13 +167,13 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * ldc, _alpha, c0, mask[0]);
-            AddProduct(C + 1 * ldc, _alpha, c1, mask[0]);
-            AddProduct(C + 2 * ldc, _alpha, c2, mask[0]);
-            AddProduct(C + 3 * ldc, _alpha, c3, mask[0]);
+            AddProduct(C + 0 * ldc, _alpha, c0, mask);
+            AddProduct(C + 1 * ldc, _alpha, c1, mask);
+            AddProduct(C + 2 * ldc, _alpha, c2, mask);
+            AddProduct(C + 3 * ldc, _alpha, c3, mask);
         }
 
-        static void Kernel6x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel6x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -214,26 +219,26 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c41, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c40);
+            AddProduct(C + 1 * F, _alpha, c41, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c51, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c50);
+            AddProduct(C + 1 * F, _alpha, c51, mask);
         }
 
-        static void Kernel6x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel6x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -266,20 +271,20 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c00, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c10, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c20, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c30, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c40, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c50, mask);
         }
 
-        static void Kernel8x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel8x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c01 = _mm512_setzero_ps();
@@ -354,40 +359,40 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c02, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01);
+            AddProduct(C + 2 * F, _alpha, c02, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c12, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11);
+            AddProduct(C + 2 * F, _alpha, c12, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c22, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21);
+            AddProduct(C + 2 * F, _alpha, c22, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c32, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31);
+            AddProduct(C + 2 * F, _alpha, c32, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c41, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c42, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c40);
+            AddProduct(C + 1 * F, _alpha, c41);
+            AddProduct(C + 2 * F, _alpha, c42, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c51, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c52, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c50);
+            AddProduct(C + 1 * F, _alpha, c51);
+            AddProduct(C + 2 * F, _alpha, c52, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c61, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c62, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c60);
+            AddProduct(C + 1 * F, _alpha, c61);
+            AddProduct(C + 2 * F, _alpha, c62, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c71, mask[1]);
-            AddProduct(C + 2 * F, _alpha, c72, mask[2]);
+            AddProduct(C + 0 * F, _alpha, c70);
+            AddProduct(C + 1 * F, _alpha, c71);
+            AddProduct(C + 2 * F, _alpha, c72, mask);
         }
 
-        static void Kernel8x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel8x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc,  __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c01 = _mm512_setzero_ps();
@@ -445,32 +450,32 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c41, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c40);
+            AddProduct(C + 1 * F, _alpha, c41, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c51, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c50);
+            AddProduct(C + 1 * F, _alpha, c51, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c61, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c60);
+            AddProduct(C + 1 * F, _alpha, c61, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c71, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c70);
+            AddProduct(C + 1 * F, _alpha, c71, mask);
         }
 
-        static void Kernel8x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel8x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -511,24 +516,24 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c00, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c10, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c20, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c30, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c40, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c50, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c60, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c70, mask);
         }
 
-        static void Kernel12x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel12x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -610,44 +615,44 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c01, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c00);
+            AddProduct(C + 1 * F, _alpha, c01, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c11, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c10);
+            AddProduct(C + 1 * F, _alpha, c11, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c21, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c20);
+            AddProduct(C + 1 * F, _alpha, c21, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c31, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c30);
+            AddProduct(C + 1 * F, _alpha, c31, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c41, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c40);
+            AddProduct(C + 1 * F, _alpha, c41, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c51, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c50);
+            AddProduct(C + 1 * F, _alpha, c51, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c61, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c60);
+            AddProduct(C + 1 * F, _alpha, c61, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c71, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c70);
+            AddProduct(C + 1 * F, _alpha, c71, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c80, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c81, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c80);
+            AddProduct(C + 1 * F, _alpha, c81, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c90, mask[0]);
-            AddProduct(C + 1 * F, _alpha, c91, mask[1]);
+            AddProduct(C + 0 * F, _alpha, c90);
+            AddProduct(C + 1 * F, _alpha, c91, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cA0, mask[0]);
-            AddProduct(C + 1 * F, _alpha, cA1, mask[1]);
+            AddProduct(C + 0 * F, _alpha, cA0);
+            AddProduct(C + 1 * F, _alpha, cA1, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cB0, mask[0]);
-            AddProduct(C + 1 * F, _alpha, cB1, mask[1]);
+            AddProduct(C + 0 * F, _alpha, cB0);
+            AddProduct(C + 1 * F, _alpha, cB1, mask);
         }
 
-        static void Kernel12x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void Kernel12x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             register __m512 c00 = _mm512_setzero_ps();
             register __m512 c10 = _mm512_setzero_ps();
@@ -704,32 +709,32 @@ namespace Simd
                 B += ldb;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c00, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c10, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c20, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c30, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c40, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c50, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c60, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c70, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c80, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c80, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c90, mask[0]);
+            AddProduct(C + 0 * F, _alpha, c90, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cA0, mask[0]);
+            AddProduct(C + 0 * F, _alpha, cA0, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cB0, mask[0]);
+            AddProduct(C + 0 * F, _alpha, cB0, mask);
         }
 
-        static void KernelMx48(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void KernelMx48(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             register __m512 c[8][3];
@@ -763,14 +768,14 @@ namespace Simd
             __m512 _alpha = _mm512_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
             {
-                AddProduct(C + 0 * F, _alpha, c[i][0], mask[0]);
-                AddProduct(C + 1 * F, _alpha, c[i][1], mask[1]);
-                AddProduct(C + 2 * F, _alpha, c[i][2], mask[2]);
+                AddProduct(C + 0 * F, _alpha, c[i][0]);
+                AddProduct(C + 1 * F, _alpha, c[i][1]);
+                AddProduct(C + 2 * F, _alpha, c[i][2], mask);
                 C += ldc;
             }
         }
 
-        static void KernelMx32(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void KernelMx32(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             register __m512 c[12][2];
@@ -801,13 +806,13 @@ namespace Simd
             __m512 _alpha = _mm512_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
             {
-                AddProduct(C + 0 * F, _alpha, c[i][0], mask[0]);
-                AddProduct(C + 1 * F, _alpha, c[i][1], mask[1]);
+                AddProduct(C + 0 * F, _alpha, c[i][0]);
+                AddProduct(C + 1 * F, _alpha, c[i][1], mask);
                 C += ldc;
             }
         }
 
-        static void KernelMx16(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, const __mmask16 * mask)
+        static void KernelMx16(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             register __m512 c[12];
@@ -837,7 +842,7 @@ namespace Simd
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
-                AddProduct(C + i * ldc, _alpha, c[i], mask[0]);
+                AddProduct(C + i * ldc, _alpha, c[i], mask);
         }
 
         SIMD_INLINE void ScaleC(float * ptr, __m512 value, __mmask16 mask = -1)
@@ -1041,7 +1046,7 @@ namespace Simd
             kernelTM = KernelMx16;
             kernelTT = KernelMx16;
 #endif
-            GemmNN gemmNN(M, N, K, microM, microN, CACHE_L2_SIZE, CACHE_L3_SIZE, CACHE_L3_SIZE,
+            GemmNN gemmNN(M, N, K, microM, microN, CACHE_L2_SIZE, CACHE_L3_SIZE, CACHE_L3_SIZE, F,
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::ScaleC, Avx512f::PackB, TailMask16);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }

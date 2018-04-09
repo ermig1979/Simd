@@ -65,16 +65,30 @@ namespace Test
 
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
 
-    bool Compare(const Buffer32f & a, const Buffer32f & b, float relativeDifferenceMax = EPS,
+    enum DifferenceType
+    {
+        DifferenceAbsolute,
+        DifferenceRelative,
+        DifferenceBoth,
+        DifferenceAny,
+    };
+
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float differenceMax,
+        bool printError, int errorCountMax, DifferenceType differenceType, const String & description = "");
+
+    bool Compare(const Buffer32f & a, const Buffer32f & b, float differenceMax = EPS,
         bool printError = false, int errorCountMax = 0, bool relative = true, const String & description = "");
 
-    bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float relativeDifferenceMax = EPS,
+    bool CompareCycle(const Buffer32f & a, const Buffer32f & b, size_t cycle, float differenceMax = EPS,
         bool printError = false, int errorCountMax = 0, const String & description = "");
 
-    bool Compare(const View & a, const View & b, float relativeDifferenceMax = EPS, bool printError = false,
+    bool Compare(const View & a, const View & b, float differenceMax, bool printError,
+        int errorCountMax, DifferenceType differenceType, const String & description = "");
+
+    bool Compare(const View & a, const View & b, float differenceMax = EPS, bool printError = false,
         int errorCountMax = 0, bool relative = true, const String & description = "");
 
-    bool Compare(const float & a, const float & b, float relativeDifferenceMax = EPS, bool printError = false,
+    bool Compare(const float & a, const float & b, float differenceMax = EPS, bool printError = false,
         const String & description = "");
 
     String ColorDescription(View::Format format);

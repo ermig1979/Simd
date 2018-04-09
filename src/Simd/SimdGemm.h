@@ -30,23 +30,23 @@
 
 namespace Simd
 {
-    template <class T, class MM> class GemmNN
+    template <class T, class TM> class GemmNN
     {
-        static const size_t FM = 3;
     public:
-        typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, const MM * mask);
-        typedef void(*Tail)(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, const MM * mask);
+        typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
+        typedef void(*Tail)(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
         typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
         typedef void(*PackB)(const T * B, size_t ldb, size_t K, size_t N, size_t microN, T * pB);
-        typedef MM(*TailMask)(ptrdiff_t tail);
+        typedef TM(*TailMask)(ptrdiff_t tail);
 
-        GemmNN(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3,
+        GemmNN(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, size_t F,
             Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, ScaleC scaleC, PackB packB, TailMask tailMask)
             : _M(M)
             , _N(N)
             , _K(K)
             , _microM(microM)
             , _microN(microN)
+            , _F(F)
             , _threadNumber(Base::GetThreadNumber())
             , _kernelMM(kernelMM)
             , _kernelMT(kernelMT)
@@ -59,6 +59,8 @@ namespace Simd
             _macroK = L1 / sizeof(T) / _microN;
             _macroM = AlignLoAny(L2 / sizeof(T) / _macroK, _microM);
             _macroN = AlignLoAny(L3 / sizeof(T) / _macroK, _microN);
+            if (_N * _M * _K < 256 * 256 * 256 * 2)
+                _threadNumber = 1;
             _pA.resize(_threadNumber);
             _pB.resize(_threadNumber);
             for (size_t t = 0; t < _threadNumber; ++t)
@@ -66,14 +68,16 @@ namespace Simd
                 _pA[t].Resize(_macroM * _macroK);
                 _pB[t].Resize(_macroN * _macroK);
             }
+            size_t NF = AlignLo(_N, _F);
             if (tailMask)
             {
-                size_t NA = AlignLoAny(_N, _microN);
-                for (size_t j = 0; j < FM; ++j)
-                {
-                    _main[j] = MM(-1);
-                    _tail[j] = tailMask(_N - NA - 8 * sizeof(MM) * j);
-                }
+                _main = TM(-1);
+                _tail = NF == _N ? TM(-1) : tailMask(_N - NF);
+            }
+            else
+            {
+                _main = TM(_F);
+                _tail = NF == _N ? TM(_F) : TM(_N - NF);
             }
         }
 
@@ -139,8 +143,8 @@ namespace Simd
         typedef std::vector<Simd::Array<T>> Arrays;
 
         Arrays _pA, _pB;
-        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _threadNumber;
-        MM _main[FM], _tail[FM];
+        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _F, _threadNumber;
+        TM _main, _tail;
         Main _kernelMM, _kernelMT;
         Tail _kernelTM, _kernelTT;
         ScaleC _scaleC;

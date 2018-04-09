@@ -67,11 +67,11 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(K, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View B(N, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View A(K, M, View::Float, NULL, TEST_ALIGN(1));
+        View B(N, K, View::Float, NULL, TEST_ALIGN(1));
+        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(1));
+        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(1));
         View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         const float alpha = 1.5f, beta = 0.5f;
         FillRandom32f(A, -1.0f, 1.0f);
@@ -82,7 +82,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(alpha, A, B, beta, srcC, dstC2));
 
-        result = result && Compare(dstC1, dstC2, EPS*10.0f, true, 32, false);
+        result = result && Compare(dstC1, dstC2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
