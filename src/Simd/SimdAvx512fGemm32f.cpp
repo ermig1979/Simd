@@ -41,23 +41,23 @@ namespace Simd
 
         static void Kernel4x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
-            register __m512 c02 = _mm512_setzero_ps();
-            register __m512 c12 = _mm512_setzero_ps();
-            register __m512 c22 = _mm512_setzero_ps();
-            register __m512 c32 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
+            __m512 c02 = _mm512_setzero_ps();
+            __m512 c12 = _mm512_setzero_ps();
+            __m512 c22 = _mm512_setzero_ps();
+            __m512 c32 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
-            register __m512 b0, b1, b2, a0;
+            __m512 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -101,19 +101,19 @@ namespace Simd
 
         static void Kernel4x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
-            register __m512 b0, b1, a0;
+            __m512 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -148,15 +148,15 @@ namespace Simd
 
         static void Kernel4x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c0 = _mm512_setzero_ps();
-            register __m512 c1 = _mm512_setzero_ps();
-            register __m512 c2 = _mm512_setzero_ps();
-            register __m512 c3 = _mm512_setzero_ps();
+            __m512 c0 = _mm512_setzero_ps();
+            __m512 c1 = _mm512_setzero_ps();
+            __m512 c2 = _mm512_setzero_ps();
+            __m512 c3 = _mm512_setzero_ps();
             const float * a0 = A + lda * 0;
             const float * a1 = A + lda * 1;
             const float * a2 = A + lda * 2;
             const float * a3 = A + lda * 3;
-            register __m512 b0;
+            __m512 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B);
@@ -175,25 +175,25 @@ namespace Simd
 
         static void Kernel6x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
-            register __m512 c41 = _mm512_setzero_ps();
-            register __m512 c51 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
+            __m512 c41 = _mm512_setzero_ps();
+            __m512 c51 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
             const float * A4 = A + lda * 4;
             const float * A5 = A + lda * 5;
-            register __m512 b0, b1, a0;
+            __m512 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -240,19 +240,19 @@ namespace Simd
 
         static void Kernel6x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
             const float * A4 = A + lda * 4;
             const float * A5 = A + lda * 5;
-            register __m512 b0, a0;
+            __m512 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -286,30 +286,30 @@ namespace Simd
 
         static void Kernel8x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c02 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c12 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c22 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
-            register __m512 c32 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c41 = _mm512_setzero_ps();
-            register __m512 c42 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c51 = _mm512_setzero_ps();
-            register __m512 c52 = _mm512_setzero_ps();
-            register __m512 c60 = _mm512_setzero_ps();
-            register __m512 c61 = _mm512_setzero_ps();
-            register __m512 c62 = _mm512_setzero_ps();
-            register __m512 c70 = _mm512_setzero_ps();
-            register __m512 c71 = _mm512_setzero_ps();
-            register __m512 c72 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c02 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c12 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c22 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
+            __m512 c32 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c41 = _mm512_setzero_ps();
+            __m512 c42 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c51 = _mm512_setzero_ps();
+            __m512 c52 = _mm512_setzero_ps();
+            __m512 c60 = _mm512_setzero_ps();
+            __m512 c61 = _mm512_setzero_ps();
+            __m512 c62 = _mm512_setzero_ps();
+            __m512 c70 = _mm512_setzero_ps();
+            __m512 c71 = _mm512_setzero_ps();
+            __m512 c72 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
@@ -318,7 +318,7 @@ namespace Simd
             const float * A5 = A + lda * 5;
             const float * A6 = A + lda * 6;
             const float * A7 = A + lda * 7;
-            register __m512 b0, b1, b2, a0;
+            __m512 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -394,22 +394,22 @@ namespace Simd
 
         static void Kernel8x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc,  __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c41 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c51 = _mm512_setzero_ps();
-            register __m512 c60 = _mm512_setzero_ps();
-            register __m512 c61 = _mm512_setzero_ps();
-            register __m512 c70 = _mm512_setzero_ps();
-            register __m512 c71 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c41 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c51 = _mm512_setzero_ps();
+            __m512 c60 = _mm512_setzero_ps();
+            __m512 c61 = _mm512_setzero_ps();
+            __m512 c70 = _mm512_setzero_ps();
+            __m512 c71 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
@@ -418,7 +418,7 @@ namespace Simd
             const float * A5 = A + lda * 5;
             const float * A6 = A + lda * 6;
             const float * A7 = A + lda * 7;
-            register __m512 b0, b1, a0;
+            __m512 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -477,14 +477,14 @@ namespace Simd
 
         static void Kernel8x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c60 = _mm512_setzero_ps();
-            register __m512 c70 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c60 = _mm512_setzero_ps();
+            __m512 c70 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
@@ -493,7 +493,7 @@ namespace Simd
             const float * A5 = A + lda * 5;
             const float * A6 = A + lda * 6;
             const float * A7 = A + lda * 7;
-            register __m512 b0, a0;
+            __m512 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -535,30 +535,30 @@ namespace Simd
 
         static void Kernel12x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c01 = _mm512_setzero_ps();
-            register __m512 c11 = _mm512_setzero_ps();
-            register __m512 c21 = _mm512_setzero_ps();
-            register __m512 c31 = _mm512_setzero_ps();
-            register __m512 c41 = _mm512_setzero_ps();
-            register __m512 c51 = _mm512_setzero_ps();
-            register __m512 c60 = _mm512_setzero_ps();
-            register __m512 c70 = _mm512_setzero_ps();
-            register __m512 c80 = _mm512_setzero_ps();
-            register __m512 c90 = _mm512_setzero_ps();
-            register __m512 cA0 = _mm512_setzero_ps();
-            register __m512 cB0 = _mm512_setzero_ps();
-            register __m512 c61 = _mm512_setzero_ps();
-            register __m512 c71 = _mm512_setzero_ps();
-            register __m512 c81 = _mm512_setzero_ps();
-            register __m512 c91 = _mm512_setzero_ps();
-            register __m512 cA1 = _mm512_setzero_ps();
-            register __m512 cB1 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c11 = _mm512_setzero_ps();
+            __m512 c21 = _mm512_setzero_ps();
+            __m512 c31 = _mm512_setzero_ps();
+            __m512 c41 = _mm512_setzero_ps();
+            __m512 c51 = _mm512_setzero_ps();
+            __m512 c60 = _mm512_setzero_ps();
+            __m512 c70 = _mm512_setzero_ps();
+            __m512 c80 = _mm512_setzero_ps();
+            __m512 c90 = _mm512_setzero_ps();
+            __m512 cA0 = _mm512_setzero_ps();
+            __m512 cB0 = _mm512_setzero_ps();
+            __m512 c61 = _mm512_setzero_ps();
+            __m512 c71 = _mm512_setzero_ps();
+            __m512 c81 = _mm512_setzero_ps();
+            __m512 c91 = _mm512_setzero_ps();
+            __m512 cA1 = _mm512_setzero_ps();
+            __m512 cB1 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
@@ -571,7 +571,7 @@ namespace Simd
             const float * A9 = A + lda * 9;
             const float * AA = A + lda * 10;
             const float * AB = A + lda * 11;
-            register __m512 b0, b1, a0;
+            __m512 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -654,18 +654,18 @@ namespace Simd
 
         static void Kernel12x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            register __m512 c00 = _mm512_setzero_ps();
-            register __m512 c10 = _mm512_setzero_ps();
-            register __m512 c20 = _mm512_setzero_ps();
-            register __m512 c30 = _mm512_setzero_ps();
-            register __m512 c40 = _mm512_setzero_ps();
-            register __m512 c50 = _mm512_setzero_ps();
-            register __m512 c60 = _mm512_setzero_ps();
-            register __m512 c70 = _mm512_setzero_ps();
-            register __m512 c80 = _mm512_setzero_ps();
-            register __m512 c90 = _mm512_setzero_ps();
-            register __m512 cA0 = _mm512_setzero_ps();
-            register __m512 cB0 = _mm512_setzero_ps();
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 c60 = _mm512_setzero_ps();
+            __m512 c70 = _mm512_setzero_ps();
+            __m512 c80 = _mm512_setzero_ps();
+            __m512 c90 = _mm512_setzero_ps();
+            __m512 cA0 = _mm512_setzero_ps();
+            __m512 cB0 = _mm512_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
@@ -678,7 +678,7 @@ namespace Simd
             const float * A9 = A + lda * 9;
             const float * AA = A + lda * 10;
             const float * AB = A + lda * 11;
-            register __m512 b0, a0;
+            __m512 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -737,11 +737,11 @@ namespace Simd
         static void KernelMx48(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
-            register __m512 c[8][3];
-            register const float * a[8];
+            __m512 c[8][3];
+            const float * a[8];
 #else
-            register __m512 c[4][3];
-            register const float * a[4];
+            __m512 c[4][3];
+            const float * a[4];
 #endif
             for (size_t i = 0; i < M; ++i)
             {
@@ -750,7 +750,7 @@ namespace Simd
                 c[i][2] = _mm512_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m512 b0, b1, b2, a0;
+            __m512 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -778,11 +778,11 @@ namespace Simd
         static void KernelMx32(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
-            register __m512 c[12][2];
-            register const float * a[12];
+            __m512 c[12][2];
+            const float * a[12];
 #else
-            register __m512 c[6][2];
-            register const float * a[6];
+            __m512 c[6][2];
+            const float * a[6];
 #endif
             for (size_t i = 0; i < M; ++i)
             {
@@ -790,7 +790,7 @@ namespace Simd
                 c[i][1] = _mm512_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m512 b0, b1, a0;
+            __m512 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
@@ -815,21 +815,21 @@ namespace Simd
         static void KernelMx16(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
-            register __m512 c[12];
-            register const float * a[12];
+            __m512 c[12];
+            const float * a[12];
 #elif SIMD_ZMM_COUNT == 16
-            register __m512 c[6];
-            register const float * a[6];
+            __m512 c[6];
+            const float * a[6];
 #else
-            register __m512 c[4];
-            register const float * a[4];
+            __m512 c[4];
+            const float * a[4];
 #endif
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = _mm512_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m512 b0, a0;
+            __m512 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);

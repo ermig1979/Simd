@@ -208,9 +208,9 @@ namespace Simd
                         ++sx;
                         dx = dy;
 
-                        register unsigned short * p_isc0 = buffer.isc0;
-                        register unsigned short * p_isc1 = buffer.isc1;
-                        register unsigned short * p_iscp = buffer.iscp;
+                        unsigned short * p_isc0 = buffer.isc0;
+                        unsigned short * p_isc1 = buffer.isc1;
+                        unsigned short * p_iscp = buffer.iscp;
 
                         // Main entries in row
                         for (evenX = false, srcx = 1, dstx = 0; srcx < (srcWidth - 1); srcx += 2, ++sx)
@@ -219,7 +219,7 @@ namespace Simd
                             p_isc1++;
                             p_iscp++;
 
-                            register unsigned short icurrent = (unsigned short)(*sx);
+                            unsigned short icurrent = (unsigned short)(*sx);
 
                             isrp = icurrent * 4;
                             icurrent = (unsigned short)(*(++sx));
@@ -239,7 +239,7 @@ namespace Simd
                         //doing the last operation due to even number of operations in previous cycle
                         if (!(srcWidth & 1))
                         {
-                            register unsigned short icurrent = (unsigned short)(*sx);
+                            unsigned short icurrent = (unsigned short)(*sx);
                             isrp = icurrent * 4;
                             ++dstx;
                             evenX = !evenX;
@@ -281,11 +281,11 @@ namespace Simd
                         ++sx;
 
                         // Main entries in odd-numbered row
-                        register unsigned short * p_iscp = buffer.iscp;
+                        unsigned short * p_iscp = buffer.iscp;
 
                         for (evenX = false, srcx = 1, dstx = 0; srcx < (srcWidth - 1); srcx += 2, ++sx)
                         {
-                            register unsigned short icurrent = (unsigned short)(*sx);
+                            unsigned short icurrent = (unsigned short)(*sx);
                             isrp = icurrent * 4;
 
                             p_iscp++;
@@ -301,7 +301,7 @@ namespace Simd
                         //doing the last operation due to even number of operations in previous cycle
                         if (!(srcWidth & 1))
                         {
-                            register unsigned short icurrent = (unsigned short)(*sx);
+                            unsigned short icurrent = (unsigned short)(*sx);
                             isrp = icurrent * 4;
                             ++dstx;
                             evenX = !evenX;

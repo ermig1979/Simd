@@ -82,7 +82,7 @@ namespace Simd
             __mmask16 tail = __mmask16(-1) >> (F + partial - size);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register size_t j = 0;
+            size_t j = 0;
             for (; j < aligned; j += QF)
             {
                 SynetEltwiseLayerForwardProduct<align, false>(src0, src1, dst, j + F * 0);
@@ -128,9 +128,9 @@ namespace Simd
             __mmask16 tail = __mmask16(-1) >> (F + partial - size);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register __m512 weight0 = _mm512_set1_ps(weight[0]);
-            register __m512 weight1 = _mm512_set1_ps(weight[1]);
-            register size_t j = 0;
+            __m512 weight0 = _mm512_set1_ps(weight[0]);
+            __m512 weight1 = _mm512_set1_ps(weight[1]);
+            size_t j = 0;
             for (; j < aligned; j += QF)
             {
                 SynetEltwiseLayerForwardSum<align, false>(src0, weight0, src1, weight1, dst, j + F * 0);
@@ -145,7 +145,7 @@ namespace Simd
             for (size_t i = 2; i < count; ++i)
             {
                 const float * srci = src[i];
-                register __m512 weighti = _mm512_set1_ps(weight[i]);
+                __m512 weighti = _mm512_set1_ps(weight[i]);
                 for (j = 0; j < aligned; j += QF)
                 {
                     SynetEltwiseLayerForwardSum<align, false>(srci, weighti, dst, j + F * 0);
@@ -172,7 +172,7 @@ namespace Simd
             __mmask16 tail = __mmask16(-1) >> (F + partial - size);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register size_t j = 0;
+            size_t j = 0;
             for (; j < aligned; j += QF)
             {
                 SynetEltwiseLayerForwardMax<align, false>(src0, src1, dst, j + F * 0);

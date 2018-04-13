@@ -29,7 +29,7 @@ namespace Simd
     {
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            register float b = beta[0];
+            float b = beta[0];
             for (size_t i = 0; i < M; ++i)
             {
                 float * pC = C + i * ldc;
@@ -38,7 +38,7 @@ namespace Simd
                 for (size_t k = 0; k < K; ++k)
                 {
                     const float * pB = B + k * ldb;
-                    register float a = alpha[0] * A[i*lda + k];
+                    float a = alpha[0] * A[i*lda + k];
                     for (size_t j = 0; j < N; ++j)
                         pC[j] = a * pB[j] + pC[j];
                 }

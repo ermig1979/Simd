@@ -30,11 +30,11 @@ namespace Simd
     {
         void SynetAddBias(const float * bias, size_t count, size_t size, float * dst)
         {
-            register size_t aligned = Simd::AlignLo(size, 4);
+            size_t aligned = Simd::AlignLo(size, 4);
             for (size_t i = 0; i < count; ++i)
             {
-                register float value = bias[i];
-                register size_t j = 0;
+                float value = bias[i];
+                size_t j = 0;
                 for (; j < aligned; j += 4)
                 {
                     dst[j + 0] += value;
@@ -50,10 +50,10 @@ namespace Simd
 
         void SynetEltwiseLayerForwardProduct(float const * const * src, size_t count, size_t size, float * dst)
         {
-            register size_t aligned = Simd::AlignLo(size, 4);
+            size_t aligned = Simd::AlignLo(size, 4);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register size_t j = 0;
+            size_t j = 0;
             for (; j < aligned; j += 4)
             {
                 dst[j + 0] = src0[j + 0] * src1[j + 0];
@@ -80,11 +80,11 @@ namespace Simd
 
         void SynetEltwiseLayerForwardSum(float const * const * src, const float * weight, size_t count, size_t size, float * dst)
         {
-            register size_t aligned = Simd::AlignLo(size, 4);
+            size_t aligned = Simd::AlignLo(size, 4);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register float weight0 = weight[0], weight1 = weight[1];
-            register size_t j = 0;
+            float weight0 = weight[0], weight1 = weight[1];
+            size_t j = 0;
             for (; j < aligned; j += 4)
             {
                 dst[j + 0] = src0[j + 0] * weight0 + src1[j + 0] * weight1;
@@ -97,7 +97,7 @@ namespace Simd
             for (size_t i = 2; i < count; ++i)
             {
                 const float * srci = src[i];
-                register float weighti = weight[i];
+                float weighti = weight[i];
                 for (j = 0; j < aligned; j += 4)
                 {
                     dst[j + 0] += srci[j + 0] * weighti;
@@ -112,10 +112,10 @@ namespace Simd
 
         void SynetEltwiseLayerForwardMax(float const * const * src, size_t count, size_t size, float * dst)
         {
-            register size_t aligned = Simd::AlignLo(size, 4);
+            size_t aligned = Simd::AlignLo(size, 4);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register size_t j = 0;
+            size_t j = 0;
             for (; j < aligned; j += 4)
             {
                 dst[j + 0] = Simd::Max(src0[j + 0], src1[j + 0]);
@@ -187,14 +187,14 @@ namespace Simd
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
         {
-            register size_t aligned = Simd::AlignLo(size, 4);
+            size_t aligned = Simd::AlignLo(size, 4);
             if (bias)
             {
                 for (size_t i = 0; i < count; ++i)
                 {
-                    register float s = scale[i];
-                    register float b = bias[i];
-                    register size_t j = 0;
+                    float s = scale[i];
+                    float b = bias[i];
+                    size_t j = 0;
                     for (; j < aligned; j += 4)
                     {
                         dst[j + 0] = src[j + 0] * s + b;
@@ -212,8 +212,8 @@ namespace Simd
             {
                 for (size_t i = 0; i < count; ++i)
                 {
-                    register float s = scale[i];
-                    register size_t j = 0;
+                    float s = scale[i];
+                    size_t j = 0;
                     for (; j < aligned; j += 4)
                     {
                         dst[j + 0] = src[j + 0] * s;

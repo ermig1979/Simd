@@ -1487,7 +1487,7 @@ namespace Simd
 
                 void Kernel4x24(size_t N, size_t K, const float * a, const float * b, float * c)
                 {
-                    register __m256 _a, b0, b1, b2, c00, c01, c02, c10, c11, c12, c20, c21, c22, c30, c31, c32;
+                    __m256 _a, b0, b1, b2, c00, c01, c02, c10, c11, c12, c20, c21, c22, c30, c31, c32;
 
                     c00 = _mm256_setzero_ps();
                     c01 = _mm256_setzero_ps();

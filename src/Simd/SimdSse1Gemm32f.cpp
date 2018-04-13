@@ -49,23 +49,23 @@ namespace Simd
 
         static void Kernel4x12(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c00 = _mm_setzero_ps();
-            register __m128 c10 = _mm_setzero_ps();
-            register __m128 c20 = _mm_setzero_ps();
-            register __m128 c30 = _mm_setzero_ps();
-            register __m128 c01 = _mm_setzero_ps();
-            register __m128 c11 = _mm_setzero_ps();
-            register __m128 c21 = _mm_setzero_ps();
-            register __m128 c31 = _mm_setzero_ps();
-            register __m128 c02 = _mm_setzero_ps();
-            register __m128 c12 = _mm_setzero_ps();
-            register __m128 c22 = _mm_setzero_ps();
-            register __m128 c32 = _mm_setzero_ps();
+            __m128 c00 = _mm_setzero_ps();
+            __m128 c10 = _mm_setzero_ps();
+            __m128 c20 = _mm_setzero_ps();
+            __m128 c30 = _mm_setzero_ps();
+            __m128 c01 = _mm_setzero_ps();
+            __m128 c11 = _mm_setzero_ps();
+            __m128 c21 = _mm_setzero_ps();
+            __m128 c31 = _mm_setzero_ps();
+            __m128 c02 = _mm_setzero_ps();
+            __m128 c12 = _mm_setzero_ps();
+            __m128 c22 = _mm_setzero_ps();
+            __m128 c32 = _mm_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
-            register __m128 b0, b1, b2, a0;
+            __m128 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
@@ -109,19 +109,19 @@ namespace Simd
 
         static void Kernel4x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c00 = _mm_setzero_ps();
-            register __m128 c10 = _mm_setzero_ps();
-            register __m128 c20 = _mm_setzero_ps();
-            register __m128 c30 = _mm_setzero_ps();
-            register __m128 c01 = _mm_setzero_ps();
-            register __m128 c11 = _mm_setzero_ps();
-            register __m128 c21 = _mm_setzero_ps();
-            register __m128 c31 = _mm_setzero_ps();
+            __m128 c00 = _mm_setzero_ps();
+            __m128 c10 = _mm_setzero_ps();
+            __m128 c20 = _mm_setzero_ps();
+            __m128 c30 = _mm_setzero_ps();
+            __m128 c01 = _mm_setzero_ps();
+            __m128 c11 = _mm_setzero_ps();
+            __m128 c21 = _mm_setzero_ps();
+            __m128 c31 = _mm_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
-            register __m128 b0, b1, a0;
+            __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
@@ -156,15 +156,15 @@ namespace Simd
 
         static void Kernel4x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c0 = _mm_setzero_ps();
-            register __m128 c1 = _mm_setzero_ps();
-            register __m128 c2 = _mm_setzero_ps();
-            register __m128 c3 = _mm_setzero_ps();
+            __m128 c0 = _mm_setzero_ps();
+            __m128 c1 = _mm_setzero_ps();
+            __m128 c2 = _mm_setzero_ps();
+            __m128 c3 = _mm_setzero_ps();
             const float * a0 = A + lda * 0;
             const float * a1 = A + lda * 1;
             const float * a2 = A + lda * 2;
             const float * a3 = A + lda * 3;
-            register __m128 b0;
+            __m128 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B);
@@ -183,25 +183,25 @@ namespace Simd
 
         static void Kernel6x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c00 = _mm_setzero_ps();
-            register __m128 c10 = _mm_setzero_ps();
-            register __m128 c20 = _mm_setzero_ps();
-            register __m128 c30 = _mm_setzero_ps();
-            register __m128 c40 = _mm_setzero_ps();
-            register __m128 c50 = _mm_setzero_ps();
-            register __m128 c01 = _mm_setzero_ps();
-            register __m128 c11 = _mm_setzero_ps();
-            register __m128 c21 = _mm_setzero_ps();
-            register __m128 c31 = _mm_setzero_ps();
-            register __m128 c41 = _mm_setzero_ps();
-            register __m128 c51 = _mm_setzero_ps();
+            __m128 c00 = _mm_setzero_ps();
+            __m128 c10 = _mm_setzero_ps();
+            __m128 c20 = _mm_setzero_ps();
+            __m128 c30 = _mm_setzero_ps();
+            __m128 c40 = _mm_setzero_ps();
+            __m128 c50 = _mm_setzero_ps();
+            __m128 c01 = _mm_setzero_ps();
+            __m128 c11 = _mm_setzero_ps();
+            __m128 c21 = _mm_setzero_ps();
+            __m128 c31 = _mm_setzero_ps();
+            __m128 c41 = _mm_setzero_ps();
+            __m128 c51 = _mm_setzero_ps();
             const float * A0 = A + lda * 0;
             const float * A1 = A + lda * 1;
             const float * A2 = A + lda * 2;
             const float * A3 = A + lda * 3;
             const float * A4 = A + lda * 4;
             const float * A5 = A + lda * 5;
-            register __m128 b0, b1, a0;
+            __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
@@ -248,19 +248,19 @@ namespace Simd
 
         static void Kernel6x4(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c0 = _mm_setzero_ps();
-            register __m128 c1 = _mm_setzero_ps();
-            register __m128 c2 = _mm_setzero_ps();
-            register __m128 c3 = _mm_setzero_ps();
-            register __m128 c4 = _mm_setzero_ps();
-            register __m128 c5 = _mm_setzero_ps();
+            __m128 c0 = _mm_setzero_ps();
+            __m128 c1 = _mm_setzero_ps();
+            __m128 c2 = _mm_setzero_ps();
+            __m128 c3 = _mm_setzero_ps();
+            __m128 c4 = _mm_setzero_ps();
+            __m128 c5 = _mm_setzero_ps();
             const float * a0 = A + lda * 0;
             const float * a1 = A + lda * 1;
             const float * a2 = A + lda * 2;
             const float * a3 = A + lda * 3;
             const float * a4 = A + lda * 4;
             const float * a5 = A + lda * 5;
-            register __m128 b0;
+            __m128 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B);
@@ -283,8 +283,8 @@ namespace Simd
 
         static void KernelMx12(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c[4][3];
-            register const float * a[4];
+            __m128 c[4][3];
+            const float * a[4];
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm_setzero_ps();
@@ -292,7 +292,7 @@ namespace Simd
                 c[i][2] = _mm_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m128 b0, b1, b2, a0;
+            __m128 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
@@ -319,15 +319,15 @@ namespace Simd
 
         static void KernelMx8(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            register __m128 c[6][2];
-            register const float * a[6];
+            __m128 c[6][2];
+            const float * a[6];
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm_setzero_ps();
                 c[i][1] = _mm_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m128 b0, b1, a0;
+            __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
@@ -352,18 +352,18 @@ namespace Simd
         static void KernelMx4(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
 #ifdef SIMD_X64_ENABLE
-            register __m128 c[6];
-            register const float * a[6];
+            __m128 c[6];
+            const float * a[6];
 #else
-            register __m128 c[4];
-            register const float * a[4];
+            __m128 c[4];
+            const float * a[4];
 #endif
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = _mm_setzero_ps();
                 a[i] = A + lda * i;
             }
-            register __m128 b0, a0;
+            __m128 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);

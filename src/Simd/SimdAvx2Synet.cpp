@@ -49,9 +49,9 @@ namespace Simd
             size_t partial = AlignLo(size, F);
             const float * src0 = src[0];
             const float * src1 = src[1];
-            register __m256 weight0 = _mm256_set1_ps(weight[0]);
-            register __m256 weight1 = _mm256_set1_ps(weight[1]);
-            register size_t j = 0;
+            __m256 weight0 = _mm256_set1_ps(weight[0]);
+            __m256 weight1 = _mm256_set1_ps(weight[1]);
+            size_t j = 0;
             if (partial)
             {
                 for (; j < aligned; j += QF)
@@ -69,8 +69,8 @@ namespace Simd
             for (size_t i = 2; i < count; ++i)
             {
                 const float * srci = src[i];
-                register __m256 weighti = _mm256_set1_ps(weight[i]);
-                register size_t j = 0;
+                __m256 weighti = _mm256_set1_ps(weight[i]);
+                size_t j = 0;
                 if (partial)
                 {
                     for (; j < aligned; j += QF)

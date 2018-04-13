@@ -2046,11 +2046,11 @@ namespace Simd
                         const float * pa = a + i*K;
                         float * pc = c + i*N;
                         size_t j = 0;
-                        register __m512 _a[6];
+                        __m512 _a[6];
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[24] = {
+                            __m512 sums[24] = {
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
@@ -2078,7 +2078,7 @@ namespace Simd
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[6] = { 
+                            __m512 sums[6] = { 
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), 
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
@@ -2106,11 +2106,11 @@ namespace Simd
                         const float * pa = a + i*K;
                         float * pc = c + i*N;
                         size_t j = 0;
-                        register __m512 _a[3];
+                        __m512 _a[3];
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[12] = {
+                            __m512 sums[12] = {
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(),
                                 _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
@@ -2132,7 +2132,7 @@ namespace Simd
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[3] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            __m512 sums[3] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
@@ -2157,16 +2157,16 @@ namespace Simd
                         for (; j < N4; j += 4)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+                            __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
-                                register __m512 _a = Load<false>(pa + k);
+                                __m512 _a = Load<false>(pa + k);
                                 Kernel1x4x16<align>(_a, K, pb + k, sums);
                             }
                             if (k < K)
                             {
-                                register __m512 _a = Load<false, true>(pa + k, tailMask);
+                                __m512 _a = Load<false, true>(pa + k, tailMask);
                                 Kernel1x4x16<false>(_a, K, pb + k, sums);
                             }
                             Add4ExtractedSums(sums + 0, pc + j);
@@ -2174,16 +2174,16 @@ namespace Simd
                         for (; j < N; ++j)
                         {
                             const float * pb = b + j*K;
-                            register __m512 sum = _mm512_setzero_ps();
+                            __m512 sum = _mm512_setzero_ps();
                             size_t k = 0;
                             for (; k < K16; k += 16)
                             {
-                                register __m512 _a = Load<false>(pa + k);
+                                __m512 _a = Load<false>(pa + k);
                                 Kernel1x1x16<align>(_a, pb + k, sum);
                             }
                             if (k < K)
                             {
-                                register __m512 _a = Load<false, true>(pa + k, tailMask);
+                                __m512 _a = Load<false, true>(pa + k, tailMask);
                                 Kernel1x1x16<false>(_a, pb + k, sum);
                             }
                             pc[j] += ExtractSum(sum);
@@ -2534,7 +2534,7 @@ namespace Simd
 
                 void Kernel4x48(size_t N, size_t K, const float * a, const float * b, float * c)
                 {
-                    register __m512 _a, b0, b1, b2, c00, c01, c02, c10, c11, c12, c20, c21, c22, c30, c31, c32;
+                    __m512 _a, b0, b1, b2, c00, c01, c02, c10, c11, c12, c20, c21, c22, c30, c31, c32;
 
                     c00 = _mm512_setzero_ps();
                     c01 = _mm512_setzero_ps();
