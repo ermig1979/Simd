@@ -145,8 +145,8 @@ namespace Test
 #define FUNC_D(function) FuncD(function, #function)
 
 #define ARGS_D(tilted, function1, function2) \
-    FuncD(function1.func, function1.description + (tilted ? "<1>" : "<0>")), \
-    FuncD(function2.func, function2.description + (tilted ? "<1>" : "<0>"))
+    FuncD(function1.func, function1.description + (tilted ? "[1]" : "[0]")), \
+    FuncD(function2.func, function2.description + (tilted ? "[1]" : "[0]"))
 
     bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int  int16, const FuncD & f1, const FuncD & f2)
     {

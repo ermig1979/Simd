@@ -538,7 +538,7 @@ namespace Test
                 for (size_t i = 0; i < tasks.size(); ++i)
                     progress += tasks[i]->Progress();
                 progress /= double(tasks.size());
-                std::cout << "\rTest progress = " << int(progress*100.0) << "%.";
+                std::cout << "\rTest progress: " << std::fixed << std::setprecision(1) << progress*100.0 << "%";
                 Test::Sleep(40);
             } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;

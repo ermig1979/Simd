@@ -308,7 +308,7 @@ namespace Test
 
             FuncHSF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            FuncHSF(const FuncHSF & f, int add) : func(f.func), description(f.description + (add ? "<1>" : "<0>")) {}
+            FuncHSF(const FuncHSF & f, int add) : func(f.func), description(f.description + (add ? "[1]" : "[0]")) {}
 
             void Call(const View & src, const Buffer32f & row, const Buffer32f & col, const View & dstSrc, View & dstDst, int add) const
             {

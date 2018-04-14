@@ -85,22 +85,22 @@ namespace Test
         switch (type)
         {
         case SimdOperationBinary8uAverage:
-            return "<Avg>";
+            return "[Avg]";
         case SimdOperationBinary8uAnd:
-            return "<And>";
+            return "[And]";
         case SimdOperationBinary8uOr:
-            return "<Or>";
+            return "[Or]";
         case SimdOperationBinary8uMaximum:
-            return "<Max>";
+            return "[Max]";
         case SimdOperationBinary8uMinimum:
-            return "<Min>";
+            return "[Min]";
         case SimdOperationBinary8uSaturatedSubtraction:
-            return "<Subs>";
+            return "[Subs]";
         case SimdOperationBinary8uSaturatedAddition:
-            return "<Adds>";
+            return "[Adds]";
         }
         assert(0);
-        return "<Unknown>";
+        return "[Unknown]";
     }
 
     SIMD_INLINE String OperationBinary16iTypeDescription(SimdOperationBinary16iType type)
@@ -108,12 +108,12 @@ namespace Test
         switch (type)
         {
         case SimdOperationBinary16iAddition:
-            return "<Add>";
+            return "[Add]";
         case SimdOperationBinary16iSubtraction:
-            return "<Sub>";
+            return "[Sub]";
         }
         assert(0);
-        return "<Unknown>";
+        return "[Unknown]";
     }
 
 #define ARGS_OB8U(format, width, height, type, function1, function2) \

@@ -111,14 +111,14 @@ namespace Test
         switch (type)
         {
         case SimdSynetEltwiseOperationProduct:
-            return "<P>";
+            return "[P]";
         case SimdSynetEltwiseOperationSum:
-            return "<S>";
+            return "[S]";
         case SimdSynetEltwiseOperationMax:
-            return "<M>";
+            return "[M]";
         }
         assert(0);
-        return "<U>";
+        return "[U]";
     }
 
     namespace

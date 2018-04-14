@@ -98,7 +98,7 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << ColorDescription(sumFormat) + ColorDescription(sqsumFormat);
-                ss << "<1" << sqsumEnable << tiltedEnable << ">";
+                ss << "[1" << sqsumEnable << tiltedEnable << "]";
 
                 Func f1d = Func(f1.func, f1.description + ss.str());
                 Func f2d = Func(f2.func, f2.description + ss.str());

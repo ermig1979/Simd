@@ -449,7 +449,7 @@ namespace Test
     String ColorDescription(View::Format format)
     {
         std::stringstream ss;
-        ss << "<" << View::PixelSize(format) << ">";
+        ss << "[" << View::PixelSize(format) << "]";
         return ss.str();
     }
 
@@ -487,20 +487,20 @@ namespace Test
         switch (type)
         {
         case SimdCompareEqual:
-            return "(==)";
+            return "[==]";
         case SimdCompareNotEqual:
-            return "(!=)";
+            return "[!=]";
         case SimdCompareGreater:
-            return "(> )";
+            return "[> ]";
         case SimdCompareGreaterOrEqual:
-            return "(>=)";
+            return "[>=]";
         case SimdCompareLesser:
-            return "(< )";
+            return "[< ]";
         case SimdCompareLesserOrEqual:
-            return "(<=)";
+            return "[<=]";
         }
         assert(0);
-        return "(Unknown)";
+        return "[Unknown]";
     }
 
     String ExpandToLeft(const String & value, size_t count)
