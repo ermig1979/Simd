@@ -306,14 +306,33 @@ namespace Simd
             Store<false>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi16(lo, hi)));
         }
 
+        template <size_t channelCount > SIMD_INLINE void Gather(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
+        {
+            struct Src { uint8_t channels[channelCount * 1]; };
+            struct Dst { uint8_t channels[channelCount * 2]; };
+            const Src * s = (const Src *)src;
+            Dst * d = (Dst*)dst;
+            for (size_t i = 0; i < size; i++)
+               d[i] = *(Dst *)(s + idx[i]);
+        }
+
+        template <> SIMD_INLINE void Gather<2>(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
+        {
+            for (size_t i = 0; i < size; i += 16)
+                _mm512_storeu_si512(dst + 4*i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), src, 2));
+        }
+
+        template <> SIMD_INLINE void Gather<4>(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
+        {
+            for (size_t i = 0; i < size; i += 8)
+                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 4));
+        }
+
         template <size_t channelCount> void ResizeBilinear(
             const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)
         {
             assert(dstWidth >= A);
-
-            struct One { uint8_t channels[channelCount]; };
-            struct Two { uint8_t channels[channelCount * 2]; };
 
             size_t size = 2 * dstWidth*channelCount;
             size_t bufferSize = AlignHi(dstWidth, A)*channelCount * 2;
@@ -350,10 +369,7 @@ namespace Simd
 
                 for (; k < 2; k++)
                 {
-                    Two * pb = (Two *)buffer.bx[k];
-                    const One * psrc = (const One *)(src + (sy + k)*srcStride);
-                    for (size_t x = 0; x < dstWidth; x++)
-                        pb[x] = *(Two *)(psrc + buffer.ix[x]);
+                    Gather<channelCount>(src + (sy + k)*srcStride, buffer.ix, dstWidth, buffer.bx[k]);
 
                     uint8_t * pbx = buffer.bx[k];
                     for (size_t i = 0; i < bufferSize; i += step)
