@@ -172,6 +172,21 @@ namespace Simd
         }
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
+
+        const unsigned int SCR_FTZ = 1 << 15;
+
+        SIMD_INLINE SimdBool GetFlushToZero()
+        {
+            return _mm_getcsr() | SCR_FTZ ? SimdTrue : SimdFalse;
+        }
+
+        SIMD_INLINE void SetFlushToZero(SimdBool value)
+        {
+            if (value)
+                _mm_setcsr(_mm_getcsr() | SCR_FTZ);
+            else
+                _mm_setcsr(_mm_getcsr() & ~SCR_FTZ);
+        }
     }
 #endif
 

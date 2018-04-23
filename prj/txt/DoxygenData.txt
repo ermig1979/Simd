@@ -277,6 +277,11 @@
 */
 
 /*! @ingroup functions
+    @defgroup cpu_flags CPU Flags
+    \short Functions for CPU flags management.
+*/
+
+/*! @ingroup functions
     @defgroup hash Hash Functions
     \short Functions for hash estimation.
 */

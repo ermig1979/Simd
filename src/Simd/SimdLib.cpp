@@ -157,6 +157,24 @@ SIMD_API void SimdSetThreadNumber(size_t threadNumber)
     Base::SetThreadNumber(threadNumber);
 }
 
+SIMD_API SimdBool SimdGetFlushToZero()
+{
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable)
+        Sse::GetFlushToZero();
+    else
+#endif
+        return SimdFalse;
+}
+
+SIMD_API void SimdSetFlushToZero(SimdBool value)
+{
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable)
+        Sse::SetFlushToZero(value);
+#endif
+}
+
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 {
 #ifdef SIMD_SSE42_ENABLE

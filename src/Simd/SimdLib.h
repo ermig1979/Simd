@@ -67,6 +67,15 @@ typedef unsigned __int64  uint64_t;
 #endif
 
 /*! @ingroup c_types
+    Describes boolean type.
+*/
+typedef enum
+{
+    SimdFalse = 0, /*!< False value. */
+    SimdTrue = 1, /*!< True value. */
+} SimdBool;
+
+/*! @ingroup c_types
     Describes types of SIMD extensions which supported by current CPU and Simd Library (see function ::SimdCpuInfo).
 */
 typedef enum
@@ -343,6 +352,26 @@ extern "C"
         \param [in] threadNumber - a number of threads.
     */
     SIMD_API void SimdSetThreadNumber(size_t threadNumber);
+
+    /*! @ingroup cpu_flags
+
+        \fn SimdBool SimdGetFlushToZero();
+
+        \short Gets current CPU Flush-To-Zero (FTZ) flag. It is used in order to process subnormal numbers.
+
+        \return current FTZ flag.
+    */
+    SIMD_API SimdBool SimdGetFlushToZero();
+
+    /*! @ingroup cpu_flags
+
+        \fn void SimdSetFlushToZero(SimdBool value);
+
+        \short Sets current CPU Flush-To-Zero (FTZ) flag. It is used in order to process subnormal numbers.
+
+        \param [in] value - a value of Flush-To-Zero (FTZ) flag.
+    */
+    SIMD_API void SimdSetFlushToZero(SimdBool value);
 
     /*! @ingroup hash
 
