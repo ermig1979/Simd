@@ -206,7 +206,7 @@ namespace Simd
         ~Detection()
         {
             for (size_t i = 0; i < _data.size(); ++i)
-                ::SimdDetectionFree(_data[i].handle);
+                ::SimdRelease(_data[i].handle);
         }
 
         /*!
@@ -383,7 +383,7 @@ namespace Simd
             ~Level()
             {
                 for (size_t i = 0; i < hids.size(); ++i)
-                    ::SimdDetectionFree(hids[i].handle);
+                    ::SimdRelease(hids[i].handle);
             }
         };
         typedef std::unique_ptr<Level> LevelPtr;

@@ -80,9 +80,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f">SimdDetectionLbpDetect16ii</a> (const void *hid, const uint8_t *mask, size_t maskStride, ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers, processes only even points).  <a href="#ga2a3409fbda5e1e13852d066cfede2d9f">More...</a><br /></td></tr>
 <tr class="separator:ga2a3409fbda5e1e13852d066cfede2d9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga267710e70e93abe7206c77ca1517696a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga267710e70e93abe7206c77ca1517696a">SimdDetectionFree</a> (void *ptr)</td></tr>
-<tr class="memdesc:ga267710e70e93abe7206c77ca1517696a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees pointers which was received with using of functions <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file. ">SimdDetectionLoadA</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>.  <a href="#ga267710e70e93abe7206c77ca1517696a">More...</a><br /></td></tr>
-<tr class="separator:ga267710e70e93abe7206c77ca1517696a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Object Detection's low-level API for <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers...">Simd::Detection</a>. </p>
@@ -112,7 +109,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade. ">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>, and must be released with using function <a class="el" href="group__object__detection.html#ga267710e70e93abe7206c77ca1517696a" title="Frees pointers which was received with using of functions SimdDetectionLoadA and SimdDetectionInit. ">SimdDetectionFree</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade. ">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>, and must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -266,7 +263,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to hidden cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image. ">SimdDetectionPrepare</a>, <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers...">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers...">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers...">SimdDetectionLbpDetect16ip</a> and <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers...">SimdDetectionLbpDetect16ii</a>. It must be released with using function <a class="el" href="group__object__detection.html#ga267710e70e93abe7206c77ca1517696a" title="Frees pointers which was received with using of functions SimdDetectionLoadA and SimdDetectionInit. ">SimdDetectionFree</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to hidden cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga8273855df9316d23cfaa85d981e75471" title="Prepares hidden classifier cascade structure to work with given input 8-bit gray image. ">SimdDetectionPrepare</a>, <a class="el" href="group__object__detection.html#gaba65e21ccb1d49e55c899bc344fc8a46" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers...">SimdDetectionHaarDetect32fp</a>, <a class="el" href="group__object__detection.html#ga7f0c306ca3748341a43d9b08f895c2ac" title="Performs object detection with using of HAAR cascade classifier (uses 32-bit float numbers...">SimdDetectionHaarDetect32fi</a>, <a class="el" href="group__object__detection.html#gaf7b8ab17f35c923312d383259dea20e3" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers...">SimdDetectionLbpDetect32fp</a>, <a class="el" href="group__object__detection.html#ga218cc08cbff2ae5b0807dded3486ac16" title="Performs object detection with using of LBP cascade classifier (uses 32-bit float numbers...">SimdDetectionLbpDetect32fi</a>, <a class="el" href="group__object__detection.html#ga31f469e40e42cb70563dfe9ab63b6032" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers...">SimdDetectionLbpDetect16ip</a> and <a class="el" href="group__object__detection.html#ga2a3409fbda5e1e13852d066cfede2d9f" title="Performs object detection with using of LBP cascade classifier (uses 16-bit integer numbers...">SimdDetectionLbpDetect16ii</a>. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </dd></dl>
 
 </div>
 </div>
@@ -820,33 +817,6 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bottom</td><td>- a bottom side of bounding box which restricts detection region. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of 8-bit image with output result. None zero points refer to left-top corner of detected objects. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga267710e70e93abe7206c77ca1517696a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga267710e70e93abe7206c77ca1517696a">&#9670;&nbsp;</a></span>SimdDetectionFree()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdDetectionFree </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>ptr</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Frees pointers which was received with using of functions <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file. ">SimdDetectionLoadA</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers...">Simd::Detection</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">ptr</td><td>- a pointer which was received with using of functions <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file. ">SimdDetectionLoadA</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>. </td></tr>
   </table>
   </dd>
 </dl>

@@ -200,7 +200,7 @@ namespace Test
 
         result = result && Compare(dst1, dst2, 0, true, 32);
 
-        SimdDetectionFree(hid);
+        SimdRelease(hid);
 
         //Annotate(src, dst1, w, h, f1.description);
         //Annotate(src, dst2, w, h, f2.description);
@@ -222,7 +222,7 @@ namespace Test
         result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);
         result = result && DetectionDetectAutoTest(data, W + O, H - O, throughColumn, int16, f1, f2);
 
-        SimdDetectionFree(data);
+        SimdRelease(data);
 
         return result;
     }
@@ -490,9 +490,9 @@ namespace Test
             result = result && Compare(dst1, dst2, 0, true, 32);
         }
 
-        SimdDetectionFree(hid);
+        SimdRelease(hid);
 
-        SimdDetectionFree(dat);
+        SimdRelease(dat);
 
         return result;
     }

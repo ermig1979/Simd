@@ -333,6 +333,18 @@ extern "C"
     */
     SIMD_API size_t SimdAlignment();
 
+    /*! @ingroup memory
+
+        \fn void SimdRelease(void * context);
+
+        \short Releases context created with using of Simd Library API.
+
+        \note This function releases a context created by functions ::SimdDetectionLoadA and ::SimdDetectionInit.
+
+        \param [in] context - a context to be released.
+    */    
+    SIMD_API void SimdRelease(void * context);
+
     /*! @ingroup thread
 
         \fn size_t SimdGetThreadNumber();
@@ -1640,7 +1652,7 @@ extern "C"
 
         \param [in] path - a path to cascade.
         \return a pointer to loaded cascade. On error it returns NULL.
-                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released with using function ::SimdDetectionFree.
+                This pointer is used in functions ::SimdDetectionInfo and ::SimdDetectionInit, and must be released with using of function ::SimdRelease.
     */
     SIMD_API void * SimdDetectionLoadA(const char * path);
 
@@ -1684,7 +1696,7 @@ extern "C"
         \return a pointer to hidden cascade. On error it returns NULL.
                 This pointer is used in functions ::SimdDetectionPrepare, ::SimdDetectionHaarDetect32fp, ::SimdDetectionHaarDetect32fi,
                 ::SimdDetectionLbpDetect32fp, ::SimdDetectionLbpDetect32fi, ::SimdDetectionLbpDetect16ip and ::SimdDetectionLbpDetect16ii.
-                It must be released with using function ::SimdDetectionFree.
+                It must be released with using of function ::SimdRelease.
     */
     SIMD_API void * SimdDetectionInit(const void * data, uint8_t * sum, size_t sumStride, size_t width, size_t height,
         uint8_t * sqsum, size_t sqsumStride, uint8_t * tilted, size_t tiltedStride, int throughColumn, int int16);
@@ -1847,17 +1859,6 @@ extern "C"
     */
     SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
         ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup object_detection
-
-        \fn void SimdDetectionFree(void * ptr);
-
-        \short Frees pointers which was received with using of functions ::SimdDetectionLoadA and ::SimdDetectionInit.
-
-        \note This function is used for implementation of Simd::Detection.
-
-        \param [in] ptr - a pointer which was received with using of functions ::SimdDetectionLoadA and ::SimdDetectionInit.
-    */    SIMD_API void SimdDetectionFree(void * ptr);
 
     /*! @ingroup edge_background
 
@@ -4238,6 +4239,21 @@ extern "C"
     */
     SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+    typedef enum
+    {
+        SimdResizeChannelByte,
+        SimdResizeChannelFloat,
+    } SimdResizeChannelType;
+
+    typedef enum
+    {
+        SimdResizeMethodBilinear,
+    } SimdResizeMethodType;
+
+    SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+
+    SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup segmentation
 

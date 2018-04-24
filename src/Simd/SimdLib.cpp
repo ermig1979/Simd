@@ -52,6 +52,8 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdConst.h"
 #include "Simd/SimdLog.h"
 
+#include "Simd/SimdResizer.h"
+
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
@@ -147,6 +149,11 @@ SIMD_API size_t SimdAlignment()
     return Simd::ALIGNMENT;
 }
 
+SIMD_API void SimdRelease(void * context)
+{
+    delete (Deletable*)context;
+}
+
 SIMD_API size_t SimdGetThreadNumber()
 {
     return Base::GetThreadNumber();
@@ -161,7 +168,7 @@ SIMD_API SimdBool SimdGetFlushToZero()
 {
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
-        Sse::GetFlushToZero();
+        return Sse::GetFlushToZero();
     else
 #endif
         return SimdFalse;
@@ -1630,11 +1637,6 @@ SIMD_API void SimdDetectionLbpDetect16ii(const void * hid, const uint8_t * mask,
     else
 #endif
         Base::DetectionLbpDetect16ii(hid, mask, maskStride, left, top, right, bottom, dst, dstStride);
-}
-
-SIMD_API void SimdDetectionFree(void * ptr)
-{
-    Base::DetectionFree(ptr);
 }
 
 SIMD_API void SimdEdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
@@ -3955,6 +3957,16 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
     else
 #endif
         Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
+}
+
+SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
+{
+    return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+}
+
+SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+{
+    ((const Resizer*)resizer)->Run(src, srcStride, dst, dstStride);
 }
 
 SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)

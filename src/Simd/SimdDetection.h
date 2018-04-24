@@ -40,11 +40,6 @@ namespace Simd
         typedef Simd::Point<ptrdiff_t> Size;
         typedef Simd::Rectangle<ptrdiff_t> Rect;
 
-        struct Deletable
-        {
-            virtual ~Deletable() {}
-        };
-
         struct Data : public Deletable
         {
             struct DTreeNode

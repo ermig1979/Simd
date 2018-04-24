@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gabd6383250b360664ae91c056ee4282b5"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__memory.html#gabd6383250b360664ae91c056ee4282b5">SimdAlignment</a> ()</td></tr>
 <tr class="memdesc:gabd6383250b360664ae91c056ee4282b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets alignment required for the most productive work of the <a class="el" href="namespace_simd.html">Simd</a> Library.  <a href="#gabd6383250b360664ae91c056ee4282b5">More...</a><br /></td></tr>
 <tr class="separator:gabd6383250b360664ae91c056ee4282b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4e38dedd9f946265c9762858a71aa4cf"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf">SimdRelease</a> (void *context)</td></tr>
+<tr class="memdesc:ga4e38dedd9f946265c9762858a71aa4cf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Releases context created with using of <a class="el" href="namespace_simd.html">Simd</a> Library API.  <a href="#ga4e38dedd9f946265c9762858a71aa4cf">More...</a><br /></td></tr>
+<tr class="separator:ga4e38dedd9f946265c9762858a71aa4cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for memory management. </p>
@@ -187,6 +190,33 @@ Functions</h2></td></tr>
 
 <p>Gets alignment required for the most productive work of the <a class="el" href="namespace_simd.html">Simd</a> Library. </p>
 <dl class="section return"><dt>Returns</dt><dd>a required alignment. </dd></dl>
+
+</div>
+</div>
+<a id="ga4e38dedd9f946265c9762858a71aa4cf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4e38dedd9f946265c9762858a71aa4cf">&#9670;&nbsp;</a></span>SimdRelease()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdRelease </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Releases context created with using of <a class="el" href="namespace_simd.html">Simd</a> Library API. </p>
+<dl class="section note"><dt>Note</dt><dd>This function releases a context created by functions <a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768" title="Loads a classifier cascade from file. ">SimdDetectionLoadA</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a context to be released. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

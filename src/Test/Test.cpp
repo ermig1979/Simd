@@ -49,289 +49,295 @@ namespace Test
     typedef std::vector<Group> Groups;
     Groups g_groups;
 
-#define TEST_ADD_GROUP(name) \
+#define TEST_ADD_GROUP_00S(name) \
+    bool name##SpecialTest(); \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, NULL, NULL, name##SpecialTest)); return true; } \
+    bool name##AtList = name##AddToList();
+
+#define TEST_ADD_GROUP_A00(name) \
+    bool name##AutoTest(); \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, NULL, NULL)); return true; } \
+    bool name##AtList = name##AddToList();
+
+#define TEST_ADD_GROUP_AD0(name) \
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, NULL)); return true; } \
     bool name##AtList = name##AddToList();
 
-#define TEST_ADD_GROUP_EX(name) \
+#define TEST_ADD_GROUP_ADS(name) \
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
     bool name##SpecialTest(); \
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
-#define TEST_ADD_GROUP_ONLY_SPECIAL(name) \
-    bool name##SpecialTest(); \
-    bool name##AddToList(){ g_groups.push_back(Group(#name, NULL, NULL, name##SpecialTest)); return true; } \
-    bool name##AtList = name##AddToList();
+    TEST_ADD_GROUP_AD0(AbsDifferenceSum);
+    TEST_ADD_GROUP_AD0(AbsDifferenceSumMasked);
+    TEST_ADD_GROUP_AD0(AbsDifferenceSums3x3);
+    TEST_ADD_GROUP_AD0(AbsDifferenceSums3x3Masked);
+    TEST_ADD_GROUP_AD0(SquaredDifferenceSum);
+    TEST_ADD_GROUP_AD0(SquaredDifferenceSumMasked);
+    TEST_ADD_GROUP_AD0(SquaredDifferenceSum32f);
+    TEST_ADD_GROUP_AD0(SquaredDifferenceKahanSum32f);
+    TEST_ADD_GROUP_AD0(CosineDistance32f);
 
-    TEST_ADD_GROUP(AbsDifferenceSum);
-    TEST_ADD_GROUP(AbsDifferenceSumMasked);
-    TEST_ADD_GROUP(AbsDifferenceSums3x3);
-    TEST_ADD_GROUP(AbsDifferenceSums3x3Masked);
-    TEST_ADD_GROUP(SquaredDifferenceSum);
-    TEST_ADD_GROUP(SquaredDifferenceSumMasked);
-    TEST_ADD_GROUP(SquaredDifferenceSum32f);
-    TEST_ADD_GROUP(SquaredDifferenceKahanSum32f);
-    TEST_ADD_GROUP(CosineDistance32f);
+    TEST_ADD_GROUP_AD0(AddFeatureDifference);
 
-    TEST_ADD_GROUP(AddFeatureDifference);
+    TEST_ADD_GROUP_AD0(BgraToBgr);
+    TEST_ADD_GROUP_AD0(BgraToGray);
+    TEST_ADD_GROUP_AD0(BgrToGray);
+    TEST_ADD_GROUP_AD0(BgrToHsl);
+    TEST_ADD_GROUP_AD0(BgrToHsv);
+    TEST_ADD_GROUP_AD0(GrayToBgr);
+    TEST_ADD_GROUP_AD0(Int16ToGray);
 
-    TEST_ADD_GROUP(BgraToBgr);
-    TEST_ADD_GROUP(BgraToGray);
-    TEST_ADD_GROUP(BgrToGray);
-    TEST_ADD_GROUP(BgrToHsl);
-    TEST_ADD_GROUP(BgrToHsv);
-    TEST_ADD_GROUP(GrayToBgr);
-    TEST_ADD_GROUP(Int16ToGray);
+    TEST_ADD_GROUP_AD0(BgraToBayer);
+    TEST_ADD_GROUP_AD0(BgrToBayer);
 
-    TEST_ADD_GROUP(BgraToBayer);
-    TEST_ADD_GROUP(BgrToBayer);
+    TEST_ADD_GROUP_AD0(BgrToBgra);
+    TEST_ADD_GROUP_AD0(GrayToBgra);
 
-    TEST_ADD_GROUP(BgrToBgra);
-    TEST_ADD_GROUP(GrayToBgra);
+    TEST_ADD_GROUP_AD0(BgraToYuv420p);
+    TEST_ADD_GROUP_AD0(BgraToYuv422p);
+    TEST_ADD_GROUP_AD0(BgraToYuv444p);
+    TEST_ADD_GROUP_AD0(BgrToYuv420p);
+    TEST_ADD_GROUP_AD0(BgrToYuv422p);
+    TEST_ADD_GROUP_AD0(BgrToYuv444p);
 
-    TEST_ADD_GROUP(BgraToYuv420p);
-    TEST_ADD_GROUP(BgraToYuv422p);
-    TEST_ADD_GROUP(BgraToYuv444p);
-    TEST_ADD_GROUP(BgrToYuv420p);
-    TEST_ADD_GROUP(BgrToYuv422p);
-    TEST_ADD_GROUP(BgrToYuv444p);
+    TEST_ADD_GROUP_AD0(BackgroundGrowRangeSlow);
+    TEST_ADD_GROUP_AD0(BackgroundGrowRangeFast);
+    TEST_ADD_GROUP_AD0(BackgroundIncrementCount);
+    TEST_ADD_GROUP_AD0(BackgroundAdjustRange);
+    TEST_ADD_GROUP_AD0(BackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP_AD0(BackgroundShiftRange);
+    TEST_ADD_GROUP_AD0(BackgroundShiftRangeMasked);
+    TEST_ADD_GROUP_AD0(BackgroundInitMask);
 
-    TEST_ADD_GROUP(BackgroundGrowRangeSlow);
-    TEST_ADD_GROUP(BackgroundGrowRangeFast);
-    TEST_ADD_GROUP(BackgroundIncrementCount);
-    TEST_ADD_GROUP(BackgroundAdjustRange);
-    TEST_ADD_GROUP(BackgroundAdjustRangeMasked);
-    TEST_ADD_GROUP(BackgroundShiftRange);
-    TEST_ADD_GROUP(BackgroundShiftRangeMasked);
-    TEST_ADD_GROUP(BackgroundInitMask);
+    TEST_ADD_GROUP_AD0(BayerToBgr);
 
-    TEST_ADD_GROUP(BayerToBgr);
+    TEST_ADD_GROUP_AD0(BayerToBgra);
 
-    TEST_ADD_GROUP(BayerToBgra);
+    TEST_ADD_GROUP_AD0(Bgr48pToBgra32);
 
-    TEST_ADD_GROUP(Bgr48pToBgra32);
+    TEST_ADD_GROUP_AD0(Binarization);
+    TEST_ADD_GROUP_AD0(AveragingBinarization);
 
-    TEST_ADD_GROUP(Binarization);
-    TEST_ADD_GROUP(AveragingBinarization);
+    TEST_ADD_GROUP_AD0(ConditionalCount8u);
+    TEST_ADD_GROUP_AD0(ConditionalCount16i);
+    TEST_ADD_GROUP_AD0(ConditionalSum);
+    TEST_ADD_GROUP_AD0(ConditionalSquareSum);
+    TEST_ADD_GROUP_AD0(ConditionalSquareGradientSum);
+    TEST_ADD_GROUP_AD0(ConditionalFill);
 
-    TEST_ADD_GROUP(ConditionalCount8u);
-    TEST_ADD_GROUP(ConditionalCount16i);
-    TEST_ADD_GROUP(ConditionalSum);
-    TEST_ADD_GROUP(ConditionalSquareSum);
-    TEST_ADD_GROUP(ConditionalSquareGradientSum);
-    TEST_ADD_GROUP(ConditionalFill);
+    TEST_ADD_GROUP_AD0(ContourMetricsMasked);
+    TEST_ADD_GROUP_AD0(ContourAnchors);
+    TEST_ADD_GROUP_00S(ContourDetector);
 
-    TEST_ADD_GROUP(ContourMetricsMasked);
-    TEST_ADD_GROUP(ContourAnchors);
-    TEST_ADD_GROUP_ONLY_SPECIAL(ContourDetector);
+    TEST_ADD_GROUP_AD0(Copy);
+    TEST_ADD_GROUP_AD0(CopyFrame);
 
-    TEST_ADD_GROUP(Copy);
-    TEST_ADD_GROUP(CopyFrame);
+    TEST_ADD_GROUP_AD0(Crc32c);
 
-    TEST_ADD_GROUP(Crc32c);
+    TEST_ADD_GROUP_AD0(DeinterleaveUv);
+    TEST_ADD_GROUP_AD0(DeinterleaveBgr);
+    TEST_ADD_GROUP_AD0(DeinterleaveBgra);
 
-    TEST_ADD_GROUP(DeinterleaveUv);
-    TEST_ADD_GROUP(DeinterleaveBgr);
-    TEST_ADD_GROUP(DeinterleaveBgra);
+    TEST_ADD_GROUP_AD0(DetectionHaarDetect32fp);
+    TEST_ADD_GROUP_AD0(DetectionHaarDetect32fi);
+    TEST_ADD_GROUP_AD0(DetectionLbpDetect32fp);
+    TEST_ADD_GROUP_AD0(DetectionLbpDetect32fi);
+    TEST_ADD_GROUP_AD0(DetectionLbpDetect16ip);
+    TEST_ADD_GROUP_AD0(DetectionLbpDetect16ii);
+    TEST_ADD_GROUP_00S(Detection);
 
-    TEST_ADD_GROUP(DetectionHaarDetect32fp);
-    TEST_ADD_GROUP(DetectionHaarDetect32fi);
-    TEST_ADD_GROUP(DetectionLbpDetect32fp);
-    TEST_ADD_GROUP(DetectionLbpDetect32fi);
-    TEST_ADD_GROUP(DetectionLbpDetect16ip);
-    TEST_ADD_GROUP(DetectionLbpDetect16ii);
-    TEST_ADD_GROUP_ONLY_SPECIAL(Detection);
+    TEST_ADD_GROUP_AD0(AlphaBlending);
+    TEST_ADD_GROUP_AD0(AlphaFilling);
+    TEST_ADD_GROUP_00S(DrawLine);
+    TEST_ADD_GROUP_00S(DrawRectangle);
+    TEST_ADD_GROUP_00S(DrawFilledRectangle);
+    TEST_ADD_GROUP_00S(DrawPolygon);
+    TEST_ADD_GROUP_00S(DrawFilledPolygon);
+    TEST_ADD_GROUP_00S(DrawEllipse);
+    TEST_ADD_GROUP_00S(DrawCircle);
 
-    TEST_ADD_GROUP(AlphaBlending);
-    TEST_ADD_GROUP(AlphaFilling);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawLine);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawRectangle);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawFilledRectangle);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawPolygon);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawFilledPolygon);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawEllipse);
-    TEST_ADD_GROUP_ONLY_SPECIAL(DrawCircle);
+    TEST_ADD_GROUP_00S(FontDraw);
 
-    TEST_ADD_GROUP_ONLY_SPECIAL(FontDraw);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundGrowRangeSlow);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundGrowRangeFast);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundIncrementCount);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundAdjustRange);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundAdjustRangeMasked);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundShiftRange);
+    TEST_ADD_GROUP_AD0(EdgeBackgroundShiftRangeMasked);
 
-    TEST_ADD_GROUP(EdgeBackgroundGrowRangeSlow);
-    TEST_ADD_GROUP(EdgeBackgroundGrowRangeFast);
-    TEST_ADD_GROUP(EdgeBackgroundIncrementCount);
-    TEST_ADD_GROUP(EdgeBackgroundAdjustRange);
-    TEST_ADD_GROUP(EdgeBackgroundAdjustRangeMasked);
-    TEST_ADD_GROUP(EdgeBackgroundShiftRange);
-    TEST_ADD_GROUP(EdgeBackgroundShiftRangeMasked);
+    TEST_ADD_GROUP_AD0(Fill);
+    TEST_ADD_GROUP_AD0(FillFrame);
+    TEST_ADD_GROUP_AD0(FillBgra);
+    TEST_ADD_GROUP_AD0(FillBgr);
+    TEST_ADD_GROUP_AD0(FillPixel);
 
-    TEST_ADD_GROUP(Fill);
-    TEST_ADD_GROUP(FillFrame);
-    TEST_ADD_GROUP(FillBgra);
-    TEST_ADD_GROUP(FillBgr);
-    TEST_ADD_GROUP(FillPixel);
+    TEST_ADD_GROUP_AD0(Float32ToFloat16);
+    TEST_ADD_GROUP_AD0(Float16ToFloat32);
+    TEST_ADD_GROUP_AD0(SquaredDifferenceSum16f);
+    TEST_ADD_GROUP_AD0(CosineDistance16f);
 
-    TEST_ADD_GROUP(Float32ToFloat16);
-    TEST_ADD_GROUP(Float16ToFloat32);
-    TEST_ADD_GROUP(SquaredDifferenceSum16f);
-    TEST_ADD_GROUP(CosineDistance16f);
+    TEST_ADD_GROUP_AD0(Float32ToUint8);
+    TEST_ADD_GROUP_AD0(Uint8ToFloat32);
 
-    TEST_ADD_GROUP(Float32ToUint8);
-    TEST_ADD_GROUP(Uint8ToFloat32);
+    TEST_ADD_GROUP_AD0(Gemm32fNN);
 
-    TEST_ADD_GROUP(Gemm32fNN);
+    TEST_ADD_GROUP_AD0(MeanFilter3x3);
+    TEST_ADD_GROUP_AD0(MedianFilterRhomb3x3);
+    TEST_ADD_GROUP_AD0(MedianFilterRhomb5x5);
+    TEST_ADD_GROUP_AD0(MedianFilterSquare3x3);
+    TEST_ADD_GROUP_AD0(MedianFilterSquare5x5);
+    TEST_ADD_GROUP_AD0(GaussianBlur3x3);
+    TEST_ADD_GROUP_AD0(AbsGradientSaturatedSum);
+    TEST_ADD_GROUP_AD0(LbpEstimate);
+    TEST_ADD_GROUP_AD0(NormalizeHistogram);
+    TEST_ADD_GROUP_AD0(SobelDx);
+    TEST_ADD_GROUP_AD0(SobelDxAbs);
+    TEST_ADD_GROUP_AD0(SobelDy);
+    TEST_ADD_GROUP_AD0(SobelDyAbs);
+    TEST_ADD_GROUP_AD0(ContourMetrics);
+    TEST_ADD_GROUP_AD0(Laplace);
+    TEST_ADD_GROUP_AD0(LaplaceAbs);
 
-    TEST_ADD_GROUP(MeanFilter3x3);
-    TEST_ADD_GROUP(MedianFilterRhomb3x3);
-    TEST_ADD_GROUP(MedianFilterRhomb5x5);
-    TEST_ADD_GROUP(MedianFilterSquare3x3);
-    TEST_ADD_GROUP(MedianFilterSquare5x5);
-    TEST_ADD_GROUP(GaussianBlur3x3);
-    TEST_ADD_GROUP(AbsGradientSaturatedSum);
-    TEST_ADD_GROUP(LbpEstimate);
-    TEST_ADD_GROUP(NormalizeHistogram);
-    TEST_ADD_GROUP(SobelDx);
-    TEST_ADD_GROUP(SobelDxAbs);
-    TEST_ADD_GROUP(SobelDy);
-    TEST_ADD_GROUP(SobelDyAbs);
-    TEST_ADD_GROUP(ContourMetrics);
-    TEST_ADD_GROUP(Laplace);
-    TEST_ADD_GROUP(LaplaceAbs);
+    TEST_ADD_GROUP_AD0(Histogram);
+    TEST_ADD_GROUP_AD0(HistogramMasked);
+    TEST_ADD_GROUP_AD0(HistogramConditional);
+    TEST_ADD_GROUP_AD0(AbsSecondDerivativeHistogram);
+    TEST_ADD_GROUP_AD0(ChangeColors);
 
-    TEST_ADD_GROUP(Histogram);
-    TEST_ADD_GROUP(HistogramMasked);
-    TEST_ADD_GROUP(HistogramConditional);
-    TEST_ADD_GROUP(AbsSecondDerivativeHistogram);
-    TEST_ADD_GROUP(ChangeColors);
+    TEST_ADD_GROUP_AD0(HogDirectionHistograms);
+    TEST_ADD_GROUP_AD0(HogExtractFeatures);
+    TEST_ADD_GROUP_AD0(HogDeinterleave);
+    TEST_ADD_GROUP_AD0(HogFilterSeparable);
 
-    TEST_ADD_GROUP(HogDirectionHistograms);
-    TEST_ADD_GROUP(HogExtractFeatures);
-    TEST_ADD_GROUP(HogDeinterleave);
-    TEST_ADD_GROUP(HogFilterSeparable);
+    TEST_ADD_GROUP_AD0(HogLiteExtractFeatures);
+    TEST_ADD_GROUP_AD0(HogLiteFilterFeatures);
+    TEST_ADD_GROUP_AD0(HogLiteResizeFeatures);
+    TEST_ADD_GROUP_AD0(HogLiteCompressFeatures);
+    TEST_ADD_GROUP_AD0(HogLiteFilterSeparable);
+    TEST_ADD_GROUP_AD0(HogLiteFindMax7x7);
+    TEST_ADD_GROUP_AD0(HogLiteCreateMask);
 
-    TEST_ADD_GROUP(HogLiteExtractFeatures);
-    TEST_ADD_GROUP(HogLiteFilterFeatures);
-    TEST_ADD_GROUP(HogLiteResizeFeatures);
-    TEST_ADD_GROUP(HogLiteCompressFeatures);
-    TEST_ADD_GROUP(HogLiteFilterSeparable);
-    TEST_ADD_GROUP(HogLiteFindMax7x7);
-    TEST_ADD_GROUP(HogLiteCreateMask);
+    TEST_ADD_GROUP_00S(ImageMatcher);
 
-    TEST_ADD_GROUP_ONLY_SPECIAL(ImageMatcher);
+    TEST_ADD_GROUP_AD0(Integral);
 
-    TEST_ADD_GROUP(Integral);
+    TEST_ADD_GROUP_AD0(InterferenceIncrement);
+    TEST_ADD_GROUP_AD0(InterferenceIncrementMasked);
+    TEST_ADD_GROUP_AD0(InterferenceDecrement);
+    TEST_ADD_GROUP_AD0(InterferenceDecrementMasked);
 
-    TEST_ADD_GROUP(InterferenceIncrement);
-    TEST_ADD_GROUP(InterferenceIncrementMasked);
-    TEST_ADD_GROUP(InterferenceDecrement);
-    TEST_ADD_GROUP(InterferenceDecrementMasked);
+    TEST_ADD_GROUP_AD0(InterleaveUv);
+    TEST_ADD_GROUP_AD0(InterleaveBgr);
+    TEST_ADD_GROUP_AD0(InterleaveBgra);
 
-    TEST_ADD_GROUP(InterleaveUv);
-    TEST_ADD_GROUP(InterleaveBgr);
-    TEST_ADD_GROUP(InterleaveBgra);
+    TEST_ADD_GROUP_00S(Motion);
 
-    TEST_ADD_GROUP_ONLY_SPECIAL(Motion);
+    TEST_ADD_GROUP_AD0(NeuralConvert);
+    TEST_ADD_GROUP_AD0(NeuralProductSum);
+    TEST_ADD_GROUP_AD0(NeuralAddVectorMultipliedByValue);
+    TEST_ADD_GROUP_AD0(NeuralAddVector);
+    TEST_ADD_GROUP_AD0(NeuralAddValue);
+    TEST_ADD_GROUP_AD0(NeuralSigmoid);
+    TEST_ADD_GROUP_AD0(NeuralRoughSigmoid);
+    TEST_ADD_GROUP_AD0(NeuralRoughSigmoid2);
+    TEST_ADD_GROUP_AD0(NeuralDerivativeSigmoid);
+    TEST_ADD_GROUP_AD0(NeuralTanh);
+    TEST_ADD_GROUP_AD0(NeuralRoughTanh);
+    TEST_ADD_GROUP_AD0(NeuralDerivativeTanh);
+    TEST_ADD_GROUP_AD0(NeuralRelu);
+    TEST_ADD_GROUP_AD0(NeuralDerivativeRelu);
+    TEST_ADD_GROUP_AD0(NeuralPow);
+    TEST_ADD_GROUP_AD0(NeuralUpdateWeights);
+    TEST_ADD_GROUP_AD0(NeuralAdaptiveGradientUpdate);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Forward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Forward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Forward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Forward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Backward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Backward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Backward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Backward);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Sum);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Sum);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Sum);
+    TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Sum);
+    TEST_ADD_GROUP_AD0(NeuralPooling1x1Max3x3);
+    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max2x2);
+    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max3x3);
+    TEST_ADD_GROUP_AD0(NeuralConvolutionForward);
+    TEST_ADD_GROUP_00S(NeuralPredict);
+    TEST_ADD_GROUP_00S(NeuralTrain);
 
-    TEST_ADD_GROUP(NeuralConvert);
-    TEST_ADD_GROUP(NeuralProductSum);
-    TEST_ADD_GROUP(NeuralAddVectorMultipliedByValue);
-    TEST_ADD_GROUP(NeuralAddVector);
-    TEST_ADD_GROUP(NeuralAddValue);
-    TEST_ADD_GROUP(NeuralSigmoid);
-    TEST_ADD_GROUP(NeuralRoughSigmoid);
-    TEST_ADD_GROUP(NeuralRoughSigmoid2);
-    TEST_ADD_GROUP(NeuralDerivativeSigmoid);
-    TEST_ADD_GROUP(NeuralTanh);
-    TEST_ADD_GROUP(NeuralRoughTanh);
-    TEST_ADD_GROUP(NeuralDerivativeTanh);
-    TEST_ADD_GROUP(NeuralRelu);
-    TEST_ADD_GROUP(NeuralDerivativeRelu);
-    TEST_ADD_GROUP(NeuralPow);
-    TEST_ADD_GROUP(NeuralUpdateWeights);
-    TEST_ADD_GROUP(NeuralAdaptiveGradientUpdate);
-    TEST_ADD_GROUP(NeuralAddConvolution2x2Forward);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Forward);
-    TEST_ADD_GROUP(NeuralAddConvolution4x4Forward);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Forward);
-    TEST_ADD_GROUP(NeuralAddConvolution2x2Backward);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Backward);
-    TEST_ADD_GROUP(NeuralAddConvolution4x4Backward);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Backward);
-    TEST_ADD_GROUP(NeuralAddConvolution2x2Sum);
-    TEST_ADD_GROUP(NeuralAddConvolution3x3Sum);
-    TEST_ADD_GROUP(NeuralAddConvolution4x4Sum);
-    TEST_ADD_GROUP(NeuralAddConvolution5x5Sum);
-    TEST_ADD_GROUP(NeuralPooling1x1Max3x3);
-    TEST_ADD_GROUP(NeuralPooling2x2Max2x2);
-    TEST_ADD_GROUP(NeuralPooling2x2Max3x3);
-    TEST_ADD_GROUP(NeuralConvolutionForward);
-    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralPredict);
-    TEST_ADD_GROUP_ONLY_SPECIAL(NeuralTrain);
+    TEST_ADD_GROUP_AD0(OperationBinary8u);
+    TEST_ADD_GROUP_AD0(OperationBinary16i);
+    TEST_ADD_GROUP_AD0(VectorProduct);
 
-    TEST_ADD_GROUP(OperationBinary8u);
-    TEST_ADD_GROUP(OperationBinary16i);
-    TEST_ADD_GROUP(VectorProduct);
+    TEST_ADD_GROUP_AD0(ReduceGray2x2);
+    TEST_ADD_GROUP_AD0(ReduceGray3x3);
+    TEST_ADD_GROUP_AD0(ReduceGray4x4);
+    TEST_ADD_GROUP_AD0(ReduceGray5x5);
 
-    TEST_ADD_GROUP(ReduceGray2x2);
-    TEST_ADD_GROUP(ReduceGray3x3);
-    TEST_ADD_GROUP(ReduceGray4x4);
-    TEST_ADD_GROUP(ReduceGray5x5);
+    TEST_ADD_GROUP_AD0(Reorder16bit);
+    TEST_ADD_GROUP_AD0(Reorder32bit);
+    TEST_ADD_GROUP_AD0(Reorder64bit);
 
-    TEST_ADD_GROUP(Reorder16bit);
-    TEST_ADD_GROUP(Reorder32bit);
-    TEST_ADD_GROUP(Reorder64bit);
+    TEST_ADD_GROUP_ADS(ResizeBilinear);
+    TEST_ADD_GROUP_A00(Resizer);
 
-    TEST_ADD_GROUP_EX(ResizeBilinear);
+    TEST_ADD_GROUP_AD0(SegmentationShrinkRegion);
+    TEST_ADD_GROUP_AD0(SegmentationFillSingleHoles);
+    TEST_ADD_GROUP_AD0(SegmentationChangeIndex);
+    TEST_ADD_GROUP_AD0(SegmentationPropagate2x2);
 
-    TEST_ADD_GROUP(SegmentationShrinkRegion);
-    TEST_ADD_GROUP(SegmentationFillSingleHoles);
-    TEST_ADD_GROUP(SegmentationChangeIndex);
-    TEST_ADD_GROUP(SegmentationPropagate2x2);
+    TEST_ADD_GROUP_AD0(ShiftBilinear);
+    TEST_ADD_GROUP_00S(ShiftDetectorRand);
+    TEST_ADD_GROUP_00S(ShiftDetectorFile);
 
-    TEST_ADD_GROUP(ShiftBilinear);
-    TEST_ADD_GROUP_ONLY_SPECIAL(ShiftDetectorRand);
-    TEST_ADD_GROUP_ONLY_SPECIAL(ShiftDetectorFile);
+    TEST_ADD_GROUP_AD0(GetStatistic);
+    TEST_ADD_GROUP_AD0(GetMoments);
+    TEST_ADD_GROUP_AD0(GetRowSums);
+    TEST_ADD_GROUP_AD0(GetColSums);
+    TEST_ADD_GROUP_AD0(GetAbsDyRowSums);
+    TEST_ADD_GROUP_AD0(GetAbsDxColSums);
+    TEST_ADD_GROUP_AD0(ValueSum);
+    TEST_ADD_GROUP_AD0(SquareSum);
+    TEST_ADD_GROUP_AD0(SobelDxAbsSum);
+    TEST_ADD_GROUP_AD0(SobelDyAbsSum);
+    TEST_ADD_GROUP_AD0(LaplaceAbsSum);
+    TEST_ADD_GROUP_AD0(ValueSquareSum);
+    TEST_ADD_GROUP_AD0(CorrelationSum);
 
-    TEST_ADD_GROUP(GetStatistic);
-    TEST_ADD_GROUP(GetMoments);
-    TEST_ADD_GROUP(GetRowSums);
-    TEST_ADD_GROUP(GetColSums);
-    TEST_ADD_GROUP(GetAbsDyRowSums);
-    TEST_ADD_GROUP(GetAbsDxColSums);
-    TEST_ADD_GROUP(ValueSum);
-    TEST_ADD_GROUP(SquareSum);
-    TEST_ADD_GROUP(SobelDxAbsSum);
-    TEST_ADD_GROUP(SobelDyAbsSum);
-    TEST_ADD_GROUP(LaplaceAbsSum);
-    TEST_ADD_GROUP(ValueSquareSum);
-    TEST_ADD_GROUP(CorrelationSum);
+    TEST_ADD_GROUP_AD0(StretchGray2x2);
 
-    TEST_ADD_GROUP(StretchGray2x2);
+    TEST_ADD_GROUP_AD0(SvmSumLinear);
 
-    TEST_ADD_GROUP(SvmSumLinear);
+    TEST_ADD_GROUP_AD0(SynetAddBias);
+    TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
+    TEST_ADD_GROUP_AD0(SynetLrnLayerCrossChannels);
+    TEST_ADD_GROUP_AD0(SynetScaleLayerForward);
 
-    TEST_ADD_GROUP(SynetAddBias);
-    TEST_ADD_GROUP(SynetEltwiseLayerForward);
-    TEST_ADD_GROUP(SynetLrnLayerCrossChannels);
-    TEST_ADD_GROUP(SynetScaleLayerForward);
+    TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
+    TEST_ADD_GROUP_AD0(TextureBoostedUv);
+    TEST_ADD_GROUP_AD0(TextureGetDifferenceSum);
+    TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
-    TEST_ADD_GROUP(TextureBoostedSaturatedGradient);
-    TEST_ADD_GROUP(TextureBoostedUv);
-    TEST_ADD_GROUP(TextureGetDifferenceSum);
-    TEST_ADD_GROUP(TexturePerformCompensation);
+    TEST_ADD_GROUP_AD0(Yuv444pToBgr);
+    TEST_ADD_GROUP_AD0(Yuv422pToBgr);
+    TEST_ADD_GROUP_AD0(Yuv420pToBgr);
+    TEST_ADD_GROUP_AD0(Yuv444pToHsl);
+    TEST_ADD_GROUP_AD0(Yuv444pToHsv);
+    TEST_ADD_GROUP_AD0(Yuv444pToHue);
+    TEST_ADD_GROUP_AD0(Yuv420pToHue);
 
-    TEST_ADD_GROUP(Yuv444pToBgr);
-    TEST_ADD_GROUP(Yuv422pToBgr);
-    TEST_ADD_GROUP(Yuv420pToBgr);
-    TEST_ADD_GROUP(Yuv444pToHsl);
-    TEST_ADD_GROUP(Yuv444pToHsv);
-    TEST_ADD_GROUP(Yuv444pToHue);
-    TEST_ADD_GROUP(Yuv420pToHue);
-
-    TEST_ADD_GROUP(Yuv444pToBgra);
-    TEST_ADD_GROUP(Yuv422pToBgra);
-    TEST_ADD_GROUP(Yuv420pToBgra);
+    TEST_ADD_GROUP_AD0(Yuv444pToBgra);
+    TEST_ADD_GROUP_AD0(Yuv422pToBgra);
+    TEST_ADD_GROUP_AD0(Yuv420pToBgra);
 
     class Task
     {

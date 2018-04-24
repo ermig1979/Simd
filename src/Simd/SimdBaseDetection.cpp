@@ -901,10 +901,5 @@ namespace Simd
                 Rect(left, top, right, bottom),
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
-
-        void DetectionFree(void * ptr)
-        {
-            delete (Deletable*)ptr;
-        }
     }
 }

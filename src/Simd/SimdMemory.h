@@ -101,6 +101,11 @@ namespace Simd
 #endif
     }
 
+    struct Deletable
+    {
+        virtual ~Deletable() {}
+    };
+
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
