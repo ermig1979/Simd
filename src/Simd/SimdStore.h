@@ -45,6 +45,18 @@ namespace Simd
         {
             _mm_store_ps(p, a);
         }
+
+        template <int part> SIMD_INLINE void StoreHalf(float  * p, __m128 a);
+
+        template <> SIMD_INLINE void StoreHalf<0>(float  * p, __m128 a)
+        {
+            _mm_storel_pi((__m64*)p, a);
+        }
+
+        template <> SIMD_INLINE void StoreHalf<1>(float  * p, __m128 a)
+        {
+            _mm_storeh_pi((__m64*)p, a);
+        }
     }
 #endif//SIMD_SSE_ENABLE
 

@@ -42,6 +42,11 @@ namespace Simd
         {
             return _mm_load_ps(p);
         }
+
+        SIMD_INLINE __m128 Load(const float * p0, const float * p1)
+        {
+            return _mm_loadh_pi(_mm_loadl_pi(_mm_undefined_ps(), (__m64*)p0), (__m64*)p1);
+        }
     }
 #endif//SIMD_SSE_ENABLE
 

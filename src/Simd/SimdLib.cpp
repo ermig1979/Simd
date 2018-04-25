@@ -3961,7 +3961,12 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
 
 SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
 {
-    return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable)
+        return Sse::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+    else
+#endif
+        return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
 }
 
 SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)

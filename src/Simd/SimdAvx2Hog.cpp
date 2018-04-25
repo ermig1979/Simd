@@ -542,12 +542,12 @@ namespace Simd
                         Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                     }
                     __m128 * ps = (__m128*)src;
-                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h0[0] + 16)), (__m64*)(h0[1] + 16)));
-                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)(h1[0] + 16)), (__m64*)(h1[1] + 16)));
-                    _mm_storel_pi((__m64*)(h0[0] + 16), s0);
-                    _mm_storeh_pi((__m64*)(h0[1] + 16), s0);
-                    _mm_storel_pi((__m64*)(h1[0] + 16), s1);
-                    _mm_storeh_pi((__m64*)(h1[1] + 16), s1);
+                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Sse::Load(h0[0] + 16, h0[1] + 16));
+                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), Sse::Load(h1[0] + 16, h1[1] + 16));
+                    Sse::StoreHalf<0>(h0[0] + 16, s0);
+                    Sse::StoreHalf<1>(h0[1] + 16, s0);
+                    Sse::StoreHalf<0>(h1[0] + 16, s1);
+                    Sse::StoreHalf<1>(h1[1] + 16, s1);
                     h0++;
                     h1++;
                     src += 72;

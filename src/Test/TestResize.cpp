@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -216,7 +216,7 @@ namespace Test
 
         View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
         if(format == View::Float)
-            FillRandom32f(s, 0.0f, 1.0f);
+            FillRandom32f(s);
         else
             FillRandom(s);
 
@@ -228,7 +228,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2, type, method));
 
         if (format == View::Float)
-            result = result && Compare(d1, d2, EPS, true, 64);
+            result = result && Compare(d1, d2, EPS, true, 64, DifferenceAbsolute);
         else
             result = result && Compare(d1, d2, 0, true, 64);
 
@@ -267,6 +267,11 @@ namespace Test
         bool result = true;
 
         result = result && ResizerAutoTest(FUNC_RS(Simd::Base::ResizerInit), FUNC_RS(SimdResizerInit));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Sse::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif 
 
         return result;
     }
