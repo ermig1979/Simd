@@ -99,7 +99,7 @@ namespace Simd
                 for (; k < 2; k++)
                 {
                     int32_t * pb = pbx[k];
-                    const uint8_t* ps = src + (sy + k)*srcStride;
+                    const uint8_t * ps = src + (sy + k)*srcStride;
                     for (size_t dx = 0; dx < _rs; dx++)
                     {
                         int32_t sx = _ix[dx];
@@ -126,10 +126,107 @@ namespace Simd
             }
         }
 
-        Resizer * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
+        //---------------------------------------------------------------------
+
+        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels)
+            : Resizer(SimdResizeChannelFloat, SimdResizeMethodBilinear)
+            , _sx(srcX), _sy(srcY), _dx(dstX), _dy(dstY), _cn(channels)
+        {
+            _ay.Resize(_dy);
+            _iy.Resize(_dy);
+            EstimateIndexAlpha(_sy, _dy, _iy.data, _ay.data, 1);
+
+            _rs = _dx * _cn;
+            _ax.Resize(_rs);
+            _ix.Resize(_rs);
+            EstimateIndexAlpha(_sx, _dx, _ix.data, _ax.data, _cn);
+        }
+
+        void ResizerFloatBilinear::EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels)
+        {
+            float scale = (float)srcSize / dstSize;
+
+            for (size_t i = 0; i < dstSize; ++i)
+            {
+                float alpha = (float)((i + 0.5f)*scale - 0.5f);
+                ptrdiff_t index = (ptrdiff_t)::floor(alpha);
+                alpha -= index;
+
+                if (index < 0)
+                {
+                    index = 0;
+                    alpha = 0;
+                }
+
+                if (index > (ptrdiff_t)srcSize - 2)
+                {
+                    index = srcSize - 2;
+                    alpha = 1;
+                }
+
+                for (size_t c = 0; c < channels; c++)
+                {
+                    size_t offset = i * channels + c;
+                    indices[offset] = (int32_t)(channels*index + c);
+                    alphas[offset] = alpha;
+                }
+            }
+        }
+
+        void ResizerFloatBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const
+        {
+            Run((const float*)src, srcStride / sizeof(float), (float*)dst, dstStride / sizeof(float));
+        }
+
+        void ResizerFloatBilinear::Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const
+        {
+            Array32f bx[2];
+            bx[0].Resize(_rs);
+            bx[1].Resize(_rs);
+            float * pbx[2] = { bx[0].data, bx[1].data };
+            int32_t prev = -2;
+            for (size_t dy = 0; dy < _dy; dy++, dst += dstStride)
+            {
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    float * pb = pbx[k];
+                    const float * ps = src + (sy + k)*srcStride;
+                    for (size_t dx = 0; dx < _rs; dx++)
+                    {
+                        int32_t sx = _ix[dx];
+                        float fx = _ax[dx];
+                        pb[dx] = ps[sx]*(1.0f - fx) + ps[sx + _cn]*fx;
+                    }
+                }
+
+                for (size_t dx = 0; dx < _rs; dx++)
+                    dst[dx] = pbx[0][dx]*fy0 + pbx[1][dx]*fy1;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear)
-                new ResizerByteBilinear(srcX, srcY, dstX, dstY, channels);
+                return new ResizerByteBilinear(srcX, srcY, dstX, dstY, channels);
+            else if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels);
             else
                 return NULL;
         }
