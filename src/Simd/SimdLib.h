@@ -4240,19 +4240,57 @@ extern "C"
     SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
+    /*! @ingroup resizing
+        Describes resized image channel types.
+    */
     typedef enum
     {
+        /*! 8-bit integer channel type.  */
         SimdResizeChannelByte,
+        /*! 32-bit float channel type.  */
         SimdResizeChannelFloat,
     } SimdResizeChannelType;
 
+    /*! @ingroup resizing
+        Describes methods used in oreder to resize image.
+    */
     typedef enum
     {
+        /*! Bilinear method.  */
         SimdResizeMethodBilinear,
     } SimdResizeMethodType;
 
+    /*! @ingroup resizing
+
+        \fn void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+
+        \short Creates resize context.
+
+        \param [in] srcX - a width of the input image.
+        \param [in] srcY - a height of the input image.
+        \param [in] dstX - a width of the output image.
+        \param [in] dstY - a height of the output image.
+        \param [in] channels - a channel number of input and output image.
+        \param [in] type - a type of input and output image channel.
+        \param [in] method - a method used in order to resize image.
+        \return a pointer to resize context. On error it returns NULL. 
+                This pointer is used in functions ::SimdResizerRun. 
+                It must be released with using of function ::SimdRelease.
+    */
     SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
+    /*! @ingroup resizing
+
+        \fn void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+
+        \short Performs image resizing.
+
+        \param [in] resizer - a resize context. It must be created by function ::SimdResizerInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to pixels data of the original input image.
+        \param [in] srcStride - a row size (in bytes) of the input image.
+        \param [out] dst - a pointer to pixels data of the resized output image.
+        \param [in] dstStride - a row size (in bytes) of the output image.
+    */
     SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup segmentation
