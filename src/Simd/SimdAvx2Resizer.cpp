@@ -71,7 +71,7 @@ namespace Simd
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         for (; dx < rsa; dx += Avx::F)
                         {
-                            __m256i idx = LoadPermuted<true>((__m256i*)(_ix.data + dx));
+                            __m256i idx = Avx2::LoadPermuted<true>((__m256i*)(_ix.data + dx));
                             __m256 s0145 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 0), 4));
                             __m256 s2367 = _mm256_castpd_ps(_mm256_i32gather_pd((double*)ps, _mm256_extracti128_si256(idx, 1), 4));
                             __m256 fx1 = _mm256_load_ps(_ax.data + dx);

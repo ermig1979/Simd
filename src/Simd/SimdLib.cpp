@@ -3961,6 +3961,11 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
 
 SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
 {
+#ifdef SIMD_AVX512F_ENABLE
+    if (Avx512f::Enable)
+        return Avx512f::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         return Avx2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

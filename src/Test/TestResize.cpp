@@ -190,7 +190,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, int width, int height, double k, FuncRS f1, FuncRS f2)
+    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
         bool result = true;
 
@@ -230,7 +230,7 @@ namespace Test
         return result;
     }
 
-    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, const FuncRS & f1, const FuncRS & f2)
+    bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, const FuncRS & f1, const FuncRS & f2)
     {
         bool result = true;
 
@@ -277,6 +277,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx2::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512f::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
         return result;
