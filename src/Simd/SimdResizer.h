@@ -62,17 +62,19 @@ namespace Simd
 
         class ResizerFloatBilinear : Resizer
         {
+        protected:
             size_t _sx, _sy, _dx, _dy, _cn, _rs;
             Array32i _ix, _iy;
             Array32f _ax, _ay;
+
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
+
         public:
             ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
 
-            static void EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels);
-
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
-        private:
-            void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
+
+            static void EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -81,29 +83,29 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        class ResizerFloatBilinear : Resizer
+        class ResizerFloatBilinear : Base::ResizerFloatBilinear
         {
-            size_t _sx, _sy, _dx, _dy, _cn, _rs;
-            Array32i _ix, _iy;
-            Array32f _ax, _ay;
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         public:
             ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
-
-            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
-        private:
-            void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         };
-
-        SIMD_INLINE bool CanResize(size_t dstX, SimdResizeChannelType type)
-        {
-            if (type == SimdResizeChannelFloat && dstX >= F)
-                return true;
-            else
-                return false;
-        }
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_SSE_ENABLE 
+
+#ifdef SIMD_AVX_ENABLE    
+    namespace Avx
+    {
+        class ResizerFloatBilinear : Base::ResizerFloatBilinear
+        {
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
+        public:
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+        };
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif //SIMD_AVX_ENABLE 
 }
 #endif//__SimdResizer_h__
