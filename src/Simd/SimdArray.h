@@ -25,6 +25,7 @@
 #define __SimdArray_h__
 
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
@@ -33,7 +34,7 @@ namespace Simd
         T * const data;
         size_t const size;
 
-        SIMD_INLINE Array(size_t size_ = 0, bool clear = false)
+        SIMD_INLINE Array(size_t size_ = 0, bool clear = false, size_t align = SIMD_ALIGN)
             : data(0)
             , size(0)
         {
@@ -46,7 +47,7 @@ namespace Simd
                 Simd::Free(data);
         }
 
-        SIMD_INLINE void Resize(size_t size_, bool clear = false)
+        SIMD_INLINE void Resize(size_t size_, bool clear = false, size_t align = SIMD_ALIGN)
         {
             if (size_ != size)
             {
@@ -54,7 +55,7 @@ namespace Simd
                     Simd::Free(data);
                 *(size_t*)&size = size_;
                 if (size_)
-                    *(T**)&data = (T*)Simd::Allocate(size * sizeof(T));
+                    *(T**)&data = (T*)Simd::Allocate(size * sizeof(T), align);
             }
             if (clear)
                 Clear();

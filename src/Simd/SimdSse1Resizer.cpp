@@ -31,7 +31,7 @@ namespace Simd
     namespace Sse
     {
         ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels)
-            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels)
+            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m128))
         {
         }
 

@@ -128,17 +128,17 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels)
+        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align)
             : Resizer(SimdResizeChannelFloat, SimdResizeMethodBilinear)
             , _sx(srcX), _sy(srcY), _dx(dstX), _dy(dstY), _cn(channels)
         {
-            _ay.Resize(_dy);
-            _iy.Resize(_dy);
+            _ay.Resize(_dy, false, align);
+            _iy.Resize(_dy, false, align);
             EstimateIndexAlpha(_sy, _dy, _iy.data, _ay.data, 1);
 
             _rs = _dx * _cn;
-            _ax.Resize(_rs);
-            _ix.Resize(_rs);
+            _ax.Resize(_rs, false, align);
+            _ix.Resize(_rs, false, align);
             EstimateIndexAlpha(_sx, _dx, _ix.data, _ax.data, _cn);
         }
 
@@ -226,7 +226,7 @@ namespace Simd
             if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear)
                 return new ResizerByteBilinear(srcX, srcY, dstX, dstY, channels);
             else if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels);
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(void*));
             else
                 return NULL;
         }

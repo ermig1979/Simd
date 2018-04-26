@@ -70,7 +70,7 @@ namespace Simd
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
 
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
 
@@ -107,5 +107,19 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_AVX_ENABLE 
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class ResizerFloatBilinear : Base::ResizerFloatBilinear
+        {
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
+        public:
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+        };
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif //SIMD_AVX2_ENABLE 
 }
 #endif//__SimdResizer_h__
