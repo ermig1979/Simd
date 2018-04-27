@@ -128,47 +128,67 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align)
+        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align, bool caffeInterp)
             : Resizer(SimdResizeChannelFloat, SimdResizeMethodBilinear)
             , _sx(srcX), _sy(srcY), _dx(dstX), _dy(dstY), _cn(channels)
         {
             _ay.Resize(_dy, false, align);
             _iy.Resize(_dy, false, align);
-            EstimateIndexAlpha(_sy, _dy, _iy.data, _ay.data, 1);
+            EstimateIndexAlpha(_sy, _dy, _iy.data, _ay.data, 1, caffeInterp);
 
             _rs = _dx * _cn;
             _ax.Resize(_rs, false, align);
             _ix.Resize(_rs, false, align);
-            EstimateIndexAlpha(_sx, _dx, _ix.data, _ax.data, _cn);
+            EstimateIndexAlpha(_sx, _dx, _ix.data, _ax.data, _cn, caffeInterp);
         }
 
-        void ResizerFloatBilinear::EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels)
+        void ResizerFloatBilinear::EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels, bool caffeInterp)
         {
-            float scale = (float)srcSize / dstSize;
-
-            for (size_t i = 0; i < dstSize; ++i)
+            if (caffeInterp)
             {
-                float alpha = (float)((i + 0.5f)*scale - 0.5f);
-                ptrdiff_t index = (ptrdiff_t)::floor(alpha);
-                alpha -= index;
-
-                if (index < 0)
+                float scale = dstSize > 1 ? float(srcSize - 1) / float(dstSize - 1) : 0.0f;
+                for (size_t i = 0; i < dstSize; ++i)
                 {
-                    index = 0;
-                    alpha = 0;
+                    float alpha = float(i)*scale;
+                    ptrdiff_t index = (ptrdiff_t)::floor(alpha);
+                    alpha -= index;
+                    if (index > (ptrdiff_t)srcSize - 2)
+                    {
+                        index = srcSize - 2;
+                        alpha = 1;
+                    }
+                    for (size_t c = 0; c < channels; c++)
+                    {
+                        size_t offset = i * channels + c;
+                        indices[offset] = (int32_t)(channels*index + c);
+                        alphas[offset] = alpha;
+                    }
                 }
-
-                if (index > (ptrdiff_t)srcSize - 2)
+            }
+            else
+            {
+                float scale = (float)srcSize / dstSize;
+                for (size_t i = 0; i < dstSize; ++i)
                 {
-                    index = srcSize - 2;
-                    alpha = 1;
-                }
-
-                for (size_t c = 0; c < channels; c++)
-                {
-                    size_t offset = i * channels + c;
-                    indices[offset] = (int32_t)(channels*index + c);
-                    alphas[offset] = alpha;
+                    float alpha = (float)((i + 0.5f)*scale - 0.5f);
+                    ptrdiff_t index = (ptrdiff_t)::floor(alpha);
+                    alpha -= index;
+                    if (index < 0)
+                    {
+                        index = 0;
+                        alpha = 0;
+                    }
+                    if (index >(ptrdiff_t)srcSize - 2)
+                    {
+                        index = srcSize - 2;
+                        alpha = 1;
+                    }
+                    for (size_t c = 0; c < channels; c++)
+                    {
+                        size_t offset = i * channels + c;
+                        indices[offset] = (int32_t)(channels*index + c);
+                        alphas[offset] = alpha;
+                    }
                 }
             }
         }
@@ -226,7 +246,9 @@ namespace Simd
             if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear)
                 return new ResizerByteBilinear(srcX, srcY, dstX, dstY, channels);
             else if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(void*));
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(void*), false);
+            else if (type == SimdResizeChannelFloat && method == SimdResizeMethodCaffeInterp)
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(void*), true);
             else
                 return NULL;
         }

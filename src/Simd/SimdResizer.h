@@ -70,11 +70,11 @@ namespace Simd
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
 
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, size_t align, bool caffeInterp);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
 
-            static void EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels);
+            static void EstimateIndexAlpha(size_t srcSize, size_t dstSize, int32_t * indices, float * alphas, size_t channels, bool caffeInterp);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -87,7 +87,7 @@ namespace Simd
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -101,7 +101,7 @@ namespace Simd
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -115,7 +115,7 @@ namespace Simd
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -129,7 +129,7 @@ namespace Simd
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const;
         public:
-            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+            ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);

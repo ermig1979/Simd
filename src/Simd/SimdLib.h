@@ -4256,8 +4256,10 @@ extern "C"
     */
     typedef enum
     {
-        /*! Bilinear method.  */
+        /*! Bilinear method. */
         SimdResizeMethodBilinear,
+        /*! caffe::interp compatible method. */
+        SimdResizeMethodCaffeInterp,
     } SimdResizeMethodType;
 
     /*! @ingroup resizing

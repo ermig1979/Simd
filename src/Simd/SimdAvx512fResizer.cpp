@@ -32,8 +32,8 @@ namespace Simd
     {
         const __m512i K64_PERMUTE_FOR_PACK = SIMD_MM512_SETR_EPI64(0, 2, 4, 6, 1, 3, 5, 7);
 
-        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels)
-            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m512))
+        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp)
+            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m512), caffeInterp)
         {
         }
 
@@ -97,7 +97,7 @@ namespace Simd
                     else
                     {
                         __m512 _1 = _mm512_set1_ps(1.0f);
-                        __m512i cn = _mm512_set1_epi32(_cn);
+                        __m512i cn = _mm512_set1_epi32((int)_cn);
                         for (; dx < rsa; dx += Avx512f::F)
                         {
                             __m512i i0 = _mm512_load_si512(_ix.data + dx);
@@ -144,7 +144,9 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels);
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, false);
+            else if (type == SimdResizeChannelFloat && method == SimdResizeMethodCaffeInterp)
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, true);
             else
                 return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }

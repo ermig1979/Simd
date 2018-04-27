@@ -30,8 +30,8 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE 
     namespace Sse
     {
-        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels)
-            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m128))
+        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp)
+            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m128), caffeInterp)
         {
         }
 
@@ -106,7 +106,9 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels);
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, false);
+            else if (type == SimdResizeChannelFloat && method == SimdResizeMethodCaffeInterp)
+                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, true);
             else
                 return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
