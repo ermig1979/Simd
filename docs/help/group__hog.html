@@ -65,9 +65,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gaa887f3dfaefd0102f0772e4d41f4eb4e">SimdHogLiteExtractFeatures</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t cell, float *features, size_t featuresStride)</td></tr>
 <tr class="memdesc:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts lite HOG features for 8-bit gray image.  <a href="#gaa887f3dfaefd0102f0772e4d41f4eb4e">More...</a><br /></td></tr>
 <tr class="separator:gaa887f3dfaefd0102f0772e4d41f4eb4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga97043492e4bbb438c36571e8b28243d9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga97043492e4bbb438c36571e8b28243d9">SimdHogLiteFilterFeatures</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float *filter, size_t filterSize, const uint32_t *mask, size_t maskStride, float *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga97043492e4bbb438c36571e8b28243d9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies filter to lite HOG features.  <a href="#ga97043492e4bbb438c36571e8b28243d9">More...</a><br /></td></tr>
-<tr class="separator:ga97043492e4bbb438c36571e8b28243d9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga55c95b8bc21d55789821a975e11a3758"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga55c95b8bc21d55789821a975e11a3758">SimdHogLiteFilterFeatures</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float *filter, size_t filterWidth, size_t filterHeight, const uint32_t *mask, size_t maskStride, float *dst, size_t dstStride)</td></tr>
+<tr class="memdesc:ga55c95b8bc21d55789821a975e11a3758"><td class="mdescLeft">&#160;</td><td class="mdescRight">Applies filter to lite HOG features.  <a href="#ga55c95b8bc21d55789821a975e11a3758">More...</a><br /></td></tr>
+<tr class="separator:ga55c95b8bc21d55789821a975e11a3758"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad1d94072a8bcadb99add4962c9831b91"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#gad1d94072a8bcadb99add4962c9831b91">SimdHogLiteResizeFeatures</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float *dst, size_t dstStride, size_t dstWidth, size_t dstHeight)</td></tr>
 <tr class="memdesc:gad1d94072a8bcadb99add4962c9831b91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes 2D-array with lite HOG features.  <a href="#gad1d94072a8bcadb99add4962c9831b91">More...</a><br /></td></tr>
 <tr class="separator:gad1d94072a8bcadb99add4962c9831b91"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -81,7 +81,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga61fc3b652ece779e7388147fa519f4b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds two 32-bit float point 2D-array with size 7x7 and finds value and position of maximum in the result array.  <a href="#ga61fc3b652ece779e7388147fa519f4b1">More...</a><br /></td></tr>
 <tr class="separator:ga61fc3b652ece779e7388147fa519f4b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga647c5c6dc0a083b473fe37165a291b7d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__hog.html#ga647c5c6dc0a083b473fe37165a291b7d">SimdHogLiteCreateMask</a> (const float *src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float *threshold, size_t scale, size_t size, uint32_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:ga647c5c6dc0a083b473fe37165a291b7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates mask for function <a class="el" href="group__hog.html#ga97043492e4bbb438c36571e8b28243d9" title="Applies filter to lite HOG features. ">SimdHogLiteFilterFeatures</a>.  <a href="#ga647c5c6dc0a083b473fe37165a291b7d">More...</a><br /></td></tr>
+<tr class="memdesc:ga647c5c6dc0a083b473fe37165a291b7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates mask for function <a class="el" href="group__hog.html#ga55c95b8bc21d55789821a975e11a3758" title="Applies filter to lite HOG features. ">SimdHogLiteFilterFeatures</a>.  <a href="#ga647c5c6dc0a083b473fe37165a291b7d">More...</a><br /></td></tr>
 <tr class="separator:ga647c5c6dc0a083b473fe37165a291b7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga9a81f09fee967aa0c9e0386af1e90c23"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__hog.html#ga9a81f09fee967aa0c9e0386af1e90c23">HogExtractFeatures</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, float *features)</td></tr>
@@ -491,8 +491,8 @@ else
 
 </div>
 </div>
-<a id="ga97043492e4bbb438c36571e8b28243d9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga97043492e4bbb438c36571e8b28243d9">&#9670;&nbsp;</a></span>SimdHogLiteFilterFeatures()</h2>
+<a id="ga55c95b8bc21d55789821a975e11a3758"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga55c95b8bc21d55789821a975e11a3758">&#9670;&nbsp;</a></span>SimdHogLiteFilterFeatures()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -537,7 +537,13 @@ else
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>filterSize</em>, </td>
+          <td class="paramname"><em>filterWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>filterHeight</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -575,8 +581,8 @@ else
 <p>Applies filter of square shape to lite HOG features.</p>
 <p>For every point of output image: </p><pre class="fragment">if(mask[x, y])
     sum = 0;
-    for(dy = 0; dy &lt; filterSize; dy++)
-        for(dx = 0; dx &lt; filterSize*featureSize; dx++)
+    for(dy = 0; dy &lt; filterHeight; dy++)
+        for(dx = 0; dx &lt; filterWidth*featureSize; dx++)
             sum += src[x*featureSize + dx, y + dy]*filter[dx, dy];
     dst[x, y] = sum;
 else
@@ -589,7 +595,8 @@ else
     <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of input array with features. Its minimal value is filterSize. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">featureSize</td><td>- a size of cell with features. It must be 8 or 16. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">filter</td><td>- a pointer to the 32-bit float array with filter values. Array must have size equal to filterSize*filterSize*featureSize. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">filterSize</td><td>- a size (width and height) of used filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">filterWidth</td><td>- a width of used filter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">filterHeight</td><td>- a height of used filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to the 32-bit integer array with mask (0 or -1). Pointer can be null otherwise the array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize). A function <a class="el" href="group__hog.html#ga647c5c6dc0a083b473fe37165a291b7d" title="Creates mask for function SimdHogLiteFilterFeatures. ">SimdHogLiteCreateMask</a> is usefull in order to create this mask. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of mask array. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output buffer with result of filtration. Array must have size greater then (srcHeight - filterSize)*(srcWidth - filterSize). </td></tr>
@@ -1038,7 +1045,7 @@ for (y = 0; y &lt; height; ++y)
       </table>
 </div><div class="memdoc">
 
-<p>Creates mask for function <a class="el" href="group__hog.html#ga97043492e4bbb438c36571e8b28243d9" title="Applies filter to lite HOG features. ">SimdHogLiteFilterFeatures</a>. </p>
+<p>Creates mask for function <a class="el" href="group__hog.html#ga55c95b8bc21d55789821a975e11a3758" title="Applies filter to lite HOG features. ">SimdHogLiteFilterFeatures</a>. </p>
 <p>Zeroes destination mask. Then for every source point: </p><pre class="fragment">if(src[x, y] &gt; threshold)
     for (dy = 0; dy &lt; size; ++dy)
         for (dx = 0; dx &lt; size; ++dx)

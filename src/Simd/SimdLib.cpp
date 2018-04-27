@@ -2403,29 +2403,29 @@ SIMD_API void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, 
         Base::HogLiteExtractFeatures(src, srcStride, width, height, cell, features, featuresStride);
 }
 
-SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+SIMD_API void SimdHogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+        Avx512bw::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
-        Avx2::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+        Avx2::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable)
-        Avx::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+        Avx::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
-        Sse41::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+        Sse41::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
     else
 #endif
-        Base::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterSize, mask, maskStride, dst, dstStride);
+        Base::HogLiteFilterFeatures(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
 }
 
 SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)

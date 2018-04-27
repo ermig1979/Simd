@@ -131,12 +131,20 @@ namespace Test
     {
         struct FuncHLFF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterSize, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride);
 
             FuncPtr func;
             String description;
 
             FuncHLFF(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Update(size_t filterWidth, size_t filterHeight, size_t featureSize, int useMask)
+            {
+                std::stringstream ss;
+                ss << description;
+                ss << "[" << filterWidth << "-" << filterHeight << "-" << featureSize << "-" << useMask << "]";
+                description = ss.str();
+            }
 
             FuncHLFF(const FuncHLFF & f, size_t fis, size_t fes, int um) : func(f.func), description(f.description + "[" + ToString(fis) + "x" + ToString(fes) + "-" + ToString(um) + "]") {}
 
@@ -144,15 +152,13 @@ namespace Test
             {
                 TEST_PERFORMANCE_TEST(description);
                 func((float*)src.data, src.stride / sizeof(float), src.width / featureSize, src.height, featureSize,
-                    (float*)filter.data, filter.width / featureSize, (uint32_t*)mask.data, mask.stride / sizeof(uint32_t),
+                    (float*)filter.data, filter.width / featureSize, filter.height, (uint32_t*)mask.data, mask.stride / sizeof(uint32_t),
                     (float*)dst.data, dst.stride / sizeof(float));
             }
         };
     }
 
 #define FUNC_HLFF(function) FuncHLFF(function, #function)
-
-#define ARGS_HLFF(fis, fes, um, f1, f2) fis, fes, um, FuncHLFF(f1, fis, fes, um), FuncHLFF(f2, fis, fes, um)
 
     void FillCorrelatedMask(View & mask, int range)
     {
@@ -167,20 +173,23 @@ namespace Test
         }
     }
 
-    bool HogLiteFilterFeaturesAutoTest(size_t srcWidth, size_t srcHeight, size_t filterSize, size_t featureSize, int useMask, const FuncHLFF & f1, const FuncHLFF & f2)
+    bool HogLiteFilterFeaturesAutoTest(size_t srcWidth, size_t srcHeight, size_t filterWidth, size_t filterHeight, size_t featureSize, int useMask, FuncHLFF f1, FuncHLFF f2)
     {
         bool result = true;
 
+        f1.Update(filterWidth, filterHeight, featureSize, useMask);
+        f2.Update(filterWidth, filterHeight, featureSize, useMask);
+
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcWidth << ", " << srcHeight << "].");
 
-        View filter(filterSize*featureSize, filterSize, View::Float, NULL, featureSize*sizeof(float));
+        View filter(filterWidth*featureSize, filterHeight, View::Float, NULL, featureSize*sizeof(float));
         FillRandom32f(filter, 0.5f, 1.5f);
 
         View src(srcWidth*featureSize, srcHeight, View::Float, NULL, TEST_ALIGN(srcWidth*featureSize*sizeof(float)));
         FillRandom32f(src, 0.5f, 1.5f);
 
-        size_t dstWidth = srcWidth - filterSize + 1;
-        size_t dstHeight = srcHeight - filterSize + 1;
+        size_t dstWidth = srcWidth - filterWidth + 1;
+        size_t dstHeight = srcHeight - filterHeight + 1;
         View mask;
         if (useMask)
         {
@@ -199,12 +208,12 @@ namespace Test
         return result;
     }
 
-    bool HogLiteFilterFeaturesAutoTest(size_t filterSize, size_t featureSize, int useMask, const FuncHLFF & f1, const FuncHLFF & f2)
+    bool HogLiteFilterFeaturesAutoTest(size_t filterWidth, size_t filterHeight, size_t featureSize, int useMask, const FuncHLFF & f1, const FuncHLFF & f2)
     {
         bool result = true;
 
-        result = result && HogLiteFilterFeaturesAutoTest(W / featureSize, H, filterSize, featureSize, useMask, f1, f2);
-        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ featureSize, H - O, filterSize, featureSize, useMask, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(W / featureSize, H, filterWidth, filterHeight, featureSize, useMask, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest((W + O)/ featureSize, H - O, filterWidth, filterHeight, featureSize, useMask, f1, f2);
 
         return result;
     }
@@ -213,11 +222,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, 1, f1, f2));
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 1, f1, f2));
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 16, 0, f1, f2));
-        result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(8, 8, 0, f1, f2));
-        //result = result && HogLiteFilterFeaturesAutoTest(ARGS_HLFF(5, 8, 0, f1, f2));
+        result = result && HogLiteFilterFeaturesAutoTest(8, 8, 16, 1, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(8, 8, 8, 1, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(8, 8, 16, 0, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(8, 8, 8, 0, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(5, 7, 16, 0, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(9, 5, 8, 1, f1, f2);
         return result;
     }
 
