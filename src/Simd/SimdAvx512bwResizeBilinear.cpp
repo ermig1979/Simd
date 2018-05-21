@@ -319,21 +319,25 @@ namespace Simd
         template <> SIMD_INLINE void Gather<2>(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
         {
             for (size_t i = 0; i < size; i += 16)
-                _mm512_storeu_si512(dst + 4*i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), 
+            {
 #if defined(__GNUC__) &&  __GNUC__ < 6
-                (const int *)
+                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), (const int *)src, 2));
+#else
+                _mm512_storeu_si512(dst + 4 * i, _mm512_i32gather_epi32(_mm512_loadu_si512(idx + i), src, 2));
 #endif
-                    src, 2));
+            }
         }
 
         template <> SIMD_INLINE void Gather<4>(const uint8_t * src, const int * idx, size_t size, uint8_t * dst)
         {
             for (size_t i = 0; i < size; i += 8)
-                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), 
+            {
 #if defined(__GNUC__) &&  __GNUC__ < 6
-                    (const long long int*)
+                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), (const long long int*)src, 4));
+#else
+                _mm512_storeu_si512(dst + 8 * i, _mm512_i32gather_epi64(_mm256_loadu_si256((__m256i*)(idx + i)), src, 4));
 #endif
-                    src, 4));
+            }
         }
 
         template <size_t channelCount> void ResizeBilinear(

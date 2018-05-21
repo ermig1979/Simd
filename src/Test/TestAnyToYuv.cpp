@@ -86,7 +86,6 @@ namespace Test
 
         result = result && AnyToYuvAutoTest(W, H, srcType, dx, dy, f1, f2);
         result = result && AnyToYuvAutoTest(W + O*dx, H - O*dy, srcType, dx, dy, f1, f2);
-        result = result && AnyToYuvAutoTest(W - O*dx, H + O*dy, srcType, dx, dy, f1, f2);
 
         return result;
     }
