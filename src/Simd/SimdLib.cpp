@@ -508,7 +508,7 @@ SIMD_API void SimdBackgroundIncrementCount(const uint8_t * value, size_t valueSt
 {
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx2::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+        Avx512bw::BackgroundIncrementCount(value, valueStride, width, height, loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
