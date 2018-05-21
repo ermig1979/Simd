@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,6 @@ namespace Test
 
         result = result && TextureBoostedSaturatedGradientAutoTest(W, H, f1, f2);
         result = result && TextureBoostedSaturatedGradientAutoTest(W + O, H - O, f1, f2);
-        result = result && TextureBoostedSaturatedGradientAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -192,7 +191,6 @@ namespace Test
 
         result = result && TextureBoostedUvAutoTest(W, H, f1, f2);
         result = result && TextureBoostedUvAutoTest(W + O, H - O, f1, f2);
-        result = result && TextureBoostedUvAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -282,7 +280,6 @@ namespace Test
 
         result = result && TextureGetDifferenceSumAutoTest(W, H, f1, f2);
         result = result && TextureGetDifferenceSumAutoTest(W + O, H - O, f1, f2);
-        result = result && TextureGetDifferenceSumAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -294,12 +291,12 @@ namespace Test
         result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Avx2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
@@ -309,12 +306,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Vmx::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Neon::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif
 

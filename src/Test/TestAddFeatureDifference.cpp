@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,6 @@ namespace Test
         {
             result = result &&  AddFeatureDifferenceAutoTest(W, H, weight*delta, f1, f2);
             result = result &&  AddFeatureDifferenceAutoTest(W + O, H - O, weight*delta, f1, f2);
-            result = result &&  AddFeatureDifferenceAutoTest(W - O, H + O, weight*delta, f1, f2);
         }
 
         return result;
@@ -101,12 +100,12 @@ namespace Test
         result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Sse2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Avx2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
@@ -116,12 +115,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Vmx::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Neon::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 

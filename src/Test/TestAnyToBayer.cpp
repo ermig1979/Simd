@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -76,7 +76,6 @@ namespace Test
         {
             result = result && AnyToBayerAutoTest(W, H, srcType, dstType, f1, f2);
             result = result && AnyToBayerAutoTest(W + E, H - E, srcType, dstType, f1, f2);
-            result = result && AnyToBayerAutoTest(W - E, H + E, srcType, dstType, f1, f2);
         }
 
         return result;
@@ -89,7 +88,7 @@ namespace Test
         result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBayer), FUNC(SimdBgrToBayer));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
@@ -99,12 +98,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBayerAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBayer), FUNC(SimdBgrToBayer));
 #endif
 
@@ -118,7 +117,7 @@ namespace Test
         result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
@@ -128,12 +127,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Vmx::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Neon::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif
 

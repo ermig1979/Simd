@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -88,12 +88,12 @@ namespace Test
         result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
@@ -103,12 +103,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Vmx::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
@@ -122,12 +122,12 @@ namespace Test
         result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Sse2::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Avx2::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
@@ -137,12 +137,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Vmx::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Neon::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif
 
