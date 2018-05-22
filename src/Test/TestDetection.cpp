@@ -224,8 +224,8 @@ namespace Test
         SimdDetectionInfo(data, &width, &height, &flags);
         if (width >= W || height >= H)
         {
-            TEST_LOG_SS(Info, "Input image is too small: (" << W << ", " << H << ")!");
-            return true;
+            TEST_LOG_SS(Error, "Test size is too small: (" << W << ", " << H << ")!");
+            return false;
         }
 
         result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);

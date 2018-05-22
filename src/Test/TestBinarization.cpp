@@ -167,7 +167,10 @@ namespace Test
         uint8_t negative = 3;
 
         if (neighborhood >= width || neighborhood >= height)
-            return true;
+        {
+            TEST_LOG_SS(Error, "Test size is too small: (" << W << ", " << H << ")!");
+            return false;
+        }
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 

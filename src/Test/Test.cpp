@@ -408,7 +408,7 @@ namespace Test
 
         bool help;
 
-        Strings filters;
+        Strings include, exclude;
 
         String text, html;
 
@@ -450,9 +450,13 @@ namespace Test
                     testThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
 #endif
                 }
-                else if (arg.find("-f=") == 0)
+                else if (arg.find("-fi=") == 0)
                 {
-                    filters.push_back(arg.substr(3, arg.size() - 3));
+                    include.push_back(arg.substr(4, arg.size() - 4));
+                }
+                else if (arg.find("-fe=") == 0)
+                {
+                    exclude.push_back(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-ot=") == 0)
                 {
@@ -502,17 +506,13 @@ namespace Test
                 return false;
             if (mode == Special && group.specialTest == NULL)
                 return false;
-            if (filters.empty())
-                return true;
-            bool required = false;
-            for (size_t i = 0; i < filters.size(); ++i)
-            {
-                if (group.name.find(filters[i]) != std::string::npos)
-                {
+            bool required = include.empty();
+            for (size_t i = 0; i < include.size() && !required; ++i)
+                if (group.name.find(include[i]) != std::string::npos)
                     required = true;
-                    break;
-                }
-            }
+            for (size_t i = 0; i < exclude.size() && required; ++i)
+                if (group.name.find(exclude[i]) != std::string::npos)
+                    required = false;
             return required;
         }
     };
@@ -611,7 +611,7 @@ namespace Test
     {
         std::cout << "Test framework of Simd Library." << std::endl << std::endl;
         std::cout << "Using example:" << std::endl << std::endl;
-        std::cout << "  ./Test -m=a -tt=1 -f=Sobel -ot=log.txt" << std::endl << std::endl;
+        std::cout << "  ./Test -m=a -tt=1 -fi=Sobel -ot=log.txt" << std::endl << std::endl;
         std::cout << "Where next parameters were used:" << std::endl << std::endl;
         std::cout << "-m=a         - a auto checking mode which includes performance testing" << std::endl;
         std::cout << "               (only for library built in Release mode)." << std::endl;
@@ -625,11 +625,11 @@ namespace Test
         std::cout << "               prepared test data)," << std::endl;
         std::cout << "               -m=s - running of special tests." << std::endl << std::endl;
         std::cout << "-tt=1        - a number of test threads." << std::endl;
-        std::cout << "-f=Sobel     - a filter. In current case will be tested only functions" << std::endl;
-        std::cout << "               which contain word 'Sobel' in their names." << std::endl;
+        std::cout << "-fi=Sobel    - an include filter. In current case will be tested only" << std::endl;
+        std::cout << "               functions which contain word 'Sobel' in their names." << std::endl;
         std::cout << "               If you miss this parameter then full testing will be" << std::endl;
-        std::cout << "               performed. You can use several filters - function name" << std::endl;
-        std::cout << "               has to satisfy at least one of them. " << std::endl << std::endl;
+        std::cout << "               performed. You can use several include filters - " << std::endl;
+        std::cout << "               function name has to satisfy at least one of them. " << std::endl << std::endl;
         std::cout << "-ot=log.txt  - a file name with test report (in TEXT format)." << std::endl;
         std::cout << "               The test's report also will be output to console." << std::endl << std::endl;
         std::cout << "Also you can use parameters: " << std::endl << std::endl;
@@ -641,6 +641,7 @@ namespace Test
         std::cout << "    -oh=log.html  a file name with test report (in HTML format)." << std::endl << std::endl;
         std::cout << "    -s=sample.avi a video source (Simd::Motion test)." << std::endl << std::endl;
         std::cout << "    -wt=1         a thread number used to parallelize algorithms." << std::endl << std::endl;
+        std::cout << "    -fe=Abs       an exclude filter to exclude some tests." << std::endl << std::endl;
         return 0;
     }
 
@@ -677,10 +678,15 @@ int main(int argc, char* argv[])
     if (groups.empty())
     {
         std::stringstream ss;
-        ss << "There are not any suitable tests for current filters: ";
-        for (size_t i = 0; i < options.filters.size(); ++i)
-            ss << "'" << options.filters[i] << "' ";
-        ss << "!" << std::endl;
+        ss << "There are not any suitable tests for current filters! " << std::endl;
+        ss << "  Include filters: " << std::endl;
+        for (size_t i = 0; i < options.include.size(); ++i)
+            ss << "'" << options.include[i] << "' ";
+        ss << std::endl;
+        ss << "  Exclude filters: " << std::endl;
+        for (size_t i = 0; i < options.exclude.size(); ++i)
+            ss << "'" << options.exclude[i] << "' ";
+        ss << std::endl;
         TEST_LOG_SS(Error, ss.str());
         return 1;
     }

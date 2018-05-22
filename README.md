@@ -151,7 +151,7 @@ In this case different implementations of each functions will be compared betwee
 Also it can be `-m=c` (creation of test data for cross-platform testing), `-m=v` (cross-platform testing with using of early prepared test data)
 and `-m=s` (running of special tests).
 * `-tt=1` - a number of test threads.
-* `-f=Sobel` - a filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
+* `-fi=Sobel` - an include filter. In current case will be tested only functions which contain word 'Sobel' in their names. 
 If you miss this parameter then full testing will be performed.
 You can use several filters - function name has to satisfy at least one of them.
 * `-ot=log.txt` - a file name with test report (in TEXT file format). The test's report also will be output to console.
@@ -166,3 +166,4 @@ Also you can use parameters:
 * `-oh=log.html` - a file name with test report (in HTML file format).	
 * `-s=sample.avi` a video source (See `Simd::Motion` test).
 * `-wt=1` a thread number used to parallelize algorithms.
+* `-fi=Abs` an exclude filter to exclude some tests.
