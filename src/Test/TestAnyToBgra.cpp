@@ -76,7 +76,6 @@ namespace Test
 
         result = result && AnyToBgraAutoTest(W, H, srcType, f1, f2);
         result = result && AnyToBgraAutoTest(W + O, H - O, srcType, f1, f2);
-        result = result && AnyToBgraAutoTest(W - O, H + O, srcType, f1, f2);
 
         return result;
     }

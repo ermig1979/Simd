@@ -885,26 +885,27 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE View<A> View<A>::Region(const Point<ptrdiff_t> & size, Position position) const
     {
+        ptrdiff_t w = width, h = height;
         switch (position)
         {
         case TopLeft:
             return Region(0, 0, size.x, size.y);
         case TopCenter:
-            return Region((width - size.x) / 2, 0, (width + size.x) / 2, size.y);
+            return Region((w - size.x) / 2, 0, (w + size.x) / 2, size.y);
         case TopRight:
-            return Region(width - size.x, 0, width, size.y);
+            return Region(w - size.x, 0, w, size.y);
         case MiddleLeft:
-            return Region(0, (height - size.y) / 2, size.x, (height + size.y) / 2);
+            return Region(0, (h - size.y) / 2, size.x, (h + size.y) / 2);
         case MiddleCenter:
-            return Region((width - size.x) / 2, (height - size.y) / 2, (width + size.x) / 2, (height + size.y) / 2);
+            return Region((w - size.x) / 2, (h - size.y) / 2, (w + size.x) / 2, (h + size.y) / 2);
         case MiddleRight:
-            return Region(width - size.x, (height - size.y) / 2, width, (height + size.y) / 2);
+            return Region(w - size.x, (h - size.y) / 2, w, (h + size.y) / 2);
         case BottomLeft:
-            return Region(0, height - size.y, size.x, height);
+            return Region(0, h - size.y, size.x, h);
         case BottomCenter:
-            return Region((width - size.x) / 2, height - size.y, (width + size.x) / 2, height);
+            return Region((w - size.x) / 2, h - size.y, (w + size.x) / 2, h);
         case BottomRight:
-            return Region(width - size.x, height - size.y, width, height);
+            return Region(w - size.x, h - size.y, w, h);
         default:
             assert(0);
         }

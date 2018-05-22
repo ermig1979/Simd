@@ -148,7 +148,7 @@ namespace Test
     FuncD(function1.func, function1.description + (tilted ? "[1]" : "[0]")), \
     FuncD(function2.func, function2.description + (tilted ? "[1]" : "[0]"))
 
-    bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int  int16, const FuncD & f1, const FuncD & f2)
+    bool DetectionDetectAutoTest(const void * data, int width, int height, int throughColumn, int int16, const FuncD & f1, const FuncD & f2)
     {
         bool result = true;
 
@@ -217,6 +217,15 @@ namespace Test
         {
             TEST_LOG_SS(Error, "Can't load cascade '" << path << "' !");
             return false;
+        }
+
+        size_t width, height;
+        SimdDetectionInfoFlags flags;
+        SimdDetectionInfo(data, &width, &height, &flags);
+        if (width >= W || height >= H)
+        {
+            TEST_LOG_SS(Info, "Input image is too small: (" << W << ", " << H << ")!");
+            return true;
         }
 
         result = result && DetectionDetectAutoTest(data, W, H, throughColumn, int16, f1, f2);

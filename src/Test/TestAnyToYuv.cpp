@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar,
+* Copyright (c) 2011-2018 Yermalayeu Ihar,
 *               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -97,17 +97,17 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Base::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Sse2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Ssse3::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Avx2::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
@@ -117,12 +117,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Vmx::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 2, FUNC(Simd::Neon::BgraToYuv420p), FUNC(SimdBgraToYuv420p));
 #endif
 
@@ -136,17 +136,17 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Base::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Sse2::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Ssse3::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Avx2::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
@@ -156,12 +156,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Vmx::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
             result = result && AnyToYuvAutoTest(View::Bgra32, 2, 1, FUNC(Simd::Neon::BgraToYuv422p), FUNC(SimdBgraToYuv422p));
 #endif
 
@@ -175,12 +175,12 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Base::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Sse2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Avx2::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
@@ -190,12 +190,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Vmx::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToYuvAutoTest(View::Bgra32, 1, 1, FUNC(Simd::Neon::BgraToYuv444p), FUNC(SimdBgraToYuv444p));
 #endif
 
@@ -209,12 +209,12 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Base::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Ssse3::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Avx2::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
@@ -224,12 +224,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Vmx::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC(Simd::Neon::BgrToYuv420p), FUNC(SimdBgrToYuv420p));
 #endif
 
@@ -243,12 +243,12 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Base::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Ssse3::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Avx2::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
 #endif
 
@@ -258,12 +258,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Vmx::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
             result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC(Simd::Neon::BgrToYuv422p), FUNC(SimdBgrToYuv422p));
 #endif
 
@@ -277,12 +277,12 @@ namespace Test
         result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Base::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Ssse3::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Avx2::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
@@ -292,12 +292,12 @@ namespace Test
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Vmx::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC(Simd::Neon::BgrToYuv444p), FUNC(SimdBgrToYuv444p));
 #endif
 

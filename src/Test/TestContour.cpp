@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -80,7 +80,6 @@ namespace Test
 
         result = result && ContourMetricsMaskedAutoTest(W, H, f1, f2);
         result = result && ContourMetricsMaskedAutoTest(W + O, H - O, f1, f2);
-        result = result && ContourMetricsMaskedAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -92,27 +91,27 @@ namespace Test
         result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W > Simd::Ssse3::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Ssse3::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W > Simd::Avx2::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx2::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Avx512bw::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W > Simd::Vmx::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Vmx::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W > Simd::Neon::A)
             result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Neon::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif
 
@@ -171,7 +170,6 @@ namespace Test
 
         result = result && ContourAnchorsAutoTest(W, H, f1, f2);
         result = result && ContourAnchorsAutoTest(W + O, H - O, f1, f2);
-        result = result && ContourAnchorsAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -183,27 +181,27 @@ namespace Test
         result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W > Simd::Sse2::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W > Simd::Avx2::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx2::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Avx512bw::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W > Simd::Vmx::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Vmx::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W > Simd::Neon::A)
             result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Neon::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif
 

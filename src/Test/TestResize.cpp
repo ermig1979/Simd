@@ -126,7 +126,7 @@ namespace Test
 
 #ifdef SIMD_VMX_ENABLE
         if (Simd::Vmx::Enable)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Vmx::ResizeBilinear), FUNC_RB_RB(SimdResizeBilinear));
+            result = result && ResizeAutoTest(FUNC_RB(Simd::Vmx::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE

@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -81,7 +81,6 @@ namespace Test
 
         result = result && Bgr48pToBgra32AutoTest(W, H, f1, f2);
         result = result && Bgr48pToBgra32AutoTest(W + O, H - O, f1, f2);
-        result = result && Bgr48pToBgra32AutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -93,12 +92,12 @@ namespace Test
         result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Base::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Sse2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Avx2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
@@ -108,12 +107,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Vmx::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::HA)
             result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Neon::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif
 

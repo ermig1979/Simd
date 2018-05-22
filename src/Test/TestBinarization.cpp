@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -88,7 +88,6 @@ namespace Test
         {
             result = result && BinarizationAutoTest(ARGS1(W, H, type, f1, f2));
             result = result && BinarizationAutoTest(ARGS1(W + O, H - O, type, f1, f2));
-            result = result && BinarizationAutoTest(ARGS1(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -101,12 +100,12 @@ namespace Test
         result = result && BinarizationAutoTest(FUNC1(Simd::Base::Binarization), FUNC1(SimdBinarization));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && BinarizationAutoTest(FUNC1(Simd::Sse2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && BinarizationAutoTest(FUNC1(Simd::Avx2::Binarization), FUNC1(SimdBinarization));
 #endif 
 
@@ -116,12 +115,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && BinarizationAutoTest(FUNC1(Simd::Vmx::Binarization), FUNC1(SimdBinarization));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && BinarizationAutoTest(FUNC1(Simd::Neon::Binarization), FUNC1(SimdBinarization));
 #endif
 
@@ -161,16 +160,20 @@ namespace Test
     {
         bool result = true;
 
+        uint8_t value = 127;
+        size_t neighborhood = 13;
+        uint8_t threshold = 128;
+        uint8_t positive = 7;
+        uint8_t negative = 3;
+
+        if (neighborhood >= width || neighborhood >= height)
+            return true;
+
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
 
-        uint8_t value = 127;
-        size_t neighborhood = 17;
-        uint8_t threshold = 128;
-        uint8_t positive = 7;
-        uint8_t negative = 3;
 
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
@@ -192,7 +195,6 @@ namespace Test
         {
             result = result && AveragingBinarizationAutoTest(ARGS2(W, H, type, f1, f2));
             result = result && AveragingBinarizationAutoTest(ARGS2(W + O, H - O, type, f1, f2));
-            result = result && AveragingBinarizationAutoTest(ARGS2(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -205,12 +207,12 @@ namespace Test
         result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Base::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Sse2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Avx2::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
@@ -220,12 +222,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Vmx::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AveragingBinarizationAutoTest(FUNC2(Simd::Neon::AveragingBinarization), FUNC2(SimdAveragingBinarization));
 #endif 
 

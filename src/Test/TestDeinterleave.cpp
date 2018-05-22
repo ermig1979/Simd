@@ -80,7 +80,6 @@ namespace Test
 
         result = result && DeinterleaveUvAutoTest(W, H, f1, f2);
         result = result && DeinterleaveUvAutoTest(W + O, H - O, f1, f2);
-        result = result && DeinterleaveUvAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -92,12 +91,12 @@ namespace Test
         result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Avx2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
@@ -107,12 +106,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Vmx::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Neon::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
@@ -175,7 +174,6 @@ namespace Test
 
         result = result && DeinterleaveBgrAutoTest(W, H, f1, f2);
         result = result && DeinterleaveBgrAutoTest(W + O, H - O, f1, f2);
-        result = result && DeinterleaveBgrAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -187,12 +185,12 @@ namespace Test
         result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Base::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Ssse3::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Avx2::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif 
 
@@ -202,7 +200,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Neon::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif
 
@@ -268,7 +266,6 @@ namespace Test
 
         result = result && DeinterleaveBgraAutoTest(W, H, f1, f2);
         result = result && DeinterleaveBgraAutoTest(W + O, H - O, f1, f2);
-        result = result && DeinterleaveBgraAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -280,12 +277,12 @@ namespace Test
         result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Base::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Ssse3::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Avx2::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
 
@@ -295,7 +292,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Neon::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
 
