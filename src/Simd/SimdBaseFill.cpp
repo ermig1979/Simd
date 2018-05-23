@@ -179,10 +179,11 @@ namespace Simd
             size_t alignedWidth = AlignLo(width, 4);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < alignedWidth; col += 4)
+                size_t col = 0;
+                for (; col < alignedWidth; col += 4)
                     *((uint64_t*)((uint16_t*)dst + col)) = uv64;
-                if (width != alignedWidth)
-                    ((uint16_t*)dst)[width - 1] = uv16;
+                for (; col < width; col += 1)
+                    ((uint16_t*)dst)[col] = uv16;
                 dst += stride;
             }
 #else
@@ -190,12 +191,13 @@ namespace Simd
             size_t alignedWidth = AlignLo(width, 2);
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < alignedWidth; col += 2)
+                size_t col = 0;
+                for (; col < alignedWidth; col += 2)
                     *((uint32_t*)((uint16_t*)dst + col)) = uv32;
-                if (width != alignedWidth)
-                    ((uint16_t*)dst)[width - 1] = uv16;
+                for (; col < width; col += 1)
+                    ((uint16_t*)dst)[col] = uv16;
                 dst += stride;
-        }
+            }
 #endif        
         }
 

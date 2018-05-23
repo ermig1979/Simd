@@ -161,22 +161,15 @@ namespace Test
         bool result = true;
 
         uint8_t value = 127;
-        size_t neighborhood = 13;
+        size_t neighborhood = std::min(17, std::min(width, height) - 1);
         uint8_t threshold = 128;
         uint8_t positive = 7;
         uint8_t negative = 3;
-
-        if (neighborhood >= width || neighborhood >= height)
-        {
-            TEST_LOG_SS(Error, "Test size is too small: (" << W << ", " << H << ")!");
-            return false;
-        }
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
         View src(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         FillRandom(src);
-
 
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));

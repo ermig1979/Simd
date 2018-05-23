@@ -31,6 +31,10 @@ namespace Simd
     {
         template <bool align> void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(dst) && Aligned(stride));
+
             size_t size = width * 3;
             size_t step = A * 3;
             size_t alignedSize = AlignLo(width, A) * 3;
@@ -73,6 +77,10 @@ namespace Simd
 
         template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
+            assert(width >= F);
+            if (align)
+                assert(Aligned(dst) && Aligned(stride));
+
             uint32_t bgra32 = uint32_t(blue) | (uint32_t(green) << 8) | (uint32_t(red) << 16) | (uint32_t(alpha) << 24);
             size_t alignedWidth = AlignLo(width, 4);
             __m128i bgra128 = _mm_set1_epi32(bgra32);
@@ -96,6 +104,10 @@ namespace Simd
 
         template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m128i & pixel)
         {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(dst) && Aligned(stride));
+
             size_t fullAlignedWidth = AlignLo(width, QA);
             size_t alignedWidth = AlignLo(width, A);
             for (size_t row = 0; row < height; ++row)

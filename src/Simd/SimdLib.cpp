@@ -1880,22 +1880,22 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A)
+    if(Avx2::Enable && width >= Avx2::F)
         Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
+    if(Sse2::Enable && width >= Sse2::F)
         Sse2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A)
+    if(Vmx::Enable && width >= Vmx::F)
         Vmx::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A)
+    if (Neon::Enable && width >= Neon::F)
         Neon::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif

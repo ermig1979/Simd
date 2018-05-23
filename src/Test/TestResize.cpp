@@ -369,6 +369,7 @@ namespace Test
     {
         bool result = true;
 
+        result = result && ResizeSpecialTest(ARGS_RB2(View::Bgr24, Size(1920, 1080), Size(224, 224), f1, f2));
         result = result && ResizeSpecialTest(ARGS_RB2(View::Gray8, Size(352, 240), Size(174, 94), f1, f2));
 
         for (Size dst(128, 8); dst.x < 144; ++dst.x)
@@ -397,6 +398,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && ResizeSpecialTest(FUNC_RB(Simd::Avx2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && ResizeSpecialTest(FUNC_RB(Simd::Avx512bw::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE

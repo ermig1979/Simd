@@ -85,7 +85,6 @@ namespace Test
 
             result = result && AlphaBlendingAutoTest(format, W, H, f1c, f2c);
             result = result && AlphaBlendingAutoTest(format, W + O, H - O, f1c, f2c);
-            result = result && AlphaBlendingAutoTest(format, W - O, H + O, f1c, f2c);
         }
 
         return result;
@@ -98,17 +97,17 @@ namespace Test
         result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Avx2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
@@ -118,12 +117,12 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Vmx::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Neon::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif
 
@@ -188,7 +187,6 @@ namespace Test
 
             result = result && AlphaFillingAutoTest(format, W, H, f1c, f2c);
             result = result && AlphaFillingAutoTest(format, W + O, H - O, f1c, f2c);
-            result = result && AlphaFillingAutoTest(format, W - O, H + O, f1c, f2c);
         }
 
         return result;
@@ -201,17 +199,17 @@ namespace Test
         result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Base::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Ssse3::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Avx2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif
 

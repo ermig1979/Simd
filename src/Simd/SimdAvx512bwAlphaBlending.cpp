@@ -229,7 +229,6 @@ namespace Simd
 
         template <bool align> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
         {
-            assert(width >= A);
             if (align)
             {
                 assert(Aligned(dst) && Aligned(dstStride));
