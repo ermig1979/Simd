@@ -2863,7 +2863,7 @@ SIMD_API void SimdLaplaceAbsSum(const uint8_t * src, size_t stride, size_t width
 SIMD_API void SimdLbpEstimate(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
+    if (Avx512bw::Enable && width >= Avx512bw::A + 2)
         Avx512bw::LbpEstimate(src, srcStride, width, height, dst, dstStride);
     else
 #endif
