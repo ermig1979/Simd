@@ -356,6 +356,7 @@ namespace Simd
             size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
             assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
+            assert(width >= HA + 2);
 
             if (cellX == 8 && cellY == 8 && quantization == 18)
                 Custom_8x8_18::HogDirectionHistograms(src, stride, width, height, histograms);
@@ -664,6 +665,7 @@ namespace Simd
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features)
         {
             assert(width % 8 == 0 && height % 8 == 0 && width >= 16 && height >= 16);
+            assert(width >= HA + 2);
 
             HogFeatureExtractor extractor;
             extractor.Run(src, stride, width, height, features);

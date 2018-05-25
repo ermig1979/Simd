@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -119,6 +119,7 @@ namespace Simd
             size_t cellX, size_t cellY, size_t quantization, float * histograms)
         {
             assert(width%cellX == 0 && height%cellY == 0 && quantization % 2 == 0);
+            assert(width >= A + 2);
 
             Buffer buffer(width, quantization);
 

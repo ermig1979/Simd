@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -116,7 +116,6 @@ namespace Test
 
         result = result && HistogramAutoTest(W, H, f1, f2);
         result = result && HistogramAutoTest(W + O, H - O, f1, f2);
-        result = result && HistogramAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -160,7 +159,6 @@ namespace Test
 
         result = result && HistogramMaskedAutoTest(W, H, f1, f2);
         result = result && HistogramMaskedAutoTest(W + O, H - O, f1, f2);
-        result = result && HistogramMaskedAutoTest(W - O, H + O, f1, f2);
 
         return result;
     }
@@ -172,12 +170,12 @@ namespace Test
         result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Base::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Sse2::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Avx2::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
@@ -187,46 +185,48 @@ namespace Test
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Vmx::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && HistogramMaskedAutoTest(FUNC_HM(Simd::Neon::HistogramMasked), FUNC_HM(SimdHistogramMasked));
 #endif 
 
         return result;
     }
 
-    bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, const FuncASDH & f1, const FuncASDH & f2)
+    bool AbsSecondDerivativeHistogramAutoTest(int width, int height, int step, int indent, int A, const FuncASDH & f1, const FuncASDH & f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << step << ", " << indent << ").");
+        if (width > 2 * indent && height > 2 * indent && indent >= step && width >= A + 2 * indent)
+        {
+            TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "] (" << step << ", " << indent << ").");
 
-        View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
-        FillRandom(s);
+            View s(int(width), int(height), View::Gray8, NULL, TEST_ALIGN(width));
+            FillRandom(s);
 
-        Histogram h1 = { 0 }, h2 = { 0 };
+            Histogram h1 = { 0 }, h2 = { 0 };
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, step, indent, h1));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, step, indent, h1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, step, indent, h2));
+            TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, step, indent, h2));
 
-        result = result && Compare(h1, h2, 0, true, 32);
+            result = result && Compare(h1, h2, 0, true, 32);
+        }
 
         return result;
     }
 
-    bool AbsSecondDerivativeHistogramAutoTest(const FuncASDH & f1, const FuncASDH & f2)
+    bool AbsSecondDerivativeHistogramAutoTest(int A, const FuncASDH & f1, const FuncASDH & f2)
     {
         bool result = true;
 
-        result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 1, 16, f1, f2);
-        result = result && AbsSecondDerivativeHistogramAutoTest(W + O, H - O, 2, 16, f1, f2);
-        result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 3, 8, f1, f2);
-        result = result && AbsSecondDerivativeHistogramAutoTest(W - O, H + O, 4, 8, f1, f2);
+        result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 1, 16, A, f1, f2);
+        result = result && AbsSecondDerivativeHistogramAutoTest(W + O, H - O, 2, 16, A, f1, f2);
+        result = result && AbsSecondDerivativeHistogramAutoTest(W, H, 3, 8, A, f1, f2);
 
         return result;
     }
@@ -235,31 +235,31 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Base::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+        result = result && AbsSecondDerivativeHistogramAutoTest(1, FUNC_ASDH(Simd::Base::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 
 #ifdef SIMD_SSE2_ENABLE
         if (Simd::Sse2::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Sse2::A, FUNC_ASDH(Simd::Sse2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Avx2::A, FUNC_ASDH(Simd::Avx2::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Avx512bw::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Avx512bw::A, FUNC_ASDH(Simd::Avx512bw::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_VMX_ENABLE
         if (Simd::Vmx::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Vmx::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Vmx::A, FUNC_ASDH(Simd::Vmx::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && AbsSecondDerivativeHistogramAutoTest(FUNC_ASDH(Simd::Neon::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
+            result = result && AbsSecondDerivativeHistogramAutoTest(Simd::Neon::A, FUNC_ASDH(Simd::Neon::AbsSecondDerivativeHistogram), FUNC_ASDH(SimdAbsSecondDerivativeHistogram));
 #endif 
 
         return result;
@@ -329,7 +329,7 @@ namespace Test
         result = result && ChangeColorsAutoTest(FUNC_CC(Simd::Base::ChangeColors), FUNC_CC(SimdChangeColors));
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::HA)
             result = result && ChangeColorsAutoTest(FUNC_CC(Simd::Avx512bw::ChangeColors), FUNC_CC(SimdChangeColors));
 #endif 
 
@@ -396,7 +396,6 @@ namespace Test
         {
             result = result && HistogramConditionalAutoTest(ARGS_HC(W, H, type, f1, f2));
             result = result && HistogramConditionalAutoTest(ARGS_HC(W + O, H - O, type, f1, f2));
-            result = result && HistogramConditionalAutoTest(ARGS_HC(W - O, H + O, type, f1, f2));
         }
 
         return result;
@@ -409,12 +408,12 @@ namespace Test
         result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Base::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Sse2::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Avx2::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif 
 
@@ -424,7 +423,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && HistogramConditionalAutoTest(FUNC_HC(Simd::Neon::HistogramConditional), FUNC_HC(SimdHistogramConditional));
 #endif 
 

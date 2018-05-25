@@ -69,9 +69,15 @@ namespace Test
 
 #define ARGS_HLEF(cell, f1, f2) cell, FuncHLEF(f1, cell), FuncHLEF(f2, cell)
 
-    bool HogLiteExtractFeaturesAutoTest(size_t width, size_t height, size_t size, size_t cell, const FuncHLEF & f1, const FuncHLEF & f2)
+    bool HogLiteExtractFeaturesAutoTest(size_t A, size_t width, size_t height, size_t size, size_t cell, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
+
+        width = std::max(3 * cell, width);
+        height = std::max(3 * cell, height);
+
+        if ((width / cell - 1)*cell < A)
+            return result;
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
@@ -92,14 +98,14 @@ namespace Test
         return result;
     }
 
-    bool HogLiteExtractFeaturesAutoTest(const FuncHLEF & f1, const FuncHLEF & f2)
+    bool HogLiteExtractFeaturesAutoTest(size_t A, const FuncHLEF & f1, const FuncHLEF & f2)
     {
         bool result = true;
 
-        result = result && HogLiteExtractFeaturesAutoTest(W, H, 16, ARGS_HLEF(4, f1, f2));
-        result = result && HogLiteExtractFeaturesAutoTest(W + O, H - O, 16, ARGS_HLEF(4, f1, f2));
-        result = result && HogLiteExtractFeaturesAutoTest(W, H, 16, ARGS_HLEF(8, f1, f2));
-        result = result && HogLiteExtractFeaturesAutoTest(W + O, H - O, 16, ARGS_HLEF(8, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(A, W, H, 16, ARGS_HLEF(4, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(A, W + O, H - O, 16, ARGS_HLEF(4, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(A, W, H, 16, ARGS_HLEF(8, f1, f2));
+        result = result && HogLiteExtractFeaturesAutoTest(A, W + O, H - O, 16, ARGS_HLEF(8, f1, f2));
 
         return result;
     }
@@ -108,21 +114,21 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Base::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+        result = result && HogLiteExtractFeaturesAutoTest(1, FUNC_HLEF(Simd::Base::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Sse41::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+            result = result && HogLiteExtractFeaturesAutoTest(Simd::Sse41::A, FUNC_HLEF(Simd::Sse41::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Avx2::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+            result = result && HogLiteExtractFeaturesAutoTest(Simd::Avx2::A, FUNC_HLEF(Simd::Avx2::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && HogLiteExtractFeaturesAutoTest(FUNC_HLEF(Simd::Avx512bw::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+            result = result && HogLiteExtractFeaturesAutoTest(1, FUNC_HLEF(Simd::Avx512bw::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif
         return result;
     }

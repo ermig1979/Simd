@@ -80,7 +80,6 @@ namespace Test
 
         result = result && HogDirectionHistogramsAutoTest(c, s, q, f1, f2);
         result = result && HogDirectionHistogramsAutoTest(c, s + Point(1, 1), q, f1, f2);
-        result = result && HogDirectionHistogramsAutoTest(c, s - Point(1, 1), q, f1, f2);
 
         return result;
     }
@@ -92,32 +91,32 @@ namespace Test
         result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Base::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse41::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::HA + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Avx512bw::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_VSX_ENABLE
-        if (Simd::Vsx::Enable)
+        if (Simd::Vsx::Enable && W >= Simd::Vsx::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Vsx::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Neon::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 #endif
 
@@ -148,6 +147,9 @@ namespace Test
     bool HogExtractFeaturesAutoTest(int width, int height, const FuncHEF & f1, const FuncHEF & f2)
     {
         bool result = true;
+
+        width = Simd::AlignHi(std::max(16, width), 8);
+        height = Simd::AlignHi(std::max(16, height), 8);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
@@ -183,22 +185,22 @@ namespace Test
         result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Base::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Sse41::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::HA + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx2::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::HA + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Avx512bw::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
             result = result && HogExtractFeaturesAutoTest(FUNC_HEF(Simd::Neon::HogExtractFeatures), FUNC_HEF(SimdHogExtractFeatures));
 #endif 
 
@@ -263,7 +265,7 @@ namespace Test
         size_t w = Simd::AlignHi(W / 8, SIMD_ALIGN), h = H / 8, c = 31;
 
         result = result && HogDeinterleaveAutoTest(w, h, c, f1, f2);
-        result = result && HogDeinterleaveAutoTest(w - 1, h + 1, c, f1, f2);
+        result = result && HogDeinterleaveAutoTest(w + 1, h - 1, c, f1, f2);
 
         return result;
     }
@@ -321,9 +323,12 @@ namespace Test
 
 #define FUNC_HSF(function) FuncHSF(function, #function)
 
-    bool HogFilterSeparableAutoTest(size_t width, size_t height, int rowSize, int colSize, int add, const FuncHSF & f1, const FuncHSF & f2)
+    bool HogFilterSeparableAutoTest(int width, int height, int rowSize, int colSize, int add, const FuncHSF & f1, const FuncHSF & f2)
     {
         bool result = true;
+
+        colSize = std::min(colSize, height - 1);
+        rowSize = std::min(rowSize, width - 1);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
@@ -339,9 +344,9 @@ namespace Test
         View dstDst1(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
         View dstDst2(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, col, row, dstSrc, dstDst1, add));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, row, col, dstSrc, dstDst1, add));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, col, row, dstSrc, dstDst2, add));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, row, col, dstSrc, dstDst2, add));
 
         result = result && Compare(dstDst1, dstDst2, EPS, true, 64, false);
 
@@ -352,7 +357,7 @@ namespace Test
     {
         bool result = true;
 
-        size_t w = Simd::AlignHi(W / 4, SIMD_ALIGN), h = H / 4;
+        int w = (int)Simd::AlignHi(W / 4, SIMD_ALIGN), h = H / 4;
 
         for (int add = 0; result && add < 2; ++add)
         {
