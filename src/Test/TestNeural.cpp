@@ -1939,6 +1939,11 @@ namespace Test
             result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Avx512f::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Neon::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#endif
+
         return result;
     }
 
