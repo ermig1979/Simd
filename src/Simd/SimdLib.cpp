@@ -3574,7 +3574,7 @@ SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, si
 typedef void(*SimdNeuralConvolutionForwardPtr) (const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
     const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
     void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
-volatile SimdNeuralConvolutionForwardPtr simdNeuralConvolutionForward = SIMD_FUNC4(NeuralConvolutionForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC);
+volatile SimdNeuralConvolutionForwardPtr simdNeuralConvolutionForward = SIMD_FUNC5(NeuralConvolutionForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
     const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
