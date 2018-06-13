@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 option(AVX512 "AVX512 enable" ON)
 
-set(TRUNK_DIR ${CMAKE_SOURCE_DIR}/../..)
+set(TRUNK_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../..)
 
 if(CMAKE_BUILD_TYPE STREQUAL "")
     set(CMAKE_BUILD_TYPE "Release")
@@ -35,7 +35,9 @@ message("Version: ${CMAKE_CXX_COMPILER_VERSION}")
 include_directories(${TRUNK_DIR}/src)
 
 if((CHECK_VERSION STREQUAL "") OR (NOT (CHECK_VERSION STREQUAL "0")))
-    execute_process(COMMAND bash ${TRUNK_DIR}/prj/sh/GetVersion.sh)
+    add_custom_command(OUTPUT ${TRUNK_DIR}/src/Simd/SimdVersion.h
+        COMMAND bash ${TRUNK_DIR}/prj/sh/GetVersion.sh
+        WORKING_DIRECTORY ${TRUNK_DIR}/prj/sh)
 else()
     message("Skip version checking.")
 endif()
@@ -112,8 +114,8 @@ if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL 
     else()
         set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${TEST_FLAGS} -mtune=native")
     endif()
-    add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
-    target_link_libraries(Test Simd -lpthread)
+    add_executable(TestSimd ${TEST_SRC_C} ${TEST_SRC_CPP})
+    target_link_libraries(TestSimd Simd -lpthread)
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc64"))
 
@@ -137,8 +139,8 @@ elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "ppc") OR (CMAKE_SYSTEM_PROCESSOR STREQU
     else()
         set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${TEST_FLAGS} -mtune=native")
     endif()
-    add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
-    target_link_libraries(Test Simd -lpthread)
+    add_executable(TestSimd ${TEST_SRC_C} ${TEST_SRC_CPP})
+    target_link_libraries(TestSimd Simd -lpthread)
 
 elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64"))
 
@@ -169,8 +171,8 @@ elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUA
     else()
         set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${TEST_FLAGS} -mtune=native -D_GLIBCXX_USE_NANOSLEEP")
     endif()
-    add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
-    target_link_libraries(Test Simd -lpthread)
+    add_executable(TestSimd ${TEST_SRC_C} ${TEST_SRC_CPP})
+    target_link_libraries(TestSimd Simd -lpthread)
 
 elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "mips"))
 
@@ -196,8 +198,8 @@ elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "mips"))
     else()
         set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${TEST_FLAGS} -mtune=native")# -D_GLIBCXX_USE_NANOSLEEP")
     endif()
-    add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
-    target_link_libraries(Test Simd -lpthread "${CMAKE_MODULE_LINKER_FLAGS} -EL")
+    add_executable(TestSimd ${TEST_SRC_C} ${TEST_SRC_CPP})
+    target_link_libraries(TestSimd Simd -lpthread "${CMAKE_MODULE_LINKER_FLAGS} -EL")
 
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
