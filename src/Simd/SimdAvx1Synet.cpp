@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSynet.h"
 
 namespace Simd
 {
@@ -69,12 +70,29 @@ namespace Simd
                 SynetAddBias<false>(bias, count, size, dst);
         }
 
-        template <bool align> void SynetEltwiseLayerForwardProduct(const float * src0, const float * src1, float * dst, size_t offset)
+        template <SimdSynetEltwiseOperationType type> __m256 SynetEltwiseLayerForward(__m256 src0, __m256 src1);
+
+        template <> SIMD_INLINE __m256 SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(__m256 src0, __m256 src1)
         {
-            Store<align>(dst + offset, _mm256_mul_ps(Load<align>(src0 + offset), Load<align>(src1 + offset)));
+            return _mm256_mul_ps(src0, src1);
         }
 
-        template <bool align> void SynetEltwiseLayerForwardProduct(float const * const * src, size_t count, size_t size, float * dst)
+        template <> SIMD_INLINE __m256 SynetEltwiseLayerForward<SimdSynetEltwiseOperationMax>(__m256 src0, __m256 src1)
+        {
+            return _mm256_max_ps(src0, src1);
+        }
+
+        template <> SIMD_INLINE __m256 SynetEltwiseLayerForward<SimdSynetEltwiseOperationMin>(__m256 src0, __m256 src1)
+        {
+            return _mm256_min_ps(src0, src1);
+        }
+
+        template <SimdSynetEltwiseOperationType type, bool align> SIMD_INLINE void SynetEltwiseLayerForward(const float * src0, const float * src1, float * dst, size_t offset)
+        {
+            Store<align>(dst + offset, SynetEltwiseLayerForward<type>(Load<align>(src0 + offset), Load<align>(src1 + offset)));
+        }
+
+        template <SimdSynetEltwiseOperationType type, bool align> void SynetEltwiseLayerForward(float const * const * src, size_t count, size_t size, float * dst)
         {
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
@@ -85,16 +103,16 @@ namespace Simd
             {
                 for (; j < aligned; j += QF)
                 {
-                    SynetEltwiseLayerForwardProduct<align>(src0, src1, dst, j + F * 0);
-                    SynetEltwiseLayerForwardProduct<align>(src0, src1, dst, j + F * 1);
-                    SynetEltwiseLayerForwardProduct<align>(src0, src1, dst, j + F * 2);
-                    SynetEltwiseLayerForwardProduct<align>(src0, src1, dst, j + F * 3);
+                    SynetEltwiseLayerForward<type, align>(src0, src1, dst, j + F * 0);
+                    SynetEltwiseLayerForward<type, align>(src0, src1, dst, j + F * 1);
+                    SynetEltwiseLayerForward<type, align>(src0, src1, dst, j + F * 2);
+                    SynetEltwiseLayerForward<type, align>(src0, src1, dst, j + F * 3);
                 }
                 for (; j < partial; j += F)
-                    SynetEltwiseLayerForwardProduct<align>(src0, src1, dst, j);
+                    SynetEltwiseLayerForward<type, align>(src0, src1, dst, j);
             }
             for (; j < size; ++j)
-                dst[j] = src0[j] * src1[j];
+                dst[j] = Base::SynetEltwiseLayerForward<type>(src0[j], src1[j]);
             for (size_t i = 2; i < count; ++i)
             {
                 const float * srci = src[i];
@@ -103,16 +121,16 @@ namespace Simd
                 {
                     for (; j < aligned; j += QF)
                     {
-                        SynetEltwiseLayerForwardProduct<align>(dst, srci, dst, j + F * 0);
-                        SynetEltwiseLayerForwardProduct<align>(dst, srci, dst, j + F * 1);
-                        SynetEltwiseLayerForwardProduct<align>(dst, srci, dst, j + F * 2);
-                        SynetEltwiseLayerForwardProduct<align>(dst, srci, dst, j + F * 3);
+                        SynetEltwiseLayerForward<type, align>(dst, srci, dst, j + F * 0);
+                        SynetEltwiseLayerForward<type, align>(dst, srci, dst, j + F * 1);
+                        SynetEltwiseLayerForward<type, align>(dst, srci, dst, j + F * 2);
+                        SynetEltwiseLayerForward<type, align>(dst, srci, dst, j + F * 3);
                     }
                     for (; j < partial; j += F)
-                        SynetEltwiseLayerForwardProduct<align>(dst, srci, dst, j);
+                        SynetEltwiseLayerForward<type, align>(dst, srci, dst, j);
                 }
                 for (; j < size; ++j)
-                    dst[j] *= srci[j];
+                    dst[j] = Base::SynetEltwiseLayerForward<type>(dst[j], srci[j]);
             }
         }
 
@@ -171,65 +189,21 @@ namespace Simd
             }
         }
 
-        template <bool align> void SynetEltwiseLayerForwardMax(const float * src0, const float * src1, float * dst, size_t offset)
-        {
-            Store<align>(dst + offset, _mm256_max_ps(Load<align>(src0 + offset), Load<align>(src1 + offset)));
-        }
-
-        template <bool align> void SynetEltwiseLayerForwardMax(float const * const * src, size_t count, size_t size, float * dst)
-        {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            const float * src0 = src[0];
-            const float * src1 = src[1];
-            size_t j = 0;
-            if (partial)
-            {
-                for (; j < aligned; j += QF)
-                {
-                    SynetEltwiseLayerForwardMax<align>(src0, src1, dst, j + F * 0);
-                    SynetEltwiseLayerForwardMax<align>(src0, src1, dst, j + F * 1);
-                    SynetEltwiseLayerForwardMax<align>(src0, src1, dst, j + F * 2);
-                    SynetEltwiseLayerForwardMax<align>(src0, src1, dst, j + F * 3);
-                }
-                for (; j < partial; j += F)
-                    SynetEltwiseLayerForwardMax<align>(src0, src1, dst, j);
-            }
-            for (; j < size; ++j)
-                dst[j] = Simd::Max(src0[j], src1[j]);
-            for (size_t i = 2; i < count; ++i)
-            {
-                const float * srci = src[i];
-                size_t j = 0;
-                if (partial)
-                {
-                    for (; j < aligned; j += QF)
-                    {
-                        SynetEltwiseLayerForwardMax<align>(dst, srci, dst, j + F * 0);
-                        SynetEltwiseLayerForwardMax<align>(dst, srci, dst, j + F * 1);
-                        SynetEltwiseLayerForwardMax<align>(dst, srci, dst, j + F * 2);
-                        SynetEltwiseLayerForwardMax<align>(dst, srci, dst, j + F * 3);
-                    }
-                    for (; j < partial; j += F)
-                        SynetEltwiseLayerForwardMax<align>(dst, srci, dst, j);
-                }
-                for (; j < size; ++j)
-                    dst[j] = Simd::Max(dst[j], srci[j]);
-            }
-        }
-
         template <bool align> void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
         {
             switch (type)
             {
             case SimdSynetEltwiseOperationProduct:
-                SynetEltwiseLayerForwardProduct<align>(src, count, size, dst);
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct, align>(src, count, size, dst);
                 break;
             case SimdSynetEltwiseOperationSum:
                 SynetEltwiseLayerForwardSum<align>(src, weight, count, size, dst);
                 break;
             case SimdSynetEltwiseOperationMax:
-                SynetEltwiseLayerForwardMax<align>(src, count, size, dst);
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationMax, align>(src, count, size, dst);
+                break;
+            case SimdSynetEltwiseOperationMin:
+                SynetEltwiseLayerForward<SimdSynetEltwiseOperationMin, align>(src, count, size, dst);
                 break;
             default:
                 assert(0);

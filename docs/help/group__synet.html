@@ -56,7 +56,9 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7">SimdSynetEltwiseOperationSum</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05">SimdSynetEltwiseOperationMax</a>
+&#160;&#160;<a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05">SimdSynetEltwiseOperationMax</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27">SimdSynetEltwiseOperationMin</a>
 <br />
  }</td></tr>
 <tr class="separator:ga89b4d9922d69654a2a675ccba0a9452d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -97,6 +99,8 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da738726c372bc02f4decefc769cbe44c7"></a>SimdSynetEltwiseOperationSum&#160;</td><td class="fielddoc"><p>Weighted sum. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05"></a>SimdSynetEltwiseOperationMax&#160;</td><td class="fielddoc"><p>Maximum. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27"></a>SimdSynetEltwiseOperationMin&#160;</td><td class="fielddoc"><p>Minimum. </p>
 </td></tr>
 </table>
 
@@ -224,6 +228,11 @@ for(i = 0; i &lt; count; ++i)
 for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
         dst[j] = max(dst[j], src[i][j]);
+</pre><p>Algorithm's details for <a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27">SimdSynetEltwiseOperationMin</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
+    dst[j] = FLT_MAX;
+for(i = 0; i &lt; count; ++i)
+    for(j = 0; j &lt; size; ++j)
+        dst[j] = min(dst[j], src[i][j]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

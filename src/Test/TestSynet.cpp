@@ -111,11 +111,13 @@ namespace Test
         switch (type)
         {
         case SimdSynetEltwiseOperationProduct:
-            return "[P]";
+            return "[Pro]";
         case SimdSynetEltwiseOperationSum:
-            return "[S]";
+            return "[Sum]";
         case SimdSynetEltwiseOperationMax:
-            return "[M]";
+            return "[Max]";
+        case SimdSynetEltwiseOperationMin:
+            return "[Min]";
         }
         assert(0);
         return "[U]";
@@ -173,7 +175,7 @@ namespace Test
     {
         bool result = true;
 
-        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMax; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
+        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMin; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
         {
             for (size_t count = 2; count <= 3; ++count)
             {
@@ -481,7 +483,7 @@ namespace Test
     {
         bool result = true; 
 
-        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMax; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
+        for (SimdSynetEltwiseOperationType type = SimdSynetEltwiseOperationProduct; type <= SimdSynetEltwiseOperationMin; type = (SimdSynetEltwiseOperationType)((size_t)type + 1))
             for (size_t count = 2; count <= 2; ++count)
                 result = result && SynetEltwiseLayerForwardDataTest(create, DH*DW, count, type, FuncELF(FUNC_ELF(SimdSynetEltwiseLayerForward), type, count));
        

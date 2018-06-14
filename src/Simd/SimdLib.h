@@ -5058,6 +5058,7 @@ extern "C"
         SimdSynetEltwiseOperationProduct, /*!< Product. */
         SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
         SimdSynetEltwiseOperationMax, /*!< Maximum. */
+        SimdSynetEltwiseOperationMin, /*!< Minimum. */
     } SimdSynetEltwiseOperationType;
 
     /*! @ingroup synet
@@ -5091,6 +5092,15 @@ extern "C"
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
                 dst[j] = max(dst[j], src[i][j]);
+        \endverbatim
+
+        Algorithm's details for ::SimdSynetEltwiseOperationMin:
+        \verbatim
+        for(j = 0; j < size; ++j)
+            dst[j] = FLT_MAX;
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                dst[j] = min(dst[j], src[i][j]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
