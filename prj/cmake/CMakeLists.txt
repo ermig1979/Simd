@@ -36,9 +36,7 @@ message("Version: ${CMAKE_CXX_COMPILER_VERSION}")
 include_directories(${TRUNK_DIR}/src)
 
 if((CHECK_VERSION STREQUAL "") OR (NOT (CHECK_VERSION STREQUAL "0")))
-    add_custom_command(OUTPUT ${TRUNK_DIR}/src/Simd/SimdVersion.h
-        COMMAND bash ${TRUNK_DIR}/prj/sh/GetVersion.sh
-        WORKING_DIRECTORY ${TRUNK_DIR}/prj/sh)
+    execute_process(COMMAND bash ${TRUNK_DIR}/prj/sh/GetVersion.sh)
 else()
     message("Skip version checking.")
 endif()
