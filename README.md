@@ -50,6 +50,12 @@ To do this you must change appropriate property (Configuration Type) of **Simd**
 
 `simd/src/Simd/SimdConfig.h`
 
+Also in order to build the library you can use CMake and MinGW:
+
+    cd .\prj\cmake
+    cmake . -DTOOLCHAIN="your_toolchain\bin\g++" -DTARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC" -G "MinGW Makefiles"
+    mingw32-make
+
 The library building for Android
 ================================
 

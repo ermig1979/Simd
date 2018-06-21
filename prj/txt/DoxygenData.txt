@@ -42,6 +42,13 @@
     You also may build it as a static library. 
     To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also define macro `SIMD_STATIC` in file:
     \n`simd/src/Simd/SimdConfig.h.`
+	
+	Also in order to build the library you can use CMake and MinGW:
+	\code
+    cd .\prj\cmake
+    cmake . -DTOOLCHAIN="your_toolchain\bin\g++" -DTARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC" -G "MinGW Makefiles"
+    mingw32-make
+    \endcode	
 
     \section s3 The library building for Android
 

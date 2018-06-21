@@ -1,6 +1,6 @@
 echo "Try to estimate SVN revision:"
 
-TRUNK_DIR="../.."
+TRUNK_DIR=$1
 USER_VERSION_TXT="$TRUNK_DIR/prj/txt/UserVersion.txt"
 FULL_VERSION_TXT="$TRUNK_DIR/prj/txt/FullVersion.txt"
 SIMD_VERSION_H="$TRUNK_DIR/src/Simd/SimdVersion.h"

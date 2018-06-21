@@ -3,12 +3,12 @@
 echo Try to estimate SVN revision:
 
 set SUBWCREV_EXE=SubWCRev.exe
-set TRUNK_DIR=..\..
-set USER_VERSION_TXT=%TRUNK_DIR%\prj\txt\UserVersion.txt
-set FULL_VERSION_TXT=%TRUNK_DIR%\prj\txt\FullVersion.txt
-set SIMD_VERSION_H_TXT=%TRUNK_DIR%\prj\txt\SimdVersion.h.txt
-set SIMD_VERSION_H=%TRUNK_DIR%\src\Simd\SimdVersion.h
-set FIND_AND_REPLACE_CMD=%TRUNK_DIR%\prj\cmd\FindAndReplace.cmd
+set TRUNK_DIR=%1
+set USER_VERSION_TXT="%TRUNK_DIR%\prj\txt\UserVersion.txt"
+set FULL_VERSION_TXT="%TRUNK_DIR%\prj\txt\FullVersion.txt"
+set SIMD_VERSION_H_TXT="%TRUNK_DIR%\prj\txt\SimdVersion.h.txt"
+set SIMD_VERSION_H="%TRUNK_DIR%\src\Simd\SimdVersion.h"
+set FIND_AND_REPLACE_CMD="%TRUNK_DIR%\prj\cmd\FindAndReplace.cmd"
 
 for %%X in (%SUBWCREV_EXE%) do (set SUBWCREV_EXE_FOUND=%%~$PATH:X)
 if not defined SUBWCREV_EXE_FOUND (

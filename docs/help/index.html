@@ -73,7 +73,7 @@ The library building for Windows</h1>
 <code>simd/prj/vs2015/.</code> <br />
  By default the library is built as a DLL (Dynamic Linked Library). You also may build it as a static library. To do this you must change appropriate property (Configuration Type) of <b>Simd</b> project and also define macro <code>SIMD_STATIC</code> in file: <br />
 <code>simd/src/Simd/SimdConfig.h.</code></p>
-<h1><a class="anchor" id="s3"></a>
+<p>Also in order to build the library you can use CMake and MinGW: </p><div class="fragment"><div class="line">cd .\prj\cmake</div><div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;your_toolchain\bin\g++&quot;</span> -DTARGET=<span class="stringliteral">&quot;x86_64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -DLIBRARY=<span class="stringliteral">&quot;STATIC&quot;</span> -G <span class="stringliteral">&quot;MinGW Makefiles&quot;</span></div><div class="line">mingw32-make</div></div><!-- fragment --><h1><a class="anchor" id="s3"></a>
 The library building for Android</h1>
 <p>To build the library and test application for Android(x86, x64, ARM, ARM64) you need to use Microsoft Visual Studio 2017. The project files are in the directory: <code>simd/prj/vs2017a/</code> By default the library is built as a SO (Dynamic Library).</p>
 <h1><a class="anchor" id="s4"></a>
