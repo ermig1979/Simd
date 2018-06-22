@@ -88,6 +88,11 @@ namespace Test
 
         result = result && BayerToBgrAutoTest(FUNC(Simd::Base::BayerToBgr), FUNC(SimdBayerToBgr));
 
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A + 2)
+            result = result && BayerToBgrAutoTest(FUNC(Simd::Ssse3::BayerToBgr), FUNC(SimdBayerToBgr));
+#endif
+
         return result;
     }
 
