@@ -678,6 +678,11 @@ namespace Simd
             return _mm256_sub_epi8(_mm256_max_epu8(a, b), _mm256_min_epu8(a, b));
         }
 
+        SIMD_INLINE __m256i AbsDifferenceI16(__m256i a, __m256i b)
+        {
+            return _mm256_sub_epi16(_mm256_max_epi16(a, b), _mm256_min_epi16(a, b));
+        }
+
         SIMD_INLINE __m256i MulU8(__m256i a, __m256i b)
         {
             __m256i lo = _mm256_mullo_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO));
@@ -717,6 +722,18 @@ namespace Simd
         template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
         {
             return _mm256_unpackhi_epi8(a, b);
+        }
+
+        template <int index> __m256i U8To16(__m256i a);
+
+        template <> SIMD_INLINE __m256i U8To16<0>(__m256i a)
+        {
+            return _mm256_and_si256(a, K16_00FF);
+        }
+
+        template <> SIMD_INLINE __m256i U8To16<1>(__m256i a)
+        {
+            return _mm256_and_si256(_mm256_srli_si256(a, 1), K16_00FF);
         }
 
         template<int part> SIMD_INLINE __m256i SubUnpackedU8(__m256i a, __m256i b)
@@ -759,6 +776,16 @@ namespace Simd
         template <int index> SIMD_INLINE __m256 Broadcast(__m256 a)
         {
             return _mm256_castsi256_ps(_mm256_shuffle_epi32(_mm256_castps_si256(a), index * 0x55));
+        }
+
+        SIMD_INLINE __m256i Average16(const __m256i & a, const __m256i & b, const __m256i & c, const __m256i & d)
+        {
+            return _mm256_srli_epi16(_mm256_add_epi16(_mm256_add_epi16(_mm256_add_epi16(a, b), _mm256_add_epi16(c, d)), K16_0002), 2);
+        }
+
+        SIMD_INLINE __m256i Merge16(const __m256i & even, __m256i odd)
+        {
+            return _mm256_or_si256(_mm256_slli_si256(odd, 1), even);
         }
     }
 #endif// SIMD_AVX2_ENABLE

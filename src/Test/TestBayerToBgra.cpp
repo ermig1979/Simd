@@ -92,6 +92,11 @@ namespace Test
             result = result && BayerToBgraAutoTest(FUNC(Simd::Sse2::BayerToBgra), FUNC(SimdBayerToBgra));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A + 2)
+            result = result && BayerToBgraAutoTest(FUNC(Simd::Avx2::BayerToBgra), FUNC(SimdBayerToBgra));
+#endif 
+
         return result;
     }
 
