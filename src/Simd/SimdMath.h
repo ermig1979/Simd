@@ -395,6 +395,11 @@ namespace Simd
             return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
         }
 
+        SIMD_INLINE __m128i AbsDifferenceI16(__m128i a, __m128i b)
+        {
+            return _mm_sub_epi16(_mm_max_epi16(a, b), _mm_min_epi16(a, b));
+        }
+
         SIMD_INLINE __m128i MulU8(__m128i a, __m128i b)
         {
             __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO));
@@ -439,6 +444,18 @@ namespace Simd
             return _mm_unpackhi_epi8(a, b);
         }
 
+        template <int index> __m128i U8To16(__m128i a);
+
+        template <> SIMD_INLINE __m128i U8To16<0>(__m128i a)
+        {
+            return _mm_and_si128(a, K16_00FF);
+        }
+
+        template <> SIMD_INLINE __m128i U8To16<1>(__m128i a)
+        {
+            return _mm_and_si128(_mm_srli_si128(a, 1), K16_00FF);
+        }
+
         template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
 
         template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
@@ -481,6 +498,16 @@ namespace Simd
         template<int imm> SIMD_INLINE __m128 Shuffle32f(__m128 a)
         {
             return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), imm));
+        }
+
+        SIMD_INLINE __m128i Average16(const __m128i & a, const __m128i & b, const __m128i & c, const __m128i & d)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(a, b), _mm_add_epi16(c, d)), K16_0002), 2);
+        }
+
+        SIMD_INLINE __m128i Merge16(const __m128i & even, __m128i odd)
+        {
+            return _mm_or_si128(_mm_slli_si128(odd, 1), even);
         }
     }
 #endif// SIMD_SSE2_ENABLE

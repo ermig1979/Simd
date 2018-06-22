@@ -76,7 +76,6 @@ namespace Test
         {
             result = result && BayerToBgraAutoTest(W, H, format, f1, f2);
             result = result && BayerToBgraAutoTest(W + E, H - E, format, f1, f2);
-            result = result && BayerToBgraAutoTest(W - E, H + E, format, f1, f2);
         }
 
         return result;
@@ -87,6 +86,11 @@ namespace Test
         bool result = true;
 
         result = result && BayerToBgraAutoTest(FUNC(Simd::Base::BayerToBgra), FUNC(SimdBayerToBgra));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A + 2)
+            result = result && BayerToBgraAutoTest(FUNC(Simd::Sse2::BayerToBgra), FUNC(SimdBayerToBgra));
+#endif 
 
         return result;
     }
