@@ -705,6 +705,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride)
 {
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A + 2)
+        Avx2::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::A + 2)
         Ssse3::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);

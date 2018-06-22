@@ -28,20 +28,20 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
     {
-        template <bool align> SIMD_INLINE void SaveBgr(const __m128i src[3], uint8_t * dst)
+        template <bool align> SIMD_INLINE void SaveBgr(const __m256i src[3], uint8_t * dst)
         {
-            Store<align>((__m128i*)dst + 0, InterleaveBgr<0>(src[0], src[1], src[2]));
-            Store<align>((__m128i*)dst + 1, InterleaveBgr<1>(src[0], src[1], src[2]));
-            Store<align>((__m128i*)dst + 2, InterleaveBgr<2>(src[0], src[1], src[2]));
+            Store<align>((__m256i*)dst + 0, InterleaveBgr<0>(src[0], src[1], src[2]));
+            Store<align>((__m256i*)dst + 1, InterleaveBgr<1>(src[0], src[1], src[2]));
+            Store<align>((__m256i*)dst + 2, InterleaveBgr<2>(src[0], src[1], src[2]));
         }
 
-        template <bool align, SimdPixelFormatType bayerFormat> void BayerToBgr(const __m128i src[12], uint8_t * bgr, size_t stride)
+        template <bool align, SimdPixelFormatType bayerFormat> void BayerToBgr(const __m256i src[12], uint8_t * bgr, size_t stride)
         {
-            __m128i _bgr[6];
-            Sse2::BayerToBgr<bayerFormat>(src, _bgr);
+            __m256i _bgr[6];
+            BayerToBgr<bayerFormat>(src, _bgr);
             SaveBgr<align>(_bgr + 0, bgr);
             SaveBgr<align>(_bgr + 3, bgr + stride);
         }
@@ -49,7 +49,7 @@ namespace Simd
         template <bool align, SimdPixelFormatType bayerFormat> void BayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, uint8_t * bgr, size_t bgrStride)
         {
             const uint8_t * src[3];
-            __m128i _src[12];
+            __m256i _src[12];
             size_t body = AlignHi(width - 2, A) - A;
             for (size_t row = 0; row < height; row += 2)
             {
@@ -103,5 +103,5 @@ namespace Simd
                 BayerToBgr<false>(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif// SIMD_AVX2_ENABLE
 }
