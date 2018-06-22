@@ -1006,6 +1006,18 @@ namespace Simd
             return _mm512_unpackhi_epi8(a, b);
         }
 
+        template <int index> __m512i U8To16(__m512i a);
+
+        template <> SIMD_INLINE __m512i U8To16<0>(__m512i a)
+        {
+            return _mm512_and_si512(a, K16_00FF);
+        }
+
+        template <> SIMD_INLINE __m512i U8To16<1>(__m512i a)
+        {
+            return _mm512_shuffle_epi8(a, K8_SUFFLE_BGRA_TO_G0A0);
+        }
+
         template <int part> SIMD_INLINE __m512i UnpackU16(__m512i a, __m512i b = K_ZERO);
 
         template <> SIMD_INLINE __m512i UnpackU16<0>(__m512i a, __m512i b)
@@ -1026,6 +1038,11 @@ namespace Simd
         SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
         {
             return _mm512_sub_epi8(_mm512_max_epu8(a, b), _mm512_min_epu8(a, b));
+        }
+
+        SIMD_INLINE __m512i AbsDifferenceI16(__m512i a, __m512i b)
+        {
+            return _mm512_sub_epi16(_mm512_max_epi16(a, b), _mm512_min_epi16(a, b));
         }
 
         SIMD_INLINE __m512i Saturate16iTo8u(__m512i value)
@@ -1104,6 +1121,20 @@ namespace Simd
             return _mm512_castsi512_ps(_mm512_permutex_epi64(_mm512_castps_si512(a), imm));
         }
 
+        SIMD_INLINE __m512i Average16(const __m512i & a, const __m512i & b)
+        {
+            return _mm512_avg_epu16(a, b);
+        }
+
+        SIMD_INLINE __m512i Average16(const __m512i & a, const __m512i & b, const __m512i & c, const __m512i & d)
+        {
+            return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(_mm512_add_epi16(a, b), _mm512_add_epi16(c, d)), K16_0002), 2);
+        }
+
+        SIMD_INLINE __m512i Merge16(const __m512i & even, __m512i odd)
+        {
+            return _mm512_or_si512(_mm512_slli_epi16(odd, 8), even);
+        }
     }
 #endif //SIMD_AVX512BW_ENABLE
 

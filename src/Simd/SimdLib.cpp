@@ -705,6 +705,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A + 2)
+        Avx512bw::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A + 2)
         Avx2::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
@@ -720,6 +725,11 @@ SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height,
 
 SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A + 2)
+        Avx512bw::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A + 2)
         Avx2::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);

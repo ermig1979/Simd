@@ -349,5 +349,118 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        SIMD_INLINE void LoadBayerNose(const uint8_t * src, __m512i dst[3])
+        {
+            dst[2] = _mm512_loadu_si512((__m512i*)(src + 1));
+            __mmask64 m = __mmask64(-1) << 1;
+            __m512i src0 = Load<false, true>(src - 1, m);
+            __m128i so = _mm512_extracti32x4_epi32(src0, 0);
+            __m128i ss = _mm_srli_si128(so, 2);
+            dst[0] = _mm512_mask_blend_epi8(m, _mm512_inserti32x4(src0, ss, 0), src0);
+        }
+
+        SIMD_INLINE void LoadBayerTail(const uint8_t * src, __m512i dst[3])
+        {
+            dst[0] = _mm512_loadu_si512((__m512i*)(src - 1));
+            __mmask64 m = __mmask64(-1) >> 1;
+            __m512i src2 = Load<false, true>(src + 1, m);
+            __m128i so = _mm512_extracti32x4_epi32(src2, 3);
+            __m128i ss = _mm_slli_si128(so, 2);
+            dst[2] = _mm512_mask_blend_epi8(m, _mm512_inserti32x4(src2, ss, 3), src2);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        {
+            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            LoadBayerNose(src[0] + offset + stride, dst + 0);
+            LoadNose3<align, 2>(src[1] + offset, dst + 3);
+            LoadNose3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadBayerNose(src[2] + offset, dst + 9);
+            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        {
+            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            LoadBodyDx(src[0] + offset + stride, dst + 0);
+            LoadBody3<align, 2>(src[1] + offset, dst + 3);
+            LoadBody3<align, 2>(src[1] + offset + stride, dst + 6);
+            LoadBodyDx(src[2] + offset, dst + 9);
+            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, __m512i dst[12])
+        {
+            dst[1] = Load<align>((__m512i*)(src[0] + offset));
+            LoadBayerTail(src[0] + offset + stride, dst + 0);
+            LoadTail3<align, 2>(src[1] + offset, dst + 3);
+            LoadTail3<align, 2>(src[1] + offset + stride, dst + 6);
+
+            LoadBayerTail(src[2] + offset, dst + 9);
+            dst[10] = Load<align>((__m512i*)(src[2] + offset + stride));
+        }
+
+        template<int index, int part> SIMD_INLINE __m512i Get(const __m512i src[12])
+        {
+            return U8To16<part>(src[index]);
+        }
+
+        SIMD_INLINE __m512i BayerToGreen(const __m512i & greenLeft, const __m512i & greenTop, const __m512i & greenRight, const __m512i & greenBottom,
+            const __m512i & blueOrRedLeft, const __m512i & blueOrRedTop, const __m512i & blueOrRedRight, const __m512i & blueOrRedBottom)
+        {
+            __m512i verticalAbsDifference = AbsDifferenceI16(blueOrRedTop, blueOrRedBottom);
+            __m512i horizontalAbsDifference = AbsDifferenceI16(blueOrRedLeft, blueOrRedRight);
+            __m512i green = Average16(greenLeft, greenTop, greenRight, greenBottom);
+            green = _mm512_mask_blend_epi8(_mm512_cmpgt_epu8_mask(horizontalAbsDifference, verticalAbsDifference), green, Average16(greenTop, greenBottom));
+            return _mm512_mask_blend_epi8(_mm512_cmpgt_epu8_mask(verticalAbsDifference, horizontalAbsDifference), green, Average16(greenRight, greenLeft));
+        }
+
+        template <SimdPixelFormatType bayerFormat> void BayerToBgr(const __m512i s[12], __m512i d[6]);
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerGrbg>(const __m512i s[12], __m512i d[6])
+        {
+            d[0] = Merge16(Average16(Get<0, 1>(s), Get<7, 0>(s)), Average16(Get<0, 1>(s), Get<2, 1>(s), Get<7, 0>(s), Get<8, 0>(s)));
+            d[1] = Merge16(Get<4, 0>(s), BayerToGreen(Get<4, 0>(s), Get<2, 0>(s), Get<5, 0>(s), Get<7, 1>(s), Get<3, 1>(s), Get<1, 1>(s), Get<5, 1>(s), Get<11, 0>(s)));
+            d[2] = Merge16(Average16(Get<3, 1>(s), Get<4, 1>(s)), Get<4, 1>(s));
+            d[3] = Merge16(Get<7, 0>(s), Average16(Get<7, 0>(s), Get<8, 0>(s)));
+            d[4] = Merge16(BayerToGreen(Get<6, 1>(s), Get<4, 0>(s), Get<7, 1>(s), Get<9, 1>(s), Get<6, 0>(s), Get<0, 1>(s), Get<8, 0>(s), Get<10, 0>(s)), Get<7, 1>(s));
+            d[5] = Merge16(Average16(Get<3, 1>(s), Get<4, 1>(s), Get<9, 0>(s), Get<11, 0>(s)), Average16(Get<4, 1>(s), Get<11, 0>(s)));
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerGbrg>(const __m512i s[12], __m512i d[6])
+        {
+            d[0] = Merge16(Average16(Get<3, 1>(s), Get<4, 1>(s)), Get<4, 1>(s));
+            d[1] = Merge16(Get<4, 0>(s), BayerToGreen(Get<4, 0>(s), Get<2, 0>(s), Get<5, 0>(s), Get<7, 1>(s), Get<3, 1>(s), Get<1, 1>(s), Get<5, 1>(s), Get<11, 0>(s)));
+            d[2] = Merge16(Average16(Get<0, 1>(s), Get<7, 0>(s)), Average16(Get<0, 1>(s), Get<2, 1>(s), Get<7, 0>(s), Get<8, 0>(s)));
+            d[3] = Merge16(Average16(Get<3, 1>(s), Get<4, 1>(s), Get<9, 0>(s), Get<11, 0>(s)), Average16(Get<4, 1>(s), Get<11, 0>(s)));
+            d[4] = Merge16(BayerToGreen(Get<6, 1>(s), Get<4, 0>(s), Get<7, 1>(s), Get<9, 1>(s), Get<6, 0>(s), Get<0, 1>(s), Get<8, 0>(s), Get<10, 0>(s)), Get<7, 1>(s));
+            d[5] = Merge16(Get<7, 0>(s), Average16(Get<7, 0>(s), Get<8, 0>(s)));
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerRggb>(const __m512i s[12], __m512i d[6])
+        {
+            d[0] = Merge16(Average16(Get<0, 0>(s), Get<2, 0>(s), Get<6, 1>(s), Get<7, 1>(s)), Average16(Get<2, 0>(s), Get<7, 1>(s)));
+            d[1] = Merge16(BayerToGreen(Get<3, 1>(s), Get<0, 1>(s), Get<4, 1>(s), Get<7, 0>(s), Get<3, 0>(s), Get<1, 0>(s), Get<5, 0>(s), Get<9, 1>(s)), Get<4, 1>(s));
+            d[2] = Merge16(Get<4, 0>(s), Average16(Get<4, 0>(s), Get<5, 0>(s)));
+            d[3] = Merge16(Average16(Get<6, 1>(s), Get<7, 1>(s)), Get<7, 1>(s));
+            d[4] = Merge16(Get<7, 0>(s), BayerToGreen(Get<7, 0>(s), Get<4, 1>(s), Get<8, 0>(s), Get<11, 0>(s), Get<6, 1>(s), Get<2, 0>(s), Get<8, 1>(s), Get<10, 1>(s)));
+            d[5] = Merge16(Average16(Get<4, 0>(s), Get<9, 1>(s)), Average16(Get<4, 0>(s), Get<5, 0>(s), Get<9, 1>(s), Get<11, 1>(s)));
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerBggr>(const __m512i s[12], __m512i d[6])
+        {
+            d[0] = Merge16(Get<4, 0>(s), Average16(Get<4, 0>(s), Get<5, 0>(s)));
+            d[1] = Merge16(BayerToGreen(Get<3, 1>(s), Get<0, 1>(s), Get<4, 1>(s), Get<7, 0>(s), Get<3, 0>(s), Get<1, 0>(s), Get<5, 0>(s), Get<9, 1>(s)), Get<4, 1>(s));
+            d[2] = Merge16(Average16(Get<0, 0>(s), Get<2, 0>(s), Get<6, 1>(s), Get<7, 1>(s)), Average16(Get<2, 0>(s), Get<7, 1>(s)));
+            d[3] = Merge16(Average16(Get<4, 0>(s), Get<9, 1>(s)), Average16(Get<4, 0>(s), Get<5, 0>(s), Get<9, 1>(s), Get<11, 1>(s)));
+            d[4] = Merge16(Get<7, 0>(s), BayerToGreen(Get<7, 0>(s), Get<4, 1>(s), Get<8, 0>(s), Get<11, 0>(s), Get<6, 1>(s), Get<2, 0>(s), Get<8, 1>(s), Get<10, 1>(s)));
+            d[5] = Merge16(Average16(Get<6, 1>(s), Get<7, 1>(s)), Get<7, 1>(s));
+        }
+    }
+#endif//SIMD_AVX512BW_ENABLE
 }
 #endif//__SimdBayer_h__
