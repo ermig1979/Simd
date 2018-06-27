@@ -783,8 +783,18 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Creates reference to itself.</p>
-<dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
+<p>Creates reference to itself. It may be useful if we need to create reference to the temporary object: </p><pre class="fragment">#include "Simd/SimdLib.hpp"
+
+int main()
+{
+    typedef Simd::View&lt;Simd::Allocator&gt; View;
+    View a(100, 100, View::Gray8);
+    View b(100, 100, View::Gray8);
+    // Copying of a central part of a to the center of b:
+    Simd::Copy(a.Region(20, 20, 80, 80), b.Region(20, 20, 80, 80).Ref());
+    return 0;
+}
+</pre><dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
 
 </div>
 </div>

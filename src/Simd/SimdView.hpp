@@ -255,7 +255,21 @@ namespace Simd
 #endif
 
         /*!
-            Creates reference to itself.
+            Creates reference to itself. 
+            It may be useful if we need to create reference to the temporary object:
+            \verbatim
+            #include "Simd/SimdLib.hpp"
+
+            int main()
+            {
+                typedef Simd::View<Simd::Allocator> View;
+                View a(100, 100, View::Gray8);
+                View b(100, 100, View::Gray8);
+                // Copying of a central part of a to the center of b:
+                Simd::Copy(a.Region(20, 20, 80, 80), b.Region(20, 20, 80, 80).Ref());
+                return 0;
+            }
+            \endverbatim
 
             \return a reference to itself.
         */
