@@ -1,12 +1,12 @@
 @echo off
 
-set RAR_EXE="C:\Program Files\WinRAR\WinRAR.exe"
-if not exist %RAR_EXE% (
-echo Execution file "%RAR_EXE%" is not exists!
+set ARCHIVER="C:\Program Files\7-Zip\7z.exe"
+if not exist %ARCHIVER% (
+echo Execution file "%ARCHIVER%" is not exists!
 exit 1
 )
 
-call .\GetVersion.cmd
+call .\GetVersion.cmd ..\..
 
 call .\GenerateHelp.cmd
 
@@ -52,7 +52,5 @@ erase %TMP_DIR%\prj\vs*\*.txt /q /s /f
 erase %TMP_DIR%\docs\*.tmp /q /s /f
 
 echo Create ZIP archive:
-%RAR_EXE% a -afzip -ep1 -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
-
-
+%ARCHIVER% a -tzip -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
 
