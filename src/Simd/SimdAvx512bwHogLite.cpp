@@ -541,7 +541,7 @@ namespace Simd
                                 for (; filterCol < alignedFilterStride; filterCol += DF)
                                     ProductSum4x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
                                 for (; filterCol < filterStride; filterCol += HF)
-                                    ProductSum1x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                    ProductSum1x4x8<false>(pSrc + filterCol, pFilter + filterCol, sums);
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
