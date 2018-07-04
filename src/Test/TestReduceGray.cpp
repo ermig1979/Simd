@@ -102,11 +102,7 @@ namespace Test
     {
         bool result = true;
 
-#ifdef _DEBUG
-        result = result && ReduceGrayAutoTest(W*2, H, f1, f2);
-#else
         result = result && ReduceGrayAutoTest(W, H, f1, f2);
-#endif
         result = result && ReduceGrayAutoTest(W + E, H - E, f1, f2);
 
         return result;
@@ -208,32 +204,32 @@ namespace Test
         result = result && ReduceGrayAutoTest(FUNC1(Simd::Base::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
+        if (Simd::Sse2::Enable && W > Simd::Sse2::A)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Sse2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
+        if (Simd::Ssse3::Enable && W > Simd::Ssse3::A)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Ssse3::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W > Simd::Avx2::DA)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx2::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Avx512bw::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif
 
 #ifdef SIMD_VMX_ENABLE
-        if (Simd::Vmx::Enable)
+        if (Simd::Vmx::Enable && W > Simd::Vmx::DA)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Vmx::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W > Simd::Neon::DA)
             result = result && ReduceGrayAutoTest(FUNC1(Simd::Neon::ReduceGray4x4), FUNC1(SimdReduceGray4x4));
 #endif 
 
