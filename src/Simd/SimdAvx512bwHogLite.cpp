@@ -907,7 +907,7 @@ namespace Simd
             if (align)
                 assert(Aligned(src) && Aligned(pca) && Aligned(dst));
 
-            SIMD_ALIGNED(32) float pca2[128];
+            SIMD_ALIGNED(64) float pca2[128];
             for (size_t i = 0; i < 8; ++i)
             {
                 for (size_t j = 0; j < 8; ++j)
@@ -918,7 +918,6 @@ namespace Simd
             __m512 _pca[8];
             for (size_t i = 0; i < 8; ++i)
                 _pca[i] = Avx512f::Load<true>(pca2 + i * F);
-
             for (size_t row = 0; row < height; ++row)
             {
                 const float * s = src;
