@@ -441,9 +441,9 @@ namespace Test
         return Compare(a, b, differenceMax, printError, errorCountMax, relative ? DifferenceRelative : DifferenceAbsolute, description);
     }
 
-    bool Compare(const float & a, const float & b, float differenceMax, bool printError, const String & description)
+    bool Compare(const float & a, const float & b, float differenceMax, bool printError, DifferenceType differenceType, const String & description)
     {
-        return Compare(&a, 0, &b, 0, 1, 1, differenceMax, printError, 0, DifferenceRelative, description);
+        return Compare(&a, 0, &b, 0, 1, 1, differenceMax, printError, 0, differenceType, description);
     }
 
     String ColorDescription(View::Format format)

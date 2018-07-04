@@ -172,7 +172,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(a, b, &s2));
 
-        result = Compare(s1, s2, eps, true);
+        result = Compare(s1, s2, eps, true, DifferenceBoth);
 
         return result;
     }

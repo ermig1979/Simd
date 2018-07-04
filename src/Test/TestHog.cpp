@@ -148,8 +148,8 @@ namespace Test
     {
         bool result = true;
 
-        width = Simd::AlignHi(std::max(16, width), 8);
-        height = Simd::AlignHi(std::max(16, height), 8);
+        width = (int)Simd::AlignHi(std::max(16, width), 8);
+        height = (int)Simd::AlignHi(std::max(16, height), 8);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 

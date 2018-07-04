@@ -88,8 +88,8 @@ namespace Test
     bool Compare(const View & a, const View & b, float differenceMax = EPS, bool printError = false,
         int errorCountMax = 0, bool relative = true, const String & description = "");
 
-    bool Compare(const float & a, const float & b, float differenceMax = EPS, bool printError = false,
-        const String & description = "");
+    bool Compare(const float & a, const float & b, float differenceMax = EPS, bool printError = false, 
+        DifferenceType differenceType = DifferenceRelative, const String & description = "");
 
     String ColorDescription(View::Format format);
 

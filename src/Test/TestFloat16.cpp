@@ -224,8 +224,8 @@ namespace Test
 
         check((float*)aOrigin.data, (float*)bOrigin.data, a.width, &s3);
 
-        result = Compare(s1, s2, eps, true, "s1 & s2");
-        result = Compare(s2, s3, eps*2, true, "s2 & s3");
+        result = Compare(s1, s2, eps, true, DifferenceRelative, "s1 & s2");
+        result = Compare(s2, s3, eps*2, true, DifferenceRelative, "s2 & s3");
 
         return result;
     }
