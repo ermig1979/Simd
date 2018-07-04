@@ -478,7 +478,7 @@ namespace Test
 
 #define FUNC_HLFS(function) FuncHLFS(function, #function)
 
-#define ARGS_HLFS(hs, vs, fs, add, f1, f2) hs, vs, fs, add, FuncHLFS(f1, hs, vs, fs, add), FuncHLFS(f2, hs, vs, fs, add)
+#define ARGS_HLFS(wm, hs, vs, fs, add, f1, f2) wm, hs, vs, fs, add, FuncHLFS(f1, hs, vs, fs, add), FuncHLFS(f2, hs, vs, fs, add)
 
     bool HogLiteFilterSeparableAutoTest(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize, size_t featureSize, int add, const FuncHLFS & f1, const FuncHLFS & f2)
     {
@@ -511,25 +511,27 @@ namespace Test
         return result;
     }
 
-    bool HogLiteFilterSeparableAutoTest(size_t hSize, size_t vSize, size_t featureSize, int add, const FuncHLFS & f1, const FuncHLFS & f2)
+    bool HogLiteFilterSeparableAutoTest(size_t wMin, size_t hSize, size_t vSize, size_t featureSize, int add, const FuncHLFS & f1, const FuncHLFS & f2)
     {
         bool result = true;
 
+        if (W / featureSize < hSize - 1 + wMin)
+            return result;
         result = result && HogLiteFilterSeparableAutoTest(W / featureSize, H, hSize, vSize, featureSize, add, f1, f2);
         result = result && HogLiteFilterSeparableAutoTest((W + O) / featureSize, H - O, hSize, vSize, featureSize, add, f1, f2);
 
         return result;
     }
 
-    bool HogLiteFilterSeparableAutoTest(const FuncHLFS & f1, const FuncHLFS & f2)
+    bool HogLiteFilterSeparableAutoTest(size_t wMin, const FuncHLFS & f1, const FuncHLFS & f2)
     {
         bool result = true;
 
-        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 16, 1, f1, f2));
-        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 16, 0, f1, f2));
-        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(8, 8, 8, 1, f1, f2));
-        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(6, 6, 16, 1, f1, f2));
-        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(6, 6, 8, 1, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(wMin, 8, 8, 16, 1, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(wMin, 8, 8, 16, 0, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(wMin, 8, 8, 8, 1, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(wMin, 6, 6, 16, 1, f1, f2));
+        result = result && HogLiteFilterSeparableAutoTest(ARGS_HLFS(wMin, 6, 6, 8, 1, f1, f2));
 
         return result;
     }
@@ -538,26 +540,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Base::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+        result = result && HogLiteFilterSeparableAutoTest(1, FUNC_HLFS(Simd::Base::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
-            result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Sse41::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+            result = result && HogLiteFilterSeparableAutoTest(Simd::Sse41::F, FUNC_HLFS(Simd::Sse41::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Avx::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+            result = result && HogLiteFilterSeparableAutoTest(Simd::Avx::F, FUNC_HLFS(Simd::Avx::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Avx2::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+            result = result && HogLiteFilterSeparableAutoTest(Simd::Avx::F, FUNC_HLFS(Simd::Avx2::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && HogLiteFilterSeparableAutoTest(FUNC_HLFS(Simd::Avx512bw::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+            result = result && HogLiteFilterSeparableAutoTest(1, FUNC_HLFS(Simd::Avx512bw::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
         return result;

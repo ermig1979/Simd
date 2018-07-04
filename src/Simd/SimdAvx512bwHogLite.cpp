@@ -965,7 +965,7 @@ namespace Simd
             void Init(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize)
             {
                 _dstWidth = srcWidth - hSize + 1;
-                _dstStride = AlignHi(_dstWidth, Avx::F);
+                _dstStride = AlignHi(_dstWidth, Avx512f::F);
                 _dstHeight = srcHeight - vSize + 1;
                 _buffer.Resize(_dstStride*srcHeight);
             }
@@ -1147,7 +1147,6 @@ namespace Simd
 
                 size_t alignedWidth = AlignLo(width, F);
                 __mmask16 tailMask = TailMask16(width - alignedWidth);
-
                 for (size_t row = 0; row < height; ++row)
                 {
                     size_t col = 0;
