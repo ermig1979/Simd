@@ -861,7 +861,7 @@ namespace Simd
             *(void**)&data = Allocator::Align(d, align);
             _owner = false;
         }
-        else
+        else if(height && stride)
         {
             *(void**)&data = Allocator::Allocate(height*stride, align);
             _owner = true;

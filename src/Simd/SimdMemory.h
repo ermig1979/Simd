@@ -28,6 +28,10 @@
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdMath.h"
 
+#if defined(__GNUC__) && defined(SIMD_ALLOCATE_ERROR_MESSAGE)
+#include <iostream>
+#endif
+
 namespace Simd
 {
     SIMD_INLINE size_t AlignHiAny(size_t size, size_t align)
@@ -81,6 +85,10 @@ namespace Simd
         size = AlignHi(size, align);
         void * ptr;
         int result = ::posix_memalign(&ptr, align, size);
+#ifdef SIMD_ALLOCATE_ERROR_MESSAGE
+        if (result != 0)
+            std::cout << "The function posix_memalign can't allocate " << size << " bytes with align " << align << " !" << std::endl << std::flush;
+#endif
 #ifdef SIMD_ALLOCATE_ASSERT
         assert(result == 0);
 #endif
