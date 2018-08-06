@@ -30,11 +30,6 @@ namespace Simd
     namespace Avx2
     {
 #ifdef SIMD_MADDUBS_ERROR
-        SIMD_INLINE __m256i Average16(const __m256i & s00, const __m256i & s01, const __m256i & s10, const __m256i & s11)
-        {
-            return _mm256_srli_epi16(_mm256_add_epi16(_mm256_add_epi16(_mm256_add_epi16(s00, s01), _mm256_add_epi16(s10, s11)), K16_0002), 2);
-        }
-
         SIMD_INLINE __m256i Average8(const __m256i & s00, const __m256i & s01, const __m256i & s10, const __m256i & s11)
         {
             __m256i lo = Average16(
