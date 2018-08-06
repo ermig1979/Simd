@@ -43,6 +43,7 @@ if((CHECK_VERSION STREQUAL "") OR (NOT (CHECK_VERSION STREQUAL "0")))
 	endif()
 else()
     message("Skip version checking.")
+	add_definitions(-DSIMD_VERSION="unknown")
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
