@@ -589,6 +589,11 @@ namespace Simd
         const size_t OA = 8 * A;
         const size_t HA = A / 2;
 
+        const size_t F = sizeof(v128_f32) / sizeof(float);
+        const size_t DF = 2 * F;
+        const size_t QF = 4 * F;
+        const size_t HF = F / 2;
+
         const v128_u8 K8_00 = SIMD_VEC_SET1_EPI8(0x00);
         const v128_u8 K8_01 = SIMD_VEC_SET1_EPI8(0x01);
         const v128_u8 K8_02 = SIMD_VEC_SET1_EPI8(0x02);
