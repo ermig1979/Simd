@@ -426,7 +426,7 @@ namespace Test
             for (int i = 1; i < argc; ++i)
             {
                 String arg = argv[i];
-                if (arg.substr(0, 2) == "-help" || arg.substr(0, 2) == "-?")
+                if (arg.substr(0, 5) == "-help" || arg.substr(0, 2) == "-?")
                 {
                     help = true;
                     break;
