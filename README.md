@@ -8,7 +8,7 @@ object detection (HAAR and LBP classifier cascades) and classification, neural n
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2 and AVX-512 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC, NEON for ARM.
+SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2 and AVX-512 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC (big-endian), NEON for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, 
@@ -74,15 +74,15 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers.
+The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) platforms with using of G++ or Clang compilers.
 With using of native compiler (g++) for current platform it is simple:
 
 	cd ./prj/cmake
 	cmake . -DTOOLCHAIN="" -DTARGET=""
 	make
 	
-To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation.
-There is an example of using for PowerPC (64 bit):
+To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use toolchain for cross compilation.
+There is an example of using for PowerPC (64 bit, big-endian):
 
 	cd ./prj/cmake
 	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
