@@ -155,7 +155,8 @@ namespace Simd
             Rect canvasRect, alphaRect;
             CreateAlpha(text, Rect(canvas.Size()), position, alpha, canvasRect, alphaRect);
 
-            Simd::AlphaFilling(canvas.Region(canvasRect).Ref(), color, alpha.Region(alphaRect));
+            if(alpha.Area())
+                Simd::AlphaFilling(canvas.Region(canvasRect).Ref(), color, alpha.Region(alphaRect));
 
             return true;
         }
