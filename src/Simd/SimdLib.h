@@ -4031,6 +4031,34 @@ extern "C"
 
     /*! @ingroup resizing
 
+        \fn void SimdReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+        \short Performs reducing and Gaussian blurring (in two time) a 8-bit channel color image with using window 2x2.
+
+        For input and output image must be performed: dstWidth = (srcWidth + 1)/2,  dstHeight = (srcHeight + 1)/2.
+
+        For all points:
+        \verbatim
+        dst[x, y, c] = (src[2*x, 2*y, c] + src[2*x, 2*y + 1, c] + src[2*x + 1, 2*y, c] + src[2*x + 1, 2*y + 1, c] + 2)/4;
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::Reduce2x2(const View<A> & src, View<A> & dst).
+
+        \param [in] src - a pointer to pixels data of the original input image.
+        \param [in] srcWidth - a width of the input image.
+        \param [in] srcHeight - a height of the input image.
+        \param [in] srcStride - a row size of the input image.
+        \param [out] dst - a pointer to pixels data of the reduced output image.
+        \param [in] dstWidth - a width of the output image.
+        \param [in] dstHeight - a height of the output image.
+        \param [in] dstStride - a row size of the output image.
+        \param [in] channelCount - a nmber of channels for input and output images.
+    */
+    SIMD_API void SimdReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+        uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+    /*! @ingroup resizing
+
         \fn void SimdReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
         \short Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2.

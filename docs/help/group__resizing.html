@@ -67,6 +67,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga0b1456f1c629752b6004ade49bbbf096"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga0b1456f1c629752b6004ade49bbbf096">SimdReduceColor2x2</a> (const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount)</td></tr>
+<tr class="memdesc:ga0b1456f1c629752b6004ade49bbbf096"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing and Gaussian blurring (in two time) a 8-bit channel color image with using window 2x2.  <a href="#ga0b1456f1c629752b6004ade49bbbf096">More...</a><br /></td></tr>
+<tr class="separator:ga0b1456f1c629752b6004ade49bbbf096"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga747122dabe4b67feb8f012aa0b4d8bd9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#ga747122dabe4b67feb8f012aa0b4d8bd9">SimdReduceGray2x2</a> (const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride, uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride)</td></tr>
 <tr class="memdesc:ga747122dabe4b67feb8f012aa0b4d8bd9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs reducing and Gaussian blurring (in two time) a 8-bit gray image with using window 2x2.  <a href="#ga747122dabe4b67feb8f012aa0b4d8bd9">More...</a><br /></td></tr>
 <tr class="separator:ga747122dabe4b67feb8f012aa0b4d8bd9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -170,6 +173,95 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga0b1456f1c629752b6004ade49bbbf096"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0b1456f1c629752b6004ade49bbbf096">&#9670;&nbsp;</a></span>SimdReduceColor2x2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdReduceColor2x2 </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channelCount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Performs reducing and Gaussian blurring (in two time) a 8-bit channel color image with using window 2x2. </p>
+<p>For input and output image must be performed: dstWidth = (srcWidth + 1)/2, dstHeight = (srcHeight + 1)/2.</p>
+<p>For all points: </p><pre class="fragment">dst[x, y, c] = (src[2*x, 2*y, c] + src[2*x, 2*y + 1, c] + src[2*x + 1, 2*y, c] + src[2*x + 1, 2*y + 1, c] + 2)/4;
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: Simd::Reduce2x2(const View&lt;A&gt; &amp; src, View&lt;A&gt; &amp; dst).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the reduced output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a nmber of channels for input and output images. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga747122dabe4b67feb8f012aa0b4d8bd9"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga747122dabe4b67feb8f012aa0b4d8bd9">&#9670;&nbsp;</a></span>SimdReduceGray2x2()</h2>
 

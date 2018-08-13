@@ -278,6 +278,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(OperationBinary16i);
     TEST_ADD_GROUP_AD0(VectorProduct);
 
+    TEST_ADD_GROUP_AD0(ReduceColor2x2);
     TEST_ADD_GROUP_AD0(ReduceGray2x2);
     TEST_ADD_GROUP_AD0(ReduceGray3x3);
     TEST_ADD_GROUP_AD0(ReduceGray4x4);
