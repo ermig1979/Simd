@@ -2583,6 +2583,24 @@ namespace Simd
 
     /*! @ingroup resizing
 
+        \fn void Reduce2x2(const View<A> & src, View<A> & dst)
+
+        \short Performs reducing of image (in 2 times).
+
+        For input and output image must be performed: dst.width = (src.width + 1)/2,  dst.height = (src.height + 1)/2.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a reduced output image.
+    */
+    template<template<class> class A> SIMD_INLINE void Reduce2x2(const View<A> & src, View<A> & dst)
+    {
+        assert(src.format == dst.format && Scale(src.Size()) == dst.Size() && src.ChannelSize() == 1);
+
+        SimdReduceColor2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride, src.ChannelCount());
+    }
+
+    /*! @ingroup resizing
+
         \fn void ResizeBilinear(const View<A>& src, View<A>& dst)
 
         \short Performs resizing of input image with using bilinear interpolation.
@@ -2640,6 +2658,48 @@ namespace Simd
                 for (size_t i = 0; i < level; ++i)
                     Simd::ReduceGray(pyramid.At(i), pyramid.At(i + 1), ::SimdReduce2x2);
                 Simd::Copy(pyramid[level], dst);
+            }
+            else
+                Simd::ResizeBilinear(src, dst);
+        }
+    }
+
+    /*! @ingroup resizing
+
+        \fn void ResizeArea(const View<A> & src, View<A> & dst)
+
+        \short Performs resizing of input image with using area interpolation.
+
+        All images must have the same format.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a resized output image.
+    */
+    template<template<class> class A> SIMD_INLINE void ResizeArea(const View<A> & src, View<A> & dst)
+    {
+        assert(src.format == dst.format);
+
+        if (EqualSize(src, dst))
+        {
+            Copy(src, dst);
+        }
+        else
+        {
+            size_t level = 0;
+            for (; (dst.width << (level + 1)) < (size_t)src.width; level++);
+            Point<ptrdiff_t> size = src.Size() << level;
+            if (level)
+            {
+                std::vector<View<A>> pyramid(level);
+                pyramid[0].Resize(size, src.format);
+                Simd::ResizeBilinear(src, pyramid[0]);
+                for (size_t i = 1; i < level; ++i)
+                {
+                    size = Simd::Scale(size);
+                    pyramid[i].Resize(size, src.format);
+                    Simd::Reduce2x2(pyramid.At(i - 1), pyramid.At(i));
+                }
+                Simd::Reduce2x2(pyramid.At(level - 1), dst);
             }
             else
                 Simd::ResizeBilinear(src, dst);
