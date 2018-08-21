@@ -195,7 +195,7 @@ namespace Simd
             for (size_t c = 0; c < 6; ++c)
                 tailMasks[c] = TailMask64(evenSize - alignedSize - A * c);
             for (size_t c = 0; c < 3; ++c)
-                tailMasks[6 + c] = TailMask64(evenSize - alignedSize - A * c);
+                tailMasks[6 + c] = TailMask64((evenSize - alignedSize)/2 - A * c);
             for (size_t srcRow = 0; srcRow < srcHeight; srcRow += 2)
             {
                 const uint8_t *src0 = src;
