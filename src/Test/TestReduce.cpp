@@ -115,6 +115,11 @@ namespace Test
             result = result && ReduceColorAutoTest(FUNC_RC(Simd::Avx2::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
 #endif
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && ReduceColorAutoTest(FUNC_RC(Simd::Avx512bw::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
+#endif
+
         return result;
     }
 
