@@ -172,4 +172,4 @@ Also you can use parameters:
 * `-oh=log.html` - a file name with test report (in HTML file format).	
 * `-s=sample.avi` a video source (See `Simd::Motion` test).
 * `-wt=1` a thread number used to parallelize algorithms.
-* `-fi=Abs` an exclude filter to exclude some tests.
+* `-fe=Abs` an exclude filter to exclude some tests.
