@@ -2415,7 +2415,9 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
 
 SIMD_API void SimdHogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride)
 {
+#if defined(SIMD_AVX2_ENABLE) || defined(SIMD_SSE41_ENABLE)
     size_t size = (width / cell - 1)*cell;
+#endif
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
         Avx512bw::HogLiteExtractFeatures(src, srcStride, width, height, cell, features, featuresStride);

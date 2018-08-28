@@ -50,6 +50,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <AdditionalIncludeDirectories>;$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+	  <AdditionalOptions>%(AdditionalOptions) -std=c++11</AdditionalOptions>
     </ClCompile>
     <BuildLog>
       <Path>$(SolutionDir)\..\..\obj\$(PlatformToolset)\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>

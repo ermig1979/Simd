@@ -28,6 +28,11 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdParallel.hpp"
 
+#ifdef _N
+#define _N_OLD _N
+#undef _N
+#endif
+
 namespace Simd
 {
     template <class T, class TM> class GemmNN
@@ -160,4 +165,10 @@ namespace Simd
     }
 #endif//SIMD_AVX_ENABLE
 }
+
+#ifdef _N_OLD
+#define _N _N_OLD
+#undef _N_OLD
+#endif
+
 #endif//__SimdGemm_h__
