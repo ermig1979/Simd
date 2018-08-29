@@ -154,11 +154,25 @@ namespace Test
     {
         assert(view.format == View::Float);
 
+        bool fast = view.Area() > 100000;
+        float boost = (hi - lo) / 255;
         for (size_t row = 0; row < view.height; ++row)
         {
-            for (size_t col = 0; col < view.width; ++col)
+            if (fast)
             {
-                view.At<float>(col, row) = lo + (hi - lo)*(float)Random();
+                for (size_t col = 0; col < view.width; col += INT16_MAX)
+                {
+                    size_t size = std::min<size_t>(INT16_MAX, view.width - col);
+                    float * dst = & view.At<float>(col, row);
+                    const uint8_t * src = Rand();
+                    for (size_t i = 0; i < size; ++i)
+                        dst[i] = lo + boost*src[i];
+                }
+            }
+            else
+            {
+                for (size_t col = 0; col < view.width; ++col)
+                    view.At<float>(col, row) = lo + (hi - lo)*(float)Random();
             }
         }
     }

@@ -5314,6 +5314,108 @@ extern "C"
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup synet
+
+        \fn void SimdWinograd2x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+
+        \short This function is used for filter conversion in Winograd 2x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array with filter weights.
+        \param [in] srcChannels - a number of input channels.
+        \param [in] dstChannels - a number of output channels.
+        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
+        \param [in] dstStride - a size of lead dimension in the output array.
+    */
+    SIMD_API void SimdWinograd2x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+
+    /*! @ingroup synet
+
+        \fn void SimdWinograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad);
+
+        \short This function is used for input image conversion in Winograd 2x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input image.
+        \param [in] srcChannels - a number of input channels.
+        \param [in] srcHeight - a height of input image.
+        \param [in] srcWidth - a width of input image.
+        \param [out] dst - a pointer to the output array with converted image.
+        \param [in] dstStride - a size of lead dimension in the output array.
+        \param [in] pad - a flag to signalize padding.
+    */
+    SIMD_API void SimdWinograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad);
+
+    /*! @ingroup synet
+
+        \fn void SimdWinograd2x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+        \short This function is used for output image conversion in Winograd 2x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input image.
+        \param [in] srcStride - a size of lead dimension in the input array.
+        \param [out] dst - a pointer to the output image.
+        \param [in] dstChannels - a number of output channels.
+        \param [in] dstHeight - a height of output image.
+        \param [in] dstWidth - a width of output image.
+    */
+    SIMD_API void SimdWinograd2x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+    /*! @ingroup synet
+
+        \fn void SimdWinograd4x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+
+        \short This function is used for filter conversion in Winograd 4x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array with filter weights.
+        \param [in] srcChannels - a number of input channels.
+        \param [in] dstChannels - a number of output channels.
+        \param [out] dst - a pointer to the output 32-bit float array with filter weights.
+        \param [in] dstStride - a size of lead dimension in the output array.
+    */
+    SIMD_API void SimdWinograd4x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+
+    /*! @ingroup synet
+
+        \fn void SimdWinograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad);
+
+        \short This function is used for input image conversion in Winograd 4x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input image.
+        \param [in] srcChannels - a number of input channels.
+        \param [in] srcHeight - a height of input image.
+        \param [in] srcWidth - a width of input image.
+        \param [out] dst - a pointer to the output array with converted image.
+        \param [in] dstStride - a size of lead dimension in the output array.
+        \param [in] pad - a flag to signalize padding.
+    */
+    SIMD_API void SimdWinograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad);
+
+    /*! @ingroup synet
+
+        \fn void SimdWinograd4x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+        \short This function is used for output image conversion in Winograd 4x3 convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input image.
+        \param [in] srcStride - a size of lead dimension in the input array.
+        \param [out] dst - a pointer to the output image.
+        \param [in] dstChannels - a number of output channels.
+        \param [in] dstHeight - a height of output image.
+        \param [in] dstWidth - a width of output image.
+    */
+    SIMD_API void SimdWinograd4x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
     /*! @ingroup yuv_conversion
 
         \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);

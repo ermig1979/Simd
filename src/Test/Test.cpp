@@ -328,6 +328,13 @@ namespace Test
     TEST_ADD_GROUP_AD0(TextureGetDifferenceSum);
     TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
+    TEST_ADD_GROUP_AD0(Winograd2x3SetFilter);
+    TEST_ADD_GROUP_AD0(Winograd2x3SetInput);
+    TEST_ADD_GROUP_AD0(Winograd2x3SetOutput);
+    TEST_ADD_GROUP_AD0(Winograd4x3SetFilter);
+    TEST_ADD_GROUP_AD0(Winograd4x3SetInput);
+    TEST_ADD_GROUP_AD0(Winograd4x3SetOutput);
+
     TEST_ADD_GROUP_AD0(Yuv444pToBgr);
     TEST_ADD_GROUP_AD0(Yuv422pToBgr);
     TEST_ADD_GROUP_AD0(Yuv420pToBgr);
