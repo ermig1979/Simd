@@ -65,7 +65,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcChannel, dstChannel, dst2));
 
-        result = result && Compare(dst1, dst2, EPS, true);
+        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -84,6 +84,11 @@ namespace Test
         bool result = true;
 
         result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Base::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Sse::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
+#endif 
 
         return result;
     }
@@ -149,7 +154,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcChannels, srcHeight, srcWidth, dst2, pad));
 
-        result = result && Compare(dst1, dst2, EPS, true);
+        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -224,7 +229,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, dstChannels, dstHeight, dstWidth));
 
-        result = result && Compare(dst1, dst2, EPS, true);
+        result = result && Compare(dst1, dst2, EPS, true, 64);
 
         return result;
     }
@@ -291,7 +296,7 @@ namespace Test
 
             TEST_SAVE(dst2);
 
-            result = result && Compare(dst1, dst2, EPS, true);
+            result = result && Compare(dst1, dst2, EPS, true, 64);
         }
 
         return result;
@@ -347,7 +352,7 @@ namespace Test
 
             TEST_SAVE(dst2);
 
-            result = result && Compare(dst1, dst2, EPS, true);
+            result = result && Compare(dst1, dst2, EPS, true, 64);
         }
 
         return result;
@@ -400,7 +405,7 @@ namespace Test
 
             TEST_SAVE(dst2);
 
-            result = result && Compare(dst1, dst2, EPS, true);
+            result = result && Compare(dst1, dst2, EPS, true, 64);
         }
 
         return result;

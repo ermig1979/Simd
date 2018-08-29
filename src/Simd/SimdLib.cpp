@@ -5103,9 +5103,12 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
+typedef void(*SimdWinograd2x3SetFilterPtr) (const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+volatile SimdWinograd2x3SetFilterPtr simdWinograd2x3SetFilter = SIMD_FUNC1(Winograd2x3SetFilter, SIMD_SSE_FUNC);
+
 SIMD_API void SimdWinograd2x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride)
 {
-    Base::Winograd2x3SetFilter(src, srcChannels, dstChannels, dst, dstStride);
+    simdWinograd2x3SetFilter(src, srcChannels, dstChannels, dst, dstStride);
 }
 
 SIMD_API void SimdWinograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad)

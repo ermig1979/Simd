@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMath.h"
+#include "Simd/SimdWinograd.h"
 
 namespace Simd
 {
@@ -29,35 +30,9 @@ namespace Simd
     {
         void Winograd2x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride)
         {
-            const float r2 = float(1.0 / 2);
-            const float r4 = float(1.0 / 4);
-            for (size_t m = 0; m < dstChannels; ++m)
-            {
-                for (size_t n = 0; n < srcChannels; ++n)
-                {
-                    float c1[16];
-                    const float * F = src + 9 * (n + m * srcChannels);
-                    c1[0] = F[0];
-                    c1[1] = (F[0] + F[2] + F[1])*r2;
-                    c1[2] = (F[0] + F[2] - F[1])*r2;
-                    c1[3] = F[2];
-                    c1[4] = (F[0] + F[6] + F[3])*r2;
-                    c1[5] = ((F[0] + F[6] + F[3]) + (F[2] + F[8] + F[5]) + (F[1] + F[7] + F[4]))*r4;
-                    c1[6] = ((F[0] + F[6] + F[3]) + (F[2] + F[8] + F[5]) - (F[1] + F[7] + F[4]))*r4;
-                    c1[7] = (F[2] + F[8] + F[5])*r2;
-                    c1[8] = (F[0] + F[6] - F[3])*r2;
-                    c1[9] = ((F[0] + F[6] - F[3]) + (F[2] + F[8] - F[5]) + (F[1] + F[7] - F[4]))*r4;
-                    c1[10] = ((F[0] + F[6] - F[3]) + (F[2] + F[8] - F[5]) - (F[1] + F[7] - F[4]))*r4;
-                    c1[11] = (F[2] + F[8] - F[5])*r2;
-                    c1[12] = F[6];
-                    c1[13] = (F[6] + F[8] + F[7])*r2;
-                    c1[14] = (F[6] + F[8] - F[7])*r2;
-                    c1[15] = F[8];
-
-                    for (size_t x = 0; x < 16; ++x)
-                        dst[x * dstStride + m * srcChannels + n] = c1[x];
-                }
-            }
+            size_t size = dstChannels * srcChannels;
+            for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)
+                Base::Winograd2x3SetFilter1(src, dst, dstStride);
         }
 
         void Winograd2x3SetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
