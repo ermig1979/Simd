@@ -210,82 +210,9 @@ namespace Simd
 
         void Winograd4x3SetFilter(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride)
         {
-            const float r4 = float(1.0 / 4);
-            const float r6 = float(1.0 / 6);
-            const float r12 = float(1.0 / 12);
-            const float r24 = float(1.0 / 24);
-            for (size_t m = 0; m < dstChannels; ++m)
-            {
-                for (size_t n = 0; n < srcChannels; ++n)
-                {
-                    float c1[18];
-                    const float * F = src + 9 * (n + m * srcChannels);
-                    c1[0] = r4 * F[0];
-                    c1[1] = r4 * F[1];
-                    c1[2] = r4 * F[2];
-                    c1[3] = -r6 * (F[0] + F[3] + F[6]);
-                    c1[4] = -r6 * (F[1] + F[4] + F[7]);
-                    c1[5] = -r6 * (F[2] + F[5] + F[8]);
-                    c1[6] = -r6 * (F[0] - F[3] + F[6]);
-                    c1[7] = -r6 * (F[1] - F[4] + F[7]);
-                    c1[8] = -r6 * (F[2] - F[5] + F[8]);
-                    c1[9] = r24 * F[0] + r12 * F[3] + r6 * F[6];
-                    c1[10] = r24 * F[1] + r12 * F[4] + r6 * F[7];
-                    c1[11] = r24 * F[2] + r12 * F[5] + r6 * F[8];
-                    c1[12] = r24 * F[0] - r12 * F[3] + r6 * F[6];
-                    c1[13] = r24 * F[1] - r12 * F[4] + r6 * F[7];
-                    c1[14] = r24 * F[2] - r12 * F[5] + r6 * F[8];
-                    c1[15] = F[6];
-                    c1[16] = F[7];
-                    c1[17] = F[8];
-
-                    float c2[36];
-                    c2[0] = r4 * c1[0];
-                    c2[1] = -r6 * (c1[0] + c1[1] + c1[2]);
-                    c2[2] = -r6 * (c1[0] - c1[1] + c1[2]);
-                    c2[3] = r24 * c1[0] + r12 * c1[1] + r6 * c1[2];
-                    c2[4] = r24 * c1[0] - r12 * c1[1] + r6 * c1[2];
-                    c2[5] = c1[2];
-
-                    c2[6] = r4 * c1[3];
-                    c2[7] = -r6 * (c1[3] + c1[4] + c1[5]);
-                    c2[8] = -r6 * (c1[3] - c1[4] + c1[5]);
-                    c2[9] = r24 * c1[3] + r12 * c1[4] + r6 * c1[5];
-                    c2[10] = r24 * c1[3] - r12 * c1[4] + r6 * c1[5];
-                    c2[11] = c1[5];
-
-                    c2[12] = r4 * c1[6];
-                    c2[13] = -r6 * (c1[6] + c1[7] + c1[8]);
-                    c2[14] = -r6 * (c1[6] - c1[7] + c1[8]);
-                    c2[15] = r24 * c1[6] + r12 * c1[7] + r6 * c1[8];
-                    c2[16] = r24 * c1[6] - r12 * c1[7] + r6 * c1[8];
-                    c2[17] = c1[8];
-
-                    c2[18] = r4 * c1[9];
-                    c2[19] = -r6 * (c1[9] + c1[10] + c1[11]);
-                    c2[20] = -r6 * (c1[9] - c1[10] + c1[11]);
-                    c2[21] = r24 * c1[9] + r12 * c1[10] + r6 * c1[11];
-                    c2[22] = r24 * c1[9] - r12 * c1[10] + r6 * c1[11];
-                    c2[23] = c1[11];
-
-                    c2[24] = r4 * c1[12];
-                    c2[25] = -r6 * (c1[12] + c1[13] + c1[14]);
-                    c2[26] = -r6 * (c1[12] - c1[13] + c1[14]);
-                    c2[27] = r24 * c1[12] + r12 * c1[13] + r6 * c1[14];
-                    c2[28] = r24 * c1[12] - r12 * c1[13] + r6 * c1[14];
-                    c2[29] = c1[14];
-
-                    c2[30] = r4 * c1[15];
-                    c2[31] = -r6 * (c1[15] + c1[16] + c1[17]);
-                    c2[32] = -r6 * (c1[15] - c1[16] + c1[17]);
-                    c2[33] = r24 * c1[15] + r12 * c1[16] + r6 * c1[17];
-                    c2[34] = r24 * c1[15] - r12 * c1[16] + r6 * c1[17];
-                    c2[35] = c1[17];
-
-                    for (size_t x = 0; x < 36; ++x)
-                        dst[x * dstStride + m * srcChannels + n] = c2[x];
-                }
-            }
+            size_t size = dstChannels * srcChannels;
+            for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)
+                Base::Winograd4x3SetFilter1(src, dst, dstStride);
         }
 
         void Winograd4x3SetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)

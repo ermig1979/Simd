@@ -51,7 +51,76 @@ namespace Simd
             dst[14 * stride] = (src[6] + src[8] - src[7])*r2;
             dst[15 * stride] = src[8];
         }
-    };
+
+        SIMD_INLINE void Winograd4x3SetFilter1(const float * src, float * dst, size_t stride)
+        {
+            const float r4 = float(1.0f / 4.0f);
+            const float r6 = float(1.0f / 6.0f);
+            const float r12 = float(1.0f / 12.0f);
+            const float r24 = float(1.0f / 24.0f);
+            float t[18];
+            t[0] = r4 * src[0];
+            t[1] = r4 * src[1];
+            t[2] = r4 * src[2];
+            t[3] = -r6 * (src[0] + src[3] + src[6]);
+            t[4] = -r6 * (src[1] + src[4] + src[7]);
+            t[5] = -r6 * (src[2] + src[5] + src[8]);
+            t[6] = -r6 * (src[0] - src[3] + src[6]);
+            t[7] = -r6 * (src[1] - src[4] + src[7]);
+            t[8] = -r6 * (src[2] - src[5] + src[8]);
+            t[9] = r24 * src[0] + r12 * src[3] + r6 * src[6];
+            t[10] = r24 * src[1] + r12 * src[4] + r6 * src[7];
+            t[11] = r24 * src[2] + r12 * src[5] + r6 * src[8];
+            t[12] = r24 * src[0] - r12 * src[3] + r6 * src[6];
+            t[13] = r24 * src[1] - r12 * src[4] + r6 * src[7];
+            t[14] = r24 * src[2] - r12 * src[5] + r6 * src[8];
+            t[15] = src[6];
+            t[16] = src[7];
+            t[17] = src[8];
+
+            dst[stride*0] = r4 * t[0];
+            dst[stride*1] = -r6 * (t[0] + t[1] + t[2]);
+            dst[stride*2] = -r6 * (t[0] - t[1] + t[2]);
+            dst[stride*3] = r24 * t[0] + r12 * t[1] + r6 * t[2];
+            dst[stride*4] = r24 * t[0] - r12 * t[1] + r6 * t[2];
+            dst[stride*5] = t[2];
+
+            dst[stride*6] = r4 * t[3];
+            dst[stride*7] = -r6 * (t[3] + t[4] + t[5]);
+            dst[stride*8] = -r6 * (t[3] - t[4] + t[5]);
+            dst[stride*9] = r24 * t[3] + r12 * t[4] + r6 * t[5];
+            dst[stride*10] = r24 * t[3] - r12 * t[4] + r6 * t[5];
+            dst[stride*11] = t[5];
+
+            dst[stride*12] = r4 * t[6];
+            dst[stride*13] = -r6 * (t[6] + t[7] + t[8]);
+            dst[stride*14] = -r6 * (t[6] - t[7] + t[8]);
+            dst[stride*15] = r24 * t[6] + r12 * t[7] + r6 * t[8];
+            dst[stride*16] = r24 * t[6] - r12 * t[7] + r6 * t[8];
+            dst[stride*17] = t[8];
+
+            dst[stride*18] = r4 * t[9];
+            dst[stride*19] = -r6 * (t[9] + t[10] + t[11]);
+            dst[stride*20] = -r6 * (t[9] - t[10] + t[11]);
+            dst[stride*21] = r24 * t[9] + r12 * t[10] + r6 * t[11];
+            dst[stride*22] = r24 * t[9] - r12 * t[10] + r6 * t[11];
+            dst[stride*23] = t[11];
+
+            dst[stride*24] = r4 * t[12];
+            dst[stride*25] = -r6 * (t[12] + t[13] + t[14]);
+            dst[stride*26] = -r6 * (t[12] - t[13] + t[14]);
+            dst[stride*27] = r24 * t[12] + r12 * t[13] + r6 * t[14];
+            dst[stride*28] = r24 * t[12] - r12 * t[13] + r6 * t[14];
+            dst[stride*29] = t[14];
+
+            dst[stride*30] = r4 * t[15];
+            dst[stride*31] = -r6 * (t[15] + t[16] + t[17]);
+            dst[stride*32] = -r6 * (t[15] - t[16] + t[17]);
+            dst[stride*33] = r24 * t[15] + r12 * t[16] + r6 * t[17];
+            dst[stride*34] = r24 * t[15] - r12 * t[16] + r6 * t[17];
+            dst[stride*35] = t[17];
+        }
+    }
 }
 
 #endif//__SimdWinograd_h__
