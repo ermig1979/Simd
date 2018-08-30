@@ -180,6 +180,11 @@ namespace Test
 
         result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
+#endif 
+
         return result;
     }
 

@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMath.h"
+#include "Simd/SimdMemory.h"
 #include "Simd/SimdWinograd.h"
 
 namespace Simd
@@ -35,62 +35,12 @@ namespace Simd
                 Base::Winograd2x3SetFilter1(src, dst, dstStride);
         }
 
-        void Winograd2x3SetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            float tmp[16];
-            tmp[0] = src[0 * srcStride + 0];
-            tmp[1] = src[0 * srcStride + 1];
-            tmp[2] = src[0 * srcStride + 2];
-            tmp[3] = src[0 * srcStride + 3];
-
-            tmp[4] = src[1 * srcStride + 0];
-            tmp[5] = src[1 * srcStride + 1];
-            tmp[6] = src[1 * srcStride + 2];
-            tmp[7] = src[1 * srcStride + 3];
-
-            tmp[8] = src[2 * srcStride + 0];
-            tmp[9] = src[2 * srcStride + 1];
-            tmp[10] = src[2 * srcStride + 2];
-            tmp[11] = src[2 * srcStride + 3];
-
-            tmp[12] = src[3 * srcStride + 0];
-            tmp[13] = src[3 * srcStride + 1];
-            tmp[14] = src[3 * srcStride + 2];
-            tmp[15] = src[3 * srcStride + 3];
-
-            dst[0 * dstStride] = (tmp[0] - tmp[8]) - (tmp[2] - tmp[10]);
-            dst[1 * dstStride] = (tmp[1] - tmp[9]) + (tmp[2] - tmp[10]);
-            dst[2 * dstStride] = (tmp[2] - tmp[10]) - (tmp[1] - tmp[9]);
-            dst[3 * dstStride] = (tmp[1] - tmp[9]) - (tmp[3] - tmp[11]);
-            dst[4 * dstStride] = (tmp[4] + tmp[8]) - (tmp[6] + tmp[10]);
-            dst[5 * dstStride] = (tmp[5] + tmp[9]) + (tmp[6] + tmp[10]);
-            dst[6 * dstStride] = (tmp[6] + tmp[10]) - (tmp[5] + tmp[9]);
-            dst[7 * dstStride] = (tmp[5] + tmp[9]) - (tmp[7] + tmp[11]);
-            dst[8 * dstStride] = (tmp[8] - tmp[4]) - (tmp[10] - tmp[6]);
-            dst[9 * dstStride] = (tmp[9] - tmp[5]) + (tmp[10] - tmp[6]);
-            dst[10 * dstStride] = (tmp[10] - tmp[6]) - (tmp[9] - tmp[5]);
-            dst[11 * dstStride] = (tmp[9] - tmp[5]) - (tmp[11] - tmp[7]);
-            dst[12 * dstStride] = (tmp[4] - tmp[12]) - (tmp[6] - tmp[14]);
-            dst[13 * dstStride] = (tmp[5] - tmp[13]) + (tmp[6] - tmp[14]);
-            dst[14 * dstStride] = (tmp[6] - tmp[14]) - (tmp[5] - tmp[13]);
-            dst[15 * dstStride] = (tmp[5] - tmp[13]) - (tmp[7] - tmp[15]);
-        }
-
-        void Winograd2x3SetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
-        {
-            float tmp[4 * 4] = { 0 };
-            for (size_t row = rowB; row < rowE; ++row)
-                for (size_t col = colB; col < colE; ++col)
-                    tmp[row * 4 + col] = src[row * srcStride + col];
-            Winograd2x3SetInput1(tmp, 4, dst, dstStride);
-        }
-
         void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad)
         {
             size_t dstHeight = pad ? srcHeight : srcHeight - 2;
             size_t dstWidth = pad ? srcWidth : srcWidth - 2;
-            size_t dstHeightFull = dstHeight / 2 * 2;
-            size_t dstWidthFull = dstWidth / 2 * 2;
+            size_t dstHeightFull = AlignLo(dstHeight, 2);
+            size_t dstWidthFull = AlignLo(dstWidth, 2);
             size_t noseW = Simd::Min<size_t>(4, dstWidth + 1);
             size_t noseH = Simd::Min<size_t>(4, dstHeight + 1);
             size_t start = pad ? 2 : 0;
