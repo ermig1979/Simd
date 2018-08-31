@@ -31,17 +31,17 @@ namespace Test
     {
         struct FuncWF
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t dstChannels, float * dst, size_t dstStride);
+            typedef void(*FuncPtr)(const float * src, size_t size, float * dst);
 
             FuncPtr func;
             String description;
 
             FuncWF(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(const View & src, size_t srcChannels, size_t dstChannels, View & dst) const
+            void Call(const View & src, size_t size, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, srcChannels, dstChannels, (float*)dst.data, dst.stride / sizeof(float));
+                func((float*)src.data, size, (float*)dst.data);
             }
         };
     }
@@ -56,14 +56,14 @@ namespace Test
 
         size_t count = Simd::Square(block + core - 1);
         View src(core*core*srcChannel*dstChannel, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(srcChannel*dstChannel, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(srcChannel*dstChannel, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(srcChannel*dstChannel*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(srcChannel*dstChannel*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         FillRandom32f(src, -10.0, 10.0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcChannel, dstChannel, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcChannel*dstChannel, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcChannel, dstChannel, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcChannel*dstChannel, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 64);
 
@@ -79,29 +79,29 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetFilterAutoTest()
+    bool Winograd2x3pSetFilterAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Base::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
+        result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Base::Winograd2x3pSetFilter), FUNC_WF(SimdWinograd2x3pSetFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Sse::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Sse::Winograd2x3pSetFilter), FUNC_WF(SimdWinograd2x3pSetFilter));
 #endif 
 
         return result;
     }
 
-    bool Winograd4x3SetFilterAutoTest()
+    bool Winograd4x3pSetFilterAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Base::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
+        result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Base::Winograd4x3pSetFilter), FUNC_WF(SimdWinograd4x3pSetFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Sse::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Sse::Winograd4x3pSetFilter), FUNC_WF(SimdWinograd4x3pSetFilter));
 #endif 
 
         return result;
@@ -111,7 +111,7 @@ namespace Test
     {
         struct FuncWI
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, int pad);
+            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
 
             FuncPtr func;
             String description;
@@ -126,7 +126,7 @@ namespace Test
             void Call(const View & src, size_t srcChannels, size_t srcHeight, size_t srcWidth, View & dst, int pad) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, srcChannels, srcHeight, srcWidth, (float*)dst.data, dst.stride / sizeof(float), pad);
+                func((float*)src.data, srcChannels, srcHeight, srcWidth, (float*)dst.data, pad);
             }
         };
     }
@@ -150,8 +150,8 @@ namespace Test
         size_t strideS = srcChannels * tileH * tileW;
 
         View src(srcChannels*srcHeight*srcWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(strideS, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(strideS, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         FillRandom32f(src, -10.0, 10.0);
 
@@ -174,25 +174,39 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetInputAutoTest()
+    bool Winograd2x3iSetInputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
+        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
 #endif 
 
         return result;
     }
 
-    bool Winograd4x3SetInputAutoTest()
+    bool Winograd2x3pSetInputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Base::Winograd4x3SetInput), FUNC_WI(SimdWinograd4x3SetInput));
+        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
+#endif 
+
+        return result;
+    }
+
+    bool Winograd4x3pSetInputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Base::Winograd4x3pSetInput), FUNC_WI(SimdWinograd4x3pSetInput));
 
         return result;
     }
@@ -201,7 +215,7 @@ namespace Test
     {
         struct FuncWO
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+            typedef void(*FuncPtr)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
 
             FuncPtr func;
             String description;
@@ -211,7 +225,7 @@ namespace Test
             void Call(const View & src, View & dst, size_t dstChannels, size_t dstHeight, size_t dstWidth) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, src.stride / sizeof(float), (float*)dst.data, dstChannels, dstHeight, dstWidth);
+                func((float*)src.data, (float*)dst.data, dstChannels, dstHeight, dstWidth);
             }
         };
     }
@@ -229,7 +243,7 @@ namespace Test
         size_t tileW = (dstWidth + block - 1) / block;
         size_t strideD = dstChannels * tileH * tileW;
 
-        View src(strideD, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View src(strideD*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst1(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
@@ -253,20 +267,25 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetOutputAutoTest()
+    bool Winograd2x3pSetOutputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3SetOutput), FUNC_WO(SimdWinograd2x3SetOutput));
+        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+#endif 
 
         return result;
     }
 
-    bool Winograd4x3SetOutputAutoTest()
+    bool Winograd4x3pSetOutputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
+        result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::Winograd4x3pSetOutput), FUNC_WO(SimdWinograd4x3pSetOutput));
 
         return result;
     }
@@ -283,8 +302,8 @@ namespace Test
 
         size_t count = Simd::Square(block + core - 1);
         View src(core*core*srcChannel*dstChannel, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(srcChannel*dstChannel, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(srcChannel*dstChannel, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(srcChannel*dstChannel*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(srcChannel*dstChannel*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         if (create)
         {
@@ -292,7 +311,7 @@ namespace Test
 
             TEST_SAVE(src);
 
-            f.Call(src, srcChannel, dstChannel, dst1);
+            f.Call(src, srcChannel*dstChannel, dst1);
 
             TEST_SAVE(dst1);
         }
@@ -302,7 +321,7 @@ namespace Test
 
             TEST_LOAD(dst1);
 
-            f.Call(src, srcChannel, dstChannel, dst2);
+            f.Call(src, srcChannel*dstChannel, dst2);
 
             TEST_SAVE(dst2);
 
@@ -312,14 +331,14 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetFilterDataTest(bool create)
+    bool Winograd2x3pSetFilterDataTest(bool create)
     {
-        return WinogradSetFilterDataTest(create, DW, DH, 2, 3, FUNC_WF(SimdWinograd2x3SetFilter));
+        return WinogradSetFilterDataTest(create, DW, DH, 2, 3, FUNC_WF(SimdWinograd2x3pSetFilter));
     }
 
-    bool Winograd4x3SetFilterDataTest(bool create)
+    bool Winograd4x3pSetFilterDataTest(bool create)
     {
-        return WinogradSetFilterDataTest(create, DW, DH, 4, 3, FUNC_WF(SimdWinograd4x3SetFilter));
+        return WinogradSetFilterDataTest(create, DW, DH, 4, 3, FUNC_WF(SimdWinograd4x3pSetFilter));
     }
 
     bool WinogradSetInputDataTest(bool create, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t block, size_t core, const FuncWI & f)
@@ -339,8 +358,8 @@ namespace Test
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcChannels << ", " << srcHeight << ", " << srcWidth << "].");
 
         View src(srcChannels*srcHeight*srcWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(strideS, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(strideS, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         if (create)
         {
@@ -368,14 +387,19 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetInputDataTest(bool create)
+    bool Winograd2x3iSetInputDataTest(bool create)
     {
-        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WI(SimdWinograd2x3SetInput));
+        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WI(SimdWinograd2x3iSetInput));
     }
 
-    bool Winograd4x3SetInputDataTest(bool create)
+    bool Winograd2x3pSetInputDataTest(bool create)
     {
-        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WI(SimdWinograd4x3SetInput));
+        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WI(SimdWinograd2x3pSetInput));
+    }
+
+    bool Winograd4x3pSetInputDataTest(bool create)
+    {
+        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WI(SimdWinograd4x3pSetInput));
     }
 
     bool WinogradSetOutputDataTest(bool create, size_t dstChannels, size_t dstHeight, size_t dstWidth, size_t block, size_t core, const FuncWO & f)
@@ -391,7 +415,7 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << dstChannels << ", " << dstHeight << ", " << dstWidth << "].");
 
-        View src(strideD, count, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View src(strideD*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst1(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
@@ -421,13 +445,13 @@ namespace Test
         return result;
     }
 
-    bool Winograd2x3SetOutputDataTest(bool create)
+    bool Winograd2x3pSetOutputDataTest(bool create)
     {
-        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WO(SimdWinograd2x3SetOutput));
+        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WO(SimdWinograd2x3pSetOutput));
     }
 
-    bool Winograd4x3SetOutputDataTest(bool create)
+    bool Winograd4x3pSetOutputDataTest(bool create)
     {
-        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WO(SimdWinograd4x3SetOutput));
+        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WO(SimdWinograd4x3pSetOutput));
     }
 }

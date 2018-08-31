@@ -470,8 +470,8 @@ namespace Simd
             kernelTM = KernelMx8;
             kernelTT = KernelMx8;
 #endif
-            L1 = N > 4024 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
-            L2 = N > 4024 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
+            L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
+            L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmScaleC, Avx::GemmPackB, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
