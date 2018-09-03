@@ -30,21 +30,35 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        SIMD_INLINE void Winograd2x3iSetInput1(const float * src, size_t srcStride, float * dst)
+        SIMD_INLINE void Winograd2x3iSetInput1(const __m128 * src, float * dst)
         {
             static const __m128 _mpmm = _mm_setr_ps(-1.0f, 1.0f, -1.0f, -1.0f);
-            __m128 s0 = _mm_loadu_ps(src + 0 * srcStride);
-            __m128 s1 = _mm_loadu_ps(src + 1 * srcStride);
-            __m128 s2 = _mm_loadu_ps(src + 2 * srcStride);
-            __m128 s3 = _mm_loadu_ps(src + 3 * srcStride);
-            __m128 t0 = _mm_sub_ps(s0, s2);
-            __m128 t1 = _mm_add_ps(s1, s2);
-            __m128 t2 = _mm_sub_ps(s2, s1);
-            __m128 t3 = _mm_sub_ps(s1, s3);
+            __m128 t0 = _mm_sub_ps(src[0], src[2]);
+            __m128 t1 = _mm_add_ps(src[1], src[2]);
+            __m128 t2 = _mm_sub_ps(src[2], src[1]);
+            __m128 t3 = _mm_sub_ps(src[1], src[3]);
             _mm_storeu_ps(dst + 0, _mm_add_ps(_mm_shuffle_ps(t0, t0, 0x64), _mm_mul_ps(_mpmm, _mm_shuffle_ps(t0, t0, 0xDA))));
             _mm_storeu_ps(dst + 4, _mm_add_ps(_mm_shuffle_ps(t1, t1, 0x64), _mm_mul_ps(_mpmm, _mm_shuffle_ps(t1, t1, 0xDA))));
             _mm_storeu_ps(dst + 8, _mm_add_ps(_mm_shuffle_ps(t2, t2, 0x64), _mm_mul_ps(_mpmm, _mm_shuffle_ps(t2, t2, 0xDA))));
             _mm_storeu_ps(dst + 12, _mm_add_ps(_mm_shuffle_ps(t3, t3, 0x64), _mm_mul_ps(_mpmm, _mm_shuffle_ps(t3, t3, 0xDA))));
+        }
+
+        SIMD_INLINE void Winograd2x3iSetInput1(const float * src, size_t srcStride, float * dst)
+        {
+            __m128 s[4];
+            s[0] = _mm_loadu_ps(src + 0 * srcStride);
+            s[1] = _mm_loadu_ps(src + 1 * srcStride);
+            s[2] = _mm_loadu_ps(src + 2 * srcStride);
+            s[3] = _mm_loadu_ps(src + 3 * srcStride);
+            Winograd2x3iSetInput1(s, dst);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, float * dst)
+        {
+            __m128 s[4] = {_mm_setzero_ps(), _mm_setzero_ps() , _mm_setzero_ps() , _mm_setzero_ps() };
+            for (size_t row = rowB; row < rowE; ++row)
+                s[row] = _mm_loadu_ps(src + row * srcStride);
+            Winograd2x3iSetInput1(s, dst);
         }
 
         SIMD_INLINE void Winograd2x3iSetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst)
@@ -84,7 +98,7 @@ namespace Simd
                     if (pad)
                         Winograd2x3iSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst), dst += 16;
                     for (col = start; col < dstWidthFull; col += 2)
-                        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, 0, 4, dst), dst += 16;
+                        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, dst), dst += 16;
                     if (col < dstWidth)
                         Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst), dst += 16;
                 }
@@ -102,7 +116,7 @@ namespace Simd
                     if (pad)
                         Winograd2x3iSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst), dst += 16;
                     for (col = start; col < dstWidthFull; col += 2)
-                        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 4, dst), dst += 16;
+                        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, dst), dst += 16;
                     if (col < dstWidth)
                         Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst), dst += 16;
                 }
@@ -175,40 +189,6 @@ namespace Simd
                 Base::Winograd2x3pSetFilter1(src, dst, size);
         }
 
-        SIMD_INLINE void Winograd2x3pSetInput4(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            __m128 t[16];
-            Load4(src + 0 * srcStride, 2, t + 0);
-            Load4(src + 1 * srcStride, 2, t + 4);
-            Load4(src + 2 * srcStride, 2, t + 8);
-            Load4(src + 3 * srcStride, 2, t + 12);
-            _mm_storeu_ps(dst + 0 * dstStride, _mm_sub_ps(_mm_sub_ps(t[0], t[8]), _mm_sub_ps(t[2], t[10])));
-            _mm_storeu_ps(dst + 1 * dstStride, _mm_add_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[2], t[10])));
-            _mm_storeu_ps(dst + 2 * dstStride, _mm_sub_ps(_mm_sub_ps(t[2], t[10]), _mm_sub_ps(t[1], t[9])));
-            _mm_storeu_ps(dst + 3 * dstStride, _mm_sub_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[3], t[11])));
-            _mm_storeu_ps(dst + 4 * dstStride, _mm_sub_ps(_mm_add_ps(t[4], t[8]), _mm_add_ps(t[6], t[10])));
-            _mm_storeu_ps(dst + 5 * dstStride, _mm_add_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[6], t[10])));
-            _mm_storeu_ps(dst + 6 * dstStride, _mm_sub_ps(_mm_add_ps(t[6], t[10]), _mm_add_ps(t[5], t[9])));
-            _mm_storeu_ps(dst + 7 * dstStride, _mm_sub_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[7], t[11])));
-            _mm_storeu_ps(dst + 8 * dstStride, _mm_sub_ps(_mm_sub_ps(t[8], t[4]), _mm_sub_ps(t[10], t[6])));
-            _mm_storeu_ps(dst + 9 * dstStride, _mm_add_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[10], t[6])));
-            _mm_storeu_ps(dst + 10 * dstStride, _mm_sub_ps(_mm_sub_ps(t[10], t[6]), _mm_sub_ps(t[9], t[5])));
-            _mm_storeu_ps(dst + 11 * dstStride, _mm_sub_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[11], t[7])));
-            _mm_storeu_ps(dst + 12 * dstStride, _mm_sub_ps(_mm_sub_ps(t[4], t[12]), _mm_sub_ps(t[6], t[14])));
-            _mm_storeu_ps(dst + 13 * dstStride, _mm_add_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[6], t[14])));
-            _mm_storeu_ps(dst + 14 * dstStride, _mm_sub_ps(_mm_sub_ps(t[6], t[14]), _mm_sub_ps(t[5], t[13])));
-            _mm_storeu_ps(dst + 15 * dstStride, _mm_sub_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[7], t[15])));
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput4p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
-        {
-            float tmp[4 * 16] = { 0 };
-            for (size_t row = rowB; row < rowE; ++row)
-                for (size_t col = colB; col < colE; ++col)
-                    tmp[row * 16 + col] = src[row * srcStride + col];
-            Winograd2x3pSetInput4(tmp, 16, dst, dstStride);
-        }
-
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
         {
             size_t dstHeight = pad ? srcHeight : srcHeight - 2;
@@ -237,7 +217,9 @@ namespace Simd
                 {
                     if (pad)
                         Base::Winograd2x3pSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
-                    for (col = start; col < dstWidthFull; col += 2)
+                    for (col = start; col < dstWidthFull8; col += 8, dst += 4)
+                        Winograd2x3pSetInput4p(src + col, srcWidth, 1, noseH, dst, dstStride);
+                    for (; col < dstWidthFull; col += 2)
                         Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, 4, dst++, dstStride);
                     if (col < dstWidth)
                         Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
@@ -257,7 +239,9 @@ namespace Simd
                 {
                     if (pad)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
-                    for (col = start; col < dstWidthFull; col += 2)
+                    for (col = start; col < dstWidthFull8; col += 8, dst += 4)
+                        Winograd2x3pSetInput4p(src + row * srcWidth + col, srcWidth, 0, tailH, dst, dstStride);
+                    for (; col < dstWidthFull; col += 2)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 4, dst++, dstStride);
                     if (col < dstWidth)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);

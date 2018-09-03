@@ -266,6 +266,72 @@ namespace Simd
             dst[stride*35] = t[17];
         }
     }
+
+#ifdef SIMD_SSE_ENABLE    
+    namespace Sse
+    {
+        SIMD_INLINE void Winograd2x3pSetInputLoad4(const float * src, __m128 * dst)
+        {
+            __m128 a0 = _mm_loadu_ps(src + 0);
+            __m128 a1 = _mm_loadu_ps(src + 2);
+            __m128 a2 = _mm_loadu_ps(src + 4);
+            __m128 a3 = _mm_loadu_ps(src + 6);
+            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
+            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
+            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
+            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4Store(const __m128 * t, float * dst, size_t dstStride)
+        {
+            _mm_storeu_ps(dst + 0 * dstStride, _mm_sub_ps(_mm_sub_ps(t[0], t[8]), _mm_sub_ps(t[2], t[10])));
+            _mm_storeu_ps(dst + 1 * dstStride, _mm_add_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[2], t[10])));
+            _mm_storeu_ps(dst + 2 * dstStride, _mm_sub_ps(_mm_sub_ps(t[2], t[10]), _mm_sub_ps(t[1], t[9])));
+            _mm_storeu_ps(dst + 3 * dstStride, _mm_sub_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[3], t[11])));
+            _mm_storeu_ps(dst + 4 * dstStride, _mm_sub_ps(_mm_add_ps(t[4], t[8]), _mm_add_ps(t[6], t[10])));
+            _mm_storeu_ps(dst + 5 * dstStride, _mm_add_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[6], t[10])));
+            _mm_storeu_ps(dst + 6 * dstStride, _mm_sub_ps(_mm_add_ps(t[6], t[10]), _mm_add_ps(t[5], t[9])));
+            _mm_storeu_ps(dst + 7 * dstStride, _mm_sub_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[7], t[11])));
+            _mm_storeu_ps(dst + 8 * dstStride, _mm_sub_ps(_mm_sub_ps(t[8], t[4]), _mm_sub_ps(t[10], t[6])));
+            _mm_storeu_ps(dst + 9 * dstStride, _mm_add_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[10], t[6])));
+            _mm_storeu_ps(dst + 10 * dstStride, _mm_sub_ps(_mm_sub_ps(t[10], t[6]), _mm_sub_ps(t[9], t[5])));
+            _mm_storeu_ps(dst + 11 * dstStride, _mm_sub_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[11], t[7])));
+            _mm_storeu_ps(dst + 12 * dstStride, _mm_sub_ps(_mm_sub_ps(t[4], t[12]), _mm_sub_ps(t[6], t[14])));
+            _mm_storeu_ps(dst + 13 * dstStride, _mm_add_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[6], t[14])));
+            _mm_storeu_ps(dst + 14 * dstStride, _mm_sub_ps(_mm_sub_ps(t[6], t[14]), _mm_sub_ps(t[5], t[13])));
+            _mm_storeu_ps(dst + 15 * dstStride, _mm_sub_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[7], t[15])));
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 t[16];
+            Winograd2x3pSetInputLoad4(src + 0 * srcStride, t + 0);
+            Winograd2x3pSetInputLoad4(src + 1 * srcStride, t + 4);
+            Winograd2x3pSetInputLoad4(src + 2 * srcStride, t + 8);
+            Winograd2x3pSetInputLoad4(src + 3 * srcStride, t + 12);
+            Winograd2x3pSetInput4Store(t, dst, dstStride);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4p(const float * src, size_t srcStride, size_t rowB, size_t rowE, float * dst, size_t dstStride)
+        {
+            __m128 t[16];
+            __m128 * pt = t;
+            for (size_t row = 0; row < 4; row++, pt += 4)
+            {
+                if (row >= rowB && row < rowE)
+                    Winograd2x3pSetInputLoad4(src + row * srcStride, pt);
+                else
+                {
+                    pt[0] = _mm_setzero_ps();
+                    pt[1] = _mm_setzero_ps();
+                    pt[2] = _mm_setzero_ps();
+                    pt[3] = _mm_setzero_ps();
+                }
+            }
+            Winograd2x3pSetInput4Store(t, dst, dstStride);
+        }
+    }
+#endif //SIMD_SSE_ENABLE
 }
 
 #endif//__SimdWinograd_h__
