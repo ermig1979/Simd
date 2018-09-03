@@ -330,6 +330,35 @@ namespace Simd
             }
             Winograd2x3pSetInput4Store(t, dst, dstStride);
         }
+
+        SIMD_INLINE void Load2t(const float * src, size_t srcStride, __m128 * dst)
+        {
+            __m128 s0 = _mm_loadu_ps(src + 0 * srcStride);
+            __m128 s1 = _mm_loadu_ps(src + 1 * srcStride);
+            __m128 s2 = _mm_loadu_ps(src + 2 * srcStride);
+            __m128 s3 = _mm_loadu_ps(src + 3 * srcStride);
+            dst[0] = _mm_add_ps(_mm_add_ps(s0, s1), s2);
+            dst[1] = _mm_sub_ps(_mm_sub_ps(s1, s2), s3);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetOutput4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 t[8];
+            Load2t(src + 0 * srcStride, srcStride, t + 0);
+            Load2t(src + 4 * srcStride, srcStride, t + 2);
+            Load2t(src + 8 * srcStride, srcStride, t + 4);
+            Load2t(src + 12 * srcStride, srcStride, t + 6);
+
+            __m128 d00 = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
+            __m128 d01 = _mm_add_ps(_mm_add_ps(t[1], t[3]), t[5]);
+            __m128 d10 = _mm_sub_ps(_mm_sub_ps(t[2], t[4]), t[6]);
+            __m128 d11 = _mm_sub_ps(_mm_sub_ps(t[3], t[5]), t[7]);
+
+            _mm_storeu_ps(dst + 0 * dstStride + 0, _mm_unpacklo_ps(d00, d01));
+            _mm_storeu_ps(dst + 0 * dstStride + 4, _mm_unpackhi_ps(d00, d01));
+            _mm_storeu_ps(dst + 1 * dstStride + 0, _mm_unpacklo_ps(d10, d11));
+            _mm_storeu_ps(dst + 1 * dstStride + 4, _mm_unpackhi_ps(d10, d11));
+        }
     }
 #endif //SIMD_SSE_ENABLE
 }
