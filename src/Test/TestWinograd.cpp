@@ -185,6 +185,11 @@ namespace Test
             result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
 #endif 
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
+#endif 
+
         return result;
     }
 

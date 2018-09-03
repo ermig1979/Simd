@@ -5107,7 +5107,7 @@ typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float *
 typedef void(*SimdWinogradSetInputPtr) (const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
 typedef void(*SimdWinogradSetOutputPtr) (const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
 
-volatile SimdWinogradSetInputPtr simdWinograd2x3iSetInput = SIMD_FUNC1(Winograd2x3iSetInput, SIMD_SSE_FUNC);
+volatile SimdWinogradSetInputPtr simdWinograd2x3iSetInput = SIMD_FUNC2(Winograd2x3iSetInput, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
 SIMD_API void SimdWinograd2x3iSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
 {
