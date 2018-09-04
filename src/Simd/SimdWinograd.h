@@ -270,9 +270,27 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        SIMD_INLINE void Winograd2x3pSetInputLoad4(const float * src, __m128 * dst)
+        SIMD_INLINE __m128 LoadNose(const float * p)
+        {
+            SIMD_ALIGNED(16) const int32_t m[F] = {0, -1, -1, -1};
+            return _mm_and_ps(_mm_loadu_ps(p), _mm_load_ps((float*)m));
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInputLoad4Body(const float * src, __m128 * dst)
         {
             __m128 a0 = _mm_loadu_ps(src + 0);
+            __m128 a1 = _mm_loadu_ps(src + 2);
+            __m128 a2 = _mm_loadu_ps(src + 4);
+            __m128 a3 = _mm_loadu_ps(src + 6);
+            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
+            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
+            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
+            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInputLoad4Nose(const float * src, __m128 * dst)
+        {
+            __m128 a0 = LoadNose(src);
             __m128 a1 = _mm_loadu_ps(src + 2);
             __m128 a2 = _mm_loadu_ps(src + 4);
             __m128 a3 = _mm_loadu_ps(src + 6);
@@ -302,24 +320,34 @@ namespace Simd
             _mm_storeu_ps(dst + 15 * dstStride, _mm_sub_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[7], t[15])));
         }
 
-        SIMD_INLINE void Winograd2x3pSetInput4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        SIMD_INLINE void Winograd2x3pSetInput4Body(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
             __m128 t[16];
-            Winograd2x3pSetInputLoad4(src + 0 * srcStride, t + 0);
-            Winograd2x3pSetInputLoad4(src + 1 * srcStride, t + 4);
-            Winograd2x3pSetInputLoad4(src + 2 * srcStride, t + 8);
-            Winograd2x3pSetInputLoad4(src + 3 * srcStride, t + 12);
+            Winograd2x3pSetInputLoad4Body(src + 0 * srcStride, t + 0);
+            Winograd2x3pSetInputLoad4Body(src + 1 * srcStride, t + 4);
+            Winograd2x3pSetInputLoad4Body(src + 2 * srcStride, t + 8);
+            Winograd2x3pSetInputLoad4Body(src + 3 * srcStride, t + 12);
             Winograd2x3pSetInput4Store(t, dst, dstStride);
         }
 
-        SIMD_INLINE void Winograd2x3pSetInput4p(const float * src, size_t srcStride, size_t rowB, size_t rowE, float * dst, size_t dstStride)
+        SIMD_INLINE void Winograd2x3pSetInput4Nose(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 t[16];
+            Winograd2x3pSetInputLoad4Nose(src + 0 * srcStride, t + 0);
+            Winograd2x3pSetInputLoad4Nose(src + 1 * srcStride, t + 4);
+            Winograd2x3pSetInputLoad4Nose(src + 2 * srcStride, t + 8);
+            Winograd2x3pSetInputLoad4Nose(src + 3 * srcStride, t + 12);
+            Winograd2x3pSetInput4Store(t, dst, dstStride);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4PadEdgeRow(const float * src, size_t srcStride, size_t rowB, size_t rowE, float * dst, size_t dstStride)
         {
             __m128 t[16];
             __m128 * pt = t;
             for (size_t row = 0; row < 4; row++, pt += 4)
             {
                 if (row >= rowB && row < rowE)
-                    Winograd2x3pSetInputLoad4(src + row * srcStride, pt);
+                    Winograd2x3pSetInputLoad4Body(src + row * srcStride, pt);
                 else
                 {
                     pt[0] = _mm_setzero_ps();

@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdWinograd.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -194,22 +195,24 @@ namespace Simd
             size_t dstHeight = pad ? srcHeight : srcHeight - 2;
             size_t dstWidth = pad ? srcWidth : srcWidth - 2;
             size_t dstStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*srcChannels;
-            size_t dstHeightFull = AlignLo(dstHeight, 2);
-            size_t dstWidthFull = AlignLo(dstWidth, 2);
+            size_t dstHeightBody = AlignLo(dstHeight, 2);
+            size_t dstWidthBody = AlignLo(dstWidth, 2);
             size_t noseW = Simd::Min<size_t>(4, dstWidth + 1);
             size_t noseH = Simd::Min<size_t>(4, dstHeight + 1);
-            size_t start = pad ? 2 : 0;
+            size_t startEdge = pad ? 2 : 0, startBody = 0;
             if (pad)
             {
-                if (dstHeight == dstHeightFull)
-                    dstHeightFull -= 2;
-                if (dstWidth == dstWidthFull)
-                    dstWidthFull -= 2;
+                if (dstHeight == dstHeightBody)
+                    dstHeightBody -= 2;
+                if (dstWidth == dstWidthBody)
+                    dstWidthBody -= 2;
                 src -= srcWidth + 1;
+                startBody = dstWidth < 9 ? 2 : 8;
             }
-            size_t tailW = dstWidth - dstWidthFull + (pad ? 1 : 2);
-            size_t tailH = dstHeight - dstHeightFull + (pad ? 1 : 2);
-            size_t dstWidthFull8 = dstWidthFull >= start ? AlignLo(dstWidthFull - start, 8) + start : start;
+            size_t tailW = dstWidth - dstWidthBody + (pad ? 1 : 2);
+            size_t tailH = dstHeight - dstHeightBody + (pad ? 1 : 2);
+            size_t dstWidthEdge8 = startEdge + (dstWidthBody >= startEdge ? AlignLo(dstWidthBody - startEdge, 8) : 0);
+            size_t dstWidthBody8 = startBody + (dstWidthBody >= startBody ? AlignLo(dstWidthBody - startBody, 8) : 0);
             for (size_t c = 0; c < srcChannels; ++c)
             {
                 size_t row = 0, col = 0;
@@ -217,20 +220,25 @@ namespace Simd
                 {
                     if (pad)
                         Base::Winograd2x3pSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
-                    for (col = start; col < dstWidthFull8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4p(src + col, srcWidth, 1, noseH, dst, dstStride);
-                    for (; col < dstWidthFull; col += 2)
+                    for (col = startEdge; col < dstWidthEdge8; col += 8, dst += 4)
+                        Winograd2x3pSetInput4PadEdgeRow(src + col, srcWidth, 1, noseH, dst, dstStride);
+                    for (; col < dstWidthBody; col += 2)
                         Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, 4, dst++, dstStride);
                     if (col < dstWidth)
                         Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
                 }
-                for (row = start; row < dstHeightFull; row += 2)
+                for (row = startEdge; row < dstHeightBody; row += 2)
                 {
                     if (pad)
-                        Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, 4, 1, noseW, dst++, dstStride);
-                    for (col = start; col < dstWidthFull8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4(src + row * srcWidth + col, srcWidth, dst, dstStride);
-                    for (; col < dstWidthFull; col += 2)
+                    {
+                        if(startBody == 8)
+                            Winograd2x3pSetInput4Nose(src + row * srcWidth, srcWidth, dst, dstStride), dst +=4;
+                        else
+                            Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, 4, 1, noseW, dst++, dstStride);
+                    }
+                    for (col = startBody; col < dstWidthBody8; col += 8, dst += 4)
+                        Winograd2x3pSetInput4Body(src + row * srcWidth + col, srcWidth, dst, dstStride);
+                    for (; col < dstWidthBody; col += 2)
                         Base::Winograd2x3pSetInput1(src + row * srcWidth + col, srcWidth, dst++, dstStride);
                     if (col < dstWidth)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, 4, 0, tailW, dst++, dstStride);
@@ -239,9 +247,9 @@ namespace Simd
                 {
                     if (pad)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
-                    for (col = start; col < dstWidthFull8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4p(src + row * srcWidth + col, srcWidth, 0, tailH, dst, dstStride);
-                    for (; col < dstWidthFull; col += 2)
+                    for (col = startEdge; col < dstWidthEdge8; col += 8, dst += 4)
+                        Winograd2x3pSetInput4PadEdgeRow(src + row * srcWidth + col, srcWidth, 0, tailH, dst, dstStride);
+                    for (; col < dstWidthBody; col += 2)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 4, dst++, dstStride);
                     if (col < dstWidth)
                         Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);
