@@ -293,6 +293,11 @@ namespace Test
             result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
 #endif 
 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx512f::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+#endif 
+
         return result;
     }
 

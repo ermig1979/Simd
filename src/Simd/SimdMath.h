@@ -919,6 +919,18 @@ namespace Simd
         {
             return Mask<mask>(Alignr<shift>(lo, hi), m);
         }
+
+        template <int part> SIMD_INLINE __m512 Interleave(const __m512 & a, const __m512 & b);
+
+        template <> SIMD_INLINE __m512 Interleave<0>(const __m512 & a, const __m512 & b)
+        {
+            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_0, b);
+        }
+
+        template <> SIMD_INLINE __m512 Interleave<1>(const __m512 & a, const __m512 & b)
+        {
+            return _mm512_permutex2var_ps(a, K32_INTERLEAVE_1, b);
+        }
     }
 #endif //SIMD_AVX512F_ENABLE
 

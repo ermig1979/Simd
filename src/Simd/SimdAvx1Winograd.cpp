@@ -399,7 +399,7 @@ namespace Simd
                     size_t col = 0, tileX = 0;
                     const float * s = src + tileY * tileW;
                     float * d = dst + row * dstWidth;
-                    for (col = 0; col < dstW16; col += 16, tileX += 8)
+                    for (; col < dstW16; col += 16, tileX += 8)
                         Winograd2x3pSetOutput8Body(s + tileX, srcStride, d + col, dstWidth);
                     if (col < dstWidth)
                         Winograd2x3pSetOutput8Edge(s + tileW - 8, srcStride, d + tailCol, dstWidth, true, false, tailMask);
@@ -409,7 +409,7 @@ namespace Simd
                     size_t col = 0, tileX = 0;
                     const float * s = src + (tileH - 1) * tileW;
                     float * d = dst + (dstHeight - 1) * dstWidth;
-                    for (col = 0; col < dstW16; col += 16, tileX += 8)
+                    for (; col < dstW16; col += 16, tileX += 8)
                         Winograd2x3pSetOutput8Edge(s + tileX, srcStride, d + col, dstWidth, false, true, tailMask);
                     if (col < dstWidth)
                         Winograd2x3pSetOutput8Edge(s + tileW - 8, srcStride, d + tailCol, dstWidth, false, false, tailMask);

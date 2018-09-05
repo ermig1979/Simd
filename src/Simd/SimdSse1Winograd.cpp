@@ -425,7 +425,7 @@ src += srcWidth * srcHeight;
                     size_t col = 0, tileX = 0;
                     const float * s = src + tileY * tileW;
                     float * d = dst + row * dstWidth;
-                    for (col = 0; col < dstW8; col += 8, tileX += 4)
+                    for (; col < dstW8; col += 8, tileX += 4)
                         Winograd2x3pSetOutput4Body(s + tileX, srcStride, d + col, dstWidth);
                     if (col < dstWidth)
                         Winograd2x3pSetOutput4Edge(s + tileW - 4, srcStride, d + tailCol, dstWidth, true, false, tailMask);
@@ -435,7 +435,7 @@ src += srcWidth * srcHeight;
                     size_t col = 0, tileX = 0;
                     const float * s = src + (tileH - 1) * tileW;
                     float * d = dst + (dstHeight - 1) * dstWidth;
-                    for (col = 0; col < dstW8; col += 8, tileX += 4)
+                    for (; col < dstW8; col += 8, tileX += 4)
                         Winograd2x3pSetOutput4Edge(s + tileX, srcStride, d + col, dstWidth, false, true, tailMask);
                     if (col < dstWidth)
                         Winograd2x3pSetOutput4Edge(s + tileW - 4, srcStride, d + tailCol, dstWidth, false, false, tailMask);
