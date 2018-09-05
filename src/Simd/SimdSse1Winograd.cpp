@@ -93,35 +93,35 @@ namespace Simd
             size_t tailH = dstHeight - dstHeightFull + (pad ? 1 : 2);
             for (size_t c = 0; c < srcChannels; ++c)
             {
-                size_t row = 0, col = 0;
-                if (pad)
-                {
-                    if (pad)
-                        Winograd2x3iSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst), dst += 16;
-                    for (col = start; col < dstWidthFull; col += 2)
-                        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, dst), dst += 16;
-                    if (col < dstWidth)
-                        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst), dst += 16;
-                }
-                for (row = start; row < dstHeightFull; row += 2)
-                {
-                    if (pad)
-                        Winograd2x3iSetInput1p(src + row * srcWidth, srcWidth, 0, 4, 1, noseW, dst), dst += 16;
-                    for (col = start; col < dstWidthFull; col += 2)
-                        Winograd2x3iSetInput1(src + row * srcWidth + col, srcWidth, dst), dst += 16;
-                    if (col < dstWidth)
-                        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, 4, 0, tailW, dst), dst += 16;
-                }
-                if (row < dstHeight)
-                {
-                    if (pad)
-                        Winograd2x3iSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst), dst += 16;
-                    for (col = start; col < dstWidthFull; col += 2)
-                        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, dst), dst += 16;
-                    if (col < dstWidth)
-                        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst), dst += 16;
-                }
-                src += srcWidth * srcHeight;
+size_t row = 0, col = 0;
+if (pad)
+{
+    if (pad)
+        Winograd2x3iSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst), dst += 16;
+    for (col = start; col < dstWidthFull; col += 2)
+        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, dst), dst += 16;
+    if (col < dstWidth)
+        Winograd2x3iSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst), dst += 16;
+}
+for (row = start; row < dstHeightFull; row += 2)
+{
+    if (pad)
+        Winograd2x3iSetInput1p(src + row * srcWidth, srcWidth, 0, 4, 1, noseW, dst), dst += 16;
+    for (col = start; col < dstWidthFull; col += 2)
+        Winograd2x3iSetInput1(src + row * srcWidth + col, srcWidth, dst), dst += 16;
+    if (col < dstWidth)
+        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, 4, 0, tailW, dst), dst += 16;
+}
+if (row < dstHeight)
+{
+    if (pad)
+        Winograd2x3iSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst), dst += 16;
+    for (col = start; col < dstWidthFull; col += 2)
+        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, dst), dst += 16;
+    if (col < dstWidth)
+        Winograd2x3iSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst), dst += 16;
+}
+src += srcWidth * srcHeight;
             }
         }
 
@@ -190,71 +190,157 @@ namespace Simd
                 Base::Winograd2x3pSetFilter1(src, dst, size);
         }
 
+        SIMD_INLINE void Winograd2x3pSetInputLoad4Body(const float * src, __m128 * dst)
+        {
+            __m128 a0 = _mm_loadu_ps(src + 0);
+            __m128 a1 = _mm_loadu_ps(src + 2);
+            __m128 a2 = _mm_loadu_ps(src + 4);
+            __m128 a3 = _mm_loadu_ps(src + 6);
+            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
+            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
+            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
+            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInputLoad4Edge(const float * src, __m128 * dst, PadType pad)
+        {
+            __m128 a0 = (pad == PadNose1 ? LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0));
+            __m128 a1 = _mm_loadu_ps(src + 2);
+            __m128 a2 = _mm_loadu_ps(src + 4);
+            __m128 a3 = (pad == PadTail2 ? LoadPadZeroTail2(src + 6) : (pad == PadTail1 ? LoadPadZeroTail1(src + 6) : _mm_loadu_ps(src + 6)));
+            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
+            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
+            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
+            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInputLoad4Zero(__m128 * dst)
+        {
+            dst[0] = _mm_setzero_ps();
+            dst[1] = _mm_setzero_ps();
+            dst[2] = _mm_setzero_ps();
+            dst[3] = _mm_setzero_ps();
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4Store(const __m128 * t, float * dst, size_t dstStride)
+        {
+            _mm_storeu_ps(dst + 0 * dstStride, _mm_sub_ps(_mm_sub_ps(t[0], t[8]), _mm_sub_ps(t[2], t[10])));
+            _mm_storeu_ps(dst + 1 * dstStride, _mm_add_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[2], t[10])));
+            _mm_storeu_ps(dst + 2 * dstStride, _mm_sub_ps(_mm_sub_ps(t[2], t[10]), _mm_sub_ps(t[1], t[9])));
+            _mm_storeu_ps(dst + 3 * dstStride, _mm_sub_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[3], t[11])));
+            _mm_storeu_ps(dst + 4 * dstStride, _mm_sub_ps(_mm_add_ps(t[4], t[8]), _mm_add_ps(t[6], t[10])));
+            _mm_storeu_ps(dst + 5 * dstStride, _mm_add_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[6], t[10])));
+            _mm_storeu_ps(dst + 6 * dstStride, _mm_sub_ps(_mm_add_ps(t[6], t[10]), _mm_add_ps(t[5], t[9])));
+            _mm_storeu_ps(dst + 7 * dstStride, _mm_sub_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[7], t[11])));
+            _mm_storeu_ps(dst + 8 * dstStride, _mm_sub_ps(_mm_sub_ps(t[8], t[4]), _mm_sub_ps(t[10], t[6])));
+            _mm_storeu_ps(dst + 9 * dstStride, _mm_add_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[10], t[6])));
+            _mm_storeu_ps(dst + 10 * dstStride, _mm_sub_ps(_mm_sub_ps(t[10], t[6]), _mm_sub_ps(t[9], t[5])));
+            _mm_storeu_ps(dst + 11 * dstStride, _mm_sub_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[11], t[7])));
+            _mm_storeu_ps(dst + 12 * dstStride, _mm_sub_ps(_mm_sub_ps(t[4], t[12]), _mm_sub_ps(t[6], t[14])));
+            _mm_storeu_ps(dst + 13 * dstStride, _mm_add_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[6], t[14])));
+            _mm_storeu_ps(dst + 14 * dstStride, _mm_sub_ps(_mm_sub_ps(t[6], t[14]), _mm_sub_ps(t[5], t[13])));
+            _mm_storeu_ps(dst + 15 * dstStride, _mm_sub_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[7], t[15])));
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4Body(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 t[16];
+            Winograd2x3pSetInputLoad4Body(src + 0 * srcStride, t + 0);
+            Winograd2x3pSetInputLoad4Body(src + 1 * srcStride, t + 4);
+            Winograd2x3pSetInputLoad4Body(src + 2 * srcStride, t + 8);
+            Winograd2x3pSetInputLoad4Body(src + 3 * srcStride, t + 12);
+            Winograd2x3pSetInput4Store(t, dst, dstStride);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetInput4Edge(const float * src, size_t srcStride, PadType rowPad, PadType colPad, float * dst, size_t dstStride)
+        {
+            __m128 t[16];
+            if (rowPad == PadNose1)
+                Winograd2x3pSetInputLoad4Zero(t + 0);
+            else
+                Winograd2x3pSetInputLoad4Edge(src + 0 * srcStride, t + 0, colPad);
+            Winograd2x3pSetInputLoad4Edge(src + 1 * srcStride, t + 4, colPad);
+            if (rowPad == PadTail2)
+                Winograd2x3pSetInputLoad4Zero(t + 8);
+            else
+                Winograd2x3pSetInputLoad4Edge(src + 2 * srcStride, t + 8, colPad);
+            if (rowPad >= PadTail1)
+                Winograd2x3pSetInputLoad4Zero(t + 12);
+            else
+                Winograd2x3pSetInputLoad4Edge(src + 3 * srcStride, t + 12, colPad);
+            Winograd2x3pSetInput4Store(t, dst, dstStride);
+        }
+
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
         {
-            size_t dstHeight = pad ? srcHeight : srcHeight - 2;
-            size_t dstWidth = pad ? srcWidth : srcWidth - 2;
-            size_t dstStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*srcChannels;
-            size_t dstHeightBody = AlignLo(dstHeight, 2);
-            size_t dstWidthBody = AlignLo(dstWidth, 2);
-            size_t noseW = Simd::Min<size_t>(4, dstWidth + 1);
-            size_t noseH = Simd::Min<size_t>(4, dstHeight + 1);
-            size_t startEdge = pad ? 2 : 0, startBody = 0;
+            if (srcHeight < 4 || srcWidth < 10)
+            {
+                Base::Winograd2x3pSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
+                return;
+            }
+            size_t dstH = pad ? srcHeight : srcHeight - 2;
+            size_t dstW = pad ? srcWidth : srcWidth - 2;
+            size_t tileH = (dstH + 1) / 2;
+            size_t tileW = (dstW + 1) / 2;
+            size_t dstStride = srcChannels*tileH*tileW;
+
+            size_t dstH2 = AlignLo(dstH, 2);
+            size_t dstW2 = AlignLo(dstW, 2);
+            size_t dstW8 = AlignLo(dstW, 8);
+            PadType rowPad = dstH2 < dstH ? PadTail1 : PadNone;
+            PadType colPad = dstW2 < dstW ? PadTail1 : PadNone;
+            size_t tailCol = dstW2 < dstW ? dstW - 7 : dstW - 8;
+            size_t tailRow = dstH2 < dstH ? dstH - 1 : dstH - 2;
+            bool specialColTail = dstW8 < dstW || pad;
+            bool specialRowTail = dstH2 < dstH || pad;
             if (pad)
             {
-                if (dstHeight == dstHeightBody)
-                    dstHeightBody -= 2;
-                if (dstWidth == dstWidthBody)
-                    dstWidthBody -= 2;
                 src -= srcWidth + 1;
-                startBody = dstWidth < 9 ? 2 : 8;
+                rowPad = dstH2 < dstH ? PadTail2 : PadTail1;
+                colPad = dstW2 < dstW ? PadTail2 : PadTail1;
             }
-            size_t tailW = dstWidth - dstWidthBody + (pad ? 1 : 2);
-            size_t tailH = dstHeight - dstHeightBody + (pad ? 1 : 2);
-            size_t dstWidthEdge8 = startEdge + (dstWidthBody >= startEdge ? AlignLo(dstWidthBody - startEdge, 8) : 0);
-            size_t dstWidthBody8 = startBody + (dstWidthBody >= startBody ? AlignLo(dstWidthBody - startBody, 8) : 0);
             for (size_t c = 0; c < srcChannels; ++c)
             {
-                size_t row = 0, col = 0;
+                size_t row = 0, tileY = 0;
                 if (pad)
                 {
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + row * srcWidth;
+                    float * d = dst + tileY * tileW;
                     if (pad)
-                        Base::Winograd2x3pSetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
-                    for (col = startEdge; col < dstWidthEdge8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4PadEdgeRow(src + col, srcWidth, 1, noseH, dst, dstStride);
-                    for (; col < dstWidthBody; col += 2)
-                        Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, 4, dst++, dstStride);
-                    if (col < dstWidth)
-                        Base::Winograd2x3pSetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
+                        Winograd2x3pSetInput4Edge(s + col, srcWidth, PadNose1, PadNose1, d + tileX, dstStride), col += 8, tileX += 4;
+                    for (; col < dstW8; col += 8, tileX += 4)
+                        Winograd2x3pSetInput4Edge(s + col, srcWidth, PadNose1, PadNone, d + tileX, dstStride);
+                    if (specialColTail)
+                        Winograd2x3pSetInput4Edge(s + tailCol, srcWidth, PadNose1, colPad, d + tileW - 4, dstStride);
+                    row += 2, tileY += 1;
                 }
-                for (row = startEdge; row < dstHeightBody; row += 2)
+                for (; row < dstH2; row += 2, tileY += 1)
                 {
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + row * srcWidth;
+                    float * d = dst + tileY * tileW;
                     if (pad)
-                    {
-                        if(startBody == 8)
-                            Winograd2x3pSetInput4Nose(src + row * srcWidth, srcWidth, dst, dstStride), dst +=4;
-                        else
-                            Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, 4, 1, noseW, dst++, dstStride);
-                    }
-                    for (col = startBody; col < dstWidthBody8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4Body(src + row * srcWidth + col, srcWidth, dst, dstStride);
-                    for (; col < dstWidthBody; col += 2)
-                        Base::Winograd2x3pSetInput1(src + row * srcWidth + col, srcWidth, dst++, dstStride);
-                    if (col < dstWidth)
-                        Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, 4, 0, tailW, dst++, dstStride);
+                        Winograd2x3pSetInput4Edge(s + col, srcWidth, PadNone, PadNose1, d + tileX, dstStride), col += 8, tileX += 4;
+                    for (; col < dstW8; col += 8, tileX += 4)
+                        Winograd2x3pSetInput4Body(s + col, srcWidth, d + tileX, dstStride);
+                    if (specialColTail)
+                        Winograd2x3pSetInput4Edge(s + tailCol, srcWidth, PadNone, colPad, d + tileW - 4, dstStride);
                 }
-                if (row < dstHeight)
+                if (specialRowTail)
                 {
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + tailRow * srcWidth;
+                    float * d = dst + (tileH - 1) * tileW;
                     if (pad)
-                        Base::Winograd2x3pSetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
-                    for (col = startEdge; col < dstWidthEdge8; col += 8, dst += 4)
-                        Winograd2x3pSetInput4PadEdgeRow(src + row * srcWidth + col, srcWidth, 0, tailH, dst, dstStride);
-                    for (; col < dstWidthBody; col += 2)
-                        Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 4, dst++, dstStride);
-                    if (col < dstWidth)
-                        Base::Winograd2x3pSetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);
+                        Winograd2x3pSetInput4Edge(s + col, srcWidth, rowPad, PadNose1, d + tileX, dstStride), col += 8, tileX += 4;
+                    for (; col < dstW8; col += 8, tileX += 4)
+                        Winograd2x3pSetInput4Edge(s + col, srcWidth, rowPad, PadNone, d + tileX, dstStride);
+                    if (specialColTail)
+                        Winograd2x3pSetInput4Edge(s + tailCol, srcWidth, rowPad, colPad, d + tileW - 4, dstStride);
                 }
                 src += srcWidth * srcHeight;
+                dst += tileW * tileH;
             }
         }
 

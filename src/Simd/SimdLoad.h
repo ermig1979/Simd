@@ -28,6 +28,14 @@
 
 namespace Simd
 {
+    enum PadType
+    {
+        PadNose1,
+        PadNone,
+        PadTail1,
+        PadTail2,
+    };
+
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
@@ -46,6 +54,30 @@ namespace Simd
         SIMD_INLINE __m128 Load(const float * p0, const float * p1)
         {
             return _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1);
+        }
+
+        SIMD_INLINE __m128 LoadPadZeroNose1(const float * p)
+        {
+            SIMD_ALIGNED(16) const int32_t m[F] = { 0, -1, -1, -1 };
+            __m128 a = _mm_loadu_ps(p + 1);
+            __m128 b = _mm_shuffle_ps(a, a, 0x90);
+            return _mm_and_ps(b, _mm_load_ps((float*)m));
+        }
+
+        SIMD_INLINE __m128 LoadPadZeroTail1(const float * p)
+        {
+            SIMD_ALIGNED(16) const int32_t m[F] = { -1, -1, -1, 0 };
+            __m128 a = _mm_loadu_ps(p - 1);
+            __m128 b = _mm_shuffle_ps(a, a, 0xF9);
+            return _mm_and_ps(b, _mm_load_ps((float*)m));
+        }
+
+        SIMD_INLINE __m128 LoadPadZeroTail2(const float * p)
+        {
+            SIMD_ALIGNED(16) const int32_t m[F] = { -1, -1, 0, 0 };
+            __m128 a = _mm_loadu_ps(p - 2);
+            __m128 b = _mm_shuffle_ps(a, a, 0xFE);
+            return _mm_and_ps(b, _mm_load_ps((float*)m));
         }
     }
 #endif//SIMD_SSE_ENABLE

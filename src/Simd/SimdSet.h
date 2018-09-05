@@ -54,6 +54,16 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE __m256 Set(__m128 a0, __m128 a1)
+        {
+            return _mm256_insertf128_ps(_mm256_castps128_ps256(a0), a1, 1);
+        }
+    }
+#endif// SIMD_AVX_ENABLE
+
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {

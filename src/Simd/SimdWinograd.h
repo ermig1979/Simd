@@ -25,6 +25,7 @@
 #define __SimdWinograd_h__
 
 #include "Simd/SimdMath.h"
+#include "Simd/SimdLoad.h"
 
 namespace Simd
 {
@@ -100,56 +101,6 @@ namespace Simd
             dst[13 * stride] = (src[6] + src[8] + src[7])*r2;
             dst[14 * stride] = (src[6] + src[8] - src[7])*r2;
             dst[15 * stride] = src[8];
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            float tmp[16];
-            tmp[0] = src[0 * srcStride + 0];
-            tmp[1] = src[0 * srcStride + 1];
-            tmp[2] = src[0 * srcStride + 2];
-            tmp[3] = src[0 * srcStride + 3];
-
-            tmp[4] = src[1 * srcStride + 0];
-            tmp[5] = src[1 * srcStride + 1];
-            tmp[6] = src[1 * srcStride + 2];
-            tmp[7] = src[1 * srcStride + 3];
-
-            tmp[8] = src[2 * srcStride + 0];
-            tmp[9] = src[2 * srcStride + 1];
-            tmp[10] = src[2 * srcStride + 2];
-            tmp[11] = src[2 * srcStride + 3];
-
-            tmp[12] = src[3 * srcStride + 0];
-            tmp[13] = src[3 * srcStride + 1];
-            tmp[14] = src[3 * srcStride + 2];
-            tmp[15] = src[3 * srcStride + 3];
-
-            dst[0 * dstStride] = (tmp[0] - tmp[8]) - (tmp[2] - tmp[10]);
-            dst[1 * dstStride] = (tmp[1] - tmp[9]) + (tmp[2] - tmp[10]);
-            dst[2 * dstStride] = (tmp[2] - tmp[10]) - (tmp[1] - tmp[9]);
-            dst[3 * dstStride] = (tmp[1] - tmp[9]) - (tmp[3] - tmp[11]);
-            dst[4 * dstStride] = (tmp[4] + tmp[8]) - (tmp[6] + tmp[10]);
-            dst[5 * dstStride] = (tmp[5] + tmp[9]) + (tmp[6] + tmp[10]);
-            dst[6 * dstStride] = (tmp[6] + tmp[10]) - (tmp[5] + tmp[9]);
-            dst[7 * dstStride] = (tmp[5] + tmp[9]) - (tmp[7] + tmp[11]);
-            dst[8 * dstStride] = (tmp[8] - tmp[4]) - (tmp[10] - tmp[6]);
-            dst[9 * dstStride] = (tmp[9] - tmp[5]) + (tmp[10] - tmp[6]);
-            dst[10 * dstStride] = (tmp[10] - tmp[6]) - (tmp[9] - tmp[5]);
-            dst[11 * dstStride] = (tmp[9] - tmp[5]) - (tmp[11] - tmp[7]);
-            dst[12 * dstStride] = (tmp[4] - tmp[12]) - (tmp[6] - tmp[14]);
-            dst[13 * dstStride] = (tmp[5] - tmp[13]) + (tmp[6] - tmp[14]);
-            dst[14 * dstStride] = (tmp[6] - tmp[14]) - (tmp[5] - tmp[13]);
-            dst[15 * dstStride] = (tmp[5] - tmp[13]) - (tmp[7] - tmp[15]);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
-        {
-            float tmp[4 * 4] = { 0 };
-            for (size_t row = rowB; row < rowE; ++row)
-                for (size_t col = colB; col < colE; ++col)
-                    tmp[row * 4 + col] = src[row * srcStride + col];
-            Winograd2x3pSetInput1(tmp, 4, dst, dstStride);
         }
 
         SIMD_INLINE void Winograd2x3pSetOutput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
@@ -270,95 +221,6 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        SIMD_INLINE __m128 LoadNose(const float * p)
-        {
-            SIMD_ALIGNED(16) const int32_t m[F] = {0, -1, -1, -1};
-            return _mm_and_ps(_mm_loadu_ps(p), _mm_load_ps((float*)m));
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInputLoad4Body(const float * src, __m128 * dst)
-        {
-            __m128 a0 = _mm_loadu_ps(src + 0);
-            __m128 a1 = _mm_loadu_ps(src + 2);
-            __m128 a2 = _mm_loadu_ps(src + 4);
-            __m128 a3 = _mm_loadu_ps(src + 6);
-            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
-            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
-            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
-            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInputLoad4Nose(const float * src, __m128 * dst)
-        {
-            __m128 a0 = LoadNose(src);
-            __m128 a1 = _mm_loadu_ps(src + 2);
-            __m128 a2 = _mm_loadu_ps(src + 4);
-            __m128 a3 = _mm_loadu_ps(src + 6);
-            dst[0] = _mm_shuffle_ps(a0, a2, 0x88);
-            dst[1] = _mm_shuffle_ps(a0, a2, 0xDD);
-            dst[2] = _mm_shuffle_ps(a1, a3, 0x88);
-            dst[3] = _mm_shuffle_ps(a1, a3, 0xDD);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput4Store(const __m128 * t, float * dst, size_t dstStride)
-        {
-            _mm_storeu_ps(dst + 0 * dstStride, _mm_sub_ps(_mm_sub_ps(t[0], t[8]), _mm_sub_ps(t[2], t[10])));
-            _mm_storeu_ps(dst + 1 * dstStride, _mm_add_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[2], t[10])));
-            _mm_storeu_ps(dst + 2 * dstStride, _mm_sub_ps(_mm_sub_ps(t[2], t[10]), _mm_sub_ps(t[1], t[9])));
-            _mm_storeu_ps(dst + 3 * dstStride, _mm_sub_ps(_mm_sub_ps(t[1], t[9]), _mm_sub_ps(t[3], t[11])));
-            _mm_storeu_ps(dst + 4 * dstStride, _mm_sub_ps(_mm_add_ps(t[4], t[8]), _mm_add_ps(t[6], t[10])));
-            _mm_storeu_ps(dst + 5 * dstStride, _mm_add_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[6], t[10])));
-            _mm_storeu_ps(dst + 6 * dstStride, _mm_sub_ps(_mm_add_ps(t[6], t[10]), _mm_add_ps(t[5], t[9])));
-            _mm_storeu_ps(dst + 7 * dstStride, _mm_sub_ps(_mm_add_ps(t[5], t[9]), _mm_add_ps(t[7], t[11])));
-            _mm_storeu_ps(dst + 8 * dstStride, _mm_sub_ps(_mm_sub_ps(t[8], t[4]), _mm_sub_ps(t[10], t[6])));
-            _mm_storeu_ps(dst + 9 * dstStride, _mm_add_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[10], t[6])));
-            _mm_storeu_ps(dst + 10 * dstStride, _mm_sub_ps(_mm_sub_ps(t[10], t[6]), _mm_sub_ps(t[9], t[5])));
-            _mm_storeu_ps(dst + 11 * dstStride, _mm_sub_ps(_mm_sub_ps(t[9], t[5]), _mm_sub_ps(t[11], t[7])));
-            _mm_storeu_ps(dst + 12 * dstStride, _mm_sub_ps(_mm_sub_ps(t[4], t[12]), _mm_sub_ps(t[6], t[14])));
-            _mm_storeu_ps(dst + 13 * dstStride, _mm_add_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[6], t[14])));
-            _mm_storeu_ps(dst + 14 * dstStride, _mm_sub_ps(_mm_sub_ps(t[6], t[14]), _mm_sub_ps(t[5], t[13])));
-            _mm_storeu_ps(dst + 15 * dstStride, _mm_sub_ps(_mm_sub_ps(t[5], t[13]), _mm_sub_ps(t[7], t[15])));
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput4Body(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            __m128 t[16];
-            Winograd2x3pSetInputLoad4Body(src + 0 * srcStride, t + 0);
-            Winograd2x3pSetInputLoad4Body(src + 1 * srcStride, t + 4);
-            Winograd2x3pSetInputLoad4Body(src + 2 * srcStride, t + 8);
-            Winograd2x3pSetInputLoad4Body(src + 3 * srcStride, t + 12);
-            Winograd2x3pSetInput4Store(t, dst, dstStride);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput4Nose(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            __m128 t[16];
-            Winograd2x3pSetInputLoad4Nose(src + 0 * srcStride, t + 0);
-            Winograd2x3pSetInputLoad4Nose(src + 1 * srcStride, t + 4);
-            Winograd2x3pSetInputLoad4Nose(src + 2 * srcStride, t + 8);
-            Winograd2x3pSetInputLoad4Nose(src + 3 * srcStride, t + 12);
-            Winograd2x3pSetInput4Store(t, dst, dstStride);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetInput4PadEdgeRow(const float * src, size_t srcStride, size_t rowB, size_t rowE, float * dst, size_t dstStride)
-        {
-            __m128 t[16];
-            __m128 * pt = t;
-            for (size_t row = 0; row < 4; row++, pt += 4)
-            {
-                if (row >= rowB && row < rowE)
-                    Winograd2x3pSetInputLoad4Body(src + row * srcStride, pt);
-                else
-                {
-                    pt[0] = _mm_setzero_ps();
-                    pt[1] = _mm_setzero_ps();
-                    pt[2] = _mm_setzero_ps();
-                    pt[3] = _mm_setzero_ps();
-                }
-            }
-            Winograd2x3pSetInput4Store(t, dst, dstStride);
-        }
-
         SIMD_INLINE void Load2t(const float * src, size_t srcStride, __m128 * dst)
         {
             __m128 s0 = _mm_loadu_ps(src + 0 * srcStride);
