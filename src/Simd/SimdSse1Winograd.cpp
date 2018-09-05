@@ -344,31 +344,103 @@ src += srcWidth * srcHeight;
             }
         }
 
+        SIMD_INLINE void Winograd2x3pSetOutputLoad2t(const float * src, size_t srcStride, __m128 * dst)
+        {
+            __m128 s0 = _mm_loadu_ps(src + 0 * srcStride);
+            __m128 s1 = _mm_loadu_ps(src + 1 * srcStride);
+            __m128 s2 = _mm_loadu_ps(src + 2 * srcStride);
+            __m128 s3 = _mm_loadu_ps(src + 3 * srcStride);
+            dst[0] = _mm_add_ps(_mm_add_ps(s0, s1), s2);
+            dst[1] = _mm_sub_ps(_mm_sub_ps(s1, s2), s3);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetOutput4(const float * src, size_t srcStride, __m128 * dst)
+        {
+            __m128 t[8], d[4];
+            Winograd2x3pSetOutputLoad2t(src + 0 * srcStride, srcStride, t + 0);
+            Winograd2x3pSetOutputLoad2t(src + 4 * srcStride, srcStride, t + 2);
+            Winograd2x3pSetOutputLoad2t(src + 8 * srcStride, srcStride, t + 4);
+            Winograd2x3pSetOutputLoad2t(src + 12 * srcStride, srcStride, t + 6);
+            d[0] = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
+            d[1] = _mm_add_ps(_mm_add_ps(t[1], t[3]), t[5]);
+            d[2] = _mm_sub_ps(_mm_sub_ps(t[2], t[4]), t[6]);
+            d[3] = _mm_sub_ps(_mm_sub_ps(t[3], t[5]), t[7]);
+            dst[0] = _mm_unpacklo_ps(d[0], d[1]);
+            dst[1] = _mm_unpackhi_ps(d[0], d[1]);
+            dst[2] = _mm_unpacklo_ps(d[2], d[3]);
+            dst[3] = _mm_unpackhi_ps(d[2], d[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetOutput4Body(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 d[4];
+            Winograd2x3pSetOutput4(src, srcStride, d);
+            _mm_storeu_ps(dst + 0 * dstStride + 0, d[0]);
+            _mm_storeu_ps(dst + 0 * dstStride + 4, d[1]);
+            _mm_storeu_ps(dst + 1 * dstStride + 0, d[2]);
+            _mm_storeu_ps(dst + 1 * dstStride + 4, d[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3pSetOutput4Edge(const float * src, size_t srcStride, float * dst, size_t dstStride, bool lastRow, bool lastCol, const __m128 & mask)
+        {
+            __m128 d[4];
+            Winograd2x3pSetOutput4(src, srcStride, d);
+            _mm_storeu_ps(dst + 0, d[0]);
+            if(lastCol)
+                _mm_storeu_ps(dst + 4, d[1]);
+            else
+                StoreMasked<false>(dst + 4, d[1], mask);
+            if (lastRow)
+            {
+                dst += dstStride;
+                _mm_storeu_ps(dst + 0, d[2]);
+                if (lastCol)
+                    _mm_storeu_ps(dst + 4, d[1]);
+                else
+                    StoreMasked<false>(dst + 4, d[3], mask);
+            }
+        }
+
         void Winograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
         {
-            size_t srcStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*dstChannels;
-            size_t dstHeightFull = AlignLo(dstHeight, 2);
-            size_t dstWidthFull = AlignLo(dstWidth, 2);
-            size_t dstWidthFull8 = AlignLo(dstWidth, 8);
+            if (dstHeight < 2 || dstWidth < 8)
+            {
+                Base::Winograd2x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
+                return;
+            }
+            size_t tileH = (dstHeight + 1) / 2;
+            size_t tileW = (dstWidth + 1) / 2;
+            size_t srcStride = dstChannels*tileH*tileW;
+            size_t dstH2 = AlignLo(dstHeight, 2);
+            size_t dstW2 = AlignLo(dstWidth, 2);
+            size_t dstW8 = AlignLo(dstWidth, 8);
+            __m128 tailMask = LeftNotZero(4 + dstW2 - dstWidth);
+            size_t tailCol = dstW2 < dstWidth ? dstWidth - 7 : dstWidth - 8;
+            size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
             for (size_t c = 0; c < dstChannels; ++c)
             {
-                size_t row, col;
-                for (row = 0; row < dstHeightFull; row += 2)
+                size_t row = 0, tileY = 0;
+                for (; row < dstH2; row += 2, tileY += 1)
                 {
-                    for (col = 0; col < dstWidthFull8; col += 8, src += 4)
-                        Winograd2x3pSetOutput4(src, srcStride, dst + row * dstWidth + col, dstWidth);
-                    for (; col < dstWidthFull; col += 2)
-                        Base::Winograd2x3pSetOutput1(src++, srcStride, dst + row * dstWidth + col, dstWidth);
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + tileY * tileW;
+                    float * d = dst + row * dstWidth;
+                    for (col = 0; col < dstW8; col += 8, tileX += 4)
+                        Winograd2x3pSetOutput4Body(s + tileX, srcStride, d + col, dstWidth);
                     if (col < dstWidth)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, 2, dstWidth - col);
+                        Winograd2x3pSetOutput4Edge(s + tileW - 4, srcStride, d + tailCol, dstWidth, true, false, tailMask);
                 }
                 if (row < dstHeight)
                 {
-                    for (col = 0; col < dstWidthFull; col += 2)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, 2);
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + (tileH - 1) * tileW;
+                    float * d = dst + (dstHeight - 1) * dstWidth;
+                    for (col = 0; col < dstW8; col += 8, tileX += 4)
+                        Winograd2x3pSetOutput4Edge(s + tileX, srcStride, d + col, dstWidth, false, true, tailMask);
                     if (col < dstWidth)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col);
+                        Winograd2x3pSetOutput4Edge(s + tileW - 4, srcStride, d + tailCol, dstWidth, false, false, tailMask);
                 }
+                src += tileW * tileH;
                 dst += dstHeight * dstWidth;
             }
         }

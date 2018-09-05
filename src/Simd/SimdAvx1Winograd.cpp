@@ -314,7 +314,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void Load2t(const float * src, size_t srcStride, __m256 * dst)
+        SIMD_INLINE void Winograd2x3pSetOutputLoad2t(const float * src, size_t srcStride, __m256 * dst)
         {
             __m256 s0 = _mm256_loadu_ps(src + 0 * srcStride);
             __m256 s1 = _mm256_loadu_ps(src + 1 * srcStride);
@@ -324,58 +324,97 @@ namespace Simd
             dst[1] = _mm256_sub_ps(_mm256_sub_ps(s1, s2), s3);
         }
 
-        SIMD_INLINE void Winograd2x3pSetOutput8(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        SIMD_INLINE void Winograd2x3pSetOutput8(const float * src, size_t srcStride, __m256 * dst)
         {
-            __m256 t[8];
-            Load2t(src + 0 * srcStride, srcStride, t + 0);
-            Load2t(src + 4 * srcStride, srcStride, t + 2);
-            Load2t(src + 8 * srcStride, srcStride, t + 4);
-            Load2t(src + 12 * srcStride, srcStride, t + 6);
+            __m256 t[8], d[4], u[4];
+            Winograd2x3pSetOutputLoad2t(src + 0 * srcStride, srcStride, t + 0);
+            Winograd2x3pSetOutputLoad2t(src + 4 * srcStride, srcStride, t + 2);
+            Winograd2x3pSetOutputLoad2t(src + 8 * srcStride, srcStride, t + 4);
+            Winograd2x3pSetOutputLoad2t(src + 12 * srcStride, srcStride, t + 6);
+            d[0] = _mm256_add_ps(_mm256_add_ps(t[0], t[2]), t[4]);
+            d[1] = _mm256_add_ps(_mm256_add_ps(t[1], t[3]), t[5]);
+            d[2] = _mm256_sub_ps(_mm256_sub_ps(t[2], t[4]), t[6]);
+            d[3] = _mm256_sub_ps(_mm256_sub_ps(t[3], t[5]), t[7]);
+            u[0] = _mm256_unpacklo_ps(d[0], d[1]);
+            u[1] = _mm256_unpackhi_ps(d[0], d[1]);
+            u[2] = _mm256_unpacklo_ps(d[2], d[3]);
+            u[3] = _mm256_unpackhi_ps(d[2], d[3]);
+            dst[0] = _mm256_permute2f128_ps(u[0], u[1], 0x20);
+            dst[1] = _mm256_permute2f128_ps(u[0], u[1], 0x31);
+            dst[2] = _mm256_permute2f128_ps(u[2], u[3], 0x20);
+            dst[3] = _mm256_permute2f128_ps(u[2], u[3], 0x31);
+        }
 
-            __m256 d00 = _mm256_add_ps(_mm256_add_ps(t[0], t[2]), t[4]);
-            __m256 d01 = _mm256_add_ps(_mm256_add_ps(t[1], t[3]), t[5]);
-            __m256 d10 = _mm256_sub_ps(_mm256_sub_ps(t[2], t[4]), t[6]);
-            __m256 d11 = _mm256_sub_ps(_mm256_sub_ps(t[3], t[5]), t[7]);
+        SIMD_INLINE void Winograd2x3pSetOutput8Body(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m256 d[4];
+            Winograd2x3pSetOutput8(src, srcStride, d);
+            _mm256_storeu_ps(dst + 0 * dstStride + 0, d[0]);
+            _mm256_storeu_ps(dst + 0 * dstStride + 8, d[1]);
+            _mm256_storeu_ps(dst + 1 * dstStride + 0, d[2]);
+            _mm256_storeu_ps(dst + 1 * dstStride + 8, d[3]);
+        }
 
-            __m256 u00 = _mm256_unpacklo_ps(d00, d01);
-            __m256 u01 = _mm256_unpackhi_ps(d00, d01);
-            __m256 u10 = _mm256_unpacklo_ps(d10, d11);
-            __m256 u11 = _mm256_unpackhi_ps(d10, d11);
-
-            _mm256_storeu_ps(dst + 0 * dstStride + 0, _mm256_permute2f128_ps(u00, u01, 0x20));
-            _mm256_storeu_ps(dst + 0 * dstStride + 8, _mm256_permute2f128_ps(u00, u01, 0x31));
-            _mm256_storeu_ps(dst + 1 * dstStride + 0, _mm256_permute2f128_ps(u10, u11, 0x20));
-            _mm256_storeu_ps(dst + 1 * dstStride + 8, _mm256_permute2f128_ps(u10, u11, 0x31));
+        SIMD_INLINE void Winograd2x3pSetOutput8Edge(const float * src, size_t srcStride, float * dst, size_t dstStride, bool lastRow, bool lastCol, const __m256 & mask)
+        {
+            __m256 d[4];
+            Winograd2x3pSetOutput8(src, srcStride, d);
+            _mm256_storeu_ps(dst + 0, d[0]);
+            if (lastCol)
+                _mm256_storeu_ps(dst + 8, d[1]);
+            else
+                StoreMasked<false>(dst + 8, d[1], mask);
+            if (lastRow)
+            {
+                dst += dstStride;
+                _mm256_storeu_ps(dst + 0, d[2]);
+                if (lastCol)
+                    _mm256_storeu_ps(dst + 8, d[1]);
+                else
+                    StoreMasked<false>(dst + 8, d[3], mask);
+            }
         }
 
         void Winograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
         {
-            size_t srcStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*dstChannels;
-            size_t dstHeightFull = AlignLo(dstHeight, 2);
-            size_t dstWidthFull = AlignLo(dstWidth, 2);
-            size_t dstWidthFull8 = AlignLo(dstWidth, 8);
-            size_t dstWidthFull16 = AlignLo(dstWidth, 16);
+            if (dstHeight < 2 || dstWidth < 16)
+            {
+                Sse::Winograd2x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
+                return;
+            }
+            size_t tileH = (dstHeight + 1) / 2;
+            size_t tileW = (dstWidth + 1) / 2;
+            size_t srcStride = dstChannels * tileH*tileW;
+            size_t dstH2 = AlignLo(dstHeight, 2);
+            size_t dstW2 = AlignLo(dstWidth, 2);
+            size_t dstW16 = AlignLo(dstWidth, 16);
+            __m256 tailMask = LeftNotZero(8 + dstW2 - dstWidth);
+            size_t tailCol = dstW2 < dstWidth ? dstWidth - 15 : dstWidth - 16;
+            size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
             for (size_t c = 0; c < dstChannels; ++c)
             {
-                size_t row, col;
-                for (row = 0; row < dstHeightFull; row += 2)
+                size_t row = 0, tileY = 0;
+                for (; row < dstH2; row += 2, tileY += 1)
                 {
-                    for (col = 0; col < dstWidthFull16; col += 16, src += 8)
-                        Winograd2x3pSetOutput8(src, srcStride, dst + row * dstWidth + col, dstWidth);
-                    for (; col < dstWidthFull8; col += 8, src += 4)
-                        Sse::Winograd2x3pSetOutput4(src, srcStride, dst + row * dstWidth + col, dstWidth);
-                    for (; col < dstWidthFull; col += 2)
-                        Base::Winograd2x3pSetOutput1(src++, srcStride, dst + row * dstWidth + col, dstWidth);
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + tileY * tileW;
+                    float * d = dst + row * dstWidth;
+                    for (col = 0; col < dstW16; col += 16, tileX += 8)
+                        Winograd2x3pSetOutput8Body(s + tileX, srcStride, d + col, dstWidth);
                     if (col < dstWidth)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, 2, dstWidth - col);
+                        Winograd2x3pSetOutput8Edge(s + tileW - 8, srcStride, d + tailCol, dstWidth, true, false, tailMask);
                 }
                 if (row < dstHeight)
                 {
-                    for (col = 0; col < dstWidthFull; col += 2)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, 2);
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + (tileH - 1) * tileW;
+                    float * d = dst + (dstHeight - 1) * dstWidth;
+                    for (col = 0; col < dstW16; col += 16, tileX += 8)
+                        Winograd2x3pSetOutput8Edge(s + tileX, srcStride, d + col, dstWidth, false, true, tailMask);
                     if (col < dstWidth)
-                        Base::Winograd2x3pSetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col);
+                        Winograd2x3pSetOutput8Edge(s + tileW - 8, srcStride, d + tailCol, dstWidth, false, false, tailMask);
                 }
+                src += tileW * tileH;
                 dst += dstHeight * dstWidth;
             }
         }

@@ -57,6 +57,12 @@ namespace Simd
         {
             _mm_storeh_pi((__m64*)p, a);
         }
+
+        template <bool align> SIMD_INLINE void StoreMasked(float * p, __m128 value, __m128 mask)
+        {
+            __m128 old = Load<align>(p);
+            Store<align>(p, Combine(mask, value, old));
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -131,6 +137,12 @@ namespace Simd
         {
             Sse::Store<align>(p0, _mm256_extractf128_ps(a, 0));
             Sse::Store<align>(p1, _mm256_extractf128_ps(a, 1));
+        }
+
+        template <bool align> SIMD_INLINE void StoreMasked(float * p, __m256 value, __m256 mask)
+        {
+            __m256 old = Load<align>(p);
+            Store<align>(p, _mm256_blendv_ps(old, value, mask));
         }
     }
 #endif

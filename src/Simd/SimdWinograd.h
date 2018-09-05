@@ -103,51 +103,6 @@ namespace Simd
             dst[15 * stride] = src[8];
         }
 
-        SIMD_INLINE void Winograd2x3pSetOutput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            float c1[16];
-            c1[0] = src[0 * srcStride];
-            c1[1] = src[1 * srcStride];
-            c1[2] = src[2 * srcStride];
-            c1[3] = src[3 * srcStride];
-            c1[4] = src[4 * srcStride];
-            c1[5] = src[5 * srcStride];
-            c1[6] = src[6 * srcStride];
-            c1[7] = src[7 * srcStride];
-            c1[8] = src[8 * srcStride];
-            c1[9] = src[9 * srcStride];
-            c1[10] = src[10 * srcStride];
-            c1[11] = src[11 * srcStride];
-            c1[12] = src[12 * srcStride];
-            c1[13] = src[13 * srcStride];
-            c1[14] = src[14 * srcStride];
-            c1[15] = src[15 * srcStride];
-
-            float tmp[8];
-            tmp[0] = c1[0] + c1[1] + c1[2];
-            tmp[1] = c1[1] - c1[2] - c1[3];
-            tmp[2] = c1[4] + c1[5] + c1[6];
-            tmp[3] = c1[5] - c1[6] - c1[7];
-            tmp[4] = c1[8] + c1[9] + c1[10];
-            tmp[5] = c1[9] - c1[10] - c1[11];
-            tmp[6] = c1[12] + c1[13] + c1[14];
-            tmp[7] = c1[13] - c1[14] - c1[15];
-
-            dst[0 * dstStride + 0] = tmp[0] + tmp[2] + tmp[4];
-            dst[0 * dstStride + 1] = tmp[1] + tmp[3] + tmp[5];
-            dst[1 * dstStride + 0] = tmp[2] - tmp[4] - tmp[6];
-            dst[1 * dstStride + 1] = tmp[3] - tmp[5] - tmp[7];
-        }
-
-        SIMD_INLINE void Winograd2x3pSetOutput1p(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t rowE, size_t colE)
-        {
-            float tmp[2 * 2];
-            Winograd2x3pSetOutput1(src, srcStride, tmp, 2);
-            for (size_t row = 0; row < rowE; ++row)
-                for (size_t col = 0; col < colE; ++col)
-                    dst[row*dstStride + col] = tmp[row * 2 + col];
-        }
-
         SIMD_INLINE void Winograd4x3pSetFilter1(const float * src, float * dst, size_t stride)
         {
             const float r4 = float(1.0f / 4.0f);
@@ -217,40 +172,6 @@ namespace Simd
             dst[stride*35] = t[17];
         }
     }
-
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
-    {
-        SIMD_INLINE void Load2t(const float * src, size_t srcStride, __m128 * dst)
-        {
-            __m128 s0 = _mm_loadu_ps(src + 0 * srcStride);
-            __m128 s1 = _mm_loadu_ps(src + 1 * srcStride);
-            __m128 s2 = _mm_loadu_ps(src + 2 * srcStride);
-            __m128 s3 = _mm_loadu_ps(src + 3 * srcStride);
-            dst[0] = _mm_add_ps(_mm_add_ps(s0, s1), s2);
-            dst[1] = _mm_sub_ps(_mm_sub_ps(s1, s2), s3);
-        }
-
-        SIMD_INLINE void Winograd2x3pSetOutput4(const float * src, size_t srcStride, float * dst, size_t dstStride)
-        {
-            __m128 t[8];
-            Load2t(src + 0 * srcStride, srcStride, t + 0);
-            Load2t(src + 4 * srcStride, srcStride, t + 2);
-            Load2t(src + 8 * srcStride, srcStride, t + 4);
-            Load2t(src + 12 * srcStride, srcStride, t + 6);
-
-            __m128 d00 = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
-            __m128 d01 = _mm_add_ps(_mm_add_ps(t[1], t[3]), t[5]);
-            __m128 d10 = _mm_sub_ps(_mm_sub_ps(t[2], t[4]), t[6]);
-            __m128 d11 = _mm_sub_ps(_mm_sub_ps(t[3], t[5]), t[7]);
-
-            _mm_storeu_ps(dst + 0 * dstStride + 0, _mm_unpacklo_ps(d00, d01));
-            _mm_storeu_ps(dst + 0 * dstStride + 4, _mm_unpackhi_ps(d00, d01));
-            _mm_storeu_ps(dst + 1 * dstStride + 0, _mm_unpacklo_ps(d10, d11));
-            _mm_storeu_ps(dst + 1 * dstStride + 4, _mm_unpackhi_ps(d10, d11));
-        }
-    }
-#endif //SIMD_SSE_ENABLE
 }
 
 #endif//__SimdWinograd_h__

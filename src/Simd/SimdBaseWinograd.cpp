@@ -192,6 +192,51 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void Winograd2x3pSetOutput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            float c1[16];
+            c1[0] = src[0 * srcStride];
+            c1[1] = src[1 * srcStride];
+            c1[2] = src[2 * srcStride];
+            c1[3] = src[3 * srcStride];
+            c1[4] = src[4 * srcStride];
+            c1[5] = src[5 * srcStride];
+            c1[6] = src[6 * srcStride];
+            c1[7] = src[7 * srcStride];
+            c1[8] = src[8 * srcStride];
+            c1[9] = src[9 * srcStride];
+            c1[10] = src[10 * srcStride];
+            c1[11] = src[11 * srcStride];
+            c1[12] = src[12 * srcStride];
+            c1[13] = src[13 * srcStride];
+            c1[14] = src[14 * srcStride];
+            c1[15] = src[15 * srcStride];
+
+            float tmp[8];
+            tmp[0] = c1[0] + c1[1] + c1[2];
+            tmp[1] = c1[1] - c1[2] - c1[3];
+            tmp[2] = c1[4] + c1[5] + c1[6];
+            tmp[3] = c1[5] - c1[6] - c1[7];
+            tmp[4] = c1[8] + c1[9] + c1[10];
+            tmp[5] = c1[9] - c1[10] - c1[11];
+            tmp[6] = c1[12] + c1[13] + c1[14];
+            tmp[7] = c1[13] - c1[14] - c1[15];
+
+            dst[0 * dstStride + 0] = tmp[0] + tmp[2] + tmp[4];
+            dst[0 * dstStride + 1] = tmp[1] + tmp[3] + tmp[5];
+            dst[1 * dstStride + 0] = tmp[2] - tmp[4] - tmp[6];
+            dst[1 * dstStride + 1] = tmp[3] - tmp[5] - tmp[7];
+        }
+
+        SIMD_INLINE void Winograd2x3pSetOutput1p(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t rowE, size_t colE)
+        {
+            float tmp[2 * 2];
+            Winograd2x3pSetOutput1(src, srcStride, tmp, 2);
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    dst[row*dstStride + col] = tmp[row * 2 + col];
+        }
+
         void Winograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
         {
             size_t srcStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*dstChannels;
