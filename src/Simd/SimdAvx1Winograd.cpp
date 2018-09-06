@@ -61,11 +61,20 @@ namespace Simd
 
         SIMD_INLINE void Winograd2x3iSetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst)
         {
-            float tmp[4 * 4] = { 0 };
-            for (size_t row = rowB; row < rowE; ++row)
-                for (size_t col = colB; col < colE; ++col)
-                    tmp[row * 4 + col] = src[row * srcStride + col];
-            Winograd2x3iSetInput1(tmp, 4, dst);
+            __m128 s[4] = { _mm_setzero_ps(), _mm_setzero_ps() , _mm_setzero_ps() , _mm_setzero_ps() };
+            if (colB == 1)
+                for (size_t row = rowB; row < rowE; ++row)
+                    s[row] = Sse::LoadPadZeroNose1(src + row * srcStride);
+            else if (colE == 2)
+                for (size_t row = rowB; row < rowE; ++row)
+                    s[row] = Sse::LoadPadZeroTail2(src + row * srcStride);
+            else if (colE == 3)
+                for (size_t row = rowB; row < rowE; ++row)
+                    s[row] = Sse::LoadPadZeroTail1(src + row * srcStride);
+            else
+                for (size_t row = rowB; row < rowE; ++row)
+                    _mm_loadu_ps(src + row * srcStride);
+            Winograd2x3iSetInput1(s, dst);
         }
 
         SIMD_INLINE __m256 Winograd2x3iSetInput2Row(__m256 t, __m256 k)
@@ -257,6 +266,8 @@ namespace Simd
             size_t dstH2 = AlignLo(dstH, 2);
             size_t dstW2 = AlignLo(dstW, 2);
             size_t dstW16 = AlignLo(dstW, 16);
+            if (pad && dstW16 == dstW)
+                dstW16 -= 16;
             PadType rowPad = dstH2 < dstH ? PadTail1 : PadNone;
             PadType colPad = dstW2 < dstW ? PadTail1 : PadNone;
             size_t tailCol = dstW2 < dstW ? dstW - 15 : dstW - 16;

@@ -118,9 +118,9 @@ namespace Test
 
             FuncWI(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Update(int pad)
+            void Update(size_t c, size_t h, size_t w, int p)
             {
-                description = description + (pad ? "[1]" : "[0]");
+                description = description + "[" + ToString(w) + "-" + ToString(h) + "-" + ToString(c) + "-" + ToString(p) + "]";
             }
 
             void Call(const View & src, size_t srcChannels, size_t srcHeight, size_t srcWidth, View & dst, int pad) const
@@ -137,8 +137,8 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(pad);
-        f2.Update(pad);
+        f1.Update(srcChannels, srcHeight, srcWidth, pad);
+        f2.Update(srcChannels, srcHeight, srcWidth, pad);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcChannels << ", " << srcHeight << ", " << srcWidth << "].");
 
@@ -168,8 +168,13 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(W / 14, W / 15, W / 13, block, core, f1, f2, 0);
-        result = result && WinogradSetInputAutoTest(W / 14, W / 15, W / 13, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(3, 320, 320, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(16, 160, 160, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(32, 80, 80, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(64, 40, 40, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(128, 20, 20, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(256, 10, 10, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(320, 20, 20, block, core, f1, f2, 1);
 
         return result;
     }
@@ -237,6 +242,11 @@ namespace Test
 
             FuncWO(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
+            void Update(size_t c, size_t h, size_t w)
+            {
+                description = description + "[" + ToString(w) + "-" + ToString(h) + "-" + ToString(c) + "]";
+            }
+
             void Call(const View & src, View & dst, size_t dstChannels, size_t dstHeight, size_t dstWidth) const
             {
                 TEST_PERFORMANCE_TEST(description);
@@ -250,6 +260,9 @@ namespace Test
     bool WinogradSetOutputAutoTest(size_t dstChannels, size_t dstHeight, size_t dstWidth, size_t block, size_t core, FuncWO f1, FuncWO f2)
     {
         bool result = true;
+
+        f1.Update(dstChannels, dstHeight, dstWidth);
+        f2.Update(dstChannels, dstHeight, dstWidth);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << dstChannels << ", " << dstHeight << ", " << dstWidth << "].");
 
@@ -277,7 +290,12 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(W / 14, W / 15, W / 13, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(16, 320, 320, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(32, 160, 160, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(64, 80, 80, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(128, 40, 40, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(256, 20, 20, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(256, 10, 10, block, core, f1, f2);
 
         return result;
     }

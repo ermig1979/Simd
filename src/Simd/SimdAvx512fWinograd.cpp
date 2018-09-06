@@ -103,7 +103,7 @@ namespace Simd
 
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
         {
-            if (srcHeight < 4)
+            if (srcHeight < 4 || srcWidth < 4)
             {
                 Base::Winograd2x3pSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
                 return;
@@ -117,6 +117,8 @@ namespace Simd
             size_t dstH2 = AlignLo(dstH, 2);
             size_t dstW2 = AlignLo(dstW, 2);
             size_t dstW32 = AlignLo(dstW, 32);
+            if (pad && dstW32 == dstW)
+                dstW32 -= 32;
             PadType rowPad = dstH2 < dstH ? PadTail1 : PadNone;
             size_t tailRow = dstH2 < dstH ? dstH - 1 : dstH - 2;
             bool specialRowTail = dstH2 < dstH || (pad && dstH2);
@@ -131,7 +133,7 @@ namespace Simd
                 tails[c * 2 + 1] = TailMask16(dstW - dstW32 - F * c - 2 + (pad ? 1 : 2));
             }
             noses[4] = TailMask16(tileW);
-            tails[4] = TailMask16(tileW - AlignLo(tileW, F));
+            tails[4] = TailMask16(tileW - dstW32/2);
 
             if (pad)
             {
