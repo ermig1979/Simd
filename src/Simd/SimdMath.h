@@ -931,6 +931,18 @@ namespace Simd
         {
             return _mm512_permutex2var_ps(a, K32_INTERLEAVE_1, b);
         }
+
+        template <int odd> SIMD_INLINE __m512 Deinterleave(const __m512 & a, const __m512 & b);
+
+        template <> SIMD_INLINE __m512 Deinterleave<0>(const __m512 & a, const __m512 & b)
+        {
+            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_0, b);
+        }
+
+        template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512 & a, const __m512 & b)
+        {
+            return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
+        }
     }
 #endif //SIMD_AVX512F_ENABLE
 
@@ -1071,8 +1083,8 @@ namespace Simd
 
         SIMD_INLINE __m512i Hadd32(__m512i a, __m512i b)
         {
-            __m512i ab0 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_0, b);
-            __m512i ab1 = _mm512_permutex2var_epi32(a, K32_PERMUTE_FOR_HADD_1, b);
+            __m512i ab0 = _mm512_permutex2var_epi32(a, K32_DEINTERLEAVE_0, b);
+            __m512i ab1 = _mm512_permutex2var_epi32(a, K32_DEINTERLEAVE_1, b);
             return _mm512_add_epi32(ab0, ab1);
         }
 
