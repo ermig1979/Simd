@@ -162,6 +162,235 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void Load4(const float * src, size_t step, __m128 * dst)
+        {
+            __m128 a0 = _mm_loadu_ps(src + 0 * step);
+            __m128 a1 = _mm_loadu_ps(src + 1 * step);
+            __m128 a2 = _mm_loadu_ps(src + 2 * step);
+            __m128 a3 = _mm_loadu_ps(src + 3 * step);
+            __m128 b0 = _mm_unpacklo_ps(a0, a2);
+            __m128 b1 = _mm_unpackhi_ps(a0, a2);
+            __m128 b2 = _mm_unpacklo_ps(a1, a3);
+            __m128 b3 = _mm_unpackhi_ps(a1, a3);
+            dst[0] = _mm_unpacklo_ps(b0, b2);
+            dst[1] = _mm_unpackhi_ps(b0, b2);
+            dst[2] = _mm_unpacklo_ps(b1, b3);
+            dst[3] = _mm_unpackhi_ps(b1, b3);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput4LoadRow(const float * src, __m128 * dst)
+        {
+            __m128 t[4];
+            Load4(src, 16, t);
+            dst[0] = _mm_add_ps(_mm_add_ps(t[0], t[1]), t[2]);
+            dst[1] = _mm_sub_ps(_mm_sub_ps(t[1], t[2]), t[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput4(const float * src, __m128 * dst)
+        {
+            __m128 t[8], d[4];
+            Winograd2x3iSetOutput4LoadRow(src + 0, t + 0);
+            Winograd2x3iSetOutput4LoadRow(src + 4, t + 2);
+            Winograd2x3iSetOutput4LoadRow(src + 8, t + 4);
+            Winograd2x3iSetOutput4LoadRow(src + 12, t + 6);
+            d[0] = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
+            d[1] = _mm_add_ps(_mm_add_ps(t[1], t[3]), t[5]);
+            d[2] = _mm_sub_ps(_mm_sub_ps(t[2], t[4]), t[6]);
+            d[3] = _mm_sub_ps(_mm_sub_ps(t[3], t[5]), t[7]);
+            dst[0] = _mm_unpacklo_ps(d[0], d[1]);
+            dst[1] = _mm_unpackhi_ps(d[0], d[1]);
+            dst[2] = _mm_unpacklo_ps(d[2], d[3]);
+            dst[3] = _mm_unpackhi_ps(d[2], d[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput4Body(const float * src, float * dst, size_t dstStride)
+        {
+            __m128 d[4];
+            Winograd2x3iSetOutput4(src, d);
+            _mm_storeu_ps(dst + 0 * dstStride + 0, d[0]);
+            _mm_storeu_ps(dst + 0 * dstStride + 4, d[1]);
+            _mm_storeu_ps(dst + 1 * dstStride + 0, d[2]);
+            _mm_storeu_ps(dst + 1 * dstStride + 4, d[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput4Edge(const float * src, float * dst)
+        {
+            __m128 t[6], d[2];
+            Winograd2x3iSetOutput4LoadRow(src + 0, t + 0);
+            Winograd2x3iSetOutput4LoadRow(src + 4, t + 2);
+            Winograd2x3iSetOutput4LoadRow(src + 8, t + 4);
+            d[0] = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
+            d[1] = _mm_add_ps(_mm_add_ps(t[1], t[3]), t[5]);
+            _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(d[0], d[1]));
+            _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(d[0], d[1]));
+        }
+
+        template<bool row, bool col> SIMD_INLINE void Winograd2x3iSetOutput4Edge(const float * src, float * dst, size_t dstStride, const __m128 & mask)
+        {
+            __m128 d[4];
+            Winograd2x3iSetOutput4(src, d);
+            _mm_storeu_ps(dst + 0, d[0]);
+            if (col)
+                _mm_storeu_ps(dst + 4, d[1]);
+            else
+                Sse::StoreMasked<false>(dst + 4, d[1], mask);
+            if (row)
+            {
+                dst += dstStride;
+                _mm_storeu_ps(dst + 0, d[2]);
+                if (col)
+                    _mm_storeu_ps(dst + 4, d[1]);
+                else
+                    Sse::StoreMasked<false>(dst + 4, d[3], mask);
+            }
+        }
+
+        SIMD_INLINE void Load8(const float * src, __m256 * dst)
+        {
+            __m256 a0 = Load<false>(src + 0, src + 32);
+            __m256 a1 = Load<false>(src + 16, src + 48);
+            __m256 a2 = Load<false>(src + 64, src + 96);
+            __m256 a3 = Load<false>(src + 80, src + 112);
+            __m256 b0 = _mm256_unpacklo_ps(a0, a2);
+            __m256 b1 = _mm256_unpackhi_ps(a0, a2);
+            __m256 b2 = _mm256_unpacklo_ps(a1, a3);
+            __m256 b3 = _mm256_unpackhi_ps(a1, a3);
+            dst[0] = _mm256_unpacklo_ps(b0, b2);
+            dst[1] = _mm256_unpackhi_ps(b0, b2);
+            dst[2] = _mm256_unpacklo_ps(b1, b3);
+            dst[3] = _mm256_unpackhi_ps(b1, b3);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput8LoadRow(const float * src, __m256 * dst)
+        {
+            __m256 t[4];
+            Load8(src, t);
+            dst[0] = _mm256_add_ps(_mm256_add_ps(t[0], t[1]), t[2]);
+            dst[1] = _mm256_sub_ps(_mm256_sub_ps(t[1], t[2]), t[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput8(const float * src, __m256 * dst)
+        {
+            __m256 t[8], d[4];
+            Winograd2x3iSetOutput8LoadRow(src + 0, t + 0);
+            Winograd2x3iSetOutput8LoadRow(src + 4, t + 2);
+            Winograd2x3iSetOutput8LoadRow(src + 8, t + 4);
+            Winograd2x3iSetOutput8LoadRow(src + 12, t + 6);
+            d[0] = _mm256_add_ps(_mm256_add_ps(t[0], t[2]), t[4]);
+            d[1] = _mm256_add_ps(_mm256_add_ps(t[1], t[3]), t[5]);
+            d[2] = _mm256_sub_ps(_mm256_sub_ps(t[2], t[4]), t[6]);
+            d[3] = _mm256_sub_ps(_mm256_sub_ps(t[3], t[5]), t[7]);
+            dst[0] = _mm256_unpacklo_ps(d[0], d[1]);
+            dst[1] = _mm256_unpackhi_ps(d[0], d[1]);
+            dst[2] = _mm256_unpacklo_ps(d[2], d[3]);
+            dst[3] = _mm256_unpackhi_ps(d[2], d[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput8Body(const float * src, float * dst, size_t dstStride)
+        {
+            __m256 d[4];
+            Winograd2x3iSetOutput8(src, d);
+            _mm256_storeu_ps(dst + 0 * dstStride + 0, d[0]);
+            _mm256_storeu_ps(dst + 0 * dstStride + 8, d[1]);
+            _mm256_storeu_ps(dst + 1 * dstStride + 0, d[2]);
+            _mm256_storeu_ps(dst + 1 * dstStride + 8, d[3]);
+        }
+
+        void Winograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
+        {
+            if (dstHeight < 2 || dstWidth < 16)
+            {
+                Sse::Winograd2x3iSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
+                return;
+            }
+            size_t tileH = (dstHeight + 1) / 2;
+            size_t tileW = (dstWidth + 1) / 2;
+            size_t dstH2 = AlignLo(dstHeight, 2);
+            size_t dstW2 = AlignLo(dstWidth, 2);
+            size_t dstW8 = AlignLo(dstWidth, 8);
+            size_t dstW16 = AlignLo(dstWidth, 16);
+            __m128 tailMask = Sse::LeftNotZero(4 + dstW2 - dstWidth);
+            size_t tailCol = dstW2 < dstWidth ? dstWidth - 7 : dstWidth - 8;
+            size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
+            bool longTail = dstWidth - dstW8 > 4;
+#if 0
+            for (size_t c = 0; c < dstChannels; ++c)
+            {
+                size_t row = 0, tileY = 0;
+                for (; row < dstH2; row += 2, tileY += 1)
+                {
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + tileY * tileW * 16;
+                    float * d = dst + row * dstWidth;
+                    for (; col < dstW8; col += 8, tileX += 64)
+                        Winograd2x3iSetOutput4Body(s + tileX, d + col, dstWidth);
+                    if (col < dstWidth)
+                    {
+                        if (longTail)
+                            Winograd2x3iSetOutput4Edge<true, false>(s + (tileW - 4) * 16, d + tailCol, dstWidth, tailMask);
+                        else
+                        {
+                            for (; col < dstW2; col += 2, tileX += 16)
+                                Base::Winograd2x3iSetOutput1(s + tileX, d + col, dstWidth);
+                            if (col < dstWidth)
+                                Base::Winograd2x3iSetOutput1p(s + tileX, d + col, dstWidth, 2, dstWidth - col);
+                        }
+                    }
+                }
+                if (row < dstHeight)
+                {
+                    size_t col = 0, tileX = 0;
+                    const float * s = src + (tileH - 1) * tileW * 16;
+                    float * d = dst + (dstHeight - 1) * dstWidth;
+                    for (; col < dstW8; col += 8, tileX += 64)
+                        Winograd2x3iSetOutput4Edge(s + tileX, d + col);
+                    if (col < dstWidth)
+                    {
+                        if (longTail)
+                            Winograd2x3iSetOutput4Edge<false, false>(s + (tileW - 4) * 16, d + tailCol, dstWidth, tailMask);
+                        else
+                        {
+                            for (; col < dstW2; col += 2, tileX += 16)
+                                Base::Winograd2x3iSetOutput1p(s + tileX, d + col, dstWidth, dstHeight - row, 2);
+                            if (col < dstWidth)
+                                Base::Winograd2x3iSetOutput1p(s + tileX, d + col, dstWidth, dstHeight - row, dstWidth - col);
+                        }
+                    }
+                }
+                src += tileW * tileH * 16;
+                dst += dstHeight * dstWidth;
+            }
+#else
+            for (size_t c = 0; c < dstChannels; ++c)
+            {
+                size_t row = 0;
+                for (; row < dstH2; row += 2)
+                {
+                    size_t col = 0;
+                    for (; col < dstW16; col += 16)
+                        Winograd2x3iSetOutput8Body(src, dst + row * dstWidth + col, dstWidth), src += 128;
+                    for (; col < dstW8; col += 8)
+                        Winograd2x3iSetOutput4Body(src, dst + row * dstWidth + col, dstWidth), src += 64;
+                    for (; col < dstW2; col += 2)
+                        Base::Winograd2x3iSetOutput1(src, dst + row * dstWidth + col, dstWidth), src += 16;
+                    if (col < dstWidth)
+                        Base::Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, 2, dstWidth - col), src += 16;
+                }
+                if (row < dstHeight)
+                {
+                    size_t col = 0;
+                    for (; col < dstW8; col += 8)
+                        Winograd2x3iSetOutput4Edge(src, dst + row * dstWidth + col), src += 64;
+                    for (; col < dstW2; col += 2)
+                        Base::Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, dstHeight - row, 2), src += 16;
+                    if (col < dstWidth)
+                        Base::Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col), src += 16;
+                }
+                dst += dstHeight * dstWidth;
+            }
+#endif
+        }
+
         SIMD_INLINE void Winograd2x3pSetInputLoad8Body(const float * src, __m256 * dst)
         {
             __m256 a0 = Load<false>(src + 0, src + 8);
