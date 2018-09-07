@@ -5333,6 +5333,22 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdWinograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+        \short This function is used for output image conversion in Winograd 2x3 interleaved convolution algorithm.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input image.
+        \param [out] dst - a pointer to the output image.
+        \param [in] dstChannels - a number of output channels.
+        \param [in] dstHeight - a height of output image.
+        \param [in] dstWidth - a width of output image.
+    */
+    SIMD_API void SimdWinograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+    /*! @ingroup synet
+
         \fn void SimdWinograd2x3pSetFilter(const float * src, size_t size, float * dst);
 
         \short This function is used for filter conversion in Winograd 2x3 planar convolution algorithm.

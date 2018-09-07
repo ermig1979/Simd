@@ -329,6 +329,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
     TEST_ADD_GROUP_AD0(Winograd2x3iSetInput);
+    TEST_ADD_GROUP_AD0(Winograd2x3iSetOutput);
     TEST_ADD_GROUP_AD0(Winograd2x3pSetFilter);
     TEST_ADD_GROUP_AD0(Winograd2x3pSetInput);
     TEST_ADD_GROUP_AD0(Winograd2x3pSetOutput);

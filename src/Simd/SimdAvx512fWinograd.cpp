@@ -202,7 +202,6 @@ namespace Simd
             Winograd2x3pSetOutputLoad2t<mask>(src + 0 * srcStride, srcStride, t + 0, tails[0]);
             Winograd2x3pSetOutputLoad2t<mask>(src + 4 * srcStride, srcStride, t + 2, tails[0]);
             Winograd2x3pSetOutputLoad2t<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
-            Winograd2x3pSetOutputLoad2t<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
             d[0] = _mm512_add_ps(_mm512_add_ps(t[0], t[2]), t[4]);
             d[1] = _mm512_add_ps(_mm512_add_ps(t[1], t[3]), t[5]);
             Store<false, mask>(dst + 0, Interleave<0>(d[0], d[1]), tails[1]);
@@ -210,6 +209,7 @@ namespace Simd
             if (main)
             {
                 dst += dstStride;
+                Winograd2x3pSetOutputLoad2t<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
                 d[2] = _mm512_sub_ps(_mm512_sub_ps(t[2], t[4]), t[6]);
                 d[3] = _mm512_sub_ps(_mm512_sub_ps(t[3], t[5]), t[7]);
                 Store<false, mask>(dst + 0, Interleave<0>(d[2], d[3]), tails[1]);

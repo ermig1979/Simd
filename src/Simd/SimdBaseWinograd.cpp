@@ -82,6 +82,31 @@ namespace Simd
             }
         }
 
+        void Winograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
+        {
+            size_t dstHeightFull = AlignLo(dstHeight, 2);
+            size_t dstWidthFull = AlignLo(dstWidth, 2);
+            for (size_t c = 0; c < dstChannels; ++c)
+            {
+                size_t row, col;
+                for (row = 0; row < dstHeightFull; row += 2)
+                {
+                    for (col = 0; col < dstWidthFull; col += 2)
+                        Winograd2x3iSetOutput1(src, dst + row * dstWidth + col, dstWidth), src += 16;
+                    if (col < dstWidth)
+                        Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, 2, dstWidth - col), src += 16;
+                }
+                if (row < dstHeight)
+                {
+                    for (col = 0; col < dstWidthFull; col += 2)
+                        Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, dstHeight - row, 2), src += 16;
+                    if (col < dstWidth)
+                        Winograd2x3iSetOutput1p(src, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col), src += 16;
+                }
+                dst += dstHeight * dstWidth;
+            }
+        }
+
         void Winograd2x3pSetFilter(const float * src, size_t size, float * dst)
         {
             for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)

@@ -81,6 +81,34 @@ namespace Simd
             Winograd2x3iSetInput1(tmp, 4, dst);
         }
 
+
+        SIMD_INLINE void Winograd2x3iSetOutput1(const float * src, float * dst, size_t dstStride)
+        {
+            float tmp[8];
+            tmp[0] = src[0] + src[1] + src[2];
+            tmp[1] = src[1] - src[2] - src[3];
+            tmp[2] = src[4] + src[5] + src[6];
+            tmp[3] = src[5] - src[6] - src[7];
+            tmp[4] = src[8] + src[9] + src[10];
+            tmp[5] = src[9] - src[10] - src[11];
+            tmp[6] = src[12] + src[13] + src[14];
+            tmp[7] = src[13] - src[14] - src[15];
+
+            dst[0 * dstStride + 0] = tmp[0] + tmp[2] + tmp[4];
+            dst[0 * dstStride + 1] = tmp[1] + tmp[3] + tmp[5];
+            dst[1 * dstStride + 0] = tmp[2] - tmp[4] - tmp[6];
+            dst[1 * dstStride + 1] = tmp[3] - tmp[5] - tmp[7];
+        }
+
+        SIMD_INLINE void Winograd2x3iSetOutput1p(const float * src, float * dst, size_t dstStride, size_t rowE, size_t colE)
+        {
+            float tmp[2 * 2];
+            Winograd2x3iSetOutput1(src, tmp, 2);
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    dst[row*dstStride + col] = tmp[row * 2 + col];
+        }
+
         SIMD_INLINE void Winograd2x3pSetFilter1(const float * src, float * dst, size_t stride)
         {
             const float r2 = 1.0f / 2.0f;

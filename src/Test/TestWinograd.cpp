@@ -300,6 +300,20 @@ namespace Test
         return result;
     }
 
+    bool Winograd2x3iSetOutputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3iSetOutput), FUNC_WO(SimdWinograd2x3iSetOutput));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::Winograd2x3iSetOutput), FUNC_WO(SimdWinograd2x3iSetOutput));
+#endif 
+
+        return result;
+    }
+
     bool Winograd2x3pSetOutputAutoTest()
     {
         bool result = true;
@@ -486,6 +500,11 @@ namespace Test
         }
 
         return result;
+    }
+
+    bool Winograd2x3iSetOutputDataTest(bool create)
+    {
+        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WO(SimdWinograd2x3iSetOutput));
     }
 
     bool Winograd2x3pSetOutputDataTest(bool create)

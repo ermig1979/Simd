@@ -82,34 +82,27 @@ namespace Simd
             return _mm256_add_ps(_mm256_permute_ps(t, 0x64), _mm256_mul_ps(k, _mm256_permute_ps(t, 0xDA)));
         }
 
-        SIMD_INLINE void Winograd2x3iSetInput4(const float * src, size_t srcStride, float * dst)
+        SIMD_INLINE void Winograd2x3iSetInput4(const float * src, size_t srcStride, float * dst, const __m256 & k)
         {
-            static const __m256 k = _mm256_setr_ps(-1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f);
             __m256 s0 = _mm256_loadu_ps(src + 0 * srcStride);
             __m256 s1 = _mm256_loadu_ps(src + 1 * srcStride);
             __m256 s2 = _mm256_loadu_ps(src + 2 * srcStride);
             __m256 s3 = _mm256_loadu_ps(src + 3 * srcStride);
             __m256 t0 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s0, s2), k);
             __m256 t1 = Winograd2x3iSetInput2Row(_mm256_add_ps(s1, s2), k);
+            _mm256_storeu_ps(dst + 0, _mm256_permute2f128_ps(t0, t1, 0x20));
+            _mm256_storeu_ps(dst + 32, _mm256_permute2f128_ps(t0, t1, 0x31));
             __m256 t2 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s2, s1), k);
             __m256 t3 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s1, s3), k);
-            src += 2;
-            __m256 s4 = _mm256_loadu_ps(src + 0 * srcStride);
-            __m256 s5 = _mm256_loadu_ps(src + 1 * srcStride);
-            __m256 s6 = _mm256_loadu_ps(src + 2 * srcStride);
-            __m256 s7 = _mm256_loadu_ps(src + 3 * srcStride);
-            __m256 t4 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s4, s6), k);
-            __m256 t5 = Winograd2x3iSetInput2Row(_mm256_add_ps(s5, s6), k);
-            __m256 t6 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s6, s5), k);
-            __m256 t7 = Winograd2x3iSetInput2Row(_mm256_sub_ps(s5, s7), k);
-            _mm256_storeu_ps(dst + 0, _mm256_permute2f128_ps(t0, t1, 0x20));
             _mm256_storeu_ps(dst + 8, _mm256_permute2f128_ps(t2, t3, 0x20));
-            _mm256_storeu_ps(dst + 16, _mm256_permute2f128_ps(t4, t5, 0x20));
-            _mm256_storeu_ps(dst + 24, _mm256_permute2f128_ps(t6, t7, 0x20));
-            _mm256_storeu_ps(dst + 32, _mm256_permute2f128_ps(t0, t1, 0x31));
             _mm256_storeu_ps(dst + 40, _mm256_permute2f128_ps(t2, t3, 0x31));
-            _mm256_storeu_ps(dst + 48, _mm256_permute2f128_ps(t4, t5, 0x31));
-            _mm256_storeu_ps(dst + 56, _mm256_permute2f128_ps(t6, t7, 0x31));
+        }
+
+        SIMD_INLINE void Winograd2x3iSetInput4(const float * src, size_t srcStride, float * dst)
+        {
+            static const __m256 k = _mm256_setr_ps(-1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f);
+            Winograd2x3iSetInput4(src + 0, srcStride, dst + 0, k);
+            Winograd2x3iSetInput4(src + 2, srcStride, dst + 16, k);
         }
 
         void Winograd2x3iSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)

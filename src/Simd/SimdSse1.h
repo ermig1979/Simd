@@ -109,6 +109,8 @@ namespace Simd
 
         void Winograd2x3iSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
 
+        void Winograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
         void Winograd2x3pSetFilter(const float * src, size_t size, float * dst);
 
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
