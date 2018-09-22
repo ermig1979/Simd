@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdDetection.h"
-#include "Simd/SimdBase_tinyxml2.h"
+#include "Simd/SimdXml.hpp"
 
 #include <exception>
 #include <stdexcept>
@@ -44,6 +44,10 @@ namespace Simd
     {
         namespace Xml
         {
+			typedef Simd::Xml::File<char> File;
+			typedef Simd::Xml::XmlDocument<char> Doc;
+			typedef Simd::Xml::XmlNode<char> Node;
+
             template <class T> T FromString(const std::string & s)
             {
                 T t;
@@ -70,32 +74,31 @@ namespace Simd
                 return str;
             }
 
-            template<class T> inline T GetValue(tinyxml2::XMLNode * parent)
+            template<class T> inline T GetValue(Node * parent)
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-                tinyxml2::XMLNode * child = parent->FirstChild();
+				Node * child = parent->FirstNode();
                 if (child == NULL)
                     SIMD_EX("Invalid node!");
                 return FromString<T>(child->Value());
             }
 
-            template<class T> inline T GetValue(tinyxml2::XMLNode * parent, const char * name)
+            template<class T> inline T GetValue(Node * parent, const char * name)
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-                return GetValue<T>(parent->FirstChildElement(name));
+                return GetValue<T>(parent->FirstNode(name));
             }
 
-            template<class T> inline std::vector<T> GetValues(tinyxml2::XMLNode * parent)
+            template<class T> inline std::vector<T> GetValues(Node * parent)
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-                tinyxml2::XMLNode * child = parent->FirstChild();
+				Node * child = parent->FirstNode();
                 if (child == NULL)
                     SIMD_EX("Invalid node!");
-                int curLineNum = 0;
-                std::stringstream ss(tinyxml2::XMLUtil::SkipWhiteSpace(child->Value(), &curLineNum));
+                std::stringstream ss(child->Value());
                 std::vector<T> values;
                 while (!ss.eof())
                 {
@@ -106,19 +109,16 @@ namespace Simd
                 return values;
             }
 
-            template<class T> inline std::vector<T> GetValues(tinyxml2::XMLNode * parent, const char * name)
+            template<class T> inline std::vector<T> GetValues(Node * parent, const char * name)
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-                return GetValues<T>(parent->FirstChildElement(name));
+                return GetValues<T>(parent->FirstNode(name));
             }
 
-            inline size_t GetSize(tinyxml2::XMLNode * parent)
+            inline size_t GetSize(Node * parent)
             {
-                size_t count = 0;
-                for (tinyxml2::XMLNode * node = parent->FirstChildElement(); node != NULL; node = node->NextSiblingElement())
-                    count++;
-                return count;
+				return Simd::Xml::CountChildren(parent);
             }
         }
 
@@ -155,15 +155,18 @@ namespace Simd
             Data * data = NULL;
             try
             {
-                tinyxml2::XMLDocument xml;
-                if (xml.LoadFile(path) != tinyxml2::XML_SUCCESS)
-                    SIMD_EX("Can't load XML file '" << path << "'!");
+				Xml::File file;
+				if(!file.Open(path))
+					SIMD_EX("Can't load XML file '" << path << "'!");
 
-                tinyxml2::XMLElement * root = xml.RootElement();
+                Xml::Doc doc;
+				doc.Parse<0>(file.Data());
+
+                Xml::Node * root = doc.FirstNode();
                 if (root == NULL)
                     SIMD_EX("Invalid format of XML file '" << path << "'!");
 
-                tinyxml2::XMLElement * cascade = root->FirstChildElement(Names::cascade);
+				Xml::Node * cascade = root->FirstNode(Names::cascade);
                 if (cascade == NULL)
                     return data;
 
@@ -174,49 +177,45 @@ namespace Simd
                 data->stageType = 0;
 
                 std::string featureType = Xml::GetValue<std::string>(cascade, Names::featureType);
-                if (featureType == Names::HAAR)
-                    data->featureType = SimdDetectionInfoFeatureHaar;
-                else if (featureType == Names::LBP)
-                    data->featureType = SimdDetectionInfoFeatureLbp;
-                else if (featureType == Names::HOG)
-                {
-                    SIMD_EX("HOG feature type is not supported!")
-                }
-                else
-                    SIMD_EX("Invalid cascade feature type!")
+				if (featureType == Names::HAAR)
+					data->featureType = SimdDetectionInfoFeatureHaar;
+				else if (featureType == Names::LBP)
+					data->featureType = SimdDetectionInfoFeatureLbp;
+				else if (featureType == Names::HOG)
+					SIMD_EX("HOG feature type is not supported!")
+				else
+					SIMD_EX("Invalid cascade feature type!");
 
-                    data->origWinSize.x = Xml::GetValue<int>(cascade, Names::width);
+                data->origWinSize.x = Xml::GetValue<int>(cascade, Names::width);
                 data->origWinSize.y = Xml::GetValue<int>(cascade, Names::height);
-                if (data->origWinSize.x <= 0 || data->origWinSize.y <= 0)
-                    SIMD_EX("Invalid cascade width or height!")
+				if (data->origWinSize.x <= 0 || data->origWinSize.y <= 0)
+					SIMD_EX("Invalid cascade width or height!");
 
-                    tinyxml2::XMLElement * stageParams = cascade->FirstChildElement(Names::stageParams);
-                if (stageParams && stageParams->FirstChildElement(Names::maxDepth))
+				Xml::Node * stageParams = cascade->FirstNode(Names::stageParams);
+                if (stageParams && stageParams->FirstNode(Names::maxDepth))
                     data->isStumpBased = Xml::GetValue<int>(stageParams, Names::maxDepth) == 1 ? true : false;
                 else
                     data->isStumpBased = true;
 
                 if (!data->isStumpBased)
-                {
-                    SIMD_EX("Tree classifier cascades are not supported!")
-                }
+					SIMD_EX("Tree classifier cascades are not supported!");
 
-                tinyxml2::XMLElement * featureParams = cascade->FirstChildElement(Names::featureParams);
+				Xml::Node * featureParams = cascade->FirstNode(Names::featureParams);
                 data->ncategories = Xml::GetValue<int>(featureParams, Names::maxCatCount);
                 int subsetSize = (data->ncategories + 31) / 32;
                 int nodeStep = 3 + (data->ncategories > 0 ? subsetSize : 1);
 
-                tinyxml2::XMLElement * stages = cascade->FirstChildElement(Names::stages);
+				Xml::Node * stages = cascade->FirstNode(Names::stages);
                 if (stages == NULL)
                     SIMD_EX("Invalid stages count!");
                 data->stages.reserve(Xml::GetSize(stages));
                 int stageIndex = 0;
-                for (tinyxml2::XMLNode * stageNode = stages->FirstChildElement(); stageNode != NULL; stageNode = stageNode->NextSiblingElement(), ++stageIndex)
+                for (Xml::Node * stageNode = stages->FirstNode(); stageNode != NULL; stageNode = stageNode->NextSibling(), ++stageIndex)
                 {
                     Data::Stage stage;
                     stage.threshold = Xml::GetValue<float>(stageNode, Names::stageThreshold) - THRESHOLD_EPS;
 
-                    tinyxml2::XMLNode * weakClassifiers = stageNode->FirstChildElement(Names::weakClassifiers);
+					Xml::Node * weakClassifiers = stageNode->FirstNode(Names::weakClassifiers);
                     if (weakClassifiers == NULL)
                         SIMD_EX("Invalid weak classifiers count!");
                     stage.ntrees = (int)Xml::GetSize(weakClassifiers);
@@ -224,7 +223,7 @@ namespace Simd
                     data->stages.push_back(stage);
                     data->classifiers.reserve(data->stages[stageIndex].first + data->stages[stageIndex].ntrees);
 
-                    for (tinyxml2::XMLNode * weakClassifier = weakClassifiers->FirstChildElement(); weakClassifier != NULL; weakClassifier = weakClassifier->NextSiblingElement())
+                    for (Xml::Node * weakClassifier = weakClassifiers->FirstNode(); weakClassifier != NULL; weakClassifier = weakClassifier->NextSibling())
                     {
                         std::vector<double> internalNodes = Xml::GetValues<double>(weakClassifier, Names::internalNodes);
                         std::vector<float> leafValues = Xml::GetValues<float>(weakClassifier, Names::leafValues);
@@ -264,17 +263,17 @@ namespace Simd
                     }
                 }
 
-                tinyxml2::XMLNode * featureNodes = cascade->FirstChildElement(Names::features);
+				Xml::Node * featureNodes = cascade->FirstNode(Names::features);
                 if (data->featureType == SimdDetectionInfoFeatureHaar)
                 {
                     data->hasTilted = false;
                     data->haarFeatures.reserve(Xml::GetSize(featureNodes));
-                    for (tinyxml2::XMLNode * featureNode = featureNodes->FirstChildElement(); featureNode != NULL; featureNode = featureNode->NextSiblingElement())
+                    for (Xml::Node * featureNode = featureNodes->FirstNode(); featureNode != NULL; featureNode = featureNode->NextSibling())
                     {
                         Data::HaarFeature feature;
                         int rectIndex = 0;
-                        tinyxml2::XMLNode * rectsNode = featureNode->FirstChildElement(Names::rects);
-                        for (tinyxml2::XMLNode * rectNode = rectsNode->FirstChildElement(); rectNode != NULL; rectNode = rectNode->NextSiblingElement(), rectIndex++)
+						Xml::Node * rectsNode = featureNode->FirstNode(Names::rects);
+                        for (Xml::Node * rectNode = rectsNode->FirstNode(); rectNode != NULL; rectNode = rectNode->NextSibling(), rectIndex++)
                         {
                             std::vector<double> values = Xml::GetValues<double>(rectNode);
                             feature.rect[rectIndex].r.x = (int)values[0];
@@ -283,7 +282,7 @@ namespace Simd
                             feature.rect[rectIndex].r.height = (int)values[3];
                             feature.rect[rectIndex].weight = (float)values[4];
                         }
-                        feature.tilted = featureNode->FirstChildElement(Names::tilted) && Xml::GetValue<int>(featureNode, Names::tilted) != 0;
+                        feature.tilted = featureNode->FirstNode(Names::tilted) && Xml::GetValue<int>(featureNode, Names::tilted) != 0;
                         if (feature.tilted)
                             data->hasTilted = true;
                         data->haarFeatures.push_back(feature);
@@ -294,7 +293,7 @@ namespace Simd
                 {
                     data->canInt16 = true;
                     data->lbpFeatures.reserve(Xml::GetSize(featureNodes));
-                    for (tinyxml2::XMLNode * featureNode = featureNodes->FirstChildElement(); featureNode != NULL; featureNode = featureNode->NextSiblingElement())
+                    for (Xml::Node * featureNode = featureNodes->FirstNode(); featureNode != NULL; featureNode = featureNode->NextSibling())
                     {
                         Data::LbpFeature feature;
                         std::vector<int> values = Xml::GetValues<int>(featureNode, Names::rect);
